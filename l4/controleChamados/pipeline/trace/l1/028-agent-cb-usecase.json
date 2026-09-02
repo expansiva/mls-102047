@@ -1,0 +1,144 @@
+{
+  "savedAt": "2026-09-02T18:03:57.086Z",
+  "agentName": "agentCbUsecase",
+  "stepId": 28,
+  "planning": null,
+  "status": "waiting_after_prompt",
+  "interaction": {
+    "cost": 0.0051,
+    "inputTokens": 16055,
+    "outputTokens": 2004,
+    "model": "code"
+  },
+  "counters": null,
+  "payload": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitUsecase",
+      "arguments": {
+        "status": "ok",
+        "result": {
+          "usecaseId": "decideClosure",
+          "ports": [
+            "Ticket"
+          ],
+          "rulesApplied": [
+            "onlyOpenTicketCanBeClosed"
+          ],
+          "functions": [
+            {
+              "functionName": "decideClosure",
+              "inputTypeName": "DecideClosureInput",
+              "outputTypeName": "DecideClosureOutput",
+              "input": [
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "description": "Chamado",
+                  "ofEntity": "Ticket",
+                  "fieldRef": "Ticket.ticketId",
+                  "item": {
+                    "fields": []
+                  }
+                },
+                {
+                  "name": "status",
+                  "type": "string",
+                  "required": true,
+                  "description": "Decisão tomada.",
+                  "ofEntity": "Ticket",
+                  "fieldRef": "Ticket.status",
+                  "item": {
+                    "fields": []
+                  }
+                }
+              ],
+              "output": [
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "description",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "status",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                }
+              ],
+              "ports": [
+                "Ticket"
+              ],
+              "rulesApplied": [
+                "onlyOpenTicketCanBeClosed"
+              ],
+              "transactional": true,
+              "steps": [
+                "Load the Ticket aggregate by ticketId through the Ticket port.",
+                "Validate the requested status is closed; field enum constraint requires rejecting other values.",
+                "Apply rule onlyOpenTicketCanBeClosed: reject with rule id in error details unless the current ticket status is open.",
+                "Call the Ticket domain canTransition helper using the lifecycle matrix, which permits open to closed and treats closed as terminal.",
+                "Set the Ticket status to closed and save the parent Ticket aggregate through the Ticket port inside the transaction.",
+                "Return the canonical Ticket output shape: ticketId, title, description, and status."
+              ],
+              "outputShape": {
+                "kind": "object",
+                "fields": [
+                  {
+                    "name": "ticketId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.ticketId"
+                  },
+                  {
+                    "name": "title",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.title"
+                  },
+                  {
+                    "name": "description",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.description"
+                  },
+                  {
+                    "name": "status",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.status"
+                  }
+                ]
+              }
+            }
+          ],
+          "mdmRefs": []
+        },
+        "questions": [],
+        "trace": [
+          "The entity is its own parent aggregate, so the Ticket port is used for load and save.",
+          "ticketId is a route parameter and status is a user input, so both are public inputs.",
+          "No context resolution, MDM reference, derived projection, or event write was provided."
+        ]
+      }
+    },
+    "status": "completed",
+    "stepId": 31,
+    "interaction": null,
+    "nextSteps": null
+  }
+}

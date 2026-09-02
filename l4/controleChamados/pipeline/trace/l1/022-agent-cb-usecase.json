@@ -1,0 +1,132 @@
+{
+  "savedAt": "2026-09-02T18:04:09.981Z",
+  "agentName": "agentCbUsecase",
+  "stepId": 22,
+  "planning": null,
+  "status": "waiting_after_prompt",
+  "interaction": {
+    "cost": 0.0061,
+    "inputTokens": 16244,
+    "outputTokens": 2645,
+    "model": "code"
+  },
+  "counters": null,
+  "payload": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitUsecase",
+      "arguments": {
+        "status": "ok",
+        "result": {
+          "usecaseId": "createTicketComment",
+          "ports": [
+            "TicketComment",
+            "Ticket"
+          ],
+          "rulesApplied": [
+            "onlyOpenTicketCanReceiveComment"
+          ],
+          "functions": [
+            {
+              "functionName": "createTicketComment",
+              "inputTypeName": "CreateTicketCommentInput",
+              "outputTypeName": "CreateTicketCommentOutput",
+              "input": [
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "description": "Selected ticket to which the comment belongs.",
+                  "ofEntity": "TicketComment",
+                  "fieldRef": "TicketComment.ticketId",
+                  "item": {
+                    "fields": []
+                  }
+                },
+                {
+                  "name": "commentText",
+                  "type": "string",
+                  "required": true,
+                  "description": "Comment text to record in the ticket history.",
+                  "ofEntity": "TicketComment",
+                  "fieldRef": "TicketComment.commentText",
+                  "item": {
+                    "fields": []
+                  }
+                }
+              ],
+              "output": [
+                {
+                  "name": "ticketCommentId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                },
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                },
+                {
+                  "name": "commentText",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                }
+              ],
+              "ports": [
+                "TicketComment",
+                "Ticket"
+              ],
+              "rulesApplied": [
+                "onlyOpenTicketCanReceiveComment"
+              ],
+              "transactional": true,
+              "steps": [
+                "Load the Ticket aggregate through the Ticket port using the public ticketId.",
+                "Apply onlyOpenTicketCanReceiveComment: reject with a machine-readable rule identifier and an English user-facing message when the ticket status is not open.",
+                "Create a TicketComment through the TicketComment port with a generated ticketCommentId, the selected ticketId, and commentText.",
+                "Return the created comment using the canonical output shape."
+              ],
+              "outputShape": {
+                "kind": "object",
+                "fields": [
+                  {
+                    "name": "ticketCommentId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.ticketCommentId"
+                  },
+                  {
+                    "name": "ticketId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.ticketId"
+                  },
+                  {
+                    "name": "commentText",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.commentText"
+                  }
+                ]
+              }
+            }
+          ],
+          "mdmRefs": []
+        },
+        "questions": [],
+        "trace": [
+          "Public inputs were limited to selectedEntity ticketId and userInput commentText.",
+          "TicketComment.ticketCommentId is server-generated and is not exposed as create input.",
+          "The only rejection predicate is the listed onlyOpenTicketCanReceiveComment rule; required fields are enforced by the input contract."
+        ]
+      }
+    },
+    "status": "completed",
+    "stepId": 10,
+    "interaction": null,
+    "nextSteps": null
+  }
+}

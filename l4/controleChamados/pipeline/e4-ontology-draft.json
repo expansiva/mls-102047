@@ -1,0 +1,261 @@
+{
+  "planId": "e4-ontology-review",
+  "moduleName": "controleChamados",
+  "userLanguage": "pt-BR",
+  "title": "Ontologia de negócio",
+  "reviewRound": 1,
+  "solutionMode": "new",
+  "businessDomain": "Controle de chamados e acompanhamento de atendimento",
+  "entities": [
+    {
+      "entityId": "Ticket",
+      "title": "Chamado",
+      "description": "Registro operacional de uma solicitação de atendimento, com título, descrição, status e histórico de comentários.",
+      "kind": "core",
+      "ownership": "moduleOwned",
+      "party": "none",
+      "sourceRefs": {
+        "journeyIds": [
+          "registerTicket",
+          "consultTicket",
+          "commentOpenTicket",
+          "closeOpenTicket"
+        ],
+        "featureIds": [
+          "ticketRegistration",
+          "ticketConsultation",
+          "ticketCommenting",
+          "ticketClosure"
+        ],
+        "authorityRefs": [
+          "tickets:read",
+          "tickets:manage"
+        ]
+      },
+      "fields": [
+        {
+          "fieldId": "ticketId",
+          "title": "Identificador do chamado",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador estável do chamado, usado para vinculá-lo aos comentários e aos fluxos de atendimento.",
+          "constraints": [
+            {
+              "constraintId": "uniqueTicketId",
+              "kind": "unique",
+              "value": "true",
+              "description": "Cada chamado possui um identificador estável e exclusivo.",
+              "source": "inferred"
+            }
+          ]
+        },
+        {
+          "fieldId": "title",
+          "title": "Título",
+          "type": "string",
+          "required": true,
+          "description": "Título que identifica resumidamente a solicitação de atendimento.",
+          "constraints": []
+        },
+        {
+          "fieldId": "description",
+          "title": "Descrição",
+          "type": "text",
+          "required": true,
+          "description": "Descrição detalhada da solicitação de atendimento registrada no chamado.",
+          "constraints": []
+        },
+        {
+          "fieldId": "status",
+          "title": "Status",
+          "type": "string",
+          "required": true,
+          "description": "Situação atual do chamado durante o atendimento.",
+          "constraints": [
+            {
+              "constraintId": "ticketStatusEnum",
+              "kind": "enum",
+              "value": "[\"open\",\"closed\"]",
+              "description": "Estados permitidos para o ciclo de vida do chamado.",
+              "source": "journey"
+            }
+          ],
+          "enum": [
+            "open",
+            "closed"
+          ]
+        }
+      ],
+      "lifecycleStates": [
+        "open",
+        "closed"
+      ],
+      "statusEnum": [
+        "open",
+        "closed"
+      ],
+      "lifecycleLabels": [
+        {
+          "code": "open",
+          "label": "Aberto"
+        },
+        {
+          "code": "closed",
+          "label": "Fechado"
+        }
+      ],
+      "initialState": "open",
+      "terminalStates": [
+        "closed"
+      ],
+      "lifecyclePredicates": [
+        {
+          "predicateId": "commentableTicket",
+          "description": "Um chamado pode receber comentários somente enquanto estiver aberto.",
+          "stateIds": [
+            "open"
+          ],
+          "source": "journey"
+        },
+        {
+          "predicateId": "closableTicket",
+          "description": "Um chamado pode ser fechado somente enquanto estiver aberto.",
+          "stateIds": [
+            "open"
+          ],
+          "source": "journey"
+        },
+        {
+          "predicateId": "closedTicket",
+          "description": "Um chamado fechado está encerrado definitivamente e não pode voltar ao estado aberto.",
+          "stateIds": [
+            "closed"
+          ],
+          "source": "journey"
+        }
+      ],
+      "useRules": [
+        "onlyOpenTicketCanReceiveComment",
+        "onlyOpenTicketCanBeClosed",
+        "closedTicketCannotBeReopened"
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "ticketId",
+        "notes": "Chamado é um registro operacional transacional da organização e seu status não deve compor cadastro mestre."
+      }
+    },
+    {
+      "entityId": "TicketComment",
+      "title": "Comentário do chamado",
+      "description": "Registro histórico de uma atualização escrita pelo atendente em um chamado aberto.",
+      "kind": "core",
+      "ownership": "moduleOwned",
+      "party": "none",
+      "sourceRefs": {
+        "journeyIds": [
+          "commentOpenTicket",
+          "consultTicket"
+        ],
+        "featureIds": [
+          "ticketCommenting",
+          "ticketConsultation"
+        ],
+        "authorityRefs": [
+          "tickets:read",
+          "tickets:manage"
+        ]
+      },
+      "fields": [
+        {
+          "fieldId": "ticketCommentId",
+          "title": "Identificador do comentário",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador estável do comentário, usado para referenciá-lo no histórico do chamado.",
+          "constraints": [
+            {
+              "constraintId": "uniqueTicketCommentId",
+              "kind": "unique",
+              "value": "true",
+              "description": "Cada comentário possui um identificador estável e exclusivo.",
+              "source": "inferred"
+            }
+          ]
+        },
+        {
+          "fieldId": "ticketId",
+          "title": "Chamado",
+          "type": "uuid",
+          "required": true,
+          "description": "Chamado selecionado ao qual este comentário pertence e em cujo histórico será exibido.",
+          "constraints": []
+        },
+        {
+          "fieldId": "commentText",
+          "title": "Comentário",
+          "type": "text",
+          "required": true,
+          "description": "Atualização do atendimento registrada pelo atendente no histórico do chamado.",
+          "constraints": [
+            {
+              "constraintId": "commentTextMinLength",
+              "kind": "minLength",
+              "value": "1",
+              "description": "O comentário deve conter uma atualização escrita pelo atendente.",
+              "source": "journey"
+            }
+          ]
+        }
+      ],
+      "lifecycleStates": [],
+      "lifecyclePredicates": [],
+      "useRules": [
+        "onlyOpenTicketCanReceiveComment"
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "ticketCommentId",
+        "notes": "Comentário é um evento operacional persistido no histórico do chamado. A autoria é associada à identidade do atendente disponível no diretório e na auditoria da plataforma, sem duplicar usuários neste módulo."
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "ticketCommentBelongsToTicket",
+      "fromEntity": "TicketComment",
+      "toEntity": "Ticket",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada comentário pertence a um único chamado, mantendo seu histórico vinculado ao chamado selecionado.",
+      "persistence": {
+        "mode": "moduleReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "TicketComment",
+        "from": {
+          "entityId": "TicketComment",
+          "fieldIds": [
+            "ticketId"
+          ]
+        },
+        "to": {
+          "entityId": "Ticket",
+          "fieldIds": [
+            "ticketId"
+          ]
+        },
+        "description": "TicketComment.ticketId obrigatório referencia Ticket.ticketId, vinculando cada comentário ao chamado."
+      }
+    }
+  ],
+  "changeSummary": [
+    "Definição inicial da ontologia para uma nova solução de controle de chamados.",
+    "Foram estabelecidos os registros operacionais de chamado e comentário, vinculados por relacionamento obrigatório.",
+    "O ciclo de vida do chamado foi congelado com os estados aberto e fechado, incluindo os significados de elegibilidade para comentário, fechamento e encerramento definitivo."
+  ],
+  "systemDecisions": []
+}

@@ -1,0 +1,163 @@
+{
+  "savedAt": "2026-09-02T18:03:58.204Z",
+  "agentName": "agentCbUsecase",
+  "stepId": 18,
+  "planning": null,
+  "status": "waiting_after_prompt",
+  "interaction": {
+    "cost": 0.0062,
+    "inputTokens": 17372,
+    "outputTokens": 2526,
+    "model": "code"
+  },
+  "counters": null,
+  "payload": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitUsecase",
+      "arguments": {
+        "status": "ok",
+        "result": {
+          "usecaseId": "updateTicket",
+          "ports": [
+            "Ticket"
+          ],
+          "rulesApplied": [
+            "onlyOpenTicketCanReceiveComment",
+            "onlyOpenTicketCanBeClosed",
+            "closedTicketCannotBeReopened"
+          ],
+          "functions": [
+            {
+              "functionName": "updateTicket",
+              "inputTypeName": "UpdateTicketInput",
+              "outputTypeName": "UpdateTicketOutput",
+              "input": [
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "description": "Identificador estável do chamado, usado para vinculá-lo aos comentários e aos fluxos de atendimento.",
+                  "ofEntity": "Ticket",
+                  "fieldRef": "Ticket.ticketId",
+                  "item": {
+                    "fields": []
+                  }
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "required": true,
+                  "description": "Título que identifica resumidamente a solicitação de atendimento.",
+                  "ofEntity": "Ticket",
+                  "fieldRef": "Ticket.title",
+                  "item": {
+                    "fields": []
+                  }
+                },
+                {
+                  "name": "description",
+                  "type": "string",
+                  "required": true,
+                  "description": "Descrição detalhada da solicitação de atendimento registrada no chamado.",
+                  "ofEntity": "Ticket",
+                  "fieldRef": "Ticket.description",
+                  "item": {
+                    "fields": []
+                  }
+                }
+              ],
+              "output": [
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "description",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "status",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                }
+              ],
+              "ports": [
+                "Ticket"
+              ],
+              "rulesApplied": [
+                "onlyOpenTicketCanReceiveComment",
+                "onlyOpenTicketCanBeClosed",
+                "closedTicketCannotBeReopened"
+              ],
+              "transactional": true,
+              "steps": [
+                "Load the Ticket aggregate through the Ticket port using ticketId.",
+                "Resolve the current status from the loaded Ticket; status is server-managed and is not accepted as a public update input.",
+                "Validate required writable fields and apply title and description changes.",
+                "Use the Ticket domain canTransition helper with the declared ticketLifecycle matrix when a status transition is required; do not add a stricter local transition allow-list.",
+                "Apply onlyOpenTicketCanBeClosed: reject with rule id details if a requested transition attempts to close a Ticket whose current status is not open.",
+                "Apply closedTicketCannotBeReopened: reject with rule id details if a closed Ticket would transition back to open.",
+                "onlyOpenTicketCanReceiveComment does not reject this update because the operation does not receive or create a comment.",
+                "Save the updated Ticket through the Ticket port in the same transaction.",
+                "Return the canonical Ticket output shape: ticketId, title, description, and status."
+              ],
+              "outputShape": {
+                "kind": "object",
+                "fields": [
+                  {
+                    "name": "ticketId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.ticketId"
+                  },
+                  {
+                    "name": "title",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.title"
+                  },
+                  {
+                    "name": "description",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.description"
+                  },
+                  {
+                    "name": "status",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.status"
+                  }
+                ]
+              }
+            }
+          ],
+          "mdmRefs": []
+        },
+        "questions": [],
+        "trace": [
+          "Ticket is the parent aggregate and the only provided port, so the update operates through the Ticket port.",
+          "ticketId is public because it is selectedEntity; title and description are public user inputs.",
+          "status is systemDefault/server-managed and is intentionally excluded from the public input surface.",
+          "No eventWrites were declared."
+        ]
+      }
+    },
+    "status": "completed",
+    "stepId": 30,
+    "interaction": null,
+    "nextSteps": null
+  }
+}

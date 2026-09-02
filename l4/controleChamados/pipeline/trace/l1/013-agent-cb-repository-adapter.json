@@ -1,0 +1,85 @@
+{
+  "savedAt": "2026-09-02T18:03:38.353Z",
+  "agentName": "agentCbRepositoryAdapter",
+  "stepId": 13,
+  "planning": {
+    "planId": "cb-gen-adapter",
+    "dependsOn": [
+      "cb-gen-table"
+    ],
+    "executionMode": "sequential",
+    "executionHost": "client"
+  },
+  "status": "waiting_after_prompt",
+  "interaction": {
+    "cost": 0.0045,
+    "inputTokens": 6789,
+    "outputTokens": 1800,
+    "model": "code"
+  },
+  "counters": null,
+  "payload": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitRepositoryAdapters",
+      "arguments": {
+        "status": "ok",
+        "result": {
+          "items": [
+            {
+              "entityId": "Ticket",
+              "className": "TicketRepositoryAdapter",
+              "portRef": "ITicketRepository",
+              "tableRef": "ticket",
+              "mdmReads": [],
+              "notes": [
+                "Implement async delete(id), getById(id), list(filter?), and save(aggregate) using only ctx.data.moduleData.getTable<Row>('ticket').",
+                "Map real columns ticketId, title, status to snake_case ticket_id, title, status; store description in details JSONB under the verbatim key description.",
+                "getById and list map rows back to the Ticket aggregate, reading details.description.",
+                "list supports optional filter.search with findMany ilike on title, filter.sortBy/sortOrder via orderBy; if sorting status, sort in memory using the declared domain enum order rather than SQL text.",
+                "Use the table API's insert/update/delete/findOne/findMany operations and do not keep adapter state outside the runtime table store.",
+                "Implement every port method: delete, getById, list, save."
+              ],
+              "portMethods": [
+                "delete",
+                "getById",
+                "list",
+                "save"
+              ]
+            },
+            {
+              "entityId": "TicketComment",
+              "className": "TicketCommentRepositoryAdapter",
+              "portRef": "ITicketCommentRepository",
+              "tableRef": "ticket_comment",
+              "mdmReads": [],
+              "notes": [
+                "Implement async delete(id), getById(id), list(filter?), and save(aggregate) using only ctx.data.moduleData.getTable<Row>('ticket_comment').",
+                "Map real columns ticketCommentId and ticketId to snake_case ticket_comment_id and ticket_id; store commentText in details JSONB under the verbatim key commentText.",
+                "getById and list map rows back to TicketComment, reading details.commentText.",
+                "list supports optional filter.search with findMany ilike on the applicable text field when present; filter.sortBy/sortOrder uses orderBy, with enum fields sorted in memory by declared enum order rather than SQL text.",
+                "Use the table API's insert/update/delete/findOne/findMany operations and do not keep adapter state outside the runtime table store.",
+                "Implement every port method: delete, getById, list, save."
+              ],
+              "portMethods": [
+                "delete",
+                "getById",
+                "list",
+                "save"
+              ]
+            }
+          ]
+        },
+        "questions": [],
+        "trace": [
+          "No MDM references or append-only event adapters were declared.",
+          "No enum declarations were provided; status sorting must use the domain's declared enum order when available."
+        ]
+      }
+    },
+    "status": "completed",
+    "stepId": 9,
+    "interaction": null,
+    "nextSteps": null
+  }
+}

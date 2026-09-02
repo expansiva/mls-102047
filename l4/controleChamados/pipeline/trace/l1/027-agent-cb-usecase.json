@@ -1,0 +1,133 @@
+{
+  "savedAt": "2026-09-02T18:04:09.952Z",
+  "agentName": "agentCbUsecase",
+  "stepId": 27,
+  "planning": null,
+  "status": "waiting_after_prompt",
+  "interaction": {
+    "cost": 0.0057,
+    "inputTokens": 16340,
+    "outputTokens": 2307,
+    "model": "code"
+  },
+  "counters": null,
+  "payload": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitUsecase",
+      "arguments": {
+        "status": "ok",
+        "result": {
+          "usecaseId": "recordComment",
+          "ports": [
+            "TicketComment",
+            "Ticket"
+          ],
+          "rulesApplied": [
+            "onlyOpenTicketCanReceiveComment"
+          ],
+          "functions": [
+            {
+              "functionName": "recordComment",
+              "inputTypeName": "RecordCommentInput",
+              "outputTypeName": "RecordCommentOutput",
+              "input": [
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "description": "Chamado",
+                  "ofEntity": "Ticket",
+                  "fieldRef": "Ticket.ticketId",
+                  "item": {
+                    "fields": []
+                  }
+                },
+                {
+                  "name": "commentText",
+                  "type": "string",
+                  "required": true,
+                  "description": "Atualização do atendimento registrada pelo atendente no histórico do chamado.",
+                  "ofEntity": "TicketComment",
+                  "fieldRef": "TicketComment.commentText",
+                  "item": {
+                    "fields": []
+                  }
+                }
+              ],
+              "output": [
+                {
+                  "name": "ticketCommentId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                },
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                },
+                {
+                  "name": "commentText",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                }
+              ],
+              "ports": [
+                "TicketComment",
+                "Ticket"
+              ],
+              "rulesApplied": [
+                "onlyOpenTicketCanReceiveComment"
+              ],
+              "transactional": true,
+              "steps": [
+                "Load the Ticket through the Ticket port using the route ticketId.",
+                "Reject with rule details onlyOpenTicketCanReceiveComment when the ticket does not exist or its status is not open; the rule requires that only an open ticket can receive comments.",
+                "Generate the TicketComment identifier with ctx.idGenerator.",
+                "Create the TicketComment through the TicketComment port with ticketId and commentText, then persist it within the transaction wrapper.",
+                "Return the created comment identifier, ticket identifier, and comment text."
+              ],
+              "outputShape": {
+                "kind": "object",
+                "fields": [
+                  {
+                    "name": "ticketCommentId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.ticketCommentId"
+                  },
+                  {
+                    "name": "ticketId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.ticketId"
+                  },
+                  {
+                    "name": "commentText",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.commentText"
+                  }
+                ]
+              }
+            }
+          ],
+          "mdmRefs": []
+        },
+        "questions": [],
+        "trace": [
+          "Public inputs were derived from inputs[] entries whose sources are routeParam and userInput.",
+          "TicketComment and Ticket are the provided aggregate ports; no MDM or derived references are involved.",
+          "The rule onlyOpenTicketCanReceiveComment is applied inline as the status validation."
+        ]
+      }
+    },
+    "status": "completed",
+    "stepId": 9,
+    "interaction": null,
+    "nextSteps": null
+  }
+}

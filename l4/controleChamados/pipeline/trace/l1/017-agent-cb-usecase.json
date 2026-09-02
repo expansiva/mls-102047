@@ -1,0 +1,149 @@
+{
+  "savedAt": "2026-09-02T18:03:54.604Z",
+  "agentName": "agentCbUsecase",
+  "stepId": 17,
+  "planning": null,
+  "status": "waiting_after_prompt",
+  "interaction": {
+    "cost": 0.0052,
+    "inputTokens": 16654,
+    "outputTokens": 2030,
+    "model": "code"
+  },
+  "counters": null,
+  "payload": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitUsecase",
+      "arguments": {
+        "status": "ok",
+        "result": {
+          "usecaseId": "createTicket",
+          "ports": [
+            "Ticket"
+          ],
+          "rulesApplied": [
+            "onlyOpenTicketCanReceiveComment",
+            "onlyOpenTicketCanBeClosed",
+            "closedTicketCannotBeReopened"
+          ],
+          "functions": [
+            {
+              "functionName": "createTicket",
+              "inputTypeName": "CreateTicketInput",
+              "outputTypeName": "CreateTicketOutput",
+              "input": [
+                {
+                  "name": "title",
+                  "type": "string",
+                  "required": true,
+                  "description": "Título que identifica resumidamente a solicitação de atendimento.",
+                  "ofEntity": "Ticket",
+                  "fieldRef": "Ticket.title",
+                  "item": {
+                    "fields": []
+                  }
+                },
+                {
+                  "name": "description",
+                  "type": "string",
+                  "required": true,
+                  "description": "Descrição detalhada da solicitação de atendimento registrada no chamado.",
+                  "ofEntity": "Ticket",
+                  "fieldRef": "Ticket.description",
+                  "item": {
+                    "fields": []
+                  }
+                }
+              ],
+              "output": [
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "description",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                },
+                {
+                  "name": "status",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "Ticket"
+                }
+              ],
+              "ports": [
+                "Ticket"
+              ],
+              "rulesApplied": [
+                "onlyOpenTicketCanReceiveComment",
+                "onlyOpenTicketCanBeClosed",
+                "closedTicketCannotBeReopened"
+              ],
+              "transactional": true,
+              "steps": [
+                "Validate required title and description fields.",
+                "Set status from the system default to the lifecycle initial state open using ctx.clock/context resolution where applicable.",
+                "Create the Ticket through the Ticket port within the transaction wrapper.",
+                "Return ticketId, title, description, and status from the created Ticket.",
+                "The comment and close/reopen rules govern later operations; creation does not perform a comment or lifecycle transition."
+              ],
+              "outputShape": {
+                "kind": "object",
+                "fields": [
+                  {
+                    "name": "ticketId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.ticketId"
+                  },
+                  {
+                    "name": "title",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.title"
+                  },
+                  {
+                    "name": "description",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.description"
+                  },
+                  {
+                    "name": "status",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "Ticket.status"
+                  }
+                ]
+              }
+            }
+          ],
+          "mdmRefs": []
+        },
+        "questions": [],
+        "trace": [
+          "Created a command usecase from the create access pattern.",
+          "Included only userInput fields in the public input.",
+          "Resolved systemDefault status server-side as the lifecycle initial state open.",
+          "Used the Ticket aggregate port and no MDM access.",
+          "Applied the referenced lifecycle rules without adding reject predicates to creation."
+        ]
+      }
+    },
+    "status": "completed",
+    "stepId": 9,
+    "interaction": null,
+    "nextSteps": null
+  }
+}

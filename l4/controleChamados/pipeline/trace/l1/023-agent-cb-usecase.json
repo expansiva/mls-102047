@@ -1,0 +1,144 @@
+{
+  "savedAt": "2026-09-02T18:04:04.176Z",
+  "agentName": "agentCbUsecase",
+  "stepId": 23,
+  "planning": null,
+  "status": "waiting_after_prompt",
+  "interaction": {
+    "cost": 0.0067,
+    "inputTokens": 16748,
+    "outputTokens": 2927,
+    "model": "code"
+  },
+  "counters": null,
+  "payload": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitUsecase",
+      "arguments": {
+        "status": "ok",
+        "result": {
+          "usecaseId": "updateTicketComment",
+          "ports": [
+            "TicketComment",
+            "Ticket"
+          ],
+          "rulesApplied": [
+            "onlyOpenTicketCanReceiveComment"
+          ],
+          "functions": [
+            {
+              "functionName": "updateTicketComment",
+              "inputTypeName": "UpdateTicketCommentInput",
+              "outputTypeName": "UpdateTicketCommentOutput",
+              "input": [
+                {
+                  "name": "ticketCommentId",
+                  "type": "string",
+                  "required": true,
+                  "description": "Stable identifier of the comment to update.",
+                  "ofEntity": "TicketComment",
+                  "fieldRef": "TicketComment.ticketCommentId",
+                  "item": {
+                    "fields": []
+                  }
+                },
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "description": "Selected ticket identifier to which the comment belongs.",
+                  "ofEntity": "TicketComment",
+                  "fieldRef": "TicketComment.ticketId",
+                  "item": {
+                    "fields": []
+                  }
+                },
+                {
+                  "name": "commentText",
+                  "type": "string",
+                  "required": true,
+                  "description": "Updated comment text recorded in the ticket history.",
+                  "ofEntity": "TicketComment",
+                  "fieldRef": "TicketComment.commentText",
+                  "item": {
+                    "fields": []
+                  }
+                }
+              ],
+              "output": [
+                {
+                  "name": "ticketCommentId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                },
+                {
+                  "name": "ticketId",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                },
+                {
+                  "name": "commentText",
+                  "type": "string",
+                  "required": true,
+                  "ofEntity": "TicketComment"
+                }
+              ],
+              "ports": [
+                "TicketComment",
+                "Ticket"
+              ],
+              "rulesApplied": [
+                "onlyOpenTicketCanReceiveComment"
+              ],
+              "transactional": true,
+              "steps": [
+                "Within a single transaction wrapper, load the TicketComment by ticketCommentId through the TicketComment port and load the Ticket by ticketId through the Ticket port.",
+                "Validate that the referenced Ticket has status open; if not, reject with an English AppError whose machine-readable details include ruleId onlyOpenTicketCanReceiveComment.",
+                "Update the commentText on the loaded TicketComment, preserving its ticketCommentId and ticketId, and save it through the TicketComment port.",
+                "Return the updated TicketComment projected as ticketCommentId, ticketId, and commentText."
+              ],
+              "outputShape": {
+                "kind": "object",
+                "fields": [
+                  {
+                    "name": "ticketCommentId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.ticketCommentId"
+                  },
+                  {
+                    "name": "ticketId",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.ticketId"
+                  },
+                  {
+                    "name": "commentText",
+                    "type": "string",
+                    "required": true,
+                    "fieldRef": "TicketComment.commentText"
+                  }
+                ]
+              }
+            }
+          ],
+          "mdmRefs": []
+        },
+        "questions": [],
+        "trace": [
+          "Generated one update usecase from accessPattern.kind=update.",
+          "Public inputs include only inputs sourced from selectedEntity or userInput.",
+          "Applied onlyOpenTicketCanReceiveComment as an inline status validation.",
+          "Used the provided aggregate ports and no MDM or child repository."
+        ]
+      }
+    },
+    "status": "completed",
+    "stepId": 9,
+    "interaction": null,
+    "nextSteps": null
+  }
+}

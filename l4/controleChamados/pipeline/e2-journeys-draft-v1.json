@@ -1,0 +1,258 @@
+{
+  "planId": "e2-review",
+  "moduleName": "controleChamados",
+  "userLanguage": "pt-BR",
+  "title": "Revisar jornadas de negócio",
+  "reviewRound": 1,
+  "journeys": [
+    {
+      "journeyId": "commentOpenTicket",
+      "policyDecisions": [
+        {
+          "decisionId": "commentAfterTicketClosurePolicy",
+          "question": "Comentários podem ser registrados depois que um chamado é fechado?",
+          "chosen": "Comentários só podem ser registrados enquanto o chamado estiver aberto.",
+          "alternatives": [
+            "Permitir comentários também em chamados fechados"
+          ]
+        }
+      ],
+      "business": {
+        "actorRef": "atendente",
+        "title": "Registrar comentário em chamado aberto",
+        "goal": "Documentar o andamento do atendimento em um chamado aberto.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "locateTicket",
+            "kind": "locate",
+            "entity": "Ticket",
+            "title": "Localizar o chamado aberto",
+            "description": "Um chamado aberto é selecionado a partir da Lista de chamados para acompanhamento.",
+            "featureRefs": [
+              "ticketCommenting"
+            ]
+          },
+          {
+            "stepId": "recordComment",
+            "kind": "act",
+            "entity": "TicketComment",
+            "title": "Registrar comentário",
+            "description": "Um comentário fica registrado no histórico do chamado.",
+            "featureRefs": [
+              "ticketCommenting"
+            ]
+          }
+        ],
+        "outcome": {
+          "statement": "O histórico do chamado passa a registrar uma atualização do atendimento.",
+          "evidence": [
+            "O comentário está associado ao chamado selecionado.",
+            "O comentário pode ser consultado no histórico do chamado."
+          ]
+        },
+        "useRules": [
+          "onlyOpenTicketCanReceiveComment"
+        ]
+      }
+    },
+    {
+      "journeyId": "closeOpenTicket",
+      "policyDecisions": [
+        {
+          "decisionId": "ticketClosureRequirementPolicy",
+          "question": "O que é necessário para fechar um chamado aberto?",
+          "chosen": "O atendente pode fechar o chamado quando concluir o atendimento, sem exigir um comentário final.",
+          "alternatives": [
+            "Exigir pelo menos um comentário antes do fechamento",
+            "Exigir um comentário final no momento do fechamento"
+          ]
+        },
+        {
+          "decisionId": "ticketReopeningPolicy",
+          "question": "Um chamado fechado pode voltar a ser aberto?",
+          "chosen": "O fechamento é definitivo; chamados fechados não são reabertos.",
+          "alternatives": [
+            "Permitir que o atendente reabra um chamado fechado"
+          ]
+        }
+      ],
+      "business": {
+        "actorRef": "atendente",
+        "title": "Fechar chamado aberto",
+        "goal": "Encerrar um chamado quando o atendimento estiver concluído.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "locateTicket",
+            "kind": "locate",
+            "entity": "Ticket",
+            "title": "Localizar o chamado aberto",
+            "description": "Um chamado aberto é selecionado a partir da Lista de chamados para encerramento.",
+            "featureRefs": [
+              "ticketClosure"
+            ]
+          },
+          {
+            "stepId": "decideClosure",
+            "kind": "decide",
+            "entity": "Ticket",
+            "title": "Confirmar o fechamento do chamado",
+            "description": "O chamado passa a ter status fechado.",
+            "featureRefs": [
+              "ticketClosure"
+            ]
+          }
+        ],
+        "outcome": {
+          "statement": "O chamado é encerrado e deixa de aceitar novos comentários.",
+          "evidence": [
+            "O status do chamado está fechado.",
+            "O histórico do chamado permanece disponível para consulta."
+          ]
+        },
+        "useRules": [
+          "onlyOpenTicketCanBeClosed",
+          "closedTicketCannotBeReopened"
+        ]
+      }
+    },
+    {
+      "journeyId": "registerTicket",
+      "policyDecisions": [
+        {
+          "decisionId": "demoteRegisterTicketToRecordCatalogue",
+          "question": "Registrar chamado não tem decisão nem repasse: vira a tela de cadastro padrão de Ticket?",
+          "chosen": "Tela de cadastro padrão de Ticket",
+          "alternatives": [
+            "Tela de cadastro padrão de Ticket",
+            "Manter Registrar chamado como jornada própria"
+          ]
+        }
+      ],
+      "business": {
+        "actorRef": "atendente",
+        "title": "Registrar chamado",
+        "goal": "Criar um novo chamado para iniciar o atendimento.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "createTicket",
+            "kind": "act",
+            "entity": "Ticket",
+            "title": "Registrar os dados do chamado",
+            "description": "O atendente informa título e descrição, e cria o chamado com status aberto.",
+            "featureRefs": [
+              "ticketRegistration"
+            ]
+          }
+        ],
+        "outcome": {
+          "statement": "Um novo chamado aberto fica disponível para acompanhamento.",
+          "evidence": [
+            "O chamado possui título e descrição registrados.",
+            "O status inicial do chamado está aberto.",
+            "O novo chamado está disponível na Lista de chamados."
+          ]
+        },
+        "useRules": []
+      }
+    },
+    {
+      "journeyId": "consultTicket",
+      "policyDecisions": [
+        {
+          "decisionId": "demoteConsultTicketToRecordCatalogue",
+          "question": "Consultar chamados não tem decisão nem repasse: vira a tela de cadastro padrão de Ticket?",
+          "chosen": "Tela de cadastro padrão de Ticket",
+          "alternatives": [
+            "Tela de cadastro padrão de Ticket",
+            "Manter Consultar chamados como jornada própria"
+          ]
+        }
+      ],
+      "business": {
+        "actorRef": "atendente",
+        "title": "Consultar chamados",
+        "goal": "Acompanhar as informações e o histórico de um chamado.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "locateTicket",
+            "kind": "locate",
+            "entity": "Ticket",
+            "title": "Localizar chamado na Lista de chamados",
+            "description": "O atendente localiza um chamado na Lista de chamados, que é a fonte de consulta dos chamados registrados.",
+            "featureRefs": [
+              "ticketConsultation"
+            ]
+          },
+          {
+            "stepId": "inspectTicket",
+            "kind": "act",
+            "entity": "Ticket",
+            "title": "Consultar informações e histórico do chamado",
+            "description": "O atendente inspeciona o título, a descrição, o status e o histórico de comentários do chamado localizado.",
+            "featureRefs": [
+              "ticketConsultation"
+            ]
+          }
+        ],
+        "outcome": {
+          "statement": "As informações do chamado ficam disponíveis para acompanhamento.",
+          "evidence": [
+            "O título, a descrição e o status do chamado podem ser consultados.",
+            "O histórico de comentários do chamado pode ser consultado."
+          ]
+        },
+        "useRules": []
+      }
+    }
+  ],
+  "features": [
+    {
+      "featureId": "ticketCommenting",
+      "title": "Comentários em chamados",
+      "priority": "now",
+      "journeyStepRefs": [
+        "commentOpenTicket.locateTicket",
+        "commentOpenTicket.recordComment"
+      ]
+    },
+    {
+      "featureId": "ticketClosure",
+      "title": "Fechamento de chamados",
+      "priority": "now",
+      "journeyStepRefs": [
+        "closeOpenTicket.locateTicket",
+        "closeOpenTicket.decideClosure"
+      ]
+    },
+    {
+      "featureId": "ticketRegistration",
+      "title": "Cadastro de chamados",
+      "priority": "now",
+      "journeyStepRefs": [
+        "registerTicket.createTicket"
+      ]
+    },
+    {
+      "featureId": "ticketConsultation",
+      "title": "Consulta de chamados",
+      "priority": "now",
+      "journeyStepRefs": [
+        "consultTicket.locateTicket",
+        "consultTicket.inspectTicket"
+      ]
+    }
+  ],
+  "systemDecisions": []
+}

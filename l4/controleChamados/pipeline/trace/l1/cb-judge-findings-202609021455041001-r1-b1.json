@@ -1,0 +1,65 @@
+{
+  "runId": "20260902145504.1001",
+  "judgeRun": 1,
+  "batchIndex": 1,
+  "owners": [
+    "listTicket",
+    "createTicket",
+    "updateTicket",
+    "deleteTicket",
+    "getTicket",
+    "listTicketComment",
+    "createTicketComment",
+    "updateTicketComment",
+    "deleteTicketComment",
+    "getTicketComment",
+    "locateTicket",
+    "recordComment",
+    "decideClosure"
+  ],
+  "findings": [
+    {
+      "ownerId": "createTicket",
+      "type": "estrutural",
+      "severity": "error",
+      "message": "rulesApplied inclui onlyOpenTicketCanReceiveComment, mas createTicket não lê nem cria TicketComment e não possui dados de comentário para executar essa regra.",
+      "suggestion": "Regenerar createTicket para não declarar/aplicar essa regra, ou ajustar o contrato para fornecer uma operação de comentário aplicável."
+    },
+    {
+      "ownerId": "createTicket",
+      "type": "estrutural",
+      "severity": "error",
+      "message": "rulesApplied inclui onlyOpenTicketCanBeClosed, mas createTicket não é uma transição de status e o status é resolvido como systemDefault open; não há decisão de fechamento para essa regra.",
+      "suggestion": "Regenerar createTicket para remover essa regra ou modelar uma transição de fechamento separada."
+    },
+    {
+      "ownerId": "createTicket",
+      "type": "estrutural",
+      "severity": "error",
+      "message": "rulesApplied inclui closedTicketCannotBeReopened, mas createTicket não opera sobre um Ticket fechado nem recebe uma transição de status; a regra não pode ser executada com os dados declarados.",
+      "suggestion": "Regenerar createTicket para remover essa regra ou fornecer uma operação de transição aplicável."
+    },
+    {
+      "ownerId": "updateTicket",
+      "type": "estrutural",
+      "severity": "error",
+      "message": "rulesApplied inclui onlyOpenTicketCanReceiveComment, mas updateTicket não recebe nem cria comentário; o próprio step declara que a regra não é aplicável.",
+      "suggestion": "Regenerar updateTicket para remover essa regra, ou alterar o contrato para que a atualização inclua uma operação de comentário."
+    },
+    {
+      "ownerId": "updateTicket",
+      "type": "estrutural",
+      "severity": "error",
+      "message": "rulesApplied inclui onlyOpenTicketCanBeClosed, mas o input status obrigatório é systemDefault e foi omitido corretamente da entrada; a função preserva o status e não recebe uma transição para closed, portanto a regra não pode ser executada.",
+      "suggestion": "Regenerar updateTicket para não declarar essa regra quando não houver transição de fechamento, ou tornar status uma decisão de transição fornecida à função."
+    },
+    {
+      "ownerId": "updateTicket",
+      "type": "estrutural",
+      "severity": "error",
+      "message": "rulesApplied inclui closedTicketCannotBeReopened, mas o input status é resolvido por systemDefault, a função preserva o status e não solicita transição para open; a regra não pode ser executada com os dados declarados.",
+      "suggestion": "Regenerar updateTicket para não declarar essa regra quando não houver transição de reabertura, ou modelar explicitamente a transição aplicável."
+    }
+  ],
+  "savedAt": "2026-09-02T14:57:18.853Z"
+}

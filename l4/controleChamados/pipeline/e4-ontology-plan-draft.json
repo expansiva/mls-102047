@@ -1,0 +1,139 @@
+{
+  "planId": "e4-ontology-plan",
+  "moduleName": "controleChamados",
+  "userLanguage": "pt-BR",
+  "title": "Ontologia de negócio",
+  "reviewRound": 1,
+  "solutionMode": "new",
+  "businessDomain": "Controle de chamados e acompanhamento de atendimento",
+  "entities": [
+    {
+      "entityId": "Ticket",
+      "title": "Chamado",
+      "description": "Registro operacional de uma solicitação de atendimento, com título, descrição, status e histórico de comentários.",
+      "kind": "core",
+      "ownership": "moduleOwned",
+      "party": "none",
+      "sourceRefs": {
+        "journeyIds": [
+          "registerTicket",
+          "consultTicket",
+          "commentOpenTicket",
+          "closeOpenTicket"
+        ],
+        "featureIds": [
+          "ticketRegistration",
+          "ticketConsultation",
+          "ticketCommenting",
+          "ticketClosure"
+        ],
+        "authorityRefs": [
+          "tickets:read",
+          "tickets:manage"
+        ]
+      },
+      "lifecycleStates": [
+        "open",
+        "closed"
+      ],
+      "statusEnum": [
+        "open",
+        "closed"
+      ],
+      "lifecycleLabels": [
+        {
+          "code": "open",
+          "label": "Aberto"
+        },
+        {
+          "code": "closed",
+          "label": "Fechado"
+        }
+      ],
+      "initialState": "open",
+      "terminalStates": [
+        "closed"
+      ],
+      "lifecyclePredicates": [
+        {
+          "predicateId": "commentableTicket",
+          "description": "Um chamado pode receber comentários somente enquanto estiver aberto.",
+          "stateIds": [
+            "open"
+          ],
+          "source": "journey"
+        },
+        {
+          "predicateId": "closableTicket",
+          "description": "Um chamado pode ser fechado somente enquanto estiver aberto.",
+          "stateIds": [
+            "open"
+          ],
+          "source": "journey"
+        },
+        {
+          "predicateId": "closedTicket",
+          "description": "Um chamado fechado está encerrado definitivamente e não pode voltar ao estado aberto.",
+          "stateIds": [
+            "closed"
+          ],
+          "source": "journey"
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "ticketId",
+        "notes": "Chamado é um registro operacional transacional da organização e seu status não deve compor cadastro mestre."
+      }
+    },
+    {
+      "entityId": "TicketComment",
+      "title": "Comentário do chamado",
+      "description": "Registro histórico de uma atualização escrita pelo atendente em um chamado aberto.",
+      "kind": "core",
+      "ownership": "moduleOwned",
+      "party": "none",
+      "sourceRefs": {
+        "journeyIds": [
+          "commentOpenTicket",
+          "consultTicket"
+        ],
+        "featureIds": [
+          "ticketCommenting",
+          "ticketConsultation"
+        ],
+        "authorityRefs": [
+          "tickets:read",
+          "tickets:manage"
+        ]
+      },
+      "lifecycleStates": [],
+      "lifecyclePredicates": [],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "ticketCommentId",
+        "notes": "Comentário é um evento operacional persistido no histórico do chamado. A autoria é associada à identidade do atendente disponível no diretório e na auditoria da plataforma, sem duplicar usuários neste módulo."
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "ticketCommentBelongsToTicket",
+      "fromEntity": "TicketComment",
+      "toEntity": "Ticket",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada comentário pertence a um único chamado, mantendo seu histórico vinculado ao chamado selecionado.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    }
+  ],
+  "changeSummary": [
+    "Definição inicial da ontologia para uma nova solução de controle de chamados.",
+    "Foram estabelecidos os registros operacionais de chamado e comentário, vinculados por relacionamento obrigatório.",
+    "O ciclo de vida do chamado foi congelado com os estados aberto e fechado, incluindo os significados de elegibilidade para comentário, fechamento e encerramento definitivo."
+  ]
+}
