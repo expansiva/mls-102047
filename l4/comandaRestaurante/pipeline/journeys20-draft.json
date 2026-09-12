@@ -2,219 +2,256 @@
   "journeys": [
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "abrirComanda",
+      "journeyId": "openTab",
       "business": {
         "actorRef": "garcom",
-        "title": "Abrir comanda para uma mesa",
-        "goal": "Iniciar uma comanda em uma mesa disponível para registrar o consumo.",
+        "title": "Open a table tab",
+        "goal": "Open a tab for an available restaurant table.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "localizarMesa",
+            "stepId": "locateAvailableTable",
             "kind": "locate",
-            "entity": "Mesa",
-            "title": "Localizar mesa disponível",
-            "description": "Localiza a mesa que receberá a comanda."
+            "entity": "Table",
+            "title": "x",
+            "description": "x"
           },
           {
-            "stepId": "inspecionarMesa",
+            "stepId": "inspectTableAvailability",
             "kind": "inspect",
-            "entity": "Mesa",
-            "title": "Conferir mesa",
-            "description": "Confere se a mesa está disponível para abertura de comanda."
+            "entity": "Table",
+            "title": "x",
+            "description": "x"
           },
           {
-            "stepId": "abrirComanda",
+            "stepId": "createTabForTable",
             "kind": "act",
-            "entity": "Comanda",
+            "entity": "OrderTab",
             "affects": [
-              "Mesa"
+              "Table"
             ],
-            "title": "Abrir comanda",
-            "description": "Abre uma comanda vinculada à mesa e a marca como ocupada."
+            "effect": "create",
+            "title": "x",
+            "description": "Open a tab and mark the selected table as occupied."
           }
         ],
         "outcome": {
-          "statement": "Uma comanda aberta fica vinculada à mesa selecionada.",
+          "statement": "An open tab is linked to the selected table.",
           "evidence": [
-            "Comanda identificada como aberta para a mesa.",
-            "Mesa identificada como ocupada."
+            "The tab has an open status and identifies the table.",
+            "The table is shown as occupied."
           ]
         }
       },
-      "businessHash": "sha256:eb23ac2024818599a616b7719c3a868a1eeccd33c801adfc35703f6edb59496f"
+      "businessHash": "sha256:34171fac38ef4164e81848acb017d9fbdb8ac62bf61aceef8fb8c76836fa6700"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "lancarItemComanda",
+      "journeyId": "addTabItem",
       "business": {
         "actorRef": "garcom",
-        "title": "Lançar item na comanda",
-        "goal": "Registrar um item do cardápio, sua quantidade e observação em uma comanda aberta.",
+        "title": "Add an item to an open tab",
+        "goal": "Record a menu item, quantity, and optional preparation note on an open tab.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarComandaAberta",
+            "stepId": "locateOpenTab",
             "kind": "locate",
-            "entity": "Comanda",
-            "title": "Localizar comanda aberta",
-            "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa."
+            "entity": "OrderTab",
+            "title": "x",
+            "description": "x"
           },
           {
-            "stepId": "inspecionarComanda",
+            "stepId": "inspectOpenTab",
             "kind": "inspect",
-            "entity": "Comanda",
-            "title": "Conferir comanda",
-            "description": "Confere que a comanda permanece aberta antes do lançamento."
+            "entity": "OrderTab",
+            "title": "x",
+            "description": "Review the current tab and its launched items."
           },
           {
-            "stepId": "localizarItemCardapio",
+            "stepId": "locateMenuItem",
             "kind": "locate",
-            "entity": "ItemCardapio",
-            "title": "Localizar item do cardápio",
-            "description": "Localiza o item que será consumido."
+            "entity": "MenuItem",
+            "title": "x",
+            "description": "Find the menu item to launch."
           },
           {
-            "stepId": "inspecionarItemCardapio",
+            "stepId": "inspectMenuItem",
             "kind": "inspect",
-            "entity": "ItemCardapio",
-            "title": "Conferir item do cardápio",
-            "description": "Confere o item e seu preço vigente no cardápio."
+            "entity": "MenuItem",
+            "title": "x",
+            "description": "Review the menu item and its current price."
           },
           {
-            "stepId": "registrarItemComanda",
+            "stepId": "createTabItem",
             "kind": "act",
-            "entity": "ItemComanda",
+            "entity": "TabItem",
             "affects": [
-              "Comanda"
+              "OrderTab"
             ],
-            "title": "Registrar item",
-            "description": "Lança o item na comanda com quantidade e observação, quando houver."
+            "effect": "create",
+            "title": "x",
+            "description": "Launch the selected menu item with its quantity and optional note."
           }
         ],
         "outcome": {
-          "statement": "O consumo é registrado na comanda aberta.",
+          "statement": "The item is recorded on the open tab.",
           "evidence": [
-            "Item lançado com quantidade e observação registrada, quando informada.",
-            "Total da comanda atualizado com o item lançado."
+            "The tab lists the new item with its quantity, note, and charged price.",
+            "The tab total reflects the launched item."
           ]
         }
       },
-      "businessHash": "sha256:839b31058d40e1104c627feaf52cd25f9649622c05ad2cc8c5c6746b5e624496"
+      "businessHash": "sha256:b0e85afc45434e8f8611b1609b0ca08ad38d1ba8fd0cd32de5b792b1b8cc0403"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "cancelarItemComanda",
+      "journeyId": "cancelTabItem",
       "business": {
         "actorRef": "garcom",
-        "title": "Cancelar item lançado por engano",
-        "goal": "Cancelar um item registrado indevidamente enquanto a comanda estiver aberta.",
+        "title": "Cancel a mistakenly launched item",
+        "goal": "Cancel an item launched by mistake while its tab remains open.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarComandaParaCancelamento",
+            "stepId": "locateOpenTabForCorrection",
             "kind": "locate",
-            "entity": "Comanda",
-            "title": "Localizar comanda aberta",
-            "description": "Usa a comanda em contexto ou localiza a comanda que contém o item."
+            "entity": "OrderTab",
+            "title": "x",
+            "description": "x"
           },
           {
-            "stepId": "inspecionarComandaParaCancelamento",
+            "stepId": "inspectTabItems",
             "kind": "inspect",
-            "entity": "Comanda",
-            "title": "Conferir situação da comanda",
-            "description": "Confere que a comanda está aberta."
+            "entity": "TabItem",
+            "title": "x",
+            "description": "Review the items launched on the open tab."
           },
           {
-            "stepId": "localizarItemLancado",
-            "kind": "locate",
-            "entity": "ItemComanda",
-            "title": "Localizar item lançado",
-            "description": "Localiza o item que foi lançado por engano."
-          },
-          {
-            "stepId": "inspecionarItemLancado",
-            "kind": "inspect",
-            "entity": "ItemComanda",
-            "title": "Conferir item lançado",
-            "description": "Confere o item selecionado antes do cancelamento."
-          },
-          {
-            "stepId": "cancelarItemLancado",
+            "stepId": "cancelLaunchedItem",
             "kind": "act",
-            "entity": "ItemComanda",
+            "entity": "TabItem",
             "affects": [
-              "Comanda"
+              "OrderTab"
             ],
-            "title": "Cancelar item",
-            "description": "Cancela o item lançado indevidamente na comanda aberta."
+            "effect": "transition",
+            "transitionRef": "cancelTabItem",
+            "title": "x",
+            "description": "Cancel the item that was launched by mistake."
           }
         ],
         "outcome": {
-          "statement": "O item lançado por engano deixa de compor a comanda.",
+          "statement": "The mistakenly launched item is cancelled and no longer contributes to the tab total.",
           "evidence": [
-            "Item identificado como cancelado.",
-            "Total da comanda recalculado sem o item cancelado."
+            "The item is identified as cancelled on the tab.",
+            "The tab total is recalculated without the cancelled item."
           ]
         }
       },
-      "businessHash": "sha256:b7b98382e08c6edda1c86fec0d474910eb6cc1c05c295c6366ec45fa148d8f0d"
+      "businessHash": "sha256:9fce627574bd398d28458dbc93f8b49a1f32b529c4cefd5174b9b561675c7ec1"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "fecharComanda",
+      "journeyId": "closeTab",
       "business": {
         "actorRef": "caixa",
-        "title": "Fechar comanda e liberar mesa",
-        "goal": "Receber uma comanda aberta, registrar desconto opcional e pagamento, e liberar a mesa.",
+        "title": "Close and settle a table tab",
+        "goal": "Settle an open tab with an optional discount and payment method, then free its table.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarComandaParaFechamento",
+            "stepId": "locateOpenTabForSettlement",
             "kind": "locate",
-            "entity": "Comanda",
-            "title": "Localizar comanda aberta",
-            "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa."
+            "entity": "OrderTab",
+            "title": "x",
+            "description": "x"
           },
           {
-            "stepId": "inspecionarComandaParaFechamento",
+            "stepId": "inspectTabTotal",
             "kind": "inspect",
-            "entity": "Comanda",
-            "title": "Conferir total da comanda",
-            "description": "Confere os itens lançados e o total a cobrar."
+            "entity": "OrderTab",
+            "title": "x",
+            "description": "Review the launched items and total due."
           },
           {
-            "stepId": "fecharComanda",
+            "stepId": "applyOptionalDiscount",
             "kind": "act",
-            "entity": "Comanda",
+            "entity": "OrderTab",
+            "effect": "update",
+            "title": "x",
+            "description": "Record a discount when one applies to the tab."
+          },
+          {
+            "stepId": "recordPayment",
+            "kind": "act",
+            "entity": "Payment",
             "affects": [
-              "Mesa"
+              "OrderTab"
             ],
-            "title": "Registrar fechamento e pagamento",
-            "description": "Aplica desconto opcional, registra a forma de pagamento, fecha a comanda e libera a mesa."
+            "effect": "create",
+            "title": "x",
+            "description": "Record the payment method and amount used to settle the tab."
+          },
+          {
+            "stepId": "closeSettledTab",
+            "kind": "act",
+            "entity": "OrderTab",
+            "affects": [
+              "Table"
+            ],
+            "effect": "transition",
+            "transitionRef": "closeOrderTab",
+            "title": "x",
+            "description": "Close the settled tab and free its table."
           }
         ],
         "outcome": {
-          "statement": "A comanda é fechada, o pagamento fica registrado e a mesa é liberada.",
+          "statement": "The tab is closed, its payment is recorded, and the table is available again.",
           "evidence": [
-            "Comanda identificada como fechada com total final e desconto, quando aplicado.",
-            "Forma de pagamento registrada.",
-            "Mesa identificada como disponível."
+            "The tab has a closed status, final total, and any applied discount.",
+            "A payment record shows the registered payment method and amount.",
+            "The associated table is shown as available."
           ]
         }
       },
-      "businessHash": "sha256:d45784c973770e00027fa7462fad3702325eeae3136fb8fd6608e1c3153607f1"
+      "businessHash": "sha256:58eace969bede96514343d38c2494039c073749a5e0993d90ae6ca7d2f89e8d0"
     }
   ],
   "systemDecisions": [],
   "droppedActors": [],
-  "removedOrphans": []
+  "removedOrphans": [],
+  "normalizations": [
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "openTab",
+      "stepId": "createTabForTable",
+      "detail": "transitionRef x dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "addTabItem",
+      "stepId": "createTabItem",
+      "detail": "transitionRef x dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "closeTab",
+      "stepId": "applyOptionalDiscount",
+      "detail": "transitionRef x dropped; effect is update."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "closeTab",
+      "stepId": "recordPayment",
+      "detail": "transitionRef x dropped; effect is create."
+    }
+  ]
 }

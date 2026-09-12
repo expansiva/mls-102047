@@ -7,14 +7,14 @@ export const hiringPipelineEntityJobPosition = {
   "moduleName": "hiringPipeline",
   "entityId": "JobPosition",
   "title": "Job Position",
-  "description": "An approved hiring need with its requirements and requested headcount.",
+  "description": "An open hiring position with its requirements and capacity for hires.",
   "kind": "core",
   "party": "none",
   "displayField": "title",
   "fields": [
     {
       "fieldId": "id",
-      "title": "ID",
+      "title": "Job Position ID",
       "type": "uuid",
       "required": true,
       "description": "Unique identifier for the job position."
@@ -31,31 +31,35 @@ export const hiringPipelineEntityJobPosition = {
       "title": "Department",
       "type": "string",
       "required": true,
-      "description": "Department requesting the job position."
+      "description": "Department seeking to fill the position."
     },
     {
       "fieldId": "description",
       "title": "Description",
       "type": "text",
       "required": true,
-      "description": "Hiring requirements and description of the job position."
+      "description": "Description of the position and its hiring requirements."
     },
     {
       "fieldId": "headcount",
-      "title": "Headcount",
+      "title": "Required Headcount",
       "type": "integer",
       "required": true,
-      "description": "Number of candidates requested for the job position."
+      "description": "Number of candidates required for this position."
     }
   ],
   "details": {
     "filledHeadcount": {
       "type": "integer",
-      "description": "Number of candidates hired for this job position."
+      "description": "Number of applications that have reached the hired stage for this position."
     },
     "remainingHeadcount": {
       "type": "integer",
-      "description": "Number of additional candidates that can be hired before the requested headcount is filled."
+      "description": "Number of additional hires needed to fulfill the required headcount."
+    },
+    "isHeadcountFilled": {
+      "type": "boolean",
+      "description": "Indicates whether the position's required headcount has been fulfilled."
     }
   },
   "lifecycleStates": [],

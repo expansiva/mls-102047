@@ -7,14 +7,14 @@ export const mensalidadesAcademiaEntityMatricula = {
   "moduleName": "mensalidadesAcademia",
   "entityId": "Matricula",
   "title": "Matrícula",
-  "description": "Vínculo de um aluno a um plano a partir de uma data, que determina sua elegibilidade para gerações futuras de mensalidades.",
+  "description": "Vínculo do aluno a um plano de academia a partir de uma data.",
   "kind": "core",
   "party": "none",
-  "displayField": "id",
+  "displayField": "dataInicio",
   "fields": [
     {
       "fieldId": "id",
-      "title": "Identificador da matrícula",
+      "title": "Identificador",
       "type": "uuid",
       "required": true,
       "description": "Identificador único da matrícula."
@@ -24,7 +24,7 @@ export const mensalidadesAcademiaEntityMatricula = {
       "title": "Aluno",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao aluno vinculado à matrícula."
+      "description": "Referência ao aluno ao qual a matrícula pertence."
     },
     {
       "fieldId": "planoId",
@@ -38,14 +38,7 @@ export const mensalidadesAcademiaEntityMatricula = {
       "title": "Data de início",
       "type": "date",
       "required": true,
-      "description": "Data a partir da qual a matrícula passa a ser elegível para gerar mensalidades."
-    },
-    {
-      "fieldId": "dataCancelamento",
-      "title": "Data de cancelamento",
-      "type": "date",
-      "required": false,
-      "description": "Data em que o aluno cancelou a matrícula."
+      "description": "Data a partir da qual a matrícula passa a vigorar."
     },
     {
       "fieldId": "status",
@@ -62,7 +55,7 @@ export const mensalidadesAcademiaEntityMatricula = {
           "title": "Cancelada"
         }
       ],
-      "description": "Situação atual da matrícula para determinar sua participação nas gerações futuras de mensalidades."
+      "description": "Situação atual da matrícula."
     }
   ],
   "lifecycleStates": [
@@ -85,7 +78,7 @@ export const mensalidadesAcademiaEntityMatricula = {
       "by": [
         "aluno"
       ],
-      "description": "O aluno cancela a própria matrícula, interrompendo a geração de mensalidades futuras."
+      "description": "Encerra a matrícula ativa do próprio aluno e impede a geração de mensalidades futuras."
     }
   ],
   "storage": {

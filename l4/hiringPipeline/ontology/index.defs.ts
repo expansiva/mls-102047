@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
 export const hiringPipelineOntologyIndex = {
   "schemaVersion": "2026-09-11-ns5-ontology-v2",
   "moduleName": "hiringPipeline",
-  "businessDomain": "Recruitment and hiring pipeline management",
+  "businessDomain": "Hiring pipeline management",
   "entities": [
     "JobPosition",
     "Candidate",
@@ -13,12 +13,12 @@ export const hiringPipelineOntologyIndex = {
   ],
   "relationships": [
     {
-      "relationshipId": "applicationCandidate",
-      "fromEntity": "Application",
-      "toEntity": "Candidate",
-      "type": "manyToOne",
+      "relationshipId": "candidateApplications",
+      "fromEntity": "Candidate",
+      "toEntity": "Application",
+      "type": "oneToMany",
       "required": true,
-      "description": "Each application is submitted by one candidate.",
+      "description": "A candidate submits one or more applications.",
       "persistence": {
         "mode": "crossStoreReference"
       },
@@ -26,26 +26,26 @@ export const hiringPipelineOntologyIndex = {
         "kind": "fieldReference",
         "ownerEntity": "Application",
         "from": {
-          "entityId": "Application",
-          "fieldIds": [
-            "candidateId"
-          ]
-        },
-        "to": {
           "entityId": "Candidate",
           "fieldIds": [
             "id"
+          ]
+        },
+        "to": {
+          "entityId": "Application",
+          "fieldIds": [
+            "candidateId"
           ]
         }
       }
     },
     {
-      "relationshipId": "applicationJobPosition",
-      "fromEntity": "Application",
-      "toEntity": "JobPosition",
-      "type": "manyToOne",
+      "relationshipId": "jobPositionApplications",
+      "fromEntity": "JobPosition",
+      "toEntity": "Application",
+      "type": "oneToMany",
       "required": true,
-      "description": "Each application is for one job position.",
+      "description": "A job position receives one or more candidate applications.",
       "persistence": {
         "mode": "moduleReference"
       },
@@ -53,15 +53,15 @@ export const hiringPipelineOntologyIndex = {
         "kind": "fieldReference",
         "ownerEntity": "Application",
         "from": {
-          "entityId": "Application",
-          "fieldIds": [
-            "jobPositionId"
-          ]
-        },
-        "to": {
           "entityId": "JobPosition",
           "fieldIds": [
             "id"
+          ]
+        },
+        "to": {
+          "entityId": "Application",
+          "fieldIds": [
+            "jobPositionId"
           ]
         }
       }

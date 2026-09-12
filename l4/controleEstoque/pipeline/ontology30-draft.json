@@ -1,12 +1,12 @@
 {
   "plan": {
     "moduleName": "controleEstoque",
-    "businessDomain": "Controle de estoque de produtos, com registro imutável de entradas e saídas e acompanhamento do saldo disponível em relação ao estoque mínimo.",
+    "businessDomain": "Controle de estoque de produtos, movimentações de entrada e saída, saldo disponível e alerta de estoque baixo.",
     "entities": [
       {
-        "entityId": "Product",
-        "title": "Produto controlado",
-        "description": "Papel do módulo para um produto da organização cujo estoque, saldo disponível e estoque mínimo são acompanhados.",
+        "entityId": "Produto",
+        "title": "Produto em estoque",
+        "description": "Produto disponibilizado para controle de estoque, com quantidade mínima definida para reposição.",
         "kind": "mdm",
         "party": "none",
         "mdmSubtype": "Product",
@@ -15,48 +15,36 @@
           "target": "mdm",
           "scope": "organization",
           "idField": "id",
-          "mdmType": "controleEstoque.Product"
+          "mdmType": "controleEstoque.Produto"
         }
       },
       {
-        "entityId": "StockMovement",
+        "entityId": "MovimentacaoEstoque",
         "title": "Movimentação de estoque",
-        "description": "Registro definitivo de uma entrada ou saída de unidades de um produto controlado.",
+        "description": "Registro imutável de entrada ou saída de unidades de um produto no estoque.",
         "kind": "event",
         "party": "none",
-        "displayField": "movementType",
+        "displayField": "tipoMovimentacao",
         "mutability": "appendOnly",
         "storage": {
           "target": "moduleDatabase",
           "scope": "module",
           "idField": "id",
-          "mdmType": "controleEstoque.StockMovement"
+          "mdmType": "controleEstoque.MovimentacaoEstoque"
         }
       }
     ],
     "relationships": [
       {
-        "relationshipId": "stockMovementProduct",
-        "fromEntity": "StockMovement",
-        "toEntity": "Product",
+        "relationshipId": "movimentacaoEstoqueProduto",
+        "fromEntity": "MovimentacaoEstoque",
+        "toEntity": "Produto",
         "type": "manyToOne",
         "required": true,
-        "description": "Cada movimentação de estoque registra a entrada ou saída de unidades de um produto controlado.",
+        "description": "Cada movimentação de estoque registra a entrada ou saída de um produto.",
         "persistence": {
           "mode": "crossStoreReference"
         }
-      }
-    ],
-    "normalizations": [
-      {
-        "kind": "dropCrud",
-        "entityId": "Product",
-        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-      },
-      {
-        "kind": "dropCrud",
-        "entityId": "StockMovement",
-        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
       }
     ]
   },
@@ -64,30 +52,33 @@
     {
       "schemaVersion": "2026-09-11-ns5-ontology-v2",
       "moduleName": "controleEstoque",
-      "entityId": "Product",
-      "title": "Produto controlado",
-      "description": "Papel do módulo para um produto da organização cujo estoque, saldo disponível e estoque mínimo são acompanhados.",
+      "entityId": "Produto",
+      "title": "Produto em estoque",
+      "description": "Produto disponibilizado para controle de estoque, com quantidade mínima definida para reposição.",
       "kind": "mdm",
       "party": "none",
       "mdmSubtype": "Product",
       "displayField": "name",
       "fields": [
         {
-          "fieldId": "minimumStock",
-          "title": "Estoque mínimo",
-          "type": "number",
+          "fieldId": "quantidadeMinima",
+          "title": "Quantidade mínima",
+          "type": "integer",
           "required": true,
-          "description": "Quantidade mínima disponível deste produto que deve acionar um aviso de estoque baixo."
+          "constraints": {
+            "min": 0
+          },
+          "description": "Quantidade mínima de unidades que deve permanecer disponível para o produto."
         }
       ],
       "details": {
-        "currentStock": {
-          "type": "number",
-          "description": "Quantidade atualmente disponível do produto, calculada a partir das movimentações de estoque registradas."
+        "saldoAtual": {
+          "type": "integer",
+          "description": "Quantidade atual de unidades disponíveis do produto, calculada a partir das movimentações registradas."
         },
-        "isBelowMinimum": {
+        "estoqueBaixo": {
           "type": "boolean",
-          "description": "Indica se o saldo atual do produto está abaixo do estoque mínimo definido."
+          "description": "Indica se o saldo atual do produto está abaixo da quantidade mínima configurada."
         }
       },
       "lifecycleStates": [],
@@ -96,66 +87,66 @@
         "target": "mdm",
         "scope": "organization",
         "idField": "id",
-        "mdmType": "controleEstoque.Product"
+        "mdmType": "controleEstoque.Produto"
       }
     },
     {
       "schemaVersion": "2026-09-11-ns5-ontology-v2",
       "moduleName": "controleEstoque",
-      "entityId": "StockMovement",
+      "entityId": "MovimentacaoEstoque",
       "title": "Movimentação de estoque",
-      "description": "Registro definitivo de uma entrada ou saída de unidades de um produto controlado.",
+      "description": "Registro imutável de entrada ou saída de unidades de um produto no estoque.",
       "kind": "event",
       "party": "none",
-      "displayField": "movementType",
+      "displayField": "tipoMovimentacao",
       "fields": [
         {
           "fieldId": "id",
-          "title": "Identificador da movimentação",
+          "title": "Identificador",
           "type": "uuid",
           "required": true,
           "description": "Identificador único da movimentação de estoque."
         },
         {
-          "fieldId": "productId",
-          "title": "Produto",
-          "type": "uuid",
-          "required": true,
-          "description": "Referência ao produto controlado selecionado para a movimentação."
-        },
-        {
-          "fieldId": "movementType",
+          "fieldId": "tipoMovimentacao",
           "title": "Tipo de movimentação",
           "type": "string",
           "required": true,
           "enum": [
             {
-              "value": "entry",
+              "value": "entrada",
               "title": "Entrada"
             },
             {
-              "value": "exit",
+              "value": "saida",
               "title": "Saída"
             }
           ],
-          "description": "Indica se as unidades foram recebidas ou retiradas do estoque."
+          "description": "Indica se as unidades foram adicionadas ou retiradas do estoque."
         },
         {
-          "fieldId": "quantity",
+          "fieldId": "produtoId",
+          "title": "Produto",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao produto ao qual a movimentação se aplica."
+        },
+        {
+          "fieldId": "quantidade",
           "title": "Quantidade",
           "type": "integer",
           "required": true,
           "constraints": {
             "min": 1
           },
-          "description": "Quantidade inteira de unidades registrada na entrada ou saída."
+          "description": "Quantidade de unidades registrada na entrada ou saída."
         },
         {
-          "fieldId": "registeredAt",
-          "title": "Data e hora do registro",
+          "fieldId": "dataMovimentacao",
+          "title": "Data da movimentação",
           "type": "datetime",
           "required": true,
-          "description": "Data e hora em que a movimentação foi registrada definitivamente."
+          "description": "Data e hora em que a movimentação foi registrada."
         }
       ],
       "lifecycleStates": [],
@@ -170,26 +161,26 @@
   ],
   "relationships": [
     {
-      "relationshipId": "stockMovementProduct",
-      "fromEntity": "StockMovement",
-      "toEntity": "Product",
+      "relationshipId": "movimentacaoEstoqueProduto",
+      "fromEntity": "MovimentacaoEstoque",
+      "toEntity": "Produto",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada movimentação de estoque registra a entrada ou saída de unidades de um produto controlado.",
+      "description": "Cada movimentação de estoque registra a entrada ou saída de um produto.",
       "persistence": {
         "mode": "crossStoreReference"
       },
       "realization": {
         "kind": "fieldReference",
-        "ownerEntity": "StockMovement",
+        "ownerEntity": "MovimentacaoEstoque",
         "from": {
-          "entityId": "StockMovement",
+          "entityId": "MovimentacaoEstoque",
           "fieldIds": [
-            "productId"
+            "produtoId"
           ]
         },
         "to": {
-          "entityId": "Product",
+          "entityId": "Produto",
           "fieldIds": [
             "id"
           ]

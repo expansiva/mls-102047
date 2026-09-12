@@ -1,7 +1,7 @@
 {
   "plan": {
     "moduleName": "agendaClinica",
-    "businessDomain": "Agendamento e realização de consultas clínicas",
+    "businessDomain": "Agendamento e registro de consultas clínicas",
     "entities": [
       {
         "entityId": "Paciente",
@@ -21,12 +21,12 @@
       {
         "entityId": "Profissional",
         "title": "Profissional",
-        "description": "Médico ou terapeuta da clínica que realiza consultas.",
+        "description": "Médico ou terapeuta da clínica que realiza consultas e acessa a própria agenda.",
         "kind": "mdm",
         "party": "person",
         "mdmSubtype": "Person",
         "displayField": "name",
-        "maintenance": "crud",
+        "writer": "crud",
         "storage": {
           "target": "mdm",
           "scope": "organization",
@@ -37,7 +37,7 @@
       {
         "entityId": "Consulta",
         "title": "Consulta",
-        "description": "Agendamento clínico de um paciente com um profissional, incluindo sua confirmação e resultado de atendimento.",
+        "description": "Agendamento de atendimento de um paciente com um profissional em data e horário determinados.",
         "kind": "core",
         "party": "none",
         "displayField": "scheduledAt",
@@ -72,18 +72,6 @@
           "mode": "crossStoreReference"
         }
       }
-    ],
-    "normalizations": [
-      {
-        "kind": "dropCrud",
-        "entityId": "Paciente",
-        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-      },
-      {
-        "kind": "dropCrud",
-        "entityId": "Consulta",
-        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-      }
     ]
   },
   "entities": [
@@ -112,7 +100,7 @@
       "moduleName": "agendaClinica",
       "entityId": "Profissional",
       "title": "Profissional",
-      "description": "Médico ou terapeuta da clínica que realiza consultas.",
+      "description": "Médico ou terapeuta da clínica que realiza consultas e acessa a própria agenda.",
       "kind": "mdm",
       "party": "person",
       "mdmSubtype": "Person",
@@ -126,14 +114,14 @@
         "idField": "id",
         "mdmType": "agendaClinica.Profissional"
       },
-      "maintenance": "crud"
+      "writer": "crud"
     },
     {
       "schemaVersion": "2026-09-11-ns5-ontology-v2",
       "moduleName": "agendaClinica",
       "entityId": "Consulta",
       "title": "Consulta",
-      "description": "Agendamento clínico de um paciente com um profissional, incluindo sua confirmação e resultado de atendimento.",
+      "description": "Agendamento de atendimento de um paciente com um profissional em data e horário determinados.",
       "kind": "core",
       "party": "none",
       "displayField": "scheduledAt",
@@ -150,7 +138,7 @@
           "title": "Paciente",
           "type": "uuid",
           "required": true,
-          "description": "Referência ao paciente para quem a consulta foi agendada."
+          "description": "Referência ao paciente para o qual a consulta foi agendada."
         },
         {
           "fieldId": "profissionalId",
@@ -164,7 +152,7 @@
           "title": "Data e horário",
           "type": "datetime",
           "required": true,
-          "description": "Data e horário programados para a consulta."
+          "description": "Data e horário agendados para a consulta."
         },
         {
           "fieldId": "status",
@@ -181,8 +169,8 @@
               "title": "Confirmada"
             },
             {
-              "value": "noShow",
-              "title": "Falta do paciente"
+              "value": "missed",
+              "title": "Falta registrada"
             },
             {
               "value": "attended",
@@ -192,11 +180,11 @@
           "description": "Situação atual da consulta."
         },
         {
-          "fieldId": "clinicalNote",
+          "fieldId": "attendanceNote",
           "title": "Anotação do atendimento",
           "type": "text",
           "required": false,
-          "description": "Anotação registrada pelo profissional sobre o atendimento realizado."
+          "description": "Anotação registrada pelo profissional após o atendimento."
         }
       ],
       "uniqueKeys": [
@@ -215,7 +203,7 @@
           "reachedBy": "actor"
         },
         {
-          "state": "noShow",
+          "state": "missed",
           "reachedBy": "actor"
         },
         {
@@ -225,7 +213,7 @@
       ],
       "transitions": [
         {
-          "transitionId": "confirmAppointment",
+          "transitionId": "confirmarConsulta",
           "from": [
             "scheduled"
           ],
@@ -233,22 +221,22 @@
           "by": [
             "recepcionista"
           ],
-          "description": "Registra a confirmação telefônica da consulta."
+          "description": "Registra a confirmação telefônica da consulta pelo paciente."
         },
         {
-          "transitionId": "recordPatientNoShow",
+          "transitionId": "registrarFalta",
           "from": [
             "scheduled",
             "confirmed"
           ],
-          "to": "noShow",
+          "to": "missed",
           "by": [
             "recepcionista"
           ],
           "description": "Registra que o paciente não compareceu à consulta."
         },
         {
-          "transitionId": "recordAppointmentAttendance",
+          "transitionId": "registrarAtendimento",
           "from": [
             "scheduled",
             "confirmed"
@@ -257,7 +245,7 @@
           "by": [
             "profissional"
           ],
-          "description": "Registra a realização do atendimento e sua anotação."
+          "description": "Registra a realização da consulta e a anotação do atendimento."
         }
       ],
       "storage": {

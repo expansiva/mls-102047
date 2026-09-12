@@ -8,27 +8,28 @@ export const registerCandidateJourney = {
   "business": {
     "actorRef": "recruiter",
     "title": "Register a candidate",
-    "goal": "Record a candidate so they can be considered for positions.",
+    "goal": "Add a candidate to the hiring pipeline.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "createCandidate",
+        "stepId": "captureCandidateDetails",
         "kind": "act",
         "entity": "Candidate",
-        "title": "Register the candidate",
-        "description": "Record the candidate's name, email address, resume link, and source."
+        "effect": "create",
+        "title": "Capture candidate details.",
+        "description": "Register the candidate's name, email, resume link, and source."
       }
     ],
     "outcome": {
-      "statement": "The candidate is available to be added to a job application.",
+      "statement": "The candidate is available to be considered for job positions.",
       "evidence": [
-        "The candidate record shows the name, email address, resume link, and source."
+        "The candidate record shows the name, email, resume link, and source."
       ]
     }
   },
-  "businessHash": "sha256:b75d4d662133e651b3247a1c0f859c70709f6d6efbf58f3c921d3ef43e7997c9"
+  "businessHash": "sha256:84d48c38dd2ebd84d6fd485164df286baba6c55f39694db7645b91df1736bf1e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegisterCandidateJourneyType = typeof registerCandidateJourney;

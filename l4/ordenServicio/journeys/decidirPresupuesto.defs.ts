@@ -7,52 +7,53 @@ export const decidirPresupuestoJourney = {
   "journeyId": "decidirPresupuesto",
   "business": {
     "actorRef": "cliente",
-    "title": "Decidir sobre un presupuesto",
-    "goal": "Consultar una orden propia y aprobar o rechazar el presupuesto recibido.",
+    "title": "Decidir sobre presupuesto",
+    "goal": "Revisar el presupuesto de una orden propia y aprobar o rechazar la reparación propuesta.",
     "entry": {
       "mode": "fromNotification"
     },
     "steps": [
       {
-        "stepId": "localizarOrdenPropia",
+        "stepId": "localizarOrdenNotificada",
         "kind": "locate",
         "entity": "OrdenServicio",
-        "title": "Abrir una orden propia presupuestada.",
-        "description": "Acceder desde la notificación al presupuesto de una orden propia, con una alternativa de búsqueda entre las propias órdenes."
+        "title": "x",
+        "description": "x"
       },
       {
         "stepId": "consultarPresupuesto",
         "kind": "inspect",
         "entity": "OrdenServicio",
-        "title": "Consultar estado, diagnóstico y valor del presupuesto.",
-        "description": "Revisar la información de la orden propia disponible para el cliente, sin acceso a costos internos ni anotaciones técnicas."
+        "title": "x",
+        "description": "x"
       },
       {
         "stepId": "decidirPresupuesto",
         "kind": "decide",
         "entity": "OrdenServicio",
-        "title": "Aprobar o rechazar el presupuesto.",
-        "description": "Elegir entre aprobar el presupuesto para autorizar la reparación o rechazarlo para dejar el aparato disponible para retiro."
+        "title": "x",
+        "description": "Elige aprobar el presupuesto para autorizar la reparación o rechazarlo para cerrar la orden y dejar el aparato disponible para retiro."
       },
       {
-        "stepId": "remitirOrdenAreparacion",
-        "kind": "handoff",
+        "stepId": "registrarDecisionPresupuesto",
+        "kind": "act",
         "entity": "OrdenServicio",
-        "title": "Remitir la orden aprobada a reparación.",
-        "description": "Poner la orden aprobada a disposición del técnico para realizar la reparación.",
-        "handoffTo": "tecnico"
+        "effect": "transition",
+        "transitionRef": "resolverPresupuesto",
+        "title": "x",
+        "description": "Registra la decisión seleccionada sobre el presupuesto."
       }
     ],
     "outcome": {
-      "statement": "El presupuesto queda aprobado para reparación o la orden queda cerrada como rechazada y el aparato disponible para retiro.",
+      "statement": "La decisión del cliente queda registrada: la orden queda autorizada para reparación o cerrada como rechazada y disponible para retiro.",
       "evidence": [
-        "La decisión del cliente está registrada en la orden.",
-        "Una orden aprobada queda disponible para reparación.",
-        "Una orden rechazada queda cerrada como rechazada y el aparato está disponible para retiro."
+        "La orden registra la aprobación o el rechazo del presupuesto.",
+        "Una orden aprobada queda disponible para reparación técnica.",
+        "Una orden rechazada queda cerrada y su aparato queda disponible para retiro."
       ]
     }
   },
-  "businessHash": "sha256:27fb4e5beee500d935d577f3bd1af6a781d78cb014491bdfcb49d76045862a12"
+  "businessHash": "sha256:656fdbbc38bd83da6b42db294a319b658f1d8264bd5bd0810e16eb25175bb65d"
 } as const satisfies Ns5JourneyArtifact;
 
 export type DecidirPresupuestoJourneyType = typeof decidirPresupuestoJourney;

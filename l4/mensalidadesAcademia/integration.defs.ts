@@ -3,10 +3,22 @@
 import type { Ns5IntegrationArtifact } from '/_102035_/l2/solution/types.js';
 
 export const mensalidadesAcademiaIntegration = {
-  "schemaVersion": "2026-09-10-ns5-integration-v1",
+  "schemaVersion": "2026-09-12-ns5-integration-v2",
   "moduleName": "mensalidadesAcademia",
   "inbound": [],
-  "outbound": [],
+  "outbound": [
+    {
+      "id": "matriculaCancelada",
+      "kind": "event",
+      "to": "any",
+      "event": "matriculaCancelada",
+      "on": "Matricula.cancelarMatricula",
+      "description": "Informa a outros módulos que a matrícula do aluno foi cancelada, encerrando a geração de mensalidades futuras.",
+      "entityRefs": [
+        "Matricula"
+      ]
+    }
+  ],
   "plugins": []
 } as const satisfies Ns5IntegrationArtifact;
 

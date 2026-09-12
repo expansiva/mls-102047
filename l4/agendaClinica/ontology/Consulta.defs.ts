@@ -7,7 +7,7 @@ export const agendaClinicaEntityConsulta = {
   "moduleName": "agendaClinica",
   "entityId": "Consulta",
   "title": "Consulta",
-  "description": "Agendamento clínico de um paciente com um profissional, incluindo sua confirmação e resultado de atendimento.",
+  "description": "Agendamento de atendimento de um paciente com um profissional em data e horário determinados.",
   "kind": "core",
   "party": "none",
   "displayField": "scheduledAt",
@@ -24,7 +24,7 @@ export const agendaClinicaEntityConsulta = {
       "title": "Paciente",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao paciente para quem a consulta foi agendada."
+      "description": "Referência ao paciente para o qual a consulta foi agendada."
     },
     {
       "fieldId": "profissionalId",
@@ -38,7 +38,7 @@ export const agendaClinicaEntityConsulta = {
       "title": "Data e horário",
       "type": "datetime",
       "required": true,
-      "description": "Data e horário programados para a consulta."
+      "description": "Data e horário agendados para a consulta."
     },
     {
       "fieldId": "status",
@@ -55,8 +55,8 @@ export const agendaClinicaEntityConsulta = {
           "title": "Confirmada"
         },
         {
-          "value": "noShow",
-          "title": "Falta do paciente"
+          "value": "missed",
+          "title": "Falta registrada"
         },
         {
           "value": "attended",
@@ -66,11 +66,11 @@ export const agendaClinicaEntityConsulta = {
       "description": "Situação atual da consulta."
     },
     {
-      "fieldId": "clinicalNote",
+      "fieldId": "attendanceNote",
       "title": "Anotação do atendimento",
       "type": "text",
       "required": false,
-      "description": "Anotação registrada pelo profissional sobre o atendimento realizado."
+      "description": "Anotação registrada pelo profissional após o atendimento."
     }
   ],
   "uniqueKeys": [
@@ -89,7 +89,7 @@ export const agendaClinicaEntityConsulta = {
       "reachedBy": "actor"
     },
     {
-      "state": "noShow",
+      "state": "missed",
       "reachedBy": "actor"
     },
     {
@@ -99,7 +99,7 @@ export const agendaClinicaEntityConsulta = {
   ],
   "transitions": [
     {
-      "transitionId": "confirmAppointment",
+      "transitionId": "confirmarConsulta",
       "from": [
         "scheduled"
       ],
@@ -107,22 +107,22 @@ export const agendaClinicaEntityConsulta = {
       "by": [
         "recepcionista"
       ],
-      "description": "Registra a confirmação telefônica da consulta."
+      "description": "Registra a confirmação telefônica da consulta pelo paciente."
     },
     {
-      "transitionId": "recordPatientNoShow",
+      "transitionId": "registrarFalta",
       "from": [
         "scheduled",
         "confirmed"
       ],
-      "to": "noShow",
+      "to": "missed",
       "by": [
         "recepcionista"
       ],
       "description": "Registra que o paciente não compareceu à consulta."
     },
     {
-      "transitionId": "recordAppointmentAttendance",
+      "transitionId": "registrarAtendimento",
       "from": [
         "scheduled",
         "confirmed"
@@ -131,7 +131,7 @@ export const agendaClinicaEntityConsulta = {
       "by": [
         "profissional"
       ],
-      "description": "Registra a realização do atendimento e sua anotação."
+      "description": "Registra a realização da consulta e a anotação do atendimento."
     }
   ],
   "storage": {

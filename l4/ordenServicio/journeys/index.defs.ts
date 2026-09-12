@@ -9,27 +9,27 @@ export const ordenServicioJourneyIndex = {
     {
       "journeyId": "abrirOrdenServicio",
       "actorRef": "recepcionista",
-      "title": "Abrir una orden de servicio"
+      "title": "Abrir orden de servicio"
     },
     {
       "journeyId": "analizarYpresupuestarOrden",
       "actorRef": "tecnico",
-      "title": "Analizar y presupuestar una orden"
+      "title": "Analizar y presupuestar orden"
     },
     {
       "journeyId": "decidirPresupuesto",
       "actorRef": "cliente",
-      "title": "Decidir sobre un presupuesto"
+      "title": "Decidir sobre presupuesto"
     },
     {
-      "journeyId": "repararYmarcarLista",
+      "journeyId": "repararOrdenAprobada",
       "actorRef": "tecnico",
-      "title": "Reparar un aparato aprobado"
+      "title": "Reparar orden aprobada"
     },
     {
       "journeyId": "entregarYfinalizarOrden",
       "actorRef": "recepcionista",
-      "title": "Entregar el aparato y finalizar una orden"
+      "title": "Entregar aparato y finalizar orden"
     },
     {
       "journeyId": "consultarMisOrdenes",

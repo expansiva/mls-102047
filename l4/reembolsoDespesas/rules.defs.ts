@@ -7,12 +7,20 @@ export const reembolsoDespesasRules = {
   "moduleName": "reembolsoDespesas",
   "rules": [
     {
-      "ruleId": "oneResubmission",
-      "description": "Uma despesa rejeitada pode ser corrigida e reenviada para aprovação somente uma vez."
+      "ruleId": "resubmissionOnlyWhenRejected",
+      "description": "Uma despesa só pode ser reenviada para aprovação quando tiver sido rejeitada."
     },
     {
-      "ruleId": "rejectionReasonRequired",
-      "description": "A rejeição de uma despesa deve registrar um motivo informado pelo gestor."
+      "ruleId": "onlyOneResubmission",
+      "description": "Uma despesa rejeitada pode ser corrigida e reenviada para aprovação apenas uma vez."
+    },
+    {
+      "ruleId": "rejectionRequiresReason",
+      "description": "A rejeição de uma despesa exige o registro de um motivo."
+    },
+    {
+      "ruleId": "paymentOnlyForApprovedExpense",
+      "description": "O pagamento só pode ser registrado para uma despesa aprovada."
     }
   ]
 } as const satisfies Ns5RulesArtifact;

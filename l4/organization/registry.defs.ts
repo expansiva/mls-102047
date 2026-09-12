@@ -7,64 +7,6 @@ export const solutionRegistry = {
   "level1SchemaVersion": "ns4-level1-v1",
   "modules": [
     {
-      "moduleName": "mensalidadesAcademia",
-      "actors": [
-        {
-          "actorId": "recepcao",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gerencia",
-          "kind": "internal"
-        },
-        {
-          "actorId": "aluno",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "mensalidadesAcademia.Aluno",
-          "namespace": "mensalidadesAcademia"
-        },
-        {
-          "mdmSubtype": "Service",
-          "role": "mensalidadesAcademia.Plano",
-          "namespace": "mensalidadesAcademia"
-        }
-      ],
-      "generalFields": [],
-      "updatedAt": "2026-09-12T08:00:54.176Z"
-    },
-    {
-      "moduleName": "comandaRestaurante",
-      "actors": [
-        {
-          "actorId": "garcom",
-          "kind": "internal"
-        },
-        {
-          "actorId": "caixa",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "AssetEquipment",
-          "role": "comandaRestaurante.Mesa",
-          "namespace": "comandaRestaurante"
-        },
-        {
-          "mdmSubtype": "Product",
-          "role": "comandaRestaurante.ItemCardapio",
-          "namespace": "comandaRestaurante"
-        }
-      ],
-      "generalFields": [],
-      "updatedAt": "2026-09-12T08:10:57.094Z"
-    },
-    {
       "moduleName": "controleEstoque",
       "actors": [
         {
@@ -75,70 +17,151 @@ export const solutionRegistry = {
       "roles": [
         {
           "mdmSubtype": "Product",
-          "role": "controleEstoque.Product",
+          "role": "controleEstoque.Produto",
           "namespace": "controleEstoque"
         }
       ],
       "generalFields": [],
-      "updatedAt": "2026-09-12T08:22:06.542Z"
-    },
-    {
-      "moduleName": "compras",
-      "actors": [
+      "entities": [
         {
-          "actorId": "comprador",
-          "kind": "internal"
+          "entityId": "Produto",
+          "kind": "mdm",
+          "mdmSubtype": "Product"
         },
         {
-          "actorId": "gerenteCompras",
-          "kind": "internal"
-        },
-        {
-          "actorId": "almoxarife",
-          "kind": "internal"
+          "entityId": "MovimentacaoEstoque",
+          "kind": "event"
         }
       ],
-      "roles": [
+      "events": [
         {
-          "mdmSubtype": "Company",
-          "role": "compras.Supplier",
-          "namespace": "compras"
-        },
-        {
-          "mdmSubtype": "Product",
-          "role": "compras.Product",
-          "namespace": "compras"
+          "eventId": "estoqueAbaixoDoMinimo",
+          "on": "MovimentacaoEstoque.create"
         }
       ],
-      "generalFields": [],
-      "updatedAt": "2026-09-12T08:27:05.112Z"
+      "updatedAt": "2026-09-12T19:32:37.338Z"
     },
     {
-      "moduleName": "locacaoEquipamentos",
+      "moduleName": "agendaClinica",
       "actors": [
         {
-          "actorId": "atendente",
+          "actorId": "recepcionista",
           "kind": "internal"
         },
         {
-          "actorId": "gerente",
+          "actorId": "profissional",
           "kind": "internal"
         }
       ],
       "roles": [
         {
           "mdmSubtype": "Person",
-          "role": "locacaoEquipamentos.Cliente",
-          "namespace": "locacaoEquipamentos"
+          "role": "agendaClinica.Paciente",
+          "namespace": "agendaClinica"
         },
         {
-          "mdmSubtype": "AssetEquipment",
-          "role": "locacaoEquipamentos.Equipamento",
-          "namespace": "locacaoEquipamentos"
+          "mdmSubtype": "Person",
+          "role": "agendaClinica.Profissional",
+          "namespace": "agendaClinica"
         }
       ],
       "generalFields": [],
-      "updatedAt": "2026-09-12T08:41:25.107Z"
+      "entities": [
+        {
+          "entityId": "Paciente",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Profissional",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Consulta",
+          "kind": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "consultaConfirmada",
+          "on": "Consulta.confirmarConsulta"
+        },
+        {
+          "eventId": "consultaComFaltaRegistrada",
+          "on": "Consulta.registrarFalta"
+        },
+        {
+          "eventId": "consultaAtendida",
+          "on": "Consulta.registrarAtendimento"
+        }
+      ],
+      "updatedAt": "2026-09-12T19:43:15.338Z"
+    },
+    {
+      "moduleName": "reembolsoDespesas",
+      "actors": [
+        {
+          "actorId": "colaborador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gestorEquipe",
+          "kind": "internal"
+        },
+        {
+          "actorId": "financeiro",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "mdmSubtype": "Person",
+          "role": "reembolsoDespesas.Colaborador",
+          "namespace": "reembolsoDespesas"
+        },
+        {
+          "mdmSubtype": "Person",
+          "role": "reembolsoDespesas.GestorEquipe",
+          "namespace": "reembolsoDespesas"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Despesa",
+          "kind": "core"
+        },
+        {
+          "entityId": "Colaborador",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "GestorEquipe",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "despesaEnviadaParaAprovacao",
+          "on": "Despesa.submitForApproval"
+        },
+        {
+          "eventId": "despesaReenviadaParaAprovacao",
+          "on": "Despesa.resubmitForApproval"
+        },
+        {
+          "eventId": "decisaoDeAprovacaoRegistrada",
+          "on": "Despesa.recordApprovalDecision"
+        },
+        {
+          "eventId": "pagamentoDeDespesaRegistrado",
+          "on": "Despesa.registerPayment"
+        }
+      ],
+      "updatedAt": "2026-09-12T19:47:57.034Z"
     },
     {
       "moduleName": "hiringPipeline",
@@ -160,7 +183,162 @@ export const solutionRegistry = {
         }
       ],
       "generalFields": [],
-      "updatedAt": "2026-09-12T08:45:40.977Z"
+      "entities": [
+        {
+          "entityId": "JobPosition",
+          "kind": "core"
+        },
+        {
+          "entityId": "Candidate",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Application",
+          "kind": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "advanceToInterview",
+          "on": "Application.advanceToInterview"
+        },
+        {
+          "eventId": "issueOffer",
+          "on": "Application.issueOffer"
+        },
+        {
+          "eventId": "markHired",
+          "on": "Application.markHired"
+        },
+        {
+          "eventId": "rejectApplication",
+          "on": "Application.rejectApplication"
+        }
+      ],
+      "updatedAt": "2026-09-12T19:59:56.097Z"
+    },
+    {
+      "moduleName": "manutencaoFrota",
+      "actors": [
+        {
+          "actorId": "motorista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gestorFrota",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "mdmSubtype": "Person",
+          "role": "manutencaoFrota.Motorista",
+          "namespace": "manutencaoFrota"
+        },
+        {
+          "mdmSubtype": "Company",
+          "role": "manutencaoFrota.Oficina",
+          "namespace": "manutencaoFrota"
+        },
+        {
+          "mdmSubtype": "AssetVehicle",
+          "role": "manutencaoFrota.Veiculo",
+          "namespace": "manutencaoFrota"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Abastecimento",
+          "kind": "event"
+        },
+        {
+          "entityId": "Motorista",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Oficina",
+          "kind": "mdm",
+          "mdmSubtype": "Company"
+        },
+        {
+          "entityId": "Veiculo",
+          "kind": "mdm",
+          "mdmSubtype": "AssetVehicle"
+        },
+        {
+          "entityId": "PlanoManutencao",
+          "kind": "core"
+        },
+        {
+          "entityId": "OrdemManutencao",
+          "kind": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "preventivaVencida",
+          "on": "Abastecimento.create"
+        }
+      ],
+      "updatedAt": "2026-09-12T20:05:09.582Z"
+    },
+    {
+      "moduleName": "mensalidadesAcademia",
+      "actors": [
+        {
+          "actorId": "recepcao",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerencia",
+          "kind": "internal"
+        },
+        {
+          "actorId": "aluno",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "mdmSubtype": "Person",
+          "role": "mensalidadesAcademia.Aluno",
+          "namespace": "mensalidadesAcademia"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Plano",
+          "kind": "core"
+        },
+        {
+          "entityId": "Aluno",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Matricula",
+          "kind": "core"
+        },
+        {
+          "entityId": "Mensalidade",
+          "kind": "event"
+        },
+        {
+          "entityId": "Pagamento",
+          "kind": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "matriculaCancelada",
+          "on": "Matricula.cancelarMatricula"
+        }
+      ],
+      "updatedAt": "2026-09-12T20:09:09.008Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

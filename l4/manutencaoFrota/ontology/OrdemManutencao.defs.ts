@@ -7,10 +7,10 @@ export const manutencaoFrotaEntityOrdemManutencao = {
   "moduleName": "manutencaoFrota",
   "entityId": "OrdemManutencao",
   "title": "Ordem de manutenção",
-  "description": "Ordem aberta para executar manutenção preventiva vencida ou corrigir um defeito de veículo.",
+  "description": "Registro do encaminhamento de um veículo para manutenção preventiva ou corretiva e da conclusão do serviço.",
   "kind": "core",
   "party": "none",
-  "displayField": "dataEntrada",
+  "displayField": "descricao",
   "fields": [
     {
       "fieldId": "id",
@@ -24,116 +24,59 @@ export const manutencaoFrotaEntityOrdemManutencao = {
       "title": "Veículo",
       "type": "uuid",
       "required": true,
-      "description": "Veículo para o qual a manutenção foi aberta."
+      "description": "Referência ao veículo encaminhado para manutenção."
     },
     {
-      "fieldId": "planoManutencaoPreventivaId",
-      "title": "Plano de manutenção preventiva",
+      "fieldId": "planoManutencaoId",
+      "title": "Plano de manutenção",
       "type": "uuid",
       "required": false,
-      "description": "Plano preventivo que motivou a ordem, quando aplicável."
+      "description": "Referência ao plano preventivo que motivou a abertura da ordem, quando aplicável."
     },
     {
       "fieldId": "oficinaId",
       "title": "Oficina",
       "type": "uuid",
       "required": true,
-      "description": "Oficina responsável pela execução do serviço."
-    },
-    {
-      "fieldId": "motivo",
-      "title": "Motivo da manutenção",
-      "type": "string",
-      "required": true,
-      "enum": [
-        {
-          "value": "preventive",
-          "title": "Manutenção preventiva"
-        },
-        {
-          "value": "defect",
-          "title": "Defeito identificado"
-        }
-      ],
-      "description": "Motivo que originou a ordem de manutenção."
+      "description": "Referência à oficina responsável pela execução do serviço."
     },
     {
       "fieldId": "descricao",
-      "title": "Descrição do serviço ou defeito",
+      "title": "Descrição",
       "type": "text",
       "required": true,
-      "description": "Descrição do serviço preventivo a executar ou do defeito identificado."
+      "description": "Descrição do defeito identificado ou do serviço de manutenção solicitado."
     },
     {
       "fieldId": "dataEntrada",
       "title": "Data de entrada",
       "type": "date",
       "required": true,
-      "description": "Data de entrada do veículo na oficina."
+      "description": "Data em que o veículo foi encaminhado à oficina."
+    },
+    {
+      "fieldId": "custo",
+      "title": "Custo",
+      "type": "money",
+      "required": false,
+      "description": "Custo informado para o serviço de manutenção concluído."
     },
     {
       "fieldId": "dataSaida",
       "title": "Data de saída",
       "type": "date",
       "required": false,
-      "description": "Data de saída do veículo da oficina após a conclusão do serviço."
-    },
-    {
-      "fieldId": "custo",
-      "title": "Custo da manutenção",
-      "type": "money",
-      "required": false,
-      "constraints": {
-        "precision": 2
-      },
-      "description": "Valor total registrado para a manutenção executada."
-    },
-    {
-      "fieldId": "status",
-      "title": "Situação",
-      "type": "string",
-      "required": true,
-      "enum": [
-        {
-          "value": "open",
-          "title": "Aberta"
-        },
-        {
-          "value": "completed",
-          "title": "Concluída"
-        }
-      ],
-      "description": "Situação atual da ordem de manutenção."
+      "description": "Data em que o veículo foi liberado pela oficina."
     }
   ],
-  "lifecycleStates": [
-    {
-      "state": "open",
-      "reachedBy": "actor"
-    },
-    {
-      "state": "completed",
-      "reachedBy": "actor"
-    }
-  ],
-  "transitions": [
-    {
-      "transitionId": "concluirOrdem",
-      "from": [
-        "open"
-      ],
-      "to": "completed",
-      "by": [
-        "gestorFrota"
-      ],
-      "description": "Registra o custo e a data de saída do veículo, concluindo a ordem de manutenção."
-    }
-  ],
+  "lifecycleStates": [],
+  "transitions": [],
   "storage": {
     "target": "moduleDatabase",
     "scope": "module",
     "idField": "id"
-  }
+  },
+  "mutability": "appendOnly"
 } as const satisfies Ns5OntologyEntityArtifact;
 
 export type ManutencaoFrotaEntityOrdemManutencaoType = typeof manutencaoFrotaEntityOrdemManutencao;

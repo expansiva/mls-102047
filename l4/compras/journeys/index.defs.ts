@@ -7,14 +7,9 @@ export const comprasJourneyIndex = {
   "moduleName": "compras",
   "journeys": [
     {
-      "journeyId": "cadastrarFornecedor",
+      "journeyId": "cadastrarFornecedorEoferta",
       "actorRef": "comprador",
-      "title": "Cadastrar fornecedor"
-    },
-    {
-      "journeyId": "definirCondicoesFornecimento",
-      "actorRef": "comprador",
-      "title": "Definir produtos e preços de um fornecedor"
+      "title": "Cadastrar fornecedor e produtos fornecidos"
     },
     {
       "journeyId": "abrirEenviarPedidoCompra",
@@ -22,17 +17,22 @@ export const comprasJourneyIndex = {
       "title": "Abrir e enviar pedido de compra"
     },
     {
-      "journeyId": "decidirPedidoAcimaDoLimite",
+      "journeyId": "aprovarPedidoAcimaDoLimite",
       "actorRef": "gerenteCompras",
-      "title": "Aprovar ou rejeitar pedido acima do limite"
+      "title": "Aprovar pedido acima do limite"
     },
     {
-      "journeyId": "registrarRecebimentoPedido",
+      "journeyId": "rejeitarPedidoAcimaDoLimite",
+      "actorRef": "gerenteCompras",
+      "title": "Rejeitar pedido acima do limite"
+    },
+    {
+      "journeyId": "registrarRecebimentoDePedido",
       "actorRef": "almoxarife",
       "title": "Registrar recebimento de pedido"
     },
     {
-      "journeyId": "acompanharIndicadoresCompras",
+      "journeyId": "acompanharIndicadoresDeCompras",
       "actorRef": "gerenteCompras",
       "title": "Acompanhar indicadores de compras"
     }

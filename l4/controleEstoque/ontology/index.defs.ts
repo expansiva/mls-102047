@@ -5,33 +5,33 @@ import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
 export const controleEstoqueOntologyIndex = {
   "schemaVersion": "2026-09-11-ns5-ontology-v2",
   "moduleName": "controleEstoque",
-  "businessDomain": "Controle de estoque de produtos, com registro imutável de entradas e saídas e acompanhamento do saldo disponível em relação ao estoque mínimo.",
+  "businessDomain": "Controle de estoque de produtos, movimentações de entrada e saída, saldo disponível e alerta de estoque baixo.",
   "entities": [
-    "Product",
-    "StockMovement"
+    "Produto",
+    "MovimentacaoEstoque"
   ],
   "relationships": [
     {
-      "relationshipId": "stockMovementProduct",
-      "fromEntity": "StockMovement",
-      "toEntity": "Product",
+      "relationshipId": "movimentacaoEstoqueProduto",
+      "fromEntity": "MovimentacaoEstoque",
+      "toEntity": "Produto",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada movimentação de estoque registra a entrada ou saída de unidades de um produto controlado.",
+      "description": "Cada movimentação de estoque registra a entrada ou saída de um produto.",
       "persistence": {
         "mode": "crossStoreReference"
       },
       "realization": {
         "kind": "fieldReference",
-        "ownerEntity": "StockMovement",
+        "ownerEntity": "MovimentacaoEstoque",
         "from": {
-          "entityId": "StockMovement",
+          "entityId": "MovimentacaoEstoque",
           "fieldIds": [
-            "productId"
+            "produtoId"
           ]
         },
         "to": {
-          "entityId": "Product",
+          "entityId": "Produto",
           "fieldIds": [
             "id"
           ]

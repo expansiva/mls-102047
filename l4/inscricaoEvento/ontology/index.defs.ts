@@ -5,21 +5,20 @@ import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
 export const inscricaoEventoOntologyIndex = {
   "schemaVersion": "2026-09-11-ns5-ontology-v2",
   "moduleName": "inscricaoEvento",
-  "businessDomain": "Gestão e inscrições públicas em eventos",
+  "businessDomain": "Gestão de eventos publicados e inscrições públicas, incluindo lista de espera e cancelamentos.",
   "entities": [
     "Evento",
     "Inscricao",
-    "Participant",
-    "Venue"
+    "Participante"
   ],
   "relationships": [
     {
-      "relationshipId": "eventRegistrations",
-      "fromEntity": "Evento",
-      "toEntity": "Inscricao",
-      "type": "oneToMany",
-      "required": false,
-      "description": "Um evento pode ter várias inscrições.",
+      "relationshipId": "inscricaoEvento",
+      "fromEntity": "Inscricao",
+      "toEntity": "Evento",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada inscrição pertence a um único evento.",
       "persistence": {
         "mode": "moduleReference"
       },
@@ -27,26 +26,26 @@ export const inscricaoEventoOntologyIndex = {
         "kind": "fieldReference",
         "ownerEntity": "Inscricao",
         "from": {
-          "entityId": "Evento",
+          "entityId": "Inscricao",
           "fieldIds": [
-            "id"
+            "eventoId"
           ]
         },
         "to": {
-          "entityId": "Inscricao",
+          "entityId": "Evento",
           "fieldIds": [
-            "eventId"
+            "id"
           ]
         }
       }
     },
     {
-      "relationshipId": "registrationParticipant",
+      "relationshipId": "inscricaoParticipante",
       "fromEntity": "Inscricao",
-      "toEntity": "Participant",
+      "toEntity": "Participante",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada inscrição pertence a uma pessoa participante.",
+      "description": "Cada inscrição identifica a pessoa participante que a realizou.",
       "persistence": {
         "mode": "crossStoreReference"
       },
@@ -56,38 +55,11 @@ export const inscricaoEventoOntologyIndex = {
         "from": {
           "entityId": "Inscricao",
           "fieldIds": [
-            "participantId"
+            "participanteId"
           ]
         },
         "to": {
-          "entityId": "Participant",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "eventVenue",
-      "fromEntity": "Evento",
-      "toEntity": "Venue",
-      "type": "manyToOne",
-      "required": true,
-      "description": "Cada evento ocorre em um local cadastrado.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Evento",
-        "from": {
-          "entityId": "Evento",
-          "fieldIds": [
-            "venueId"
-          ]
-        },
-        "to": {
-          "entityId": "Venue",
+          "entityId": "Participante",
           "fieldIds": [
             "id"
           ]

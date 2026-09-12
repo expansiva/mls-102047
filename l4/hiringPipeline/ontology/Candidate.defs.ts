@@ -7,7 +7,7 @@ export const hiringPipelineEntityCandidate = {
   "moduleName": "hiringPipeline",
   "entityId": "Candidate",
   "title": "Candidate",
-  "description": "A person registered for consideration in the organization's hiring process.",
+  "description": "A person registered as a candidate in the hiring pipeline.",
   "kind": "mdm",
   "party": "person",
   "mdmSubtype": "Person",
@@ -15,7 +15,7 @@ export const hiringPipelineEntityCandidate = {
   "fields": [
     {
       "fieldId": "resumeLink",
-      "title": "Resume link",
+      "title": "Resume Link",
       "type": "string",
       "required": true,
       "constraints": {
@@ -31,7 +31,7 @@ export const hiringPipelineEntityCandidate = {
       "constraints": {
         "maxLength": 255
       },
-      "description": "How the candidate was sourced for the hiring process."
+      "description": "Source through which the candidate was identified."
     }
   ],
   "lifecycleStates": [],

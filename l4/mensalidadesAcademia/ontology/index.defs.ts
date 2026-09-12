@@ -5,22 +5,22 @@ import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
 export const mensalidadesAcademiaOntologyIndex = {
   "schemaVersion": "2026-09-11-ns5-ontology-v2",
   "moduleName": "mensalidadesAcademia",
-  "businessDomain": "Gestão de mensalidades, matrículas, pagamentos e indicadores de academia.",
+  "businessDomain": "Gestão de matrículas, mensalidades e pagamentos de academia.",
   "entities": [
-    "Aluno",
     "Plano",
+    "Aluno",
     "Matricula",
     "Mensalidade",
     "Pagamento"
   ],
   "relationships": [
     {
-      "relationshipId": "alunoMatriculas",
-      "fromEntity": "Aluno",
-      "toEntity": "Matricula",
-      "type": "oneToMany",
+      "relationshipId": "matriculaAluno",
+      "fromEntity": "Matricula",
+      "toEntity": "Aluno",
+      "type": "manyToOne",
       "required": true,
-      "description": "Um aluno pode possuir matrículas registradas na academia.",
+      "description": "Cada matrícula pertence a um aluno da academia.",
       "persistence": {
         "mode": "crossStoreReference"
       },
@@ -28,53 +28,53 @@ export const mensalidadesAcademiaOntologyIndex = {
         "kind": "fieldReference",
         "ownerEntity": "Matricula",
         "from": {
-          "entityId": "Aluno",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
           "entityId": "Matricula",
           "fieldIds": [
             "alunoId"
           ]
+        },
+        "to": {
+          "entityId": "Aluno",
+          "fieldIds": [
+            "id"
+          ]
         }
       }
     },
     {
-      "relationshipId": "planoMatriculas",
-      "fromEntity": "Plano",
-      "toEntity": "Matricula",
-      "type": "oneToMany",
+      "relationshipId": "matriculaPlano",
+      "fromEntity": "Matricula",
+      "toEntity": "Plano",
+      "type": "manyToOne",
       "required": true,
-      "description": "Um plano pode estar vinculado a diversas matrículas.",
+      "description": "Cada matrícula é realizada em um plano de academia.",
       "persistence": {
-        "mode": "crossStoreReference"
+        "mode": "moduleReference"
       },
       "realization": {
         "kind": "fieldReference",
         "ownerEntity": "Matricula",
         "from": {
-          "entityId": "Plano",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
           "entityId": "Matricula",
           "fieldIds": [
             "planoId"
+          ]
+        },
+        "to": {
+          "entityId": "Plano",
+          "fieldIds": [
+            "id"
           ]
         }
       }
     },
     {
-      "relationshipId": "matriculaMensalidades",
-      "fromEntity": "Matricula",
-      "toEntity": "Mensalidade",
-      "type": "oneToMany",
+      "relationshipId": "mensalidadeMatricula",
+      "fromEntity": "Mensalidade",
+      "toEntity": "Matricula",
+      "type": "manyToOne",
       "required": true,
-      "description": "Uma matrícula origina mensalidades para os períodos em que permanece ativa.",
+      "description": "Cada mensalidade é gerada para uma matrícula ativa.",
       "persistence": {
         "mode": "moduleReference"
       },
@@ -82,26 +82,26 @@ export const mensalidadesAcademiaOntologyIndex = {
         "kind": "fieldReference",
         "ownerEntity": "Mensalidade",
         "from": {
-          "entityId": "Matricula",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
           "entityId": "Mensalidade",
           "fieldIds": [
             "matriculaId"
+          ]
+        },
+        "to": {
+          "entityId": "Matricula",
+          "fieldIds": [
+            "id"
           ]
         }
       }
     },
     {
-      "relationshipId": "mensalidadePagamentos",
-      "fromEntity": "Mensalidade",
-      "toEntity": "Pagamento",
-      "type": "oneToMany",
+      "relationshipId": "pagamentoMensalidade",
+      "fromEntity": "Pagamento",
+      "toEntity": "Mensalidade",
+      "type": "manyToOne",
       "required": true,
-      "description": "Uma mensalidade pode receber um ou mais pagamentos registrados.",
+      "description": "Cada pagamento é registrado para uma mensalidade.",
       "persistence": {
         "mode": "moduleReference"
       },
@@ -109,15 +109,15 @@ export const mensalidadesAcademiaOntologyIndex = {
         "kind": "fieldReference",
         "ownerEntity": "Pagamento",
         "from": {
-          "entityId": "Mensalidade",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
           "entityId": "Pagamento",
           "fieldIds": [
             "mensalidadeId"
+          ]
+        },
+        "to": {
+          "entityId": "Mensalidade",
+          "fieldIds": [
+            "id"
           ]
         }
       }

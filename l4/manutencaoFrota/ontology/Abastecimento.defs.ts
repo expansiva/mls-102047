@@ -7,7 +7,7 @@ export const manutencaoFrotaEntityAbastecimento = {
   "moduleName": "manutencaoFrota",
   "entityId": "Abastecimento",
   "title": "Abastecimento",
-  "description": "Registro do abastecimento realizado em um veículo, com data, volume, valor e quilometragem do painel.",
+  "description": "Registro do abastecimento realizado em um veículo por um motorista.",
   "kind": "event",
   "party": "none",
   "displayField": "data",
@@ -20,50 +20,49 @@ export const manutencaoFrotaEntityAbastecimento = {
       "description": "Identificador único do registro de abastecimento."
     },
     {
-      "fieldId": "veiculoId",
-      "title": "Veículo",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência ao veículo da frota selecionado para o abastecimento."
-    },
-    {
       "fieldId": "data",
-      "title": "Data",
+      "title": "Data do abastecimento",
       "type": "date",
       "required": true,
       "description": "Data em que o abastecimento foi realizado."
     },
     {
       "fieldId": "litros",
-      "title": "Litros",
+      "title": "Litros abastecidos",
       "type": "number",
       "required": true,
-      "constraints": {
-        "min": 0,
-        "precision": 3
-      },
-      "description": "Volume de combustível abastecido, em litros."
+      "description": "Quantidade de litros abastecidos no veículo."
     },
     {
       "fieldId": "valor",
-      "title": "Valor",
+      "title": "Valor do abastecimento",
       "type": "money",
       "required": true,
       "constraints": {
-        "min": 0,
         "precision": 2
       },
       "description": "Valor total pago pelo abastecimento."
     },
     {
       "fieldId": "quilometragemPainel",
-      "title": "Quilometragem do painel",
+      "title": "Quilometragem no painel",
       "type": "integer",
       "required": true,
-      "constraints": {
-        "min": 0
-      },
-      "description": "Quilometragem indicada no painel do veículo no momento do abastecimento."
+      "description": "Quilometragem exibida no painel do veículo no momento do abastecimento."
+    },
+    {
+      "fieldId": "veiculoId",
+      "title": "Veículo",
+      "type": "uuid",
+      "required": true,
+      "description": "Referência ao veículo da frota que recebeu o abastecimento."
+    },
+    {
+      "fieldId": "motoristaId",
+      "title": "Motorista",
+      "type": "uuid",
+      "required": true,
+      "description": "Referência ao motorista que registrou o abastecimento."
     }
   ],
   "lifecycleStates": [],

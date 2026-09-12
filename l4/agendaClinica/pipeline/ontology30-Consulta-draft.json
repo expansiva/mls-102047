@@ -13,7 +13,7 @@
       "title": "Paciente",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao paciente para quem a consulta foi agendada."
+      "description": "Referência ao paciente para o qual a consulta foi agendada."
     },
     {
       "fieldId": "profissionalId",
@@ -27,7 +27,7 @@
       "title": "Data e horário",
       "type": "datetime",
       "required": true,
-      "description": "Data e horário programados para a consulta."
+      "description": "Data e horário agendados para a consulta."
     },
     {
       "fieldId": "status",
@@ -44,8 +44,8 @@
           "title": "Confirmada"
         },
         {
-          "value": "noShow",
-          "title": "Falta do paciente"
+          "value": "missed",
+          "title": "Falta registrada"
         },
         {
           "value": "attended",
@@ -55,11 +55,11 @@
       "description": "Situação atual da consulta."
     },
     {
-      "fieldId": "clinicalNote",
+      "fieldId": "attendanceNote",
       "title": "Anotação do atendimento",
       "type": "text",
       "required": false,
-      "description": "Anotação registrada pelo profissional sobre o atendimento realizado."
+      "description": "Anotação registrada pelo profissional após o atendimento."
     }
   ],
   "uniqueKeys": [
@@ -78,7 +78,7 @@
       "reachedBy": "actor"
     },
     {
-      "state": "noShow",
+      "state": "missed",
       "reachedBy": "actor"
     },
     {
@@ -88,7 +88,7 @@
   ],
   "transitions": [
     {
-      "transitionId": "confirmAppointment",
+      "transitionId": "confirmarConsulta",
       "from": [
         "scheduled"
       ],
@@ -96,22 +96,22 @@
       "by": [
         "recepcionista"
       ],
-      "description": "Registra a confirmação telefônica da consulta."
+      "description": "Registra a confirmação telefônica da consulta pelo paciente."
     },
     {
-      "transitionId": "recordPatientNoShow",
+      "transitionId": "registrarFalta",
       "from": [
         "scheduled",
         "confirmed"
       ],
-      "to": "noShow",
+      "to": "missed",
       "by": [
         "recepcionista"
       ],
       "description": "Registra que o paciente não compareceu à consulta."
     },
     {
-      "transitionId": "recordAppointmentAttendance",
+      "transitionId": "registrarAtendimento",
       "from": [
         "scheduled",
         "confirmed"
@@ -120,7 +120,7 @@
       "by": [
         "profissional"
       ],
-      "description": "Registra a realização do atendimento e sua anotação."
+      "description": "Registra a realização da consulta e a anotação do atendimento."
     }
   ]
 }

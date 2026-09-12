@@ -7,7 +7,7 @@ export const hiringPipelineEntityApplication = {
   "moduleName": "hiringPipeline",
   "entityId": "Application",
   "title": "Application",
-  "description": "A candidate's application for a specific job position, tracked through the hiring pipeline.",
+  "description": "A candidate's application for a job position, tracked through the hiring pipeline.",
   "kind": "core",
   "party": "none",
   "displayField": "id",
@@ -17,21 +17,21 @@ export const hiringPipelineEntityApplication = {
       "title": "Application ID",
       "type": "uuid",
       "required": true,
-      "description": "Unique identifier for this application."
+      "description": "Unique identifier for the application."
     },
     {
       "fieldId": "candidateId",
       "title": "Candidate",
       "type": "uuid",
       "required": true,
-      "description": "Candidate submitting this application."
+      "description": "Reference to the candidate who submitted the application."
     },
     {
       "fieldId": "jobPositionId",
       "title": "Job Position",
       "type": "uuid",
       "required": true,
-      "description": "Job position to which the candidate is applying."
+      "description": "Reference to the job position the candidate applied for."
     },
     {
       "fieldId": "status",
@@ -67,14 +67,8 @@ export const hiringPipelineEntityApplication = {
       "title": "Rejection Reason",
       "type": "text",
       "required": false,
-      "description": "Reason the application was rejected."
+      "description": "Reason recorded when the application is rejected."
     }
-  ],
-  "uniqueKeys": [
-    [
-      "candidateId",
-      "jobPositionId"
-    ]
   ],
   "lifecycleStates": [
     {
@@ -100,7 +94,7 @@ export const hiringPipelineEntityApplication = {
   ],
   "transitions": [
     {
-      "transitionId": "moveToInterview",
+      "transitionId": "advanceToInterview",
       "from": [
         "screening"
       ],
@@ -111,7 +105,7 @@ export const hiringPipelineEntityApplication = {
       "description": "Advance a screened application to the interview stage."
     },
     {
-      "transitionId": "approveOffer",
+      "transitionId": "issueOffer",
       "from": [
         "interview"
       ],
@@ -119,10 +113,10 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "hiringManager"
       ],
-      "description": "Approve an offer for the candidate."
+      "description": "Authorize and issue an offer for an interviewed candidate."
     },
     {
-      "transitionId": "hireCandidate",
+      "transitionId": "markHired",
       "from": [
         "offer"
       ],
@@ -130,7 +124,7 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "hiringManager"
       ],
-      "description": "Mark the offered candidate as hired for the job position."
+      "description": "Confirm that a candidate with an offer has been hired."
     },
     {
       "transitionId": "rejectApplication",
@@ -143,7 +137,7 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "recruiter"
       ],
-      "description": "Reject an application and record the reason."
+      "description": "Reject an active application and record the reason for rejection."
     }
   ],
   "storage": {

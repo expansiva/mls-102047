@@ -11,52 +11,52 @@ export const mensalidadesAcademiaRules = {
       "description": "A modalidade de um plano deve ser mensal, trimestral ou anual."
     },
     {
-      "ruleId": "matriculaElegivelParaGeracao",
-      "description": "Uma matrícula é elegível para a geração de mensalidades de um período quando está ativa e sua data de início é igual ou anterior a esse período."
+      "ruleId": "gerarMensalidadeParaMatriculaAtiva",
+      "description": "Em cada mês, deve ser gerada uma mensalidade para cada aluno com matrícula ativa."
     },
     {
-      "ruleId": "umaMensalidadePorAlunoAtivoNoPeriodo",
-      "description": "A geração mensal deve criar uma única mensalidade no período para cada aluno com matrícula elegível."
+      "ruleId": "unicidadeMensalidadePorAlunoEmes",
+      "description": "Um aluno pode ter no máximo uma mensalidade gerada para cada mês de referência."
     },
     {
       "ruleId": "valorMensalidadeConformePlano",
-      "description": "O valor da mensalidade gerada deve ser igual ao valor do plano vinculado à matrícula."
+      "description": "O valor devido de uma mensalidade deve corresponder ao valor do plano da matrícula no momento de sua geração."
     },
     {
       "ruleId": "vencimentoMensalidadeConformePlano",
-      "description": "O vencimento da mensalidade gerada deve corresponder ao dia de vencimento do plano no mês de referência."
+      "description": "A data de vencimento de uma mensalidade deve corresponder ao dia de vencimento do plano da matrícula no mês de referência."
     },
     {
-      "ruleId": "valorRecebidoDaMensalidade",
-      "description": "O valor recebido de uma mensalidade deve ser a soma dos valores de seus pagamentos registrados."
-    },
-    {
-      "ruleId": "saldoPendenteDaMensalidade",
-      "description": "O saldo pendente de uma mensalidade deve ser a diferença entre seu valor e o valor recebido."
-    },
-    {
-      "ruleId": "mensalidadeVencidaPorSaldoPendente",
-      "description": "Uma mensalidade com saldo pendente após sua data de vencimento deve ficar vencida."
-    },
-    {
-      "ruleId": "alunoInadimplentePorMensalidadeVencida",
-      "description": "Um aluno deve ser considerado inadimplente quando possuir ao menos uma mensalidade vencida."
+      "ruleId": "mensalidadeEmAtrasoFicaVencida",
+      "description": "Uma mensalidade não paga após sua data de vencimento deve ficar vencida."
     },
     {
       "ruleId": "bloqueioPorDuasMensalidadesVencidas",
-      "description": "Um aluno com duas ou mais mensalidades vencidas deve permanecer bloqueado para entrada até regularizar sua situação."
+      "description": "O aluno com duas ou mais mensalidades vencidas deve permanecer bloqueado para entrada até regularizar sua situação."
     },
     {
-      "ruleId": "totaisFinanceirosDoMes",
-      "description": "O total a receber no mês deve ser a soma dos valores das mensalidades geradas para o período, e o total recebido deve ser a soma dos pagamentos registrados no período."
+      "ruleId": "cancelamentoImpedeCobrancasFuturas",
+      "description": "O cancelamento da matrícula deve impedir a geração de mensalidades para períodos futuros."
     },
     {
-      "ruleId": "quantidadesDeAlunosNosIndicadores",
-      "description": "As quantidades de alunos ativos, bloqueados e inadimplentes devem refletir, no período consultado, respectivamente os alunos com matrícula ativa, os alunos bloqueados para entrada e os alunos inadimplentes."
+      "ruleId": "totalAreceberMensal",
+      "description": "O total a receber no mês deve ser a soma dos saldos em aberto das mensalidades do período."
     },
     {
-      "ruleId": "cancelamentoInterrompeGeracoesFuturas",
-      "description": "O cancelamento da matrícula deve encerrar sua elegibilidade para gerar mensalidades futuras."
+      "ruleId": "totalRecebidoMensal",
+      "description": "O total recebido no mês deve ser a soma dos valores dos pagamentos registrados para as mensalidades do período."
+    },
+    {
+      "ruleId": "quantidadeAlunosAtivos",
+      "description": "A quantidade de alunos ativos deve corresponder ao número de alunos com matrícula ativa no período."
+    },
+    {
+      "ruleId": "quantidadeAlunosBloqueados",
+      "description": "A quantidade de alunos bloqueados deve corresponder ao número de alunos com duas ou mais mensalidades vencidas."
+    },
+    {
+      "ruleId": "quantidadeAlunosInadimplentes",
+      "description": "A quantidade de alunos inadimplentes deve corresponder ao número de alunos com pelo menos uma mensalidade vencida."
     }
   ]
 } as const satisfies Ns5RulesArtifact;

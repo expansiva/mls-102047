@@ -8,53 +8,60 @@ export const abrirEenviarPedidoCompraJourney = {
   "business": {
     "actorRef": "comprador",
     "title": "Abrir e enviar pedido de compra",
-    "goal": "Emitir um pedido para um fornecedor com os produtos, quantidades e preços necessários.",
+    "goal": "Criar um pedido para um fornecedor com os produtos, quantidades e preços necessários e enviá-lo para processamento.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "selecionarFornecedor",
+        "stepId": "localizarFornecedor",
         "kind": "locate",
-        "entity": "Supplier",
-        "title": "Selecionar fornecedor",
-        "description": "Localiza e seleciona o fornecedor que receberá o pedido."
+        "entity": "Fornecedor",
+        "title": "x",
+        "description": "Localiza o fornecedor para o qual o pedido será aberto."
       },
       {
-        "stepId": "selecionarProdutos",
-        "kind": "locate",
-        "entity": "Product",
-        "title": "Selecionar produtos",
-        "description": "Localiza os produtos que serão incluídos no pedido."
+        "stepId": "consultarOfertas",
+        "kind": "inspect",
+        "entity": "OfertaFornecedor",
+        "title": "x",
+        "description": "Consulta os produtos fornecidos e os preços combinados para compor o pedido."
       },
       {
         "stepId": "abrirPedido",
         "kind": "act",
-        "entity": "PurchaseOrder",
-        "affects": [
-          "PurchaseOrderItem"
-        ],
-        "title": "Abrir pedido de compra",
+        "entity": "PedidoCompra",
+        "effect": "create",
+        "title": "x",
         "description": "Cria o pedido com um ou mais produtos, suas quantidades e preços."
       },
       {
         "stepId": "enviarPedido",
         "kind": "act",
-        "entity": "PurchaseOrder",
-        "title": "Enviar pedido",
-        "description": "Envia o pedido de compra para o fluxo de atendimento e aprovação aplicável."
+        "entity": "PedidoCompra",
+        "effect": "transition",
+        "transitionRef": "enviarPedido",
+        "title": "x",
+        "description": "Envia o pedido de compra para processamento."
+      },
+      {
+        "stepId": "encaminharParaAprovacao",
+        "kind": "handoff",
+        "entity": "PedidoCompra",
+        "title": "x",
+        "description": "Encaminha o pedido ao gerente de compras quando o valor exige aprovação.",
+        "handoffTo": "gerenteCompras"
       }
     ],
     "outcome": {
-      "statement": "O pedido de compra é enviado com fornecedor, itens, quantidades e preços definidos.",
+      "statement": "O pedido de compra é enviado e, quando exigido pelo valor, fica disponível para decisão do gerente de compras.",
       "evidence": [
-        "Pedido de compra identificado e enviado.",
-        "Itens do pedido registram produto, quantidade e preço.",
-        "Pedidos acima do valor limite ficam disponíveis para decisão do gerente de compras."
+        "Pedido registra fornecedor, itens, quantidades e preços.",
+        "Pedido consta como enviado ou aguardando aprovação, conforme o valor."
       ]
     }
   },
-  "businessHash": "sha256:cd919a29a46886693955cc7ae4f53dbfc341cdec3d238ab0975d8804129de487"
+  "businessHash": "sha256:e30aad8ce3480a9ca0086e8442abcfa8ab2dfcd745bf26791fb1988115b856ed"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AbrirEenviarPedidoCompraJourneyType = typeof abrirEenviarPedidoCompraJourney;

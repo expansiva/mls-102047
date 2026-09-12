@@ -7,10 +7,10 @@ export const registrarAbastecimentoJourney = {
   "journeyId": "registrarAbastecimento",
   "business": {
     "actorRef": "motorista",
-    "title": "Registrar abastecimento de veículo",
-    "goal": "Registrar o abastecimento de um veículo que dirige, com a quilometragem indicada no painel.",
+    "title": "Registrar abastecimento do veículo atribuído",
+    "goal": "Registrar o consumo e atualizar a quilometragem do veículo que dirige.",
     "entry": {
-      "mode": "coldStart"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
@@ -18,28 +18,36 @@ export const registrarAbastecimentoJourney = {
         "kind": "locate",
         "entity": "Veiculo",
         "title": "Localizar veículo atribuído",
-        "description": "Localiza, entre os veículos atribuídos ao motorista, o veículo abastecido."
+        "description": "Localiza um dos veículos atribuídos ao motorista."
       },
       {
-        "stepId": "registrarAbastecimentoVeiculo",
+        "stepId": "inspecionarQuilometragem",
+        "kind": "inspect",
+        "entity": "Veiculo",
+        "title": "Conferir veículo e quilometragem",
+        "description": "Confere a identificação do veículo e a quilometragem atualmente registrada."
+      },
+      {
+        "stepId": "registrarAbastecimento",
         "kind": "act",
         "entity": "Abastecimento",
         "affects": [
           "Veiculo"
         ],
+        "effect": "create",
         "title": "Registrar abastecimento",
-        "description": "Registra data, litros, valor e quilometragem do painel, atualizando a quilometragem atual do veículo."
+        "description": "Informa data, litros, valor e quilometragem exibida no painel."
       }
     ],
     "outcome": {
-      "statement": "O abastecimento do veículo é registrado e sua quilometragem atual fica atualizada.",
+      "statement": "O abastecimento é registrado no veículo atribuído e sua quilometragem é atualizada.",
       "evidence": [
-        "Registro de abastecimento com data, litros, valor e quilometragem do painel.",
-        "Quilometragem atual atualizada no veículo atribuído."
+        "Registro de abastecimento com data, litros, valor e km no painel.",
+        "Quilometragem atual do veículo compatível com o km informado no abastecimento."
       ]
     }
   },
-  "businessHash": "sha256:f34949991b8dfecca399af44a3704144d10a05a332acf3d470dd47236f57c87a"
+  "businessHash": "sha256:50a0c44f47c60636fe0700cd669154b6b1fc02de0109a7da7a9ba4be7a19ff8d"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarAbastecimentoJourneyType = typeof registrarAbastecimentoJourney;

@@ -3,58 +3,115 @@
 import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaWorkflows = {
-  "schemaVersion": "2026-09-10-ns5-workflows-v1",
+  "schemaVersion": "2026-09-12-ns5-workflows-v2",
   "moduleName": "agendaClinica",
   "processes": [
     {
-      "processId": "acompanharConsulta",
-      "title": "Acompanhar consulta",
-      "description": "Coordena o acompanhamento de uma consulta agendada entre a recepção e o profissional até seu desfecho.",
+      "processId": "acompanharConsultaAgendada",
+      "title": "Acompanhar consulta agendada",
+      "description": "Coordena a confirmação da consulta e o atendimento pelo profissional no horário marcado.",
+      "trigger": {
+        "kind": "manual",
+        "actorRef": "recepcionista"
+      },
       "tasks": [
         {
           "taskId": "agendarConsulta",
           "kind": "human",
           "actorRef": "recepcionista",
           "journeyRef": "agendarConsulta",
-          "stepRef": "registrarConsulta",
           "next": [
-            "confirmarConsulta",
-            "registrarFalta",
-            "registrarAtendimento"
+            "confirmarConsultaPorTelefone"
           ],
-          "description": "A recepcionista registra a consulta agendada para iniciar seu acompanhamento."
+          "description": "A recepcionista agenda a consulta para o paciente com o profissional e horário definidos."
         },
         {
-          "taskId": "confirmarConsulta",
+          "taskId": "confirmarConsultaPorTelefone",
           "kind": "human",
           "actorRef": "recepcionista",
           "journeyRef": "confirmarConsultaPorTelefone",
-          "stepRef": "registrarConfirmacao",
           "next": [
-            "registrarFalta",
-            "registrarAtendimento"
+            "aguardarHorarioDaConsulta"
           ],
-          "description": "A recepcionista registra a confirmação telefônica antes do desfecho da consulta."
+          "description": "A recepcionista registra a confirmação telefônica da consulta agendada."
         },
         {
-          "taskId": "registrarFalta",
+          "taskId": "aguardarHorarioDaConsulta",
+          "kind": "wait",
+          "next": [
+            "consultarAgendaDiaria"
+          ],
+          "description": "Aguarda o horário programado da consulta."
+        },
+        {
+          "taskId": "consultarAgendaDiaria",
           "kind": "human",
-          "actorRef": "recepcionista",
-          "journeyRef": "registrarFaltaDoPaciente",
-          "stepRef": "registrarFalta",
-          "next": [],
-          "description": "A recepcionista registra a falta quando o paciente não comparece."
+          "actorRef": "profissional",
+          "journeyRef": "consultarAgendaDiaria",
+          "next": [
+            "registrarAtendimento"
+          ],
+          "description": "O profissional consulta a própria agenda do dia para preparar o atendimento."
         },
         {
           "taskId": "registrarAtendimento",
           "kind": "human",
           "actorRef": "profissional",
           "journeyRef": "registrarAtendimento",
-          "stepRef": "registrarAtendimentoRealizado",
           "next": [],
           "description": "O profissional registra o atendimento realizado e sua anotação."
         }
       ]
+    },
+    {
+      "processId": "registrarAusenciaEmConsulta",
+      "title": "Registrar ausência em consulta",
+      "description": "Registra a falta do paciente quando ele não comparece à consulta.",
+      "trigger": {
+        "kind": "manual",
+        "actorRef": "recepcionista"
+      },
+      "tasks": [
+        {
+          "taskId": "registrarFaltaPaciente",
+          "kind": "human",
+          "actorRef": "recepcionista",
+          "journeyRef": "registrarFaltaPaciente",
+          "next": [],
+          "description": "A recepcionista marca a consulta como falta do paciente após o não comparecimento."
+        }
+      ]
+    }
+  ],
+  "journeyDecisions": [
+    {
+      "journeyId": "cadastrarPaciente",
+      "inProcess": false
+    },
+    {
+      "journeyId": "agendarConsulta",
+      "inProcess": true,
+      "processId": "acompanharConsultaAgendada"
+    },
+    {
+      "journeyId": "confirmarConsultaPorTelefone",
+      "inProcess": true,
+      "processId": "acompanharConsultaAgendada"
+    },
+    {
+      "journeyId": "registrarFaltaPaciente",
+      "inProcess": true,
+      "processId": "registrarAusenciaEmConsulta"
+    },
+    {
+      "journeyId": "consultarAgendaDiaria",
+      "inProcess": true,
+      "processId": "acompanharConsultaAgendada"
+    },
+    {
+      "journeyId": "registrarAtendimento",
+      "inProcess": true,
+      "processId": "acompanharConsultaAgendada"
     }
   ]
 } as const satisfies Ns5WorkflowsArtifact;

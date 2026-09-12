@@ -5,7 +5,7 @@
     {
       "entityId": "Cliente",
       "title": "Cliente",
-      "description": "Persona cliente vinculada a las órdenes de servicio que consulta y decide presupuestos desde el portal.",
+      "description": "Persona cliente que entrega un aparato, recibe el presupuesto y consulta o decide sobre sus propias órdenes.",
       "kind": "mdm",
       "party": "person",
       "mdmSubtype": "Person",
@@ -20,7 +20,7 @@
     {
       "entityId": "Aparato",
       "title": "Aparato",
-      "description": "Equipo electrónico recibido para su análisis, reparación y posterior entrega.",
+      "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior entrega.",
       "kind": "mdm",
       "party": "none",
       "mdmSubtype": "AssetEquipment",
@@ -33,12 +33,28 @@
       }
     },
     {
+      "entityId": "Tecnico",
+      "title": "Técnico",
+      "description": "Persona del servicio técnico a quien se asignan órdenes para su análisis y reparación.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "writer": "crud",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "ordenServicio.Tecnico"
+      }
+    },
+    {
       "entityId": "OrdenServicio",
       "title": "Orden de servicio",
-      "description": "Registro transaccional de la recepción, análisis, presupuesto, autorización, reparación y entrega de un aparato.",
+      "description": "Registro de la recepción, diagnóstico, presupuesto, decisión, reparación y entrega de un aparato.",
       "kind": "core",
       "party": "none",
-      "displayField": "numeroOrden",
+      "displayField": "orderNumber",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
@@ -47,33 +63,18 @@
       }
     },
     {
-      "entityId": "PiezaNecesaria",
-      "title": "Pieza necesaria",
-      "description": "Pieza prevista para una orden durante el diagnóstico, con su costo interno y su consideración en el presupuesto.",
+      "entityId": "PiezaPresupuesto",
+      "title": "Pieza de presupuesto",
+      "description": "Pieza necesaria para una orden, con su costo interno y la información usada en el presupuesto técnico.",
       "kind": "supporting",
       "party": "none",
-      "displayField": "descripcion",
+      "displayField": "description",
       "mutability": "appendOnly",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
         "idField": "id",
-        "mdmType": "ordenServicio.PiezaNecesaria"
-      }
-    },
-    {
-      "entityId": "Reparacion",
-      "title": "Reparación",
-      "description": "Registro del trabajo técnico realizado sobre el aparato de una orden aprobada.",
-      "kind": "event",
-      "party": "none",
-      "displayField": "descripcion",
-      "mutability": "appendOnly",
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id",
-        "mdmType": "ordenServicio.Reparacion"
+        "mdmType": "ordenServicio.PiezaPresupuesto"
       }
     }
   ],
@@ -101,53 +102,26 @@
       }
     },
     {
-      "relationshipId": "piezasNecesariasOrdenServicio",
-      "fromEntity": "PiezaNecesaria",
-      "toEntity": "OrdenServicio",
+      "relationshipId": "ordenServicioTecnico",
+      "fromEntity": "OrdenServicio",
+      "toEntity": "Tecnico",
       "type": "manyToOne",
-      "required": true,
-      "description": "Cada pieza necesaria se registra para una orden de servicio.",
+      "required": false,
+      "description": "Una orden de servicio puede estar asignada a un técnico para su atención.",
       "persistence": {
-        "mode": "moduleReference"
+        "mode": "crossStoreReference"
       }
     },
     {
-      "relationshipId": "reparacionOrdenServicio",
-      "fromEntity": "Reparacion",
-      "toEntity": "OrdenServicio",
-      "type": "manyToOne",
-      "required": true,
-      "description": "Cada reparación documenta el trabajo realizado en una orden de servicio aprobada.",
+      "relationshipId": "ordenServicioPiezasPresupuesto",
+      "fromEntity": "OrdenServicio",
+      "toEntity": "PiezaPresupuesto",
+      "type": "oneToMany",
+      "required": false,
+      "description": "Una orden de servicio puede incluir varias piezas necesarias en su presupuesto.",
       "persistence": {
         "mode": "moduleReference"
       }
-    }
-  ],
-  "normalizations": [
-    {
-      "kind": "dropCrud",
-      "entityId": "Cliente",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-    },
-    {
-      "kind": "dropCrud",
-      "entityId": "Aparato",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-    },
-    {
-      "kind": "dropCrud",
-      "entityId": "OrdenServicio",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-    },
-    {
-      "kind": "dropCrud",
-      "entityId": "PiezaNecesaria",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-    },
-    {
-      "kind": "dropCrud",
-      "entityId": "Reparacion",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
     }
   ]
 }

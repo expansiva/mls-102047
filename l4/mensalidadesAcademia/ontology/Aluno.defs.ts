@@ -13,20 +13,6 @@ export const mensalidadesAcademiaEntityAluno = {
   "mdmSubtype": "Person",
   "displayField": "name",
   "fields": [],
-  "details": {
-    "quantidadeMensalidadesVencidas": {
-      "type": "integer",
-      "description": "Quantidade atual de mensalidades vencidas e ainda não regularizadas pelo aluno."
-    },
-    "inadimplente": {
-      "type": "boolean",
-      "description": "Indica se o aluno possui ao menos uma mensalidade vencida e não regularizada."
-    },
-    "bloqueadoParaEntrada": {
-      "type": "boolean",
-      "description": "Indica se o aluno está bloqueado para entrada por possuir duas ou mais mensalidades vencidas não regularizadas."
-    }
-  },
   "lifecycleStates": [],
   "transitions": [],
   "storage": {

@@ -2,90 +2,60 @@
   "entityId": "Despesa",
   "fields": [
     {
-      "fieldId": "id",
-      "title": "Identificador",
+      "fieldId": "despesaId",
+      "title": "Identificador da despesa",
       "type": "uuid",
       "required": true,
-      "description": "Identificador único da despesa."
+      "description": "Identificador único da solicitação de reembolso."
     },
     {
-      "fieldId": "collaboratorId",
+      "fieldId": "colaboradorId",
       "title": "Colaborador",
       "type": "uuid",
       "required": true,
-      "description": "Referência à pessoa colaboradora que registrou a despesa."
+      "description": "Referência ao colaborador responsável pela despesa e pelo reembolso."
     },
     {
-      "fieldId": "expenseDate",
+      "fieldId": "gestorEquipeId",
+      "title": "Gestor da equipe",
+      "type": "uuid",
+      "required": false,
+      "description": "Referência ao gestor da equipe que avaliou a despesa."
+    },
+    {
+      "fieldId": "dataDespesa",
       "title": "Data da despesa",
       "type": "date",
       "required": true,
-      "description": "Data em que a despesa ocorreu."
+      "description": "Data em que a despesa foi realizada."
     },
     {
-      "fieldId": "category",
+      "fieldId": "categoria",
       "title": "Categoria",
       "type": "string",
       "required": true,
-      "constraints": {
-        "maxLength": 100
-      },
       "description": "Categoria informada para classificar a despesa."
     },
     {
-      "fieldId": "amount",
+      "fieldId": "valor",
       "title": "Valor",
       "type": "money",
       "required": true,
-      "constraints": {
-        "min": 0.01,
-        "precision": 2
-      },
-      "description": "Valor monetário solicitado para reembolso."
+      "description": "Valor solicitado para reembolso."
     },
     {
-      "fieldId": "description",
+      "fieldId": "descricao",
       "title": "Descrição",
       "type": "text",
       "required": true,
-      "constraints": {
-        "maxLength": 2000
-      },
-      "description": "Descrição da despesa para reembolso."
+      "description": "Descrição da despesa realizada."
     },
     {
-      "fieldId": "receiptDocumentId",
+      "fieldId": "comprovanteId",
       "title": "Comprovante",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao documento que contém o comprovante da despesa."
-    },
-    {
-      "fieldId": "rejectionReason",
-      "title": "Motivo da rejeição",
-      "type": "text",
-      "required": false,
-      "constraints": {
-        "maxLength": 1000
-      },
-      "description": "Motivo informado pelo gestor quando a despesa é rejeitada."
-    },
-    {
-      "fieldId": "resubmissionCount",
-      "title": "Quantidade de reenvios",
-      "type": "integer",
-      "required": true,
-      "constraints": {
-        "min": 0
-      },
-      "description": "Quantidade de vezes que uma despesa rejeitada foi reenviada para aprovação."
-    },
-    {
-      "fieldId": "paymentDate",
-      "title": "Data de pagamento",
-      "type": "date",
-      "required": false,
-      "description": "Data em que o financeiro registrou o pagamento do reembolso."
+      "description": "Identificador do comprovante anexado à despesa."
     },
     {
       "fieldId": "status",
@@ -94,32 +64,59 @@
       "required": true,
       "enum": [
         {
-          "value": "registered",
-          "title": "Registrada"
+          "value": "draft",
+          "title": "Em elaboração"
         },
         {
           "value": "pendingApproval",
-          "title": "Aguardando aprovação"
+          "title": "Pendente de aprovação"
         },
         {
-          "value": "rejected",
-          "title": "Rejeitada"
-        },
-        {
-          "value": "approved",
-          "title": "Aprovada"
+          "value": "decisionRecorded",
+          "title": "Decisão registrada"
         },
         {
           "value": "paid",
           "title": "Paga"
         }
       ],
-      "description": "Situação atual da despesa no processo de reembolso."
+      "description": "Etapa atual da solicitação de reembolso."
+    },
+    {
+      "fieldId": "decisaoAprovacao",
+      "title": "Decisão de aprovação",
+      "type": "string",
+      "required": false,
+      "enum": [
+        {
+          "value": "approved",
+          "title": "Aprovada"
+        },
+        {
+          "value": "rejected",
+          "title": "Rejeitada"
+        }
+      ],
+      "description": "Resultado da avaliação realizada pelo gestor da equipe."
+    },
+    {
+      "fieldId": "motivoRejeicao",
+      "title": "Motivo da rejeição",
+      "type": "text",
+      "required": false,
+      "description": "Motivo informado pelo gestor quando a despesa é rejeitada."
+    },
+    {
+      "fieldId": "dataPagamento",
+      "title": "Data de pagamento",
+      "type": "date",
+      "required": false,
+      "description": "Data em que o financeiro registrou o pagamento do reembolso."
     }
   ],
   "lifecycleStates": [
     {
-      "state": "registered",
+      "state": "draft",
       "reachedBy": "actor"
     },
     {
@@ -127,11 +124,7 @@
       "reachedBy": "actor"
     },
     {
-      "state": "rejected",
-      "reachedBy": "actor"
-    },
-    {
-      "state": "approved",
+      "state": "decisionRecorded",
       "reachedBy": "actor"
     },
     {
@@ -143,60 +136,56 @@
     {
       "transitionId": "submitForApproval",
       "from": [
-        "registered"
+        "draft"
       ],
       "to": "pendingApproval",
       "by": [
         "colaborador"
       ],
-      "description": "Envia a despesa registrada para avaliação do gestor da equipe."
-    },
-    {
-      "transitionId": "approveExpense",
-      "from": [
-        "pendingApproval"
-      ],
-      "to": "approved",
-      "by": [
-        "gestorEquipe"
-      ],
-      "description": "Aprova a despesa enviada após avaliação do gestor."
-    },
-    {
-      "transitionId": "rejectExpense",
-      "from": [
-        "pendingApproval"
-      ],
-      "to": "rejected",
-      "by": [
-        "gestorEquipe"
-      ],
-      "description": "Rejeita a despesa enviada, registrando o motivo da rejeição."
+      "description": "Encaminha a despesa registrada para avaliação do gestor da equipe."
     },
     {
       "transitionId": "resubmitForApproval",
       "from": [
-        "rejected"
+        "decisionRecorded"
       ],
       "to": "pendingApproval",
       "by": [
         "colaborador"
       ],
-      "description": "Reenvia uma despesa corrigida para uma nova avaliação.",
+      "description": "Reencaminha para aprovação uma despesa rejeitada e corrigida.",
       "ruleRefs": [
-        "oneResubmission"
+        "resubmissionOnlyWhenRejected",
+        "onlyOneResubmission"
       ]
     },
     {
-      "transitionId": "recordPayment",
+      "transitionId": "recordApprovalDecision",
       "from": [
-        "approved"
+        "pendingApproval"
+      ],
+      "to": "decisionRecorded",
+      "by": [
+        "gestorEquipe"
+      ],
+      "description": "Registra a aprovação ou a rejeição da despesa, incluindo o motivo quando rejeitada.",
+      "ruleRefs": [
+        "rejectionRequiresReason"
+      ]
+    },
+    {
+      "transitionId": "registerPayment",
+      "from": [
+        "decisionRecorded"
       ],
       "to": "paid",
       "by": [
         "financeiro"
       ],
-      "description": "Registra o pagamento da despesa aprovada."
+      "description": "Registra a data de pagamento de uma despesa aprovada.",
+      "ruleRefs": [
+        "paymentOnlyForApprovedExpense"
+      ]
     }
   ]
 }

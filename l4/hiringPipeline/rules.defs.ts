@@ -7,28 +7,48 @@ export const hiringPipelineRules = {
   "moduleName": "hiringPipeline",
   "rules": [
     {
-      "ruleId": "applicationStartsInScreening",
-      "description": "A newly created application starts in the screening stage."
+      "ruleId": "newApplicationStartsInScreening",
+      "description": "A newly recorded application starts in the screening stage."
     },
     {
-      "ruleId": "applicationStageProgression",
-      "description": "An application may move from screening to interview, from interview to offer, and from offer to hired."
+      "ruleId": "interviewRequiresScreening",
+      "description": "An application may move to interview only from screening."
     },
     {
-      "ruleId": "rejectionRequiresReason",
-      "description": "An application may be moved to rejected only when a rejection reason is recorded."
+      "ruleId": "offerRequiresInterview",
+      "description": "An application may move to offer only from interview."
     },
     {
-      "ruleId": "filledHeadcountCalculation",
-      "description": "A job position's filled headcount equals the number of applications for that position in the hired stage."
+      "ruleId": "hireRequiresOffer",
+      "description": "An application may be marked hired only from offer."
+    },
+    {
+      "ruleId": "hireRequiresRemainingHeadcount",
+      "description": "An application may be marked hired only when its job position has remaining headcount."
+    },
+    {
+      "ruleId": "rejectionRequiresActiveApplication",
+      "description": "An application may be rejected only while it is in screening, interview, or offer."
+    },
+    {
+      "ruleId": "rejectionReasonRequired",
+      "description": "A rejected application must have a rejection reason."
+    },
+    {
+      "ruleId": "applicationsRequireOpenPosition",
+      "description": "An application may be recorded only for an open job position."
+    },
+    {
+      "ruleId": "filledHeadcountCountsHiredApplications",
+      "description": "A job position's filled headcount equals the number of its applications marked hired."
     },
     {
       "ruleId": "remainingHeadcountCalculation",
-      "description": "A job position's remaining headcount equals its requested headcount minus its filled headcount."
+      "description": "A job position's remaining headcount equals its required headcount minus its filled headcount."
     },
     {
       "ruleId": "positionClosesWhenHeadcountFilled",
-      "description": "A job position closes automatically when its filled headcount reaches its requested headcount."
+      "description": "A job position closes automatically when its filled headcount reaches its required headcount."
     }
   ]
 } as const satisfies Ns5RulesArtifact;

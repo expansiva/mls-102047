@@ -7,9 +7,9 @@ export const financeiroJourneyIndex = {
   "moduleName": "financeiro",
   "journeys": [
     {
-      "journeyId": "registrarRecebimento",
+      "journeyId": "registrarRecebimentoDireto",
       "actorRef": "caixa",
-      "title": "Registrar recebimento de título"
+      "title": "Registrar recebimento em dinheiro ou Pix"
     }
   ],
   "systemDecisions": []

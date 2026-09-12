@@ -15,7 +15,7 @@ export const mensalidadesAcademiaModule = {
   "details": {
     "totalAreceberNoMes": {
       "type": "money",
-      "description": "Total das mensalidades previstas para recebimento no mês consultado."
+      "description": "Total das mensalidades a receber no mês consultado."
     },
     "totalRecebidoNoMes": {
       "type": "money",
@@ -23,23 +23,15 @@ export const mensalidadesAcademiaModule = {
     },
     "quantidadeAlunosAtivos": {
       "type": "integer",
-      "description": "Quantidade de alunos com matrícula ativa no período consultado."
+      "description": "Quantidade de alunos com matrícula ativa no período."
     },
     "quantidadeAlunosBloqueados": {
       "type": "integer",
-      "description": "Quantidade de alunos bloqueados por inadimplência no período consultado."
+      "description": "Quantidade de alunos bloqueados por duas mensalidades vencidas."
     },
     "quantidadeAlunosInadimplentes": {
       "type": "integer",
-      "description": "Quantidade de alunos com mensalidades vencidas no período consultado."
-    },
-    "totalAreceber": {
-      "type": "money",
-      "description": "Valor total das mensalidades a receber no período consultado."
-    },
-    "totalRecebido": {
-      "type": "money",
-      "description": "Valor total recebido em pagamentos de mensalidades no período consultado."
+      "description": "Quantidade de alunos com ao menos uma mensalidade vencida."
     }
   }
 } as const satisfies Ns5ModuleArtifact;

@@ -1,0 +1,96 @@
+{
+  "entityId": "TabItem",
+  "fields": [
+    {
+      "fieldId": "id",
+      "title": "Identifier",
+      "type": "uuid",
+      "required": true,
+      "description": "Unique identifier for the launched tab item."
+    },
+    {
+      "fieldId": "orderTabId",
+      "title": "Table tab",
+      "type": "uuid",
+      "required": true,
+      "description": "Reference to the open table tab that contains this launched item."
+    },
+    {
+      "fieldId": "menuItemId",
+      "title": "Menu item",
+      "type": "uuid",
+      "required": true,
+      "description": "Reference to the selected menu item."
+    },
+    {
+      "fieldId": "quantity",
+      "title": "Quantity",
+      "type": "integer",
+      "required": true,
+      "constraints": {
+        "min": 1
+      },
+      "description": "Number of units of the menu item launched on the tab."
+    },
+    {
+      "fieldId": "preparationNote",
+      "title": "Preparation note",
+      "type": "text",
+      "required": false,
+      "description": "Optional preparation instruction for this launched item."
+    },
+    {
+      "fieldId": "unitPrice",
+      "title": "Unit price",
+      "type": "money",
+      "required": true,
+      "description": "Price per unit recorded when the item is launched."
+    },
+    {
+      "fieldId": "status",
+      "title": "Status",
+      "type": "string",
+      "required": true,
+      "enum": [
+        {
+          "value": "launched",
+          "title": "Launched"
+        },
+        {
+          "value": "cancelled",
+          "title": "Cancelled"
+        }
+      ],
+      "description": "Current status of the launched tab item."
+    }
+  ],
+  "details": {
+    "lineTotal": {
+      "type": "money",
+      "description": "Total amount for this item, calculated from its quantity and recorded unit price."
+    }
+  },
+  "lifecycleStates": [
+    {
+      "state": "launched",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "cancelled",
+      "reachedBy": "actor"
+    }
+  ],
+  "transitions": [
+    {
+      "transitionId": "cancelTabItem",
+      "from": [
+        "launched"
+      ],
+      "to": "cancelled",
+      "by": [
+        "garcom"
+      ],
+      "description": "Cancels an item launched by mistake while its table tab remains open."
+    }
+  ]
+}

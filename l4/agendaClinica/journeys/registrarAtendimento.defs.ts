@@ -14,36 +14,38 @@ export const registrarAtendimentoJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarConsultaParaAtendimento",
+        "stepId": "localizarConsultaDaAgenda",
         "kind": "locate",
         "entity": "Consulta",
-        "title": "Localizar consulta",
-        "description": "Localiza a própria consulta que foi realizada."
+        "title": "x",
+        "description": "Localiza uma consulta da própria agenda."
       },
       {
-        "stepId": "consultarConsulta",
+        "stepId": "inspecionarConsulta",
         "kind": "inspect",
         "entity": "Consulta",
-        "title": "Consultar consulta",
-        "description": "Confere os dados da consulta antes de registrar o atendimento."
+        "title": "x",
+        "description": "Confere os dados da consulta antes de concluir o atendimento."
       },
       {
         "stepId": "registrarAtendimentoRealizado",
         "kind": "act",
         "entity": "Consulta",
-        "title": "Registrar atendimento",
+        "effect": "transition",
+        "transitionRef": "registrarAtendimento",
+        "title": "x",
         "description": "Marca a consulta como atendida e registra a anotação do atendimento."
       }
     ],
     "outcome": {
       "statement": "A consulta fica registrada como atendida com a anotação do profissional.",
       "evidence": [
-        "Consulta marcada como atendida.",
-        "Anotação do atendimento registrada na consulta."
+        "Situação da consulta indica atendimento realizado.",
+        "Anotação do atendimento está registrada na consulta."
       ]
     }
   },
-  "businessHash": "sha256:f8dca464a8502acbe31f2e0f27b17e902909fb438904f81ce5bae0ed53f16c7d"
+  "businessHash": "sha256:f4b141538e312c7e305b1dc0e259af89e509e35d60e80d682447516f9f08f2d7"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarAtendimentoJourneyType = typeof registrarAtendimentoJourney;

@@ -7,10 +7,10 @@ export const mensalidadesAcademiaEntityPagamento = {
   "moduleName": "mensalidadesAcademia",
   "entityId": "Pagamento",
   "title": "Pagamento",
-  "description": "Registro de um valor recebido para quitação total ou parcial de uma mensalidade.",
+  "description": "Registro do pagamento realizado para uma mensalidade.",
   "kind": "event",
   "party": "none",
-  "displayField": "id",
+  "displayField": "dataPagamento",
   "fields": [
     {
       "fieldId": "id",
@@ -24,50 +24,31 @@ export const mensalidadesAcademiaEntityPagamento = {
       "title": "Mensalidade",
       "type": "uuid",
       "required": true,
-      "description": "Mensalidade à qual o pagamento recebido pertence."
+      "description": "Referência à mensalidade para a qual o pagamento foi registrado."
     },
     {
       "fieldId": "dataPagamento",
       "title": "Data do pagamento",
       "type": "date",
       "required": true,
-      "description": "Data em que o pagamento foi recebido."
+      "description": "Data em que o pagamento foi realizado."
     },
     {
       "fieldId": "valor",
-      "title": "Valor recebido",
+      "title": "Valor pago",
       "type": "money",
       "required": true,
-      "description": "Valor efetivamente recebido neste pagamento."
+      "description": "Valor efetivamente pago para a mensalidade."
     },
     {
       "fieldId": "formaPagamento",
       "title": "Forma de pagamento",
       "type": "string",
       "required": true,
-      "enum": [
-        {
-          "value": "dinheiro",
-          "title": "Dinheiro"
-        },
-        {
-          "value": "cartao",
-          "title": "Cartão"
-        },
-        {
-          "value": "pix",
-          "title": "Pix"
-        },
-        {
-          "value": "transferencia",
-          "title": "Transferência"
-        },
-        {
-          "value": "boleto",
-          "title": "Boleto"
-        }
-      ],
-      "description": "Forma utilizada pelo aluno para realizar o pagamento."
+      "constraints": {
+        "maxLength": 100
+      },
+      "description": "Forma utilizada para realizar o pagamento."
     }
   ],
   "lifecycleStates": [],

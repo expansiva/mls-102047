@@ -8,34 +8,35 @@ export const acompanharSituacaoEquipamentosJourney = {
   "business": {
     "actorRef": "gerente",
     "title": "Acompanhar situação dos equipamentos",
-    "goal": "Ver quais equipamentos estão disponíveis, locados ou em manutenção.",
+    "goal": "Visualizar quais equipamentos estão disponíveis, locados ou em manutenção.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarEquipamentosPorSituacao",
+        "stepId": "localizarEquipamentos",
         "kind": "locate",
         "entity": "Equipamento",
-        "title": "Localizar equipamentos",
-        "description": "Localiza os equipamentos conforme sua situação operacional."
+        "title": "x",
+        "description": "Localiza os equipamentos da locadora."
       },
       {
-        "stepId": "inspecionarSituacaoEquipamentos",
+        "stepId": "consultarSituacaoEquipamentos",
         "kind": "inspect",
         "entity": "Equipamento",
-        "title": "Consultar situação",
-        "description": "Consulta os equipamentos disponíveis, locados e em manutenção."
+        "title": "x",
+        "description": "Consulta o código, a descrição, a diária e a situação de disponibilidade, locação ou manutenção de cada equipamento."
       }
     ],
     "outcome": {
-      "statement": "O gerente obtém a situação atual da frota de equipamentos.",
+      "statement": "O gerente acompanha a disponibilidade e a situação operacional dos equipamentos.",
       "evidence": [
-        "Lista de equipamentos identificada por situação: disponível, locado ou em manutenção."
+        "Lista de equipamentos com situação disponível, locado ou em manutenção.",
+        "Dados de código, descrição e valor da diária visíveis para cada equipamento."
       ]
     }
   },
-  "businessHash": "sha256:ff449ec2dfae63b60b1dc73c26e87c1d28bc88f29866afe2d543fdcb5a78a016"
+  "businessHash": "sha256:8ecf34f2834ca6111cd14e70e15eb7ed5b773c3a2b3d776d996ca09279b49cf4"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AcompanharSituacaoEquipamentosJourneyType = typeof acompanharSituacaoEquipamentosJourney;

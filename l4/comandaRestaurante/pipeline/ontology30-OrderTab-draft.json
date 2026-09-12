@@ -1,0 +1,76 @@
+{
+  "entityId": "OrderTab",
+  "fields": [
+    {
+      "fieldId": "id",
+      "title": "Tab ID",
+      "type": "uuid",
+      "required": true,
+      "description": "Unique identifier of the restaurant table tab."
+    },
+    {
+      "fieldId": "tableId",
+      "title": "Restaurant table",
+      "type": "uuid",
+      "required": true,
+      "description": "Selected restaurant table for which this tab was opened."
+    },
+    {
+      "fieldId": "discountAmount",
+      "title": "Discount amount",
+      "type": "money",
+      "required": false,
+      "description": "Optional monetary discount applied when settling the tab."
+    },
+    {
+      "fieldId": "status",
+      "title": "Status",
+      "type": "string",
+      "required": true,
+      "enum": [
+        {
+          "value": "open",
+          "title": "Open"
+        },
+        {
+          "value": "closed",
+          "title": "Closed"
+        }
+      ],
+      "description": "Current operational status of the table tab."
+    }
+  ],
+  "details": {
+    "subtotalAmount": {
+      "type": "money",
+      "description": "Sum of the amounts for all non-cancelled items launched on this tab before any discount."
+    },
+    "totalAmount": {
+      "type": "money",
+      "description": "Amount due for this tab after applying the optional discount to the subtotal."
+    }
+  },
+  "lifecycleStates": [
+    {
+      "state": "open",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "closed",
+      "reachedBy": "actor"
+    }
+  ],
+  "transitions": [
+    {
+      "transitionId": "closeOrderTab",
+      "from": [
+        "open"
+      ],
+      "to": "closed",
+      "by": [
+        "caixa"
+      ],
+      "description": "Closes a settled table tab after its payment has been recorded, freeing its table."
+    }
+  ]
+}

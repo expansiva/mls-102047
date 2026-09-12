@@ -2,79 +2,48 @@
   "journeys": [
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "cadastrarFornecedor",
+      "journeyId": "cadastrarFornecedorEoferta",
       "business": {
         "actorRef": "comprador",
-        "title": "Cadastrar fornecedor",
-        "goal": "Cadastrar ou vincular uma empresa fornecedora à organização para que possa ser usada em compras.",
+        "title": "Cadastrar fornecedor e produtos fornecidos",
+        "goal": "Registrar ou vincular um fornecedor e os produtos que ele fornece com o preço combinado.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "informarFornecedor",
+            "stepId": "cadastrarFornecedor",
             "kind": "act",
-            "entity": "Supplier",
-            "title": "Cadastrar ou vincular fornecedor",
-            "description": "Informa os dados da empresa fornecedora, incluindo CNPJ, razão social e contato, para criar ou vincular o fornecedor."
+            "entity": "Fornecedor",
+            "effect": "create",
+            "title": "x",
+            "description": "Informa CNPJ, razão social e contato para criar ou vincular o fornecedor existente na base mestre."
+          },
+          {
+            "stepId": "localizarProduto",
+            "kind": "locate",
+            "entity": "Produto",
+            "title": "x",
+            "description": "Localiza o produto que será associado ao fornecedor."
+          },
+          {
+            "stepId": "registrarOfertaFornecedor",
+            "kind": "act",
+            "entity": "OfertaFornecedor",
+            "effect": "create",
+            "title": "x",
+            "description": "Registra que o fornecedor fornece o produto e informa o preço combinado."
           }
         ],
         "outcome": {
-          "statement": "O fornecedor fica disponível para utilização nos pedidos de compra.",
+          "statement": "O fornecedor fica disponível para compras com seus produtos e preços combinados registrados.",
           "evidence": [
-            "Fornecedor identificado por CNPJ e razão social.",
-            "Fornecedor disponível para seleção em pedidos de compra."
+            "Fornecedor identificado pelo CNPJ e razão social.",
+            "Oferta do fornecedor apresenta o produto e o preço combinado."
           ]
         }
       },
-      "businessHash": "sha256:9537385cdb9ee7088797ea64e625d7bbfb22df99762584c2f3a4dd84566552d2"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "definirCondicoesFornecimento",
-      "business": {
-        "actorRef": "comprador",
-        "title": "Definir produtos e preços de um fornecedor",
-        "goal": "Registrar quais produtos um fornecedor oferece e os preços combinados.",
-        "entry": {
-          "mode": "contextOrLookup"
-        },
-        "steps": [
-          {
-            "stepId": "localizarFornecedor",
-            "kind": "locate",
-            "entity": "Supplier",
-            "title": "Localizar fornecedor",
-            "description": "Localiza o fornecedor que terá suas condições de fornecimento cadastradas."
-          },
-          {
-            "stepId": "localizarProdutos",
-            "kind": "locate",
-            "entity": "Product",
-            "title": "Localizar produtos",
-            "description": "Localiza os produtos fornecidos pela empresa."
-          },
-          {
-            "stepId": "registrarCondicoes",
-            "kind": "act",
-            "entity": "SupplyCondition",
-            "affects": [
-              "Supplier",
-              "Product"
-            ],
-            "title": "Registrar condições de fornecimento",
-            "description": "Registra os produtos fornecidos e o preço combinado para cada produto."
-          }
-        ],
-        "outcome": {
-          "statement": "Os produtos fornecidos e seus preços combinados ficam associados ao fornecedor.",
-          "evidence": [
-            "Condições de fornecimento registradas para o fornecedor.",
-            "Cada condição apresenta o produto e o preço combinado."
-          ]
-        }
-      },
-      "businessHash": "sha256:6b01292bc86185af6218db9272fa2345ccdf544f83bfbc5fdb195cd706ccbd09"
+      "businessHash": "sha256:d26a9d17fb44cb8aa30a9f12bf39bbb28e61c401718a099a1a2aeab98476ad96"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -82,193 +51,287 @@
       "business": {
         "actorRef": "comprador",
         "title": "Abrir e enviar pedido de compra",
-        "goal": "Emitir um pedido para um fornecedor com os produtos, quantidades e preços necessários.",
+        "goal": "Criar um pedido para um fornecedor com os produtos, quantidades e preços necessários e enviá-lo para processamento.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "selecionarFornecedor",
+            "stepId": "localizarFornecedor",
             "kind": "locate",
-            "entity": "Supplier",
-            "title": "Selecionar fornecedor",
-            "description": "Localiza e seleciona o fornecedor que receberá o pedido."
+            "entity": "Fornecedor",
+            "title": "x",
+            "description": "Localiza o fornecedor para o qual o pedido será aberto."
           },
           {
-            "stepId": "selecionarProdutos",
-            "kind": "locate",
-            "entity": "Product",
-            "title": "Selecionar produtos",
-            "description": "Localiza os produtos que serão incluídos no pedido."
+            "stepId": "consultarOfertas",
+            "kind": "inspect",
+            "entity": "OfertaFornecedor",
+            "title": "x",
+            "description": "Consulta os produtos fornecidos e os preços combinados para compor o pedido."
           },
           {
             "stepId": "abrirPedido",
             "kind": "act",
-            "entity": "PurchaseOrder",
-            "affects": [
-              "PurchaseOrderItem"
-            ],
-            "title": "Abrir pedido de compra",
+            "entity": "PedidoCompra",
+            "effect": "create",
+            "title": "x",
             "description": "Cria o pedido com um ou mais produtos, suas quantidades e preços."
           },
           {
             "stepId": "enviarPedido",
             "kind": "act",
-            "entity": "PurchaseOrder",
-            "title": "Enviar pedido",
-            "description": "Envia o pedido de compra para o fluxo de atendimento e aprovação aplicável."
+            "entity": "PedidoCompra",
+            "effect": "transition",
+            "transitionRef": "enviarPedido",
+            "title": "x",
+            "description": "Envia o pedido de compra para processamento."
+          },
+          {
+            "stepId": "encaminharParaAprovacao",
+            "kind": "handoff",
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Encaminha o pedido ao gerente de compras quando o valor exige aprovação.",
+            "handoffTo": "gerenteCompras"
           }
         ],
         "outcome": {
-          "statement": "O pedido de compra é enviado com fornecedor, itens, quantidades e preços definidos.",
+          "statement": "O pedido de compra é enviado e, quando exigido pelo valor, fica disponível para decisão do gerente de compras.",
           "evidence": [
-            "Pedido de compra identificado e enviado.",
-            "Itens do pedido registram produto, quantidade e preço.",
-            "Pedidos acima do valor limite ficam disponíveis para decisão do gerente de compras."
+            "Pedido registra fornecedor, itens, quantidades e preços.",
+            "Pedido consta como enviado ou aguardando aprovação, conforme o valor."
           ]
         }
       },
-      "businessHash": "sha256:cd919a29a46886693955cc7ae4f53dbfc341cdec3d238ab0975d8804129de487"
+      "businessHash": "sha256:e30aad8ce3480a9ca0086e8442abcfa8ab2dfcd745bf26791fb1988115b856ed"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "decidirPedidoAcimaDoLimite",
+      "journeyId": "aprovarPedidoAcimaDoLimite",
       "business": {
         "actorRef": "gerenteCompras",
-        "title": "Aprovar ou rejeitar pedido acima do limite",
-        "goal": "Decidir se um pedido de compra acima do valor limite pode prosseguir.",
+        "title": "Aprovar pedido acima do limite",
+        "goal": "Avaliar um pedido que exige aprovação e autorizá-lo para recebimento.",
         "entry": {
           "mode": "fromNotification"
         },
         "steps": [
           {
-            "stepId": "localizarPedido",
+            "stepId": "localizarPedidoPendente",
             "kind": "locate",
-            "entity": "PurchaseOrder",
-            "title": "Localizar pedido",
-            "description": "Abre o pedido acima do valor limite indicado para decisão."
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Abre o pedido de compra encaminhado para aprovação."
           },
           {
             "stepId": "inspecionarPedido",
             "kind": "inspect",
-            "entity": "PurchaseOrder",
-            "title": "Inspecionar pedido",
-            "description": "Analisa o fornecedor, os itens, as quantidades, os preços e o valor total do pedido."
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Examina fornecedor, itens, quantidades, preços e valor total do pedido."
           },
           {
-            "stepId": "decidirPedido",
+            "stepId": "decidirAprovacao",
             "kind": "decide",
-            "entity": "PurchaseOrder",
-            "title": "Aprovar ou rejeitar pedido",
-            "description": "Decide entre aprovar o pedido para prosseguimento ou rejeitá-lo."
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Decide aprovar o pedido após a avaliação."
+          },
+          {
+            "stepId": "aprovarPedido",
+            "kind": "act",
+            "entity": "PedidoCompra",
+            "effect": "transition",
+            "transitionRef": "aprovarPedido",
+            "title": "x",
+            "description": "Registra a aprovação do pedido para que possa ser recebido."
+          },
+          {
+            "stepId": "encaminharParaRecebimento",
+            "kind": "handoff",
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Disponibiliza o pedido aprovado ao almoxarife para o recebimento.",
+            "handoffTo": "almoxarife"
           }
         ],
         "outcome": {
-          "statement": "O pedido acima do limite recebe uma decisão do gerente de compras.",
+          "statement": "O pedido acima do limite é aprovado e autorizado para recebimento.",
           "evidence": [
-            "Decisão de aprovação ou rejeição registrada no pedido.",
-            "Pedidos aprovados podem seguir para recebimento.",
-            "Pedidos rejeitados não seguem para recebimento."
+            "Pedido registra a decisão de aprovação do gerente de compras.",
+            "Pedido fica disponível para registro de recebimento pelo almoxarife."
           ]
         }
       },
-      "businessHash": "sha256:c62d172065b11677928cbafbcee137010606f622bb3aff313ba79b7f45db9307"
+      "businessHash": "sha256:ba5ab54f49c0a4d08cdfbe89a20f99d30dc8589ca12e1f3a7e84f71f3d5a6bfa"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "registrarRecebimentoPedido",
+      "journeyId": "rejeitarPedidoAcimaDoLimite",
+      "business": {
+        "actorRef": "gerenteCompras",
+        "title": "Rejeitar pedido acima do limite",
+        "goal": "Avaliar um pedido que exige aprovação e rejeitá-lo quando não deve prosseguir.",
+        "entry": {
+          "mode": "fromNotification"
+        },
+        "steps": [
+          {
+            "stepId": "localizarPedidoParaRejeicao",
+            "kind": "locate",
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Abre o pedido de compra encaminhado para aprovação."
+          },
+          {
+            "stepId": "inspecionarPedidoParaRejeicao",
+            "kind": "inspect",
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Examina fornecedor, itens, quantidades, preços e valor total do pedido."
+          },
+          {
+            "stepId": "decidirRejeicao",
+            "kind": "decide",
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Decide rejeitar o pedido após a avaliação."
+          },
+          {
+            "stepId": "rejeitarPedido",
+            "kind": "act",
+            "entity": "PedidoCompra",
+            "effect": "transition",
+            "transitionRef": "rejeitarPedido",
+            "title": "x",
+            "description": "Registra a rejeição do pedido, impedindo seu recebimento."
+          }
+        ],
+        "outcome": {
+          "statement": "O pedido acima do limite é rejeitado e não segue para recebimento.",
+          "evidence": [
+            "Pedido registra a decisão de rejeição do gerente de compras.",
+            "Pedido não está disponível para recebimento."
+          ]
+        }
+      },
+      "businessHash": "sha256:331580e56f740e51c479053c71575e7fcc1412002fec04eca5b422486e369967"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "registrarRecebimentoDePedido",
       "business": {
         "actorRef": "almoxarife",
         "title": "Registrar recebimento de pedido",
-        "goal": "Registrar o recebimento total ou parcial dos itens entregues e dar entrada no estoque.",
+        "goal": "Registrar o recebimento total ou parcial dos itens de um pedido e dar entrada no estoque do que foi recebido.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarPedidoEnviado",
+            "stepId": "localizarPedidoParaRecebimento",
             "kind": "locate",
-            "entity": "PurchaseOrder",
-            "title": "Localizar pedido enviado",
-            "description": "Localiza o pedido de compra correspondente à entrega recebida."
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Localiza o pedido aprovado ou enviado que chegou para recebimento."
           },
           {
-            "stepId": "inspecionarItensPendentes",
+            "stepId": "inspecionarItensDoPedido",
             "kind": "inspect",
-            "entity": "PurchaseOrder",
-            "title": "Inspecionar itens pendentes",
-            "description": "Confere os itens e as quantidades ainda pendentes de recebimento no pedido."
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Confere os itens e as quantidades solicitadas no pedido."
           },
           {
             "stepId": "registrarRecebimento",
             "kind": "act",
-            "entity": "Receipt",
+            "entity": "RecebimentoCompra",
             "affects": [
-              "PurchaseOrder",
-              "StockEntry"
+              "PedidoCompra",
+              "Estoque"
             ],
-            "title": "Registrar recebimento",
-            "description": "Registra as quantidades efetivamente recebidas, total ou parcialmente, e gera as entradas correspondentes no estoque."
+            "effect": "create",
+            "title": "x",
+            "description": "Registra as quantidades efetivamente recebidas, totais ou parciais, atualiza o acompanhamento do pedido e lança a entrada dos produtos no estoque."
           }
         ],
         "outcome": {
-          "statement": "O recebimento é registrado e as quantidades recebidas entram no estoque.",
+          "statement": "O recebimento é registrado e o estoque passa a considerar as quantidades efetivamente recebidas.",
           "evidence": [
-            "Recebimento vinculado ao pedido de compra.",
-            "Quantidades recebidas registradas por item.",
-            "Entradas de estoque registradas para os produtos recebidos.",
-            "Saldo pendente do pedido reflete recebimentos parciais, quando houver."
+            "Recebimento identifica o pedido, os itens e as quantidades recebidas.",
+            "Saldo de estoque dos produtos recebidos reflete a entrada registrada.",
+            "Pedido indica o recebimento total ou parcial."
           ]
         }
       },
-      "businessHash": "sha256:64a6a1ab17962237acb50f0f3e35d979e2bfa182cfab44230bab34d7222fdcc9"
+      "businessHash": "sha256:f5eeca8d98f0c2905f4e5678ac717a389aae544ebc97ad40778091b619e2b41e"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "acompanharIndicadoresCompras",
+      "journeyId": "acompanharIndicadoresDeCompras",
       "business": {
         "actorRef": "gerenteCompras",
         "title": "Acompanhar indicadores de compras",
-        "goal": "Acompanhar pedidos em aberto, atrasados e o total comprado por fornecedor no mês.",
+        "goal": "Visualizar os pedidos em aberto, os pedidos atrasados e o total comprado por fornecedor no mês.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "localizarPedidos",
+            "stepId": "localizarPedidosParaAcompanhamento",
             "kind": "locate",
-            "entity": "PurchaseOrder",
-            "title": "Localizar pedidos para acompanhamento",
-            "description": "Consulta os pedidos de compra em aberto e os pedidos atrasados."
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Acessa os pedidos de compra relevantes para o acompanhamento."
           },
           {
-            "stepId": "inspecionarIndicadoresPedidos",
+            "stepId": "inspecionarIndicadoresDePedidos",
             "kind": "inspect",
-            "entity": "PurchaseOrder",
-            "title": "Inspecionar indicadores de pedidos",
-            "description": "Analisa os indicadores de pedidos em aberto e atrasados."
-          },
-          {
-            "stepId": "inspecionarTotaisPorFornecedor",
-            "kind": "inspect",
-            "entity": "Supplier",
-            "title": "Inspecionar totais por fornecedor",
-            "description": "Analisa o total comprado de cada fornecedor no mês."
+            "entity": "PedidoCompra",
+            "title": "x",
+            "description": "Consulta os indicadores de pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês."
           }
         ],
         "outcome": {
-          "statement": "O gerente de compras visualiza a situação dos pedidos e os totais mensais por fornecedor.",
+          "statement": "O gerente de compras dispõe dos indicadores atuais para acompanhar o andamento e o volume das compras.",
           "evidence": [
-            "Relação de pedidos em aberto disponível.",
-            "Relação de pedidos atrasados disponível.",
-            "Total comprado por fornecedor no mês disponível."
+            "Indicador de pedidos em aberto é exibido.",
+            "Indicador de pedidos atrasados é exibido.",
+            "Total comprado por fornecedor no mês é exibido."
           ]
         }
       },
-      "businessHash": "sha256:07ee9f4789f3c98d88896815e06d7b87714ec9726c3e13a0e97752f1e2c93342"
+      "businessHash": "sha256:d157fe0e07779cb3a591d862b828c45fc45bdee0c246a38d744d82a187eb1272"
     }
   ],
   "systemDecisions": [],
   "droppedActors": [],
-  "removedOrphans": []
+  "removedOrphans": [],
+  "normalizations": [
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "cadastrarFornecedorEoferta",
+      "stepId": "cadastrarFornecedor",
+      "detail": "transitionRef ignore dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "cadastrarFornecedorEoferta",
+      "stepId": "registrarOfertaFornecedor",
+      "detail": "transitionRef wrong dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "abrirEenviarPedidoCompra",
+      "stepId": "abrirPedido",
+      "detail": "transitionRef x dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "registrarRecebimentoDePedido",
+      "stepId": "registrarRecebimento",
+      "detail": "transitionRef x dropped; effect is create."
+    }
+  ]
 }

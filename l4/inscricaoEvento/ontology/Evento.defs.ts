@@ -7,10 +7,10 @@ export const inscricaoEventoEntityEvento = {
   "moduleName": "inscricaoEvento",
   "entityId": "Evento",
   "title": "Evento",
-  "description": "Evento organizado pela organização, com informações, capacidade e publicação para inscrições públicas.",
+  "description": "Evento organizado com informações, capacidade e publicação para inscrições públicas.",
   "kind": "core",
   "party": "none",
-  "displayField": "title",
+  "displayField": "titulo",
   "fields": [
     {
       "fieldId": "id",
@@ -20,42 +20,45 @@ export const inscricaoEventoEntityEvento = {
       "description": "Identificador único do evento."
     },
     {
-      "fieldId": "title",
+      "fieldId": "titulo",
       "title": "Título",
       "type": "string",
       "required": true,
-      "description": "Título do evento."
+      "constraints": {
+        "maxLength": 255
+      },
+      "description": "Título de apresentação do evento."
     },
     {
-      "fieldId": "description",
+      "fieldId": "descricao",
       "title": "Descrição",
       "type": "text",
       "required": true,
-      "description": "Descrição do evento para a página pública."
+      "description": "Descrição do evento e das informações relevantes para os participantes."
     },
     {
-      "fieldId": "eventDate",
-      "title": "Data do evento",
+      "fieldId": "data",
+      "title": "Data e horário",
       "type": "datetime",
       "required": true,
-      "description": "Data e horário em que o evento será realizado."
+      "description": "Data e horário programados para a realização do evento."
     },
     {
-      "fieldId": "venueId",
+      "fieldId": "local",
       "title": "Local",
-      "type": "uuid",
+      "type": "string",
       "required": true,
-      "description": "Referência ao local cadastrado onde o evento ocorre."
+      "constraints": {
+        "maxLength": 255
+      },
+      "description": "Local onde o evento será realizado."
     },
     {
-      "fieldId": "capacity",
+      "fieldId": "numeroVagas",
       "title": "Número de vagas",
       "type": "integer",
       "required": true,
-      "constraints": {
-        "min": 1
-      },
-      "description": "Quantidade máxima de inscrições confirmadas no evento."
+      "description": "Quantidade total de vagas disponíveis para inscrição no evento."
     },
     {
       "fieldId": "status",
@@ -64,44 +67,48 @@ export const inscricaoEventoEntityEvento = {
       "required": true,
       "enum": [
         {
-          "value": "draft",
-          "title": "Rascunho"
+          "value": "cadastrado",
+          "title": "Cadastrado"
         },
         {
-          "value": "published",
+          "value": "publicado",
           "title": "Publicado"
         }
       ],
-      "description": "Situação de publicação do evento."
+      "description": "Situação atual do evento quanto à sua disponibilidade para inscrições públicas."
     }
   ],
   "details": {
-    "occupiedSeats": {
+    "totalVagasOcupadas": {
       "type": "integer",
-      "description": "Quantidade atual de vagas ocupadas por inscrições confirmadas."
+      "description": "Quantidade de inscrições confirmadas que ocupam vagas no evento."
+    },
+    "vagasDisponiveis": {
+      "type": "integer",
+      "description": "Quantidade de vagas ainda disponíveis para confirmação de inscrições no evento."
     }
   },
   "lifecycleStates": [
     {
-      "state": "draft",
+      "state": "cadastrado",
       "reachedBy": "actor"
     },
     {
-      "state": "published",
+      "state": "publicado",
       "reachedBy": "actor"
     }
   ],
   "transitions": [
     {
-      "transitionId": "publishEvent",
+      "transitionId": "publicarEvento",
       "from": [
-        "draft"
+        "cadastrado"
       ],
-      "to": "published",
+      "to": "publicado",
       "by": [
         "organizador"
       ],
-      "description": "Publica o evento para disponibilizar sua página pública de inscrições."
+      "description": "Publica o evento e disponibiliza sua página para inscrições públicas."
     }
   ],
   "storage": {

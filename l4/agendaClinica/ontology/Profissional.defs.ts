@@ -7,7 +7,7 @@ export const agendaClinicaEntityProfissional = {
   "moduleName": "agendaClinica",
   "entityId": "Profissional",
   "title": "Profissional",
-  "description": "Médico ou terapeuta da clínica que realiza consultas.",
+  "description": "Médico ou terapeuta da clínica que realiza consultas e acessa a própria agenda.",
   "kind": "mdm",
   "party": "person",
   "mdmSubtype": "Person",
@@ -21,7 +21,7 @@ export const agendaClinicaEntityProfissional = {
     "idField": "id",
     "mdmType": "agendaClinica.Profissional"
   },
-  "maintenance": "crud"
+  "writer": "crud"
 } as const satisfies Ns5OntologyEntityArtifact;
 
 export type AgendaClinicaEntityProfissionalType = typeof agendaClinicaEntityProfissional;

@@ -8,7 +8,7 @@ export const criarContratoLocacaoJourney = {
   "business": {
     "actorRef": "atendente",
     "title": "Criar contrato de locação",
-    "goal": "Registrar a locação de um cliente com um ou mais equipamentos para o período solicitado.",
+    "goal": "Registrar a locação de um cliente para um ou mais equipamentos no período solicitado.",
     "entry": {
       "mode": "coldStart"
     },
@@ -17,15 +17,15 @@ export const criarContratoLocacaoJourney = {
         "stepId": "localizarCliente",
         "kind": "locate",
         "entity": "Cliente",
-        "title": "Localizar cliente",
+        "title": "x",
         "description": "Localiza o cliente que fará a locação."
       },
       {
-        "stepId": "localizarEquipamentos",
-        "kind": "locate",
+        "stepId": "consultarEquipamentos",
+        "kind": "inspect",
         "entity": "Equipamento",
-        "title": "Localizar equipamentos",
-        "description": "Localiza os equipamentos solicitados e consulta sua disponibilidade para o período."
+        "title": "x",
+        "description": "Confere os equipamentos solicitados, suas diárias e a disponibilidade no período de locação."
       },
       {
         "stepId": "registrarContrato",
@@ -34,19 +34,20 @@ export const criarContratoLocacaoJourney = {
         "affects": [
           "Equipamento"
         ],
-        "title": "Registrar contrato",
-        "description": "Cria o contrato com os equipamentos, a data de retirada e a data prevista de devolução, impedindo períodos sobrepostos para o mesmo equipamento."
+        "effect": "create",
+        "title": "x",
+        "description": "Cria o contrato com o cliente, os equipamentos, a data de retirada e a data prevista de devolução."
       }
     ],
     "outcome": {
-      "statement": "O contrato de locação é registrado para o cliente com equipamentos reservados no período informado.",
+      "statement": "O contrato de locação é registrado para os equipamentos disponíveis no período informado.",
       "evidence": [
-        "Contrato de locação identificado com cliente, equipamentos e datas de retirada e devolução prevista.",
-        "Equipamentos do contrato passam a constar como locados no período contratado."
+        "Contrato de locação criado com cliente, período e equipamentos.",
+        "Equipamentos do contrato passam a constar como locados para o período registrado."
       ]
     }
   },
-  "businessHash": "sha256:a70220331de0e7f8b898efb34aa7bccd801e48124381bb02915b73f32a7cc4f1"
+  "businessHash": "sha256:ab1a0c1931d471eac12ccbe0d7eaf26aa7bdfdd9f6ffd6678cacb74e982348a4"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CriarContratoLocacaoJourneyType = typeof criarContratoLocacaoJourney;

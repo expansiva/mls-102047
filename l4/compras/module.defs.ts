@@ -13,17 +13,17 @@ export const comprasModule = {
   "defaultLanguage": "pt-BR",
   "sourcePrompt": "criar o módulo compras em português. a organização compra de fornecedores (empresas com CNPJ, razão social, contato). o comprador cadastra fornecedores e quais produtos cada um fornece, com preço combinado. o comprador abre um pedido de compra para um fornecedor com um ou mais produtos, quantidade e preço, e envia; o gerente de compras aprova ou rejeita pedidos acima de um valor limite. quando o pedido chega, o almoxarife registra o recebimento (total ou parcial) e isso dá entrada no estoque dos produtos recebidos. o gerente vê o painel de pedidos em aberto, atrasados e o total comprado por fornecedor no mês. perfis: comprador, gerente de compras e almoxarife.",
   "details": {
-    "openPurchaseOrderCount": {
+    "pedidosEmAberto": {
       "type": "integer",
-      "description": "Quantidade calculada de pedidos de compra em aberto."
+      "description": "Quantidade calculada de pedidos de compra que permanecem em aberto."
     },
-    "overduePurchaseOrderCount": {
+    "pedidosAtrasados": {
       "type": "integer",
-      "description": "Quantidade calculada de pedidos de compra atrasados."
+      "description": "Quantidade calculada de pedidos de compra em atraso."
     },
-    "monthlyPurchasedTotalBySupplier": {
+    "totalCompradoPorFornecedorNoMes": {
       "type": "json",
-      "description": "Totais calculados de compras do mês agrupados por fornecedor."
+      "description": "Totais calculados de compras do mês, agrupados por fornecedor."
     }
   }
 } as const satisfies Ns5ModuleArtifact;

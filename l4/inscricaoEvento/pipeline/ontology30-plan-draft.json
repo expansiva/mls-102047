@@ -1,14 +1,14 @@
 {
   "moduleName": "inscricaoEvento",
-  "businessDomain": "Gestão e inscrições públicas em eventos",
+  "businessDomain": "Gestão de eventos publicados e inscrições públicas, incluindo lista de espera e cancelamentos.",
   "entities": [
     {
       "entityId": "Evento",
       "title": "Evento",
-      "description": "Evento organizado pela organização, com informações, capacidade e publicação para inscrições públicas.",
+      "description": "Evento organizado com informações, capacidade e publicação para inscrições públicas.",
       "kind": "core",
       "party": "none",
-      "displayField": "title",
+      "displayField": "titulo",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
@@ -19,8 +19,8 @@
     {
       "entityId": "Inscricao",
       "title": "Inscrição",
-      "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmada, espera ou cancelada.",
-      "kind": "event",
+      "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmação, espera ou cancelamento.",
+      "kind": "core",
       "party": "none",
       "displayField": "id",
       "storage": {
@@ -31,83 +31,43 @@
       }
     },
     {
-      "entityId": "Participant",
+      "entityId": "Participante",
       "title": "Participante",
-      "description": "Pessoa que realiza ou cancela uma inscrição em um evento.",
+      "description": "Pessoa identificada para realizar inscrições em eventos deste módulo.",
       "kind": "mdm",
       "party": "person",
       "mdmSubtype": "Person",
       "displayField": "name",
-      "maintenance": "crud",
       "storage": {
         "target": "mdm",
         "scope": "organization",
         "idField": "id",
-        "mdmType": "inscricaoEvento.Participant"
-      }
-    },
-    {
-      "entityId": "Venue",
-      "title": "Local do evento",
-      "description": "Local cadastrado na organização onde um evento ocorre.",
-      "kind": "mdm",
-      "party": "none",
-      "mdmSubtype": "Location",
-      "displayField": "name",
-      "maintenance": "crud",
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "inscricaoEvento.Venue"
+        "mdmType": "inscricaoEvento.Participante"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "eventRegistrations",
-      "fromEntity": "Evento",
-      "toEntity": "Inscricao",
-      "type": "oneToMany",
-      "required": false,
-      "description": "Um evento pode ter várias inscrições.",
+      "relationshipId": "inscricaoEvento",
+      "fromEntity": "Inscricao",
+      "toEntity": "Evento",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada inscrição pertence a um único evento.",
       "persistence": {
         "mode": "moduleReference"
       }
     },
     {
-      "relationshipId": "registrationParticipant",
+      "relationshipId": "inscricaoParticipante",
       "fromEntity": "Inscricao",
-      "toEntity": "Participant",
+      "toEntity": "Participante",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada inscrição pertence a uma pessoa participante.",
+      "description": "Cada inscrição identifica a pessoa participante que a realizou.",
       "persistence": {
         "mode": "crossStoreReference"
       }
-    },
-    {
-      "relationshipId": "eventVenue",
-      "fromEntity": "Evento",
-      "toEntity": "Venue",
-      "type": "manyToOne",
-      "required": true,
-      "description": "Cada evento ocorre em um local cadastrado.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      }
-    }
-  ],
-  "normalizations": [
-    {
-      "kind": "dropCrud",
-      "entityId": "Evento",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-    },
-    {
-      "kind": "dropCrud",
-      "entityId": "Inscricao",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
     }
   ]
 }

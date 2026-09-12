@@ -7,8 +7,8 @@ export const inscricaoEventoEntityInscricao = {
   "moduleName": "inscricaoEvento",
   "entityId": "Inscricao",
   "title": "Inscrição",
-  "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmada, espera ou cancelada.",
-  "kind": "event",
+  "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmação, espera ou cancelamento.",
+  "kind": "core",
   "party": "none",
   "displayField": "id",
   "fields": [
@@ -20,25 +20,25 @@ export const inscricaoEventoEntityInscricao = {
       "description": "Identificador único da inscrição."
     },
     {
-      "fieldId": "eventId",
+      "fieldId": "eventoId",
       "title": "Evento",
       "type": "uuid",
       "required": true,
       "description": "Referência ao evento ao qual a inscrição pertence."
     },
     {
-      "fieldId": "participantId",
+      "fieldId": "participanteId",
       "title": "Participante",
       "type": "uuid",
       "required": true,
-      "description": "Referência à pessoa participante registrada no MDM."
+      "description": "Referência à pessoa participante que realizou a inscrição."
     },
     {
-      "fieldId": "registeredAt",
-      "title": "Data e hora da inscrição",
+      "fieldId": "dataInscricao",
+      "title": "Data da inscrição",
       "type": "datetime",
       "required": true,
-      "description": "Data e hora em que a inscrição foi realizada, usada para ordenar a lista de espera."
+      "description": "Data e hora de registro da inscrição, usada para ordenar a lista de espera."
     },
     {
       "fieldId": "status",
@@ -51,11 +51,11 @@ export const inscricaoEventoEntityInscricao = {
           "title": "Confirmada"
         },
         {
-          "value": "waitingList",
+          "value": "waitlisted",
           "title": "Lista de espera"
         },
         {
-          "value": "canceled",
+          "value": "cancelled",
           "title": "Cancelada"
         }
       ],
@@ -64,54 +64,45 @@ export const inscricaoEventoEntityInscricao = {
   ],
   "uniqueKeys": [
     [
-      "eventId",
-      "participantId"
+      "eventoId",
+      "participanteId"
     ]
   ],
   "lifecycleStates": [
     {
       "state": "confirmed",
-      "reachedBy": "command"
+      "reachedBy": "actor"
     },
     {
-      "state": "waitingList",
-      "reachedBy": "command"
+      "state": "waitlisted",
+      "reachedBy": "actor"
     },
     {
-      "state": "canceled",
+      "state": "cancelled",
       "reachedBy": "actor"
     }
   ],
   "transitions": [
     {
-      "transitionId": "placeRegistrationOnWaitingList",
-      "from": [
-        "confirmed"
-      ],
-      "to": "waitingList",
-      "by": "system",
-      "description": "Coloca a inscrição na lista de espera quando não houver vagas disponíveis no evento."
-    },
-    {
-      "transitionId": "cancelRegistration",
+      "transitionId": "cancelarInscricao",
       "from": [
         "confirmed",
-        "waitingList"
+        "waitlisted"
       ],
-      "to": "canceled",
+      "to": "cancelled",
       "by": [
         "publico"
       ],
-      "description": "Cancela a própria inscrição no evento."
+      "description": "O participante cancela sua própria inscrição no evento."
     },
     {
-      "transitionId": "promoteWaitlistedRegistration",
+      "transitionId": "promoverListaEspera",
       "from": [
-        "waitingList"
+        "waitlisted"
       ],
       "to": "confirmed",
       "by": "system",
-      "description": "Confirma a primeira inscrição da lista de espera após a liberação de uma vaga."
+      "description": "O sistema promove a primeira inscrição da lista de espera quando uma vaga é liberada."
     }
   ],
   "storage": {

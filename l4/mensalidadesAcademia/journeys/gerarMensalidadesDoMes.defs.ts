@@ -8,42 +8,29 @@ export const gerarMensalidadesDoMesJourney = {
   "business": {
     "actorRef": "gerencia",
     "title": "Gerar mensalidades do mês",
-    "goal": "Criar uma mensalidade para cada aluno com matrícula ativa no período.",
+    "goal": "Criar uma mensalidade mensal para cada aluno com matrícula ativa.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarMatriculasAtivas",
-        "kind": "locate",
-        "entity": "Matricula",
-        "title": "Localizar matrículas ativas",
-        "description": "Obtém as matrículas ativas que devem participar da geração do mês."
-      },
-      {
-        "stepId": "inspecionarPlanosDasMatriculas",
-        "kind": "inspect",
-        "entity": "Plano",
-        "title": "Conferir valores e vencimentos",
-        "description": "Consulta os valores e os dias de vencimento dos planos vinculados às matrículas ativas."
-      },
-      {
-        "stepId": "gerarMensalidades",
+        "stepId": "gerarCobrancasMensais",
         "kind": "act",
         "entity": "Mensalidade",
-        "title": "Gerar mensalidades",
-        "description": "Gera uma mensalidade do período para cada aluno ativo, com o valor do plano e a data de vencimento correspondente."
+        "effect": "create",
+        "title": "Gerar as mensalidades do mês.",
+        "description": "Cria uma mensalidade por aluno ativo, com o valor do plano e o vencimento correspondente."
       }
     ],
     "outcome": {
-      "statement": "As mensalidades do período são geradas para todos os alunos ativos.",
+      "statement": "As mensalidades do período foram geradas para os alunos ativos.",
       "evidence": [
-        "Existe uma mensalidade do período para cada matrícula ativa.",
-        "Cada mensalidade apresenta o valor do plano e sua data de vencimento."
+        "Cada aluno com matrícula ativa possui uma mensalidade do mês.",
+        "Cada mensalidade gerada mostra o valor do plano e a data de vencimento."
       ]
     }
   },
-  "businessHash": "sha256:565e2126162539187aa774eb07c2224f37e01e51dd56bb70c12891434c04b32a"
+  "businessHash": "sha256:8284a84a8f19c17f0fd7342c15b4412cb475bf42b93b39c7e58160c1067651db"
 } as const satisfies Ns5JourneyArtifact;
 
 export type GerarMensalidadesDoMesJourneyType = typeof gerarMensalidadesDoMesJourney;

@@ -3,7 +3,7 @@
 import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
 
 export const hiringPipelineAccess = {
-  "schemaVersion": "2026-09-10-ns5-access-v2",
+  "schemaVersion": "2026-09-12-ns5-access-v3",
   "moduleName": "hiringPipeline",
   "actors": [
     {
@@ -11,33 +11,22 @@ export const hiringPipelineAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Recruiter",
-      "description": "Opens job positions, registers candidates, and manages applications through the hiring pipeline except offer and hiring decisions."
+      "description": "Internal staff member who opens job positions, registers candidates, and handles hiring pipeline activities other than offer and hiring decisions."
     },
     {
       "actorId": "hiringManager",
       "kind": "internal",
       "origin": "named",
       "title": "Hiring Manager",
-      "description": "Decides offers and hiring for candidates applying to their job positions."
-    }
-  ],
-  "authorities": [
-    {
-      "authorityId": "manageHiringPipeline",
-      "title": "Manage hiring pipeline",
-      "description": "Open and manage job positions, register candidates, and manage applications through screening, interview, and rejection."
-    },
-    {
-      "authorityId": "decideHiringOutcomes",
-      "title": "Decide hiring outcomes",
-      "description": "Review applications and position capacity and decide offer and hiring outcomes for responsible job positions."
+      "description": "Internal manager responsible for deciding offers and hiring for job positions."
     }
   ],
   "grants": [
     {
-      "grantId": "recruiterManageHiringPipeline",
+      "grantId": "recruiterPipelineManagement",
       "actorRef": "recruiter",
-      "authorityRef": "manageHiringPipeline",
+      "title": "Manage hiring pipeline",
+      "description": "Allows recruiters to open and review job positions, register candidates, create and advance applications, and record application rejections across the organization.",
       "entityRefs": [
         "JobPosition",
         "Candidate",
@@ -45,29 +34,30 @@ export const hiringPipelineAccess = {
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "All hiring pipeline records in the organization."
+        "description": "Applies to all hiring-pipeline records in the organization."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Recruiters can view complete job position, candidate, and application records needed to manage the pipeline."
+        "description": "Recruiters may view complete job-position, candidate, and application records needed to manage the pipeline."
       }
     },
     {
-      "grantId": "hiringManagerDecideOutcomes",
+      "grantId": "hiringManagerHiringDecisions",
       "actorRef": "hiringManager",
-      "authorityRef": "decideHiringOutcomes",
+      "title": "Make hiring decisions",
+      "description": "Allows hiring managers to review positions, candidates, and applications and to authorize offers and confirm hires across the organization.",
       "entityRefs": [
         "JobPosition",
         "Candidate",
         "Application"
       ],
       "dataScope": {
-        "mode": "custom",
-        "description": "Only job positions for which the hiring manager is responsible, their applications, and the candidates associated with those applications."
+        "mode": "organization",
+        "description": "Applies to all hiring-pipeline records in the organization."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Hiring managers can view complete responsible position, associated candidate, and application records needed for offer and hiring decisions."
+        "description": "Hiring managers may view complete job-position, candidate, and application records needed to make offer and hiring decisions."
       }
     }
   ]

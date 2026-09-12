@@ -13,28 +13,21 @@
       "title": "Cliente",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao cliente responsável pelo contrato de locação."
-    },
-    {
-      "fieldId": "equipamentoIds",
-      "title": "Equipamentos",
-      "type": "json",
-      "required": true,
-      "description": "Referências aos um ou mais equipamentos incluídos no contrato."
+      "description": "Referência ao cliente que celebra o contrato de locação."
     },
     {
       "fieldId": "dataRetirada",
       "title": "Data de retirada",
       "type": "date",
       "required": true,
-      "description": "Data em que os equipamentos são retirados para locação."
+      "description": "Data em que os equipamentos são retirados pelo cliente."
     },
     {
       "fieldId": "dataPrevistaDevolucao",
       "title": "Data prevista de devolução",
       "type": "date",
       "required": true,
-      "description": "Data prevista para a devolução dos equipamentos."
+      "description": "Data prevista para a devolução dos equipamentos locados."
     },
     {
       "fieldId": "dataRealDevolucao",
@@ -50,12 +43,12 @@
       "required": true,
       "enum": [
         {
-          "value": "open",
-          "title": "Em aberto"
+          "value": "emLocacao",
+          "title": "Em locação"
         },
         {
-          "value": "returned",
-          "title": "Devolvido"
+          "value": "concluido",
+          "title": "Concluído"
         }
       ],
       "description": "Situação atual do contrato de locação."
@@ -66,18 +59,18 @@
       "type": "integer",
       "description": "Quantidade de dias entre a data prevista e a data real de devolução quando houver atraso."
     },
-    "multaAtraso": {
+    "multa": {
       "type": "money",
-      "description": "Valor total da multa por atraso, calculado pelas diárias dos equipamentos, dias de atraso e fator de 1,5."
+      "description": "Valor da multa calculada pelas diárias dos itens, dias de atraso e fator de 1,5."
     }
   },
   "lifecycleStates": [
     {
-      "state": "open",
+      "state": "emLocacao",
       "reachedBy": "actor"
     },
     {
-      "state": "returned",
+      "state": "concluido",
       "reachedBy": "actor"
     }
   ],
@@ -85,13 +78,13 @@
     {
       "transitionId": "registrarDevolucao",
       "from": [
-        "open"
+        "emLocacao"
       ],
-      "to": "returned",
+      "to": "concluido",
       "by": [
         "atendente"
       ],
-      "description": "Registra a data real de devolução e conclui o contrato de locação."
+      "description": "Registra a data real de devolução, conclui o contrato e libera os equipamentos devolvidos."
     }
   ]
 }

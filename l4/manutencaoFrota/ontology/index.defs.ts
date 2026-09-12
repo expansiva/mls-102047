@@ -5,22 +5,50 @@ import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
 export const manutencaoFrotaOntologyIndex = {
   "schemaVersion": "2026-09-11-ns5-ontology-v2",
   "moduleName": "manutencaoFrota",
-  "businessDomain": "Gestão de frota de transportadora, incluindo abastecimentos, manutenção preventiva e ordens de manutenção.",
+  "businessDomain": "Gestão de abastecimentos, manutenção preventiva e ordens de manutenção da frota de uma transportadora.",
   "entities": [
-    "Veiculo",
-    "Oficina",
     "Abastecimento",
-    "PlanoManutencaoPreventiva",
+    "Motorista",
+    "Oficina",
+    "Veiculo",
+    "PlanoManutencao",
     "OrdemManutencao"
   ],
   "relationships": [
+    {
+      "relationshipId": "veiculoMotoristaAtribuido",
+      "fromEntity": "Veiculo",
+      "toEntity": "Motorista",
+      "type": "manyToOne",
+      "required": false,
+      "description": "O veículo pode estar atribuído a um motorista responsável por conduzi-lo.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Veiculo",
+        "from": {
+          "entityId": "Veiculo",
+          "fieldIds": [
+            "motoristaId"
+          ]
+        },
+        "to": {
+          "entityId": "Motorista",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
     {
       "relationshipId": "abastecimentoVeiculo",
       "fromEntity": "Abastecimento",
       "toEntity": "Veiculo",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada abastecimento é registrado para um único veículo da frota.",
+      "description": "O abastecimento é registrado para um veículo da frota.",
       "persistence": {
         "mode": "crossStoreReference"
       },
@@ -42,20 +70,47 @@ export const manutencaoFrotaOntologyIndex = {
       }
     },
     {
-      "relationshipId": "planoVeiculo",
-      "fromEntity": "PlanoManutencaoPreventiva",
-      "toEntity": "Veiculo",
-      "type": "oneToOne",
+      "relationshipId": "abastecimentoMotorista",
+      "fromEntity": "Abastecimento",
+      "toEntity": "Motorista",
+      "type": "manyToOne",
       "required": true,
-      "description": "Cada plano preventivo vigente define a periodicidade de manutenção de um veículo.",
+      "description": "O abastecimento é registrado pelo motorista que realizou o lançamento.",
       "persistence": {
         "mode": "crossStoreReference"
       },
       "realization": {
         "kind": "fieldReference",
-        "ownerEntity": "PlanoManutencaoPreventiva",
+        "ownerEntity": "Abastecimento",
         "from": {
-          "entityId": "PlanoManutencaoPreventiva",
+          "entityId": "Abastecimento",
+          "fieldIds": [
+            "motoristaId"
+          ]
+        },
+        "to": {
+          "entityId": "Motorista",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "planoManutencaoVeiculo",
+      "fromEntity": "PlanoManutencao",
+      "toEntity": "Veiculo",
+      "type": "manyToOne",
+      "required": true,
+      "description": "O plano preventivo define a manutenção de um veículo específico.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "PlanoManutencao",
+        "from": {
+          "entityId": "PlanoManutencao",
           "fieldIds": [
             "veiculoId"
           ]
@@ -69,12 +124,12 @@ export const manutencaoFrotaOntologyIndex = {
       }
     },
     {
-      "relationshipId": "ordemVeiculo",
+      "relationshipId": "ordemManutencaoVeiculo",
       "fromEntity": "OrdemManutencao",
       "toEntity": "Veiculo",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada ordem de manutenção é aberta para um único veículo.",
+      "description": "A ordem de manutenção encaminha um veículo para serviço.",
       "persistence": {
         "mode": "crossStoreReference"
       },
@@ -96,12 +151,12 @@ export const manutencaoFrotaOntologyIndex = {
       }
     },
     {
-      "relationshipId": "ordemPlanoPreventivo",
+      "relationshipId": "ordemManutencaoPlano",
       "fromEntity": "OrdemManutencao",
-      "toEntity": "PlanoManutencaoPreventiva",
+      "toEntity": "PlanoManutencao",
       "type": "manyToOne",
       "required": false,
-      "description": "Uma ordem pode estar vinculada ao plano preventivo que motivou a manutenção.",
+      "description": "A ordem pode ser aberta em decorrência do vencimento de um plano preventivo.",
       "persistence": {
         "mode": "moduleReference"
       },
@@ -111,11 +166,11 @@ export const manutencaoFrotaOntologyIndex = {
         "from": {
           "entityId": "OrdemManutencao",
           "fieldIds": [
-            "planoManutencaoPreventivaId"
+            "planoManutencaoId"
           ]
         },
         "to": {
-          "entityId": "PlanoManutencaoPreventiva",
+          "entityId": "PlanoManutencao",
           "fieldIds": [
             "id"
           ]
@@ -123,12 +178,12 @@ export const manutencaoFrotaOntologyIndex = {
       }
     },
     {
-      "relationshipId": "ordemOficina",
+      "relationshipId": "ordemManutencaoOficina",
       "fromEntity": "OrdemManutencao",
       "toEntity": "Oficina",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada ordem de manutenção indica a oficina responsável pelo serviço.",
+      "description": "A ordem de manutenção é executada por uma oficina.",
       "persistence": {
         "mode": "crossStoreReference"
       },

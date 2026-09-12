@@ -8,27 +8,27 @@ export const manutencaoFrotaRules = {
   "rules": [
     {
       "ruleId": "atualizarQuilometragemPorAbastecimento",
-      "description": "Ao registrar um abastecimento, a quilometragem atual do veículo deve ser atualizada com a quilometragem informada no painel."
+      "description": "Ao registrar um abastecimento, a quilometragem atual do veículo deve ser atualizada para a quilometragem informada no painel."
     },
     {
-      "ruleId": "definirPeriodicidadePreventiva",
-      "description": "Um plano de manutenção preventiva deve definir uma periodicidade por intervalo de quilômetros ou por intervalo de meses."
+      "ruleId": "exigirCriterioPreventivo",
+      "description": "Todo plano de manutenção preventiva deve definir um intervalo por quilometragem, por meses ou por ambos."
     },
     {
-      "ruleId": "calcularQuilometragemPrevista",
-      "description": "Quando o plano tiver intervalo de quilômetros, sua quilometragem prevista para a próxima preventiva deve ser a quilometragem de referência acrescida desse intervalo."
+      "ruleId": "calcularProximaQuilometragemPreventiva",
+      "description": "Quando o plano definir intervalo por quilometragem, a próxima quilometragem prevista deve ser a quilometragem de referência acrescida desse intervalo."
     },
     {
-      "ruleId": "calcularDataPrevista",
-      "description": "Quando o plano tiver intervalo de meses, sua data prevista para a próxima preventiva deve ser a data de referência acrescida desse intervalo."
+      "ruleId": "calcularProximaDataPreventiva",
+      "description": "Quando o plano definir intervalo por meses, a próxima data prevista deve ser a data de referência acrescida desse intervalo."
     },
     {
       "ruleId": "identificarPreventivaVencidaPorQuilometragem",
-      "description": "A manutenção preventiva deve ser considerada vencida quando a quilometragem atual do veículo ultrapassar a quilometragem prevista no plano."
+      "description": "A manutenção preventiva deve ser considerada vencida quando a quilometragem atual do veículo ultrapassar a próxima quilometragem prevista do plano."
     },
     {
-      "ruleId": "motivarOrdemManutencao",
-      "description": "Uma ordem de manutenção deve ser aberta por vencimento de plano preventivo ou por defeito identificado no veículo."
+      "ruleId": "avisarPreventivaVencidaPorQuilometragem",
+      "description": "O sistema deve avisar quando a manutenção preventiva de um veículo for considerada vencida por quilometragem."
     }
   ]
 } as const satisfies Ns5RulesArtifact;

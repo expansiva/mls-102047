@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026-09-10-ns5-access-v2",
+  "schemaVersion": "2026-09-12-ns5-access-v3",
   "moduleName": "compras",
   "actors": [
     {
@@ -7,144 +7,135 @@
       "kind": "internal",
       "origin": "named",
       "title": "Comprador",
-      "description": "Profissional responsável por cadastrar fornecedores e suas condições de fornecimento, abrir pedidos de compra e enviá-los."
+      "description": "Profissional da organização que cadastra fornecedores, registra os produtos fornecidos e abre pedidos de compra."
     },
     {
       "actorId": "gerenteCompras",
       "kind": "internal",
       "origin": "named",
       "title": "Gerente de compras",
-      "description": "Responsável por aprovar ou rejeitar pedidos acima do valor limite e acompanhar os indicadores de compras."
+      "description": "Profissional da organização que aprova ou rejeita pedidos de compra acima do valor limite e acompanha indicadores de compras."
     },
     {
       "actorId": "almoxarife",
       "kind": "internal",
       "origin": "named",
       "title": "Almoxarife",
-      "description": "Profissional responsável por registrar o recebimento total ou parcial dos pedidos e a entrada dos produtos no estoque."
-    }
-  ],
-  "authorities": [
-    {
-      "authorityId": "gerirFornecedoresEcondicoes",
-      "title": "Gerir fornecedores e condições de fornecimento",
-      "description": "Cadastrar ou vincular fornecedores e registrar as condições comerciais de produtos e preços combinados."
-    },
-    {
-      "authorityId": "gerirPedidosCompra",
-      "title": "Gerir pedidos de compra",
-      "description": "Abrir, compor e enviar pedidos de compra para fornecedores."
-    },
-    {
-      "authorityId": "decidirPedidosAcimaLimite",
-      "title": "Decidir pedidos acima do limite",
-      "description": "Analisar e aprovar ou rejeitar pedidos de compra sujeitos à decisão gerencial."
-    },
-    {
-      "authorityId": "acompanharIndicadoresCompras",
-      "title": "Acompanhar indicadores de compras",
-      "description": "Consultar pedidos em aberto ou atrasados e os totais mensais comprados por fornecedor."
-    },
-    {
-      "authorityId": "registrarRecebimentos",
-      "title": "Registrar recebimentos",
-      "description": "Registrar recebimentos totais ou parciais e as entradas de estoque correspondentes."
+      "description": "Profissional da organização que registra o recebimento total ou parcial dos pedidos e a entrada dos produtos no estoque."
     }
   ],
   "grants": [
     {
-      "grantId": "compradorGerirFornecedoresEcondicoes",
+      "grantId": "compradorCadastroComercial",
       "actorRef": "comprador",
-      "authorityRef": "gerirFornecedoresEcondicoes",
+      "title": "Cadastrar fornecedores e ofertas comerciais",
+      "description": "Permite ao comprador cadastrar ou vincular fornecedores e registrar as condições comerciais dos produtos fornecidos.",
       "entityRefs": [
-        "Supplier",
-        "Product",
-        "SupplyCondition"
+        "Fornecedor",
+        "Produto",
+        "OfertaFornecedor"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Fornecedores, produtos e condições de fornecimento de toda a organização."
+        "description": "Fornecedores, produtos de referência e ofertas comerciais da organização."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Acesso completo aos registros necessários para cadastrar fornecedores e manter condições de fornecimento."
+        "description": "Acesso completo aos registros necessários para cadastrar fornecedores e suas ofertas."
       }
     },
     {
-      "grantId": "compradorGerirPedidosCompra",
+      "grantId": "compradorPedidosProprios",
       "actorRef": "comprador",
-      "authorityRef": "gerirPedidosCompra",
+      "title": "Gerenciar próprios pedidos de compra",
+      "description": "Permite ao comprador abrir, enviar e acompanhar os pedidos de compra pelos quais é responsável.",
       "entityRefs": [
-        "Supplier",
-        "Product",
-        "PurchaseOrder",
-        "PurchaseOrderItem"
+        "PedidoCompra"
       ],
       "dataScope": {
-        "mode": "organization",
-        "description": "Pedidos de compra, seus itens, fornecedores e produtos de toda a organização."
+        "mode": "own",
+        "description": "Somente pedidos vinculados ao comprador correspondente à pessoa da sessão.",
+        "anchorEntity": "Comprador"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Acesso completo aos dados necessários para abrir e enviar pedidos de compra."
+        "description": "Acesso completo aos dados dos próprios pedidos de compra."
       }
     },
     {
-      "grantId": "gerenteDecidirPedidosAcimaLimite",
+      "grantId": "compradorPerfilProprio",
+      "actorRef": "comprador",
+      "title": "Manter cadastro próprio de comprador",
+      "description": "Permite ao comprador manter seu vínculo de pessoa responsável no módulo de compras.",
+      "entityRefs": [
+        "Comprador"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Somente o registro de comprador correspondente à pessoa da sessão.",
+        "anchorEntity": "Comprador"
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Acesso completo ao próprio registro de comprador."
+      }
+    },
+    {
+      "grantId": "gerenteAprovacaoEindicadores",
       "actorRef": "gerenteCompras",
-      "authorityRef": "decidirPedidosAcimaLimite",
+      "title": "Aprovar pedidos e acompanhar compras",
+      "description": "Permite ao gerente de compras avaliar, aprovar ou rejeitar pedidos que exigem decisão e acompanhar os indicadores de compras da organização.",
       "entityRefs": [
-        "Supplier",
-        "Product",
-        "PurchaseOrder",
-        "PurchaseOrderItem"
+        "PedidoCompra",
+        "Fornecedor",
+        "Produto",
+        "OfertaFornecedor"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Pedidos de compra de toda a organização sujeitos à análise e decisão gerencial."
+        "description": "Pedidos, fornecedores, produtos e ofertas comerciais de toda a organização."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Acesso completo aos pedidos, itens, fornecedores e produtos necessários para decidir pedidos acima do limite."
+        "description": "Acesso completo aos registros necessários para decidir pedidos e acompanhar valores, pendências e atrasos."
       }
     },
     {
-      "grantId": "gerenteAcompanharIndicadoresCompras",
-      "actorRef": "gerenteCompras",
-      "authorityRef": "acompanharIndicadoresCompras",
-      "entityRefs": [
-        "Supplier",
-        "PurchaseOrder"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Indicadores e pedidos de compra de toda a organização."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Acesso aos campos necessários para acompanhar pedidos em aberto, atrasados e totais mensais por fornecedor."
-      }
-    },
-    {
-      "grantId": "almoxarifeRegistrarRecebimentos",
+      "grantId": "almoxarifeRecebimentos",
       "actorRef": "almoxarife",
-      "authorityRef": "registrarRecebimentos",
+      "title": "Registrar recebimentos de compras",
+      "description": "Permite ao almoxarife consultar pedidos disponíveis para recebimento e registrar recebimentos totais ou parciais com entrada no estoque.",
       "entityRefs": [
-        "Supplier",
-        "Product",
-        "PurchaseOrder",
-        "PurchaseOrderItem",
-        "Receipt",
-        "StockEntry"
+        "PedidoCompra",
+        "RecebimentoCompra",
+        "Produto",
+        "Estoque"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Pedidos enviados, seus itens, produtos, recebimentos e entradas de estoque de toda a organização."
+        "description": "Pedidos, recebimentos, produtos e estoques da organização necessários ao registro da entrada."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Acesso completo aos dados necessários para conferir pedidos, registrar recebimentos e registrar entradas de estoque."
+        "description": "Acesso completo aos dados necessários para conferir pedidos e registrar os recebimentos."
       }
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropAnchorEntity",
+      "grantId": "compradorCadastroComercial",
+      "detail": "anchorEntity removed; organization is not own/assigned/related."
+    },
+    {
+      "kind": "dropAnchorEntity",
+      "grantId": "gerenteAprovacaoEindicadores",
+      "detail": "anchorEntity removed; organization is not own/assigned/related."
+    },
+    {
+      "kind": "dropAnchorEntity",
+      "grantId": "almoxarifeRecebimentos",
+      "detail": "anchorEntity removed; organization is not own/assigned/related."
     }
   ]
 }

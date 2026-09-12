@@ -8,7 +8,7 @@ export const consultarMisOrdenesJourney = {
   "business": {
     "actorRef": "cliente",
     "title": "Consultar mis órdenes de servicio",
-    "goal": "Ver el estado y la información permitida de las propias órdenes desde el portal.",
+    "goal": "Conocer el estado, diagnóstico y valor presupuestado de las propias órdenes.",
     "entry": {
       "mode": "coldStart"
     },
@@ -17,27 +17,27 @@ export const consultarMisOrdenesJourney = {
         "stepId": "localizarMisOrdenes",
         "kind": "locate",
         "entity": "OrdenServicio",
-        "title": "Localizar mis órdenes.",
-        "description": "Acceder al listado de órdenes vinculadas al propio cliente."
+        "title": "x",
+        "description": "x"
       },
       {
         "stepId": "consultarDetalleOrden",
         "kind": "inspect",
         "entity": "OrdenServicio",
-        "title": "Consultar el detalle permitido de una orden.",
-        "description": "Ver el estado, el diagnóstico y el valor del presupuesto de una orden propia, sin costos internos de piezas ni anotaciones técnicas."
+        "title": "x",
+        "description": "Consulta el estado, el diagnóstico y el valor del presupuesto de una orden propia, sin costos internos de piezas ni anotaciones del técnico."
       }
     ],
     "outcome": {
-      "statement": "El cliente consulta únicamente sus propias órdenes y la información habilitada para él.",
+      "statement": "El cliente conoce la situación de sus propias órdenes sin acceder a información interna.",
       "evidence": [
-        "Las órdenes visibles pertenecen al cliente de la sesión.",
-        "Cada orden muestra su estado, diagnóstico y valor de presupuesto.",
-        "No se muestran costos internos de piezas ni anotaciones técnicas."
+        "Se muestran las órdenes asociadas al cliente autenticado.",
+        "El detalle visible incluye estado, diagnóstico y valor del presupuesto.",
+        "El detalle no muestra costos internos ni anotaciones técnicas."
       ]
     }
   },
-  "businessHash": "sha256:d8e0bbe3aa070284d8659bdb85c8396c777e26e2fae1161c862235506ff1908f"
+  "businessHash": "sha256:c4a688611977967131984f855ab5d8f1802685b5a6359d426e09ee3184909132"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarMisOrdenesJourneyType = typeof consultarMisOrdenesJourney;

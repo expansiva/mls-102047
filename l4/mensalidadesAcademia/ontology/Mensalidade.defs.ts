@@ -7,10 +7,10 @@ export const mensalidadesAcademiaEntityMensalidade = {
   "moduleName": "mensalidadesAcademia",
   "entityId": "Mensalidade",
   "title": "Mensalidade",
-  "description": "Cobrança gerada para uma matrícula em um período mensal, contendo o valor e o vencimento aplicáveis.",
+  "description": "Cobrança mensal gerada para uma matrícula ativa, com valor e vencimento do período.",
   "kind": "event",
   "party": "none",
-  "displayField": "periodo",
+  "displayField": "competencia",
   "fields": [
     {
       "fieldId": "id",
@@ -24,51 +24,48 @@ export const mensalidadesAcademiaEntityMensalidade = {
       "title": "Matrícula",
       "type": "uuid",
       "required": true,
-      "description": "Matrícula que originou a cobrança."
+      "description": "Referência à matrícula para a qual a mensalidade foi gerada."
     },
     {
-      "fieldId": "periodo",
-      "title": "Período",
+      "fieldId": "competencia",
+      "title": "Competência",
       "type": "date",
       "required": true,
-      "description": "Mês de referência da mensalidade."
+      "description": "Mês de referência da cobrança."
     },
     {
-      "fieldId": "valor",
-      "title": "Valor",
+      "fieldId": "valorDevido",
+      "title": "Valor devido",
       "type": "money",
       "required": true,
-      "constraints": {
-        "precision": 2
-      },
-      "description": "Valor da mensalidade definido a partir do plano na geração da cobrança."
+      "description": "Valor da mensalidade definido pelo plano no momento da geração."
     },
     {
-      "fieldId": "vencimento",
-      "title": "Vencimento",
+      "fieldId": "dataVencimento",
+      "title": "Data de vencimento",
       "type": "date",
       "required": true,
-      "description": "Data de vencimento da mensalidade."
+      "description": "Data limite para pagamento da mensalidade."
     }
   ],
   "uniqueKeys": [
     [
       "matriculaId",
-      "periodo"
+      "competencia"
     ]
   ],
   "details": {
-    "valorRecebido": {
+    "valorPago": {
       "type": "money",
       "description": "Soma dos pagamentos registrados para esta mensalidade."
     },
-    "saldoPendente": {
+    "saldoEmAberto": {
       "type": "money",
-      "description": "Valor da mensalidade que permanece sem pagamento."
+      "description": "Diferença entre o valor devido e o valor pago registrado."
     },
-    "situacao": {
+    "situacaoCobranca": {
       "type": "string",
-      "description": "Situação calculada da mensalidade conforme pagamentos e vencimento."
+      "description": "Situação calculada da cobrança conforme pagamentos e vencimento."
     }
   },
   "lifecycleStates": [],

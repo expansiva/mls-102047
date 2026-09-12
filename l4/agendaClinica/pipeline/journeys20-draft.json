@@ -6,27 +6,28 @@
       "business": {
         "actorRef": "recepcionista",
         "title": "Cadastrar paciente",
-        "goal": "Cadastrar ou vincular o paciente à clínica para permitir seu atendimento.",
+        "goal": "Registrar ou vincular o paciente para permitir seu atendimento na clínica.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "registrarPaciente",
+            "stepId": "informarDadosPaciente",
             "kind": "act",
             "entity": "Paciente",
-            "title": "Registrar paciente",
-            "description": "Cadastra o paciente ou vincula o registro existente à clínica."
+            "effect": "create",
+            "title": "x",
+            "description": "Informa os dados cadastrais do paciente."
           }
         ],
         "outcome": {
-          "statement": "O paciente fica disponível para agendamento na clínica.",
+          "statement": "O paciente fica cadastrado ou vinculado ao registro mestre existente.",
           "evidence": [
-            "Registro do paciente identificado e vinculado ao módulo da clínica."
+            "Registro de Paciente disponível para agendamento."
           ]
         }
       },
-      "businessHash": "sha256:f0ba3648040e1c936f1982773f474350d9add931bbfd336af521ba2b9db2b243"
+      "businessHash": "sha256:56f79077b7ebd77e004786f5b826983d537ee6300ec9e1bfc5c4209c17e37929"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -36,40 +37,41 @@
         "title": "Agendar consulta",
         "goal": "Marcar uma consulta para um paciente com um profissional em data e horário disponíveis.",
         "entry": {
-          "mode": "contextOrLookup"
+          "mode": "coldStart"
         },
         "steps": [
           {
             "stepId": "localizarPaciente",
             "kind": "locate",
             "entity": "Paciente",
-            "title": "Localizar paciente",
+            "title": "x",
             "description": "Localiza o paciente que receberá a consulta."
           },
           {
             "stepId": "localizarProfissional",
             "kind": "locate",
             "entity": "Profissional",
-            "title": "Localizar profissional",
-            "description": "Localiza o médico ou terapeuta que realizará a consulta."
+            "title": "x",
+            "description": "Localiza o profissional que realizará a consulta."
           },
           {
-            "stepId": "registrarConsulta",
+            "stepId": "criarConsulta",
             "kind": "act",
             "entity": "Consulta",
-            "title": "Registrar consulta",
-            "description": "Agenda a consulta na data e horário escolhidos para o profissional."
+            "effect": "create",
+            "title": "x",
+            "description": "Registra a consulta com paciente, profissional, data e horário."
           }
         ],
         "outcome": {
-          "statement": "A consulta fica agendada para o paciente e o profissional.",
+          "statement": "A consulta fica agendada para o paciente e o profissional no horário informado.",
           "evidence": [
-            "Consulta registrada com paciente, profissional, data e horário.",
-            "O horário do profissional fica reservado para a consulta."
+            "Consulta criada com data, horário, paciente e profissional.",
+            "Horário do profissional passa a constar como ocupado."
           ]
         }
       },
-      "businessHash": "sha256:d2bf320d66011c391384809a5fedbd917bc41c23c837dcfb7dd40afbaceae8be"
+      "businessHash": "sha256:6799d2524c273213ff99272987c51f3fd9ac61dc388d0da06f8449f742856c26"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -83,78 +85,84 @@
         },
         "steps": [
           {
-            "stepId": "localizarConsulta",
+            "stepId": "localizarConsultaAgendada",
             "kind": "locate",
             "entity": "Consulta",
-            "title": "Localizar consulta",
-            "description": "Localiza a consulta agendada que será confirmada por telefone."
+            "title": "x",
+            "description": "Localiza a consulta agendada para contato."
           },
           {
-            "stepId": "consultarDadosDaConsulta",
+            "stepId": "inspecionarDadosDaConsulta",
             "kind": "inspect",
             "entity": "Consulta",
-            "title": "Consultar dados da consulta",
-            "description": "Verifica os dados da consulta e do paciente para realizar o contato telefônico."
+            "title": "x",
+            "description": "Confere os dados da consulta antes do contato telefônico."
           },
           {
-            "stepId": "registrarConfirmacao",
+            "stepId": "confirmarConsulta",
             "kind": "act",
             "entity": "Consulta",
-            "title": "Registrar confirmação",
-            "description": "Registra que a consulta foi confirmada por telefone."
+            "effect": "transition",
+            "transitionRef": "confirmarConsulta",
+            "title": "x",
+            "description": "Registra que o paciente confirmou a consulta por telefone."
           }
         ],
         "outcome": {
-          "statement": "A confirmação telefônica da consulta fica registrada.",
+          "statement": "A consulta fica registrada como confirmada.",
           "evidence": [
-            "Consulta identificada como confirmada por telefone."
+            "Situação da consulta indica confirmação.",
+            "Registro da consulta mostra a confirmação telefônica."
           ]
         }
       },
-      "businessHash": "sha256:ff9bb0afc8184aa8692ac269c1c4a6b5436aba98cc031ae4727b20e449d5dbad"
+      "businessHash": "sha256:4172afd9d3b870f9c2ff59752c98b18dddf6a822f373846d09d5397f8526616e"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "registrarFaltaDoPaciente",
+      "journeyId": "registrarFaltaPaciente",
       "business": {
         "actorRef": "recepcionista",
         "title": "Registrar falta do paciente",
-        "goal": "Registrar que o paciente não compareceu à consulta agendada.",
+        "goal": "Registrar que o paciente não compareceu à consulta.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarConsultaParaFalta",
+            "stepId": "localizarConsultaDoPaciente",
             "kind": "locate",
             "entity": "Consulta",
-            "title": "Localizar consulta",
-            "description": "Localiza a consulta cujo paciente não compareceu."
+            "title": "x",
+            "description": "Localiza a consulta em que o paciente não compareceu."
           },
           {
             "stepId": "registrarFalta",
             "kind": "act",
             "entity": "Consulta",
-            "title": "Registrar falta",
+            "effect": "transition",
+            "transitionRef": "registrarFalta",
+            "title": "x",
             "description": "Marca a consulta como falta do paciente."
           }
         ],
         "outcome": {
           "statement": "A ausência do paciente fica registrada na consulta.",
           "evidence": [
-            "Consulta marcada como falta do paciente."
+            "Situação da consulta indica falta.",
+            "Consulta permanece disponível no histórico do paciente e do profissional."
           ]
         }
       },
-      "businessHash": "sha256:9052fd77d35670137950ffb9191c074db00d74a19ca3b0a6d8f3aba9ccb238dc"
+      "businessHash": "sha256:7bc5e90e6b1f478bb7841c1ee551d593c82221774efe834cb4605f2d4c7ef094"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "consultarAgendaDoDia",
+      "journeyId": "consultarAgendaDiaria",
       "business": {
         "actorRef": "profissional",
-        "title": "Consultar agenda do dia",
-        "goal": "Ver as próprias consultas previstas para o dia.",
+        "title": "Consultar agenda diária",
+        "goal": "Visualizar as próprias consultas previstas para o dia.",
         "entry": {
           "mode": "coldStart"
         },
@@ -163,25 +171,25 @@
             "stepId": "localizarConsultasDoDia",
             "kind": "locate",
             "entity": "Consulta",
-            "title": "Localizar consultas do dia",
-            "description": "Localiza as consultas previstas para a própria agenda no dia."
+            "title": "x",
+            "description": "Localiza as consultas do próprio profissional para o dia."
           },
           {
-            "stepId": "consultarAgenda",
+            "stepId": "inspecionarAgendaDoDia",
             "kind": "inspect",
             "entity": "Consulta",
-            "title": "Consultar agenda",
-            "description": "Consulta horários e pacientes das consultas encontradas."
+            "title": "x",
+            "description": "Consulta horários e dados dos pacientes da agenda diária."
           }
         ],
         "outcome": {
-          "statement": "O profissional visualiza sua agenda do dia.",
+          "statement": "O profissional visualiza sua agenda diária.",
           "evidence": [
-            "Lista das consultas do dia do profissional apresentada."
+            "Lista de consultas do dia do profissional é apresentada com horários e pacientes."
           ]
         }
       },
-      "businessHash": "sha256:cbbdfceae53d9c24fb1772ec7dc59e394d7ccdc9fc5e36ce7059e52fdc352b19"
+      "businessHash": "sha256:e508a925562d83d7e68262e702cfd6943b2ea74dd135a4c892547a926a8cf68e"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -195,39 +203,55 @@
         },
         "steps": [
           {
-            "stepId": "localizarConsultaParaAtendimento",
+            "stepId": "localizarConsultaDaAgenda",
             "kind": "locate",
             "entity": "Consulta",
-            "title": "Localizar consulta",
-            "description": "Localiza a própria consulta que foi realizada."
+            "title": "x",
+            "description": "Localiza uma consulta da própria agenda."
           },
           {
-            "stepId": "consultarConsulta",
+            "stepId": "inspecionarConsulta",
             "kind": "inspect",
             "entity": "Consulta",
-            "title": "Consultar consulta",
-            "description": "Confere os dados da consulta antes de registrar o atendimento."
+            "title": "x",
+            "description": "Confere os dados da consulta antes de concluir o atendimento."
           },
           {
             "stepId": "registrarAtendimentoRealizado",
             "kind": "act",
             "entity": "Consulta",
-            "title": "Registrar atendimento",
+            "effect": "transition",
+            "transitionRef": "registrarAtendimento",
+            "title": "x",
             "description": "Marca a consulta como atendida e registra a anotação do atendimento."
           }
         ],
         "outcome": {
           "statement": "A consulta fica registrada como atendida com a anotação do profissional.",
           "evidence": [
-            "Consulta marcada como atendida.",
-            "Anotação do atendimento registrada na consulta."
+            "Situação da consulta indica atendimento realizado.",
+            "Anotação do atendimento está registrada na consulta."
           ]
         }
       },
-      "businessHash": "sha256:f8dca464a8502acbe31f2e0f27b17e902909fb438904f81ce5bae0ed53f16c7d"
+      "businessHash": "sha256:f4b141538e312c7e305b1dc0e259af89e509e35d60e80d682447516f9f08f2d7"
     }
   ],
   "systemDecisions": [],
   "droppedActors": [],
-  "removedOrphans": []
+  "removedOrphans": [],
+  "normalizations": [
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "cadastrarPaciente",
+      "stepId": "informarDadosPaciente",
+      "detail": "transitionRef x dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "agendarConsulta",
+      "stepId": "criarConsulta",
+      "detail": "transitionRef x dropped; effect is create."
+    }
+  ]
 }

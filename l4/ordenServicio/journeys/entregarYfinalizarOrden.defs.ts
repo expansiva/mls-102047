@@ -7,8 +7,8 @@ export const entregarYfinalizarOrdenJourney = {
   "journeyId": "entregarYfinalizarOrden",
   "business": {
     "actorRef": "recepcionista",
-    "title": "Entregar el aparato y finalizar una orden",
-    "goal": "Entregar al cliente un aparato listo o disponible tras el rechazo y finalizar la orden correspondiente.",
+    "title": "Entregar aparato y finalizar orden",
+    "goal": "Entregar al cliente su aparato y finalizar la orden de servicio.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,33 +17,38 @@ export const entregarYfinalizarOrdenJourney = {
         "stepId": "localizarOrdenParaEntrega",
         "kind": "locate",
         "entity": "OrdenServicio",
-        "title": "Localizar la orden lista o rechazada.",
-        "description": "Abrir la orden del aparato disponible para retiro o entrega."
+        "title": "x",
+        "description": "x"
       },
       {
-        "stepId": "verificarDisponibilidad",
+        "stepId": "verificarOrdenYretiro",
         "kind": "inspect",
         "entity": "OrdenServicio",
-        "title": "Verificar la disponibilidad del aparato.",
-        "description": "Comprobar que la orden está lista para entrega o cerrada como rechazada y disponible para retiro."
+        "title": "x",
+        "description": "x"
       },
       {
-        "stepId": "registrarEntregaYfinalizacion",
+        "stepId": "registrarEntregaFinal",
         "kind": "act",
         "entity": "OrdenServicio",
-        "title": "Registrar la entrega y finalizar la orden.",
-        "description": "Registrar la entrega del aparato al cliente y finalizar la orden."
+        "affects": [
+          "Aparato"
+        ],
+        "effect": "transition",
+        "transitionRef": "finalizarOrden",
+        "title": "x",
+        "description": "Registra la entrega del aparato al cliente y finaliza la orden."
       }
     ],
     "outcome": {
       "statement": "El aparato queda entregado al cliente y la orden queda finalizada.",
       "evidence": [
-        "La entrega del aparato está registrada en la orden.",
-        "La orden figura como finalizada."
+        "La orden registra la entrega final.",
+        "La orden figura finalizada."
       ]
     }
   },
-  "businessHash": "sha256:3dd46694fdd743bc9f207e4cbb543331ad4c171104417108d4f45b86e8694b7b"
+  "businessHash": "sha256:5706c53bb86d4f73732e79aeb21f0d1875b60d4c88d5b20e0ffbfbd62d617962"
 } as const satisfies Ns5JourneyArtifact;
 
 export type EntregarYfinalizarOrdenJourneyType = typeof entregarYfinalizarOrdenJourney;

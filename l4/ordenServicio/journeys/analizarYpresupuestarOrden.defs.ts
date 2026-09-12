@@ -7,55 +7,53 @@ export const analizarYpresupuestarOrdenJourney = {
   "journeyId": "analizarYpresupuestarOrden",
   "business": {
     "actorRef": "tecnico",
-    "title": "Analizar y presupuestar una orden",
-    "goal": "Documentar el diagnóstico, las piezas necesarias y el valor que se presentará al cliente.",
+    "title": "Analizar y presupuestar orden",
+    "goal": "Diagnosticar el aparato y enviar al cliente un presupuesto para su decisión.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarOrden",
+        "stepId": "localizarOrdenAsignada",
         "kind": "locate",
         "entity": "OrdenServicio",
-        "title": "Localizar la orden pendiente de análisis.",
-        "description": "Abrir la orden recibida para revisar los datos del aparato, el defecto informado y las fotos."
+        "title": "x",
+        "description": "x"
       },
       {
-        "stepId": "inspeccionarOrden",
+        "stepId": "inspeccionarRecepcion",
         "kind": "inspect",
         "entity": "OrdenServicio",
-        "title": "Inspeccionar la información de recepción.",
-        "description": "Revisar el cliente, el aparato, el defecto informado y las fotos de la orden."
+        "title": "x",
+        "description": "x"
       },
       {
         "stepId": "registrarDiagnosticoYpresupuesto",
         "kind": "act",
         "entity": "OrdenServicio",
-        "affects": [
-          "PiezaNecesaria"
-        ],
-        "title": "Registrar diagnóstico y presupuesto.",
-        "description": "Registrar el diagnóstico, las piezas necesarias con su costo interno y el valor del presupuesto para el cliente."
+        "effect": "transition",
+        "transitionRef": "enviarPresupuesto",
+        "title": "x",
+        "description": "Registra el diagnóstico, las piezas necesarias con su costo interno y el valor del presupuesto para el cliente, y envía el presupuesto."
       },
       {
-        "stepId": "enviarPresupuestoAlCliente",
+        "stepId": "enviarDecisionCliente",
         "kind": "handoff",
         "entity": "OrdenServicio",
-        "title": "Poner el presupuesto a disposición del cliente.",
-        "description": "Enviar la orden presupuestada al portal del cliente para que pueda decidir sobre el presupuesto.",
+        "title": "x",
+        "description": "x",
         "handoffTo": "cliente"
       }
     ],
     "outcome": {
-      "statement": "El cliente tiene disponible un presupuesto con el diagnóstico y el valor para aprobarlo o rechazarlo.",
+      "statement": "El cliente dispone de un presupuesto con el diagnóstico y el valor propuesto para decidir.",
       "evidence": [
-        "La orden contiene el diagnóstico técnico.",
-        "Las piezas necesarias y sus costos internos están registrados.",
-        "La orden muestra un valor de presupuesto para el cliente y está disponible en su portal."
+        "La orden contiene el diagnóstico técnico y el valor del presupuesto.",
+        "La orden queda pendiente de la decisión del cliente."
       ]
     }
   },
-  "businessHash": "sha256:08f8722515feb3e164dc4da8f421309b67d5da0fa4360260eed66988c008da4a"
+  "businessHash": "sha256:c1635b1d941141d321af0ea824537cc3009ada2128739b235a32345ef84211ba"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AnalizarYpresupuestarOrdenJourneyType = typeof analizarYpresupuestarOrdenJourney;

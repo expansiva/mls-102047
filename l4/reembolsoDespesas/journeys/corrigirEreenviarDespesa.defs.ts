@@ -21,7 +21,7 @@ export const corrigirEreenviarDespesaJourney = {
         "description": "Localiza uma despesa própria rejeitada que ainda pode ser reenviada."
       },
       {
-        "stepId": "consultarMotivoDaRejeicao",
+        "stepId": "consultarMotivoRejeicao",
         "kind": "inspect",
         "entity": "Despesa",
         "title": "Consultar motivo da rejeição",
@@ -31,26 +31,38 @@ export const corrigirEreenviarDespesaJourney = {
         "stepId": "corrigirDespesa",
         "kind": "act",
         "entity": "Despesa",
+        "effect": "update",
         "title": "Corrigir despesa",
-        "description": "Corrige os dados ou o comprovante da despesa rejeitada."
+        "description": "Corrige os dados ou o comprovante da despesa conforme necessário."
       },
       {
-        "stepId": "reenviarParaAprovacao",
+        "stepId": "reenviarDespesa",
         "kind": "act",
         "entity": "Despesa",
+        "effect": "transition",
+        "transitionRef": "resubmitForApproval",
         "title": "Reenviar para aprovação",
-        "description": "Reenvia a despesa corrigida para nova avaliação, respeitando o único reenvio permitido."
+        "description": "Reenvia a despesa corrigida para nova avaliação do gestor."
+      },
+      {
+        "stepId": "encaminharDespesaReenviada",
+        "kind": "handoff",
+        "entity": "Despesa",
+        "title": "Encaminhar despesa reenviada",
+        "description": "A despesa corrigida segue para nova avaliação do gestor da equipe.",
+        "handoffTo": "gestorEquipe"
       }
     ],
     "outcome": {
-      "statement": "A despesa rejeitada é corrigida e reenviada para nova aprovação.",
+      "statement": "A despesa rejeitada é corrigida e reenviada para uma única nova avaliação.",
       "evidence": [
-        "A despesa apresenta os dados corrigidos.",
-        "A despesa fica disponível novamente para avaliação do gestor."
+        "Alterações da despesa ficam registradas.",
+        "Despesa passa novamente para aprovação.",
+        "Reenvio da despesa é identificado como realizado."
       ]
     }
   },
-  "businessHash": "sha256:a3c9941d07ee020be411d93eea38945ee977e001b220250419718babf79b7685"
+  "businessHash": "sha256:210ae97b6f01738f5e82d4315051823abd445b362499fcd9e2bdd7f89f91467e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CorrigirEreenviarDespesaJourneyType = typeof corrigirEreenviarDespesaJourney;

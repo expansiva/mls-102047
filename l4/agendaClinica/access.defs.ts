@@ -3,7 +3,7 @@
 import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaAccess = {
-  "schemaVersion": "2026-09-10-ns5-access-v2",
+  "schemaVersion": "2026-09-12-ns5-access-v3",
   "moduleName": "agendaClinica",
   "actors": [
     {
@@ -18,79 +18,30 @@ export const agendaClinicaAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Profissional",
-      "description": "Médico ou terapeuta da clínica que consulta a própria agenda e registra os atendimentos realizados."
-    }
-  ],
-  "authorities": [
-    {
-      "authorityId": "gerirPacientes",
-      "title": "Gerir pacientes",
-      "description": "Cadastrar ou vincular pacientes da clínica e consultar seus registros para o agendamento."
-    },
-    {
-      "authorityId": "gerirProfissionais",
-      "title": "Gerir profissionais",
-      "description": "Manter os registros dos médicos e terapeutas que podem realizar consultas na clínica."
-    },
-    {
-      "authorityId": "gerirConsultas",
-      "title": "Gerir consultas",
-      "description": "Agendar consultas, consultar seus dados operacionais, registrar confirmações telefônicas e registrar faltas de pacientes."
-    },
-    {
-      "authorityId": "consultarEatenderPropriasConsultas",
-      "title": "Consultar e atender próprias consultas",
-      "description": "Consultar a própria agenda e registrar o atendimento realizado com sua anotação."
+      "description": "Médico ou terapeuta da clínica que consulta sua agenda diária e registra os atendimentos realizados."
     }
   ],
   "grants": [
     {
-      "grantId": "recepcionistaGerirPacientes",
+      "grantId": "gestaoAgendaRecepcionista",
       "actorRef": "recepcionista",
-      "authorityRef": "gerirPacientes",
+      "title": "Gestão de pacientes, profissionais e agenda",
+      "description": "Permite cadastrar pacientes, manter o cadastro de profissionais e agendar, confirmar ou registrar faltas em consultas de toda a clínica, sem acesso às anotações de atendimento.",
       "entityRefs": [
-        "Paciente"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Pacientes vinculados à clínica."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "A recepcionista acessa integralmente o registro de paciente necessário ao cadastro e agendamento."
-      }
-    },
-    {
-      "grantId": "recepcionistaGerirProfissionais",
-      "actorRef": "recepcionista",
-      "authorityRef": "gerirProfissionais",
-      "entityRefs": [
-        "Profissional"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Profissionais vinculados à clínica."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "A recepcionista acessa integralmente os registros de profissionais para mantê-los disponíveis no agendamento."
-      }
-    },
-    {
-      "grantId": "recepcionistaGerirConsultas",
-      "actorRef": "recepcionista",
-      "authorityRef": "gerirConsultas",
-      "entityRefs": [
+        "Paciente",
+        "Profissional",
         "Consulta"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Consultas da clínica que a recepcionista agenda, confirma ou registra como falta."
+        "description": "Abrange os cadastros e as consultas de toda a clínica."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "A recepcionista vê os dados operacionais da consulta, sem acesso à anotação clínica do atendimento.",
+        "description": "Disponibiliza os dados necessários para cadastro e gestão da agenda, preservando a anotação clínica do atendimento.",
         "allowedFields": [
+          "Paciente.id",
+          "Profissional.id",
           "Consulta.id",
           "Consulta.pacienteId",
           "Consulta.profissionalId",
@@ -98,25 +49,26 @@ export const agendaClinicaAccess = {
           "Consulta.status"
         ],
         "deniedFields": [
-          "Consulta.clinicalNote"
+          "Consulta.attendanceNote"
         ]
       }
     },
     {
-      "grantId": "profissionalConsultarEatenderPropriasConsultas",
+      "grantId": "agendaPropriaProfissional",
       "actorRef": "profissional",
-      "authorityRef": "consultarEatenderPropriasConsultas",
+      "title": "Agenda e atendimentos próprios",
+      "description": "Permite consultar as próprias consultas agendadas e registrar o atendimento realizado com sua anotação.",
       "entityRefs": [
         "Consulta"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Somente consultas vinculadas ao profissional correspondente à pessoa da sessão.",
+        "description": "Abrange somente as consultas vinculadas ao profissional autenticado.",
         "anchorEntity": "Profissional"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "O profissional acessa integralmente suas próprias consultas, inclusive a anotação clínica que registra."
+        "description": "Disponibiliza todos os campos da consulta vinculada ao próprio profissional, incluindo a anotação de atendimento."
       }
     }
   ]

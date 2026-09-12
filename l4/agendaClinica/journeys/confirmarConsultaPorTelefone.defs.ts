@@ -14,35 +14,38 @@ export const confirmarConsultaPorTelefoneJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarConsulta",
+        "stepId": "localizarConsultaAgendada",
         "kind": "locate",
         "entity": "Consulta",
-        "title": "Localizar consulta",
-        "description": "Localiza a consulta agendada que será confirmada por telefone."
+        "title": "x",
+        "description": "Localiza a consulta agendada para contato."
       },
       {
-        "stepId": "consultarDadosDaConsulta",
+        "stepId": "inspecionarDadosDaConsulta",
         "kind": "inspect",
         "entity": "Consulta",
-        "title": "Consultar dados da consulta",
-        "description": "Verifica os dados da consulta e do paciente para realizar o contato telefônico."
+        "title": "x",
+        "description": "Confere os dados da consulta antes do contato telefônico."
       },
       {
-        "stepId": "registrarConfirmacao",
+        "stepId": "confirmarConsulta",
         "kind": "act",
         "entity": "Consulta",
-        "title": "Registrar confirmação",
-        "description": "Registra que a consulta foi confirmada por telefone."
+        "effect": "transition",
+        "transitionRef": "confirmarConsulta",
+        "title": "x",
+        "description": "Registra que o paciente confirmou a consulta por telefone."
       }
     ],
     "outcome": {
-      "statement": "A confirmação telefônica da consulta fica registrada.",
+      "statement": "A consulta fica registrada como confirmada.",
       "evidence": [
-        "Consulta identificada como confirmada por telefone."
+        "Situação da consulta indica confirmação.",
+        "Registro da consulta mostra a confirmação telefônica."
       ]
     }
   },
-  "businessHash": "sha256:ff9bb0afc8184aa8692ac269c1c4a6b5436aba98cc031ae4727b20e449d5dbad"
+  "businessHash": "sha256:4172afd9d3b870f9c2ff59752c98b18dddf6a822f373846d09d5397f8526616e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConfirmarConsultaPorTelefoneJourneyType = typeof confirmarConsultaPorTelefoneJourney;

@@ -7,23 +7,36 @@ export const manutencaoFrotaEntityVeiculo = {
   "moduleName": "manutencaoFrota",
   "entityId": "Veiculo",
   "title": "Veículo",
-  "description": "Veículo da frota acompanhado pela transportadora para operação, abastecimento e manutenção.",
+  "description": "Veículo da frota identificado e acompanhado para abastecimentos e manutenções.",
   "kind": "mdm",
   "party": "none",
   "mdmSubtype": "AssetVehicle",
-  "displayField": "name",
+  "displayField": "plate",
   "fields": [
     {
-      "fieldId": "quilometragemAtual",
+      "fieldId": "currentMileage",
       "title": "Quilometragem atual",
       "type": "integer",
       "required": true,
       "constraints": {
         "min": 0
       },
-      "description": "Quilometragem atualmente registrada no painel do veículo."
+      "description": "Quilometragem atualmente registrada para o veículo."
+    },
+    {
+      "fieldId": "motoristaId",
+      "title": "Motorista atribuído",
+      "type": "uuid",
+      "required": false,
+      "description": "Referência ao motorista atualmente atribuído para conduzir o veículo."
     }
   ],
+  "details": {
+    "preventiveMaintenanceOverdue": {
+      "type": "boolean",
+      "description": "Indica se algum plano preventivo do veículo ultrapassou a quilometragem prevista para manutenção."
+    }
+  },
   "lifecycleStates": [],
   "transitions": [],
   "storage": {

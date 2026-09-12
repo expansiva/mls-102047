@@ -7,7 +7,7 @@ export const manutencaoFrotaEntityOficina = {
   "moduleName": "manutencaoFrota",
   "entityId": "Oficina",
   "title": "Oficina",
-  "description": "Empresa prestadora de serviços de manutenção indicada nas ordens de manutenção.",
+  "description": "Empresa prestadora de serviços de manutenção utilizada nas ordens de manutenção.",
   "kind": "mdm",
   "party": "organization",
   "mdmSubtype": "Company",
@@ -21,7 +21,7 @@ export const manutencaoFrotaEntityOficina = {
     "idField": "id",
     "mdmType": "manutencaoFrota.Oficina"
   },
-  "maintenance": "crud"
+  "writer": "crud"
 } as const satisfies Ns5OntologyEntityArtifact;
 
 export type ManutencaoFrotaEntityOficinaType = typeof manutencaoFrotaEntityOficina;

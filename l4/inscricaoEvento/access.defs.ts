@@ -3,7 +3,7 @@
 import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
 
 export const inscricaoEventoAccess = {
-  "schemaVersion": "2026-09-10-ns5-access-v2",
+  "schemaVersion": "2026-09-12-ns5-access-v3",
   "moduleName": "inscricaoEvento",
   "actors": [
     {
@@ -11,125 +11,72 @@ export const inscricaoEventoAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Organizador",
-      "description": "Profissional da organização que cadastra, publica e acompanha eventos e inscrições."
+      "description": "Pessoa da organização que cadastra, publica e acompanha os eventos e suas inscrições."
     },
     {
       "actorId": "publico",
       "kind": "external",
       "origin": "named",
       "title": "Público",
-      "description": "Pessoa que acessa a página pública de um evento para realizar ou cancelar sua inscrição."
-    }
-  ],
-  "authorities": [
-    {
-      "authorityId": "gerenciarEventos",
-      "title": "Gerenciar eventos e locais",
-      "description": "Cadastrar, alterar, publicar e acompanhar os eventos da organização e os locais utilizados."
-    },
-    {
-      "authorityId": "acompanharInscricoes",
-      "title": "Acompanhar e exportar inscrições",
-      "description": "Consultar inscrições, participantes e ocupação dos eventos, incluindo a exportação da lista de inscritos."
-    },
-    {
-      "authorityId": "consultarEventoPublicado",
-      "title": "Consultar evento publicado",
-      "description": "Consultar a referência de evento publicada vinculada à própria inscrição."
-    },
-    {
-      "authorityId": "gerenciarPropriaInscricao",
-      "title": "Gerenciar própria inscrição",
-      "description": "Realizar, consultar e cancelar a própria inscrição em evento."
+      "description": "Pessoa que acessa a página pública de um evento e realiza sua própria inscrição."
     }
   ],
   "grants": [
     {
-      "grantId": "organizadorGerenciaEventos",
+      "grantId": "gerenciarEventosEinscricoes",
       "actorRef": "organizador",
-      "authorityRef": "gerenciarEventos",
-      "entityRefs": [
-        "Evento",
-        "Venue"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Eventos e locais cadastrados pela organização."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Acesso completo aos dados de eventos e locais necessários para seu cadastro e publicação."
-      }
-    },
-    {
-      "grantId": "organizadorAcompanhaInscricoes",
-      "actorRef": "organizador",
-      "authorityRef": "acompanharInscricoes",
+      "title": "Gerenciar eventos e inscrições",
+      "description": "Permite ao organizador cadastrar, publicar e acompanhar todos os eventos e suas inscrições, incluindo a lista de participantes e os indicadores de ocupação.",
       "entityRefs": [
         "Evento",
         "Inscricao",
-        "Participant"
+        "Participante"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Inscrições e participantes de todos os eventos da organização."
+        "description": "Abrange os eventos, inscrições e participantes da organização."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Acesso completo aos dados de inscrições, participantes e eventos para acompanhamento e exportação."
+        "description": "Disponibiliza todos os dados dos eventos, inscrições e participantes necessários para a gestão."
       }
     },
     {
-      "grantId": "publicoConsultaEventoPublicado",
+      "grantId": "consultarEadministrarInscricaoPropria",
       "actorRef": "publico",
-      "authorityRef": "consultarEventoPublicado",
+      "title": "Consultar eventos e administrar inscrição própria",
+      "description": "Permite ao público consultar as informações de eventos publicadas e visualizar ou cancelar somente a própria inscrição.",
       "entityRefs": [
-        "Inscricao"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Somente a própria inscrição, incluindo a referência ao evento publicado ao qual ela está vinculada.",
-        "anchorEntity": "Participant"
-      },
-      "disclosure": {
-        "mode": "summaryOnly",
-        "description": "Exibe somente a referência do evento e a situação da própria inscrição.",
-        "allowedFields": [
-          "Inscricao.eventId",
-          "Inscricao.status"
-        ],
-        "deniedFields": [
-          "Inscricao.id",
-          "Inscricao.participantId",
-          "Inscricao.registeredAt"
-        ]
-      }
-    },
-    {
-      "grantId": "publicoGerenciaPropriaInscricao",
-      "actorRef": "publico",
-      "authorityRef": "gerenciarPropriaInscricao",
-      "entityRefs": [
+        "Evento",
         "Inscricao",
-        "Participant"
+        "Participante"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Somente a inscrição e o cadastro de participante vinculados à própria pessoa.",
-        "anchorEntity": "Participant"
+        "description": "Abrange somente a inscrição vinculada à própria pessoa participante e os dados do evento consultados no contexto dessa inscrição.",
+        "anchorEntity": "Participante"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Exibe somente os dados necessários para consultar e cancelar a própria inscrição.",
+        "description": "Exibe somente dados públicos do evento, a disponibilidade de vagas e os dados necessários para consultar ou cancelar a própria inscrição.",
         "allowedFields": [
+          "Evento.id",
+          "Evento.titulo",
+          "Evento.descricao",
+          "Evento.data",
+          "Evento.local",
+          "Evento.numeroVagas",
+          "Evento.status",
+          "Evento.details.vagasDisponiveis",
           "Inscricao.id",
-          "Inscricao.eventId",
-          "Inscricao.registeredAt",
-          "Inscricao.status",
-          "Participant.id"
+          "Inscricao.eventoId",
+          "Inscricao.dataInscricao",
+          "Inscricao.status"
         ],
         "deniedFields": [
-          "Inscricao.participantId"
+          "Inscricao.participanteId",
+          "Evento.details.totalVagasOcupadas",
+          "Participante.id"
         ]
       }
     }

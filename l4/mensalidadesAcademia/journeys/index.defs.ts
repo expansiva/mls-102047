@@ -7,7 +7,17 @@ export const mensalidadesAcademiaJourneyIndex = {
   "moduleName": "mensalidadesAcademia",
   "journeys": [
     {
-      "journeyId": "matricularAlunoEmPlano",
+      "journeyId": "cadastrarPlano",
+      "actorRef": "gerencia",
+      "title": "Cadastrar plano de academia"
+    },
+    {
+      "journeyId": "atualizarPlano",
+      "actorRef": "gerencia",
+      "title": "Atualizar condições de um plano"
+    },
+    {
+      "journeyId": "matricularAluno",
       "actorRef": "recepcao",
       "title": "Matricular aluno em um plano"
     },
@@ -17,19 +27,19 @@ export const mensalidadesAcademiaJourneyIndex = {
       "title": "Gerar mensalidades do mês"
     },
     {
-      "journeyId": "registrarPagamentoDeMensalidade",
+      "journeyId": "registrarPagamentoMensalidade",
       "actorRef": "recepcao",
       "title": "Registrar pagamento de mensalidade"
     },
     {
-      "journeyId": "acompanharIndicadoresDaAcademia",
+      "journeyId": "acompanharPainelMensal",
       "actorRef": "gerencia",
-      "title": "Acompanhar indicadores da academia"
+      "title": "Acompanhar painel mensal"
     },
     {
-      "journeyId": "cancelarMatricula",
+      "journeyId": "cancelarPropriaMatricula",
       "actorRef": "aluno",
-      "title": "Cancelar matrícula"
+      "title": "Cancelar própria matrícula"
     }
   ],
   "systemDecisions": []

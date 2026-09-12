@@ -8,35 +8,35 @@ export const consultarSaldoProdutoJourney = {
   "business": {
     "actorRef": "estoquista",
     "title": "Consultar saldo de produto",
-    "goal": "Verificar o saldo atual de um produto para acompanhar sua disponibilidade.",
+    "goal": "Verificar o saldo atual e a situação de estoque de um produto.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarProduto",
+        "stepId": "localizarProdutoSaldo",
         "kind": "locate",
-        "entity": "Product",
+        "entity": "Produto",
         "title": "Localizar produto",
-        "description": "Localiza o produto cujo estoque será consultado."
+        "description": "Localizar o produto cujo estoque será consultado."
       },
       {
-        "stepId": "consultarSaldo",
+        "stepId": "inspecionarSaldoProduto",
         "kind": "inspect",
-        "entity": "Product",
-        "title": "Consultar saldo atual",
-        "description": "Visualiza o saldo atual e o estoque mínimo definido para o produto."
+        "entity": "Produto",
+        "title": "Consultar saldo do produto",
+        "description": "Consultar o saldo atual, a quantidade mínima e a situação de estoque do produto."
       }
     ],
     "outcome": {
-      "statement": "O estoquista conhece a disponibilidade atual do produto.",
+      "statement": "O estoquista conhece o saldo disponível e identifica se o produto está abaixo do mínimo.",
       "evidence": [
-        "Saldo atual do produto apresentado.",
-        "Estoque mínimo do produto apresentado."
+        "O saldo atual e a quantidade mínima são exibidos para o produto.",
+        "A situação de estoque baixo é indicada quando o saldo está abaixo da quantidade mínima."
       ]
     }
   },
-  "businessHash": "sha256:005b985f096812378eb55a80bca205388a43ec7fcd0e1d2a5dcfdd9103058def"
+  "businessHash": "sha256:1e9f59426697c4ef7fc5868f102a3d24e62f5990c2e03766499373b14bfcc138"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarSaldoProdutoJourneyType = typeof consultarSaldoProdutoJourney;

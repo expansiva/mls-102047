@@ -1,11 +1,11 @@
 {
   "moduleName": "controleEstoque",
-  "businessDomain": "Controle de estoque de produtos, com registro imutável de entradas e saídas e acompanhamento do saldo disponível em relação ao estoque mínimo.",
+  "businessDomain": "Controle de estoque de produtos, movimentações de entrada e saída, saldo disponível e alerta de estoque baixo.",
   "entities": [
     {
-      "entityId": "Product",
-      "title": "Produto controlado",
-      "description": "Papel do módulo para um produto da organização cujo estoque, saldo disponível e estoque mínimo são acompanhados.",
+      "entityId": "Produto",
+      "title": "Produto em estoque",
+      "description": "Produto disponibilizado para controle de estoque, com quantidade mínima definida para reposição.",
       "kind": "mdm",
       "party": "none",
       "mdmSubtype": "Product",
@@ -14,48 +14,36 @@
         "target": "mdm",
         "scope": "organization",
         "idField": "id",
-        "mdmType": "controleEstoque.Product"
+        "mdmType": "controleEstoque.Produto"
       }
     },
     {
-      "entityId": "StockMovement",
+      "entityId": "MovimentacaoEstoque",
       "title": "Movimentação de estoque",
-      "description": "Registro definitivo de uma entrada ou saída de unidades de um produto controlado.",
+      "description": "Registro imutável de entrada ou saída de unidades de um produto no estoque.",
       "kind": "event",
       "party": "none",
-      "displayField": "movementType",
+      "displayField": "tipoMovimentacao",
       "mutability": "appendOnly",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
         "idField": "id",
-        "mdmType": "controleEstoque.StockMovement"
+        "mdmType": "controleEstoque.MovimentacaoEstoque"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "stockMovementProduct",
-      "fromEntity": "StockMovement",
-      "toEntity": "Product",
+      "relationshipId": "movimentacaoEstoqueProduto",
+      "fromEntity": "MovimentacaoEstoque",
+      "toEntity": "Produto",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada movimentação de estoque registra a entrada ou saída de unidades de um produto controlado.",
+      "description": "Cada movimentação de estoque registra a entrada ou saída de um produto.",
       "persistence": {
         "mode": "crossStoreReference"
       }
-    }
-  ],
-  "normalizations": [
-    {
-      "kind": "dropCrud",
-      "entityId": "Product",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-    },
-    {
-      "kind": "dropCrud",
-      "entityId": "StockMovement",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
     }
   ]
 }

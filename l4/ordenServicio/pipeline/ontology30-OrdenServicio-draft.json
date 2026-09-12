@@ -9,12 +9,12 @@
       "description": "Identificador único de la orden de servicio."
     },
     {
-      "fieldId": "numeroOrden",
+      "fieldId": "orderNumber",
       "title": "Número de orden",
       "type": "string",
       "required": true,
       "unique": true,
-      "description": "Número secuencial único asignado a la orden de servicio."
+      "description": "Número secuencial visible que identifica la orden de servicio."
     },
     {
       "fieldId": "clienteId",
@@ -28,49 +28,112 @@
       "title": "Aparato",
       "type": "uuid",
       "required": true,
-      "description": "Referencia al aparato recibido para diagnóstico, reparación y entrega."
+      "description": "Referencia al aparato recibido para atención técnica."
     },
     {
-      "fieldId": "defectoInformado",
+      "fieldId": "tecnicoId",
+      "title": "Técnico asignado",
+      "type": "uuid",
+      "required": false,
+      "description": "Referencia al técnico asignado para analizar o reparar la orden."
+    },
+    {
+      "fieldId": "reportedDefect",
       "title": "Defecto informado",
       "type": "text",
       "required": true,
-      "description": "Descripción del problema comunicada por el cliente al recibir el aparato."
+      "description": "Descripción del defecto o problema comunicado al recibir el aparato."
     },
     {
-      "fieldId": "fotosRecepcion",
+      "fieldId": "receptionPhotos",
       "title": "Fotos de recepción",
       "type": "json",
       "required": false,
-      "description": "Referencias a las fotos aportadas del aparato al momento de su recepción."
+      "description": "Referencias a las fotos tomadas del aparato al momento de su recepción."
     },
     {
-      "fieldId": "diagnostico",
+      "fieldId": "receivedAt",
+      "title": "Fecha de recepción",
+      "type": "datetime",
+      "required": true,
+      "description": "Fecha y hora en que se recibió el aparato y se abrió la orden."
+    },
+    {
+      "fieldId": "diagnosis",
       "title": "Diagnóstico",
       "type": "text",
       "required": false,
-      "description": "Resultado técnico del análisis del aparato."
+      "description": "Diagnóstico técnico registrado tras analizar el aparato."
     },
     {
-      "fieldId": "anotacionesTecnicas",
-      "title": "Anotaciones técnicas",
+      "fieldId": "budgetAmount",
+      "title": "Valor del presupuesto",
+      "type": "money",
+      "required": false,
+      "description": "Importe presupuestado para el cliente por la reparación."
+    },
+    {
+      "fieldId": "budgetSentAt",
+      "title": "Fecha de envío del presupuesto",
+      "type": "datetime",
+      "required": false,
+      "description": "Fecha y hora en que se envió el presupuesto al cliente."
+    },
+    {
+      "fieldId": "budgetDecision",
+      "title": "Decisión del presupuesto",
+      "type": "string",
+      "required": false,
+      "enum": [
+        {
+          "value": "pending",
+          "title": "Pendiente"
+        },
+        {
+          "value": "approved",
+          "title": "Aprobado"
+        },
+        {
+          "value": "rejected",
+          "title": "Rechazado"
+        }
+      ],
+      "description": "Decisión del cliente sobre el presupuesto enviado."
+    },
+    {
+      "fieldId": "decisionAt",
+      "title": "Fecha de decisión",
+      "type": "datetime",
+      "required": false,
+      "description": "Fecha y hora en que el cliente registró su decisión sobre el presupuesto."
+    },
+    {
+      "fieldId": "technicianNotes",
+      "title": "Anotaciones del técnico",
       "type": "text",
       "required": false,
       "description": "Observaciones internas del técnico que no se muestran al cliente."
     },
     {
-      "fieldId": "valorPresupuesto",
-      "title": "Valor del presupuesto",
-      "type": "money",
+      "fieldId": "repairWork",
+      "title": "Trabajo realizado",
+      "type": "text",
       "required": false,
-      "description": "Importe presupuestado que se comunica al cliente para autorizar la reparación."
+      "description": "Descripción del trabajo efectuado durante la reparación autorizada."
     },
     {
-      "fieldId": "fechaEntrega",
+      "fieldId": "readyAt",
+      "title": "Fecha de disponibilidad",
+      "type": "datetime",
+      "required": false,
+      "description": "Fecha y hora en que el aparato quedó listo para retiro."
+    },
+    {
+      "fieldId": "deliveredAt",
       "title": "Fecha de entrega",
       "type": "datetime",
       "required": false,
-      "description": "Fecha y hora en que el aparato fue entregado al cliente."
+      "description": "Fecha y hora en que se entregó el aparato al cliente."
     },
     {
       "fieldId": "status",
@@ -79,134 +142,129 @@
       "required": true,
       "enum": [
         {
-          "value": "recibida",
-          "title": "Recibida"
+          "value": "open",
+          "title": "Abierta"
         },
         {
-          "value": "presupuestada",
-          "title": "Presupuestada"
+          "value": "budgetSent",
+          "title": "Presupuesto enviado"
         },
         {
-          "value": "pendienteAprobacion",
-          "title": "Pendiente de aprobación"
+          "value": "decisionRecorded",
+          "title": "Decisión registrada"
         },
         {
-          "value": "aprobada",
-          "title": "Aprobada"
+          "value": "approved",
+          "title": "Presupuesto aprobado"
         },
         {
-          "value": "rechazada",
-          "title": "Rechazada, disponible para retiro"
+          "value": "rejected",
+          "title": "Rechazada"
         },
         {
-          "value": "listaParaEntrega",
-          "title": "Lista para entrega"
+          "value": "readyForPickup",
+          "title": "Lista para retiro"
         },
         {
-          "value": "finalizada",
+          "value": "completed",
           "title": "Finalizada"
         }
       ],
-      "description": "Estado actual de la orden de servicio dentro de su proceso de atención."
+      "description": "Estado actual de atención de la orden de servicio."
     }
   ],
   "lifecycleStates": [
     {
-      "state": "recibida",
+      "state": "open",
       "reachedBy": "actor"
     },
     {
-      "state": "presupuestada",
+      "state": "budgetSent",
       "reachedBy": "actor"
     },
     {
-      "state": "pendienteAprobacion",
+      "state": "decisionRecorded",
       "reachedBy": "actor"
     },
     {
-      "state": "aprobada",
+      "state": "approved",
+      "reachedBy": "command"
+    },
+    {
+      "state": "rejected",
+      "reachedBy": "command"
+    },
+    {
+      "state": "readyForPickup",
       "reachedBy": "actor"
     },
     {
-      "state": "rechazada",
-      "reachedBy": "actor"
-    },
-    {
-      "state": "listaParaEntrega",
-      "reachedBy": "actor"
-    },
-    {
-      "state": "finalizada",
+      "state": "completed",
       "reachedBy": "actor"
     }
   ],
   "transitions": [
     {
-      "transitionId": "registrarDiagnosticoYpresupuesto",
+      "transitionId": "enviarPresupuesto",
       "from": [
-        "recibida"
+        "open"
       ],
-      "to": "presupuestada",
+      "to": "budgetSent",
       "by": [
         "tecnico"
       ],
-      "description": "El técnico registra el diagnóstico, las piezas necesarias y el valor del presupuesto."
+      "description": "El técnico registra el diagnóstico, las piezas presupuestadas y el valor para el cliente, y envía el presupuesto."
     },
     {
-      "transitionId": "enviarPresupuestoAlCliente",
+      "transitionId": "resolverPresupuesto",
       "from": [
-        "presupuestada"
+        "budgetSent"
       ],
-      "to": "pendienteAprobacion",
-      "by": [
-        "tecnico"
-      ],
-      "description": "El técnico envía el presupuesto al portal del cliente para su decisión."
-    },
-    {
-      "transitionId": "aprobarPresupuesto",
-      "from": [
-        "pendienteAprobacion"
-      ],
-      "to": "aprobada",
+      "to": "decisionRecorded",
       "by": [
         "cliente"
       ],
-      "description": "El cliente aprueba el presupuesto y autoriza la reparación."
+      "description": "El cliente registra la aprobación o el rechazo del presupuesto desde el portal."
     },
     {
-      "transitionId": "rechazarPresupuesto",
+      "transitionId": "autorizarReparacion",
       "from": [
-        "pendienteAprobacion"
+        "decisionRecorded"
       ],
-      "to": "rechazada",
-      "by": [
-        "cliente"
-      ],
-      "description": "El cliente rechaza el presupuesto y el aparato queda disponible para retiro."
+      "to": "approved",
+      "by": "system",
+      "description": "El sistema deja la orden aprobada cuando la decisión registrada por el cliente es aprobar el presupuesto."
     },
     {
-      "transitionId": "marcarOrdenLista",
+      "transitionId": "cerrarComoRechazada",
       "from": [
-        "aprobada"
+        "decisionRecorded"
       ],
-      "to": "listaParaEntrega",
+      "to": "rejected",
+      "by": "system",
+      "description": "El sistema cierra la orden como rechazada y deja el aparato disponible para retiro cuando el cliente rechaza el presupuesto."
+    },
+    {
+      "transitionId": "marcarLista",
+      "from": [
+        "approved"
+      ],
+      "to": "readyForPickup",
       "by": [
         "tecnico"
       ],
-      "description": "El técnico marca la orden como lista para entregar tras registrar la reparación."
+      "description": "El técnico registra el trabajo realizado y marca la orden como lista para entrega."
     },
     {
-      "transitionId": "registrarEntregaYfinalizacion",
+      "transitionId": "finalizarOrden",
       "from": [
-        "rechazada",
-        "listaParaEntrega"
+        "readyForPickup"
       ],
-      "to": "finalizada",
+      "to": "completed",
       "by": [
         "recepcionista"
       ],
-      "description": "El recepcionista entrega el aparato al cliente y finaliza la orden."
+      "description": "El recepcionista registra la entrega del aparato al cliente y finaliza la orden."
     }
   ]
 }

@@ -7,17 +7,24 @@ export const mensalidadesAcademiaEntityPlano = {
   "moduleName": "mensalidadesAcademia",
   "entityId": "Plano",
   "title": "Plano",
-  "description": "Serviço oferecido pela academia, com modalidade, valor e dia de vencimento definidos para as matrículas.",
-  "kind": "mdm",
+  "description": "Condição comercial de matrícula da academia, com modalidade, valor e dia de vencimento.",
+  "kind": "core",
   "party": "none",
-  "mdmSubtype": "Service",
-  "displayField": "name",
+  "displayField": "modalidade",
   "fields": [
+    {
+      "fieldId": "id",
+      "title": "Identificador",
+      "type": "uuid",
+      "required": true,
+      "description": "Identificador único do plano de academia."
+    },
     {
       "fieldId": "modalidade",
       "title": "Modalidade",
       "type": "string",
       "required": true,
+      "unique": true,
       "enum": [
         {
           "value": "mensal",
@@ -32,14 +39,14 @@ export const mensalidadesAcademiaEntityPlano = {
           "title": "Anual"
         }
       ],
-      "description": "Periodicidade de cobrança do plano."
+      "description": "Periodicidade comercial do plano de academia."
     },
     {
       "fieldId": "valor",
       "title": "Valor",
       "type": "money",
       "required": true,
-      "description": "Valor cobrado em cada mensalidade vinculada a este plano."
+      "description": "Valor cobrado pelo plano em cada mensalidade gerada."
     },
     {
       "fieldId": "diaVencimento",
@@ -50,18 +57,17 @@ export const mensalidadesAcademiaEntityPlano = {
         "min": 1,
         "max": 31
       },
-      "description": "Dia do mês usado para definir o vencimento das mensalidades deste plano."
+      "description": "Dia do mês em que as mensalidades vinculadas ao plano vencem."
     }
   ],
   "lifecycleStates": [],
   "transitions": [],
   "storage": {
-    "target": "mdm",
-    "scope": "organization",
-    "idField": "id",
-    "mdmType": "mensalidadesAcademia.Plano"
+    "target": "moduleDatabase",
+    "scope": "module",
+    "idField": "id"
   },
-  "maintenance": "crud"
+  "mutability": "appendOnly"
 } as const satisfies Ns5OntologyEntityArtifact;
 
 export type MensalidadesAcademiaEntityPlanoType = typeof mensalidadesAcademiaEntityPlano;

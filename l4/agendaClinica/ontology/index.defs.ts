@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
 export const agendaClinicaOntologyIndex = {
   "schemaVersion": "2026-09-11-ns5-ontology-v2",
   "moduleName": "agendaClinica",
-  "businessDomain": "Agendamento e realização de consultas clínicas",
+  "businessDomain": "Agendamento e registro de consultas clínicas",
   "entities": [
     "Paciente",
     "Profissional",

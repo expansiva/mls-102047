@@ -7,12 +7,12 @@ export const agendaClinicaRules = {
   "moduleName": "agendaClinica",
   "rules": [
     {
-      "ruleId": "professionalScheduleAvailability",
-      "description": "Uma consulta só pode ser agendada se não houver outra consulta do mesmo profissional no mesmo horário."
+      "ruleId": "horarioProfissionalExclusivo",
+      "description": "Não pode haver duas consultas para o mesmo profissional na mesma data e horário."
     },
     {
-      "ruleId": "attendanceRequiresClinicalNote",
-      "description": "Uma consulta só pode ser marcada como atendida quando uma anotação do atendimento for registrada."
+      "ruleId": "anotacaoObrigatoriaNoAtendimento",
+      "description": "O registro de atendimento deve incluir uma anotação do atendimento."
     }
   ]
 } as const satisfies Ns5RulesArtifact;

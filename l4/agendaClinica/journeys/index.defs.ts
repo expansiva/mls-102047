@@ -22,14 +22,14 @@ export const agendaClinicaJourneyIndex = {
       "title": "Confirmar consulta por telefone"
     },
     {
-      "journeyId": "registrarFaltaDoPaciente",
+      "journeyId": "registrarFaltaPaciente",
       "actorRef": "recepcionista",
       "title": "Registrar falta do paciente"
     },
     {
-      "journeyId": "consultarAgendaDoDia",
+      "journeyId": "consultarAgendaDiaria",
       "actorRef": "profissional",
-      "title": "Consultar agenda do dia"
+      "title": "Consultar agenda diária"
     },
     {
       "journeyId": "registrarAtendimento",

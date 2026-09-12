@@ -3,10 +3,23 @@
 import type { Ns5IntegrationArtifact } from '/_102035_/l2/solution/types.js';
 
 export const controleEstoqueIntegration = {
-  "schemaVersion": "2026-09-10-ns5-integration-v1",
+  "schemaVersion": "2026-09-12-ns5-integration-v2",
   "moduleName": "controleEstoque",
   "inbound": [],
-  "outbound": [],
+  "outbound": [
+    {
+      "id": "estoqueAbaixoDoMinimo",
+      "kind": "event",
+      "to": "any",
+      "event": "estoqueAbaixoDoMinimo",
+      "on": "MovimentacaoEstoque.create",
+      "description": "Publica um aviso para módulos interessados quando uma movimentação registrada deixar o saldo do produto abaixo do estoque mínimo.",
+      "entityRefs": [
+        "Produto",
+        "MovimentacaoEstoque"
+      ]
+    }
+  ],
   "plugins": []
 } as const satisfies Ns5IntegrationArtifact;
 

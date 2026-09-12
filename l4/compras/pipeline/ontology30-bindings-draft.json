@@ -1,37 +1,18 @@
 {
   "bindings": [
     {
-      "relationshipId": "supplierSuppliesProducts",
+      "relationshipId": "compradorGerenciaFornecedor",
       "realization": {
         "kind": "mdmRelationship",
-        "ownerEntity": "Supplier",
+        "ownerEntity": "Comprador",
         "from": {
-          "entityId": "Supplier",
+          "entityId": "Comprador",
           "fieldIds": [
             "id"
           ]
         },
         "to": {
-          "entityId": "Product",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "supplyConditionSupplier",
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "SupplyCondition",
-        "from": {
-          "entityId": "SupplyCondition",
-          "fieldIds": [
-            "supplierId"
-          ]
-        },
-        "to": {
-          "entityId": "Supplier",
+          "entityId": "Fornecedor",
           "fieldIds": [
             "id"
           ]
@@ -39,18 +20,37 @@
       }
     },
     {
-      "relationshipId": "supplyConditionProduct",
+      "relationshipId": "ofertaDoFornecedor",
       "realization": {
         "kind": "fieldReference",
-        "ownerEntity": "SupplyCondition",
+        "ownerEntity": "OfertaFornecedor",
         "from": {
-          "entityId": "SupplyCondition",
+          "entityId": "Fornecedor",
           "fieldIds": [
-            "productId"
+            "id"
           ]
         },
         "to": {
-          "entityId": "Product",
+          "entityId": "OfertaFornecedor",
+          "fieldIds": [
+            "fornecedorId"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "ofertaParaProduto",
+      "realization": {
+        "kind": "externalReference",
+        "ownerEntity": "OfertaFornecedor",
+        "from": {
+          "entityId": "OfertaFornecedor",
+          "fieldIds": [
+            "produtoId"
+          ]
+        },
+        "to": {
+          "entityId": "Produto",
           "fieldIds": [
             "id"
           ]
@@ -58,18 +58,56 @@
       }
     },
     {
-      "relationshipId": "purchaseOrderSupplier",
+      "relationshipId": "pedidoDoFornecedor",
       "realization": {
         "kind": "fieldReference",
-        "ownerEntity": "PurchaseOrder",
+        "ownerEntity": "PedidoCompra",
         "from": {
-          "entityId": "PurchaseOrder",
+          "entityId": "Fornecedor",
           "fieldIds": [
-            "supplierId"
+            "id"
           ]
         },
         "to": {
-          "entityId": "Supplier",
+          "entityId": "PedidoCompra",
+          "fieldIds": [
+            "fornecedorId"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "pedidoAbertoPorComprador",
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "PedidoCompra",
+        "from": {
+          "entityId": "Comprador",
+          "fieldIds": [
+            "id"
+          ]
+        },
+        "to": {
+          "entityId": "PedidoCompra",
+          "fieldIds": [
+            "compradorId"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "pedidoContemProdutos",
+      "realization": {
+        "kind": "externalReference",
+        "ownerEntity": "PedidoCompra",
+        "from": {
+          "entityId": "PedidoCompra",
+          "fieldIds": [
+            "itens"
+          ]
+        },
+        "to": {
+          "entityId": "Produto",
           "fieldIds": [
             "id"
           ]
@@ -77,94 +115,37 @@
       }
     },
     {
-      "relationshipId": "purchaseOrderItems",
+      "relationshipId": "recebimentoDoPedido",
       "realization": {
         "kind": "fieldReference",
-        "ownerEntity": "PurchaseOrderItem",
+        "ownerEntity": "RecebimentoCompra",
         "from": {
-          "entityId": "PurchaseOrder",
+          "entityId": "PedidoCompra",
           "fieldIds": [
             "id"
           ]
         },
         "to": {
-          "entityId": "PurchaseOrderItem",
+          "entityId": "RecebimentoCompra",
           "fieldIds": [
-            "purchaseOrderId"
+            "pedidoCompraId"
           ]
         }
       }
     },
     {
-      "relationshipId": "purchaseOrderItemProduct",
+      "relationshipId": "recebimentoIncluiProdutos",
       "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "PurchaseOrderItem",
+        "kind": "externalReference",
+        "ownerEntity": "RecebimentoCompra",
         "from": {
-          "entityId": "PurchaseOrderItem",
+          "entityId": "RecebimentoCompra",
           "fieldIds": [
-            "productId"
+            "itensRecebidos"
           ]
         },
         "to": {
-          "entityId": "Product",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "purchaseOrderReceipts",
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Receipt",
-        "from": {
-          "entityId": "PurchaseOrder",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "Receipt",
-          "fieldIds": [
-            "purchaseOrderId"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "receiptStockEntries",
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "StockEntry",
-        "from": {
-          "entityId": "Receipt",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "StockEntry",
-          "fieldIds": [
-            "receiptId"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "stockEntryPurchaseOrderItem",
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "StockEntry",
-        "from": {
-          "entityId": "StockEntry",
-          "fieldIds": [
-            "purchaseOrderItemId"
-          ]
-        },
-        "to": {
-          "entityId": "PurchaseOrderItem",
+          "entityId": "Produto",
           "fieldIds": [
             "id"
           ]
@@ -172,18 +153,18 @@
       }
     },
     {
-      "relationshipId": "stockEntryProduct",
+      "relationshipId": "recebimentoLancaEntradaNoEstoque",
       "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "StockEntry",
+        "kind": "externalReference",
+        "ownerEntity": "RecebimentoCompra",
         "from": {
-          "entityId": "StockEntry",
+          "entityId": "RecebimentoCompra",
           "fieldIds": [
-            "productId"
+            "estoqueId"
           ]
         },
         "to": {
-          "entityId": "Product",
+          "entityId": "Estoque",
           "fieldIds": [
             "id"
           ]

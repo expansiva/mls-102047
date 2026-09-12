@@ -1,60 +1,92 @@
 {
-  "schemaVersion": "2026-09-10-ns5-workflows-v1",
+  "schemaVersion": "2026-09-12-ns5-workflows-v2",
   "moduleName": "compras",
   "processes": [
     {
-      "processId": "aprovarPedidoDeCompra",
-      "title": "Aprovação de pedido de compra",
-      "description": "Orquestra o envio de pedidos que exigem avaliação do gerente de compras.",
+      "processId": "aprovarEReceberPedidoCompra",
+      "title": "Aprovação e recebimento de pedido de compra",
+      "description": "Orquestra o encaminhamento de pedidos que exigem aprovação e seu recebimento após a chegada.",
+      "trigger": {
+        "kind": "manual",
+        "actorRef": "comprador"
+      },
       "tasks": [
         {
-          "taskId": "enviarPedidoParaAprovacao",
+          "taskId": "abrirEnviarPedido",
           "kind": "human",
           "actorRef": "comprador",
           "journeyRef": "abrirEenviarPedidoCompra",
-          "stepRef": "enviarPedido",
           "next": [
-            "decidirPedidoEnviado"
+            "aprovarPedido"
           ],
-          "description": "O comprador envia o pedido para que siga ao tratamento aplicável."
+          "description": "O comprador abre e envia o pedido, encaminhando ao gerente os pedidos cujo valor exige aprovação."
         },
         {
-          "taskId": "decidirPedidoEnviado",
+          "taskId": "aprovarPedido",
           "kind": "human",
           "actorRef": "gerenteCompras",
-          "journeyRef": "decidirPedidoAcimaDoLimite",
-          "stepRef": "decidirPedido",
-          "next": [],
-          "description": "O gerente de compras aprova ou rejeita o pedido que requer decisão."
-        }
-      ]
-    },
-    {
-      "processId": "receberPedidoDeCompra",
-      "title": "Recebimento de pedido de compra",
-      "description": "Orquestra a passagem do pedido enviado ou aprovado para o registro de recebimento no almoxarifado.",
-      "tasks": [
-        {
-          "taskId": "encaminharPedidoParaRecebimento",
-          "kind": "human",
-          "actorRef": "comprador",
-          "journeyRef": "abrirEenviarPedidoCompra",
-          "stepRef": "enviarPedido",
+          "journeyRef": "aprovarPedidoAcimaDoLimite",
           "next": [
-            "registrarEntregaDoPedido"
+            "aguardarChegadaPedido"
           ],
-          "description": "O comprador envia o pedido para atendimento pelo fornecedor e posterior recebimento."
+          "description": "O gerente de compras avalia e aprova o pedido encaminhado para que ele possa ser recebido."
         },
         {
-          "taskId": "registrarEntregaDoPedido",
+          "taskId": "aguardarChegadaPedido",
+          "kind": "wait",
+          "next": [
+            "registrarRecebimento"
+          ],
+          "description": "Aguarda a chegada do pedido aprovado ao almoxarifado."
+        },
+        {
+          "taskId": "registrarRecebimento",
           "kind": "human",
           "actorRef": "almoxarife",
-          "journeyRef": "registrarRecebimentoPedido",
-          "stepRef": "registrarRecebimento",
-          "next": [],
-          "description": "O almoxarife registra as quantidades recebidas, total ou parcialmente, e efetiva a entrada em estoque."
+          "journeyRef": "registrarRecebimentoDePedido",
+          "next": [
+            "aguardarNovoRecebimento"
+          ],
+          "description": "O almoxarife registra o recebimento total ou parcial e dá entrada no estoque dos produtos recebidos."
+        },
+        {
+          "taskId": "aguardarNovoRecebimento",
+          "kind": "wait",
+          "next": [
+            "registrarRecebimento"
+          ],
+          "description": "Aguarda uma nova entrega quando ainda houver itens pendentes de recebimento."
         }
       ]
+    }
+  ],
+  "journeyDecisions": [
+    {
+      "journeyId": "cadastrarFornecedorEoferta",
+      "inProcess": false
+    },
+    {
+      "journeyId": "abrirEenviarPedidoCompra",
+      "inProcess": true,
+      "processId": "aprovarEReceberPedidoCompra"
+    },
+    {
+      "journeyId": "aprovarPedidoAcimaDoLimite",
+      "inProcess": true,
+      "processId": "aprovarEReceberPedidoCompra"
+    },
+    {
+      "journeyId": "rejeitarPedidoAcimaDoLimite",
+      "inProcess": false
+    },
+    {
+      "journeyId": "registrarRecebimentoDePedido",
+      "inProcess": true,
+      "processId": "aprovarEReceberPedidoCompra"
+    },
+    {
+      "journeyId": "acompanharIndicadoresDeCompras",
+      "inProcess": false
     }
   ]
 }

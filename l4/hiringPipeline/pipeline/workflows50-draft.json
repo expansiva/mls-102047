@@ -1,137 +1,86 @@
 {
-  "schemaVersion": "2026-09-10-ns5-workflows-v1",
+  "schemaVersion": "2026-09-12-ns5-workflows-v2",
   "moduleName": "hiringPipeline",
   "processes": [
     {
-      "processId": "interviewOfferDecision",
-      "title": "Interview offer decision",
-      "description": "Coordinate the handoff of an interviewed application from the recruiter to the hiring manager for an offer decision and recruiter follow-up.",
+      "processId": "reviewInterviewForOffer",
+      "title": "Review interviewed candidate for offer",
+      "description": "Routes an interviewed application to the hiring manager for an offer decision.",
+      "trigger": {
+        "kind": "event",
+        "event": "Application.advanceToInterview"
+      },
       "tasks": [
         {
-          "taskId": "advanceToInterview",
-          "kind": "human",
-          "actorRef": "recruiter",
-          "journeyRef": "startAndProgressApplication",
-          "stepRef": "moveToInterview",
-          "next": [
-            "sendForOfferDecision"
-          ],
-          "description": "The recruiter advances the application to the interview stage before requesting an offer decision."
-        },
-        {
-          "taskId": "sendForOfferDecision",
-          "kind": "human",
-          "actorRef": "recruiter",
-          "journeyRef": "startAndProgressApplication",
-          "stepRef": "sendForOfferDecision",
-          "next": [
-            "inspectApplication"
-          ],
-          "description": "The recruiter hands the interviewed application to the hiring manager for an offer decision."
-        },
-        {
-          "taskId": "inspectApplication",
+          "taskId": "issueOfferDecision",
           "kind": "human",
           "actorRef": "hiringManager",
-          "journeyRef": "decideOffer",
-          "stepRef": "inspectApplication",
-          "next": [
-            "chooseOfferOutcome"
-          ],
-          "description": "The hiring manager reviews the application before deciding whether to approve an offer."
-        },
-        {
-          "taskId": "chooseOfferOutcome",
-          "kind": "human",
-          "actorRef": "hiringManager",
-          "journeyRef": "decideOffer",
-          "stepRef": "chooseOfferOutcome",
-          "next": [
-            "returnOfferDecision"
-          ],
-          "description": "The hiring manager decides whether the interviewed candidate should receive an offer."
-        },
-        {
-          "taskId": "returnOfferDecision",
-          "kind": "human",
-          "actorRef": "hiringManager",
-          "journeyRef": "decideOffer",
-          "stepRef": "returnToRecruiter",
-          "next": [
-            "rejectAfterOfferDecision"
-          ],
-          "description": "The hiring manager returns the offer decision to the recruiter for follow-up."
-        },
-        {
-          "taskId": "rejectAfterOfferDecision",
-          "kind": "human",
-          "actorRef": "recruiter",
-          "journeyRef": "recordApplicationRejection",
-          "stepRef": "rejectApplication",
+          "journeyRef": "issueOffer",
           "next": [],
-          "description": "The recruiter records the rejection reason when the offer decision does not approve the application."
+          "description": "The hiring manager reviews the interviewed application and decides whether to issue an offer."
         }
       ]
     },
     {
-      "processId": "offerHiringDecision",
-      "title": "Offer hiring decision",
-      "description": "Coordinate the hiring manager's final hiring decision for an offered application and recruiter follow-up when it is not hired.",
+      "processId": "confirmHireAndUpdatePosition",
+      "title": "Confirm hire and update position capacity",
+      "description": "Routes an offered application to the hiring manager and updates the associated position after a hire is recorded.",
+      "trigger": {
+        "kind": "event",
+        "event": "Application.issueOffer"
+      },
       "tasks": [
         {
-          "taskId": "inspectOfferApplication",
+          "taskId": "confirmHire",
           "kind": "human",
           "actorRef": "hiringManager",
-          "journeyRef": "decideHiring",
-          "stepRef": "inspectOfferApplication",
+          "journeyRef": "hireCandidate",
           "next": [
-            "inspectPositionCapacity"
+            "updatePositionCapacity"
           ],
-          "description": "The hiring manager reviews the offered application before making the final hiring decision."
+          "description": "The hiring manager confirms whether the offered candidate is hired."
         },
         {
-          "taskId": "inspectPositionCapacity",
-          "kind": "human",
-          "actorRef": "hiringManager",
-          "journeyRef": "decideHiring",
-          "stepRef": "inspectPositionCapacity",
-          "next": [
-            "chooseHiringOutcome"
-          ],
-          "description": "The hiring manager verifies the position's available capacity before deciding whether to hire."
-        },
-        {
-          "taskId": "chooseHiringOutcome",
-          "kind": "human",
-          "actorRef": "hiringManager",
-          "journeyRef": "decideHiring",
-          "stepRef": "chooseHiringOutcome",
-          "next": [
-            "returnHiringDecision"
-          ],
-          "description": "The hiring manager decides whether to hire the candidate for the position."
-        },
-        {
-          "taskId": "returnHiringDecision",
-          "kind": "human",
-          "actorRef": "hiringManager",
-          "journeyRef": "decideHiring",
-          "stepRef": "returnToRecruiter",
-          "next": [
-            "rejectAfterHiringDecision"
-          ],
-          "description": "The hiring manager returns the hiring decision to the recruiter for follow-up."
-        },
-        {
-          "taskId": "rejectAfterHiringDecision",
-          "kind": "human",
-          "actorRef": "recruiter",
-          "journeyRef": "recordApplicationRejection",
-          "stepRef": "rejectApplication",
+          "taskId": "updatePositionCapacity",
+          "kind": "mechanical",
+          "entityRef": "JobPosition",
+          "effect": "update",
           "next": [],
-          "description": "The recruiter records the rejection reason when the candidate is not hired."
+          "description": "Update the position's filled headcount and close the position when its required headcount is filled."
         }
       ]
+    }
+  ],
+  "journeyDecisions": [
+    {
+      "journeyId": "openJobPosition",
+      "inProcess": false
+    },
+    {
+      "journeyId": "registerCandidate",
+      "inProcess": false
+    },
+    {
+      "journeyId": "startApplicationScreening",
+      "inProcess": false
+    },
+    {
+      "journeyId": "advanceApplicationToInterview",
+      "inProcess": false
+    },
+    {
+      "journeyId": "issueOffer",
+      "inProcess": true,
+      "processId": "reviewInterviewForOffer"
+    },
+    {
+      "journeyId": "hireCandidate",
+      "inProcess": true,
+      "processId": "confirmHireAndUpdatePosition"
+    },
+    {
+      "journeyId": "rejectApplication",
+      "inProcess": false
     }
   ]
 }

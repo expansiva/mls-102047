@@ -1,11 +1,11 @@
 {
   "moduleName": "comandaRestaurante",
-  "businessDomain": "Gestão de comandas, mesas, cardápio e pagamentos de restaurante.",
+  "businessDomain": "Restaurant table tabs, menu item launches, and settlement payments.",
   "entities": [
     {
-      "entityId": "Mesa",
-      "title": "Mesa",
-      "description": "Mesa física do restaurante disponível para receber uma comanda.",
+      "entityId": "Table",
+      "title": "Restaurant table",
+      "description": "A restaurant table that can be selected for a tab and whose availability reflects its current tab.",
       "kind": "mdm",
       "party": "none",
       "mdmSubtype": "AssetEquipment",
@@ -14,43 +14,43 @@
         "target": "mdm",
         "scope": "organization",
         "idField": "id",
-        "mdmType": "comandaRestaurante.Mesa"
+        "mdmType": "comandaRestaurante.Table"
       }
     },
     {
-      "entityId": "ItemCardapio",
-      "title": "Item do cardápio",
-      "description": "Produto oferecido no cardápio do restaurante, com preço definido para uso nas comandas.",
+      "entityId": "MenuItem",
+      "title": "Menu item",
+      "description": "A menu offering available to be launched on a restaurant tab, including its module-specific current price.",
       "kind": "mdm",
       "party": "none",
       "mdmSubtype": "Product",
       "displayField": "name",
-      "maintenance": "crud",
+      "writer": "crud",
       "storage": {
         "target": "mdm",
         "scope": "organization",
         "idField": "id",
-        "mdmType": "comandaRestaurante.ItemCardapio"
+        "mdmType": "comandaRestaurante.MenuItem"
       }
     },
     {
-      "entityId": "Comanda",
-      "title": "Comanda",
-      "description": "Registro do consumo aberto para uma mesa e encerrado após o pagamento.",
+      "entityId": "OrderTab",
+      "title": "Table tab",
+      "description": "The open-to-settled restaurant tab associated with one table.",
       "kind": "core",
       "party": "none",
-      "displayField": "number",
+      "displayField": "id",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
         "idField": "id",
-        "mdmType": "comandaRestaurante.Comanda"
+        "mdmType": "comandaRestaurante.OrderTab"
       }
     },
     {
-      "entityId": "ItemComanda",
-      "title": "Item da comanda",
-      "description": "Lançamento de um item do cardápio em uma comanda, incluindo quantidade, observação e eventual cancelamento.",
+      "entityId": "TabItem",
+      "title": "Launched tab item",
+      "description": "A menu item launched on a table tab with its quantity and optional preparation note.",
       "kind": "event",
       "party": "none",
       "displayField": "id",
@@ -58,60 +58,69 @@
         "target": "moduleDatabase",
         "scope": "module",
         "idField": "id",
-        "mdmType": "comandaRestaurante.ItemComanda"
+        "mdmType": "comandaRestaurante.TabItem"
+      }
+    },
+    {
+      "entityId": "Payment",
+      "title": "Tab payment",
+      "description": "The payment recorded to settle a restaurant table tab.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "id",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "comandaRestaurante.Payment"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "comandaMesa",
-      "fromEntity": "Comanda",
-      "toEntity": "Mesa",
+      "relationshipId": "tabUsesTable",
+      "fromEntity": "OrderTab",
+      "toEntity": "Table",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada comanda é aberta para uma mesa do restaurante.",
+      "description": "Each table tab is opened for one restaurant table.",
       "persistence": {
         "mode": "crossStoreReference"
       }
     },
     {
-      "relationshipId": "comandaItens",
-      "fromEntity": "Comanda",
-      "toEntity": "ItemComanda",
+      "relationshipId": "tabHasItems",
+      "fromEntity": "OrderTab",
+      "toEntity": "TabItem",
       "type": "oneToMany",
       "required": false,
-      "description": "Uma comanda reúne os itens nela lançados.",
+      "description": "A table tab contains the items launched on it.",
       "persistence": {
         "mode": "moduleReference"
       }
     },
     {
-      "relationshipId": "itemComandaCardapio",
-      "fromEntity": "ItemComanda",
-      "toEntity": "ItemCardapio",
+      "relationshipId": "itemUsesMenuItem",
+      "fromEntity": "TabItem",
+      "toEntity": "MenuItem",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada item da comanda corresponde a um item do cardápio.",
+      "description": "Each launched tab item refers to one menu item.",
       "persistence": {
         "mode": "crossStoreReference"
       }
-    }
-  ],
-  "normalizations": [
-    {
-      "kind": "dropCrud",
-      "entityId": "Mesa",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
     },
     {
-      "kind": "dropCrud",
-      "entityId": "Comanda",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
-    },
-    {
-      "kind": "dropCrud",
-      "entityId": "ItemComanda",
-      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      "relationshipId": "tabHasPayment",
+      "fromEntity": "OrderTab",
+      "toEntity": "Payment",
+      "type": "oneToOne",
+      "required": false,
+      "description": "A settled table tab has its recorded payment.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
     }
   ]
 }
