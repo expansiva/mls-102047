@@ -1,0 +1,647 @@
+{
+  "plan": {
+    "moduleName": "manutencaoFrota",
+    "businessDomain": "Gestão de frota de transportadora, incluindo abastecimentos, manutenção preventiva e ordens de manutenção.",
+    "entities": [
+      {
+        "entityId": "Veiculo",
+        "title": "Veículo",
+        "description": "Veículo da frota acompanhado pela transportadora para operação, abastecimento e manutenção.",
+        "kind": "mdm",
+        "party": "none",
+        "mdmSubtype": "AssetVehicle",
+        "displayField": "name",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "manutencaoFrota.Veiculo"
+        }
+      },
+      {
+        "entityId": "Oficina",
+        "title": "Oficina",
+        "description": "Empresa prestadora de serviços de manutenção indicada nas ordens de manutenção.",
+        "kind": "mdm",
+        "party": "organization",
+        "mdmSubtype": "Company",
+        "displayField": "name",
+        "maintenance": "crud",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "manutencaoFrota.Oficina"
+        }
+      },
+      {
+        "entityId": "Abastecimento",
+        "title": "Abastecimento",
+        "description": "Registro do abastecimento realizado em um veículo, com data, volume, valor e quilometragem do painel.",
+        "kind": "event",
+        "party": "none",
+        "displayField": "data",
+        "mutability": "appendOnly",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "manutencaoFrota.Abastecimento"
+        }
+      },
+      {
+        "entityId": "PlanoManutencaoPreventiva",
+        "title": "Plano de manutenção preventiva",
+        "description": "Definição vigente da periodicidade de manutenção preventiva de um veículo por quilometragem ou tempo.",
+        "kind": "core",
+        "party": "none",
+        "displayField": "intervaloKm",
+        "mutability": "appendOnly",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "manutencaoFrota.PlanoManutencaoPreventiva"
+        }
+      },
+      {
+        "entityId": "OrdemManutencao",
+        "title": "Ordem de manutenção",
+        "description": "Ordem aberta para executar manutenção preventiva vencida ou corrigir um defeito de veículo.",
+        "kind": "core",
+        "party": "none",
+        "displayField": "dataEntrada",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "manutencaoFrota.OrdemManutencao"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "relationshipId": "abastecimentoVeiculo",
+        "fromEntity": "Abastecimento",
+        "toEntity": "Veiculo",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada abastecimento é registrado para um único veículo da frota.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "planoVeiculo",
+        "fromEntity": "PlanoManutencaoPreventiva",
+        "toEntity": "Veiculo",
+        "type": "oneToOne",
+        "required": true,
+        "description": "Cada plano preventivo vigente define a periodicidade de manutenção de um veículo.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "ordemVeiculo",
+        "fromEntity": "OrdemManutencao",
+        "toEntity": "Veiculo",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada ordem de manutenção é aberta para um único veículo.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "ordemPlanoPreventivo",
+        "fromEntity": "OrdemManutencao",
+        "toEntity": "PlanoManutencaoPreventiva",
+        "type": "manyToOne",
+        "required": false,
+        "description": "Uma ordem pode estar vinculada ao plano preventivo que motivou a manutenção.",
+        "persistence": {
+          "mode": "moduleReference"
+        }
+      },
+      {
+        "relationshipId": "ordemOficina",
+        "fromEntity": "OrdemManutencao",
+        "toEntity": "Oficina",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada ordem de manutenção indica a oficina responsável pelo serviço.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      }
+    ],
+    "normalizations": [
+      {
+        "kind": "dropCrud",
+        "entityId": "Veiculo",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "dropCrud",
+        "entityId": "Abastecimento",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "dropCrud",
+        "entityId": "PlanoManutencaoPreventiva",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "dropCrud",
+        "entityId": "OrdemManutencao",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      }
+    ]
+  },
+  "entities": [
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "manutencaoFrota",
+      "entityId": "Veiculo",
+      "title": "Veículo",
+      "description": "Veículo da frota acompanhado pela transportadora para operação, abastecimento e manutenção.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "AssetVehicle",
+      "displayField": "name",
+      "fields": [
+        {
+          "fieldId": "quilometragemAtual",
+          "title": "Quilometragem atual",
+          "type": "integer",
+          "required": true,
+          "constraints": {
+            "min": 0
+          },
+          "description": "Quilometragem atualmente registrada no painel do veículo."
+        }
+      ],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "manutencaoFrota.Veiculo"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "manutencaoFrota",
+      "entityId": "Oficina",
+      "title": "Oficina",
+      "description": "Empresa prestadora de serviços de manutenção indicada nas ordens de manutenção.",
+      "kind": "mdm",
+      "party": "organization",
+      "mdmSubtype": "Company",
+      "displayField": "name",
+      "fields": [],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "manutencaoFrota.Oficina"
+      },
+      "maintenance": "crud"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "manutencaoFrota",
+      "entityId": "Abastecimento",
+      "title": "Abastecimento",
+      "description": "Registro do abastecimento realizado em um veículo, com data, volume, valor e quilometragem do painel.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "data",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único do registro de abastecimento."
+        },
+        {
+          "fieldId": "veiculoId",
+          "title": "Veículo",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao veículo da frota selecionado para o abastecimento."
+        },
+        {
+          "fieldId": "data",
+          "title": "Data",
+          "type": "date",
+          "required": true,
+          "description": "Data em que o abastecimento foi realizado."
+        },
+        {
+          "fieldId": "litros",
+          "title": "Litros",
+          "type": "number",
+          "required": true,
+          "constraints": {
+            "min": 0,
+            "precision": 3
+          },
+          "description": "Volume de combustível abastecido, em litros."
+        },
+        {
+          "fieldId": "valor",
+          "title": "Valor",
+          "type": "money",
+          "required": true,
+          "constraints": {
+            "min": 0,
+            "precision": 2
+          },
+          "description": "Valor total pago pelo abastecimento."
+        },
+        {
+          "fieldId": "quilometragemPainel",
+          "title": "Quilometragem do painel",
+          "type": "integer",
+          "required": true,
+          "constraints": {
+            "min": 0
+          },
+          "description": "Quilometragem indicada no painel do veículo no momento do abastecimento."
+        }
+      ],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      },
+      "mutability": "appendOnly"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "manutencaoFrota",
+      "entityId": "PlanoManutencaoPreventiva",
+      "title": "Plano de manutenção preventiva",
+      "description": "Definição vigente da periodicidade de manutenção preventiva de um veículo por quilometragem ou tempo.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "intervaloKm",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador do plano",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único do plano de manutenção preventiva."
+        },
+        {
+          "fieldId": "veiculoId",
+          "title": "Veículo",
+          "type": "uuid",
+          "required": true,
+          "unique": true,
+          "description": "Veículo ao qual o plano de manutenção preventiva se aplica."
+        },
+        {
+          "fieldId": "intervaloKm",
+          "title": "Intervalo em quilômetros",
+          "type": "integer",
+          "required": false,
+          "constraints": {
+            "min": 1
+          },
+          "description": "Quantidade de quilômetros entre manutenções preventivas, quando a periodicidade for definida por quilometragem."
+        },
+        {
+          "fieldId": "intervaloMeses",
+          "title": "Intervalo em meses",
+          "type": "integer",
+          "required": false,
+          "constraints": {
+            "min": 1
+          },
+          "description": "Quantidade de meses entre manutenções preventivas, quando a periodicidade for definida por tempo."
+        },
+        {
+          "fieldId": "quilometragemReferencia",
+          "title": "Quilometragem de referência",
+          "type": "integer",
+          "required": true,
+          "constraints": {
+            "min": 0
+          },
+          "description": "Quilometragem do veículo usada como base para calcular a próxima manutenção preventiva."
+        },
+        {
+          "fieldId": "dataReferencia",
+          "title": "Data de referência",
+          "type": "date",
+          "required": true,
+          "description": "Data usada como base para calcular a próxima manutenção preventiva por tempo."
+        }
+      ],
+      "details": {
+        "quilometragemPrevista": {
+          "type": "integer",
+          "description": "Quilometragem calculada em que a próxima manutenção preventiva deve ser realizada."
+        },
+        "dataPrevista": {
+          "type": "date",
+          "description": "Data calculada em que a próxima manutenção preventiva deve ser realizada por tempo."
+        },
+        "preventivaVencida": {
+          "type": "boolean",
+          "description": "Indica se a quilometragem atual do veículo ultrapassou a quilometragem prevista para a preventiva."
+        }
+      },
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      },
+      "mutability": "appendOnly"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "manutencaoFrota",
+      "entityId": "OrdemManutencao",
+      "title": "Ordem de manutenção",
+      "description": "Ordem aberta para executar manutenção preventiva vencida ou corrigir um defeito de veículo.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "dataEntrada",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único da ordem de manutenção."
+        },
+        {
+          "fieldId": "veiculoId",
+          "title": "Veículo",
+          "type": "uuid",
+          "required": true,
+          "description": "Veículo para o qual a manutenção foi aberta."
+        },
+        {
+          "fieldId": "planoManutencaoPreventivaId",
+          "title": "Plano de manutenção preventiva",
+          "type": "uuid",
+          "required": false,
+          "description": "Plano preventivo que motivou a ordem, quando aplicável."
+        },
+        {
+          "fieldId": "oficinaId",
+          "title": "Oficina",
+          "type": "uuid",
+          "required": true,
+          "description": "Oficina responsável pela execução do serviço."
+        },
+        {
+          "fieldId": "motivo",
+          "title": "Motivo da manutenção",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "preventive",
+              "title": "Manutenção preventiva"
+            },
+            {
+              "value": "defect",
+              "title": "Defeito identificado"
+            }
+          ],
+          "description": "Motivo que originou a ordem de manutenção."
+        },
+        {
+          "fieldId": "descricao",
+          "title": "Descrição do serviço ou defeito",
+          "type": "text",
+          "required": true,
+          "description": "Descrição do serviço preventivo a executar ou do defeito identificado."
+        },
+        {
+          "fieldId": "dataEntrada",
+          "title": "Data de entrada",
+          "type": "date",
+          "required": true,
+          "description": "Data de entrada do veículo na oficina."
+        },
+        {
+          "fieldId": "dataSaida",
+          "title": "Data de saída",
+          "type": "date",
+          "required": false,
+          "description": "Data de saída do veículo da oficina após a conclusão do serviço."
+        },
+        {
+          "fieldId": "custo",
+          "title": "Custo da manutenção",
+          "type": "money",
+          "required": false,
+          "constraints": {
+            "precision": 2
+          },
+          "description": "Valor total registrado para a manutenção executada."
+        },
+        {
+          "fieldId": "status",
+          "title": "Situação",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "open",
+              "title": "Aberta"
+            },
+            {
+              "value": "completed",
+              "title": "Concluída"
+            }
+          ],
+          "description": "Situação atual da ordem de manutenção."
+        }
+      ],
+      "lifecycleStates": [
+        {
+          "state": "open",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "completed",
+          "reachedBy": "actor"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "concluirOrdem",
+          "from": [
+            "open"
+          ],
+          "to": "completed",
+          "by": [
+            "gestorFrota"
+          ],
+          "description": "Registra o custo e a data de saída do veículo, concluindo a ordem de manutenção."
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "abastecimentoVeiculo",
+      "fromEntity": "Abastecimento",
+      "toEntity": "Veiculo",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada abastecimento é registrado para um único veículo da frota.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Abastecimento",
+        "from": {
+          "entityId": "Abastecimento",
+          "fieldIds": [
+            "veiculoId"
+          ]
+        },
+        "to": {
+          "entityId": "Veiculo",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "planoVeiculo",
+      "fromEntity": "PlanoManutencaoPreventiva",
+      "toEntity": "Veiculo",
+      "type": "oneToOne",
+      "required": true,
+      "description": "Cada plano preventivo vigente define a periodicidade de manutenção de um veículo.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "PlanoManutencaoPreventiva",
+        "from": {
+          "entityId": "PlanoManutencaoPreventiva",
+          "fieldIds": [
+            "veiculoId"
+          ]
+        },
+        "to": {
+          "entityId": "Veiculo",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "ordemVeiculo",
+      "fromEntity": "OrdemManutencao",
+      "toEntity": "Veiculo",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada ordem de manutenção é aberta para um único veículo.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "OrdemManutencao",
+        "from": {
+          "entityId": "OrdemManutencao",
+          "fieldIds": [
+            "veiculoId"
+          ]
+        },
+        "to": {
+          "entityId": "Veiculo",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "ordemPlanoPreventivo",
+      "fromEntity": "OrdemManutencao",
+      "toEntity": "PlanoManutencaoPreventiva",
+      "type": "manyToOne",
+      "required": false,
+      "description": "Uma ordem pode estar vinculada ao plano preventivo que motivou a manutenção.",
+      "persistence": {
+        "mode": "moduleReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "OrdemManutencao",
+        "from": {
+          "entityId": "OrdemManutencao",
+          "fieldIds": [
+            "planoManutencaoPreventivaId"
+          ]
+        },
+        "to": {
+          "entityId": "PlanoManutencaoPreventiva",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "ordemOficina",
+      "fromEntity": "OrdemManutencao",
+      "toEntity": "Oficina",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada ordem de manutenção indica a oficina responsável pelo serviço.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "OrdemManutencao",
+        "from": {
+          "entityId": "OrdemManutencao",
+          "fieldIds": [
+            "oficinaId"
+          ]
+        },
+        "to": {
+          "entityId": "Oficina",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    }
+  ],
+  "removedOrphans": [],
+  "liftedAggregateEntities": []
+}

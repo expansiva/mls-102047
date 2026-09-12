@@ -1,0 +1,154 @@
+{
+  "journeys": [
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "cadastrarProduto",
+      "business": {
+        "actorRef": "estoquista",
+        "title": "Cadastrar produto no estoque",
+        "goal": "Disponibilizar um produto para controle de estoque com seu estoque mínimo.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "registrarProduto",
+            "kind": "act",
+            "entity": "Product",
+            "title": "Registrar ou vincular produto",
+            "description": "Registra ou vincula o produto ao módulo e informa o estoque mínimo que deve acionar aviso."
+          }
+        ],
+        "outcome": {
+          "statement": "O produto fica disponível para registro e acompanhamento de movimentações de estoque.",
+          "evidence": [
+            "Produto identificado no controle de estoque com estoque mínimo definido.",
+            "O produto pode ser selecionado em movimentações de estoque."
+          ]
+        }
+      },
+      "businessHash": "sha256:c1b452042afb7f2446f255abb39564b393914239da9daae981f08d1c877fd0cb"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "registrarMovimentacaoEstoque",
+      "business": {
+        "actorRef": "estoquista",
+        "title": "Registrar movimentação de estoque",
+        "goal": "Registrar uma entrada ou saída de unidades de um produto e atualizar sua disponibilidade.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "localizarProduto",
+            "kind": "locate",
+            "entity": "Product",
+            "title": "Localizar produto",
+            "description": "Localiza o produto que terá unidades recebidas ou retiradas."
+          },
+          {
+            "stepId": "consultarSaldoAtual",
+            "kind": "inspect",
+            "entity": "Product",
+            "title": "Consultar saldo atual",
+            "description": "Confere o saldo atual do produto antes do registro."
+          },
+          {
+            "stepId": "registrarMovimentacao",
+            "kind": "act",
+            "entity": "StockMovement",
+            "affects": [
+              "Product"
+            ],
+            "title": "Registrar movimentação",
+            "description": "Registra definitivamente a quantidade como entrada ou saída e atualiza o saldo disponível do produto."
+          }
+        ],
+        "outcome": {
+          "statement": "A entrada ou saída fica registrada de forma definitiva e o saldo atual do produto é atualizado.",
+          "evidence": [
+            "Movimentação de entrada ou saída registrada.",
+            "Saldo atual do produto reflete a movimentação registrada."
+          ]
+        }
+      },
+      "businessHash": "sha256:f2df1a6f18bbcfdfb95727730e02315f8666c5c5638d1b704713243c86aadd24"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "consultarSaldoProduto",
+      "business": {
+        "actorRef": "estoquista",
+        "title": "Consultar saldo de produto",
+        "goal": "Verificar o saldo atual de um produto para acompanhar sua disponibilidade.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "localizarProduto",
+            "kind": "locate",
+            "entity": "Product",
+            "title": "Localizar produto",
+            "description": "Localiza o produto cujo estoque será consultado."
+          },
+          {
+            "stepId": "consultarSaldo",
+            "kind": "inspect",
+            "entity": "Product",
+            "title": "Consultar saldo atual",
+            "description": "Visualiza o saldo atual e o estoque mínimo definido para o produto."
+          }
+        ],
+        "outcome": {
+          "statement": "O estoquista conhece a disponibilidade atual do produto.",
+          "evidence": [
+            "Saldo atual do produto apresentado.",
+            "Estoque mínimo do produto apresentado."
+          ]
+        }
+      },
+      "businessHash": "sha256:005b985f096812378eb55a80bca205388a43ec7fcd0e1d2a5dcfdd9103058def"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "acompanharAvisoEstoqueBaixo",
+      "business": {
+        "actorRef": "estoquista",
+        "title": "Acompanhar aviso de estoque baixo",
+        "goal": "Identificar um produto cujo saldo está abaixo do mínimo para tomar providências de reposição.",
+        "entry": {
+          "mode": "fromNotification"
+        },
+        "steps": [
+          {
+            "stepId": "consultarProdutoAlertado",
+            "kind": "inspect",
+            "entity": "Product",
+            "title": "Consultar produto alertado",
+            "description": "Examina o produto indicado no aviso, seu saldo atual e seu estoque mínimo."
+          },
+          {
+            "stepId": "consultarMovimentacoes",
+            "kind": "inspect",
+            "entity": "StockMovement",
+            "title": "Consultar movimentações",
+            "description": "Consulta as entradas e saídas registradas que compõem o saldo do produto."
+          }
+        ],
+        "outcome": {
+          "statement": "O estoquista identifica o produto com saldo abaixo do mínimo e dispõe das informações para providenciar sua reposição.",
+          "evidence": [
+            "Aviso de saldo abaixo do mínimo associado ao produto.",
+            "Saldo atual, estoque mínimo e movimentações do produto consultados."
+          ]
+        }
+      },
+      "businessHash": "sha256:7c300d26d35dc04701f0c963687f316fc0efdbcf6d942f5971be9ed6d04887b1"
+    }
+  ],
+  "systemDecisions": [],
+  "droppedActors": [],
+  "removedOrphans": []
+}

@@ -1,0 +1,409 @@
+{
+  "plan": {
+    "moduleName": "hiringPipeline",
+    "businessDomain": "Recruitment and hiring pipeline management",
+    "entities": [
+      {
+        "entityId": "JobPosition",
+        "title": "Job Position",
+        "description": "An approved hiring need with its requirements and requested headcount.",
+        "kind": "core",
+        "party": "none",
+        "displayField": "title",
+        "mutability": "appendOnly",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "hiringPipeline.JobPosition"
+        }
+      },
+      {
+        "entityId": "Candidate",
+        "title": "Candidate",
+        "description": "A person registered for consideration in the organization's hiring process.",
+        "kind": "mdm",
+        "party": "person",
+        "mdmSubtype": "Person",
+        "displayField": "name",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "hiringPipeline.Candidate"
+        }
+      },
+      {
+        "entityId": "Application",
+        "title": "Application",
+        "description": "A candidate's application for a specific job position, tracked through the hiring pipeline.",
+        "kind": "core",
+        "party": "none",
+        "displayField": "id",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "hiringPipeline.Application"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "relationshipId": "applicationCandidate",
+        "fromEntity": "Application",
+        "toEntity": "Candidate",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Each application is submitted by one candidate.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "applicationJobPosition",
+        "fromEntity": "Application",
+        "toEntity": "JobPosition",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Each application is for one job position.",
+        "persistence": {
+          "mode": "moduleReference"
+        }
+      }
+    ],
+    "normalizations": [
+      {
+        "kind": "dropCrud",
+        "entityId": "JobPosition",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "dropCrud",
+        "entityId": "Candidate",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "dropCrud",
+        "entityId": "Application",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      }
+    ]
+  },
+  "entities": [
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "hiringPipeline",
+      "entityId": "JobPosition",
+      "title": "Job Position",
+      "description": "An approved hiring need with its requirements and requested headcount.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "title",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "ID",
+          "type": "uuid",
+          "required": true,
+          "description": "Unique identifier for the job position."
+        },
+        {
+          "fieldId": "title",
+          "title": "Title",
+          "type": "string",
+          "required": true,
+          "description": "Title of the job position."
+        },
+        {
+          "fieldId": "department",
+          "title": "Department",
+          "type": "string",
+          "required": true,
+          "description": "Department requesting the job position."
+        },
+        {
+          "fieldId": "description",
+          "title": "Description",
+          "type": "text",
+          "required": true,
+          "description": "Hiring requirements and description of the job position."
+        },
+        {
+          "fieldId": "headcount",
+          "title": "Headcount",
+          "type": "integer",
+          "required": true,
+          "description": "Number of candidates requested for the job position."
+        }
+      ],
+      "details": {
+        "filledHeadcount": {
+          "type": "integer",
+          "description": "Number of candidates hired for this job position."
+        },
+        "remainingHeadcount": {
+          "type": "integer",
+          "description": "Number of additional candidates that can be hired before the requested headcount is filled."
+        }
+      },
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      },
+      "mutability": "appendOnly"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "hiringPipeline",
+      "entityId": "Candidate",
+      "title": "Candidate",
+      "description": "A person registered for consideration in the organization's hiring process.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "fields": [
+        {
+          "fieldId": "resumeLink",
+          "title": "Resume link",
+          "type": "string",
+          "required": true,
+          "constraints": {
+            "maxLength": 2048
+          },
+          "description": "Link to the candidate's resume."
+        },
+        {
+          "fieldId": "source",
+          "title": "Source",
+          "type": "string",
+          "required": true,
+          "constraints": {
+            "maxLength": 255
+          },
+          "description": "How the candidate was sourced for the hiring process."
+        }
+      ],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "hiringPipeline.Candidate"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "hiringPipeline",
+      "entityId": "Application",
+      "title": "Application",
+      "description": "A candidate's application for a specific job position, tracked through the hiring pipeline.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "id",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Application ID",
+          "type": "uuid",
+          "required": true,
+          "description": "Unique identifier for this application."
+        },
+        {
+          "fieldId": "candidateId",
+          "title": "Candidate",
+          "type": "uuid",
+          "required": true,
+          "description": "Candidate submitting this application."
+        },
+        {
+          "fieldId": "jobPositionId",
+          "title": "Job Position",
+          "type": "uuid",
+          "required": true,
+          "description": "Job position to which the candidate is applying."
+        },
+        {
+          "fieldId": "status",
+          "title": "Application Status",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "screening",
+              "title": "Screening"
+            },
+            {
+              "value": "interview",
+              "title": "Interview"
+            },
+            {
+              "value": "offer",
+              "title": "Offer"
+            },
+            {
+              "value": "hired",
+              "title": "Hired"
+            },
+            {
+              "value": "rejected",
+              "title": "Rejected"
+            }
+          ],
+          "description": "Current stage of the application in the hiring pipeline."
+        },
+        {
+          "fieldId": "rejectionReason",
+          "title": "Rejection Reason",
+          "type": "text",
+          "required": false,
+          "description": "Reason the application was rejected."
+        }
+      ],
+      "uniqueKeys": [
+        [
+          "candidateId",
+          "jobPositionId"
+        ]
+      ],
+      "lifecycleStates": [
+        {
+          "state": "screening",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "interview",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "offer",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "hired",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "rejected",
+          "reachedBy": "actor"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "moveToInterview",
+          "from": [
+            "screening"
+          ],
+          "to": "interview",
+          "by": [
+            "recruiter"
+          ],
+          "description": "Advance a screened application to the interview stage."
+        },
+        {
+          "transitionId": "approveOffer",
+          "from": [
+            "interview"
+          ],
+          "to": "offer",
+          "by": [
+            "hiringManager"
+          ],
+          "description": "Approve an offer for the candidate."
+        },
+        {
+          "transitionId": "hireCandidate",
+          "from": [
+            "offer"
+          ],
+          "to": "hired",
+          "by": [
+            "hiringManager"
+          ],
+          "description": "Mark the offered candidate as hired for the job position."
+        },
+        {
+          "transitionId": "rejectApplication",
+          "from": [
+            "screening",
+            "interview",
+            "offer"
+          ],
+          "to": "rejected",
+          "by": [
+            "recruiter"
+          ],
+          "description": "Reject an application and record the reason."
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "applicationCandidate",
+      "fromEntity": "Application",
+      "toEntity": "Candidate",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Each application is submitted by one candidate.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Application",
+        "from": {
+          "entityId": "Application",
+          "fieldIds": [
+            "candidateId"
+          ]
+        },
+        "to": {
+          "entityId": "Candidate",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "applicationJobPosition",
+      "fromEntity": "Application",
+      "toEntity": "JobPosition",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Each application is for one job position.",
+      "persistence": {
+        "mode": "moduleReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Application",
+        "from": {
+          "entityId": "Application",
+          "fieldIds": [
+            "jobPositionId"
+          ]
+        },
+        "to": {
+          "entityId": "JobPosition",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    }
+  ],
+  "removedOrphans": [],
+  "liftedAggregateEntities": []
+}

@@ -1,0 +1,176 @@
+{
+  "schemaVersion": "2026-09-10-ns5-access-v2",
+  "moduleName": "mensalidadesAcademia",
+  "actors": [
+    {
+      "actorId": "recepcao",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Recepção",
+      "description": "Matricula alunos em planos e registra pagamentos de mensalidades."
+    },
+    {
+      "actorId": "gerencia",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Gerência",
+      "description": "Gera mensalidades mensais e acompanha os indicadores financeiros e de alunos."
+    },
+    {
+      "actorId": "aluno",
+      "kind": "external",
+      "origin": "inferred",
+      "title": "Aluno",
+      "description": "Pode cancelar sua matrícula na academia."
+    }
+  ],
+  "authorities": [
+    {
+      "authorityId": "gerirMatriculas",
+      "title": "Gerir matrículas de alunos",
+      "description": "Permite localizar alunos e planos e registrar matrículas para vincular alunos aos planos da academia."
+    },
+    {
+      "authorityId": "registrarPagamentos",
+      "title": "Registrar pagamentos de mensalidades",
+      "description": "Permite consultar mensalidades e registrar os pagamentos recebidos."
+    },
+    {
+      "authorityId": "administrarPlanos",
+      "title": "Administrar planos da academia",
+      "description": "Permite cadastrar, consultar, alterar e inativar os planos oferecidos pela academia."
+    },
+    {
+      "authorityId": "gerarMensalidades",
+      "title": "Gerar mensalidades do mês",
+      "description": "Permite consultar matrículas e planos ativos e gerar as mensalidades mensais correspondentes."
+    },
+    {
+      "authorityId": "consultarIndicadores",
+      "title": "Consultar indicadores da academia",
+      "description": "Permite consultar os totais financeiros e as quantidades consolidadas de alunos do período."
+    },
+    {
+      "authorityId": "cancelarPropriaMatricula",
+      "title": "Cancelar a própria matrícula",
+      "description": "Permite consultar e cancelar somente a matrícula vinculada ao próprio aluno."
+    }
+  ],
+  "grants": [
+    {
+      "grantId": "recepcaoGerirMatriculas",
+      "actorRef": "recepcao",
+      "authorityRef": "gerirMatriculas",
+      "entityRefs": [
+        "Aluno",
+        "Plano",
+        "Matricula"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange os alunos, planos e matrículas de toda a academia necessários ao atendimento da recepção."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Permite acesso integral aos registros necessários para localizar alunos e planos e registrar matrículas."
+      }
+    },
+    {
+      "grantId": "recepcaoRegistrarPagamentos",
+      "actorRef": "recepcao",
+      "authorityRef": "registrarPagamentos",
+      "entityRefs": [
+        "Mensalidade",
+        "Pagamento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange as mensalidades e os pagamentos de todos os alunos da academia."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Permite acesso integral às cobranças e aos pagamentos para conferência e registro do recebimento."
+      }
+    },
+    {
+      "grantId": "gerenciaAdministrarPlanos",
+      "actorRef": "gerencia",
+      "authorityRef": "administrarPlanos",
+      "entityRefs": [
+        "Plano"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange todos os planos oferecidos pela academia."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Permite acesso integral aos dados dos planos para sua administração."
+      }
+    },
+    {
+      "grantId": "gerenciaGerarMensalidades",
+      "actorRef": "gerencia",
+      "authorityRef": "gerarMensalidades",
+      "entityRefs": [
+        "Plano",
+        "Matricula",
+        "Mensalidade"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange os planos, matrículas e mensalidades de toda a academia necessários à geração mensal."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Permite acesso integral aos registros necessários para identificar matrículas elegíveis e gerar as cobranças."
+      }
+    },
+    {
+      "grantId": "gerenciaConsultarIndicadores",
+      "actorRef": "gerencia",
+      "authorityRef": "consultarIndicadores",
+      "entityRefs": [
+        "Aluno",
+        "Matricula",
+        "Mensalidade",
+        "Pagamento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange os dados consolidados de alunos, matrículas, mensalidades e pagamentos de toda a academia."
+      },
+      "disclosure": {
+        "mode": "aggregateOnly",
+        "description": "Permite visualizar somente totais e quantidades consolidadas de recebimentos e da situação dos alunos."
+      }
+    },
+    {
+      "grantId": "alunoCancelarPropriaMatricula",
+      "actorRef": "aluno",
+      "authorityRef": "cancelarPropriaMatricula",
+      "entityRefs": [
+        "Matricula"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Abrange exclusivamente as matrículas vinculadas ao aluno autenticado.",
+        "anchorEntity": "Aluno"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "Permite consultar somente o plano e as datas e situação da própria matrícula antes de solicitar seu cancelamento.",
+        "allowedFields": [
+          "Matricula.planoId",
+          "Matricula.dataInicio",
+          "Matricula.dataCancelamento",
+          "Matricula.status"
+        ],
+        "deniedFields": [
+          "Matricula.id",
+          "Matricula.alunoId"
+        ]
+      }
+    }
+  ]
+}

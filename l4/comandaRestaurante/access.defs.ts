@@ -1,0 +1,123 @@
+/// <mls fileReference="_102047_/l4/comandaRestaurante/access.defs.ts" enhancement="_blank"/>
+
+import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
+
+export const comandaRestauranteAccess = {
+  "schemaVersion": "2026-09-10-ns5-access-v2",
+  "moduleName": "comandaRestaurante",
+  "actors": [
+    {
+      "actorId": "garcom",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Garçom",
+      "description": "Profissional do restaurante que abre comandas para mesas e lança ou cancela itens enquanto a comanda está aberta."
+    },
+    {
+      "actorId": "caixa",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Caixa",
+      "description": "Profissional do restaurante que fecha comandas, aplica descontos e registra pagamentos."
+    }
+  ],
+  "authorities": [
+    {
+      "authorityId": "operarComandas",
+      "title": "Operar comandas",
+      "description": "Abrir comandas para mesas, lançar itens e cancelar lançamentos indevidos enquanto a comanda estiver aberta."
+    },
+    {
+      "authorityId": "fecharComandas",
+      "title": "Fechar comandas",
+      "description": "Consultar comandas abertas, registrar desconto e pagamento, encerrar a comanda e liberar a mesa."
+    },
+    {
+      "authorityId": "gerenciarCardapio",
+      "title": "Gerenciar cardápio",
+      "description": "Cadastrar, alterar, consultar e inativar itens do cardápio e seus preços vigentes."
+    }
+  ],
+  "grants": [
+    {
+      "grantId": "garcomOperaComandas",
+      "actorRef": "garcom",
+      "authorityRef": "operarComandas",
+      "entityRefs": [
+        "Mesa",
+        "ItemCardapio",
+        "Comanda",
+        "ItemComanda"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Mesas, itens do cardápio, comandas e lançamentos do restaurante."
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "Permite ao garçom identificar mesas disponíveis, consultar itens e preços e operar os lançamentos das comandas, sem acesso aos dados financeiros do fechamento.",
+        "allowedFields": [
+          "Mesa.id",
+          "Mesa.details.estaOcupada",
+          "ItemCardapio.id",
+          "ItemCardapio.preco",
+          "Comanda.id",
+          "Comanda.number",
+          "Comanda.mesaId",
+          "Comanda.status",
+          "ItemComanda.id",
+          "ItemComanda.comandaId",
+          "ItemComanda.itemCardapioId",
+          "ItemComanda.quantidade",
+          "ItemComanda.precoUnitario",
+          "ItemComanda.observacao",
+          "ItemComanda.status"
+        ],
+        "deniedFields": [
+          "Comanda.discountAmount",
+          "Comanda.paymentMethod",
+          "Comanda.details.totalAmount",
+          "ItemComanda.details.subtotal"
+        ]
+      }
+    },
+    {
+      "grantId": "caixaFechaComandas",
+      "actorRef": "caixa",
+      "authorityRef": "fecharComandas",
+      "entityRefs": [
+        "Mesa",
+        "Comanda",
+        "ItemComanda"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Mesas, comandas e lançamentos do restaurante necessários para o fechamento."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Permite ao caixa consultar integralmente as comandas e seus lançamentos, registrar o fechamento e verificar a liberação da mesa."
+      }
+    },
+    {
+      "grantId": "caixaGerenciaCardapio",
+      "actorRef": "caixa",
+      "authorityRef": "gerenciarCardapio",
+      "entityRefs": [
+        "ItemCardapio"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Itens do cardápio de todo o restaurante."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Permite ao caixa manter integralmente os itens e preços do cardápio."
+      }
+    }
+  ]
+} as const satisfies Ns5AccessArtifact;
+
+export type ComandaRestauranteAccessType = typeof comandaRestauranteAccess;
+
+export default comandaRestauranteAccess;

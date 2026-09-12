@@ -1,0 +1,91 @@
+{
+  "moduleName": "hiringPipeline",
+  "businessDomain": "Recruitment and hiring pipeline management",
+  "entities": [
+    {
+      "entityId": "JobPosition",
+      "title": "Job Position",
+      "description": "An approved hiring need with its requirements and requested headcount.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "title",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "hiringPipeline.JobPosition"
+      }
+    },
+    {
+      "entityId": "Candidate",
+      "title": "Candidate",
+      "description": "A person registered for consideration in the organization's hiring process.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "hiringPipeline.Candidate"
+      }
+    },
+    {
+      "entityId": "Application",
+      "title": "Application",
+      "description": "A candidate's application for a specific job position, tracked through the hiring pipeline.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "id",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "hiringPipeline.Application"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "applicationCandidate",
+      "fromEntity": "Application",
+      "toEntity": "Candidate",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Each application is submitted by one candidate.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "applicationJobPosition",
+      "fromEntity": "Application",
+      "toEntity": "JobPosition",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Each application is for one job position.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "JobPosition",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Candidate",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Application",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    }
+  ]
+}

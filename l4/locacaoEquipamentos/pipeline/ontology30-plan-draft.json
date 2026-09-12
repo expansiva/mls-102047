@@ -1,0 +1,87 @@
+{
+  "moduleName": "locacaoEquipamentos",
+  "businessDomain": "Locação de equipamentos para construção",
+  "entities": [
+    {
+      "entityId": "Cliente",
+      "title": "Cliente",
+      "description": "Pessoa cadastrada como cliente da locadora para celebrar contratos de locação.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "maintenance": "crud",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "locacaoEquipamentos.Cliente"
+      }
+    },
+    {
+      "entityId": "Equipamento",
+      "title": "Equipamento",
+      "description": "Equipamento de construção disponível para locação, com informações operacionais próprias da locadora.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "AssetEquipment",
+      "displayField": "code",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "locacaoEquipamentos.Equipamento"
+      }
+    },
+    {
+      "entityId": "ContratoLocacao",
+      "title": "Contrato de locação",
+      "description": "Registro da locação de equipamentos para um cliente durante um período definido.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "id",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "locacaoEquipamentos.ContratoLocacao"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "contratoCliente",
+      "fromEntity": "ContratoLocacao",
+      "toEntity": "Cliente",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada contrato de locação pertence a um cliente.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "contratoEquipamentos",
+      "fromEntity": "ContratoLocacao",
+      "toEntity": "Equipamento",
+      "type": "manyToMany",
+      "required": true,
+      "description": "Um contrato de locação inclui um ou mais equipamentos, que podem participar de contratos distintos em períodos diferentes.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "Equipamento",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "ContratoLocacao",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    }
+  ]
+}

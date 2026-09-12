@@ -1,0 +1,153 @@
+{
+  "moduleName": "ordenServicio",
+  "businessDomain": "Servicio técnico de electrónica",
+  "entities": [
+    {
+      "entityId": "Cliente",
+      "title": "Cliente",
+      "description": "Persona cliente vinculada a las órdenes de servicio que consulta y decide presupuestos desde el portal.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "ordenServicio.Cliente"
+      }
+    },
+    {
+      "entityId": "Aparato",
+      "title": "Aparato",
+      "description": "Equipo electrónico recibido para su análisis, reparación y posterior entrega.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "AssetEquipment",
+      "displayField": "name",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "ordenServicio.Aparato"
+      }
+    },
+    {
+      "entityId": "OrdenServicio",
+      "title": "Orden de servicio",
+      "description": "Registro transaccional de la recepción, análisis, presupuesto, autorización, reparación y entrega de un aparato.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "numeroOrden",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "ordenServicio.OrdenServicio"
+      }
+    },
+    {
+      "entityId": "PiezaNecesaria",
+      "title": "Pieza necesaria",
+      "description": "Pieza prevista para una orden durante el diagnóstico, con su costo interno y su consideración en el presupuesto.",
+      "kind": "supporting",
+      "party": "none",
+      "displayField": "descripcion",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "ordenServicio.PiezaNecesaria"
+      }
+    },
+    {
+      "entityId": "Reparacion",
+      "title": "Reparación",
+      "description": "Registro del trabajo técnico realizado sobre el aparato de una orden aprobada.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "descripcion",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "ordenServicio.Reparacion"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "ordenServicioCliente",
+      "fromEntity": "OrdenServicio",
+      "toEntity": "Cliente",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada orden de servicio corresponde a un cliente.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "ordenServicioAparato",
+      "fromEntity": "OrdenServicio",
+      "toEntity": "Aparato",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada orden de servicio se abre para un aparato recibido.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "piezasNecesariasOrdenServicio",
+      "fromEntity": "PiezaNecesaria",
+      "toEntity": "OrdenServicio",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada pieza necesaria se registra para una orden de servicio.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "reparacionOrdenServicio",
+      "fromEntity": "Reparacion",
+      "toEntity": "OrdenServicio",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada reparación documenta el trabajo realizado en una orden de servicio aprobada.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "Cliente",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Aparato",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "OrdenServicio",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "PiezaNecesaria",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Reparacion",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    }
+  ]
+}

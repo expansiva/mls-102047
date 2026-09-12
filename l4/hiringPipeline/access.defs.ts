@@ -1,0 +1,78 @@
+/// <mls fileReference="_102047_/l4/hiringPipeline/access.defs.ts" enhancement="_blank"/>
+
+import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
+
+export const hiringPipelineAccess = {
+  "schemaVersion": "2026-09-10-ns5-access-v2",
+  "moduleName": "hiringPipeline",
+  "actors": [
+    {
+      "actorId": "recruiter",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Recruiter",
+      "description": "Opens job positions, registers candidates, and manages applications through the hiring pipeline except offer and hiring decisions."
+    },
+    {
+      "actorId": "hiringManager",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Hiring Manager",
+      "description": "Decides offers and hiring for candidates applying to their job positions."
+    }
+  ],
+  "authorities": [
+    {
+      "authorityId": "manageHiringPipeline",
+      "title": "Manage hiring pipeline",
+      "description": "Open and manage job positions, register candidates, and manage applications through screening, interview, and rejection."
+    },
+    {
+      "authorityId": "decideHiringOutcomes",
+      "title": "Decide hiring outcomes",
+      "description": "Review applications and position capacity and decide offer and hiring outcomes for responsible job positions."
+    }
+  ],
+  "grants": [
+    {
+      "grantId": "recruiterManageHiringPipeline",
+      "actorRef": "recruiter",
+      "authorityRef": "manageHiringPipeline",
+      "entityRefs": [
+        "JobPosition",
+        "Candidate",
+        "Application"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "All hiring pipeline records in the organization."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Recruiters can view complete job position, candidate, and application records needed to manage the pipeline."
+      }
+    },
+    {
+      "grantId": "hiringManagerDecideOutcomes",
+      "actorRef": "hiringManager",
+      "authorityRef": "decideHiringOutcomes",
+      "entityRefs": [
+        "JobPosition",
+        "Candidate",
+        "Application"
+      ],
+      "dataScope": {
+        "mode": "custom",
+        "description": "Only job positions for which the hiring manager is responsible, their applications, and the candidates associated with those applications."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Hiring managers can view complete responsible position, associated candidate, and application records needed for offer and hiring decisions."
+      }
+    }
+  ]
+} as const satisfies Ns5AccessArtifact;
+
+export type HiringPipelineAccessType = typeof hiringPipelineAccess;
+
+export default hiringPipelineAccess;

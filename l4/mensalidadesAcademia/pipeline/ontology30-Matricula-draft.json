@@ -1,0 +1,80 @@
+{
+  "entityId": "Matricula",
+  "fields": [
+    {
+      "fieldId": "id",
+      "title": "Identificador da matrícula",
+      "type": "uuid",
+      "required": true,
+      "description": "Identificador único da matrícula."
+    },
+    {
+      "fieldId": "alunoId",
+      "title": "Aluno",
+      "type": "uuid",
+      "required": true,
+      "description": "Referência ao aluno vinculado à matrícula."
+    },
+    {
+      "fieldId": "planoId",
+      "title": "Plano",
+      "type": "uuid",
+      "required": true,
+      "description": "Referência ao plano contratado na matrícula."
+    },
+    {
+      "fieldId": "dataInicio",
+      "title": "Data de início",
+      "type": "date",
+      "required": true,
+      "description": "Data a partir da qual a matrícula passa a ser elegível para gerar mensalidades."
+    },
+    {
+      "fieldId": "dataCancelamento",
+      "title": "Data de cancelamento",
+      "type": "date",
+      "required": false,
+      "description": "Data em que o aluno cancelou a matrícula."
+    },
+    {
+      "fieldId": "status",
+      "title": "Situação",
+      "type": "string",
+      "required": true,
+      "enum": [
+        {
+          "value": "active",
+          "title": "Ativa"
+        },
+        {
+          "value": "cancelled",
+          "title": "Cancelada"
+        }
+      ],
+      "description": "Situação atual da matrícula para determinar sua participação nas gerações futuras de mensalidades."
+    }
+  ],
+  "lifecycleStates": [
+    {
+      "state": "active",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "cancelled",
+      "reachedBy": "actor"
+    }
+  ],
+  "transitions": [
+    {
+      "transitionId": "cancelarMatricula",
+      "from": [
+        "active"
+      ],
+      "to": "cancelled",
+      "by": [
+        "aluno"
+      ],
+      "description": "O aluno cancela a própria matrícula, interrompendo a geração de mensalidades futuras."
+    }
+  ]
+}

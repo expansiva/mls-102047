@@ -1,0 +1,470 @@
+{
+  "plan": {
+    "moduleName": "inscricaoEvento",
+    "businessDomain": "Gestão e inscrições públicas em eventos",
+    "entities": [
+      {
+        "entityId": "Evento",
+        "title": "Evento",
+        "description": "Evento organizado pela organização, com informações, capacidade e publicação para inscrições públicas.",
+        "kind": "core",
+        "party": "none",
+        "displayField": "title",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "inscricaoEvento.Evento"
+        }
+      },
+      {
+        "entityId": "Inscricao",
+        "title": "Inscrição",
+        "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmada, espera ou cancelada.",
+        "kind": "event",
+        "party": "none",
+        "displayField": "id",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "inscricaoEvento.Inscricao"
+        }
+      },
+      {
+        "entityId": "Participant",
+        "title": "Participante",
+        "description": "Pessoa que realiza ou cancela uma inscrição em um evento.",
+        "kind": "mdm",
+        "party": "person",
+        "mdmSubtype": "Person",
+        "displayField": "name",
+        "maintenance": "crud",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "inscricaoEvento.Participant"
+        }
+      },
+      {
+        "entityId": "Venue",
+        "title": "Local do evento",
+        "description": "Local cadastrado na organização onde um evento ocorre.",
+        "kind": "mdm",
+        "party": "none",
+        "mdmSubtype": "Location",
+        "displayField": "name",
+        "maintenance": "crud",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "inscricaoEvento.Venue"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "relationshipId": "eventRegistrations",
+        "fromEntity": "Evento",
+        "toEntity": "Inscricao",
+        "type": "oneToMany",
+        "required": false,
+        "description": "Um evento pode ter várias inscrições.",
+        "persistence": {
+          "mode": "moduleReference"
+        }
+      },
+      {
+        "relationshipId": "registrationParticipant",
+        "fromEntity": "Inscricao",
+        "toEntity": "Participant",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada inscrição pertence a uma pessoa participante.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "eventVenue",
+        "fromEntity": "Evento",
+        "toEntity": "Venue",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada evento ocorre em um local cadastrado.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      }
+    ],
+    "normalizations": [
+      {
+        "kind": "dropCrud",
+        "entityId": "Evento",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "dropCrud",
+        "entityId": "Inscricao",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      }
+    ]
+  },
+  "entities": [
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "inscricaoEvento",
+      "entityId": "Evento",
+      "title": "Evento",
+      "description": "Evento organizado pela organização, com informações, capacidade e publicação para inscrições públicas.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "title",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único do evento."
+        },
+        {
+          "fieldId": "title",
+          "title": "Título",
+          "type": "string",
+          "required": true,
+          "description": "Título do evento."
+        },
+        {
+          "fieldId": "description",
+          "title": "Descrição",
+          "type": "text",
+          "required": true,
+          "description": "Descrição do evento para a página pública."
+        },
+        {
+          "fieldId": "eventDate",
+          "title": "Data do evento",
+          "type": "datetime",
+          "required": true,
+          "description": "Data e horário em que o evento será realizado."
+        },
+        {
+          "fieldId": "venueId",
+          "title": "Local",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao local cadastrado onde o evento ocorre."
+        },
+        {
+          "fieldId": "capacity",
+          "title": "Número de vagas",
+          "type": "integer",
+          "required": true,
+          "constraints": {
+            "min": 1
+          },
+          "description": "Quantidade máxima de inscrições confirmadas no evento."
+        },
+        {
+          "fieldId": "status",
+          "title": "Situação",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "draft",
+              "title": "Rascunho"
+            },
+            {
+              "value": "published",
+              "title": "Publicado"
+            }
+          ],
+          "description": "Situação de publicação do evento."
+        }
+      ],
+      "details": {
+        "occupiedSeats": {
+          "type": "integer",
+          "description": "Quantidade atual de vagas ocupadas por inscrições confirmadas."
+        }
+      },
+      "lifecycleStates": [
+        {
+          "state": "draft",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "published",
+          "reachedBy": "actor"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "publishEvent",
+          "from": [
+            "draft"
+          ],
+          "to": "published",
+          "by": [
+            "organizador"
+          ],
+          "description": "Publica o evento para disponibilizar sua página pública de inscrições."
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "inscricaoEvento",
+      "entityId": "Inscricao",
+      "title": "Inscrição",
+      "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmada, espera ou cancelada.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "id",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador da inscrição",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único da inscrição."
+        },
+        {
+          "fieldId": "eventId",
+          "title": "Evento",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao evento ao qual a inscrição pertence."
+        },
+        {
+          "fieldId": "participantId",
+          "title": "Participante",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência à pessoa participante registrada no MDM."
+        },
+        {
+          "fieldId": "registeredAt",
+          "title": "Data e hora da inscrição",
+          "type": "datetime",
+          "required": true,
+          "description": "Data e hora em que a inscrição foi realizada, usada para ordenar a lista de espera."
+        },
+        {
+          "fieldId": "status",
+          "title": "Situação",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "confirmed",
+              "title": "Confirmada"
+            },
+            {
+              "value": "waitingList",
+              "title": "Lista de espera"
+            },
+            {
+              "value": "canceled",
+              "title": "Cancelada"
+            }
+          ],
+          "description": "Situação atual da inscrição no evento."
+        }
+      ],
+      "uniqueKeys": [
+        [
+          "eventId",
+          "participantId"
+        ]
+      ],
+      "lifecycleStates": [
+        {
+          "state": "confirmed",
+          "reachedBy": "command"
+        },
+        {
+          "state": "waitingList",
+          "reachedBy": "command"
+        },
+        {
+          "state": "canceled",
+          "reachedBy": "actor"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "placeRegistrationOnWaitingList",
+          "from": [
+            "confirmed"
+          ],
+          "to": "waitingList",
+          "by": "system",
+          "description": "Coloca a inscrição na lista de espera quando não houver vagas disponíveis no evento."
+        },
+        {
+          "transitionId": "cancelRegistration",
+          "from": [
+            "confirmed",
+            "waitingList"
+          ],
+          "to": "canceled",
+          "by": [
+            "publico"
+          ],
+          "description": "Cancela a própria inscrição no evento."
+        },
+        {
+          "transitionId": "promoteWaitlistedRegistration",
+          "from": [
+            "waitingList"
+          ],
+          "to": "confirmed",
+          "by": "system",
+          "description": "Confirma a primeira inscrição da lista de espera após a liberação de uma vaga."
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "inscricaoEvento",
+      "entityId": "Participant",
+      "title": "Participante",
+      "description": "Pessoa que realiza ou cancela uma inscrição em um evento.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "fields": [],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "inscricaoEvento.Participant"
+      },
+      "maintenance": "crud"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "inscricaoEvento",
+      "entityId": "Venue",
+      "title": "Local do evento",
+      "description": "Local cadastrado na organização onde um evento ocorre.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "Location",
+      "displayField": "name",
+      "fields": [],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "inscricaoEvento.Venue"
+      },
+      "maintenance": "crud"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "eventRegistrations",
+      "fromEntity": "Evento",
+      "toEntity": "Inscricao",
+      "type": "oneToMany",
+      "required": false,
+      "description": "Um evento pode ter várias inscrições.",
+      "persistence": {
+        "mode": "moduleReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Inscricao",
+        "from": {
+          "entityId": "Evento",
+          "fieldIds": [
+            "id"
+          ]
+        },
+        "to": {
+          "entityId": "Inscricao",
+          "fieldIds": [
+            "eventId"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "registrationParticipant",
+      "fromEntity": "Inscricao",
+      "toEntity": "Participant",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada inscrição pertence a uma pessoa participante.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Inscricao",
+        "from": {
+          "entityId": "Inscricao",
+          "fieldIds": [
+            "participantId"
+          ]
+        },
+        "to": {
+          "entityId": "Participant",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "eventVenue",
+      "fromEntity": "Evento",
+      "toEntity": "Venue",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada evento ocorre em um local cadastrado.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Evento",
+        "from": {
+          "entityId": "Evento",
+          "fieldIds": [
+            "venueId"
+          ]
+        },
+        "to": {
+          "entityId": "Venue",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    }
+  ],
+  "removedOrphans": [],
+  "liftedAggregateEntities": []
+}

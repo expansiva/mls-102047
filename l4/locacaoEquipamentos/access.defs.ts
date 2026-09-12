@@ -1,0 +1,84 @@
+/// <mls fileReference="_102047_/l4/locacaoEquipamentos/access.defs.ts" enhancement="_blank"/>
+
+import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
+
+export const locacaoEquipamentosAccess = {
+  "schemaVersion": "2026-09-10-ns5-access-v2",
+  "moduleName": "locacaoEquipamentos",
+  "actors": [
+    {
+      "actorId": "atendente",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Atendente",
+      "description": "Profissional da locadora que cria contratos de locação para clientes e registra devoluções de equipamentos."
+    },
+    {
+      "actorId": "gerente",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Gerente",
+      "description": "Responsável que acompanha a disponibilidade, as locações e a manutenção dos equipamentos."
+    }
+  ],
+  "authorities": [
+    {
+      "authorityId": "gerirLocacoes",
+      "title": "Gerir locações",
+      "description": "Permite cadastrar clientes, consultar equipamentos e criar contratos de locação, incluindo o registro de devoluções."
+    },
+    {
+      "authorityId": "acompanharEquipamentos",
+      "title": "Acompanhar equipamentos",
+      "description": "Permite consultar a identificação, a descrição e a situação operacional dos equipamentos da locadora."
+    }
+  ],
+  "grants": [
+    {
+      "grantId": "atendenteGerirLocacoes",
+      "actorRef": "atendente",
+      "authorityRef": "gerirLocacoes",
+      "entityRefs": [
+        "Cliente",
+        "Equipamento",
+        "ContratoLocacao"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange os clientes, equipamentos e contratos de locação de toda a organização necessários ao atendimento."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Permite visualizar todos os campos dos clientes, equipamentos e contratos necessários para registrar locações e devoluções."
+      }
+    },
+    {
+      "grantId": "gerenteAcompanharEquipamentos",
+      "actorRef": "gerente",
+      "authorityRef": "acompanharEquipamentos",
+      "entityRefs": [
+        "Equipamento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange todos os equipamentos cadastrados pela organização."
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "Permite consultar somente o código, a descrição e a situação operacional dos equipamentos.",
+        "allowedFields": [
+          "Equipamento.code",
+          "Equipamento.description",
+          "Equipamento.operationalStatus"
+        ],
+        "deniedFields": [
+          "Equipamento.dailyRate"
+        ]
+      }
+    }
+  ]
+} as const satisfies Ns5AccessArtifact;
+
+export type LocacaoEquipamentosAccessType = typeof locacaoEquipamentosAccess;
+
+export default locacaoEquipamentosAccess;

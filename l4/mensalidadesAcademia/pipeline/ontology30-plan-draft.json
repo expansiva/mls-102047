@@ -1,0 +1,187 @@
+{
+  "moduleName": "mensalidadesAcademia",
+  "businessDomain": "Gestão de mensalidades, matrículas, pagamentos e indicadores de academia.",
+  "entities": [
+    {
+      "entityId": "Aluno",
+      "title": "Aluno",
+      "description": "Pessoa que possui matrícula na academia e para a qual são geradas mensalidades.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "mensalidadesAcademia.Aluno"
+      }
+    },
+    {
+      "entityId": "Plano",
+      "title": "Plano",
+      "description": "Serviço oferecido pela academia, com modalidade, valor e dia de vencimento definidos para as matrículas.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "Service",
+      "displayField": "name",
+      "maintenance": "crud",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "mensalidadesAcademia.Plano"
+      }
+    },
+    {
+      "entityId": "Matricula",
+      "title": "Matrícula",
+      "description": "Vínculo de um aluno a um plano a partir de uma data, que determina sua elegibilidade para gerações futuras de mensalidades.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "id",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "mensalidadesAcademia.Matricula"
+      }
+    },
+    {
+      "entityId": "Mensalidade",
+      "title": "Mensalidade",
+      "description": "Cobrança gerada para uma matrícula em um período mensal, contendo o valor e o vencimento aplicáveis.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "periodo",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "mensalidadesAcademia.Mensalidade"
+      }
+    },
+    {
+      "entityId": "Pagamento",
+      "title": "Pagamento",
+      "description": "Registro de um valor recebido para quitação total ou parcial de uma mensalidade.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "id",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "mensalidadesAcademia.Pagamento"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "alunoMatriculas",
+      "fromEntity": "Aluno",
+      "toEntity": "Matricula",
+      "type": "oneToMany",
+      "required": true,
+      "description": "Um aluno pode possuir matrículas registradas na academia.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "planoMatriculas",
+      "fromEntity": "Plano",
+      "toEntity": "Matricula",
+      "type": "oneToMany",
+      "required": true,
+      "description": "Um plano pode estar vinculado a diversas matrículas.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "matriculaMensalidades",
+      "fromEntity": "Matricula",
+      "toEntity": "Mensalidade",
+      "type": "oneToMany",
+      "required": true,
+      "description": "Uma matrícula origina mensalidades para os períodos em que permanece ativa.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "mensalidadePagamentos",
+      "fromEntity": "Mensalidade",
+      "toEntity": "Pagamento",
+      "type": "oneToMany",
+      "required": true,
+      "description": "Uma mensalidade pode receber um ou mais pagamentos registrados.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    }
+  ],
+  "moduleDetails": {
+    "totalAreceberNoMes": {
+      "type": "money",
+      "description": "Total das mensalidades previstas para recebimento no mês consultado."
+    },
+    "totalRecebidoNoMes": {
+      "type": "money",
+      "description": "Total de pagamentos recebidos no mês consultado."
+    },
+    "quantidadeAlunosAtivos": {
+      "type": "integer",
+      "description": "Quantidade de alunos com matrícula ativa no período consultado."
+    },
+    "quantidadeAlunosBloqueados": {
+      "type": "integer",
+      "description": "Quantidade de alunos bloqueados por inadimplência no período consultado."
+    },
+    "quantidadeAlunosInadimplentes": {
+      "type": "integer",
+      "description": "Quantidade de alunos com mensalidades vencidas no período consultado."
+    },
+    "totalAreceber": {
+      "type": "money",
+      "description": "Valor total das mensalidades a receber no período consultado."
+    },
+    "totalRecebido": {
+      "type": "money",
+      "description": "Valor total recebido em pagamentos de mensalidades no período consultado."
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "Aluno",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Matricula",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Mensalidade",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Pagamento",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "liftedFields",
+      "entityId": "IndicadoresAcademia",
+      "detail": "periodo"
+    }
+  ],
+  "liftedAggregateEntities": [
+    "IndicadoresAcademia"
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "moduleName": "agendaClinica",
+  "businessDomain": "Agendamento e realização de consultas clínicas",
+  "entities": [
+    {
+      "entityId": "Paciente",
+      "title": "Paciente",
+      "description": "Pessoa cadastrada ou vinculada à clínica para receber consultas.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "agendaClinica.Paciente"
+      }
+    },
+    {
+      "entityId": "Profissional",
+      "title": "Profissional",
+      "description": "Médico ou terapeuta da clínica que realiza consultas.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "maintenance": "crud",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "agendaClinica.Profissional"
+      }
+    },
+    {
+      "entityId": "Consulta",
+      "title": "Consulta",
+      "description": "Agendamento clínico de um paciente com um profissional, incluindo sua confirmação e resultado de atendimento.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "scheduledAt",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "agendaClinica.Consulta"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "consultaPaciente",
+      "fromEntity": "Consulta",
+      "toEntity": "Paciente",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada consulta é agendada para um paciente.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "consultaProfissional",
+      "fromEntity": "Consulta",
+      "toEntity": "Profissional",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada consulta é realizada por um profissional.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "Paciente",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Consulta",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    }
+  ]
+}

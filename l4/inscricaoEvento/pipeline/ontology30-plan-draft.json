@@ -1,0 +1,113 @@
+{
+  "moduleName": "inscricaoEvento",
+  "businessDomain": "Gestão e inscrições públicas em eventos",
+  "entities": [
+    {
+      "entityId": "Evento",
+      "title": "Evento",
+      "description": "Evento organizado pela organização, com informações, capacidade e publicação para inscrições públicas.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "title",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "inscricaoEvento.Evento"
+      }
+    },
+    {
+      "entityId": "Inscricao",
+      "title": "Inscrição",
+      "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmada, espera ou cancelada.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "id",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "inscricaoEvento.Inscricao"
+      }
+    },
+    {
+      "entityId": "Participant",
+      "title": "Participante",
+      "description": "Pessoa que realiza ou cancela uma inscrição em um evento.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "maintenance": "crud",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "inscricaoEvento.Participant"
+      }
+    },
+    {
+      "entityId": "Venue",
+      "title": "Local do evento",
+      "description": "Local cadastrado na organização onde um evento ocorre.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "Location",
+      "displayField": "name",
+      "maintenance": "crud",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "inscricaoEvento.Venue"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "eventRegistrations",
+      "fromEntity": "Evento",
+      "toEntity": "Inscricao",
+      "type": "oneToMany",
+      "required": false,
+      "description": "Um evento pode ter várias inscrições.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "registrationParticipant",
+      "fromEntity": "Inscricao",
+      "toEntity": "Participant",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada inscrição pertence a uma pessoa participante.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "eventVenue",
+      "fromEntity": "Evento",
+      "toEntity": "Venue",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada evento ocorre em um local cadastrado.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "Evento",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Inscricao",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    }
+  ]
+}

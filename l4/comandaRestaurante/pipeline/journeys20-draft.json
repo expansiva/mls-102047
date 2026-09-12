@@ -1,0 +1,220 @@
+{
+  "journeys": [
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "abrirComanda",
+      "business": {
+        "actorRef": "garcom",
+        "title": "Abrir comanda para uma mesa",
+        "goal": "Iniciar uma comanda em uma mesa disponível para registrar o consumo.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "localizarMesa",
+            "kind": "locate",
+            "entity": "Mesa",
+            "title": "Localizar mesa disponível",
+            "description": "Localiza a mesa que receberá a comanda."
+          },
+          {
+            "stepId": "inspecionarMesa",
+            "kind": "inspect",
+            "entity": "Mesa",
+            "title": "Conferir mesa",
+            "description": "Confere se a mesa está disponível para abertura de comanda."
+          },
+          {
+            "stepId": "abrirComanda",
+            "kind": "act",
+            "entity": "Comanda",
+            "affects": [
+              "Mesa"
+            ],
+            "title": "Abrir comanda",
+            "description": "Abre uma comanda vinculada à mesa e a marca como ocupada."
+          }
+        ],
+        "outcome": {
+          "statement": "Uma comanda aberta fica vinculada à mesa selecionada.",
+          "evidence": [
+            "Comanda identificada como aberta para a mesa.",
+            "Mesa identificada como ocupada."
+          ]
+        }
+      },
+      "businessHash": "sha256:eb23ac2024818599a616b7719c3a868a1eeccd33c801adfc35703f6edb59496f"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "lancarItemComanda",
+      "business": {
+        "actorRef": "garcom",
+        "title": "Lançar item na comanda",
+        "goal": "Registrar um item do cardápio, sua quantidade e observação em uma comanda aberta.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "localizarComandaAberta",
+            "kind": "locate",
+            "entity": "Comanda",
+            "title": "Localizar comanda aberta",
+            "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa."
+          },
+          {
+            "stepId": "inspecionarComanda",
+            "kind": "inspect",
+            "entity": "Comanda",
+            "title": "Conferir comanda",
+            "description": "Confere que a comanda permanece aberta antes do lançamento."
+          },
+          {
+            "stepId": "localizarItemCardapio",
+            "kind": "locate",
+            "entity": "ItemCardapio",
+            "title": "Localizar item do cardápio",
+            "description": "Localiza o item que será consumido."
+          },
+          {
+            "stepId": "inspecionarItemCardapio",
+            "kind": "inspect",
+            "entity": "ItemCardapio",
+            "title": "Conferir item do cardápio",
+            "description": "Confere o item e seu preço vigente no cardápio."
+          },
+          {
+            "stepId": "registrarItemComanda",
+            "kind": "act",
+            "entity": "ItemComanda",
+            "affects": [
+              "Comanda"
+            ],
+            "title": "Registrar item",
+            "description": "Lança o item na comanda com quantidade e observação, quando houver."
+          }
+        ],
+        "outcome": {
+          "statement": "O consumo é registrado na comanda aberta.",
+          "evidence": [
+            "Item lançado com quantidade e observação registrada, quando informada.",
+            "Total da comanda atualizado com o item lançado."
+          ]
+        }
+      },
+      "businessHash": "sha256:839b31058d40e1104c627feaf52cd25f9649622c05ad2cc8c5c6746b5e624496"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "cancelarItemComanda",
+      "business": {
+        "actorRef": "garcom",
+        "title": "Cancelar item lançado por engano",
+        "goal": "Cancelar um item registrado indevidamente enquanto a comanda estiver aberta.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "localizarComandaParaCancelamento",
+            "kind": "locate",
+            "entity": "Comanda",
+            "title": "Localizar comanda aberta",
+            "description": "Usa a comanda em contexto ou localiza a comanda que contém o item."
+          },
+          {
+            "stepId": "inspecionarComandaParaCancelamento",
+            "kind": "inspect",
+            "entity": "Comanda",
+            "title": "Conferir situação da comanda",
+            "description": "Confere que a comanda está aberta."
+          },
+          {
+            "stepId": "localizarItemLancado",
+            "kind": "locate",
+            "entity": "ItemComanda",
+            "title": "Localizar item lançado",
+            "description": "Localiza o item que foi lançado por engano."
+          },
+          {
+            "stepId": "inspecionarItemLancado",
+            "kind": "inspect",
+            "entity": "ItemComanda",
+            "title": "Conferir item lançado",
+            "description": "Confere o item selecionado antes do cancelamento."
+          },
+          {
+            "stepId": "cancelarItemLancado",
+            "kind": "act",
+            "entity": "ItemComanda",
+            "affects": [
+              "Comanda"
+            ],
+            "title": "Cancelar item",
+            "description": "Cancela o item lançado indevidamente na comanda aberta."
+          }
+        ],
+        "outcome": {
+          "statement": "O item lançado por engano deixa de compor a comanda.",
+          "evidence": [
+            "Item identificado como cancelado.",
+            "Total da comanda recalculado sem o item cancelado."
+          ]
+        }
+      },
+      "businessHash": "sha256:b7b98382e08c6edda1c86fec0d474910eb6cc1c05c295c6366ec45fa148d8f0d"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "fecharComanda",
+      "business": {
+        "actorRef": "caixa",
+        "title": "Fechar comanda e liberar mesa",
+        "goal": "Receber uma comanda aberta, registrar desconto opcional e pagamento, e liberar a mesa.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "localizarComandaParaFechamento",
+            "kind": "locate",
+            "entity": "Comanda",
+            "title": "Localizar comanda aberta",
+            "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa."
+          },
+          {
+            "stepId": "inspecionarComandaParaFechamento",
+            "kind": "inspect",
+            "entity": "Comanda",
+            "title": "Conferir total da comanda",
+            "description": "Confere os itens lançados e o total a cobrar."
+          },
+          {
+            "stepId": "fecharComanda",
+            "kind": "act",
+            "entity": "Comanda",
+            "affects": [
+              "Mesa"
+            ],
+            "title": "Registrar fechamento e pagamento",
+            "description": "Aplica desconto opcional, registra a forma de pagamento, fecha a comanda e libera a mesa."
+          }
+        ],
+        "outcome": {
+          "statement": "A comanda é fechada, o pagamento fica registrado e a mesa é liberada.",
+          "evidence": [
+            "Comanda identificada como fechada com total final e desconto, quando aplicado.",
+            "Forma de pagamento registrada.",
+            "Mesa identificada como disponível."
+          ]
+        }
+      },
+      "businessHash": "sha256:d45784c973770e00027fa7462fad3702325eeae3136fb8fd6608e1c3153607f1"
+    }
+  ],
+  "systemDecisions": [],
+  "droppedActors": [],
+  "removedOrphans": []
+}

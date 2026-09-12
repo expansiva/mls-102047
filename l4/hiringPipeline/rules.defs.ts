@@ -1,0 +1,38 @@
+/// <mls fileReference="_102047_/l4/hiringPipeline/rules.defs.ts" enhancement="_blank"/>
+
+import type { Ns5RulesArtifact } from '/_102035_/l2/solution/types.js';
+
+export const hiringPipelineRules = {
+  "schemaVersion": "2026-09-10-ns5-rules-v1",
+  "moduleName": "hiringPipeline",
+  "rules": [
+    {
+      "ruleId": "applicationStartsInScreening",
+      "description": "A newly created application starts in the screening stage."
+    },
+    {
+      "ruleId": "applicationStageProgression",
+      "description": "An application may move from screening to interview, from interview to offer, and from offer to hired."
+    },
+    {
+      "ruleId": "rejectionRequiresReason",
+      "description": "An application may be moved to rejected only when a rejection reason is recorded."
+    },
+    {
+      "ruleId": "filledHeadcountCalculation",
+      "description": "A job position's filled headcount equals the number of applications for that position in the hired stage."
+    },
+    {
+      "ruleId": "remainingHeadcountCalculation",
+      "description": "A job position's remaining headcount equals its requested headcount minus its filled headcount."
+    },
+    {
+      "ruleId": "positionClosesWhenHeadcountFilled",
+      "description": "A job position closes automatically when its filled headcount reaches its requested headcount."
+    }
+  ]
+} as const satisfies Ns5RulesArtifact;
+
+export type HiringPipelineRulesType = typeof hiringPipelineRules;
+
+export default hiringPipelineRules;

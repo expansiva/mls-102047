@@ -1,0 +1,328 @@
+{
+  "plan": {
+    "moduleName": "agendaClinica",
+    "businessDomain": "Agendamento e realização de consultas clínicas",
+    "entities": [
+      {
+        "entityId": "Paciente",
+        "title": "Paciente",
+        "description": "Pessoa cadastrada ou vinculada à clínica para receber consultas.",
+        "kind": "mdm",
+        "party": "person",
+        "mdmSubtype": "Person",
+        "displayField": "name",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "agendaClinica.Paciente"
+        }
+      },
+      {
+        "entityId": "Profissional",
+        "title": "Profissional",
+        "description": "Médico ou terapeuta da clínica que realiza consultas.",
+        "kind": "mdm",
+        "party": "person",
+        "mdmSubtype": "Person",
+        "displayField": "name",
+        "maintenance": "crud",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "agendaClinica.Profissional"
+        }
+      },
+      {
+        "entityId": "Consulta",
+        "title": "Consulta",
+        "description": "Agendamento clínico de um paciente com um profissional, incluindo sua confirmação e resultado de atendimento.",
+        "kind": "core",
+        "party": "none",
+        "displayField": "scheduledAt",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "agendaClinica.Consulta"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "relationshipId": "consultaPaciente",
+        "fromEntity": "Consulta",
+        "toEntity": "Paciente",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada consulta é agendada para um paciente.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "consultaProfissional",
+        "fromEntity": "Consulta",
+        "toEntity": "Profissional",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada consulta é realizada por um profissional.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      }
+    ],
+    "normalizations": [
+      {
+        "kind": "dropCrud",
+        "entityId": "Paciente",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "dropCrud",
+        "entityId": "Consulta",
+        "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+      }
+    ]
+  },
+  "entities": [
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "agendaClinica",
+      "entityId": "Paciente",
+      "title": "Paciente",
+      "description": "Pessoa cadastrada ou vinculada à clínica para receber consultas.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "fields": [],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "agendaClinica.Paciente"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "agendaClinica",
+      "entityId": "Profissional",
+      "title": "Profissional",
+      "description": "Médico ou terapeuta da clínica que realiza consultas.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "fields": [],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "agendaClinica.Profissional"
+      },
+      "maintenance": "crud"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "agendaClinica",
+      "entityId": "Consulta",
+      "title": "Consulta",
+      "description": "Agendamento clínico de um paciente com um profissional, incluindo sua confirmação e resultado de atendimento.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "scheduledAt",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único da consulta."
+        },
+        {
+          "fieldId": "pacienteId",
+          "title": "Paciente",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao paciente para quem a consulta foi agendada."
+        },
+        {
+          "fieldId": "profissionalId",
+          "title": "Profissional",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao profissional que realizará a consulta."
+        },
+        {
+          "fieldId": "scheduledAt",
+          "title": "Data e horário",
+          "type": "datetime",
+          "required": true,
+          "description": "Data e horário programados para a consulta."
+        },
+        {
+          "fieldId": "status",
+          "title": "Situação",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "scheduled",
+              "title": "Agendada"
+            },
+            {
+              "value": "confirmed",
+              "title": "Confirmada"
+            },
+            {
+              "value": "noShow",
+              "title": "Falta do paciente"
+            },
+            {
+              "value": "attended",
+              "title": "Atendida"
+            }
+          ],
+          "description": "Situação atual da consulta."
+        },
+        {
+          "fieldId": "clinicalNote",
+          "title": "Anotação do atendimento",
+          "type": "text",
+          "required": false,
+          "description": "Anotação registrada pelo profissional sobre o atendimento realizado."
+        }
+      ],
+      "uniqueKeys": [
+        [
+          "profissionalId",
+          "scheduledAt"
+        ]
+      ],
+      "lifecycleStates": [
+        {
+          "state": "scheduled",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "confirmed",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "noShow",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "attended",
+          "reachedBy": "actor"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "confirmAppointment",
+          "from": [
+            "scheduled"
+          ],
+          "to": "confirmed",
+          "by": [
+            "recepcionista"
+          ],
+          "description": "Registra a confirmação telefônica da consulta."
+        },
+        {
+          "transitionId": "recordPatientNoShow",
+          "from": [
+            "scheduled",
+            "confirmed"
+          ],
+          "to": "noShow",
+          "by": [
+            "recepcionista"
+          ],
+          "description": "Registra que o paciente não compareceu à consulta."
+        },
+        {
+          "transitionId": "recordAppointmentAttendance",
+          "from": [
+            "scheduled",
+            "confirmed"
+          ],
+          "to": "attended",
+          "by": [
+            "profissional"
+          ],
+          "description": "Registra a realização do atendimento e sua anotação."
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "consultaPaciente",
+      "fromEntity": "Consulta",
+      "toEntity": "Paciente",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada consulta é agendada para um paciente.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Consulta",
+        "from": {
+          "entityId": "Consulta",
+          "fieldIds": [
+            "pacienteId"
+          ]
+        },
+        "to": {
+          "entityId": "Paciente",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "consultaProfissional",
+      "fromEntity": "Consulta",
+      "toEntity": "Profissional",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada consulta é realizada por um profissional.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Consulta",
+        "from": {
+          "entityId": "Consulta",
+          "fieldIds": [
+            "profissionalId"
+          ]
+        },
+        "to": {
+          "entityId": "Profissional",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    }
+  ],
+  "removedOrphans": [],
+  "liftedAggregateEntities": []
+}

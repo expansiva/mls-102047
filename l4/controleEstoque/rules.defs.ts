@@ -1,0 +1,26 @@
+/// <mls fileReference="_102047_/l4/controleEstoque/rules.defs.ts" enhancement="_blank"/>
+
+import type { Ns5RulesArtifact } from '/_102035_/l2/solution/types.js';
+
+export const controleEstoqueRules = {
+  "schemaVersion": "2026-09-10-ns5-rules-v1",
+  "moduleName": "controleEstoque",
+  "rules": [
+    {
+      "ruleId": "currentStockEqualsRegisteredEntriesMinusExits",
+      "description": "O saldo atual de cada produto é calculado pela soma das quantidades das entradas registradas menos a soma das quantidades das saídas registradas para esse produto."
+    },
+    {
+      "ruleId": "lowStockAlertWhenCurrentStockBelowMinimum",
+      "description": "Um aviso de estoque baixo deve ser acionado quando o saldo atual de um produto estiver abaixo do seu estoque mínimo definido."
+    },
+    {
+      "ruleId": "stockMovementCannotBeChangedAfterRegistration",
+      "description": "Uma movimentação de estoque não pode ser alterada depois de registrada definitivamente."
+    }
+  ]
+} as const satisfies Ns5RulesArtifact;
+
+export type ControleEstoqueRulesType = typeof controleEstoqueRules;
+
+export default controleEstoqueRules;

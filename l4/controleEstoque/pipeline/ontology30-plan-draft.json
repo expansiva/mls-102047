@@ -1,0 +1,61 @@
+{
+  "moduleName": "controleEstoque",
+  "businessDomain": "Controle de estoque de produtos, com registro imutável de entradas e saídas e acompanhamento do saldo disponível em relação ao estoque mínimo.",
+  "entities": [
+    {
+      "entityId": "Product",
+      "title": "Produto controlado",
+      "description": "Papel do módulo para um produto da organização cujo estoque, saldo disponível e estoque mínimo são acompanhados.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "Product",
+      "displayField": "name",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "controleEstoque.Product"
+      }
+    },
+    {
+      "entityId": "StockMovement",
+      "title": "Movimentação de estoque",
+      "description": "Registro definitivo de uma entrada ou saída de unidades de um produto controlado.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "movementType",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "controleEstoque.StockMovement"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "stockMovementProduct",
+      "fromEntity": "StockMovement",
+      "toEntity": "Product",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada movimentação de estoque registra a entrada ou saída de unidades de um produto controlado.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "Product",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "StockMovement",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "2026-09-10-ns5-workflows-v1",
+  "moduleName": "reembolsoDespesas",
+  "processes": [
+    {
+      "processId": "aprovacaoEPagamentoDeDespesa",
+      "title": "Aprovação e pagamento de despesa",
+      "description": "Orquestra o envio da despesa pelo colaborador, a decisão do gestor e o pagamento pelo financeiro, incluindo um único reenvio após rejeição.",
+      "tasks": [
+        {
+          "taskId": "enviarDespesaInicial",
+          "kind": "human",
+          "actorRef": "colaborador",
+          "journeyRef": "registrarEenviarDespesa",
+          "stepRef": "enviarParaAprovacao",
+          "next": [
+            "decidirDespesaInicial"
+          ],
+          "description": "O colaborador envia a despesa para a avaliação do gestor da equipe."
+        },
+        {
+          "taskId": "decidirDespesaInicial",
+          "kind": "human",
+          "actorRef": "gestorEquipe",
+          "journeyRef": "avaliarDespesaDaEquipe",
+          "stepRef": "decidirAprovacaoOuRejeicao",
+          "next": [
+            "registrarPagamento",
+            "corrigirDespesaRejeitada"
+          ],
+          "description": "O gestor aprova a despesa para pagamento ou a rejeita informando o motivo ao colaborador."
+        },
+        {
+          "taskId": "corrigirDespesaRejeitada",
+          "kind": "human",
+          "actorRef": "colaborador",
+          "journeyRef": "corrigirEreenviarDespesa",
+          "stepRef": "corrigirDespesa",
+          "next": [
+            "reenviarDespesaCorrigida"
+          ],
+          "description": "O colaborador corrige a despesa rejeitada antes de seu único reenvio permitido."
+        },
+        {
+          "taskId": "reenviarDespesaCorrigida",
+          "kind": "human",
+          "actorRef": "colaborador",
+          "journeyRef": "corrigirEreenviarDespesa",
+          "stepRef": "reenviarParaAprovacao",
+          "next": [
+            "decidirDespesaReenviada"
+          ],
+          "description": "O colaborador reenvia a despesa corrigida para uma nova avaliação do gestor."
+        },
+        {
+          "taskId": "decidirDespesaReenviada",
+          "kind": "human",
+          "actorRef": "gestorEquipe",
+          "journeyRef": "avaliarDespesaDaEquipe",
+          "stepRef": "decidirAprovacaoOuRejeicao",
+          "next": [
+            "registrarPagamento"
+          ],
+          "description": "O gestor decide sobre a despesa reenviada, encaminhando-a ao pagamento quando aprovada."
+        },
+        {
+          "taskId": "registrarPagamento",
+          "kind": "human",
+          "actorRef": "financeiro",
+          "journeyRef": "registrarPagamentoDeDespesa",
+          "stepRef": "registrarDataDePagamento",
+          "next": [],
+          "description": "O financeiro registra a data do pagamento da despesa aprovada."
+        }
+      ]
+    }
+  ]
+}

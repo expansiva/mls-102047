@@ -1,0 +1,38 @@
+/// <mls fileReference="_102047_/l4/manutencaoFrota/rules.defs.ts" enhancement="_blank"/>
+
+import type { Ns5RulesArtifact } from '/_102035_/l2/solution/types.js';
+
+export const manutencaoFrotaRules = {
+  "schemaVersion": "2026-09-10-ns5-rules-v1",
+  "moduleName": "manutencaoFrota",
+  "rules": [
+    {
+      "ruleId": "atualizarQuilometragemPorAbastecimento",
+      "description": "Ao registrar um abastecimento, a quilometragem atual do veículo deve ser atualizada com a quilometragem informada no painel."
+    },
+    {
+      "ruleId": "definirPeriodicidadePreventiva",
+      "description": "Um plano de manutenção preventiva deve definir uma periodicidade por intervalo de quilômetros ou por intervalo de meses."
+    },
+    {
+      "ruleId": "calcularQuilometragemPrevista",
+      "description": "Quando o plano tiver intervalo de quilômetros, sua quilometragem prevista para a próxima preventiva deve ser a quilometragem de referência acrescida desse intervalo."
+    },
+    {
+      "ruleId": "calcularDataPrevista",
+      "description": "Quando o plano tiver intervalo de meses, sua data prevista para a próxima preventiva deve ser a data de referência acrescida desse intervalo."
+    },
+    {
+      "ruleId": "identificarPreventivaVencidaPorQuilometragem",
+      "description": "A manutenção preventiva deve ser considerada vencida quando a quilometragem atual do veículo ultrapassar a quilometragem prevista no plano."
+    },
+    {
+      "ruleId": "motivarOrdemManutencao",
+      "description": "Uma ordem de manutenção deve ser aberta por vencimento de plano preventivo ou por defeito identificado no veículo."
+    }
+  ]
+} as const satisfies Ns5RulesArtifact;
+
+export type ManutencaoFrotaRulesType = typeof manutencaoFrotaRules;
+
+export default manutencaoFrotaRules;

@@ -1,0 +1,142 @@
+{
+  "moduleName": "financeiro",
+  "businessDomain": "Contas a receber da organização, incluindo títulos originados em outros módulos, seus recebimentos e estornos.",
+  "entities": [
+    {
+      "entityId": "TituloReceber",
+      "title": "Título a receber",
+      "description": "Obrigação de pagamento registrada no contas a receber, com pagador, valor, vencimento e referência à cobrança que a originou.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "id",
+      "mutability": "appendOnly",
+      "maintenance": "crud",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "financeiro.TituloReceber"
+      }
+    },
+    {
+      "entityId": "Pagador",
+      "title": "Pagador",
+      "description": "Pessoa que possui títulos a pagar e pode consultar seus próprios títulos e recebimentos pelo portal.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "maintenance": "crud",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "financeiro.Pagador"
+      }
+    },
+    {
+      "entityId": "Recebimento",
+      "title": "Recebimento",
+      "description": "Registro de um pagamento total ou parcial recebido para um título, por dinheiro, Pix ou cartão.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "id",
+      "mutability": "appendOnly",
+      "maintenance": "crud",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "financeiro.Recebimento"
+      }
+    },
+    {
+      "entityId": "EstornoRecebimento",
+      "title": "Estorno de recebimento",
+      "description": "Registro do cancelamento, no mesmo dia, de um recebimento efetuado indevidamente.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "id",
+      "mutability": "appendOnly",
+      "maintenance": "crud",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "financeiro.EstornoRecebimento"
+      }
+    },
+    {
+      "entityId": "CobrancaOrigem",
+      "title": "Cobrança de origem",
+      "description": "Referência externa à cobrança criada em outro módulo que gerou o título a receber.",
+      "kind": "supporting",
+      "party": "none",
+      "displayField": "id",
+      "mutability": "appendOnly",
+      "maintenance": "crud",
+      "storage": {
+        "target": "external",
+        "scope": "platform",
+        "idField": "id",
+        "mdmType": "financeiro.CobrancaOrigem"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "tituloPagador",
+      "fromEntity": "TituloReceber",
+      "toEntity": "Pagador",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada título a receber pertence a um pagador.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "tituloCobrancaOrigem",
+      "fromEntity": "TituloReceber",
+      "toEntity": "CobrancaOrigem",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada título a receber referencia a cobrança de outro módulo que o originou.",
+      "persistence": {
+        "mode": "externalReference"
+      }
+    },
+    {
+      "relationshipId": "recebimentoTitulo",
+      "fromEntity": "Recebimento",
+      "toEntity": "TituloReceber",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada recebimento é registrado para um título a receber.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "estornoRecebimento",
+      "fromEntity": "EstornoRecebimento",
+      "toEntity": "Recebimento",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada estorno cancela um recebimento específico.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    }
+  ],
+  "moduleDetails": {
+    "totalRecebiveisEmAberto": {
+      "type": "money",
+      "description": "Valor total atual dos títulos a receber que permanecem em aberto na organização."
+    },
+    "totalRecebiveisVencidos": {
+      "type": "money",
+      "description": "Valor total atual dos títulos a receber com vencimento já ultrapassado na organização."
+    }
+  }
+}

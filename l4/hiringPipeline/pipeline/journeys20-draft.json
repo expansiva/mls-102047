@@ -1,0 +1,257 @@
+{
+  "journeys": [
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "openJobPosition",
+      "business": {
+        "actorRef": "recruiter",
+        "title": "Open a job position",
+        "goal": "Create a position with the hiring requirements and capacity.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "createPosition",
+            "kind": "act",
+            "entity": "JobPosition",
+            "title": "Create the job position",
+            "description": "Record the title, department, description, and headcount for the new position."
+          }
+        ],
+        "outcome": {
+          "statement": "An active job position is available for candidate applications.",
+          "evidence": [
+            "The job position shows its title, department, description, and requested headcount.",
+            "The job position is available in the hiring pipeline."
+          ]
+        }
+      },
+      "businessHash": "sha256:76b20574ba315f7afe6e984f19f9c5c8a249aab6f2d5940f8535e4c634ba9c8b"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "registerCandidate",
+      "business": {
+        "actorRef": "recruiter",
+        "title": "Register a candidate",
+        "goal": "Record a candidate so they can be considered for positions.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "createCandidate",
+            "kind": "act",
+            "entity": "Candidate",
+            "title": "Register the candidate",
+            "description": "Record the candidate's name, email address, resume link, and source."
+          }
+        ],
+        "outcome": {
+          "statement": "The candidate is available to be added to a job application.",
+          "evidence": [
+            "The candidate record shows the name, email address, resume link, and source."
+          ]
+        }
+      },
+      "businessHash": "sha256:b75d4d662133e651b3247a1c0f859c70709f6d6efbf58f3c921d3ef43e7997c9"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "startAndProgressApplication",
+      "business": {
+        "actorRef": "recruiter",
+        "title": "Start and progress a candidate application",
+        "goal": "Add a candidate to a position and manage the application through screening and interview.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "locatePosition",
+            "kind": "locate",
+            "entity": "JobPosition",
+            "title": "Find the job position",
+            "description": "Open the position the candidate is applying for."
+          },
+          {
+            "stepId": "locateCandidate",
+            "kind": "locate",
+            "entity": "Candidate",
+            "title": "Find the candidate",
+            "description": "Open the candidate record to be considered."
+          },
+          {
+            "stepId": "createApplication",
+            "kind": "act",
+            "entity": "Application",
+            "affects": [
+              "Candidate",
+              "JobPosition"
+            ],
+            "title": "Create the application",
+            "description": "Associate the candidate with the job position and begin the application at screening."
+          },
+          {
+            "stepId": "moveToInterview",
+            "kind": "act",
+            "entity": "Application",
+            "title": "Move the application to interview",
+            "description": "Advance a screened candidate to the interview stage."
+          },
+          {
+            "stepId": "sendForOfferDecision",
+            "kind": "handoff",
+            "entity": "Application",
+            "title": "Send for offer decision",
+            "description": "Hand the interviewed application to the hiring manager responsible for the position to decide whether to make an offer.",
+            "handoffTo": "hiringManager"
+          }
+        ],
+        "outcome": {
+          "statement": "The candidate application is in interview or awaiting the hiring manager's offer decision.",
+          "evidence": [
+            "The application links the selected candidate and job position.",
+            "The application shows its current screening or interview stage, or is assigned for an offer decision."
+          ]
+        }
+      },
+      "businessHash": "sha256:04eaef16b1ba2aad18b076d5a98e0a4e90d36c2fcc8028ded4c0a9f159d03d6d"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "recordApplicationRejection",
+      "business": {
+        "actorRef": "recruiter",
+        "title": "Reject a candidate application",
+        "goal": "End an application that will not continue and record why.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "locateApplication",
+            "kind": "locate",
+            "entity": "Application",
+            "title": "Find the application",
+            "description": "Open the application that will not proceed."
+          },
+          {
+            "stepId": "rejectApplication",
+            "kind": "act",
+            "entity": "Application",
+            "title": "Reject the application",
+            "description": "Move the application to rejected and record the rejection reason."
+          }
+        ],
+        "outcome": {
+          "statement": "The application is rejected with a recorded reason.",
+          "evidence": [
+            "The application shows the rejected stage.",
+            "The application displays a rejection reason."
+          ]
+        }
+      },
+      "businessHash": "sha256:168dfd3fe5d77699c7faa5b484cb507baf38ad5f6590d1674d9850eae95ab42d"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "decideOffer",
+      "business": {
+        "actorRef": "hiringManager",
+        "title": "Decide whether to make an offer",
+        "goal": "Choose whether an interviewed candidate should receive an offer for the manager's position.",
+        "entry": {
+          "mode": "fromNotification"
+        },
+        "steps": [
+          {
+            "stepId": "inspectApplication",
+            "kind": "inspect",
+            "entity": "Application",
+            "title": "Review the interviewed application",
+            "description": "Review the candidate and application for the job position."
+          },
+          {
+            "stepId": "chooseOfferOutcome",
+            "kind": "decide",
+            "entity": "Application",
+            "title": "Decide on the offer",
+            "description": "Choose to move the application to offer or not to offer."
+          },
+          {
+            "stepId": "returnToRecruiter",
+            "kind": "handoff",
+            "entity": "Application",
+            "title": "Return the application to the recruiter",
+            "description": "Return the offer decision to the recruiter for follow-up, including rejection recording when no offer is approved.",
+            "handoffTo": "recruiter"
+          }
+        ],
+        "outcome": {
+          "statement": "The hiring manager's offer decision is available for recruiter follow-up.",
+          "evidence": [
+            "The application records the hiring manager's offer decision.",
+            "An approved offer application shows the offer stage, or a declined application is returned for rejection handling."
+          ]
+        }
+      },
+      "businessHash": "sha256:b043d565196a22161ee0760949920678aa94dbf5d699a47ad6a6e49f064ba5d3"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "decideHiring",
+      "business": {
+        "actorRef": "hiringManager",
+        "title": "Decide whether to hire a candidate",
+        "goal": "Choose whether a candidate with an offer should be hired for the position.",
+        "entry": {
+          "mode": "fromNotification"
+        },
+        "steps": [
+          {
+            "stepId": "inspectOfferApplication",
+            "kind": "inspect",
+            "entity": "Application",
+            "title": "Review the offer application",
+            "description": "Review the candidate's application at the offer stage."
+          },
+          {
+            "stepId": "inspectPositionCapacity",
+            "kind": "inspect",
+            "entity": "JobPosition",
+            "title": "Review position capacity",
+            "description": "Review the position's requested and filled headcount before making the hiring decision."
+          },
+          {
+            "stepId": "chooseHiringOutcome",
+            "kind": "decide",
+            "entity": "Application",
+            "title": "Decide on hiring",
+            "description": "Choose to mark the candidate as hired or not hired for the position."
+          },
+          {
+            "stepId": "returnToRecruiter",
+            "kind": "handoff",
+            "entity": "Application",
+            "title": "Return the hiring decision to the recruiter",
+            "description": "Return the hiring decision for follow-up, including rejection recording when the candidate is not hired.",
+            "handoffTo": "recruiter"
+          }
+        ],
+        "outcome": {
+          "statement": "The hiring decision is recorded, and the position is closed when its headcount has been filled.",
+          "evidence": [
+            "The application shows hired when the candidate is selected, or is returned for rejection handling when not selected.",
+            "A position whose filled headcount reaches its requested headcount shows as closed."
+          ]
+        }
+      },
+      "businessHash": "sha256:f9bab969c32b2ce2236492693bd045124afd458c4458a8dec8f6e54d0d7c8dfc"
+    }
+  ],
+  "systemDecisions": [],
+  "droppedActors": [],
+  "removedOrphans": []
+}

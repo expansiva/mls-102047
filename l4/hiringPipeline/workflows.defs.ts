@@ -1,0 +1,145 @@
+/// <mls fileReference="_102047_/l4/hiringPipeline/workflows.defs.ts" enhancement="_blank"/>
+
+import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
+
+export const hiringPipelineWorkflows = {
+  "schemaVersion": "2026-09-10-ns5-workflows-v1",
+  "moduleName": "hiringPipeline",
+  "processes": [
+    {
+      "processId": "interviewOfferDecision",
+      "title": "Interview offer decision",
+      "description": "Coordinate the handoff of an interviewed application from the recruiter to the hiring manager for an offer decision and recruiter follow-up.",
+      "tasks": [
+        {
+          "taskId": "advanceToInterview",
+          "kind": "human",
+          "actorRef": "recruiter",
+          "journeyRef": "startAndProgressApplication",
+          "stepRef": "moveToInterview",
+          "next": [
+            "sendForOfferDecision"
+          ],
+          "description": "The recruiter advances the application to the interview stage before requesting an offer decision."
+        },
+        {
+          "taskId": "sendForOfferDecision",
+          "kind": "human",
+          "actorRef": "recruiter",
+          "journeyRef": "startAndProgressApplication",
+          "stepRef": "sendForOfferDecision",
+          "next": [
+            "inspectApplication"
+          ],
+          "description": "The recruiter hands the interviewed application to the hiring manager for an offer decision."
+        },
+        {
+          "taskId": "inspectApplication",
+          "kind": "human",
+          "actorRef": "hiringManager",
+          "journeyRef": "decideOffer",
+          "stepRef": "inspectApplication",
+          "next": [
+            "chooseOfferOutcome"
+          ],
+          "description": "The hiring manager reviews the application before deciding whether to approve an offer."
+        },
+        {
+          "taskId": "chooseOfferOutcome",
+          "kind": "human",
+          "actorRef": "hiringManager",
+          "journeyRef": "decideOffer",
+          "stepRef": "chooseOfferOutcome",
+          "next": [
+            "returnOfferDecision"
+          ],
+          "description": "The hiring manager decides whether the interviewed candidate should receive an offer."
+        },
+        {
+          "taskId": "returnOfferDecision",
+          "kind": "human",
+          "actorRef": "hiringManager",
+          "journeyRef": "decideOffer",
+          "stepRef": "returnToRecruiter",
+          "next": [
+            "rejectAfterOfferDecision"
+          ],
+          "description": "The hiring manager returns the offer decision to the recruiter for follow-up."
+        },
+        {
+          "taskId": "rejectAfterOfferDecision",
+          "kind": "human",
+          "actorRef": "recruiter",
+          "journeyRef": "recordApplicationRejection",
+          "stepRef": "rejectApplication",
+          "next": [],
+          "description": "The recruiter records the rejection reason when the offer decision does not approve the application."
+        }
+      ]
+    },
+    {
+      "processId": "offerHiringDecision",
+      "title": "Offer hiring decision",
+      "description": "Coordinate the hiring manager's final hiring decision for an offered application and recruiter follow-up when it is not hired.",
+      "tasks": [
+        {
+          "taskId": "inspectOfferApplication",
+          "kind": "human",
+          "actorRef": "hiringManager",
+          "journeyRef": "decideHiring",
+          "stepRef": "inspectOfferApplication",
+          "next": [
+            "inspectPositionCapacity"
+          ],
+          "description": "The hiring manager reviews the offered application before making the final hiring decision."
+        },
+        {
+          "taskId": "inspectPositionCapacity",
+          "kind": "human",
+          "actorRef": "hiringManager",
+          "journeyRef": "decideHiring",
+          "stepRef": "inspectPositionCapacity",
+          "next": [
+            "chooseHiringOutcome"
+          ],
+          "description": "The hiring manager verifies the position's available capacity before deciding whether to hire."
+        },
+        {
+          "taskId": "chooseHiringOutcome",
+          "kind": "human",
+          "actorRef": "hiringManager",
+          "journeyRef": "decideHiring",
+          "stepRef": "chooseHiringOutcome",
+          "next": [
+            "returnHiringDecision"
+          ],
+          "description": "The hiring manager decides whether to hire the candidate for the position."
+        },
+        {
+          "taskId": "returnHiringDecision",
+          "kind": "human",
+          "actorRef": "hiringManager",
+          "journeyRef": "decideHiring",
+          "stepRef": "returnToRecruiter",
+          "next": [
+            "rejectAfterHiringDecision"
+          ],
+          "description": "The hiring manager returns the hiring decision to the recruiter for follow-up."
+        },
+        {
+          "taskId": "rejectAfterHiringDecision",
+          "kind": "human",
+          "actorRef": "recruiter",
+          "journeyRef": "recordApplicationRejection",
+          "stepRef": "rejectApplication",
+          "next": [],
+          "description": "The recruiter records the rejection reason when the candidate is not hired."
+        }
+      ]
+    }
+  ]
+} as const satisfies Ns5WorkflowsArtifact;
+
+export type HiringPipelineWorkflowsType = typeof hiringPipelineWorkflows;
+
+export default hiringPipelineWorkflows;

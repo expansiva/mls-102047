@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "2026-09-10-ns5-workflows-v1",
+  "moduleName": "compras",
+  "processes": [
+    {
+      "processId": "aprovarPedidoDeCompra",
+      "title": "Aprovação de pedido de compra",
+      "description": "Orquestra o envio de pedidos que exigem avaliação do gerente de compras.",
+      "tasks": [
+        {
+          "taskId": "enviarPedidoParaAprovacao",
+          "kind": "human",
+          "actorRef": "comprador",
+          "journeyRef": "abrirEenviarPedidoCompra",
+          "stepRef": "enviarPedido",
+          "next": [
+            "decidirPedidoEnviado"
+          ],
+          "description": "O comprador envia o pedido para que siga ao tratamento aplicável."
+        },
+        {
+          "taskId": "decidirPedidoEnviado",
+          "kind": "human",
+          "actorRef": "gerenteCompras",
+          "journeyRef": "decidirPedidoAcimaDoLimite",
+          "stepRef": "decidirPedido",
+          "next": [],
+          "description": "O gerente de compras aprova ou rejeita o pedido que requer decisão."
+        }
+      ]
+    },
+    {
+      "processId": "receberPedidoDeCompra",
+      "title": "Recebimento de pedido de compra",
+      "description": "Orquestra a passagem do pedido enviado ou aprovado para o registro de recebimento no almoxarifado.",
+      "tasks": [
+        {
+          "taskId": "encaminharPedidoParaRecebimento",
+          "kind": "human",
+          "actorRef": "comprador",
+          "journeyRef": "abrirEenviarPedidoCompra",
+          "stepRef": "enviarPedido",
+          "next": [
+            "registrarEntregaDoPedido"
+          ],
+          "description": "O comprador envia o pedido para atendimento pelo fornecedor e posterior recebimento."
+        },
+        {
+          "taskId": "registrarEntregaDoPedido",
+          "kind": "human",
+          "actorRef": "almoxarife",
+          "journeyRef": "registrarRecebimentoPedido",
+          "stepRef": "registrarRecebimento",
+          "next": [],
+          "description": "O almoxarife registra as quantidades recebidas, total ou parcialmente, e efetiva a entrada em estoque."
+        }
+      ]
+    }
+  ]
+}

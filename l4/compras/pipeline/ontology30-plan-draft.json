@@ -1,0 +1,273 @@
+{
+  "moduleName": "compras",
+  "businessDomain": "Compras e recebimento de produtos de fornecedores.",
+  "entities": [
+    {
+      "entityId": "Supplier",
+      "title": "Fornecedor",
+      "description": "Empresa fornecedora vinculada à organização para participação nos processos de compra.",
+      "kind": "mdm",
+      "party": "organization",
+      "mdmSubtype": "Company",
+      "displayField": "legalName",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "compras.Supplier"
+      }
+    },
+    {
+      "entityId": "Product",
+      "title": "Produto",
+      "description": "Produto do cadastro mestre utilizado nas condições de fornecimento, pedidos e entradas de estoque.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "Product",
+      "displayField": "name",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "compras.Product"
+      }
+    },
+    {
+      "entityId": "SupplyCondition",
+      "title": "Condição de fornecimento",
+      "description": "Condição comercial que registra o preço combinado de um produto fornecido por um fornecedor.",
+      "kind": "supporting",
+      "party": "none",
+      "displayField": "agreedPrice",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "compras.SupplyCondition"
+      }
+    },
+    {
+      "entityId": "PurchaseOrder",
+      "title": "Pedido de compra",
+      "description": "Pedido de compra emitido para um fornecedor, sujeito a envio e, quando aplicável, à decisão gerencial.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "orderNumber",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "compras.PurchaseOrder"
+      }
+    },
+    {
+      "entityId": "PurchaseOrderItem",
+      "title": "Item do pedido de compra",
+      "description": "Produto, quantidade e preço registrados como componente de um pedido de compra.",
+      "kind": "supporting",
+      "party": "none",
+      "displayField": "quantity",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "compras.PurchaseOrderItem"
+      }
+    },
+    {
+      "entityId": "Receipt",
+      "title": "Recebimento",
+      "description": "Registro do recebimento total ou parcial de um pedido de compra.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "receiptNumber",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "compras.Receipt"
+      }
+    },
+    {
+      "entityId": "StockEntry",
+      "title": "Entrada de estoque",
+      "description": "Fato de entrada em estoque gerado pelas quantidades efetivamente recebidas.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "entryDate",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "compras.StockEntry"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "supplierSuppliesProducts",
+      "fromEntity": "Supplier",
+      "toEntity": "Product",
+      "type": "manyToMany",
+      "required": false,
+      "description": "Um fornecedor pode fornecer vários produtos, e um produto pode ser fornecido por vários fornecedores.",
+      "persistence": {
+        "mode": "mdmRelationship"
+      }
+    },
+    {
+      "relationshipId": "supplyConditionSupplier",
+      "fromEntity": "SupplyCondition",
+      "toEntity": "Supplier",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada condição de fornecimento é definida para um fornecedor.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "supplyConditionProduct",
+      "fromEntity": "SupplyCondition",
+      "toEntity": "Product",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada condição de fornecimento registra o preço combinado de um produto.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "purchaseOrderSupplier",
+      "fromEntity": "PurchaseOrder",
+      "toEntity": "Supplier",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada pedido de compra é emitido para um fornecedor.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "purchaseOrderItems",
+      "fromEntity": "PurchaseOrder",
+      "toEntity": "PurchaseOrderItem",
+      "type": "oneToMany",
+      "required": true,
+      "description": "Um pedido de compra possui um ou mais itens.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "purchaseOrderItemProduct",
+      "fromEntity": "PurchaseOrderItem",
+      "toEntity": "Product",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada item do pedido de compra corresponde a um produto.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    },
+    {
+      "relationshipId": "purchaseOrderReceipts",
+      "fromEntity": "PurchaseOrder",
+      "toEntity": "Receipt",
+      "type": "oneToMany",
+      "required": false,
+      "description": "Um pedido de compra pode ter um ou mais recebimentos, inclusive parciais.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "receiptStockEntries",
+      "fromEntity": "Receipt",
+      "toEntity": "StockEntry",
+      "type": "oneToMany",
+      "required": true,
+      "description": "Um recebimento gera as entradas de estoque das quantidades recebidas.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "stockEntryPurchaseOrderItem",
+      "fromEntity": "StockEntry",
+      "toEntity": "PurchaseOrderItem",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada entrada de estoque registra o recebimento de um item do pedido de compra.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "stockEntryProduct",
+      "fromEntity": "StockEntry",
+      "toEntity": "Product",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada entrada de estoque é realizada para um produto.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      }
+    }
+  ],
+  "moduleDetails": {
+    "openPurchaseOrderCount": {
+      "type": "integer",
+      "description": "Quantidade calculada de pedidos de compra em aberto."
+    },
+    "overduePurchaseOrderCount": {
+      "type": "integer",
+      "description": "Quantidade calculada de pedidos de compra atrasados."
+    },
+    "monthlyPurchasedTotalBySupplier": {
+      "type": "json",
+      "description": "Totais calculados de compras do mês agrupados por fornecedor."
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "Supplier",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Product",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "SupplyCondition",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "PurchaseOrder",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "PurchaseOrderItem",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "Receipt",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "StockEntry",
+      "detail": "maintenance crud removed; an act writes this entity as entity or affects."
+    }
+  ]
+}
