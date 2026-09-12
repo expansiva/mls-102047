@@ -339,6 +339,337 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-09-12T20:09:09.008Z"
+    },
+    {
+      "moduleName": "ordenServicio",
+      "actors": [
+        {
+          "actorId": "recepcionista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "tecnico",
+          "kind": "internal"
+        },
+        {
+          "actorId": "cliente",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "mdmSubtype": "Person",
+          "role": "ordenServicio.Cliente",
+          "namespace": "ordenServicio"
+        },
+        {
+          "mdmSubtype": "AssetEquipment",
+          "role": "ordenServicio.Aparato",
+          "namespace": "ordenServicio"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Cliente",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Aparato",
+          "kind": "mdm",
+          "mdmSubtype": "AssetEquipment"
+        },
+        {
+          "entityId": "OrdenServicio",
+          "kind": "core"
+        },
+        {
+          "entityId": "BudgetPart",
+          "kind": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "enviarPresupuesto",
+          "on": "OrdenServicio.enviarPresupuesto"
+        },
+        {
+          "eventId": "aprobarPresupuesto",
+          "on": "OrdenServicio.aprobarPresupuesto"
+        },
+        {
+          "eventId": "rechazarPresupuesto",
+          "on": "OrdenServicio.rechazarPresupuesto"
+        },
+        {
+          "eventId": "marcarLista",
+          "on": "OrdenServicio.marcarLista"
+        },
+        {
+          "eventId": "entregarYfinalizar",
+          "on": "OrdenServicio.entregarYfinalizar"
+        }
+      ],
+      "updatedAt": "2026-09-12T21:31:27.732Z"
+    },
+    {
+      "moduleName": "locacaoEquipamentos",
+      "actors": [
+        {
+          "actorId": "atendente",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerente",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "mdmSubtype": "Person",
+          "role": "locacaoEquipamentos.Cliente",
+          "namespace": "locacaoEquipamentos"
+        },
+        {
+          "mdmSubtype": "AssetEquipment",
+          "role": "locacaoEquipamentos.Equipamento",
+          "namespace": "locacaoEquipamentos"
+        },
+        {
+          "mdmSubtype": "Person",
+          "role": "locacaoEquipamentos.Atendente",
+          "namespace": "locacaoEquipamentos"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Cliente",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Equipamento",
+          "kind": "mdm",
+          "mdmSubtype": "AssetEquipment"
+        },
+        {
+          "entityId": "Atendente",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "ContratoLocacao",
+          "kind": "core"
+        },
+        {
+          "entityId": "RentalItem",
+          "kind": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "registrarDevolucao",
+          "on": "ContratoLocacao.registrarDevolucao"
+        }
+      ],
+      "updatedAt": "2026-09-12T21:34:32.288Z"
+    },
+    {
+      "moduleName": "inscricaoEvento",
+      "actors": [
+        {
+          "actorId": "organizador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "publico",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "mdmSubtype": "Person",
+          "role": "inscricaoEvento.Participante",
+          "namespace": "inscricaoEvento"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Evento",
+          "kind": "core"
+        },
+        {
+          "entityId": "Inscricao",
+          "kind": "core"
+        },
+        {
+          "entityId": "Participante",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "publicarEvento",
+          "on": "Evento.publicarEvento"
+        },
+        {
+          "eventId": "cancelarInscricao",
+          "on": "Inscricao.cancelarInscricao"
+        },
+        {
+          "eventId": "promoverListaEspera",
+          "on": "Inscricao.promoverListaEspera"
+        }
+      ],
+      "updatedAt": "2026-09-12T21:37:59.069Z"
+    },
+    {
+      "moduleName": "compras",
+      "actors": [
+        {
+          "actorId": "comprador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerenteCompras",
+          "kind": "internal"
+        },
+        {
+          "actorId": "almoxarife",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "mdmSubtype": "Person",
+          "role": "compras.Comprador",
+          "namespace": "compras"
+        },
+        {
+          "mdmSubtype": "Company",
+          "role": "compras.Fornecedor",
+          "namespace": "compras"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Comprador",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Fornecedor",
+          "kind": "mdm",
+          "mdmSubtype": "Company"
+        },
+        {
+          "entityId": "Produto",
+          "kind": "supporting"
+        },
+        {
+          "entityId": "EstoqueProduto",
+          "kind": "supporting"
+        },
+        {
+          "entityId": "FornecimentoProduto",
+          "kind": "supporting"
+        },
+        {
+          "entityId": "PedidoCompra",
+          "kind": "core"
+        },
+        {
+          "entityId": "ItemPedidoCompra",
+          "kind": "supporting"
+        },
+        {
+          "entityId": "RecebimentoCompra",
+          "kind": "event"
+        },
+        {
+          "entityId": "ItemRecebimentoCompra",
+          "kind": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "registrarRecebimentoParcial",
+          "on": "PedidoCompra.registrarRecebimentoParcial"
+        },
+        {
+          "eventId": "registrarRecebimentoTotal",
+          "on": "PedidoCompra.registrarRecebimentoTotal"
+        }
+      ],
+      "updatedAt": "2026-09-12T21:43:47.888Z"
+    },
+    {
+      "moduleName": "comandaRestaurante",
+      "actors": [
+        {
+          "actorId": "garcom",
+          "kind": "internal"
+        },
+        {
+          "actorId": "caixa",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "mdmSubtype": "AssetEquipment",
+          "role": "comandaRestaurante.Mesa",
+          "namespace": "comandaRestaurante"
+        },
+        {
+          "mdmSubtype": "Product",
+          "role": "comandaRestaurante.ItemCardapio",
+          "namespace": "comandaRestaurante"
+        },
+        {
+          "mdmSubtype": "Person",
+          "role": "comandaRestaurante.Garcom",
+          "namespace": "comandaRestaurante"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Mesa",
+          "kind": "mdm",
+          "mdmSubtype": "AssetEquipment"
+        },
+        {
+          "entityId": "ItemCardapio",
+          "kind": "mdm",
+          "mdmSubtype": "Product"
+        },
+        {
+          "entityId": "Garcom",
+          "kind": "mdm",
+          "mdmSubtype": "Person"
+        },
+        {
+          "entityId": "Comanda",
+          "kind": "core"
+        },
+        {
+          "entityId": "ItemComanda",
+          "kind": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "comandaFechada",
+          "on": "Comanda.fecharComanda"
+        }
+      ],
+      "updatedAt": "2026-09-12T21:48:01.323Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

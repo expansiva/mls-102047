@@ -7,7 +7,7 @@ export const inscricaoEventoEntityParticipante = {
   "moduleName": "inscricaoEvento",
   "entityId": "Participante",
   "title": "Participante",
-  "description": "Pessoa identificada para realizar inscrições em eventos deste módulo.",
+  "description": "Pessoa inscrita ou em lista de espera para eventos deste módulo.",
   "kind": "mdm",
   "party": "person",
   "mdmSubtype": "Person",

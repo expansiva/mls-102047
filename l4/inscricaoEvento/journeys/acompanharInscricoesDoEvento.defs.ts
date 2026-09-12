@@ -7,43 +7,44 @@ export const acompanharInscricoesDoEventoJourney = {
   "journeyId": "acompanharInscricoesDoEvento",
   "business": {
     "actorRef": "organizador",
-    "title": "Acompanhar inscrições e baixar lista",
-    "goal": "Consultar os inscritos de um evento, suas vagas ocupadas e obter a lista em CSV.",
+    "title": "Acompanhar inscritos e exportar lista",
+    "goal": "Consultar os inscritos, as vagas ocupadas e baixar a lista do evento em CSV.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarEventoParaAcompanhamento",
+        "stepId": "localizarEvento",
         "kind": "locate",
         "entity": "Evento",
-        "title": "x",
-        "description": "Localiza o evento cujas inscrições deseja acompanhar."
+        "title": "Localizar evento",
+        "description": "Localiza o evento que deseja acompanhar."
       },
       {
-        "stepId": "inspecionarOcupacaoDoEvento",
+        "stepId": "consultarOcupacaoDoEvento",
         "kind": "inspect",
         "entity": "Evento",
-        "title": "x",
+        "title": "Consultar ocupação do evento",
         "description": "Consulta o total de vagas ocupadas e a capacidade do evento."
       },
       {
-        "stepId": "inspecionarListaDeInscricoes",
+        "stepId": "consultarEexportarInscricoes",
         "kind": "inspect",
         "entity": "Inscricao",
-        "title": "x",
-        "description": "Visualiza os inscritos, suas situações e a lista disponível para download em CSV."
+        "title": "Consultar e exportar inscritos",
+        "description": "Consulta os inscritos e baixa a lista de inscrições do evento em formato CSV."
       }
     ],
     "outcome": {
-      "statement": "O organizador acompanha a ocupação e obtém a lista de inscrições do evento em CSV.",
+      "statement": "O organizador acompanha a ocupação do evento e obtém a lista de inscritos em CSV.",
       "evidence": [
         "Total de vagas ocupadas exibido para o evento.",
-        "Lista de inscrições disponível e baixada em formato CSV."
+        "Lista de inscrições do evento disponível para consulta.",
+        "Arquivo CSV da lista de inscritos baixado."
       ]
     }
   },
-  "businessHash": "sha256:5d9af0b0a37decbf8a35a03cf73d00ec02e73baac43b95124a6e65a78bc95ddd"
+  "businessHash": "sha256:e54d7941eb27865a914d66efe155beb843076aa35ccbf40cc7eb34a926fbf3e5"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AcompanharInscricoesDoEventoJourneyType = typeof acompanharInscricoesDoEventoJourney;

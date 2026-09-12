@@ -1,0 +1,46 @@
+/// <mls fileReference="_102047_/l4/financeiro/rules.defs.ts" enhancement="_blank"/>
+
+import type { Ns5RulesArtifact } from '/_102035_/l2/solution/types.js';
+
+export const financeiroRules = {
+  "schemaVersion": "2026-09-10-ns5-rules-v1",
+  "moduleName": "financeiro",
+  "rules": [
+    {
+      "ruleId": "tituloDeveTerOrigemEmOutroModulo",
+      "description": "Todo título a receber deve corresponder a uma cobrança gerada em outro módulo da organização."
+    },
+    {
+      "ruleId": "saldoPendenteConsideraRecebimentosEestornos",
+      "description": "O saldo pendente de um título deve corresponder ao valor original menos os recebimentos confirmados que não foram estornados."
+    },
+    {
+      "ruleId": "tituloEmAbertoPossuiSaldoPendente",
+      "description": "Um título a receber está em aberto quando seu saldo pendente é superior a zero."
+    },
+    {
+      "ruleId": "cobrancaPorCartaoExigeTituloEmAberto",
+      "description": "Uma cobrança por cartão só pode ser solicitada para um título a receber em aberto."
+    },
+    {
+      "ruleId": "confirmacaoDeCartaoExigeProcessamento",
+      "description": "Um recebimento por cartão só pode ser confirmado após o processamento da respectiva cobrança."
+    },
+    {
+      "ruleId": "estornoSomenteNoMesmoDia",
+      "description": "Um recebimento confirmado só pode ser estornado no mesmo dia em que foi confirmado."
+    },
+    {
+      "ruleId": "tituloVencidoTemSaldoEprazoPassado",
+      "description": "Um título a receber está vencido quando seu vencimento é anterior à data atual e possui saldo pendente."
+    },
+    {
+      "ruleId": "extratoReuneRegistrosDoPagador",
+      "description": "O extrato por pagador deve conter os títulos e os recebimentos associados ao pagador selecionado."
+    }
+  ]
+} as const satisfies Ns5RulesArtifact;
+
+export type FinanceiroRulesType = typeof financeiroRules;
+
+export default financeiroRules;

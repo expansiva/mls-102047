@@ -8,29 +8,33 @@ export const abrirEenviarPedidoCompraJourney = {
   "business": {
     "actorRef": "comprador",
     "title": "Abrir e enviar pedido de compra",
-    "goal": "Criar um pedido para um fornecedor com os produtos, quantidades e preços necessários e enviá-lo para processamento.",
+    "goal": "Criar um pedido para um fornecedor com os produtos, quantidades e preços acordados e enviá-lo.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarFornecedor",
+        "stepId": "localizarFornecedorDoPedido",
         "kind": "locate",
         "entity": "Fornecedor",
         "title": "x",
         "description": "Localiza o fornecedor para o qual o pedido será aberto."
       },
       {
-        "stepId": "consultarOfertas",
-        "kind": "inspect",
-        "entity": "OfertaFornecedor",
+        "stepId": "selecionarProdutosDoFornecedor",
+        "kind": "locate",
+        "entity": "FornecimentoProduto",
         "title": "x",
-        "description": "Consulta os produtos fornecidos e os preços combinados para compor o pedido."
+        "description": "Consulta os produtos e preços combinados disponíveis para o fornecedor."
       },
       {
         "stepId": "abrirPedido",
         "kind": "act",
         "entity": "PedidoCompra",
+        "affects": [
+          "Fornecedor",
+          "Produto"
+        ],
         "effect": "create",
         "title": "x",
         "description": "Cria o pedido com um ou mais produtos, suas quantidades e preços."
@@ -49,19 +53,18 @@ export const abrirEenviarPedidoCompraJourney = {
         "kind": "handoff",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Encaminha o pedido ao gerente de compras quando o valor exige aprovação.",
+        "description": "Encaminha ao gerente de compras os pedidos cujo valor exige aprovação.",
         "handoffTo": "gerenteCompras"
       }
     ],
     "outcome": {
-      "statement": "O pedido de compra é enviado e, quando exigido pelo valor, fica disponível para decisão do gerente de compras.",
+      "statement": "O pedido é enviado e, quando ultrapassa o valor limite, fica disponível para decisão do gerente de compras.",
       "evidence": [
-        "Pedido registra fornecedor, itens, quantidades e preços.",
-        "Pedido consta como enviado ou aguardando aprovação, conforme o valor."
+        "Pedido de compra com fornecedor, itens, quantidades, preços e situação de envio registrada."
       ]
     }
   },
-  "businessHash": "sha256:e30aad8ce3480a9ca0086e8442abcfa8ab2dfcd745bf26791fb1988115b856ed"
+  "businessHash": "sha256:561721ec07a3e2088e1ef2ff99b385f72b30a649621b3792a07ed535dfb7476e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AbrirEenviarPedidoCompraJourneyType = typeof abrirEenviarPedidoCompraJourney;

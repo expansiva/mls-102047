@@ -8,13 +8,37 @@ export const inscricaoEventoIntegration = {
   "inbound": [],
   "outbound": [
     {
-      "id": "eventoPublicado",
+      "id": "publicarEvento",
       "kind": "event",
       "to": "any",
-      "event": "eventoPublicado",
+      "event": "publicarEvento",
       "on": "Evento.publicarEvento",
-      "description": "Notifica que um evento foi publicado e está disponível para consulta e inscrição.",
+      "description": "Publica o evento para que outros módulos possam reagir à sua disponibilização pública.",
       "entityRefs": [
+        "Evento"
+      ]
+    },
+    {
+      "id": "cancelarInscricao",
+      "kind": "event",
+      "to": "any",
+      "event": "cancelarInscricao",
+      "on": "Inscricao.cancelarInscricao",
+      "description": "Publica o cancelamento de uma inscrição para consumidores que acompanham a disponibilidade do evento.",
+      "entityRefs": [
+        "Inscricao",
+        "Evento"
+      ]
+    },
+    {
+      "id": "promoverListaEspera",
+      "kind": "event",
+      "to": "any",
+      "event": "promoverListaEspera",
+      "on": "Inscricao.promoverListaEspera",
+      "description": "Publica a promoção de uma inscrição da lista de espera para uma vaga disponível.",
+      "entityRefs": [
+        "Inscricao",
         "Evento"
       ]
     }

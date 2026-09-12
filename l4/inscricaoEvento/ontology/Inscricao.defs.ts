@@ -24,21 +24,14 @@ export const inscricaoEventoEntityInscricao = {
       "title": "Evento",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao evento ao qual a inscrição pertence."
+      "description": "Referência ao evento ao qual a pessoa se inscreveu."
     },
     {
       "fieldId": "participanteId",
       "title": "Participante",
       "type": "uuid",
       "required": true,
-      "description": "Referência à pessoa participante que realizou a inscrição."
-    },
-    {
-      "fieldId": "dataInscricao",
-      "title": "Data da inscrição",
-      "type": "datetime",
-      "required": true,
-      "description": "Data e hora de registro da inscrição, usada para ordenar a lista de espera."
+      "description": "Referência ao participante associado à inscrição."
     },
     {
       "fieldId": "status",
@@ -52,7 +45,7 @@ export const inscricaoEventoEntityInscricao = {
         },
         {
           "value": "waitlisted",
-          "title": "Lista de espera"
+          "title": "Em lista de espera"
         },
         {
           "value": "cancelled",
@@ -60,6 +53,13 @@ export const inscricaoEventoEntityInscricao = {
         }
       ],
       "description": "Situação atual da inscrição no evento."
+    },
+    {
+      "fieldId": "registeredAt",
+      "title": "Data e hora da inscrição",
+      "type": "datetime",
+      "required": true,
+      "description": "Data e hora em que a inscrição foi registrada, usada para ordenar a lista de espera."
     }
   ],
   "uniqueKeys": [
@@ -93,7 +93,7 @@ export const inscricaoEventoEntityInscricao = {
       "by": [
         "publico"
       ],
-      "description": "O participante cancela sua própria inscrição no evento."
+      "description": "Cancela a inscrição do participante no evento."
     },
     {
       "transitionId": "promoverListaEspera",
@@ -102,7 +102,7 @@ export const inscricaoEventoEntityInscricao = {
       ],
       "to": "confirmed",
       "by": "system",
-      "description": "O sistema promove a primeira inscrição da lista de espera quando uma vaga é liberada."
+      "description": "Promove automaticamente a primeira inscrição da lista de espera quando uma vaga é liberada."
     }
   ],
   "storage": {

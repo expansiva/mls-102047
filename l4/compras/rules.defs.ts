@@ -8,39 +8,35 @@ export const comprasRules = {
   "rules": [
     {
       "ruleId": "pedidoDeveTerAoMenosUmItem",
-      "description": "Um pedido de compra deve conter pelo menos um produto com quantidade e preço unitário."
+      "description": "Todo pedido de compra deve conter um ou mais itens de produto."
     },
     {
-      "ruleId": "pedidoAcimaDoLimiteExigeAprovacao",
-      "description": "Um pedido de compra cujo valor total seja superior ao valor limite deve ser aprovado pelo gerente de compras antes de poder ser recebido."
+      "ruleId": "itensDevemCorresponderAoFornecimento",
+      "description": "Cada item do pedido deve referenciar um produto fornecido pelo fornecedor do pedido e usar o preço comercial combinado."
     },
     {
-      "ruleId": "pedidoRejeitadoNaoPodeSerRecebido",
-      "description": "Um pedido de compra rejeitado não pode prosseguir para recebimento."
+      "ruleId": "valorTotalDoPedido",
+      "description": "O valor total do pedido de compra deve ser calculado pela soma das quantidades dos itens multiplicadas por seus respectivos preços unitários."
     },
     {
-      "ruleId": "recebimentoPodeSerTotalOuParcial",
-      "description": "O recebimento de compra pode registrar quantidades totais ou parciais dos itens solicitados no pedido."
+      "ruleId": "aprovacaoAcimaDoValorLimite",
+      "description": "Um pedido de compra cujo valor total seja superior ao valor limite deve ser aprovado ou rejeitado pelo gerente de compras antes de ser processado."
     },
     {
-      "ruleId": "entradaEstoqueRefleteQuantidadeRecebida",
-      "description": "A entrada no estoque deve corresponder às quantidades efetivamente registradas no recebimento de compra."
+      "ruleId": "recebimentoNaoPodeExcederQuantidadePedida",
+      "description": "A quantidade recebida acumulada de cada item do pedido não pode exceder a quantidade solicitada."
     },
     {
-      "ruleId": "valorTotalPedidoCalculado",
-      "description": "O valor total do pedido de compra é calculado pela soma das quantidades dos itens multiplicadas pelos respectivos preços unitários."
+      "ruleId": "entradaDeEstoquePorRecebimento",
+      "description": "Cada quantidade efetivamente recebida deve gerar entrada correspondente no estoque do produto."
     },
     {
-      "ruleId": "quantidadeTotalItensPedidoCalculada",
-      "description": "A quantidade total de itens do pedido de compra é calculada pela soma das quantidades solicitadas em seus itens."
+      "ruleId": "pedidoAtrasado",
+      "description": "Um pedido de compra deve ser considerado atrasado quando sua data prevista de entrega tiver passado e suas quantidades ainda não tiverem sido integralmente recebidas."
     },
     {
-      "ruleId": "percentualRecebidoPedidoCalculado",
-      "description": "O percentual recebido do pedido de compra é calculado pela proporção entre as quantidades efetivamente recebidas e as quantidades solicitadas."
-    },
-    {
-      "ruleId": "pedidoAtrasadoPorPrevisaoDeEntrega",
-      "description": "Um pedido de compra está atrasado quando sua data prevista de entrega é anterior à data atual e ele não foi totalmente recebido."
+      "ruleId": "totalCompradoMensalPorFornecedor",
+      "description": "O total comprado mensal por fornecedor deve ser calculado pela soma dos valores dos pedidos de compra do fornecedor no mês."
     }
   ]
 } as const satisfies Ns5RulesArtifact;

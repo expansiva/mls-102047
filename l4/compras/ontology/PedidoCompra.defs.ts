@@ -7,7 +7,7 @@ export const comprasEntityPedidoCompra = {
   "moduleName": "compras",
   "entityId": "PedidoCompra",
   "title": "Pedido de compra",
-  "description": "Solicitação de compra enviada a um fornecedor, com produtos, quantidades, preços e decisão de aprovação quando necessária.",
+  "description": "Solicitação de compra aberta para um fornecedor, composta por produtos, quantidades e preços.",
   "kind": "core",
   "party": "none",
   "displayField": "numeroPedido",
@@ -25,6 +25,9 @@ export const comprasEntityPedidoCompra = {
       "type": "string",
       "required": true,
       "unique": true,
+      "constraints": {
+        "maxLength": 50
+      },
       "description": "Número sequencial que identifica o pedido de compra."
     },
     {
@@ -32,35 +35,53 @@ export const comprasEntityPedidoCompra = {
       "title": "Fornecedor",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao fornecedor para o qual o pedido de compra foi emitido."
-    },
-    {
-      "fieldId": "compradorId",
-      "title": "Comprador responsável",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência ao comprador responsável pela abertura e acompanhamento do pedido."
-    },
-    {
-      "fieldId": "itens",
-      "title": "Itens do pedido",
-      "type": "json",
-      "required": true,
-      "description": "Lista dos produtos solicitados, com referência ao produto, quantidade e preço unitário acordado."
+      "description": "Referência ao fornecedor para o qual o pedido foi emitido."
     },
     {
       "fieldId": "dataEmissao",
       "title": "Data de emissão",
-      "type": "datetime",
+      "type": "date",
       "required": true,
-      "description": "Data e hora em que o pedido de compra foi aberto."
+      "description": "Data em que o pedido de compra foi aberto."
     },
     {
       "fieldId": "dataPrevistaEntrega",
       "title": "Data prevista de entrega",
       "type": "date",
+      "required": true,
+      "description": "Data prevista para a entrega dos produtos do pedido."
+    },
+    {
+      "fieldId": "dataEnvio",
+      "title": "Data de envio",
+      "type": "datetime",
       "required": false,
-      "description": "Data prevista para a entrega dos produtos solicitados."
+      "description": "Data e hora em que o pedido foi enviado para processamento."
+    },
+    {
+      "fieldId": "situacaoAprovacao",
+      "title": "Situação da aprovação",
+      "type": "string",
+      "required": true,
+      "enum": [
+        {
+          "value": "notRequired",
+          "title": "Não requerida"
+        },
+        {
+          "value": "pending",
+          "title": "Pendente"
+        },
+        {
+          "value": "approved",
+          "title": "Aprovada"
+        },
+        {
+          "value": "rejected",
+          "title": "Rejeitada"
+        }
+      ],
+      "description": "Resultado ou pendência da aprovação do pedido conforme o valor limite."
     },
     {
       "fieldId": "status",
@@ -69,94 +90,120 @@ export const comprasEntityPedidoCompra = {
       "required": true,
       "enum": [
         {
-          "value": "aberto",
-          "title": "Aberto"
+          "value": "draft",
+          "title": "Rascunho"
         },
         {
-          "value": "enviado",
-          "title": "Enviado"
+          "value": "pendingApproval",
+          "title": "Pendente de aprovação"
         },
         {
-          "value": "aprovado",
-          "title": "Aprovado"
+          "value": "processed",
+          "title": "Processado"
         },
         {
-          "value": "rejeitado",
-          "title": "Rejeitado"
+          "value": "partiallyReceived",
+          "title": "Parcialmente recebido"
+        },
+        {
+          "value": "received",
+          "title": "Recebido"
         }
       ],
-      "description": "Situação atual do pedido de compra no seu processamento."
+      "description": "Etapa atual do processamento e recebimento do pedido de compra."
     }
   ],
   "details": {
     "valorTotal": {
       "type": "money",
-      "description": "Valor total calculado pela soma das quantidades e preços dos itens do pedido."
+      "description": "Soma dos valores dos itens do pedido conforme quantidades e preços registrados."
     },
-    "quantidadeTotalItens": {
-      "type": "integer",
-      "description": "Quantidade total de unidades solicitadas nos itens do pedido."
+    "valorRecebido": {
+      "type": "money",
+      "description": "Soma dos valores correspondentes às quantidades já recebidas no pedido."
     },
     "percentualRecebido": {
       "type": "number",
-      "description": "Percentual calculado das quantidades do pedido já recebidas."
+      "description": "Percentual das quantidades previstas no pedido que já foram recebidas."
     },
     "estaAtrasado": {
       "type": "boolean",
-      "description": "Indica se o pedido permanece com recebimento pendente após a data prevista de entrega."
+      "description": "Indica se a data prevista de entrega foi ultrapassada antes do recebimento total."
     }
   },
   "lifecycleStates": [
     {
-      "state": "aberto",
+      "state": "draft",
       "reachedBy": "actor"
     },
     {
-      "state": "enviado",
+      "state": "pendingApproval",
       "reachedBy": "actor"
     },
     {
-      "state": "aprovado",
+      "state": "processed",
       "reachedBy": "actor"
     },
     {
-      "state": "rejeitado",
-      "reachedBy": "actor"
+      "state": "partiallyReceived",
+      "reachedBy": "command"
+    },
+    {
+      "state": "received",
+      "reachedBy": "command"
     }
   ],
   "transitions": [
     {
       "transitionId": "enviarPedido",
       "from": [
-        "aberto"
+        "draft"
       ],
-      "to": "enviado",
+      "to": "pendingApproval",
       "by": [
         "comprador"
       ],
-      "description": "Envia o pedido aberto para processamento e, quando aplicável, para avaliação de aprovação."
+      "description": "Envia o pedido para avaliação da aprovação aplicável ao seu valor."
     },
     {
-      "transitionId": "aprovarPedido",
+      "transitionId": "decidirPedido",
       "from": [
-        "enviado"
+        "pendingApproval"
       ],
-      "to": "aprovado",
+      "to": "processed",
       "by": [
         "gerenteCompras"
       ],
-      "description": "Aprova o pedido enviado que exige autorização do gerente de compras."
+      "description": "Registra a decisão de aprovação ou rejeição do pedido, indicada na situação da aprovação."
     },
     {
-      "transitionId": "rejeitarPedido",
+      "transitionId": "liberarPedidoSemAprovacao",
       "from": [
-        "enviado"
+        "pendingApproval"
       ],
-      "to": "rejeitado",
-      "by": [
-        "gerenteCompras"
+      "to": "processed",
+      "by": "system",
+      "description": "Processa o pedido que não exige aprovação gerencial conforme o valor limite."
+    },
+    {
+      "transitionId": "registrarRecebimentoParcial",
+      "from": [
+        "processed",
+        "partiallyReceived"
       ],
-      "description": "Rejeita o pedido enviado que não deve prosseguir para recebimento."
+      "to": "partiallyReceived",
+      "by": "system",
+      "description": "Atualiza o pedido após um recebimento que ainda não completa todas as quantidades previstas."
+    },
+    {
+      "transitionId": "registrarRecebimentoTotal",
+      "from": [
+        "processed",
+        "partiallyReceived"
+      ],
+      "to": "received",
+      "by": "system",
+      "description": "Atualiza o pedido quando os recebimentos completam todas as quantidades previstas."
     }
   ],
   "storage": {

@@ -8,7 +8,7 @@ export const criarContratoLocacaoJourney = {
   "business": {
     "actorRef": "atendente",
     "title": "Criar contrato de locação",
-    "goal": "Registrar a locação de um cliente para um ou mais equipamentos no período solicitado.",
+    "goal": "Formalizar a locação de um cliente para um ou mais equipamentos em um período definido.",
     "entry": {
       "mode": "coldStart"
     },
@@ -18,20 +18,28 @@ export const criarContratoLocacaoJourney = {
         "kind": "locate",
         "entity": "Cliente",
         "title": "x",
-        "description": "Localiza o cliente que fará a locação."
+        "description": "Localiza o cliente para quem será feita a locação ou informa seus dados para criação ou vinculação."
       },
       {
         "stepId": "consultarEquipamentos",
+        "kind": "locate",
+        "entity": "Equipamento",
+        "title": "x",
+        "description": "Localiza os equipamentos solicitados para a locação."
+      },
+      {
+        "stepId": "verificarEquipamentos",
         "kind": "inspect",
         "entity": "Equipamento",
         "title": "x",
-        "description": "Confere os equipamentos solicitados, suas diárias e a disponibilidade no período de locação."
+        "description": "Confere a situação dos equipamentos e sua disponibilidade para as datas de retirada e devolução prevista."
       },
       {
         "stepId": "registrarContrato",
         "kind": "act",
         "entity": "ContratoLocacao",
         "affects": [
+          "Cliente",
           "Equipamento"
         ],
         "effect": "create",
@@ -40,14 +48,14 @@ export const criarContratoLocacaoJourney = {
       }
     ],
     "outcome": {
-      "statement": "O contrato de locação é registrado para os equipamentos disponíveis no período informado.",
+      "statement": "O contrato de locação é registrado para os equipamentos disponíveis no período solicitado.",
       "evidence": [
-        "Contrato de locação criado com cliente, período e equipamentos.",
-        "Equipamentos do contrato passam a constar como locados para o período registrado."
+        "Contrato de locação criado com cliente, equipamentos e período de locação.",
+        "Equipamentos vinculados ao contrato passam a constar como locados para o período registrado."
       ]
     }
   },
-  "businessHash": "sha256:ab1a0c1931d471eac12ccbe0d7eaf26aa7bdfdd9f6ffd6678cacb74e982348a4"
+  "businessHash": "sha256:a8e12be4223a6ab77910233bdd0520e657517fb2a1cc1731da2e415481cd13b9"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CriarContratoLocacaoJourneyType = typeof criarContratoLocacaoJourney;

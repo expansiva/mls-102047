@@ -1,11 +1,27 @@
 {
   "moduleName": "compras",
-  "businessDomain": "Gestão de compras, fornecedores, pedidos de compra e recebimentos.",
+  "businessDomain": "Gestão de compras, fornecedores, pedidos de compra e recebimentos de produtos.",
   "entities": [
+    {
+      "entityId": "Comprador",
+      "title": "Comprador",
+      "description": "Profissional da organização responsável por cadastrar fornecedores, definir seus produtos e preços e abrir pedidos de compra.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "writer": "crud",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "compras.Comprador"
+      }
+    },
     {
       "entityId": "Fornecedor",
       "title": "Fornecedor",
-      "description": "Empresa fornecedora cadastrada ou vinculada na base mestre para as compras da organização.",
+      "description": "Empresa fornecedora cadastrada ou vinculada pela organização para realizar compras.",
       "kind": "mdm",
       "party": "organization",
       "mdmSubtype": "Company",
@@ -18,55 +34,54 @@
       }
     },
     {
-      "entityId": "Comprador",
-      "title": "Comprador responsável",
-      "description": "Pessoa responsável pelos fornecedores e ofertas que cadastra no módulo de compras.",
-      "kind": "mdm",
-      "party": "person",
-      "mdmSubtype": "Person",
-      "displayField": "name",
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "compras.Comprador"
-      }
-    },
-    {
       "entityId": "Produto",
       "title": "Produto",
-      "description": "Produto mestre referenciado do módulo de controle de estoque para composição de ofertas, pedidos e recebimentos.",
+      "description": "Produto mestre referenciado do módulo de controle de estoque para composição de fornecimentos, pedidos e recebimentos.",
       "kind": "supporting",
       "party": "none",
       "displayField": "name",
       "mutability": "appendOnly",
-      "writer": "inbound",
       "storage": {
         "target": "external",
         "scope": "platform",
         "idField": "id",
-        "mdmType": "controleEstoque.Produto"
+        "mdmType": "compras.Produto"
       }
     },
     {
-      "entityId": "OfertaFornecedor",
-      "title": "Oferta de fornecedor",
-      "description": "Condição comercial cadastrada para um produto fornecido, incluindo o preço combinado.",
+      "entityId": "EstoqueProduto",
+      "title": "Estoque do produto",
+      "description": "Posição de estoque do produto mantida pelo módulo de controle de estoque e atualizada a partir dos recebimentos.",
       "kind": "supporting",
       "party": "none",
-      "displayField": "codigoOferta",
+      "displayField": "name",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "external",
+        "scope": "platform",
+        "idField": "id",
+        "mdmType": "compras.EstoqueProduto"
+      }
+    },
+    {
+      "entityId": "FornecimentoProduto",
+      "title": "Fornecimento de produto",
+      "description": "Condição comercial que registra um produto fornecido por um fornecedor e o preço combinado.",
+      "kind": "supporting",
+      "party": "none",
+      "displayField": "produto",
       "mutability": "appendOnly",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
         "idField": "id",
-        "mdmType": "compras.OfertaFornecedor"
+        "mdmType": "compras.FornecimentoProduto"
       }
     },
     {
       "entityId": "PedidoCompra",
       "title": "Pedido de compra",
-      "description": "Solicitação de compra enviada a um fornecedor, com produtos, quantidades, preços e decisão de aprovação quando necessária.",
+      "description": "Solicitação de compra aberta para um fornecedor, composta por produtos, quantidades e preços.",
       "kind": "core",
       "party": "none",
       "displayField": "numeroPedido",
@@ -78,9 +93,24 @@
       }
     },
     {
+      "entityId": "ItemPedidoCompra",
+      "title": "Item do pedido de compra",
+      "description": "Produto, quantidade e preço que compõem um pedido de compra.",
+      "kind": "supporting",
+      "party": "none",
+      "displayField": "produto",
+      "mutability": "appendOnly",
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id",
+        "mdmType": "compras.ItemPedidoCompra"
+      }
+    },
+    {
       "entityId": "RecebimentoCompra",
       "title": "Recebimento de compra",
-      "description": "Registro do recebimento total ou parcial dos produtos de um pedido de compra.",
+      "description": "Registro do recebimento total ou parcial de um pedido de compra.",
       "kind": "event",
       "party": "none",
       "displayField": "numeroRecebimento",
@@ -93,18 +123,18 @@
       }
     },
     {
-      "entityId": "Estoque",
-      "title": "Estoque",
-      "description": "Referência ao estoque mantido pelo módulo de controle de estoque, que recebe as entradas originadas nos recebimentos de compra.",
+      "entityId": "ItemRecebimentoCompra",
+      "title": "Item do recebimento de compra",
+      "description": "Quantidade efetivamente recebida de um item de pedido e destinada à entrada no estoque.",
       "kind": "supporting",
       "party": "none",
-      "displayField": "id",
+      "displayField": "produto",
       "mutability": "appendOnly",
       "storage": {
-        "target": "external",
-        "scope": "platform",
+        "target": "moduleDatabase",
+        "scope": "module",
         "idField": "id",
-        "mdmType": "controleEstoque.Estoque"
+        "mdmType": "compras.ItemRecebimentoCompra"
       }
     }
   ],
@@ -115,119 +145,177 @@
       "toEntity": "Fornecedor",
       "type": "manyToMany",
       "required": false,
-      "description": "O comprador responsável gerencia os fornecedores que cadastra para compras.",
+      "description": "O comprador gerencia os fornecedores que cadastra e acompanha para a organização.",
       "persistence": {
         "mode": "mdmRelationship"
       }
     },
     {
-      "relationshipId": "ofertaDoFornecedor",
+      "relationshipId": "fornecedorPossuiFornecimentos",
       "fromEntity": "Fornecedor",
-      "toEntity": "OfertaFornecedor",
+      "toEntity": "FornecimentoProduto",
       "type": "oneToMany",
       "required": true,
-      "description": "O fornecedor possui ofertas comerciais de produtos para a organização.",
+      "description": "O fornecedor possui condições comerciais para os produtos que fornece.",
       "persistence": {
         "mode": "crossStoreReference"
       }
     },
     {
-      "relationshipId": "ofertaParaProduto",
-      "fromEntity": "OfertaFornecedor",
-      "toEntity": "Produto",
-      "type": "manyToOne",
+      "relationshipId": "produtoPossuiFornecimentos",
+      "fromEntity": "Produto",
+      "toEntity": "FornecimentoProduto",
+      "type": "oneToMany",
       "required": true,
-      "description": "A oferta de fornecedor estabelece o preço combinado de um produto.",
+      "description": "O produto pode ter condições comerciais registradas com diferentes fornecedores.",
       "persistence": {
         "mode": "externalReference"
       }
     },
     {
-      "relationshipId": "pedidoDoFornecedor",
+      "relationshipId": "fornecedorRecebePedidos",
       "fromEntity": "Fornecedor",
       "toEntity": "PedidoCompra",
       "type": "oneToMany",
       "required": true,
-      "description": "O fornecedor é o destinatário dos pedidos de compra emitidos para ele.",
+      "description": "O fornecedor recebe os pedidos de compra emitidos pela organização.",
       "persistence": {
         "mode": "crossStoreReference"
       }
     },
     {
-      "relationshipId": "pedidoAbertoPorComprador",
-      "fromEntity": "Comprador",
-      "toEntity": "PedidoCompra",
+      "relationshipId": "pedidoPossuiItens",
+      "fromEntity": "PedidoCompra",
+      "toEntity": "ItemPedidoCompra",
       "type": "oneToMany",
       "required": true,
-      "description": "O comprador responsável abre os pedidos de compra sob seu acompanhamento.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      }
-    },
-    {
-      "relationshipId": "pedidoContemProdutos",
-      "fromEntity": "PedidoCompra",
-      "toEntity": "Produto",
-      "type": "manyToMany",
-      "required": true,
-      "description": "O pedido de compra contém um ou mais produtos com quantidades e preços solicitados.",
-      "persistence": {
-        "mode": "externalReference"
-      }
-    },
-    {
-      "relationshipId": "recebimentoDoPedido",
-      "fromEntity": "PedidoCompra",
-      "toEntity": "RecebimentoCompra",
-      "type": "oneToMany",
-      "required": true,
-      "description": "O pedido de compra pode ter um ou mais recebimentos totais ou parciais.",
+      "description": "O pedido de compra é composto por um ou mais itens.",
       "persistence": {
         "mode": "moduleReference"
       }
     },
     {
-      "relationshipId": "recebimentoIncluiProdutos",
-      "fromEntity": "RecebimentoCompra",
-      "toEntity": "Produto",
-      "type": "manyToMany",
+      "relationshipId": "fornecimentoOriginaItensPedido",
+      "fromEntity": "FornecimentoProduto",
+      "toEntity": "ItemPedidoCompra",
+      "type": "oneToMany",
       "required": true,
-      "description": "O recebimento registra as quantidades efetivamente recebidas de cada produto.",
+      "description": "A condição de fornecimento define o produto e o preço de referência dos itens de pedido.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "produtoComponeItensPedido",
+      "fromEntity": "Produto",
+      "toEntity": "ItemPedidoCompra",
+      "type": "oneToMany",
+      "required": true,
+      "description": "O produto pode compor itens de diferentes pedidos de compra.",
       "persistence": {
         "mode": "externalReference"
       }
     },
     {
-      "relationshipId": "recebimentoLancaEntradaNoEstoque",
+      "relationshipId": "pedidoPossuiRecebimentos",
+      "fromEntity": "PedidoCompra",
+      "toEntity": "RecebimentoCompra",
+      "type": "oneToMany",
+      "required": true,
+      "description": "O pedido de compra pode ter um ou mais recebimentos parciais ou totais.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "recebimentoPossuiItens",
       "fromEntity": "RecebimentoCompra",
-      "toEntity": "Estoque",
+      "toEntity": "ItemRecebimentoCompra",
+      "type": "oneToMany",
+      "required": true,
+      "description": "O recebimento de compra registra as quantidades recebidas em seus itens.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "itemPedidoPossuiRecebimentos",
+      "fromEntity": "ItemPedidoCompra",
+      "toEntity": "ItemRecebimentoCompra",
+      "type": "oneToMany",
+      "required": true,
+      "description": "O item do pedido pode ser recebido em uma ou mais etapas.",
+      "persistence": {
+        "mode": "moduleReference"
+      }
+    },
+    {
+      "relationshipId": "produtoComponeItensRecebimento",
+      "fromEntity": "Produto",
+      "toEntity": "ItemRecebimentoCompra",
+      "type": "oneToMany",
+      "required": true,
+      "description": "O produto recebido é identificado em cada item de recebimento.",
+      "persistence": {
+        "mode": "externalReference"
+      }
+    },
+    {
+      "relationshipId": "itemRecebimentoAtualizaEstoque",
+      "fromEntity": "ItemRecebimentoCompra",
+      "toEntity": "EstoqueProduto",
       "type": "manyToOne",
       "required": true,
-      "description": "O recebimento de compra lança a entrada dos produtos no estoque controlado externamente.",
+      "description": "O item recebido gera a entrada na posição de estoque correspondente ao produto.",
       "persistence": {
         "mode": "externalReference"
       }
     }
   ],
   "moduleDetails": {
-    "pedidosEmAberto": {
+    "quantidadePedidosEmAberto": {
       "type": "integer",
       "description": "Quantidade calculada de pedidos de compra que permanecem em aberto."
     },
-    "pedidosAtrasados": {
+    "quantidadePedidosAtrasados": {
       "type": "integer",
       "description": "Quantidade calculada de pedidos de compra em atraso."
     },
     "totalCompradoPorFornecedorNoMes": {
       "type": "json",
-      "description": "Totais calculados de compras do mês, agrupados por fornecedor."
+      "description": "Totais calculados de compras do mês agrupados por fornecedor."
     }
   },
   "normalizations": [
     {
       "kind": "dropCrud",
-      "entityId": "Estoque",
+      "entityId": "Produto",
       "detail": "writer inbound removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "EstoqueProduto",
+      "detail": "writer inbound removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "writerDerived",
+      "entityId": "ItemPedidoCompra",
+      "detail": "parent via PedidoCompra.pedidoPossuiItens",
+      "writerKind": "parent",
+      "via": {
+        "entityId": "PedidoCompra",
+        "relationshipId": "pedidoPossuiItens"
+      }
+    },
+    {
+      "kind": "writerDerived",
+      "entityId": "ItemRecebimentoCompra",
+      "detail": "parent via RecebimentoCompra.recebimentoPossuiItens",
+      "writerKind": "parent",
+      "via": {
+        "entityId": "RecebimentoCompra",
+        "relationshipId": "recebimentoPossuiItens"
+      }
     }
   ]
 }

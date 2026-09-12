@@ -9,25 +9,30 @@
       "description": "Identificador único do recebimento."
     },
     {
+      "fieldId": "numeroRecebimento",
+      "title": "Número do recebimento",
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "description": "Número sequencial que identifica o recebimento."
+    },
+    {
       "fieldId": "tituloReceberId",
       "title": "Título a receber",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao título a receber ao qual esta baixa total ou parcial se refere."
+      "description": "Título a receber ao qual a solicitação, confirmação ou estorno está vinculado."
     },
     {
-      "fieldId": "valorRecebido",
+      "fieldId": "valor",
       "title": "Valor recebido",
       "type": "money",
       "required": true,
-      "constraints": {
-        "precision": 2
-      },
-      "description": "Valor efetivamente recebido e baixado no título."
+      "description": "Valor da baixa ou da cobrança solicitada para o título."
     },
     {
-      "fieldId": "formaPagamento",
-      "title": "Forma de pagamento",
+      "fieldId": "meioPagamento",
+      "title": "Meio de pagamento",
       "type": "string",
       "required": true,
       "enum": [
@@ -44,26 +49,87 @@
           "title": "Cartão"
         }
       ],
-      "description": "Meio utilizado para realizar o recebimento."
+      "description": "Meio utilizado ou solicitado para o recebimento."
+    },
+    {
+      "fieldId": "status",
+      "title": "Situação",
+      "type": "string",
+      "required": true,
+      "enum": [
+        {
+          "value": "solicitado",
+          "title": "Solicitado"
+        },
+        {
+          "value": "confirmado",
+          "title": "Confirmado"
+        },
+        {
+          "value": "estornado",
+          "title": "Estornado"
+        }
+      ],
+      "description": "Situação atual da solicitação ou confirmação de recebimento."
     },
     {
       "fieldId": "recebidoEm",
       "title": "Recebido em",
       "type": "datetime",
-      "required": true,
+      "required": false,
       "description": "Data e hora em que o recebimento foi confirmado."
     },
     {
-      "fieldId": "referenciaTransacao",
-      "title": "Referência da transação",
+      "fieldId": "stripePaymentId",
+      "title": "Identificador do pagamento Stripe",
       "type": "string",
       "required": false,
-      "constraints": {
-        "maxLength": 255
-      },
-      "description": "Identificador ou comprovante da transação de Pix ou cartão, incluindo a referência processada pela Stripe quando aplicável."
+      "description": "Identificador da cobrança processada pela Stripe quando o meio de pagamento for cartão."
+    },
+    {
+      "fieldId": "estornadoEm",
+      "title": "Estornado em",
+      "type": "datetime",
+      "required": false,
+      "description": "Data e hora em que o recebimento foi estornado."
     }
   ],
-  "lifecycleStates": [],
-  "transitions": []
+  "lifecycleStates": [
+    {
+      "state": "solicitado",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "confirmado",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "estornado",
+      "reachedBy": "actor"
+    }
+  ],
+  "transitions": [
+    {
+      "transitionId": "confirmarPagamentoComCartao",
+      "from": [
+        "solicitado"
+      ],
+      "to": "confirmado",
+      "by": [
+        "stripe"
+      ],
+      "description": "Confirma o recebimento por cartão após o processamento da cobrança pela Stripe."
+    },
+    {
+      "transitionId": "estornarRecebimento",
+      "from": [
+        "confirmado"
+      ],
+      "to": "estornado",
+      "by": [
+        "caixa"
+      ],
+      "description": "Estorna um recebimento confirmado e permite a recomposição do saldo do título."
+    }
+  ]
 }

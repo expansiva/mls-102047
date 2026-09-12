@@ -7,27 +7,27 @@ export const comprasEntityProduto = {
   "moduleName": "compras",
   "entityId": "Produto",
   "title": "Produto",
-  "description": "Produto mestre referenciado do módulo de controle de estoque para composição de ofertas, pedidos e recebimentos.",
+  "description": "Produto mestre referenciado do módulo de controle de estoque para composição de fornecimentos, pedidos e recebimentos.",
   "kind": "supporting",
   "party": "none",
   "displayField": "name",
   "fields": [
     {
       "fieldId": "id",
-      "title": "Identificador",
+      "title": "Identificador do produto",
       "type": "uuid",
       "required": true,
-      "description": "Identificador imutável do produto no módulo de controle de estoque."
+      "description": "Identificador do produto mestre no módulo de controle de estoque."
     },
     {
       "fieldId": "name",
-      "title": "Nome",
+      "title": "Nome do produto",
       "type": "string",
       "required": true,
       "constraints": {
         "maxLength": 255
       },
-      "description": "Nome do produto recebido do módulo de controle de estoque para identificação nas referências de compras."
+      "description": "Nome de exibição do produto mestre referenciado para compor fornecimentos, pedidos e recebimentos."
     }
   ],
   "lifecycleStates": [],
@@ -37,8 +37,7 @@ export const comprasEntityProduto = {
     "scope": "platform",
     "idField": "id"
   },
-  "mutability": "appendOnly",
-  "writer": "inbound"
+  "mutability": "appendOnly"
 } as const satisfies Ns5OntologyEntityArtifact;
 
 export type ComprasEntityProdutoType = typeof comprasEntityProduto;

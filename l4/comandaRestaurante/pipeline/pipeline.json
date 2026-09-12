@@ -2,11 +2,11 @@
   "schemaVersion": "2026-09-10-ns5-pipeline-v1",
   "flowId": "agentNewSolution5",
   "moduleName": "comandaRestaurante",
-  "status": "failed",
+  "status": "complete",
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:14:24.276Z",
+      "updatedAt": "2026-09-12T21:44:28.575Z",
       "artifactPaths": [
         "l4/comandaRestaurante/module.defs.ts"
       ],
@@ -16,26 +16,26 @@
           "kind": "internal",
           "origin": "named",
           "title": "Garçom",
-          "description": "Profissional do restaurante que abre comandas para mesas e lança ou cancela itens enquanto a comanda está aberta."
+          "description": "Profissional do restaurante que abre comandas para mesas, lança itens e cancela lançamentos realizados por engano enquanto a comanda está aberta."
         },
         {
           "actorId": "caixa",
           "kind": "internal",
           "origin": "named",
           "title": "Caixa",
-          "description": "Profissional do restaurante que fecha comandas, aplica descontos opcionais e registra formas de pagamento."
+          "description": "Profissional do restaurante que fecha comandas, aplica descontos opcionais, registra a forma de pagamento e libera a mesa."
         }
       ],
       "autoReason": "fast"
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:14:51.558Z",
+      "updatedAt": "2026-09-12T21:44:50.138Z",
       "artifactPaths": [
-        "l4/comandaRestaurante/journeys/openTab.defs.ts",
-        "l4/comandaRestaurante/journeys/addTabItem.defs.ts",
-        "l4/comandaRestaurante/journeys/cancelTabItem.defs.ts",
-        "l4/comandaRestaurante/journeys/closeTab.defs.ts",
+        "l4/comandaRestaurante/journeys/abrirComanda.defs.ts",
+        "l4/comandaRestaurante/journeys/lancarItemNaComanda.defs.ts",
+        "l4/comandaRestaurante/journeys/cancelarItemLancado.defs.ts",
+        "l4/comandaRestaurante/journeys/fecharComanda.defs.ts",
         "l4/comandaRestaurante/journeys/index.defs.ts"
       ],
       "decideStepCount": 0,
@@ -43,35 +43,109 @@
       "normalizations": [
         {
           "kind": "dropTransitionRef",
-          "journeyId": "openTab",
-          "stepId": "createTabForTable",
+          "journeyId": "abrirComanda",
+          "stepId": "criarComanda",
           "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
-          "journeyId": "addTabItem",
-          "stepId": "createTabItem",
+          "journeyId": "lancarItemNaComanda",
+          "stepId": "criarLancamento",
           "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
-          "journeyId": "closeTab",
-          "stepId": "applyOptionalDiscount",
+          "journeyId": "fecharComanda",
+          "stepId": "registrarDescontoEpagamento",
           "detail": "transitionRef x dropped; effect is update."
-        },
-        {
-          "kind": "dropTransitionRef",
-          "journeyId": "closeTab",
-          "stepId": "recordPayment",
-          "detail": "transitionRef x dropped; effect is create."
         }
       ],
       "autoReason": "fast"
     },
     "ontology30": {
-      "status": "failed",
-      "updatedAt": "2026-09-12T19:20:31.590Z",
-      "error": "NS5_ONTOLOGY_RELATIONSHIP_OWNER_KEY relationships[3].realization.ownerEntity: Owner Payment must store a foreign key, not its own id [id]."
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:46:50.204Z",
+      "artifactPaths": [
+        "l4/comandaRestaurante/ontology/Mesa.defs.ts",
+        "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts",
+        "l4/comandaRestaurante/ontology/Garcom.defs.ts",
+        "l4/comandaRestaurante/ontology/Comanda.defs.ts",
+        "l4/comandaRestaurante/ontology/ItemComanda.defs.ts",
+        "l4/comandaRestaurante/ontology/index.defs.ts"
+      ],
+      "uncitedEntities": [
+        "Garcom"
+      ],
+      "liftedAggregateEntities": [],
+      "normalizations": [
+        {
+          "kind": "dropCrud",
+          "entityId": "Mesa",
+          "detail": "writer crud removed; an act writes this entity as entity or affects."
+        },
+        {
+          "kind": "dropCrud",
+          "entityId": "ItemCardapio",
+          "detail": "writer crud removed; an act writes this entity as entity or affects."
+        }
+      ],
+      "autoReason": "fast"
+    },
+    "workflows50": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:46:50.547Z",
+      "artifactPaths": [
+        "l4/comandaRestaurante/workflows.defs.ts"
+      ],
+      "noProcessSignal": true,
+      "autoReason": "fast"
+    },
+    "rules40": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:47:12.751Z",
+      "artifactPaths": [
+        "l4/comandaRestaurante/rules.defs.ts"
+      ],
+      "autoReason": "fast"
+    },
+    "access60": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:47:34.142Z",
+      "artifactPaths": [
+        "l4/comandaRestaurante/access.defs.ts"
+      ],
+      "normalizations": [
+        {
+          "kind": "dropAnchorEntity",
+          "grantId": "garcomRecursosRestaurante",
+          "detail": "anchorEntity removed; organization is not own/assigned/related."
+        },
+        {
+          "kind": "dropAnchorEntity",
+          "grantId": "caixaFechamentoComandas",
+          "detail": "anchorEntity removed; organization is not own/assigned/related."
+        }
+      ],
+      "autoReason": "fast"
+    },
+    "integration70": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:48:00.999Z",
+      "artifactPaths": [
+        "l4/comandaRestaurante/integration.defs.ts"
+      ],
+      "autoReason": "fast"
+    },
+    "finalize80": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:48:01.329Z",
+      "artifactPaths": [
+        "l4/comandaRestaurante/pipeline/finalize-report.json",
+        "l4/organization/registry.defs.ts",
+        "l5/config.json",
+        "l5/project.json"
+      ],
+      "autoReason": "fast"
     }
   },
   "sourcePrompt": "módulo comandaRestaurante, português. o restaurante tem mesas e um cardápio com itens e preços. o garçom abre uma comanda para uma mesa, lança itens (com quantidade e observação), e pode cancelar um item lançado por engano enquanto a comanda estiver aberta. o caixa fecha a comanda: vê o total, aplica desconto opcional, registra a forma de pagamento e a mesa fica livre. perfis: garçom e caixa.",
@@ -80,46 +154,27 @@
     "module": "comandaRestaurante",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-12T19:20:31.590Z",
+  "updatedAt": "2026-09-12T21:48:01.329Z",
   "rebuildAll": {
     "deleted": [
-      "l4/comandaRestaurante/access.defs.ts",
-      "l4/comandaRestaurante/integration.defs.ts",
-      "l4/comandaRestaurante/journeys/abrirComanda.defs.ts",
-      "l4/comandaRestaurante/journeys/cancelarItemComanda.defs.ts",
-      "l4/comandaRestaurante/journeys/fecharComanda.defs.ts",
+      "l4/comandaRestaurante/journeys/addTabItem.defs.ts",
+      "l4/comandaRestaurante/journeys/cancelTabItem.defs.ts",
+      "l4/comandaRestaurante/journeys/closeTab.defs.ts",
       "l4/comandaRestaurante/journeys/index.defs.ts",
-      "l4/comandaRestaurante/journeys/lancarItemComanda.defs.ts",
+      "l4/comandaRestaurante/journeys/openTab.defs.ts",
       "l4/comandaRestaurante/module.defs.ts",
-      "l4/comandaRestaurante/ontology/Comanda.defs.ts",
-      "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts",
-      "l4/comandaRestaurante/ontology/ItemComanda.defs.ts",
-      "l4/comandaRestaurante/ontology/Mesa.defs.ts",
-      "l4/comandaRestaurante/ontology/index.defs.ts",
-      "l4/comandaRestaurante/pipeline/access60-draft.json",
-      "l4/comandaRestaurante/pipeline/finalize-report.json",
-      "l4/comandaRestaurante/pipeline/integration70-draft.json",
       "l4/comandaRestaurante/pipeline/journeys20-draft.json",
       "l4/comandaRestaurante/pipeline/module10-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-Comanda-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-ItemCardapio-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-ItemComanda-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-Mesa-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-MenuItem-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-OrderTab-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-Payment-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-TabItem-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-Table-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-bindings-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-plan-draft.json",
-      "l4/comandaRestaurante/pipeline/pipeline.json",
-      "l4/comandaRestaurante/pipeline/rules40-draft.json",
-      "l4/comandaRestaurante/pipeline/run01_newsolution5.json",
-      "l4/comandaRestaurante/pipeline/workflows50-draft.json",
-      "l4/comandaRestaurante/rules.defs.ts",
-      "l4/comandaRestaurante/workflows.defs.ts"
+      "l4/comandaRestaurante/pipeline/pipeline.json"
     ],
-    "edited": [
-      "l4/organization/registry.defs.ts",
-      "l5/config.json",
-      "l5/project.json"
-    ],
-    "at": "2026-09-12T19:14:12.703Z"
+    "edited": [],
+    "at": "2026-09-12T21:44:11.916Z"
   }
 }

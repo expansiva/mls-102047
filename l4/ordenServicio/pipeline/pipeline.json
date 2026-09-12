@@ -2,11 +2,11 @@
   "schemaVersion": "2026-09-10-ns5-pipeline-v1",
   "flowId": "agentNewSolution5",
   "moduleName": "ordenServicio",
-  "status": "failed",
+  "status": "complete",
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:21:14.289Z",
+      "updatedAt": "2026-09-12T21:26:44.923Z",
       "artifactPaths": [
         "l4/ordenServicio/module.defs.ts"
       ],
@@ -16,53 +16,144 @@
           "kind": "internal",
           "origin": "named",
           "title": "Recepcionista",
-          "description": "Personal del servicio técnico que abre las órdenes, registra la recepción del aparato y realiza la entrega final."
+          "description": "Personal que abre órdenes de servicio y entrega los aparatos reparados a los clientes."
         },
         {
           "actorId": "tecnico",
           "kind": "internal",
           "origin": "named",
           "title": "Técnico",
-          "description": "Personal técnico que analiza los aparatos, registra diagnósticos y presupuestos, y realiza las reparaciones."
+          "description": "Personal que analiza los aparatos, prepara presupuestos y realiza las reparaciones."
         },
         {
           "actorId": "cliente",
           "kind": "external",
           "origin": "named",
           "title": "Cliente",
-          "description": "Persona que consulta sus órdenes en el portal y aprueba o rechaza los presupuestos."
+          "description": "Persona que consulta sus órdenes y aprueba o rechaza presupuestos desde el portal."
         }
       ],
       "autoReason": "fast"
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:23:06.879Z",
+      "updatedAt": "2026-09-12T21:29:03.803Z",
       "artifactPaths": [
         "l4/ordenServicio/journeys/abrirOrdenServicio.defs.ts",
-        "l4/ordenServicio/journeys/analizarYpresupuestarOrden.defs.ts",
-        "l4/ordenServicio/journeys/decidirPresupuesto.defs.ts",
-        "l4/ordenServicio/journeys/repararOrdenAprobada.defs.ts",
-        "l4/ordenServicio/journeys/entregarYfinalizarOrden.defs.ts",
+        "l4/ordenServicio/journeys/prepararPresupuesto.defs.ts",
+        "l4/ordenServicio/journeys/aprobarPresupuesto.defs.ts",
+        "l4/ordenServicio/journeys/rechazarPresupuesto.defs.ts",
+        "l4/ordenServicio/journeys/realizarReparacion.defs.ts",
+        "l4/ordenServicio/journeys/entregarAparatoReparado.defs.ts",
         "l4/ordenServicio/journeys/consultarMisOrdenes.defs.ts",
         "l4/ordenServicio/journeys/index.defs.ts"
       ],
-      "decideStepCount": 1,
+      "decideStepCount": 2,
       "droppedActors": [],
       "normalizations": [
         {
           "kind": "dropTransitionRef",
           "journeyId": "abrirOrdenServicio",
-          "stepId": "registrarOrden",
+          "stepId": "registrarRecepcion",
           "detail": "transitionRef x dropped; effect is create."
+        },
+        {
+          "kind": "dropTransitionRef",
+          "journeyId": "prepararPresupuesto",
+          "stepId": "registrarDiagnosticoYpiezas",
+          "detail": "transitionRef x dropped; effect is update."
+        },
+        {
+          "kind": "dropTransitionRef",
+          "journeyId": "realizarReparacion",
+          "stepId": "registrarReparacionRealizada",
+          "detail": "transitionRef x dropped; effect is update."
         }
       ],
       "autoReason": "fast"
     },
     "ontology30": {
-      "status": "failed",
-      "updatedAt": "2026-09-12T19:25:29.751Z",
-      "error": "ontology30 entities remain invalid after repair: PiezaPresupuesto."
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:30:31.708Z",
+      "artifactPaths": [
+        "l4/ordenServicio/ontology/Cliente.defs.ts",
+        "l4/ordenServicio/ontology/Aparato.defs.ts",
+        "l4/ordenServicio/ontology/OrdenServicio.defs.ts",
+        "l4/ordenServicio/ontology/BudgetPart.defs.ts",
+        "l4/ordenServicio/ontology/index.defs.ts"
+      ],
+      "uncitedEntities": [
+        "BudgetPart"
+      ],
+      "liftedAggregateEntities": [],
+      "normalizations": [
+        {
+          "kind": "writerDerived",
+          "entityId": "BudgetPart",
+          "detail": "parent via OrdenServicio.serviceOrderHasBudgetParts",
+          "writerKind": "parent",
+          "via": {
+            "entityId": "OrdenServicio",
+            "relationshipId": "serviceOrderHasBudgetParts"
+          }
+        }
+      ],
+      "autoReason": "fast"
+    },
+    "rules40": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:31:00.233Z",
+      "artifactPaths": [
+        "l4/ordenServicio/rules.defs.ts"
+      ],
+      "autoReason": "fast"
+    },
+    "access60": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:31:05.862Z",
+      "artifactPaths": [
+        "l4/ordenServicio/access.defs.ts"
+      ],
+      "normalizations": [
+        {
+          "kind": "dropAnchorEntity",
+          "grantId": "recepcionGestionaOrdenes",
+          "detail": "anchorEntity removed; organization is not own/assigned/related."
+        },
+        {
+          "kind": "dropAnchorEntity",
+          "grantId": "tecnicoGestionaDiagnosticoReparacion",
+          "detail": "anchorEntity removed; organization is not own/assigned/related."
+        }
+      ],
+      "autoReason": "fast"
+    },
+    "workflows50": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:31:05.878Z",
+      "artifactPaths": [
+        "l4/ordenServicio/workflows.defs.ts"
+      ],
+      "autoReason": "fast"
+    },
+    "integration70": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:31:27.404Z",
+      "artifactPaths": [
+        "l4/ordenServicio/integration.defs.ts"
+      ],
+      "autoReason": "fast"
+    },
+    "finalize80": {
+      "status": "approved",
+      "updatedAt": "2026-09-12T21:31:27.740Z",
+      "artifactPaths": [
+        "l4/ordenServicio/pipeline/finalize-report.json",
+        "l4/organization/registry.defs.ts",
+        "l5/config.json",
+        "l5/project.json"
+      ],
+      "autoReason": "fast"
     }
   },
   "sourcePrompt": "crear el módulo ordenServicio, en español, para un servicio técnico de electrónica. el cliente trae un aparato y el recepcionista abre una orden de servicio con los datos del cliente, el aparato, el defecto informado y fotos. el técnico analiza y registra el diagnóstico, las piezas necesarias con costo interno y el valor del presupuesto para el cliente. el cliente recibe el presupuesto y lo aprueba o lo rechaza desde el portal; si lo rechaza, la orden se cierra como rechazada y el aparato queda disponible para retiro. si lo aprueba, el técnico realiza la reparación, registra lo que hizo y la marca como lista; el recepcionista entrega y finaliza. el cliente accede al portal y ve solamente sus propias órdenes, con estado, diagnóstico y valor del presupuesto — nunca el costo interno de las piezas ni las anotaciones del técnico. perfiles: recepcionista, técnico y cliente.",
@@ -71,46 +162,28 @@
     "module": "ordenServicio",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-12T19:25:29.751Z",
+  "updatedAt": "2026-09-12T21:31:27.740Z",
   "rebuildAll": {
     "deleted": [
-      "l4/ordenServicio/access.defs.ts",
-      "l4/ordenServicio/integration.defs.ts",
       "l4/ordenServicio/journeys/abrirOrdenServicio.defs.ts",
       "l4/ordenServicio/journeys/analizarYpresupuestarOrden.defs.ts",
       "l4/ordenServicio/journeys/consultarMisOrdenes.defs.ts",
       "l4/ordenServicio/journeys/decidirPresupuesto.defs.ts",
       "l4/ordenServicio/journeys/entregarYfinalizarOrden.defs.ts",
       "l4/ordenServicio/journeys/index.defs.ts",
-      "l4/ordenServicio/journeys/repararYmarcarLista.defs.ts",
+      "l4/ordenServicio/journeys/repararOrdenAprobada.defs.ts",
       "l4/ordenServicio/module.defs.ts",
-      "l4/ordenServicio/ontology/Aparato.defs.ts",
-      "l4/ordenServicio/ontology/Cliente.defs.ts",
-      "l4/ordenServicio/ontology/OrdenServicio.defs.ts",
-      "l4/ordenServicio/ontology/PiezaNecesaria.defs.ts",
-      "l4/ordenServicio/ontology/Reparacion.defs.ts",
-      "l4/ordenServicio/ontology/index.defs.ts",
-      "l4/ordenServicio/pipeline/access60-draft.json",
-      "l4/ordenServicio/pipeline/finalize-report.json",
-      "l4/ordenServicio/pipeline/integration70-draft.json",
       "l4/ordenServicio/pipeline/journeys20-draft.json",
       "l4/ordenServicio/pipeline/module10-draft.json",
       "l4/ordenServicio/pipeline/ontology30-Aparato-draft.json",
       "l4/ordenServicio/pipeline/ontology30-Cliente-draft.json",
       "l4/ordenServicio/pipeline/ontology30-OrdenServicio-draft.json",
-      "l4/ordenServicio/pipeline/ontology30-PiezaNecesaria-draft.json",
-      "l4/ordenServicio/pipeline/ontology30-Reparacion-draft.json",
-      "l4/ordenServicio/pipeline/ontology30-bindings-draft.json",
-      "l4/ordenServicio/pipeline/ontology30-draft.json",
+      "l4/ordenServicio/pipeline/ontology30-PiezaPresupuesto-draft.json",
+      "l4/ordenServicio/pipeline/ontology30-Tecnico-draft.json",
       "l4/ordenServicio/pipeline/ontology30-plan-draft.json",
-      "l4/ordenServicio/pipeline/pipeline.json",
-      "l4/ordenServicio/pipeline/rules40-draft.json",
-      "l4/ordenServicio/pipeline/run01_newsolution5.json",
-      "l4/ordenServicio/pipeline/workflows50-draft.json",
-      "l4/ordenServicio/rules.defs.ts",
-      "l4/ordenServicio/workflows.defs.ts"
+      "l4/ordenServicio/pipeline/pipeline.json"
     ],
     "edited": [],
-    "at": "2026-09-12T19:21:02.879Z"
+    "at": "2026-09-12T21:26:33.259Z"
   }
 }

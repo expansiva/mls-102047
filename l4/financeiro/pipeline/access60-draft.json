@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "2026-09-12-ns5-access-v3",
+  "moduleName": "financeiro",
+  "actors": [
+    {
+      "actorId": "caixa",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Caixa",
+      "description": "Profissional da organização que recebe títulos, registra baixas parciais e estorna recebimentos no mesmo dia."
+    },
+    {
+      "actorId": "gerenteFinanceiro",
+      "kind": "internal",
+      "origin": "named",
+      "title": "Gerente financeiro",
+      "description": "Profissional da organização que acompanha os recebíveis, títulos vencidos e extratos por pagador."
+    },
+    {
+      "actorId": "pagador",
+      "kind": "external",
+      "origin": "named",
+      "title": "Pagador",
+      "description": "Pessoa que acessa o portal para consultar seus títulos e recebimentos e pagar títulos em aberto com cartão."
+    },
+    {
+      "actorId": "stripe",
+      "kind": "system",
+      "origin": "named",
+      "title": "Stripe",
+      "description": "Sistema externo utilizado para processar pagamentos com cartão."
+    }
+  ],
+  "grants": [
+    {
+      "grantId": "caixaRecebimentos",
+      "actorRef": "caixa",
+      "title": "Operar recebimentos no caixa",
+      "description": "Permite ao caixa consultar títulos da organização, registrar recebimentos parciais ou totais em dinheiro, Pix ou cartão e estornar recebimentos realizados no mesmo dia.",
+      "entityRefs": [
+        "TituloReceber",
+        "Recebimento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange os títulos e recebimentos da organização necessários à operação do caixa."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O caixa pode consultar todos os dados dos títulos e recebimentos necessários para registrar, conferir e estornar baixas."
+      }
+    },
+    {
+      "grantId": "gerenteFinanceiroRecebiveis",
+      "actorRef": "gerenteFinanceiro",
+      "title": "Gerenciar recebíveis e extratos",
+      "description": "Permite ao gerente financeiro acompanhar os recebíveis, consultar títulos vencidos e emitir extratos por pagador para toda a organização.",
+      "entityRefs": [
+        "TituloReceber",
+        "Recebimento",
+        "ExtratoPagador",
+        "Pagador"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange os pagadores, títulos, recebimentos e extratos da organização."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O gerente financeiro pode consultar todos os dados financeiros e os extratos necessários para análise e emissão."
+      }
+    },
+    {
+      "grantId": "pagadorMeusRecebiveis",
+      "actorRef": "pagador",
+      "title": "Consultar e pagar meus títulos",
+      "description": "Permite ao pagador consultar somente seus próprios títulos e recebimentos e solicitar pagamento por cartão para títulos em aberto.",
+      "entityRefs": [
+        "TituloReceber",
+        "Recebimento"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Abrange somente títulos vinculados ao pagador da sessão e os respectivos recebimentos.",
+        "anchorEntity": "Pagador"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "O pagador vê os valores, vencimentos, situações e dados de seus recebimentos, sem referências internas de origem nem identificadores técnicos de processamento.",
+        "allowedFields": [
+          "TituloReceber.numeroTitulo",
+          "TituloReceber.valorOriginal",
+          "TituloReceber.vencimento",
+          "TituloReceber.details.valorRecebido",
+          "TituloReceber.details.saldoPendente",
+          "TituloReceber.details.situacaoCobranca",
+          "Recebimento.numeroRecebimento",
+          "Recebimento.valor",
+          "Recebimento.meioPagamento",
+          "Recebimento.status",
+          "Recebimento.recebidoEm",
+          "Recebimento.estornadoEm"
+        ]
+      }
+    },
+    {
+      "grantId": "stripeProcessarCartoes",
+      "actorRef": "stripe",
+      "title": "Processar cobranças por cartão",
+      "description": "Permite à Stripe consultar solicitações de cartão encaminhadas para processamento e confirmar os respectivos recebimentos.",
+      "entityRefs": [
+        "TituloReceber",
+        "Recebimento"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Abrange somente recebimentos por cartão vinculados ao pagador alcançado pelo título e os respectivos títulos.",
+        "anchorEntity": "Pagador"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "A Stripe recebe somente os dados financeiros e técnicos indispensáveis para processar e confirmar cobranças por cartão.",
+        "allowedFields": [
+          "TituloReceber.id",
+          "TituloReceber.numeroTitulo",
+          "TituloReceber.valorOriginal",
+          "TituloReceber.vencimento",
+          "TituloReceber.details.valorRecebido",
+          "TituloReceber.details.saldoPendente",
+          "TituloReceber.details.situacaoCobranca",
+          "Recebimento.id",
+          "Recebimento.numeroRecebimento",
+          "Recebimento.tituloReceberId",
+          "Recebimento.valor",
+          "Recebimento.meioPagamento",
+          "Recebimento.status",
+          "Recebimento.recebidoEm",
+          "Recebimento.stripePaymentId"
+        ]
+      }
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropAnchorEntity",
+      "grantId": "caixaRecebimentos",
+      "detail": "anchorEntity removed; organization is not own/assigned/related."
+    },
+    {
+      "kind": "dropAnchorEntity",
+      "grantId": "gerenteFinanceiroRecebiveis",
+      "detail": "anchorEntity removed; organization is not own/assigned/related."
+    }
+  ]
+}

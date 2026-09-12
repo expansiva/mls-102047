@@ -3,90 +3,123 @@
   "moduleName": "compras",
   "processes": [
     {
-      "processId": "aprovarEReceberPedidoCompra",
-      "title": "Aprovação e recebimento de pedido de compra",
-      "description": "Orquestra o encaminhamento de pedidos que exigem aprovação e seu recebimento após a chegada.",
+      "processId": "submeterEProcessarPedidoCompra",
+      "title": "Submeter e processar pedido de compra",
+      "description": "Orquestra o envio do pedido pelo comprador e o seu encaminhamento automático ou para decisão gerencial conforme o valor.",
       "trigger": {
         "kind": "manual",
         "actorRef": "comprador"
       },
       "tasks": [
         {
-          "taskId": "abrirEnviarPedido",
+          "taskId": "enviarPedidoParaProcessamento",
           "kind": "human",
           "actorRef": "comprador",
           "journeyRef": "abrirEenviarPedidoCompra",
           "next": [
-            "aprovarPedido"
+            "liberarPedidoAbaixoDoLimite",
+            "decidirPedidoAcimaDoLimite"
           ],
-          "description": "O comprador abre e envia o pedido, encaminhando ao gerente os pedidos cujo valor exige aprovação."
+          "description": "O comprador abre e envia o pedido, encaminhando os pedidos que exigem aprovação ao gerente de compras."
         },
         {
-          "taskId": "aprovarPedido",
+          "taskId": "liberarPedidoAbaixoDoLimite",
+          "kind": "mechanical",
+          "entityRef": "PedidoCompra",
+          "effect": "transition",
+          "transitionRef": "liberarPedidoSemAprovacao",
+          "next": [],
+          "description": "O sistema libera para processamento o pedido cujo valor não exige aprovação."
+        },
+        {
+          "taskId": "decidirPedidoAcimaDoLimite",
           "kind": "human",
           "actorRef": "gerenteCompras",
-          "journeyRef": "aprovarPedidoAcimaDoLimite",
-          "next": [
-            "aguardarChegadaPedido"
-          ],
-          "description": "O gerente de compras avalia e aprova o pedido encaminhado para que ele possa ser recebido."
-        },
+          "journeyRef": "decidirPedidoAcimaDoLimite",
+          "next": [],
+          "description": "O gerente de compras aprova ou rejeita o pedido que exige autorização."
+        }
+      ]
+    },
+    {
+      "processId": "registrarEAtualizarRecebimento",
+      "title": "Registrar e atualizar recebimento de pedido",
+      "description": "Orquestra o registro do recebimento pelo almoxarife, a atualização do estoque e o status correspondente do pedido.",
+      "trigger": {
+        "kind": "manual",
+        "actorRef": "almoxarife"
+      },
+      "tasks": [
         {
-          "taskId": "aguardarChegadaPedido",
-          "kind": "wait",
-          "next": [
-            "registrarRecebimento"
-          ],
-          "description": "Aguarda a chegada do pedido aprovado ao almoxarifado."
-        },
-        {
-          "taskId": "registrarRecebimento",
+          "taskId": "registrarRecebimentoDoPedido",
           "kind": "human",
           "actorRef": "almoxarife",
           "journeyRef": "registrarRecebimentoDePedido",
           "next": [
-            "aguardarNovoRecebimento"
+            "atualizarEstoqueRecebido"
           ],
-          "description": "O almoxarife registra o recebimento total ou parcial e dá entrada no estoque dos produtos recebidos."
+          "description": "O almoxarife registra as quantidades recebidas, total ou parcialmente, para o pedido."
         },
         {
-          "taskId": "aguardarNovoRecebimento",
-          "kind": "wait",
+          "taskId": "atualizarEstoqueRecebido",
+          "kind": "mechanical",
+          "entityRef": "EstoqueProduto",
+          "effect": "update",
           "next": [
-            "registrarRecebimento"
+            "marcarRecebimentoParcial"
           ],
-          "description": "Aguarda uma nova entrega quando ainda houver itens pendentes de recebimento."
+          "description": "O sistema atualiza o estoque dos produtos nas quantidades efetivamente recebidas."
+        },
+        {
+          "taskId": "marcarRecebimentoParcial",
+          "kind": "mechanical",
+          "entityRef": "PedidoCompra",
+          "effect": "transition",
+          "transitionRef": "registrarRecebimentoParcial",
+          "next": [],
+          "description": "O sistema registra o pedido como parcialmente recebido quando ainda houver quantidades pendentes."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "cadastrarFornecedorEoferta",
+      "journeyId": "cadastrarFornecedor",
+      "inProcess": false
+    },
+    {
+      "journeyId": "definirProdutosDoFornecedor",
       "inProcess": false
     },
     {
       "journeyId": "abrirEenviarPedidoCompra",
       "inProcess": true,
-      "processId": "aprovarEReceberPedidoCompra"
+      "processId": "submeterEProcessarPedidoCompra"
     },
     {
-      "journeyId": "aprovarPedidoAcimaDoLimite",
+      "journeyId": "decidirPedidoAcimaDoLimite",
       "inProcess": true,
-      "processId": "aprovarEReceberPedidoCompra"
-    },
-    {
-      "journeyId": "rejeitarPedidoAcimaDoLimite",
-      "inProcess": false
+      "processId": "submeterEProcessarPedidoCompra"
     },
     {
       "journeyId": "registrarRecebimentoDePedido",
       "inProcess": true,
-      "processId": "aprovarEReceberPedidoCompra"
+      "processId": "registrarEAtualizarRecebimento"
     },
     {
       "journeyId": "acompanharIndicadoresDeCompras",
       "inProcess": false
+    }
+  ],
+  "systemDecisions": [
+    {
+      "decisionId": "dropDuplicateTaskMarcarRecebimentoTotal",
+      "chosen": "drop",
+      "alternatives": [
+        "keep",
+        "drop"
+      ],
+      "decidedBy": "system"
     }
   ]
 }

@@ -1,0 +1,566 @@
+{
+  "plan": {
+    "moduleName": "financeiro",
+    "businessDomain": "Contas a receber da organização, incluindo títulos originados em outros módulos, recebimentos e consulta de extratos por pagador.",
+    "entities": [
+      {
+        "entityId": "TituloReceber",
+        "title": "Título a receber",
+        "description": "Cobrança a receber originada em outro módulo da organização, com valor, vencimento, pagador e referência à origem.",
+        "kind": "core",
+        "party": "none",
+        "displayField": "numeroTitulo",
+        "mutability": "appendOnly",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "financeiro.TituloReceber"
+        }
+      },
+      {
+        "entityId": "Recebimento",
+        "title": "Recebimento",
+        "description": "Registro de uma solicitação ou confirmação de valor recebido para um título, por dinheiro, Pix ou cartão.",
+        "kind": "event",
+        "party": "none",
+        "displayField": "numeroRecebimento",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "financeiro.Recebimento"
+        }
+      },
+      {
+        "entityId": "ExtratoPagador",
+        "title": "Extrato do pagador",
+        "description": "Extrato emitido para um pagador com os títulos e recebimentos considerados na emissão.",
+        "kind": "event",
+        "party": "none",
+        "displayField": "numeroExtrato",
+        "mutability": "appendOnly",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "financeiro.ExtratoPagador"
+        }
+      },
+      {
+        "entityId": "Pagador",
+        "title": "Pagador",
+        "description": "Pessoa responsável por títulos a receber e que pode consultar e pagar os próprios títulos no portal.",
+        "kind": "mdm",
+        "party": "person",
+        "mdmSubtype": "Person",
+        "displayField": "name",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "financeiro.Pagador"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "relationshipId": "tituloTemPagador",
+        "fromEntity": "TituloReceber",
+        "toEntity": "Pagador",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada título a receber possui um pagador responsável.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "recebimentoDoTitulo",
+        "fromEntity": "Recebimento",
+        "toEntity": "TituloReceber",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada recebimento registra uma solicitação, confirmação ou estorno relativo a um título a receber.",
+        "persistence": {
+          "mode": "moduleReference"
+        }
+      },
+      {
+        "relationshipId": "extratoDoPagador",
+        "fromEntity": "ExtratoPagador",
+        "toEntity": "Pagador",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada extrato emitido pertence ao pagador consultado.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      }
+    ],
+    "moduleDetails": {
+      "recebiveisPorPeriodoEorigem": {
+        "type": "json",
+        "description": "Indicadores calculados dos recebíveis da organização, agrupados por período e por origem."
+      }
+    },
+    "normalizations": [
+      {
+        "kind": "dropCrud",
+        "entityId": "TituloReceber",
+        "detail": "writer inbound removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "writerDerived",
+        "entityId": "Pagador",
+        "detail": "attach via TituloReceber.tituloTemPagador",
+        "writerKind": "attach",
+        "via": {
+          "entityId": "TituloReceber",
+          "relationshipId": "tituloTemPagador",
+          "stepRef": "registrarBaixaDeTitulo.registrarRecebimento"
+        }
+      }
+    ]
+  },
+  "entities": [
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "financeiro",
+      "entityId": "TituloReceber",
+      "title": "Título a receber",
+      "description": "Cobrança a receber originada em outro módulo da organização, com valor, vencimento, pagador e referência à origem.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "numeroTitulo",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único do título a receber."
+        },
+        {
+          "fieldId": "numeroTitulo",
+          "title": "Número do título",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "description": "Número sequencial que identifica o título a receber."
+        },
+        {
+          "fieldId": "pagadorId",
+          "title": "Pagador",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao pagador responsável pelo título."
+        },
+        {
+          "fieldId": "valorOriginal",
+          "title": "Valor original",
+          "type": "money",
+          "required": true,
+          "description": "Valor total originalmente cobrado no título."
+        },
+        {
+          "fieldId": "vencimento",
+          "title": "Vencimento",
+          "type": "date",
+          "required": true,
+          "description": "Data limite prevista para o pagamento do título."
+        },
+        {
+          "fieldId": "origemModulo",
+          "title": "Módulo de origem",
+          "type": "string",
+          "required": true,
+          "description": "Identificador do módulo que gerou a cobrança."
+        },
+        {
+          "fieldId": "origemReferencia",
+          "title": "Referência da origem",
+          "type": "string",
+          "required": true,
+          "description": "Identificador do registro de origem que gerou a cobrança."
+        }
+      ],
+      "uniqueKeys": [
+        [
+          "origemModulo",
+          "origemReferencia"
+        ]
+      ],
+      "details": {
+        "valorRecebido": {
+          "type": "money",
+          "description": "Soma dos recebimentos confirmados e não estornados vinculados ao título."
+        },
+        "saldoPendente": {
+          "type": "money",
+          "description": "Valor que ainda falta receber para quitar o título."
+        },
+        "situacaoCobranca": {
+          "type": "string",
+          "description": "Situação calculada do título conforme saldo pendente, vencimento e recebimentos."
+        }
+      },
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      },
+      "mutability": "appendOnly"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "financeiro",
+      "entityId": "Recebimento",
+      "title": "Recebimento",
+      "description": "Registro de uma solicitação ou confirmação de valor recebido para um título, por dinheiro, Pix ou cartão.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "numeroRecebimento",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único do recebimento."
+        },
+        {
+          "fieldId": "numeroRecebimento",
+          "title": "Número do recebimento",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "description": "Número sequencial que identifica o recebimento."
+        },
+        {
+          "fieldId": "tituloReceberId",
+          "title": "Título a receber",
+          "type": "uuid",
+          "required": true,
+          "description": "Título a receber ao qual a solicitação, confirmação ou estorno está vinculado."
+        },
+        {
+          "fieldId": "valor",
+          "title": "Valor recebido",
+          "type": "money",
+          "required": true,
+          "description": "Valor da baixa ou da cobrança solicitada para o título."
+        },
+        {
+          "fieldId": "meioPagamento",
+          "title": "Meio de pagamento",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "dinheiro",
+              "title": "Dinheiro"
+            },
+            {
+              "value": "pix",
+              "title": "Pix"
+            },
+            {
+              "value": "cartao",
+              "title": "Cartão"
+            }
+          ],
+          "description": "Meio utilizado ou solicitado para o recebimento."
+        },
+        {
+          "fieldId": "status",
+          "title": "Situação",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "solicitado",
+              "title": "Solicitado"
+            },
+            {
+              "value": "confirmado",
+              "title": "Confirmado"
+            },
+            {
+              "value": "estornado",
+              "title": "Estornado"
+            }
+          ],
+          "description": "Situação atual da solicitação ou confirmação de recebimento."
+        },
+        {
+          "fieldId": "recebidoEm",
+          "title": "Recebido em",
+          "type": "datetime",
+          "required": false,
+          "description": "Data e hora em que o recebimento foi confirmado."
+        },
+        {
+          "fieldId": "stripePaymentId",
+          "title": "Identificador do pagamento Stripe",
+          "type": "string",
+          "required": false,
+          "description": "Identificador da cobrança processada pela Stripe quando o meio de pagamento for cartão."
+        },
+        {
+          "fieldId": "estornadoEm",
+          "title": "Estornado em",
+          "type": "datetime",
+          "required": false,
+          "description": "Data e hora em que o recebimento foi estornado."
+        }
+      ],
+      "lifecycleStates": [
+        {
+          "state": "solicitado",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "confirmado",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "estornado",
+          "reachedBy": "actor"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "confirmarPagamentoComCartao",
+          "from": [
+            "solicitado"
+          ],
+          "to": "confirmado",
+          "by": [
+            "stripe"
+          ],
+          "description": "Confirma o recebimento por cartão após o processamento da cobrança pela Stripe."
+        },
+        {
+          "transitionId": "estornarRecebimento",
+          "from": [
+            "confirmado"
+          ],
+          "to": "estornado",
+          "by": [
+            "caixa"
+          ],
+          "description": "Estorna um recebimento confirmado e permite a recomposição do saldo do título."
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "financeiro",
+      "entityId": "ExtratoPagador",
+      "title": "Extrato do pagador",
+      "description": "Extrato emitido para um pagador com os títulos e recebimentos considerados na emissão.",
+      "kind": "event",
+      "party": "none",
+      "displayField": "numeroExtrato",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único do extrato emitido."
+        },
+        {
+          "fieldId": "numeroExtrato",
+          "title": "Número do extrato",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "description": "Número sequencial que identifica o extrato emitido."
+        },
+        {
+          "fieldId": "pagadorId",
+          "title": "Pagador",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao pagador para o qual o extrato foi emitido."
+        },
+        {
+          "fieldId": "emitidoEm",
+          "title": "Emitido em",
+          "type": "datetime",
+          "required": true,
+          "description": "Data e hora de emissão do extrato."
+        },
+        {
+          "fieldId": "titulosConsiderados",
+          "title": "Títulos considerados",
+          "type": "json",
+          "required": true,
+          "description": "Retrato dos títulos do pagador considerados na emissão do extrato."
+        },
+        {
+          "fieldId": "recebimentosConsiderados",
+          "title": "Recebimentos considerados",
+          "type": "json",
+          "required": true,
+          "description": "Retrato dos recebimentos do pagador considerados na emissão do extrato."
+        }
+      ],
+      "details": {
+        "valorTotalTitulos": {
+          "type": "money",
+          "description": "Valor total dos títulos considerados no extrato."
+        },
+        "valorTotalRecebido": {
+          "type": "money",
+          "description": "Valor total dos recebimentos considerados no extrato."
+        },
+        "saldoEmAberto": {
+          "type": "money",
+          "description": "Saldo em aberto dos títulos considerados no momento da emissão."
+        }
+      },
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      },
+      "mutability": "appendOnly"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "financeiro",
+      "entityId": "Pagador",
+      "title": "Pagador",
+      "description": "Pessoa responsável por títulos a receber e que pode consultar e pagar os próprios títulos no portal.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "fields": [],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "financeiro.Pagador"
+      },
+      "writer": "inbound"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "tituloTemPagador",
+      "fromEntity": "TituloReceber",
+      "toEntity": "Pagador",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada título a receber possui um pagador responsável.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "TituloReceber",
+        "from": {
+          "entityId": "TituloReceber",
+          "fieldIds": [
+            "pagadorId"
+          ]
+        },
+        "to": {
+          "entityId": "Pagador",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "recebimentoDoTitulo",
+      "fromEntity": "Recebimento",
+      "toEntity": "TituloReceber",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada recebimento registra uma solicitação, confirmação ou estorno relativo a um título a receber.",
+      "persistence": {
+        "mode": "moduleReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Recebimento",
+        "from": {
+          "entityId": "Recebimento",
+          "fieldIds": [
+            "tituloReceberId"
+          ]
+        },
+        "to": {
+          "entityId": "TituloReceber",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "extratoDoPagador",
+      "fromEntity": "ExtratoPagador",
+      "toEntity": "Pagador",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada extrato emitido pertence ao pagador consultado.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "ExtratoPagador",
+        "from": {
+          "entityId": "ExtratoPagador",
+          "fieldIds": [
+            "pagadorId"
+          ]
+        },
+        "to": {
+          "entityId": "Pagador",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    }
+  ],
+  "removedOrphans": [],
+  "liftedAggregateEntities": [],
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "TituloReceber",
+      "detail": "writer inbound removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "writerDerived",
+      "entityId": "Pagador",
+      "detail": "attach via TituloReceber.tituloTemPagador",
+      "writerKind": "attach",
+      "via": {
+        "entityId": "TituloReceber",
+        "relationshipId": "tituloTemPagador",
+        "stepRef": "registrarBaixaDeTitulo.registrarRecebimento"
+      }
+    }
+  ]
+}

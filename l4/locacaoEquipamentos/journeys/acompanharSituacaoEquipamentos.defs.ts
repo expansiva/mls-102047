@@ -21,22 +21,21 @@ export const acompanharSituacaoEquipamentosJourney = {
         "description": "Localiza os equipamentos da locadora."
       },
       {
-        "stepId": "consultarSituacaoEquipamentos",
+        "stepId": "inspecionarSituacoes",
         "kind": "inspect",
         "entity": "Equipamento",
         "title": "x",
-        "description": "Consulta o código, a descrição, a diária e a situação de disponibilidade, locação ou manutenção de cada equipamento."
+        "description": "Consulta a situação de cada equipamento, identificando os disponíveis, locados e em manutenção."
       }
     ],
     "outcome": {
-      "statement": "O gerente acompanha a disponibilidade e a situação operacional dos equipamentos.",
+      "statement": "O gerente obtém a visão da disponibilidade e da situação operacional dos equipamentos.",
       "evidence": [
-        "Lista de equipamentos com situação disponível, locado ou em manutenção.",
-        "Dados de código, descrição e valor da diária visíveis para cada equipamento."
+        "Lista de equipamentos com suas situações de disponível, locado ou em manutenção."
       ]
     }
   },
-  "businessHash": "sha256:8ecf34f2834ca6111cd14e70e15eb7ed5b773c3a2b3d776d996ca09279b49cf4"
+  "businessHash": "sha256:f20dae9a0affca28e1ce7fa922ab9aac67ff30b21c977be9cf2379fe6717fb0a"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AcompanharSituacaoEquipamentosJourneyType = typeof acompanharSituacaoEquipamentosJourney;

@@ -1,0 +1,584 @@
+{
+  "plan": {
+    "moduleName": "comandaRestaurante",
+    "businessDomain": "Operação de comandas, cardápio, mesas e pagamentos de restaurante.",
+    "entities": [
+      {
+        "entityId": "Mesa",
+        "title": "Mesa",
+        "description": "Mesa física do restaurante disponível para receber comandas.",
+        "kind": "mdm",
+        "party": "none",
+        "mdmSubtype": "AssetEquipment",
+        "displayField": "name",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "comandaRestaurante.Mesa"
+        }
+      },
+      {
+        "entityId": "ItemCardapio",
+        "title": "Item do cardápio",
+        "description": "Produto oferecido no cardápio do restaurante, com informações comerciais específicas do cardápio.",
+        "kind": "mdm",
+        "party": "none",
+        "mdmSubtype": "Product",
+        "displayField": "name",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "comandaRestaurante.ItemCardapio"
+        }
+      },
+      {
+        "entityId": "Garcom",
+        "title": "Garçom",
+        "description": "Profissional do restaurante que abre comandas e registra lançamentos de itens.",
+        "kind": "mdm",
+        "party": "person",
+        "mdmSubtype": "Person",
+        "displayField": "name",
+        "writer": "crud",
+        "storage": {
+          "target": "mdm",
+          "scope": "organization",
+          "idField": "id",
+          "mdmType": "comandaRestaurante.Garcom"
+        }
+      },
+      {
+        "entityId": "Comanda",
+        "title": "Comanda",
+        "description": "Registro de consumo aberto para uma mesa, encerrado após o pagamento.",
+        "kind": "core",
+        "party": "none",
+        "displayField": "number",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "comandaRestaurante.Comanda"
+        }
+      },
+      {
+        "entityId": "ItemComanda",
+        "title": "Item da comanda",
+        "description": "Lançamento de um item do cardápio em uma comanda, com quantidade e observação.",
+        "kind": "supporting",
+        "party": "none",
+        "displayField": "description",
+        "storage": {
+          "target": "moduleDatabase",
+          "scope": "module",
+          "idField": "id",
+          "mdmType": "comandaRestaurante.ItemComanda"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "relationshipId": "comandaMesa",
+        "fromEntity": "Comanda",
+        "toEntity": "Mesa",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada comanda é aberta para uma mesa do restaurante.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "comandaGarcom",
+        "fromEntity": "Comanda",
+        "toEntity": "Garcom",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada comanda é aberta por um garçom responsável.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      },
+      {
+        "relationshipId": "itemComandaComanda",
+        "fromEntity": "ItemComanda",
+        "toEntity": "Comanda",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada item lançado pertence a uma comanda.",
+        "persistence": {
+          "mode": "moduleReference"
+        }
+      },
+      {
+        "relationshipId": "itemComandaItemCardapio",
+        "fromEntity": "ItemComanda",
+        "toEntity": "ItemCardapio",
+        "type": "manyToOne",
+        "required": true,
+        "description": "Cada item lançado referencia um item do cardápio.",
+        "persistence": {
+          "mode": "crossStoreReference"
+        }
+      }
+    ],
+    "normalizations": [
+      {
+        "kind": "dropCrud",
+        "entityId": "Mesa",
+        "detail": "writer crud removed; an act writes this entity as entity or affects."
+      },
+      {
+        "kind": "dropCrud",
+        "entityId": "ItemCardapio",
+        "detail": "writer crud removed; an act writes this entity as entity or affects."
+      }
+    ]
+  },
+  "entities": [
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "comandaRestaurante",
+      "entityId": "Mesa",
+      "title": "Mesa",
+      "description": "Mesa física do restaurante disponível para receber comandas.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "AssetEquipment",
+      "displayField": "name",
+      "fields": [],
+      "details": {
+        "estaDisponivel": {
+          "type": "boolean",
+          "description": "Indica se a mesa está disponível para receber uma nova comanda, calculado a partir das comandas abertas."
+        }
+      },
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "comandaRestaurante.Mesa"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "comandaRestaurante",
+      "entityId": "ItemCardapio",
+      "title": "Item do cardápio",
+      "description": "Produto oferecido no cardápio do restaurante, com informações comerciais específicas do cardápio.",
+      "kind": "mdm",
+      "party": "none",
+      "mdmSubtype": "Product",
+      "displayField": "name",
+      "fields": [
+        {
+          "fieldId": "preco",
+          "title": "Preço",
+          "type": "money",
+          "required": true,
+          "description": "Preço de venda atual do item no cardápio."
+        }
+      ],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "comandaRestaurante.ItemCardapio"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "comandaRestaurante",
+      "entityId": "Garcom",
+      "title": "Garçom",
+      "description": "Profissional do restaurante que abre comandas e registra lançamentos de itens.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "fields": [],
+      "lifecycleStates": [],
+      "transitions": [],
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "comandaRestaurante.Garcom"
+      },
+      "writer": "crud"
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "comandaRestaurante",
+      "entityId": "Comanda",
+      "title": "Comanda",
+      "description": "Registro de consumo aberto para uma mesa, encerrado após o pagamento.",
+      "kind": "core",
+      "party": "none",
+      "displayField": "number",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único da comanda."
+        },
+        {
+          "fieldId": "number",
+          "title": "Número",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "description": "Número sequencial de identificação da comanda."
+        },
+        {
+          "fieldId": "mesaId",
+          "title": "Mesa",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência à mesa para a qual a comanda foi aberta."
+        },
+        {
+          "fieldId": "garcomId",
+          "title": "Garçom responsável",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao garçom que abriu a comanda."
+        },
+        {
+          "fieldId": "discountAmount",
+          "title": "Desconto",
+          "type": "money",
+          "required": false,
+          "description": "Valor opcional de desconto aplicado no fechamento da comanda."
+        },
+        {
+          "fieldId": "paymentMethod",
+          "title": "Forma de pagamento",
+          "type": "string",
+          "required": false,
+          "enum": [
+            {
+              "value": "cash",
+              "title": "Dinheiro"
+            },
+            {
+              "value": "creditCard",
+              "title": "Cartão de crédito"
+            },
+            {
+              "value": "debitCard",
+              "title": "Cartão de débito"
+            },
+            {
+              "value": "pix",
+              "title": "Pix"
+            }
+          ],
+          "description": "Forma de pagamento registrada ao fechar a comanda."
+        },
+        {
+          "fieldId": "status",
+          "title": "Situação",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "open",
+              "title": "Aberta"
+            },
+            {
+              "value": "closed",
+              "title": "Fechada"
+            }
+          ],
+          "description": "Situação atual da comanda."
+        }
+      ],
+      "details": {
+        "subtotalAmount": {
+          "type": "money",
+          "description": "Soma dos itens ativos lançados na comanda antes do desconto."
+        },
+        "totalAmount": {
+          "type": "money",
+          "description": "Valor total a pagar, calculado pelos itens ativos menos o desconto aplicado."
+        }
+      },
+      "lifecycleStates": [
+        {
+          "state": "open",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "closed",
+          "reachedBy": "actor"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "fecharComanda",
+          "from": [
+            "open"
+          ],
+          "to": "closed",
+          "by": [
+            "caixa"
+          ],
+          "description": "Fecha a comanda após registrar o desconto opcional e a forma de pagamento."
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      }
+    },
+    {
+      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "moduleName": "comandaRestaurante",
+      "entityId": "ItemComanda",
+      "title": "Item da comanda",
+      "description": "Lançamento de um item do cardápio em uma comanda, com quantidade e observação.",
+      "kind": "supporting",
+      "party": "none",
+      "displayField": "description",
+      "fields": [
+        {
+          "fieldId": "id",
+          "title": "Identificador",
+          "type": "uuid",
+          "required": true,
+          "description": "Identificador único do lançamento de item na comanda."
+        },
+        {
+          "fieldId": "comandaId",
+          "title": "Comanda",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência à comanda à qual o lançamento pertence."
+        },
+        {
+          "fieldId": "itemCardapioId",
+          "title": "Item do cardápio",
+          "type": "uuid",
+          "required": true,
+          "description": "Referência ao item do cardápio lançado na comanda."
+        },
+        {
+          "fieldId": "description",
+          "title": "Descrição",
+          "type": "string",
+          "required": true,
+          "description": "Descrição do item do cardápio registrada no lançamento para identificação na comanda."
+        },
+        {
+          "fieldId": "quantity",
+          "title": "Quantidade",
+          "type": "integer",
+          "required": true,
+          "constraints": {
+            "min": 1
+          },
+          "description": "Quantidade solicitada do item do cardápio."
+        },
+        {
+          "fieldId": "unitPrice",
+          "title": "Preço unitário",
+          "type": "money",
+          "required": true,
+          "description": "Preço unitário do item no momento em que foi lançado na comanda."
+        },
+        {
+          "fieldId": "observation",
+          "title": "Observação",
+          "type": "text",
+          "required": false,
+          "description": "Orientação ou observação informada para o preparo do item."
+        },
+        {
+          "fieldId": "status",
+          "title": "Situação",
+          "type": "string",
+          "required": true,
+          "enum": [
+            {
+              "value": "lancado",
+              "title": "Lançado"
+            },
+            {
+              "value": "cancelado",
+              "title": "Cancelado"
+            }
+          ],
+          "description": "Situação atual do lançamento na comanda."
+        }
+      ],
+      "details": {
+        "subtotal": {
+          "type": "money",
+          "description": "Valor do lançamento calculado pela quantidade multiplicada pelo preço unitário, desconsiderado quando cancelado."
+        }
+      },
+      "lifecycleStates": [
+        {
+          "state": "lancado",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "cancelado",
+          "reachedBy": "actor"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "cancelarItemComanda",
+          "from": [
+            "lancado"
+          ],
+          "to": "cancelado",
+          "by": [
+            "garcom"
+          ],
+          "description": "Cancela um item lançado por engano enquanto a comanda permanece aberta."
+        }
+      ],
+      "storage": {
+        "target": "moduleDatabase",
+        "scope": "module",
+        "idField": "id"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "comandaMesa",
+      "fromEntity": "Comanda",
+      "toEntity": "Mesa",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada comanda é aberta para uma mesa do restaurante.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Comanda",
+        "from": {
+          "entityId": "Comanda",
+          "fieldIds": [
+            "mesaId"
+          ]
+        },
+        "to": {
+          "entityId": "Mesa",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "comandaGarcom",
+      "fromEntity": "Comanda",
+      "toEntity": "Garcom",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada comanda é aberta por um garçom responsável.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "Comanda",
+        "from": {
+          "entityId": "Comanda",
+          "fieldIds": [
+            "garcomId"
+          ]
+        },
+        "to": {
+          "entityId": "Garcom",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "itemComandaComanda",
+      "fromEntity": "ItemComanda",
+      "toEntity": "Comanda",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada item lançado pertence a uma comanda.",
+      "persistence": {
+        "mode": "moduleReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "ItemComanda",
+        "from": {
+          "entityId": "ItemComanda",
+          "fieldIds": [
+            "comandaId"
+          ]
+        },
+        "to": {
+          "entityId": "Comanda",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "itemComandaItemCardapio",
+      "fromEntity": "ItemComanda",
+      "toEntity": "ItemCardapio",
+      "type": "manyToOne",
+      "required": true,
+      "description": "Cada item lançado referencia um item do cardápio.",
+      "persistence": {
+        "mode": "crossStoreReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "ItemComanda",
+        "from": {
+          "entityId": "ItemComanda",
+          "fieldIds": [
+            "itemCardapioId"
+          ]
+        },
+        "to": {
+          "entityId": "ItemCardapio",
+          "fieldIds": [
+            "id"
+          ]
+        }
+      }
+    }
+  ],
+  "removedOrphans": [],
+  "liftedAggregateEntities": [],
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "Mesa",
+      "detail": "writer crud removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "dropCrud",
+      "entityId": "ItemCardapio",
+      "detail": "writer crud removed; an act writes this entity as entity or affects."
+    }
+  ]
+}

@@ -8,20 +8,20 @@ export const abrirOrdenServicioJourney = {
   "business": {
     "actorRef": "recepcionista",
     "title": "Abrir orden de servicio",
-    "goal": "Registrar la recepción del aparato y abrir una orden para su atención técnica.",
+    "goal": "Registrar la recepción del aparato y abrir su orden de servicio.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "identificarCliente",
+        "stepId": "identificarClienteYaparato",
         "kind": "locate",
         "entity": "Cliente",
-        "title": "x",
-        "description": "x"
+        "title": "Identificar cliente y aparato",
+        "description": "Identifica al cliente y su aparato; si no existen previamente, los datos aportados permiten crear o asociar sus registros maestros."
       },
       {
-        "stepId": "registrarOrden",
+        "stepId": "registrarRecepcion",
         "kind": "act",
         "entity": "OrdenServicio",
         "affects": [
@@ -29,27 +29,19 @@ export const abrirOrdenServicioJourney = {
           "Aparato"
         ],
         "effect": "create",
-        "title": "x",
-        "description": "Registra la recepción del aparato, el defecto informado y las fotos, y abre la orden de servicio."
-      },
-      {
-        "stepId": "derivarAnalisis",
-        "kind": "handoff",
-        "entity": "OrdenServicio",
-        "title": "x",
-        "description": "x",
-        "handoffTo": "tecnico"
+        "title": "Registrar recepción",
+        "description": "Abre la orden con el defecto informado, los datos de recepción y las fotografías del aparato."
       }
     ],
     "outcome": {
-      "statement": "La orden queda abierta con el cliente, el aparato, el defecto informado y las fotos de recepción registrados.",
+      "statement": "La orden queda abierta y el aparato queda registrado para su análisis técnico.",
       "evidence": [
-        "Existe una orden de servicio abierta asociada al cliente y al aparato.",
-        "La orden contiene el defecto informado y las fotos de recepción."
+        "Existe una orden de servicio asociada al cliente y al aparato.",
+        "La orden conserva el defecto informado y las fotografías de recepción."
       ]
     }
   },
-  "businessHash": "sha256:2c5973488aab599af062007e240aff7ba2d3dd98850142624a02533b1b5d50bf"
+  "businessHash": "sha256:82405cf01c03119c7ef464c7b7c34bb46af25bd566b8e13bafb0ccb2a765488d"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AbrirOrdenServicioJourneyType = typeof abrirOrdenServicioJourney;

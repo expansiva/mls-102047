@@ -1,0 +1,114 @@
+{
+  "inbound": [
+    {
+      "id": "comandaFechada",
+      "kind": "event",
+      "from": "comandaRestaurante",
+      "event": "comandaFechada",
+      "writes": [
+        "TituloReceber"
+      ],
+      "effect": "create",
+      "description": "Cria um título a receber a partir da comanda fechada, com pagador, valor, vencimento e referência de origem.",
+      "entityRefs": []
+    },
+    {
+      "id": "ordemServicoEntregue",
+      "kind": "event",
+      "from": "ordenServicio",
+      "event": "entregarYfinalizar",
+      "writes": [
+        "TituloReceber"
+      ],
+      "effect": "create",
+      "description": "Cria um título a receber a partir da ordem de serviço entregue e finalizada, preservando os dados de cobrança e a origem.",
+      "entityRefs": []
+    },
+    {
+      "id": "pagadorCriado",
+      "kind": "event",
+      "from": "organization",
+      "event": "mdmCreated",
+      "writes": [
+        "Pagador"
+      ],
+      "effect": "create",
+      "description": "Cria a referência local do pagador quando o cadastro mestre de pessoa é criado para uso nos títulos e recebimentos.",
+      "entityRefs": []
+    },
+    {
+      "id": "pagadorAtualizado",
+      "kind": "event",
+      "from": "organization",
+      "event": "mdmUpdated",
+      "writes": [
+        "Pagador"
+      ],
+      "effect": "update",
+      "description": "Atualiza a referência local do pagador conforme alterações no cadastro mestre de pessoa.",
+      "entityRefs": []
+    },
+    {
+      "id": "pagadorInativado",
+      "kind": "event",
+      "from": "organization",
+      "event": "mdmInactivated",
+      "writes": [
+        "Pagador"
+      ],
+      "effect": "update",
+      "description": "Atualiza a referência local do pagador para refletir a inativação no cadastro mestre de pessoa.",
+      "entityRefs": []
+    }
+  ],
+  "outbound": [
+    {
+      "id": "processarPagamentoCartao",
+      "kind": "external",
+      "to": "stripe",
+      "event": "processarPagamentoCartao",
+      "on": "Recebimento.confirmarPagamentoComCartao",
+      "description": "Envia à Stripe a solicitação de processamento do pagamento com cartão de um título a receber.",
+      "entityRefs": [
+        "Recebimento",
+        "TituloReceber"
+      ]
+    }
+  ],
+  "plugins": [
+    {
+      "pluginId": "stripe",
+      "description": "Processa pagamentos com cartão realizados pelo pagador no portal.",
+      "usedBy": [
+        "portalPagador.pagarTituloComCartao"
+      ]
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "comandaFechada",
+      "detail": "transitionRef comandaFechada dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "ordemServicoEntregue",
+      "detail": "transitionRef entregarYfinalizar dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "pagadorCriado",
+      "detail": "transitionRef mdmCreated dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "pagadorAtualizado",
+      "detail": "transitionRef mdmUpdated dropped; effect is update."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "pagadorInativado",
+      "detail": "transitionRef mdmInactivated dropped; effect is update."
+    }
+  ]
+}

@@ -1,30 +1,32 @@
 {
-  "inbound": [
-    {
-      "id": "produtoMdmCreated",
-      "kind": "event",
-      "from": "organization",
-      "event": "mdmCreated",
-      "writes": [
-        "Produto"
-      ],
-      "effect": "create",
-      "transitionRef": "produtoMdmCreated",
-      "description": "Recebe o cadastro de produto do catálogo organizacional e cria a referência de produto utilizada nas compras.",
-      "entityRefs": []
-    }
-  ],
+  "schemaVersion": "2026-09-12-ns5-integration-v2",
+  "moduleName": "compras",
+  "inbound": [],
   "outbound": [
     {
-      "id": "registrarEntradaEstoque",
-      "kind": "moduleEndpoint",
+      "id": "registrarRecebimentoParcial",
+      "kind": "event",
       "to": "controleEstoque",
-      "event": "registrarEntradaEstoque",
-      "on": "RecebimentoCompra.create",
-      "description": "Solicita ao módulo de estoque o registro da entrada das quantidades efetivamente recebidas, inclusive em recebimentos parciais.",
+      "event": "registrarRecebimentoParcial",
+      "on": "PedidoCompra.registrarRecebimentoParcial",
+      "description": "Comunica ao módulo de controle de estoque o recebimento parcial do pedido para registrar a entrada das quantidades recebidas.",
       "entityRefs": [
+        "PedidoCompra",
         "RecebimentoCompra",
-        "Produto"
+        "ItemRecebimentoCompra"
+      ]
+    },
+    {
+      "id": "registrarRecebimentoTotal",
+      "kind": "event",
+      "to": "controleEstoque",
+      "event": "registrarRecebimentoTotal",
+      "on": "PedidoCompra.registrarRecebimentoTotal",
+      "description": "Comunica ao módulo de controle de estoque o recebimento total do pedido para registrar a entrada dos produtos recebidos.",
+      "entityRefs": [
+        "PedidoCompra",
+        "RecebimentoCompra",
+        "ItemRecebimentoCompra"
       ]
     }
   ],

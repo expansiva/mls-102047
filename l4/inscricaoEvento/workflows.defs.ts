@@ -7,37 +7,33 @@ export const inscricaoEventoWorkflows = {
   "moduleName": "inscricaoEvento",
   "processes": [
     {
-      "processId": "promoverListaEsperaAposCancelamento",
-      "title": "Promover lista de espera após cancelamento",
-      "description": "Promove automaticamente a primeira inscrição em lista de espera quando um cancelamento libera uma vaga.",
+      "processId": "promoverPrimeiroListaEspera",
+      "title": "Promover participante da lista de espera",
+      "description": "Promove automaticamente o primeiro participante elegível da lista de espera quando uma inscrição é cancelada e uma vaga é liberada.",
       "trigger": {
         "kind": "event",
         "event": "Inscricao.cancelarInscricao"
       },
       "tasks": [
         {
-          "taskId": "promoverPrimeiraInscricao",
+          "taskId": "promoverInscricaoEmEspera",
           "kind": "mechanical",
           "entityRef": "Inscricao",
           "effect": "transition",
           "transitionRef": "promoverListaEspera",
           "next": [],
-          "description": "Quando o cancelamento liberar uma vaga, promove a primeira inscrição da lista de espera para confirmada."
+          "description": "Promove o primeiro participante da lista de espera para confirmar sua inscrição quando houver vaga disponível."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "cadastrarEvento",
+      "journeyId": "cadastrarEpublicarEvento",
       "inProcess": false
     },
     {
-      "journeyId": "publicarEvento",
-      "inProcess": false
-    },
-    {
-      "journeyId": "inscreverEmEvento",
+      "journeyId": "realizarInscricaoPublica",
       "inProcess": false
     },
     {

@@ -8,7 +8,7 @@ export const registrarDevolucaoJourney = {
   "business": {
     "actorRef": "atendente",
     "title": "Registrar devolução de equipamentos",
-    "goal": "Registrar a data real de devolução e concluir a locação, com multa calculada quando houver atraso.",
+    "goal": "Registrar a devolução efetiva e concluir a locação, incluindo a multa por atraso quando aplicável.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,17 +18,17 @@ export const registrarDevolucaoJourney = {
         "kind": "locate",
         "entity": "ContratoLocacao",
         "title": "x",
-        "description": "Localiza o contrato a partir do contrato em mãos ou da identificação do cliente e dos equipamentos."
+        "description": "Localiza o contrato em aberto, caso ele não esteja previamente em contexto."
       },
       {
         "stepId": "conferirContrato",
         "kind": "inspect",
         "entity": "ContratoLocacao",
         "title": "x",
-        "description": "Confere os equipamentos locados, a data prevista de devolução e os valores das diárias."
+        "description": "Confere os equipamentos locados e a data prevista de devolução."
       },
       {
-        "stepId": "registrarDataDevolucao",
+        "stepId": "registrarDevolucaoReal",
         "kind": "act",
         "entity": "ContratoLocacao",
         "affects": [
@@ -37,10 +37,10 @@ export const registrarDevolucaoJourney = {
         "effect": "transition",
         "transitionRef": "registrarDevolucao",
         "title": "x",
-        "description": "Registra a data real de devolução, conclui o contrato e libera os equipamentos devolvidos."
+        "description": "Registra a data real de devolução, conclui o contrato e torna os equipamentos devolvidos disponíveis conforme sua situação."
       },
       {
-        "stepId": "consultarMulta",
+        "stepId": "consultarMultaCalculada",
         "kind": "inspect",
         "entity": "ContratoLocacao",
         "title": "x",
@@ -48,15 +48,15 @@ export const registrarDevolucaoJourney = {
       }
     ],
     "outcome": {
-      "statement": "A devolução fica registrada, os equipamentos são liberados e a multa por atraso fica disponível quando aplicável.",
+      "statement": "A devolução é registrada e a multa por atraso, quando houver, fica disponível no contrato.",
       "evidence": [
-        "Contrato com data real de devolução registrada.",
-        "Situação dos equipamentos devolvidos atualizada.",
-        "Multa calculada a partir das diárias e dos dias de atraso, quando houver."
+        "Contrato marcado como devolvido com a data real de devolução.",
+        "Multa exibida no contrato quando houver dias de atraso.",
+        "Equipamentos devolvidos deixam de constar como locados."
       ]
     }
   },
-  "businessHash": "sha256:6e5155b9f6237963e95df05a6bcffd33b6168603f2825e3f066158d477c862f6"
+  "businessHash": "sha256:5c8eceb98d96a9dbf6b273f31fb176d4ac3b2e34a0dc0690192fe52f03cf9a07"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarDevolucaoJourneyType = typeof registrarDevolucaoJourney;

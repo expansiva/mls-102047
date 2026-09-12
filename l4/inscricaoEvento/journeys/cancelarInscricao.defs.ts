@@ -8,7 +8,7 @@ export const cancelarInscricaoJourney = {
   "business": {
     "actorRef": "publico",
     "title": "Cancelar inscrição",
-    "goal": "Cancelar a própria inscrição em um evento.",
+    "goal": "Cancelar a própria inscrição em um evento e liberar a vaga quando houver uma confirmação.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,15 +17,15 @@ export const cancelarInscricaoJourney = {
         "stepId": "localizarInscricao",
         "kind": "locate",
         "entity": "Inscricao",
-        "title": "x",
+        "title": "Localizar inscrição",
         "description": "Localiza a própria inscrição do evento."
       },
       {
-        "stepId": "inspecionarInscricao",
+        "stepId": "consultarInscricao",
         "kind": "inspect",
         "entity": "Inscricao",
-        "title": "x",
-        "description": "Confere os dados e a situação da inscrição antes de cancelá-la."
+        "title": "Consultar inscrição",
+        "description": "Confere os dados e a situação da inscrição antes do cancelamento."
       },
       {
         "stepId": "cancelarInscricao",
@@ -33,19 +33,19 @@ export const cancelarInscricaoJourney = {
         "entity": "Inscricao",
         "effect": "transition",
         "transitionRef": "cancelarInscricao",
-        "title": "x",
-        "description": "Cancela a própria inscrição, liberando a vaga quando aplicável."
+        "title": "Cancelar inscrição",
+        "description": "Cancela a inscrição; caso uma vaga seja liberada, o primeiro participante da lista de espera é promovido automaticamente."
       }
     ],
     "outcome": {
-      "statement": "A inscrição é cancelada e a próxima pessoa elegível da lista de espera pode ser promovida.",
+      "statement": "A inscrição é cancelada e uma eventual vaga liberada é destinada ao primeiro participante da lista de espera.",
       "evidence": [
-        "Situação da inscrição registrada como cancelada.",
-        "Quando houver lista de espera, a primeira inscrição elegível passa a ocupar a vaga liberada."
+        "Situação da inscrição alterada para cancelada.",
+        "Próxima inscrição em lista de espera promovida quando aplicável."
       ]
     }
   },
-  "businessHash": "sha256:acb36f3090f62ec9170f1b0e74d3d9bc129250d3b56a90e5c7ab7e71dfd9e9d8"
+  "businessHash": "sha256:89447bf01d13332f5d9bd061692e3917620ec4f2283b9e9b7295a057215b3462"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CancelarInscricaoJourneyType = typeof cancelarInscricaoJourney;

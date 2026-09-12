@@ -7,24 +7,24 @@ export const comandaRestauranteJourneyIndex = {
   "moduleName": "comandaRestaurante",
   "journeys": [
     {
-      "journeyId": "openTab",
+      "journeyId": "abrirComanda",
       "actorRef": "garcom",
-      "title": "Open a table tab"
+      "title": "Abrir comanda para uma mesa"
     },
     {
-      "journeyId": "addTabItem",
+      "journeyId": "lancarItemNaComanda",
       "actorRef": "garcom",
-      "title": "Add an item to an open tab"
+      "title": "Lançar item na comanda"
     },
     {
-      "journeyId": "cancelTabItem",
+      "journeyId": "cancelarItemLancado",
       "actorRef": "garcom",
-      "title": "Cancel a mistakenly launched item"
+      "title": "Cancelar item lançado por engano"
     },
     {
-      "journeyId": "closeTab",
+      "journeyId": "fecharComanda",
       "actorRef": "caixa",
-      "title": "Close and settle a table tab"
+      "title": "Fechar comanda e liberar mesa"
     }
   ],
   "systemDecisions": []

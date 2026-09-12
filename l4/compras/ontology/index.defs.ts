@@ -5,15 +5,17 @@ import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
 export const comprasOntologyIndex = {
   "schemaVersion": "2026-09-11-ns5-ontology-v2",
   "moduleName": "compras",
-  "businessDomain": "Gestão de compras, fornecedores, pedidos de compra e recebimentos.",
+  "businessDomain": "Gestão de compras, fornecedores, pedidos de compra e recebimentos de produtos.",
   "entities": [
-    "Fornecedor",
     "Comprador",
+    "Fornecedor",
     "Produto",
-    "OfertaFornecedor",
+    "EstoqueProduto",
+    "FornecimentoProduto",
     "PedidoCompra",
+    "ItemPedidoCompra",
     "RecebimentoCompra",
-    "Estoque"
+    "ItemRecebimentoCompra"
   ],
   "relationships": [
     {
@@ -22,7 +24,7 @@ export const comprasOntologyIndex = {
       "toEntity": "Fornecedor",
       "type": "manyToMany",
       "required": false,
-      "description": "O comprador responsável gerencia os fornecedores que cadastra para compras.",
+      "description": "O comprador gerencia os fornecedores que cadastra e acompanha para a organização.",
       "persistence": {
         "mode": "mdmRelationship"
       },
@@ -44,18 +46,18 @@ export const comprasOntologyIndex = {
       }
     },
     {
-      "relationshipId": "ofertaDoFornecedor",
+      "relationshipId": "fornecedorPossuiFornecimentos",
       "fromEntity": "Fornecedor",
-      "toEntity": "OfertaFornecedor",
+      "toEntity": "FornecimentoProduto",
       "type": "oneToMany",
       "required": true,
-      "description": "O fornecedor possui ofertas comerciais de produtos para a organização.",
+      "description": "O fornecedor possui condições comerciais para os produtos que fornece.",
       "persistence": {
         "mode": "crossStoreReference"
       },
       "realization": {
         "kind": "fieldReference",
-        "ownerEntity": "OfertaFornecedor",
+        "ownerEntity": "FornecimentoProduto",
         "from": {
           "entityId": "Fornecedor",
           "fieldIds": [
@@ -63,47 +65,47 @@ export const comprasOntologyIndex = {
           ]
         },
         "to": {
-          "entityId": "OfertaFornecedor",
+          "entityId": "FornecimentoProduto",
           "fieldIds": [
-            "fornecedorId"
+            "fornecedor"
           ]
         }
       }
     },
     {
-      "relationshipId": "ofertaParaProduto",
-      "fromEntity": "OfertaFornecedor",
-      "toEntity": "Produto",
-      "type": "manyToOne",
+      "relationshipId": "produtoPossuiFornecimentos",
+      "fromEntity": "Produto",
+      "toEntity": "FornecimentoProduto",
+      "type": "oneToMany",
       "required": true,
-      "description": "A oferta de fornecedor estabelece o preço combinado de um produto.",
+      "description": "O produto pode ter condições comerciais registradas com diferentes fornecedores.",
       "persistence": {
         "mode": "externalReference"
       },
       "realization": {
         "kind": "externalReference",
-        "ownerEntity": "OfertaFornecedor",
+        "ownerEntity": "FornecimentoProduto",
         "from": {
-          "entityId": "OfertaFornecedor",
-          "fieldIds": [
-            "produtoId"
-          ]
-        },
-        "to": {
           "entityId": "Produto",
           "fieldIds": [
             "id"
+          ]
+        },
+        "to": {
+          "entityId": "FornecimentoProduto",
+          "fieldIds": [
+            "produto"
           ]
         }
       }
     },
     {
-      "relationshipId": "pedidoDoFornecedor",
+      "relationshipId": "fornecedorRecebePedidos",
       "fromEntity": "Fornecedor",
       "toEntity": "PedidoCompra",
       "type": "oneToMany",
       "required": true,
-      "description": "O fornecedor é o destinatário dos pedidos de compra emitidos para ele.",
+      "description": "O fornecedor recebe os pedidos de compra emitidos pela organização.",
       "persistence": {
         "mode": "crossStoreReference"
       },
@@ -125,66 +127,93 @@ export const comprasOntologyIndex = {
       }
     },
     {
-      "relationshipId": "pedidoAbertoPorComprador",
-      "fromEntity": "Comprador",
-      "toEntity": "PedidoCompra",
-      "type": "oneToMany",
-      "required": true,
-      "description": "O comprador responsável abre os pedidos de compra sob seu acompanhamento.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "PedidoCompra",
-        "from": {
-          "entityId": "Comprador",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "PedidoCompra",
-          "fieldIds": [
-            "compradorId"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "pedidoContemProdutos",
+      "relationshipId": "pedidoPossuiItens",
       "fromEntity": "PedidoCompra",
-      "toEntity": "Produto",
-      "type": "manyToMany",
+      "toEntity": "ItemPedidoCompra",
+      "type": "oneToMany",
       "required": true,
-      "description": "O pedido de compra contém um ou mais produtos com quantidades e preços solicitados.",
+      "description": "O pedido de compra é composto por um ou mais itens.",
       "persistence": {
-        "mode": "externalReference"
+        "mode": "moduleReference"
       },
       "realization": {
-        "kind": "externalReference",
-        "ownerEntity": "PedidoCompra",
+        "kind": "fieldReference",
+        "ownerEntity": "ItemPedidoCompra",
         "from": {
           "entityId": "PedidoCompra",
           "fieldIds": [
-            "itens"
+            "id"
           ]
         },
         "to": {
-          "entityId": "Produto",
+          "entityId": "ItemPedidoCompra",
           "fieldIds": [
-            "id"
+            "pedidoCompra"
           ]
         }
       }
     },
     {
-      "relationshipId": "recebimentoDoPedido",
+      "relationshipId": "fornecimentoOriginaItensPedido",
+      "fromEntity": "FornecimentoProduto",
+      "toEntity": "ItemPedidoCompra",
+      "type": "oneToMany",
+      "required": true,
+      "description": "A condição de fornecimento define o produto e o preço de referência dos itens de pedido.",
+      "persistence": {
+        "mode": "moduleReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "ItemPedidoCompra",
+        "from": {
+          "entityId": "FornecimentoProduto",
+          "fieldIds": [
+            "id"
+          ]
+        },
+        "to": {
+          "entityId": "ItemPedidoCompra",
+          "fieldIds": [
+            "fornecimentoProduto"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "produtoComponeItensPedido",
+      "fromEntity": "Produto",
+      "toEntity": "ItemPedidoCompra",
+      "type": "oneToMany",
+      "required": true,
+      "description": "O produto pode compor itens de diferentes pedidos de compra.",
+      "persistence": {
+        "mode": "externalReference"
+      },
+      "realization": {
+        "kind": "externalReference",
+        "ownerEntity": "ItemPedidoCompra",
+        "from": {
+          "entityId": "Produto",
+          "fieldIds": [
+            "id"
+          ]
+        },
+        "to": {
+          "entityId": "ItemPedidoCompra",
+          "fieldIds": [
+            "produto"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "pedidoPossuiRecebimentos",
       "fromEntity": "PedidoCompra",
       "toEntity": "RecebimentoCompra",
       "type": "oneToMany",
       "required": true,
-      "description": "O pedido de compra pode ter um ou mais recebimentos totais ou parciais.",
+      "description": "O pedido de compra pode ter um ou mais recebimentos parciais ou totais.",
       "persistence": {
         "mode": "moduleReference"
       },
@@ -206,53 +235,107 @@ export const comprasOntologyIndex = {
       }
     },
     {
-      "relationshipId": "recebimentoIncluiProdutos",
+      "relationshipId": "recebimentoPossuiItens",
       "fromEntity": "RecebimentoCompra",
-      "toEntity": "Produto",
-      "type": "manyToMany",
+      "toEntity": "ItemRecebimentoCompra",
+      "type": "oneToMany",
       "required": true,
-      "description": "O recebimento registra as quantidades efetivamente recebidas de cada produto.",
+      "description": "O recebimento de compra registra as quantidades recebidas em seus itens.",
       "persistence": {
-        "mode": "externalReference"
+        "mode": "moduleReference"
       },
       "realization": {
-        "kind": "externalReference",
-        "ownerEntity": "RecebimentoCompra",
+        "kind": "fieldReference",
+        "ownerEntity": "ItemRecebimentoCompra",
         "from": {
           "entityId": "RecebimentoCompra",
           "fieldIds": [
-            "itensRecebidos"
+            "id"
           ]
         },
         "to": {
-          "entityId": "Produto",
+          "entityId": "ItemRecebimentoCompra",
           "fieldIds": [
-            "id"
+            "recebimentoCompraId"
           ]
         }
       }
     },
     {
-      "relationshipId": "recebimentoLancaEntradaNoEstoque",
-      "fromEntity": "RecebimentoCompra",
-      "toEntity": "Estoque",
-      "type": "manyToOne",
+      "relationshipId": "itemPedidoPossuiRecebimentos",
+      "fromEntity": "ItemPedidoCompra",
+      "toEntity": "ItemRecebimentoCompra",
+      "type": "oneToMany",
       "required": true,
-      "description": "O recebimento de compra lança a entrada dos produtos no estoque controlado externamente.",
+      "description": "O item do pedido pode ser recebido em uma ou mais etapas.",
+      "persistence": {
+        "mode": "moduleReference"
+      },
+      "realization": {
+        "kind": "fieldReference",
+        "ownerEntity": "ItemRecebimentoCompra",
+        "from": {
+          "entityId": "ItemPedidoCompra",
+          "fieldIds": [
+            "id"
+          ]
+        },
+        "to": {
+          "entityId": "ItemRecebimentoCompra",
+          "fieldIds": [
+            "itemPedidoCompraId"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "produtoComponeItensRecebimento",
+      "fromEntity": "Produto",
+      "toEntity": "ItemRecebimentoCompra",
+      "type": "oneToMany",
+      "required": true,
+      "description": "O produto recebido é identificado em cada item de recebimento.",
       "persistence": {
         "mode": "externalReference"
       },
       "realization": {
         "kind": "externalReference",
-        "ownerEntity": "RecebimentoCompra",
+        "ownerEntity": "ItemRecebimentoCompra",
         "from": {
-          "entityId": "RecebimentoCompra",
+          "entityId": "Produto",
           "fieldIds": [
-            "estoqueId"
+            "id"
           ]
         },
         "to": {
-          "entityId": "Estoque",
+          "entityId": "ItemRecebimentoCompra",
+          "fieldIds": [
+            "produto"
+          ]
+        }
+      }
+    },
+    {
+      "relationshipId": "itemRecebimentoAtualizaEstoque",
+      "fromEntity": "ItemRecebimentoCompra",
+      "toEntity": "EstoqueProduto",
+      "type": "manyToOne",
+      "required": true,
+      "description": "O item recebido gera a entrada na posição de estoque correspondente ao produto.",
+      "persistence": {
+        "mode": "externalReference"
+      },
+      "realization": {
+        "kind": "externalReference",
+        "ownerEntity": "ItemRecebimentoCompra",
+        "from": {
+          "entityId": "ItemRecebimentoCompra",
+          "fieldIds": [
+            "estoqueProdutoId"
+          ]
+        },
+        "to": {
+          "entityId": "EstoqueProduto",
           "fieldIds": [
             "id"
           ]

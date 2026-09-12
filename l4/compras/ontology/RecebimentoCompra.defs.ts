@@ -7,7 +7,7 @@ export const comprasEntityRecebimentoCompra = {
   "moduleName": "compras",
   "entityId": "RecebimentoCompra",
   "title": "Recebimento de compra",
-  "description": "Registro do recebimento total ou parcial dos produtos de um pedido de compra.",
+  "description": "Registro do recebimento total ou parcial de um pedido de compra.",
   "kind": "event",
   "party": "none",
   "displayField": "numeroRecebimento",
@@ -17,7 +17,7 @@ export const comprasEntityRecebimentoCompra = {
       "title": "Identificador",
       "type": "uuid",
       "required": true,
-      "description": "Identificador único do registro de recebimento de compra."
+      "description": "Identificador único do recebimento de compra."
     },
     {
       "fieldId": "numeroRecebimento",
@@ -32,28 +32,14 @@ export const comprasEntityRecebimentoCompra = {
       "title": "Pedido de compra",
       "type": "uuid",
       "required": true,
-      "description": "Referência ao pedido de compra ao qual este recebimento pertence."
-    },
-    {
-      "fieldId": "estoqueId",
-      "title": "Estoque",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência ao estoque externo que recebe a entrada dos produtos."
+      "description": "Pedido de compra ao qual este recebimento está vinculado."
     },
     {
       "fieldId": "dataRecebimento",
-      "title": "Data e hora do recebimento",
+      "title": "Data de recebimento",
       "type": "datetime",
       "required": true,
       "description": "Data e hora em que os produtos foram efetivamente recebidos."
-    },
-    {
-      "fieldId": "itensRecebidos",
-      "title": "Itens recebidos",
-      "type": "json",
-      "required": true,
-      "description": "Lista dos produtos recebidos, com referências aos produtos e as respectivas quantidades efetivamente recebidas."
     }
   ],
   "lifecycleStates": [],

@@ -1,47 +1,15 @@
 {
   "moduleName": "financeiro",
-  "businessDomain": "Contas a receber da organização, incluindo títulos originados em outros módulos, seus recebimentos e estornos.",
+  "businessDomain": "Contas a receber da organização, incluindo títulos originados em outros módulos, recebimentos e consulta de extratos por pagador.",
   "entities": [
-    {
-      "entityId": "Pagador",
-      "title": "Pagador",
-      "description": "Pessoa pagadora para a qual a organização emite títulos a receber e que pode consultar e pagar seus próprios títulos no portal.",
-      "kind": "mdm",
-      "party": "person",
-      "mdmSubtype": "Person",
-      "displayField": "name",
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "financeiro.Pagador"
-      }
-    },
-    {
-      "entityId": "CobrancaOrigem",
-      "title": "Origem da cobrança",
-      "description": "Referência externa à cobrança que originou o título, mantida pelo módulo de negócio de origem.",
-      "kind": "supporting",
-      "party": "none",
-      "displayField": "id",
-      "mutability": "appendOnly",
-      "writer": "inbound",
-      "storage": {
-        "target": "external",
-        "scope": "platform",
-        "idField": "id",
-        "mdmType": "financeiro.CobrancaOrigem"
-      }
-    },
     {
       "entityId": "TituloReceber",
       "title": "Título a receber",
-      "description": "Obrigação de pagamento emitida por uma cobrança de outro módulo, com valor, vencimento, pagador e origem.",
+      "description": "Cobrança a receber originada em outro módulo da organização, com valor, vencimento, pagador e referência à origem.",
       "kind": "core",
       "party": "none",
-      "displayField": "id",
+      "displayField": "numeroTitulo",
       "mutability": "appendOnly",
-      "writer": "inbound",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
@@ -52,11 +20,10 @@
     {
       "entityId": "Recebimento",
       "title": "Recebimento",
-      "description": "Registro de uma baixa total ou parcial confirmada para um título, por dinheiro, Pix ou cartão.",
+      "description": "Registro de uma solicitação ou confirmação de valor recebido para um título, por dinheiro, Pix ou cartão.",
       "kind": "event",
       "party": "none",
-      "displayField": "id",
-      "mutability": "appendOnly",
+      "displayField": "numeroRecebimento",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
@@ -65,18 +32,33 @@
       }
     },
     {
-      "entityId": "EstornoRecebimento",
-      "title": "Estorno de recebimento",
-      "description": "Registro imutável do estorno de um recebimento realizado no mesmo dia.",
+      "entityId": "ExtratoPagador",
+      "title": "Extrato do pagador",
+      "description": "Extrato emitido para um pagador com os títulos e recebimentos considerados na emissão.",
       "kind": "event",
       "party": "none",
-      "displayField": "id",
+      "displayField": "numeroExtrato",
       "mutability": "appendOnly",
       "storage": {
         "target": "moduleDatabase",
         "scope": "module",
         "idField": "id",
-        "mdmType": "financeiro.EstornoRecebimento"
+        "mdmType": "financeiro.ExtratoPagador"
+      }
+    },
+    {
+      "entityId": "Pagador",
+      "title": "Pagador",
+      "description": "Pessoa responsável por títulos a receber e que pode consultar e pagar os próprios títulos no portal.",
+      "kind": "mdm",
+      "party": "person",
+      "mdmSubtype": "Person",
+      "displayField": "name",
+      "storage": {
+        "target": "mdm",
+        "scope": "organization",
+        "idField": "id",
+        "mdmType": "financeiro.Pagador"
       }
     }
   ],
@@ -87,57 +69,56 @@
       "toEntity": "Pagador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada título a receber pertence a um único pagador.",
+      "description": "Cada título a receber possui um pagador responsável.",
       "persistence": {
         "mode": "crossStoreReference"
       }
     },
     {
-      "relationshipId": "tituloTemOrigem",
-      "fromEntity": "TituloReceber",
-      "toEntity": "CobrancaOrigem",
-      "type": "manyToOne",
-      "required": true,
-      "description": "Cada título a receber referencia a cobrança externa que o originou.",
-      "persistence": {
-        "mode": "externalReference"
-      }
-    },
-    {
-      "relationshipId": "recebimentoBaixaTitulo",
+      "relationshipId": "recebimentoDoTitulo",
       "fromEntity": "Recebimento",
       "toEntity": "TituloReceber",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada recebimento realiza uma baixa total ou parcial de um título a receber.",
+      "description": "Cada recebimento registra uma solicitação, confirmação ou estorno relativo a um título a receber.",
       "persistence": {
         "mode": "moduleReference"
       }
     },
     {
-      "relationshipId": "estornoReverteRecebimento",
-      "fromEntity": "EstornoRecebimento",
-      "toEntity": "Recebimento",
+      "relationshipId": "extratoDoPagador",
+      "fromEntity": "ExtratoPagador",
+      "toEntity": "Pagador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada estorno reverte um recebimento específico.",
+      "description": "Cada extrato emitido pertence ao pagador consultado.",
       "persistence": {
-        "mode": "moduleReference"
+        "mode": "crossStoreReference"
       }
     }
   ],
   "moduleDetails": {
-    "recebiveisPorPeriodo": {
+    "recebiveisPorPeriodoEorigem": {
       "type": "json",
-      "description": "Totais e quantidades de títulos a receber agrupados por período para o painel financeiro."
-    },
-    "recebiveisPorOrigem": {
-      "type": "json",
-      "description": "Totais e quantidades de títulos a receber agrupados pela origem da cobrança para o painel financeiro."
-    },
-    "titulosVencidos": {
-      "type": "json",
-      "description": "Indicadores agregados dos títulos em aberto com vencimento anterior à data atual."
+      "description": "Indicadores calculados dos recebíveis da organização, agrupados por período e por origem."
     }
-  }
+  },
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "TituloReceber",
+      "detail": "writer inbound removed; an act writes this entity as entity or affects."
+    },
+    {
+      "kind": "writerDerived",
+      "entityId": "Pagador",
+      "detail": "attach via TituloReceber.tituloTemPagador",
+      "writerKind": "attach",
+      "via": {
+        "entityId": "TituloReceber",
+        "relationshipId": "tituloTemPagador",
+        "stepRef": "registrarBaixaDeTitulo.registrarRecebimento"
+      }
+    }
+  ]
 }

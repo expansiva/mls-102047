@@ -8,36 +8,35 @@ export const acompanharIndicadoresDeComprasJourney = {
   "business": {
     "actorRef": "gerenteCompras",
     "title": "Acompanhar indicadores de compras",
-    "goal": "Visualizar os pedidos em aberto, os pedidos atrasados e o total comprado por fornecedor no mês.",
+    "goal": "Acompanhar pedidos em aberto, atrasados e o total comprado por fornecedor no mês.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarPedidosParaAcompanhamento",
+        "stepId": "localizarPedidosParaPainel",
         "kind": "locate",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Acessa os pedidos de compra relevantes para o acompanhamento."
+        "description": "Consulta os pedidos em aberto e os pedidos atrasados no período."
       },
       {
-        "stepId": "inspecionarIndicadoresDePedidos",
+        "stepId": "inspecionarIndicadores",
         "kind": "inspect",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Consulta os indicadores de pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês."
+        "description": "Visualiza os indicadores de pedidos em aberto, atrasados e totais mensais comprados por fornecedor."
       }
     ],
     "outcome": {
-      "statement": "O gerente de compras dispõe dos indicadores atuais para acompanhar o andamento e o volume das compras.",
+      "statement": "O gerente acompanha a situação dos pedidos e o volume mensal comprado de cada fornecedor.",
       "evidence": [
-        "Indicador de pedidos em aberto é exibido.",
-        "Indicador de pedidos atrasados é exibido.",
-        "Total comprado por fornecedor no mês é exibido."
+        "Indicadores de pedidos em aberto e atrasados exibidos.",
+        "Totais comprados por fornecedor no mês exibidos."
       ]
     }
   },
-  "businessHash": "sha256:d157fe0e07779cb3a591d862b828c45fc45bdee0c246a38d744d82a187eb1272"
+  "businessHash": "sha256:dba27bd970d952670ddbdea2907a5153022c68b43be857f723256f67cd2a4a0c"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AcompanharIndicadoresDeComprasJourneyType = typeof acompanharIndicadoresDeComprasJourney;

@@ -9,6 +9,14 @@
       "description": "Identificador único do título a receber."
     },
     {
+      "fieldId": "numeroTitulo",
+      "title": "Número do título",
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "description": "Número sequencial que identifica o título a receber."
+    },
+    {
       "fieldId": "pagadorId",
       "title": "Pagador",
       "type": "uuid",
@@ -16,18 +24,11 @@
       "description": "Referência ao pagador responsável pelo título."
     },
     {
-      "fieldId": "cobrancaOrigemId",
-      "title": "Cobrança de origem",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência à cobrança externa que originou o título."
-    },
-    {
-      "fieldId": "valor",
-      "title": "Valor",
+      "fieldId": "valorOriginal",
+      "title": "Valor original",
       "type": "money",
       "required": true,
-      "description": "Valor total originalmente devido no título."
+      "description": "Valor total originalmente cobrado no título."
     },
     {
       "fieldId": "vencimento",
@@ -35,23 +36,49 @@
       "type": "date",
       "required": true,
       "description": "Data limite prevista para o pagamento do título."
+    },
+    {
+      "fieldId": "origemModulo",
+      "title": "Módulo de origem",
+      "type": "string",
+      "required": true,
+      "description": "Identificador do módulo que gerou a cobrança."
+    },
+    {
+      "fieldId": "origemReferencia",
+      "title": "Referência da origem",
+      "type": "string",
+      "required": true,
+      "description": "Identificador do registro de origem que gerou a cobrança."
     }
+  ],
+  "uniqueKeys": [
+    [
+      "origemModulo",
+      "origemReferencia"
+    ]
   ],
   "details": {
     "valorRecebido": {
       "type": "money",
-      "description": "Soma dos recebimentos confirmados e ainda não estornados vinculados ao título."
+      "description": "Soma dos recebimentos confirmados e não estornados vinculados ao título."
     },
-    "saldoAberto": {
+    "saldoPendente": {
       "type": "money",
-      "description": "Valor que permanece em aberto após considerar os recebimentos e estornos do título."
+      "description": "Valor que ainda falta receber para quitar o título."
     },
-    "estaVencido": {
-      "type": "boolean",
-      "description": "Indica se o título possui saldo em aberto após a data de vencimento."
+    "situacaoCobranca": {
+      "type": "string",
+      "description": "Situação calculada do título conforme saldo pendente, vencimento e recebimentos."
     }
   },
   "lifecycleStates": [],
   "transitions": [],
-  "writer": "inbound"
+  "normalizations": [
+    {
+      "kind": "dropCrud",
+      "entityId": "TituloReceber",
+      "detail": "writer inbound removed; an act writes this entity as entity or affects."
+    }
+  ]
 }

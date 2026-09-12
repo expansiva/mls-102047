@@ -7,12 +7,18 @@ export const comprasEntityFornecedor = {
   "moduleName": "compras",
   "entityId": "Fornecedor",
   "title": "Fornecedor",
-  "description": "Empresa fornecedora cadastrada ou vinculada na base mestre para as compras da organização.",
+  "description": "Empresa fornecedora cadastrada ou vinculada pela organização para realizar compras.",
   "kind": "mdm",
   "party": "organization",
   "mdmSubtype": "Company",
   "displayField": "legalName",
   "fields": [],
+  "details": {
+    "totalCompradoNoMes": {
+      "type": "money",
+      "description": "Valor total dos pedidos de compra do fornecedor no mês corrente."
+    }
+  },
   "lifecycleStates": [],
   "transitions": [],
   "storage": {

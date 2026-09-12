@@ -13,12 +13,12 @@ export const inscricaoEventoOntologyIndex = {
   ],
   "relationships": [
     {
-      "relationshipId": "inscricaoEvento",
-      "fromEntity": "Inscricao",
-      "toEntity": "Evento",
-      "type": "manyToOne",
+      "relationshipId": "eventoInscricoes",
+      "fromEntity": "Evento",
+      "toEntity": "Inscricao",
+      "type": "oneToMany",
       "required": true,
-      "description": "Cada inscrição pertence a um único evento.",
+      "description": "Um evento possui as inscrições realizadas para sua participação.",
       "persistence": {
         "mode": "moduleReference"
       },
@@ -26,26 +26,26 @@ export const inscricaoEventoOntologyIndex = {
         "kind": "fieldReference",
         "ownerEntity": "Inscricao",
         "from": {
-          "entityId": "Inscricao",
-          "fieldIds": [
-            "eventoId"
-          ]
-        },
-        "to": {
           "entityId": "Evento",
           "fieldIds": [
             "id"
+          ]
+        },
+        "to": {
+          "entityId": "Inscricao",
+          "fieldIds": [
+            "eventoId"
           ]
         }
       }
     },
     {
-      "relationshipId": "inscricaoParticipante",
-      "fromEntity": "Inscricao",
-      "toEntity": "Participante",
-      "type": "manyToOne",
+      "relationshipId": "participanteInscricoes",
+      "fromEntity": "Participante",
+      "toEntity": "Inscricao",
+      "type": "oneToMany",
       "required": true,
-      "description": "Cada inscrição identifica a pessoa participante que a realizou.",
+      "description": "Um participante pode possuir inscrições em eventos.",
       "persistence": {
         "mode": "crossStoreReference"
       },
@@ -53,15 +53,15 @@ export const inscricaoEventoOntologyIndex = {
         "kind": "fieldReference",
         "ownerEntity": "Inscricao",
         "from": {
-          "entityId": "Inscricao",
-          "fieldIds": [
-            "participanteId"
-          ]
-        },
-        "to": {
           "entityId": "Participante",
           "fieldIds": [
             "id"
+          ]
+        },
+        "to": {
+          "entityId": "Inscricao",
+          "fieldIds": [
+            "participanteId"
           ]
         }
       }

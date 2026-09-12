@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "2026-09-12-ns5-workflows-v2",
+  "moduleName": "financeiro",
+  "processes": [
+    {
+      "processId": "cobrancaCartaoNoCaixa",
+      "title": "Cobrança por cartão no caixa",
+      "description": "Orquestra a solicitação de cobrança por cartão iniciada pelo caixa e seu processamento pelo Stripe.",
+      "trigger": {
+        "kind": "manual",
+        "actorRef": "caixa"
+      },
+      "tasks": [
+        {
+          "taskId": "iniciarCobranca",
+          "kind": "human",
+          "actorRef": "caixa",
+          "journeyRef": "iniciarCobrancaPorCartaoNoCaixa",
+          "next": [
+            "confirmarPagamento"
+          ],
+          "description": "O caixa registra e encaminha ao Stripe a solicitação de cobrança por cartão do título."
+        },
+        {
+          "taskId": "confirmarPagamento",
+          "kind": "mechanical",
+          "actorRef": "stripe",
+          "entityRef": "Recebimento",
+          "effect": "transition",
+          "transitionRef": "confirmarPagamentoComCartao",
+          "next": [],
+          "description": "O Stripe processa a cobrança encaminhada e confirma o pagamento por cartão."
+        }
+      ]
+    },
+    {
+      "processId": "pagamentoCartaoNoPortal",
+      "title": "Pagamento por cartão no portal",
+      "description": "Orquestra a solicitação de pagamento por cartão feita pelo pagador e seu processamento pelo Stripe.",
+      "trigger": {
+        "kind": "manual",
+        "actorRef": "pagador"
+      },
+      "tasks": [
+        {
+          "taskId": "solicitarPagamento",
+          "kind": "human",
+          "actorRef": "pagador",
+          "journeyRef": "pagarMeuTituloComCartao",
+          "next": [
+            "confirmarPagamento"
+          ],
+          "description": "O pagador solicita e encaminha ao Stripe o pagamento por cartão de seu título em aberto."
+        },
+        {
+          "taskId": "confirmarPagamento",
+          "kind": "mechanical",
+          "actorRef": "stripe",
+          "entityRef": "Recebimento",
+          "effect": "transition",
+          "transitionRef": "confirmarPagamentoComCartao",
+          "next": [],
+          "description": "O Stripe processa a solicitação encaminhada e confirma o pagamento por cartão."
+        }
+      ]
+    }
+  ],
+  "journeyDecisions": [
+    {
+      "journeyId": "registrarBaixaDeTitulo",
+      "inProcess": false
+    },
+    {
+      "journeyId": "iniciarCobrancaPorCartaoNoCaixa",
+      "inProcess": true,
+      "processId": "cobrancaCartaoNoCaixa"
+    },
+    {
+      "journeyId": "estornarRecebimentoDoMesmoDia",
+      "inProcess": false
+    },
+    {
+      "journeyId": "acompanharPainelDeRecebiveis",
+      "inProcess": false
+    },
+    {
+      "journeyId": "consultarTitulosVencidos",
+      "inProcess": false
+    },
+    {
+      "journeyId": "emitirExtratoPorPagador",
+      "inProcess": false
+    },
+    {
+      "journeyId": "consultarMeusTitulosErecebimentos",
+      "inProcess": false
+    },
+    {
+      "journeyId": "pagarMeuTituloComCartao",
+      "inProcess": true,
+      "processId": "pagamentoCartaoNoPortal"
+    },
+    {
+      "journeyId": "processarPagamentoPorCartao",
+      "inProcess": false
+    }
+  ]
+}

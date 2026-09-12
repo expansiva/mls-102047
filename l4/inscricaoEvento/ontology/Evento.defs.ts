@@ -7,10 +7,10 @@ export const inscricaoEventoEntityEvento = {
   "moduleName": "inscricaoEvento",
   "entityId": "Evento",
   "title": "Evento",
-  "description": "Evento organizado com informações, capacidade e publicação para inscrições públicas.",
+  "description": "Evento cadastrado pelo organizador, com informações, capacidade e publicação para inscrições públicas.",
   "kind": "core",
   "party": "none",
-  "displayField": "titulo",
+  "displayField": "title",
   "fields": [
     {
       "fieldId": "id",
@@ -20,81 +20,75 @@ export const inscricaoEventoEntityEvento = {
       "description": "Identificador único do evento."
     },
     {
-      "fieldId": "titulo",
+      "fieldId": "title",
       "title": "Título",
       "type": "string",
       "required": true,
-      "constraints": {
-        "maxLength": 255
-      },
-      "description": "Título de apresentação do evento."
+      "description": "Título de divulgação do evento."
     },
     {
-      "fieldId": "descricao",
+      "fieldId": "description",
       "title": "Descrição",
       "type": "text",
       "required": true,
-      "description": "Descrição do evento e das informações relevantes para os participantes."
+      "description": "Descrição com as informações do evento."
     },
     {
-      "fieldId": "data",
-      "title": "Data e horário",
-      "type": "datetime",
+      "fieldId": "eventDate",
+      "title": "Data do evento",
+      "type": "date",
       "required": true,
-      "description": "Data e horário programados para a realização do evento."
+      "description": "Data em que o evento será realizado."
     },
     {
-      "fieldId": "local",
+      "fieldId": "location",
       "title": "Local",
       "type": "string",
       "required": true,
-      "constraints": {
-        "maxLength": 255
-      },
-      "description": "Local onde o evento será realizado."
+      "description": "Local de realização do evento."
     },
     {
-      "fieldId": "numeroVagas",
+      "fieldId": "capacity",
       "title": "Número de vagas",
       "type": "integer",
       "required": true,
-      "description": "Quantidade total de vagas disponíveis para inscrição no evento."
+      "description": "Quantidade de vagas disponíveis para inscrições confirmadas."
     },
     {
       "fieldId": "status",
-      "title": "Situação",
+      "title": "Status",
       "type": "string",
       "required": true,
       "enum": [
         {
-          "value": "cadastrado",
-          "title": "Cadastrado"
+          "value": "draft",
+          "title": "Rascunho"
         },
         {
-          "value": "publicado",
+          "value": "published",
           "title": "Publicado"
         }
       ],
-      "description": "Situação atual do evento quanto à sua disponibilidade para inscrições públicas."
+      "description": "Situação de cadastro e publicação do evento."
     }
   ],
   "details": {
-    "totalVagasOcupadas": {
+    "occupiedSeats": {
       "type": "integer",
-      "description": "Quantidade de inscrições confirmadas que ocupam vagas no evento."
+      "description": "Total de vagas ocupadas por inscrições confirmadas no evento."
     },
-    "vagasDisponiveis": {
+    "availableSeats": {
       "type": "integer",
-      "description": "Quantidade de vagas ainda disponíveis para confirmação de inscrições no evento."
+      "description": "Quantidade de vagas ainda disponíveis para inscrições confirmadas no evento."
     }
   },
   "lifecycleStates": [
     {
-      "state": "cadastrado",
+      "state": "draft",
       "reachedBy": "actor"
     },
     {
-      "state": "publicado",
+      "state": "published",
       "reachedBy": "actor"
     }
   ],
@@ -102,9 +96,9 @@ export const inscricaoEventoEntityEvento = {
     {
       "transitionId": "publicarEvento",
       "from": [
-        "cadastrado"
+        "draft"
       ],
-      "to": "publicado",
+      "to": "published",
       "by": [
         "organizador"
       ],

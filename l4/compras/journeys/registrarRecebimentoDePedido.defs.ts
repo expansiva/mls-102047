@@ -8,7 +8,7 @@ export const registrarRecebimentoDePedidoJourney = {
   "business": {
     "actorRef": "almoxarife",
     "title": "Registrar recebimento de pedido",
-    "goal": "Registrar o recebimento total ou parcial dos itens de um pedido e dar entrada no estoque do que foi recebido.",
+    "goal": "Registrar o recebimento total ou parcial de produtos de um pedido e dar entrada no estoque.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,14 +18,14 @@ export const registrarRecebimentoDePedidoJourney = {
         "kind": "locate",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Localiza o pedido aprovado ou enviado que chegou para recebimento."
+        "description": "Abre o pedido recebido em contexto ou o localiza para conferência."
       },
       {
         "stepId": "inspecionarItensDoPedido",
         "kind": "inspect",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Confere os itens e as quantidades solicitadas no pedido."
+        "description": "Confere os itens e as quantidades previstas no pedido."
       },
       {
         "stepId": "registrarRecebimento",
@@ -33,23 +33,23 @@ export const registrarRecebimentoDePedidoJourney = {
         "entity": "RecebimentoCompra",
         "affects": [
           "PedidoCompra",
-          "Estoque"
+          "Produto",
+          "EstoqueProduto"
         ],
         "effect": "create",
         "title": "x",
-        "description": "Registra as quantidades efetivamente recebidas, totais ou parciais, atualiza o acompanhamento do pedido e lança a entrada dos produtos no estoque."
+        "description": "Registra as quantidades efetivamente recebidas, total ou parcialmente, e a entrada correspondente no estoque."
       }
     ],
     "outcome": {
-      "statement": "O recebimento é registrado e o estoque passa a considerar as quantidades efetivamente recebidas.",
+      "statement": "O recebimento é registrado e o estoque dos produtos recebidos é atualizado.",
       "evidence": [
-        "Recebimento identifica o pedido, os itens e as quantidades recebidas.",
-        "Saldo de estoque dos produtos recebidos reflete a entrada registrada.",
-        "Pedido indica o recebimento total ou parcial."
+        "Registro de recebimento com quantidades recebidas.",
+        "Saldo de estoque dos produtos recebidos atualizado."
       ]
     }
   },
-  "businessHash": "sha256:f5eeca8d98f0c2905f4e5678ac717a389aae544ebc97ad40778091b619e2b41e"
+  "businessHash": "sha256:bfdfbdffdf87c9f9e90ad1b66f3de8b5ebe1ebf125a1c01ac19b5e39604f5d9f"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarRecebimentoDePedidoJourneyType = typeof registrarRecebimentoDePedidoJourney;
