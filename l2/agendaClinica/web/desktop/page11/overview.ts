@@ -38,8 +38,8 @@ export class AgendaClinicaOverview102047 extends StateLitElement {
           </article>
           <article>
             <span class="review-lab__icon" aria-hidden="true">03</span>
-            <h2>Leitura segura</h2>
-            <p>O primeiro recorte é somente leitura; aplicar e executar permanecem bloqueados.</p>
+            <h2>Edição segura</h2>
+            <p>Os ajustes da aba Geral são preparados no tobe; aplicar e executar permanecem bloqueados.</p>
           </article>
         </section>
       </main>
