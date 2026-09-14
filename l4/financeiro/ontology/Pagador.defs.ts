@@ -13,6 +13,12 @@ export const financeiroEntityPagador = {
   "mdmSubtype": "Person",
   "displayField": "name",
   "fields": [],
+  "fieldsBase": [
+    { "fieldId": "name", "title": "Nome completo", "type": "string", "required": true, "description": "Nome completo do pagador." },
+    { "fieldId": "docType", "title": "Tipo de documento", "type": "string", "required": true, "enum": [{ "value": "CPF", "title": "CPF" }], "description": "Tipo de documento de identificação do pagador." },
+    { "fieldId": "docId", "title": "CPF", "type": "string", "required": true, "description": "Número do CPF do pagador." },
+    { "fieldId": "contacts", "title": "Contatos", "type": "json", "required": true, "description": "Contatos do pagador (telefone, e-mail) para notificação de títulos." }
+  ],
   "lifecycleStates": [],
   "transitions": [],
   "storage": {
