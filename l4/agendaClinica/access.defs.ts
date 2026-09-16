@@ -39,17 +39,8 @@ export const agendaClinicaAccess = {
       "disclosure": {
         "mode": "fieldsOnly",
         "description": "Disponibiliza os dados necessários para cadastro e gestão da agenda, preservando a anotação clínica do atendimento.",
-        "allowedFields": [
-          "Paciente.id",
-          "Profissional.id",
-          "Consulta.id",
-          "Consulta.pacienteId",
-          "Consulta.profissionalId",
-          "Consulta.scheduledAt",
-          "Consulta.status"
-        ],
         "deniedFields": [
-          "Consulta.attendanceNote"
+          "Consulta.details.attendanceNote"
         ]
       }
     },
@@ -59,7 +50,8 @@ export const agendaClinicaAccess = {
       "title": "Agenda e atendimentos próprios",
       "description": "Permite consultar as próprias consultas agendadas e registrar o atendimento realizado com sua anotação.",
       "entityRefs": [
-        "Consulta"
+        "Consulta",
+        "Paciente"
       ],
       "dataScope": {
         "mode": "own",
@@ -67,8 +59,13 @@ export const agendaClinicaAccess = {
         "anchorEntity": "Profissional"
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "Disponibiliza todos os campos da consulta vinculada ao próprio profissional, incluindo a anotação de atendimento."
+        "mode": "fieldsOnly",
+        "description": "Disponibiliza a consulta inteira, incluindo a anotação de atendimento, e do paciente apenas o nome e os canais de contato — o necessário para atender e confirmar.",
+        "allowedFields": [
+          "Consulta",
+          "Paciente.details.identification.name",
+          "Paciente.details.base.contacts"
+        ]
       }
     }
   ]
