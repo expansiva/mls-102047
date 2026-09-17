@@ -11,29 +11,7 @@ export const mensalidadesAcademiaModule = {
     "pt-BR"
   ],
   "defaultLanguage": "pt-BR",
-  "sourcePrompt": "criar mensalidadesAcademia em português. academia com alunos e planos (mensal, trimestral, anual, com valor e dia de vencimento). a recepção matricula o aluno em um plano a partir de uma data. todo mês a gerência gera as mensalidades do mês para todos os alunos ativos, uma por aluno, com valor do plano e vencimento. a recepção registra pagamentos (data, valor, forma). mensalidade não paga após o vencimento fica vencida; aluno com duas mensalidades vencidas fica bloqueado e não pode entrar até regularizar. a gerência vê um painel com total a receber no mês, total recebido, quantidade de alunos ativos, bloqueados e inadimplentes. o aluno pode cancelar a matrícula, o que encerra a geração de mensalidades futuras. perfis: recepção e gerência.",
-  "details": {
-    "totalAreceberNoMes": {
-      "type": "money",
-      "description": "Total das mensalidades a receber no mês consultado."
-    },
-    "totalRecebidoNoMes": {
-      "type": "money",
-      "description": "Total de pagamentos recebidos no mês consultado."
-    },
-    "quantidadeAlunosAtivos": {
-      "type": "integer",
-      "description": "Quantidade de alunos com matrícula ativa no período."
-    },
-    "quantidadeAlunosBloqueados": {
-      "type": "integer",
-      "description": "Quantidade de alunos bloqueados por duas mensalidades vencidas."
-    },
-    "quantidadeAlunosInadimplentes": {
-      "type": "integer",
-      "description": "Quantidade de alunos com ao menos uma mensalidade vencida."
-    }
-  }
+  "sourcePrompt": "criar mensalidadesAcademia em português. academia com alunos e planos (mensal, trimestral, anual, com valor e dia de vencimento). a recepção matricula o aluno em um plano a partir de uma data. todo mês a gerência gera as mensalidades do mês para todos os alunos ativos, uma por aluno, com valor do plano e vencimento. a recepção registra pagamentos (data, valor, forma). mensalidade não paga após o vencimento fica vencida; aluno com duas mensalidades vencidas fica bloqueado e não pode entrar até regularizar. a gerência vê um painel com total a receber no mês, total recebido, quantidade de alunos ativos, bloqueados e inadimplentes. o aluno pode cancelar a matrícula, o que encerra a geração de mensalidades futuras. perfis: recepção e gerência."
 } as const satisfies Ns5ModuleArtifact;
 
 export type MensalidadesAcademiaModuleType = typeof mensalidadesAcademiaModule;

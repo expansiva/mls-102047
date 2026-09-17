@@ -2,157 +2,96 @@
   "journeys": [
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "registrarBaixaDeTitulo",
+      "journeyId": "registrarRecebimento",
       "business": {
         "actorRef": "caixa",
         "title": "Registrar recebimento de título",
-        "goal": "Receber total ou parcialmente um título por dinheiro ou Pix.",
+        "goal": "Receber um título em aberto, inclusive parcialmente, por dinheiro, Pix ou cartão.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarTituloEmAberto",
+            "stepId": "localizarTitulo",
             "kind": "locate",
             "entity": "TituloReceber",
-            "title": "Localizar título em aberto",
-            "description": "Localizar o título em aberto que será recebido."
+            "title": "Localizar título",
+            "description": "Localiza o título em aberto a partir do contexto disponível ou por consulta entre os títulos da organização."
           },
           {
-            "stepId": "conferirTitulo",
+            "stepId": "inspecionarTitulo",
             "kind": "inspect",
             "entity": "TituloReceber",
             "title": "Conferir título",
-            "description": "Conferir o pagador, o valor, o vencimento e o saldo pendente do título."
+            "description": "Confere o pagador, o valor em aberto, o vencimento e a origem da cobrança."
           },
           {
             "stepId": "registrarRecebimento",
             "kind": "act",
             "entity": "Recebimento",
-            "affects": [
-              "TituloReceber"
-            ],
             "effect": "create",
             "title": "Registrar recebimento",
-            "description": "Registrar o valor recebido, inclusive em baixa parcial, e o meio de pagamento em dinheiro ou Pix."
+            "description": "Registra o valor recebido, integral ou parcial, e a forma de pagamento: dinheiro, Pix ou cartão processado pela Stripe; o saldo do título é atualizado conforme o recebimento."
           }
         ],
         "outcome": {
-          "statement": "O recebimento é registrado e o saldo do título é atualizado.",
+          "statement": "O recebimento é registrado e o título permanece em aberto apenas pelo saldo que ainda faltar.",
           "evidence": [
-            "Comprovante de recebimento registrado.",
-            "Saldo pendente do título atualizado."
+            "Há um recebimento vinculado ao título com valor, data e forma de pagamento.",
+            "O título apresenta o saldo atualizado após a baixa, total ou parcial."
           ]
         }
       },
-      "businessHash": "sha256:05fda5443e3d2a11fe326f8b92172c73b49377395d5f875a0f1070fe5140ed2d"
+      "businessHash": "sha256:46e50cdcb5d1d2b7c7bea9ec436033da788a611a92e5403675c91cd126bc5c20"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "iniciarCobrancaPorCartaoNoCaixa",
+      "journeyId": "estornarRecebimentoNoMesmoDia",
       "business": {
         "actorRef": "caixa",
-        "title": "Cobrar título por cartão",
-        "goal": "Iniciar no caixa o pagamento de um título em aberto por cartão.",
+        "title": "Estornar recebimento no mesmo dia",
+        "goal": "Cancelar um recebimento registrado no dia quando ele precisar ser revertido.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarTituloParaCartao",
-            "kind": "locate",
-            "entity": "TituloReceber",
-            "title": "Localizar título para cartão",
-            "description": "Localizar o título em aberto que será cobrado por cartão."
-          },
-          {
-            "stepId": "conferirDadosDaCobranca",
-            "kind": "inspect",
-            "entity": "TituloReceber",
-            "title": "Conferir dados da cobrança",
-            "description": "Conferir o pagador, o valor e o saldo do título antes de iniciar a cobrança."
-          },
-          {
-            "stepId": "registrarSolicitacaoDeCartao",
-            "kind": "act",
-            "entity": "Recebimento",
-            "affects": [
-              "TituloReceber"
-            ],
-            "effect": "create",
-            "title": "Registrar solicitação de cartão",
-            "description": "Registrar a solicitação de recebimento por cartão vinculada ao título."
-          },
-          {
-            "stepId": "encaminharCobrancaParaStripe",
-            "kind": "handoff",
-            "entity": "Recebimento",
-            "title": "Encaminhar cobrança para processamento",
-            "description": "Encaminhar a cobrança por cartão para processamento.",
-            "handoffTo": "stripe"
-          }
-        ],
-        "outcome": {
-          "statement": "A cobrança por cartão é encaminhada para processamento.",
-          "evidence": [
-            "Solicitação de recebimento por cartão registrada.",
-            "Cobrança encaminhada ao processador."
-          ]
-        }
-      },
-      "businessHash": "sha256:15a80bafc3ca4f3b6e5da164047118ebc976718400a90fdf470299fe38a922ea"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "estornarRecebimentoDoMesmoDia",
-      "business": {
-        "actorRef": "caixa",
-        "title": "Estornar recebimento do mesmo dia",
-        "goal": "Cancelar um recebimento registrado no mesmo dia e recompor o saldo do título.",
-        "entry": {
-          "mode": "contextOrLookup"
-        },
-        "steps": [
-          {
-            "stepId": "localizarRecebimentoDoDia",
+            "stepId": "localizarRecebimento",
             "kind": "locate",
             "entity": "Recebimento",
-            "title": "Localizar recebimento do dia",
-            "description": "Localizar o recebimento registrado no mesmo dia que será estornado."
+            "title": "Localizar recebimento",
+            "description": "Localiza o recebimento do dia a ser estornado, a partir do contexto ou por consulta entre os recebimentos da organização."
           },
           {
-            "stepId": "conferirRecebimentoEtitulo",
+            "stepId": "inspecionarRecebimento",
             "kind": "inspect",
             "entity": "Recebimento",
-            "title": "Conferir recebimento e título",
-            "description": "Conferir o recebimento e o título vinculado antes do estorno."
+            "title": "Conferir recebimento",
+            "description": "Confere o título, o valor, a forma de pagamento e a data do recebimento antes do estorno."
           },
           {
             "stepId": "estornarRecebimento",
             "kind": "act",
             "entity": "Recebimento",
-            "affects": [
-              "TituloReceber"
-            ],
             "effect": "transition",
             "transitionRef": "estornarRecebimento",
             "title": "Estornar recebimento",
-            "description": "Estornar o recebimento registrado no mesmo dia."
+            "description": "Estorna o recebimento realizado no mesmo dia, recompondo o saldo correspondente do título."
           }
         ],
         "outcome": {
-          "statement": "O recebimento é estornado e o saldo do título é recomposto.",
+          "statement": "O recebimento do dia é estornado e o valor correspondente volta a compor o saldo do título.",
           "evidence": [
-            "Recebimento identificado como estornado.",
-            "Saldo do título atualizado após o estorno."
+            "O recebimento está marcado como estornado.",
+            "O saldo do título reflete a reversão do recebimento."
           ]
         }
       },
-      "businessHash": "sha256:d3111914db144f53e208f3165e090d83de215d9433d0bacdb2c1aea6144cf348"
+      "businessHash": "sha256:cac403c77422586e64c40abcf7ed92d584e094470eb615bd940d710a348451b6"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "acompanharPainelDeRecebiveis",
+      "journeyId": "acompanharPainelRecebiveis",
       "business": {
         "actorRef": "gerenteFinanceiro",
         "title": "Acompanhar painel de recebíveis",
@@ -162,22 +101,22 @@
         },
         "steps": [
           {
-            "stepId": "inspecionarIndicadoresDeRecebiveis",
+            "stepId": "inspecionarPainelRecebiveis",
             "kind": "inspect",
             "entity": "TituloReceber",
-            "title": "Inspecionar indicadores de recebíveis",
-            "description": "Inspecionar os valores e a composição dos recebíveis por período e origem."
+            "title": "Visualizar painel de recebíveis",
+            "description": "Visualiza o painel calculado de recebíveis para o período e a origem de cobrança desejados, com os valores agrupados por esses critérios."
           }
         ],
         "outcome": {
-          "statement": "O gerente financeiro visualiza a situação dos recebíveis no recorte solicitado.",
+          "statement": "O gerente financeiro obtém uma visão dos recebíveis no período e nas origens selecionadas.",
           "evidence": [
-            "Indicadores de recebíveis exibidos para o período selecionado.",
-            "Recebíveis identificados por origem."
+            "O painel apresenta os totais de títulos a receber para o período consultado.",
+            "Os valores podem ser observados discriminados por origem de cobrança."
           ]
         }
       },
-      "businessHash": "sha256:ba9c3c455fc9610dc72644d248a80666d3da9ee9cbc8a22d872d1f18a939731b"
+      "businessHash": "sha256:cdf17a1c738c0cbb0cbfdfb6fcf7ae2ae2f3d5858e4efbf0662b50c522721928"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -185,7 +124,7 @@
       "business": {
         "actorRef": "gerenteFinanceiro",
         "title": "Consultar títulos vencidos",
-        "goal": "Identificar títulos a receber que estão vencidos.",
+        "goal": "Identificar os títulos da organização que estão vencidos e ainda possuem saldo em aberto.",
         "entry": {
           "mode": "coldStart"
         },
@@ -195,25 +134,25 @@
             "kind": "locate",
             "entity": "TituloReceber",
             "title": "Localizar títulos vencidos",
-            "description": "Localizar títulos com vencimento passado e saldo pendente."
+            "description": "Consulta os títulos da organização com vencimento expirado e saldo pendente."
           },
           {
             "stepId": "inspecionarTitulosVencidos",
             "kind": "inspect",
             "entity": "TituloReceber",
-            "title": "Inspecionar títulos vencidos",
-            "description": "Inspecionar o pagador, o valor pendente, o vencimento e a origem de cada título vencido."
+            "title": "Examinar títulos vencidos",
+            "description": "Examina pagador, valor em aberto, vencimento e origem de cada título vencido."
           }
         ],
         "outcome": {
-          "statement": "Os títulos vencidos ficam disponíveis para acompanhamento financeiro.",
+          "statement": "O gerente financeiro identifica os títulos vencidos que exigem acompanhamento.",
           "evidence": [
-            "Lista de títulos vencidos apresentada.",
-            "Dados de vencimento e saldo pendente visíveis."
+            "A consulta apresenta títulos com vencimento anterior à data atual e saldo em aberto.",
+            "Cada título vencido exibe seu pagador, valor pendente e origem."
           ]
         }
       },
-      "businessHash": "sha256:cf81b0dbc1e8ac2b6bb2f30437f3d9955a371fa2cfbe97b53817dbeda786554d"
+      "businessHash": "sha256:a906293debcb34d8f9cc6533b183d40febf6a7920f836ac7ae184ce46c9eda3e"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -221,7 +160,7 @@
       "business": {
         "actorRef": "gerenteFinanceiro",
         "title": "Emitir extrato por pagador",
-        "goal": "Obter o extrato de títulos e recebimentos de um pagador.",
+        "goal": "Gerar a posição de títulos e recebimentos de um pagador.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -231,33 +170,32 @@
             "kind": "locate",
             "entity": "Pagador",
             "title": "Localizar pagador",
-            "description": "Localizar o pagador para o qual será emitido o extrato."
+            "description": "Localiza o pagador a partir do contexto disponível ou por consulta na organização."
           },
           {
-            "stepId": "inspecionarExtratoDoPagador",
+            "stepId": "inspecionarTitulosDoPagador",
             "kind": "inspect",
-            "entity": "Pagador",
-            "title": "Inspecionar extrato do pagador",
-            "description": "Inspecionar os títulos e os recebimentos associados ao pagador."
+            "entity": "TituloReceber",
+            "title": "Consultar títulos do pagador",
+            "description": "Consulta os títulos do pagador, incluindo valores, vencimentos, origens e saldos."
           },
           {
-            "stepId": "emitirExtrato",
-            "kind": "act",
-            "entity": "ExtratoPagador",
-            "effect": "create",
-            "title": "Emitir extrato",
-            "description": "Emitir o extrato com os títulos e recebimentos do pagador."
+            "stepId": "inspecionarRecebimentosDoPagador",
+            "kind": "inspect",
+            "entity": "Recebimento",
+            "title": "Emitir extrato do pagador",
+            "description": "Consulta os recebimentos vinculados aos títulos do pagador e emite o extrato consolidado."
           }
         ],
         "outcome": {
-          "statement": "O extrato do pagador é emitido.",
+          "statement": "O extrato do pagador é emitido com seus títulos e recebimentos.",
           "evidence": [
-            "Extrato gerado para o pagador selecionado.",
-            "Títulos e recebimentos incluídos no extrato."
+            "O extrato identifica o pagador consultado.",
+            "O extrato apresenta títulos, saldos e recebimentos relacionados ao pagador."
           ]
         }
       },
-      "businessHash": "sha256:b4f4c730785f7afc079829e1789bdf00067413c81b3031963e26f1938e74f7c7"
+      "businessHash": "sha256:9dce2144ae906b1438174be29dac147c6a49c4fa2b618a35b386bd854b884ab0"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -265,7 +203,7 @@
       "business": {
         "actorRef": "pagador",
         "title": "Consultar meus títulos e recebimentos",
-        "goal": "Visualizar somente os próprios títulos a receber e recebimentos no portal.",
+        "goal": "Visualizar no portal somente os próprios títulos e recebimentos.",
         "entry": {
           "mode": "coldStart"
         },
@@ -275,33 +213,47 @@
             "kind": "locate",
             "entity": "TituloReceber",
             "title": "Localizar meus títulos",
-            "description": "Localizar os títulos vinculados ao próprio pagador."
+            "description": "Consulta os próprios títulos no portal."
           },
           {
-            "stepId": "inspecionarMeusTitulosErecebimentos",
+            "stepId": "inspecionarMeusTitulos",
             "kind": "inspect",
             "entity": "TituloReceber",
-            "title": "Inspecionar meus títulos e recebimentos",
-            "description": "Inspecionar valores, vencimentos, situação dos títulos e os recebimentos vinculados."
+            "title": "Visualizar meus títulos",
+            "description": "Visualiza valores, vencimentos, origens e saldos dos próprios títulos."
+          },
+          {
+            "stepId": "localizarMeusRecebimentos",
+            "kind": "locate",
+            "entity": "Recebimento",
+            "title": "Localizar meus recebimentos",
+            "description": "Consulta os próprios recebimentos vinculados aos seus títulos."
+          },
+          {
+            "stepId": "inspecionarMeusRecebimentos",
+            "kind": "inspect",
+            "entity": "Recebimento",
+            "title": "Visualizar meus recebimentos",
+            "description": "Visualiza os valores, datas e formas de pagamento dos próprios recebimentos."
           }
         ],
         "outcome": {
-          "statement": "O pagador visualiza seus títulos e seus recebimentos.",
+          "statement": "O pagador consulta sua situação financeira sem acessar dados de outros pagadores.",
           "evidence": [
-            "Títulos vinculados ao pagador exibidos.",
-            "Recebimentos do pagador disponíveis para consulta."
+            "São exibidos apenas títulos vinculados ao pagador da sessão.",
+            "São exibidos apenas recebimentos vinculados aos títulos do pagador da sessão."
           ]
         }
       },
-      "businessHash": "sha256:6f467d376b9c5b24283913da4911285738717f271e37517012c095fc281ec9b0"
+      "businessHash": "sha256:77ef98a7e77bf718a756a7f6cfd971446e22daf77e911d9e4f12d39c4cf2ef21"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "pagarMeuTituloComCartao",
+      "journeyId": "pagarTituloComCartao",
       "business": {
         "actorRef": "pagador",
-        "title": "Pagar meu título com cartão",
-        "goal": "Quitar um título próprio em aberto por cartão no portal.",
+        "title": "Pagar título em aberto com cartão",
+        "goal": "Quitar total ou parcialmente um dos próprios títulos em aberto usando cartão.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -310,86 +262,34 @@
             "stepId": "localizarMeuTituloEmAberto",
             "kind": "locate",
             "entity": "TituloReceber",
-            "title": "Localizar meu título em aberto",
-            "description": "Localizar um título em aberto vinculado ao próprio pagador."
+            "title": "Localizar título em aberto",
+            "description": "Localiza um dos próprios títulos em aberto, pelo contexto recebido ou por consulta no portal."
           },
           {
-            "stepId": "conferirMeuTitulo",
+            "stepId": "inspecionarMeuTituloEmAberto",
             "kind": "inspect",
             "entity": "TituloReceber",
-            "title": "Conferir meu título",
-            "description": "Conferir o valor, o vencimento e o saldo do título antes do pagamento."
+            "title": "Conferir título em aberto",
+            "description": "Confere o valor em aberto, o vencimento e a origem do título selecionado."
           },
           {
-            "stepId": "solicitarPagamentoComCartao",
+            "stepId": "registrarPagamentoComCartao",
             "kind": "act",
             "entity": "Recebimento",
-            "affects": [
-              "TituloReceber"
-            ],
             "effect": "create",
-            "title": "Solicitar pagamento com cartão",
-            "description": "Solicitar o pagamento por cartão do título em aberto."
-          },
-          {
-            "stepId": "encaminharPagamentoParaStripe",
-            "kind": "handoff",
-            "entity": "Recebimento",
-            "title": "Encaminhar pagamento para processamento",
-            "description": "Encaminhar a solicitação de pagamento por cartão para processamento.",
-            "handoffTo": "stripe"
+            "title": "Registrar pagamento com cartão",
+            "description": "Registra o pagamento por cartão processado pela Stripe, vinculando-o ao título e atualizando seu saldo conforme o valor recebido."
           }
         ],
         "outcome": {
-          "statement": "O pagamento por cartão é enviado para processamento.",
+          "statement": "O pagamento com cartão é registrado para o título do pagador.",
           "evidence": [
-            "Solicitação de pagamento registrada.",
-            "Cobrança encaminhada ao processador de cartão."
+            "Há um recebimento por cartão vinculado ao título pago.",
+            "O título apresenta o saldo atualizado após o pagamento."
           ]
         }
       },
-      "businessHash": "sha256:81126e679978fe0a5283df16fafc56b7135eaa3551a3c29b2433d88a83468188"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "processarPagamentoPorCartao",
-      "business": {
-        "actorRef": "stripe",
-        "title": "Processar pagamento por cartão",
-        "goal": "Processar uma cobrança por cartão recebida do módulo financeiro.",
-        "entry": {
-          "mode": "fromNotification"
-        },
-        "steps": [
-          {
-            "stepId": "inspecionarSolicitacaoDeCartao",
-            "kind": "inspect",
-            "entity": "Recebimento",
-            "title": "Inspecionar solicitação de cartão",
-            "description": "Inspecionar a solicitação de recebimento por cartão encaminhada para processamento."
-          },
-          {
-            "stepId": "confirmarPagamentoComCartao",
-            "kind": "act",
-            "entity": "Recebimento",
-            "affects": [
-              "TituloReceber"
-            ],
-            "effect": "transition",
-            "transitionRef": "confirmarPagamentoComCartao",
-            "title": "Confirmar pagamento com cartão",
-            "description": "Confirmar o pagamento por cartão processado."
-          }
-        ],
-        "outcome": {
-          "statement": "O pagamento por cartão confirmado é refletido no recebimento e no título.",
-          "evidence": [
-            "Recebimento confirmado por cartão.",
-            "Saldo do título atualizado após a confirmação."
-          ]
-        }
-      },
-      "businessHash": "sha256:ed9b9d02026c33bd58eab087f9c76f690b49abd31ca52b41bc59963324105a02"
+      "businessHash": "sha256:f966cd2374cbcc15dcf34929f5cabbfb742855446d42b5df99f4c4434075ec6c"
     }
   ],
   "systemDecisions": [],
@@ -398,27 +298,15 @@
   "normalizations": [
     {
       "kind": "dropTransitionRef",
-      "journeyId": "registrarBaixaDeTitulo",
+      "journeyId": "registrarRecebimento",
       "stepId": "registrarRecebimento",
-      "detail": "transitionRef none dropped; effect is create."
+      "detail": "transitionRef x dropped; effect is create."
     },
     {
       "kind": "dropTransitionRef",
-      "journeyId": "iniciarCobrancaPorCartaoNoCaixa",
-      "stepId": "registrarSolicitacaoDeCartao",
-      "detail": "transitionRef none dropped; effect is create."
-    },
-    {
-      "kind": "dropTransitionRef",
-      "journeyId": "emitirExtratoPorPagador",
-      "stepId": "emitirExtrato",
-      "detail": "transitionRef none dropped; effect is create."
-    },
-    {
-      "kind": "dropTransitionRef",
-      "journeyId": "pagarMeuTituloComCartao",
-      "stepId": "solicitarPagamentoComCartao",
-      "detail": "transitionRef none dropped; effect is create."
+      "journeyId": "pagarTituloComCartao",
+      "stepId": "registrarPagamentoComCartao",
+      "detail": "transitionRef x dropped; effect is create."
     }
   ]
 }

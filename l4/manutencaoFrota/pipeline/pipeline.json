@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-12T20:00:37.393Z",
+      "updatedAt": "2026-09-17T05:17:04.192Z",
       "artifactPaths": [
         "l4/manutencaoFrota/module.defs.ts"
       ],
@@ -16,34 +16,28 @@
           "kind": "internal",
           "origin": "named",
           "title": "Motorista",
-          "description": "Motorista da transportadora que registra abastecimentos dos veículos atribuídos a ele."
+          "description": "Motorista da transportadora que registra abastecimentos dos veículos que dirige e consulta os veículos atribuídos a si."
         },
         {
-          "actorId": "gestorFrota",
+          "actorId": "gestor",
           "kind": "internal",
           "origin": "named",
           "title": "Gestor de frota",
-          "description": "Responsável pela gestão da frota, pelos planos preventivos e pelas ordens de manutenção."
-        }
-      ],
-      "normalizations": [
-        {
-          "kind": "ptToPtBR",
-          "detail": "pt→pt-BR"
+          "description": "Gestor responsável por cadastrar planos de manutenção preventiva e abrir ordens de manutenção dos veículos."
         }
       ],
       "autoReason": "fast"
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-12T20:01:14.820Z",
+      "updatedAt": "2026-09-17T05:17:47.094Z",
       "artifactPaths": [
-        "l4/manutencaoFrota/journeys/cadastrarVeiculo.defs.ts",
+        "l4/manutencaoFrota/journeys/consultarVeiculosAtribuidos.defs.ts",
         "l4/manutencaoFrota/journeys/registrarAbastecimento.defs.ts",
         "l4/manutencaoFrota/journeys/cadastrarPlanoPreventivo.defs.ts",
-        "l4/manutencaoFrota/journeys/abrirOrdemPorPreventivaVencida.defs.ts",
         "l4/manutencaoFrota/journeys/abrirOrdemPorDefeito.defs.ts",
-        "l4/manutencaoFrota/journeys/registrarConclusaoManutencao.defs.ts",
+        "l4/manutencaoFrota/journeys/tratarAlertaPreventivaVencida.defs.ts",
+        "l4/manutencaoFrota/journeys/registrarConclusaoOrdemManutencao.defs.ts",
         "l4/manutencaoFrota/journeys/index.defs.ts"
       ],
       "decideStepCount": 0,
@@ -51,38 +45,32 @@
       "normalizations": [
         {
           "kind": "dropTransitionRef",
-          "journeyId": "cadastrarVeiculo",
-          "stepId": "registrarVeiculo",
-          "detail": "transitionRef x dropped; effect is create."
-        },
-        {
-          "kind": "dropTransitionRef",
           "journeyId": "registrarAbastecimento",
-          "stepId": "registrarAbastecimento",
+          "stepId": "criarAbastecimento",
           "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
           "journeyId": "cadastrarPlanoPreventivo",
-          "stepId": "registrarPlanoPreventivo",
-          "detail": "transitionRef x dropped; effect is create."
-        },
-        {
-          "kind": "dropTransitionRef",
-          "journeyId": "abrirOrdemPorPreventivaVencida",
-          "stepId": "abrirOrdemPreventiva",
+          "stepId": "criarPlanoPreventivo",
           "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
           "journeyId": "abrirOrdemPorDefeito",
-          "stepId": "abrirOrdemCorretiva",
+          "stepId": "criarOrdemPorDefeito",
           "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
-          "journeyId": "registrarConclusaoManutencao",
-          "stepId": "registrarDadosConclusao",
+          "journeyId": "tratarAlertaPreventivaVencida",
+          "stepId": "criarOrdemPreventiva",
+          "detail": "transitionRef x dropped; effect is create."
+        },
+        {
+          "kind": "dropTransitionRef",
+          "journeyId": "registrarConclusaoOrdemManutencao",
+          "stepId": "atualizarOrdemConcluida",
           "detail": "transitionRef x dropped; effect is update."
         }
       ],
@@ -90,26 +78,191 @@
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-12T20:04:03.057Z",
+      "updatedAt": "2026-09-17T05:20:13.310Z",
       "artifactPaths": [
-        "l4/manutencaoFrota/ontology/Abastecimento.defs.ts",
-        "l4/manutencaoFrota/ontology/Motorista.defs.ts",
-        "l4/manutencaoFrota/ontology/Oficina.defs.ts",
-        "l4/manutencaoFrota/ontology/Veiculo.defs.ts",
-        "l4/manutencaoFrota/ontology/PlanoManutencao.defs.ts",
-        "l4/manutencaoFrota/ontology/OrdemManutencao.defs.ts",
+        "l4/manutencaoFrota/ontology/Vehicle.defs.ts",
+        "l4/manutencaoFrota/ontology/Driver.defs.ts",
+        "l4/manutencaoFrota/ontology/Workshop.defs.ts",
+        "l4/manutencaoFrota/ontology/VehicleAssignment.defs.ts",
+        "l4/manutencaoFrota/ontology/Fueling.defs.ts",
+        "l4/manutencaoFrota/ontology/MaintenancePlan.defs.ts",
+        "l4/manutencaoFrota/ontology/MaintenanceOrder.defs.ts",
         "l4/manutencaoFrota/ontology/index.defs.ts"
       ],
       "uncitedEntities": [
-        "Motorista",
-        "Oficina"
+        "Driver",
+        "Workshop",
+        "VehicleAssignment"
       ],
       "liftedAggregateEntities": [],
+      "normalizations": [
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Vehicle",
+          "detail": "roleTag manutencaoFrota.Vehicle; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Driver",
+          "detail": "roleTag manutencaoFrota.Driver; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Workshop",
+          "detail": "roleTag manutencaoFrota.Workshop; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "VehicleAssignment",
+          "detail": "storage.table manutencaoFrota_vehicleassignment"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Fueling",
+          "detail": "storage.table manutencaoFrota_fueling"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "MaintenancePlan",
+          "detail": "storage.table manutencaoFrota_maintenanceplan"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "MaintenanceOrder",
+          "detail": "storage.table manutencaoFrota_maintenanceorder"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Vehicle",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Vehicle",
+          "detail": "Vehicle.details.identification.subtype.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Vehicle",
+          "detail": "Vehicle.details.identification.countryCode.pattern"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Vehicle",
+          "detail": "Vehicle.details.assetVehicle.plate.required"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Vehicle",
+          "detail": "Vehicle.details.assetVehicle.plate.pattern"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Vehicle",
+          "detail": "Vehicle.details.assetVehicle.model.required"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Vehicle",
+          "detail": "Vehicle.details.assetVehicle.year.required"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Driver",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "Driver",
+          "detail": "details.manutencaoFrota"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Workshop",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Workshop",
+          "detail": "Workshop.details.identification.subtype.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Workshop",
+          "detail": "Workshop.details.company.companyKind.values"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "Workshop",
+          "detail": "details.manutencaoFrota"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "VehicleAssignment",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Fueling",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "MaintenancePlan",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "MaintenanceOrder",
+          "detail": "record.fields.id, record.fields.version"
+        }
+      ],
+      "citedRules": [
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "vehicleMileageUpdatedFromLatestFueling",
+        "rule-person-privacy-consent-required-br-eu",
+        "rule-company-legal-name-required",
+        "fuelingDriverMustBeAssignedToVehicle",
+        "fuelingOdometerReadingCannotBeNegative",
+        "fuelingUpdatesVehicleMileageWhenMoreRecent",
+        "maintenancePlanRequiresInterval",
+        "maintenancePlanPositiveInterval",
+        "maintenancePlanCalculatedSchedule"
+      ],
+      "citedCapabilities": [
+        "read.byId",
+        "locate.byName",
+        "locate.byTag",
+        "register.createOrAttach",
+        "edit.platformFields",
+        "edit.moduleNamespace",
+        "inactivate",
+        "statusHistory.read",
+        "audit",
+        "locate.byDocument",
+        "locate.byContact",
+        "link.contact",
+        "listLinks",
+        "tag",
+        "invite.login",
+        "locate.byColumn",
+        "count",
+        "listByForeignKey",
+        "create",
+        "update",
+        "delete",
+        "uniqueKey",
+        "read.mdmRecord",
+        "transaction",
+        "manutencaoFrota.alertOverduePreventive"
+      ],
       "autoReason": "fast"
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-09-12T20:04:25.475Z",
+      "updatedAt": "2026-09-17T05:20:35.926Z",
       "artifactPaths": [
         "l4/manutencaoFrota/workflows.defs.ts"
       ],
@@ -117,7 +270,7 @@
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-12T20:04:31.087Z",
+      "updatedAt": "2026-09-17T05:20:41.587Z",
       "artifactPaths": [
         "l4/manutencaoFrota/rules.defs.ts"
       ],
@@ -125,14 +278,19 @@
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-12T20:04:36.566Z",
+      "updatedAt": "2026-09-17T05:21:42.177Z",
       "artifactPaths": [
         "l4/manutencaoFrota/access.defs.ts"
       ],
       "normalizations": [
         {
           "kind": "dropAnchorEntity",
-          "grantId": "gestaoCompletaFrota",
+          "grantId": "gestorAdministraCadastrosFrota",
+          "detail": "anchorEntity removed; organization is not own/assigned/related."
+        },
+        {
+          "kind": "dropAnchorEntity",
+          "grantId": "gestorAdministraManutencoes",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
       ],
@@ -140,7 +298,7 @@
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-12T20:05:09.259Z",
+      "updatedAt": "2026-09-17T05:22:14.772Z",
       "artifactPaths": [
         "l4/manutencaoFrota/integration.defs.ts"
       ],
@@ -148,7 +306,7 @@
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-12T20:05:09.588Z",
+      "updatedAt": "2026-09-17T05:22:14.979Z",
       "artifactPaths": [
         "l4/manutencaoFrota/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -164,31 +322,51 @@
     "module": "manutencaoFrota",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-12T20:05:09.588Z",
+  "updatedAt": "2026-09-17T05:22:14.979Z",
   "rebuildAll": {
     "deleted": [
+      "l4/manutencaoFrota/access.defs.ts",
+      "l4/manutencaoFrota/integration.defs.ts",
       "l4/manutencaoFrota/journeys/abrirOrdemPorDefeito.defs.ts",
-      "l4/manutencaoFrota/journeys/abrirOrdemPreventiva.defs.ts",
-      "l4/manutencaoFrota/journeys/acompanharPreventivas.defs.ts",
-      "l4/manutencaoFrota/journeys/atribuirVeiculo.defs.ts",
+      "l4/manutencaoFrota/journeys/abrirOrdemPorPreventivaVencida.defs.ts",
       "l4/manutencaoFrota/journeys/cadastrarPlanoPreventivo.defs.ts",
       "l4/manutencaoFrota/journeys/cadastrarVeiculo.defs.ts",
-      "l4/manutencaoFrota/journeys/consultarVeiculosAtribuidos.defs.ts",
       "l4/manutencaoFrota/journeys/index.defs.ts",
       "l4/manutencaoFrota/journeys/registrarAbastecimento.defs.ts",
-      "l4/manutencaoFrota/journeys/registrarConclusaoOrdem.defs.ts",
+      "l4/manutencaoFrota/journeys/registrarConclusaoManutencao.defs.ts",
       "l4/manutencaoFrota/module.defs.ts",
+      "l4/manutencaoFrota/ontology/Abastecimento.defs.ts",
+      "l4/manutencaoFrota/ontology/Motorista.defs.ts",
+      "l4/manutencaoFrota/ontology/Oficina.defs.ts",
+      "l4/manutencaoFrota/ontology/OrdemManutencao.defs.ts",
+      "l4/manutencaoFrota/ontology/PlanoManutencao.defs.ts",
+      "l4/manutencaoFrota/ontology/Veiculo.defs.ts",
+      "l4/manutencaoFrota/ontology/index.defs.ts",
+      "l4/manutencaoFrota/pipeline/access60-draft.json",
+      "l4/manutencaoFrota/pipeline/finalize-report.json",
+      "l4/manutencaoFrota/pipeline/integration70-draft.json",
       "l4/manutencaoFrota/pipeline/journeys20-draft.json",
       "l4/manutencaoFrota/pipeline/module10-draft.json",
       "l4/manutencaoFrota/pipeline/ontology30-Abastecimento-draft.json",
       "l4/manutencaoFrota/pipeline/ontology30-Motorista-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-Oficina-draft.json",
       "l4/manutencaoFrota/pipeline/ontology30-OrdemManutencao-draft.json",
       "l4/manutencaoFrota/pipeline/ontology30-PlanoManutencao-draft.json",
       "l4/manutencaoFrota/pipeline/ontology30-Veiculo-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-bindings-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-draft.json",
       "l4/manutencaoFrota/pipeline/ontology30-plan-draft.json",
-      "l4/manutencaoFrota/pipeline/pipeline.json"
+      "l4/manutencaoFrota/pipeline/pipeline.json",
+      "l4/manutencaoFrota/pipeline/rules40-draft.json",
+      "l4/manutencaoFrota/pipeline/run01_newsolution5.json",
+      "l4/manutencaoFrota/pipeline/workflows50-draft.json",
+      "l4/manutencaoFrota/rules.defs.ts",
+      "l4/manutencaoFrota/workflows.defs.ts"
     ],
-    "edited": [],
-    "at": "2026-09-12T20:00:20.779Z"
+    "edited": [
+      "l4/organization/registry.defs.ts",
+      "l5/project.json"
+    ],
+    "at": "2026-09-17T05:16:52.790Z"
   }
 }

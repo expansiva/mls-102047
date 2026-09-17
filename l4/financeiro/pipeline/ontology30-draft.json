@@ -1,566 +1,1053 @@
 {
   "plan": {
     "moduleName": "financeiro",
-    "businessDomain": "Contas a receber da organização, incluindo títulos originados em outros módulos, recebimentos e consulta de extratos por pagador.",
+    "businessDomain": "Contas a receber e registro de recebimentos da organização.",
     "entities": [
       {
+        "entityId": "Pagador",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Pagador",
+        "description": "Pessoa responsável pelos títulos a receber e que acessa o portal para consultar e pagar os próprios débitos.",
+        "displayField": "details.identification.name",
+        "writer": "inbound",
+        "subtype": "Person",
+        "roleTag": "financeiro.Pagador",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "entityId": "GerenteFinanceiro",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Gerente financeiro",
+        "description": "Pessoa da organização usada para delimitar o escopo pessoal do gerente financeiro quando aplicável.",
+        "displayField": "details.identification.name",
+        "writer": "crud",
+        "subtype": "Person",
+        "roleTag": "financeiro.GerenteFinanceiro",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
         "entityId": "TituloReceber",
+        "kind": "entity",
+        "family": "tdm",
         "title": "Título a receber",
-        "description": "Cobrança a receber originada em outro módulo da organização, com valor, vencimento, pagador e referência à origem.",
-        "kind": "core",
-        "party": "none",
-        "displayField": "numeroTitulo",
-        "mutability": "appendOnly",
+        "description": "Cobrança originada em outro módulo, com pagador, valor, vencimento, origem e saldo a receber.",
+        "displayField": "id",
+        "writer": "inbound",
+        "class": "core",
         "storage": {
           "target": "moduleDatabase",
-          "scope": "module",
-          "idField": "id",
-          "mdmType": "financeiro.TituloReceber"
+          "table": "financeiro_tituloreceber",
+          "kind": "relational"
         }
       },
       {
         "entityId": "Recebimento",
+        "kind": "entity",
+        "family": "tdm",
         "title": "Recebimento",
-        "description": "Registro de uma solicitação ou confirmação de valor recebido para um título, por dinheiro, Pix ou cartão.",
-        "kind": "event",
-        "party": "none",
-        "displayField": "numeroRecebimento",
+        "description": "Registro de recebimento integral ou parcial de um título, inclusive pagamento por cartão processado pela Stripe e eventual estorno no mesmo dia.",
+        "displayField": "id",
+        "class": "event",
         "storage": {
           "target": "moduleDatabase",
-          "scope": "module",
-          "idField": "id",
-          "mdmType": "financeiro.Recebimento"
-        }
-      },
-      {
-        "entityId": "ExtratoPagador",
-        "title": "Extrato do pagador",
-        "description": "Extrato emitido para um pagador com os títulos e recebimentos considerados na emissão.",
-        "kind": "event",
-        "party": "none",
-        "displayField": "numeroExtrato",
-        "mutability": "appendOnly",
-        "storage": {
-          "target": "moduleDatabase",
-          "scope": "module",
-          "idField": "id",
-          "mdmType": "financeiro.ExtratoPagador"
-        }
-      },
-      {
-        "entityId": "Pagador",
-        "title": "Pagador",
-        "description": "Pessoa responsável por títulos a receber e que pode consultar e pagar os próprios títulos no portal.",
-        "kind": "mdm",
-        "party": "person",
-        "mdmSubtype": "Person",
-        "displayField": "name",
-        "storage": {
-          "target": "mdm",
-          "scope": "organization",
-          "idField": "id",
-          "mdmType": "financeiro.Pagador"
+          "table": "financeiro_recebimento",
+          "kind": "relational"
         }
       }
     ],
     "relationships": [
       {
-        "relationshipId": "tituloTemPagador",
-        "fromEntity": "TituloReceber",
-        "toEntity": "Pagador",
+        "relationshipId": "tituloPagador",
+        "from": "TituloReceber",
+        "to": "Pagador",
         "type": "manyToOne",
         "required": true,
-        "description": "Cada título a receber possui um pagador responsável.",
-        "persistence": {
-          "mode": "crossStoreReference"
-        }
+        "mode": "fk",
+        "description": "Cada título a receber pertence a um único pagador; um pagador pode ter vários títulos.",
+        "field": "TituloReceber.pagadorId"
       },
       {
-        "relationshipId": "recebimentoDoTitulo",
-        "fromEntity": "Recebimento",
-        "toEntity": "TituloReceber",
+        "relationshipId": "recebimentoTitulo",
+        "from": "Recebimento",
+        "to": "TituloReceber",
         "type": "manyToOne",
         "required": true,
-        "description": "Cada recebimento registra uma solicitação, confirmação ou estorno relativo a um título a receber.",
-        "persistence": {
-          "mode": "moduleReference"
-        }
+        "mode": "fk",
+        "description": "Cada recebimento registra a baixa, total ou parcial, de um único título a receber.",
+        "field": "Recebimento.tituloId"
       },
       {
-        "relationshipId": "extratoDoPagador",
-        "fromEntity": "ExtratoPagador",
-        "toEntity": "Pagador",
+        "relationshipId": "recebimentoPagador",
+        "from": "Recebimento",
+        "to": "Pagador",
         "type": "manyToOne",
         "required": true,
-        "description": "Cada extrato emitido pertence ao pagador consultado.",
-        "persistence": {
-          "mode": "crossStoreReference"
-        }
+        "mode": "throughTable",
+        "description": "O pagador de um recebimento é obtido pelo título a receber ao qual o recebimento está vinculado.",
+        "through": "TituloReceber",
+        "path": "Recebimento.tituloId -> TituloReceber.pagadorId",
+        "derived": true
       }
     ],
-    "moduleDetails": {
-      "recebiveisPorPeriodoEorigem": {
-        "type": "json",
-        "description": "Indicadores calculados dos recebíveis da organização, agrupados por período e por origem."
-      }
-    },
     "normalizations": [
       {
-        "kind": "dropCrud",
-        "entityId": "TituloReceber",
-        "detail": "writer inbound removed; an act writes this entity as entity or affects."
+        "kind": "derivedFromPlatform",
+        "entityId": "Pagador",
+        "detail": "roleTag financeiro.Pagador; source /_102034_/l4/ontology/mdm.defs.ts"
       },
       {
-        "kind": "writerDerived",
-        "entityId": "Pagador",
-        "detail": "attach via TituloReceber.tituloTemPagador",
-        "writerKind": "attach",
-        "via": {
-          "entityId": "TituloReceber",
-          "relationshipId": "tituloTemPagador",
-          "stepRef": "registrarBaixaDeTitulo.registrarRecebimento"
-        }
+        "kind": "derivedFromPlatform",
+        "entityId": "GerenteFinanceiro",
+        "detail": "roleTag financeiro.GerenteFinanceiro; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "TituloReceber",
+        "detail": "storage.table financeiro_tituloreceber"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Recebimento",
+        "detail": "storage.table financeiro_recebimento"
       }
     ]
   },
   "entities": [
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "moduleName": "financeiro",
+      "entityId": "Pagador",
+      "title": "Pagador",
+      "description": "Pessoa responsável pelos títulos a receber e que acessa o portal para consultar e pagar os próprios débitos.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "tituloPagador": {
+          "relationshipId": "tituloPagador",
+          "to": "TituloReceber",
+          "via": "TituloReceber.pagadorId",
+          "cardinality": "1:N",
+          "title": "Títulos do pagador",
+          "description": "Títulos a receber pertencentes a este pagador.",
+          "mode": "fk",
+          "direction": "to",
+          "required": "Sempre, para cada título a receber."
+        },
+        "recebimentoPagador": {
+          "relationshipId": "recebimentoPagador",
+          "to": "Recebimento",
+          "via": "TituloReceber",
+          "cardinality": "1:N",
+          "title": "Recebimentos do pagador",
+          "description": "Recebimentos atribuídos ao pagador por meio dos títulos a receber aos quais estão vinculados.",
+          "mode": "throughTable",
+          "path": "Recebimento.tituloId -> TituloReceber.pagadorId",
+          "derived": true,
+          "direction": "to",
+          "required": "Sempre, quando o recebimento estiver vinculado a um título deste pagador."
+        }
+      },
+      "capabilities": {
+        "read.byId": "Lê um pagador pelo identificador mestre para exibir seu nome e dados permitidos no título, recebimento ou extrato; usado pelo caixa e pelo gerente financeiro.",
+        "locate.byName": "Localiza pagadores pelo nome no cadastro mestre para que o gerente financeiro selecione o pagador do extrato; usado pelo gerente financeiro.",
+        "locate.byDocument": "Localiza um pagador pelo documento nacional para deduplicar e associar cobranças recebidas de outros módulos; usado por integrações e profissionais autorizados.",
+        "register.createOrAttach": "Cria ou associa ao papel de pagador a pessoa já existente no MDM ao receber uma cobrança de outro módulo; usado pelas integrações de origem da cobrança.",
+        "edit.platformFields": "Atualiza os dados de identificação e privacidade pertencentes à plataforma no cadastro do pagador; usado por profissionais autorizados da organização.",
+        "inactivate": "Inativa ou reativa o papel de pagador sem apagar o registro mestre e preservando seus títulos e recebimentos; usado pelo gerente financeiro.",
+        "listLinks": "Lista os vínculos e referências relacionadas ao pagador para consulta contextual de seu cadastro; usado pelo gerente financeiro.",
+        "statusHistory.read": "Consulta o histórico de mudanças de situação do cadastro mestre do pagador; usado pelo gerente financeiro.",
+        "audit": "Consulta as alterações auditadas no cadastro de pagador para rastreabilidade; usado pelo gerente financeiro.",
+        "invite.login": "Concede convite de acesso para que o pagador entre no portal e consulte somente seus títulos e recebimentos; usado por profissional autorizado da organização."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "rule-person-ssn-unique-for-us",
+        "rule-person-privacy-consent-required-br-eu"
+      ],
+      "writer": "inbound",
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "financeiro.Pagador",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "Documento mestre da pessoa responsável pelos títulos a receber no módulo financeiro.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Pessoa",
+                        "description": "Pessoa física no cadastro mestre."
+                      }
+                    ],
+                    "description": "Indica que este registro mestre é uma pessoa que atua como pagador.",
+                    "title": "Tipo de cadastro",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 0,
+                    "description": "Nome pelo qual o pagador é identificado nos títulos, recebimentos e extratos.",
+                    "title": "Nome",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo",
+                        "description": "Cadastro disponível para uso."
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo",
+                        "description": "Cadastro fora de uso."
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado",
+                        "description": "Cadastro incorporado a outro registro mestre."
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado",
+                        "description": "Cadastro bloqueado pela plataforma."
+                      }
+                    ],
+                    "title": "Situação do cadastro",
+                    "description": "Situação mestre do pagador, mantida pela plataforma.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "docType": {
+                    "type": "enum",
+                    "indexed": true,
+                    "values": [
+                      {
+                        "value": "CPF",
+                        "title": "CPF",
+                        "description": "Cadastro de Pessoas Físicas."
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte",
+                        "description": "Documento de viagem da pessoa."
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento nacional",
+                        "description": "Documento nacional de identificação."
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro",
+                        "description": "Outro documento aceito pela organização."
+                      }
+                    ],
+                    "title": "Tipo de documento",
+                    "description": "Tipo do documento nacional usado para deduplicar o pagador quando informado.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "docId": {
+                    "type": "string",
+                    "indexed": true,
+                    "description": "Número do documento nacional do pagador, quando informado.",
+                    "title": "Número do documento",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "Código ISO do país aplicável ao documento e às regras legais do pagador.",
+                    "title": "País",
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados de identificação da pessoa usados para reconhecer e localizar o pagador."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {},
+                "description": "Campos base da plataforma aplicáveis à pessoa; nenhum dado base adicional é usado pelo contas a receber."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consentimento de privacidade da pessoa, quando exigido pela legislação aplicável.",
+                    "title": "Consentimento de privacidade",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados próprios da pessoa necessários para o tratamento legal do cadastro de pagador."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Dados promovidos pela organização para uso compartilhado entre módulos; o financeiro apenas os lê."
+              },
+              "financeiro": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "moduleName": "financeiro",
+      "entityId": "GerenteFinanceiro",
+      "title": "Gerente financeiro",
+      "description": "Pessoa da organização usada para delimitar o escopo pessoal do gerente financeiro quando aplicável.",
+      "displayField": "details.identification.name",
+      "relationships": {},
+      "capabilities": {
+        "read.byId": "Lê o cadastro mestre do gerente financeiro pelo identificador, hidratando seus dados no MDM, para telas administrativas do financeiro.",
+        "locate.byName": "Localiza gerentes financeiros pelo nome no índice de pessoas para a administração do módulo financeiro.",
+        "locate.byDocument": "Localiza uma pessoa pelo documento nacional para evitar duplicidade ao vinculá-la como gerente financeiro.",
+        "register.createOrAttach": "Cria ou vincula a pessoa já existente ao papel de gerente financeiro por documento e pela etiqueta de papel, para a administração interna do financeiro.",
+        "edit.platformFields": "Atualiza os dados de pessoa mantidos pela plataforma no cadastro do gerente financeiro, para usuários internos autorizados.",
+        "edit.moduleNamespace": "Atualiza exclusivamente o namespace financeiro do gerente financeiro no documento mestre, para a administração autorizada do módulo.",
+        "inactivate": "Inativa ou reativa o papel do gerente financeiro por meio da situação do cadastro mestre, para a administração interna.",
+        "listLinks": "Exibe os relacionamentos mestre vinculados ao gerente financeiro, com papel e vigência, para a administração do cadastro.",
+        "audit": "Consulta quem alterou o cadastro mestre do gerente financeiro e quando, por meio da auditoria da plataforma, para usuários administrativos autorizados."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "rule-person-privacy-consent-required-br-eu"
+      ],
+      "writer": "crud",
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "financeiro.GerenteFinanceiro",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "Documento mestre da pessoa que exerce o papel de gerente financeiro no módulo.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Pessoa",
+                        "description": "Pessoa física."
+                      }
+                    ],
+                    "description": "Indica que este registro mestre é uma pessoa.",
+                    "title": "Tipo de cadastro",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 0,
+                    "description": "Nome pelo qual o gerente financeiro é identificado na organização.",
+                    "title": "Nome",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo",
+                        "description": "Registro disponível para uso."
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo",
+                        "description": "Registro fora de uso."
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado",
+                        "description": "Registro unido a outro registro mestre."
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado",
+                        "description": "Registro impedido de uso."
+                      }
+                    ],
+                    "title": "Situação do cadastro",
+                    "description": "Situação de atividade do registro mestre do gerente financeiro.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "docType": {
+                    "type": "enum",
+                    "indexed": true,
+                    "values": [
+                      {
+                        "value": "CPF",
+                        "title": "CPF",
+                        "description": "Cadastro de Pessoas Físicas."
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte",
+                        "description": "Documento de viagem."
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento nacional",
+                        "description": "Documento de identificação nacional."
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro",
+                        "description": "Outro documento aceito pela plataforma."
+                      }
+                    ],
+                    "title": "Tipo de documento",
+                    "description": "Tipo do documento nacional usado para identificar e deduplicar a pessoa.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "docId": {
+                    "type": "string",
+                    "indexed": true,
+                    "description": "Número do documento nacional da pessoa, usado na deduplicação quando informado.",
+                    "title": "Número do documento",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 0,
+                    "default": "US",
+                    "description": "Código ISO do país aplicável ao documento e às regras da pessoa.",
+                    "title": "País",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Etiquetas derivadas pela plataforma, incluindo o papel financeiro.GerenteFinanceiro.",
+                    "title": "Etiquetas",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados de identificação da pessoa, mantidos pela plataforma e usados para reconhecer o gerente financeiro."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {},
+                "description": "Dados básicos da pessoa mantidos pela plataforma."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {},
+                "description": "Dados próprios de pessoa física mantidos pela plataforma."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Dados promovidos pela organização, somente para leitura neste módulo."
+              },
+              "financeiro": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-15-ns5-ontology-v3",
       "moduleName": "financeiro",
       "entityId": "TituloReceber",
       "title": "Título a receber",
-      "description": "Cobrança a receber originada em outro módulo da organização, com valor, vencimento, pagador e referência à origem.",
-      "kind": "core",
-      "party": "none",
-      "displayField": "numeroTitulo",
-      "fields": [
-        {
-          "fieldId": "id",
-          "title": "Identificador",
-          "type": "uuid",
-          "required": true,
-          "description": "Identificador único do título a receber."
+      "description": "Cobrança originada em outro módulo, com pagador, valor, vencimento, origem e saldo a receber.",
+      "displayField": "id",
+      "relationships": {
+        "pagador": {
+          "relationshipId": "tituloPagador",
+          "to": "Pagador",
+          "via": "TituloReceber.pagadorId",
+          "cardinality": "N:1",
+          "title": "Pagador do título",
+          "description": "Cada título a receber pertence a um único pagador; um pagador pode ter vários títulos.",
+          "mode": "fk",
+          "required": "Sempre, para identificar quem deve o valor.",
+          "role": "pagador"
         },
-        {
-          "fieldId": "numeroTitulo",
-          "title": "Número do título",
-          "type": "string",
-          "required": true,
-          "unique": true,
-          "description": "Número sequencial que identifica o título a receber."
-        },
-        {
-          "fieldId": "pagadorId",
-          "title": "Pagador",
-          "type": "uuid",
-          "required": true,
-          "description": "Referência ao pagador responsável pelo título."
-        },
-        {
-          "fieldId": "valorOriginal",
-          "title": "Valor original",
-          "type": "money",
-          "required": true,
-          "description": "Valor total originalmente cobrado no título."
-        },
-        {
-          "fieldId": "vencimento",
-          "title": "Vencimento",
-          "type": "date",
-          "required": true,
-          "description": "Data limite prevista para o pagamento do título."
-        },
-        {
-          "fieldId": "origemModulo",
-          "title": "Módulo de origem",
-          "type": "string",
-          "required": true,
-          "description": "Identificador do módulo que gerou a cobrança."
-        },
-        {
-          "fieldId": "origemReferencia",
-          "title": "Referência da origem",
-          "type": "string",
-          "required": true,
-          "description": "Identificador do registro de origem que gerou a cobrança."
+        "recebimentos": {
+          "relationshipId": "recebimentoTitulo",
+          "to": "Recebimento",
+          "via": "Recebimento.tituloId",
+          "cardinality": "1:N",
+          "title": "Recebimentos do título",
+          "description": "Relaciona as baixas totais ou parciais registradas para este título.",
+          "mode": "fk",
+          "direction": "to",
+          "required": "Quando houver baixa ou estorno registrado para o título.",
+          "role": "recebimentos"
         }
+      },
+      "capabilities": {
+        "read.byId": "Lê um título pelo identificador da linha · consulta o repositório por id · usado por caixa, gerente financeiro, pagador e integrações que já possuem o título selecionado.",
+        "locate.byColumn": "Lista títulos por pagador, vencimento, saldo em aberto ou origem · filtra e pagina pelas colunas indexadas · usado por caixa, gerente financeiro e pagador conforme seu escopo de dados.",
+        "count": "Conta os títulos que atendem aos critérios de consulta · executa a mesma filtragem da lista sem paginação · usado pelo gerente financeiro nos totais de listas e pelo portal do pagador.",
+        "listByForeignKey": "Lista os títulos vinculados a um pagador · consulta pela chave estrangeira pagadorId · usado pelo gerente financeiro para o extrato e pelo portal para os próprios títulos.",
+        "create": "Registra o título recebido de uma cobrança originada em outro módulo · insere a linha de entrada com pagador, valores, vencimento e referência de origem · usado pela integração interna de origem.",
+        "update": "Atualiza o saldo em aberto calculado do título · grava a alteração na mesma linha após um recebimento ou estorno · usado pelo processamento financeiro autorizado.",
+        "uniqueKey": "Impede a duplicação de uma cobrança recebida · aplica índice único sobre módulo e referência de origem · usado pelo motor em cada entrada inbound.",
+        "transaction": "Grava a baixa ou o estorno e o saldo correspondente de forma atômica · executa as escritas de título e recebimento em uma transação · usado pelo caixa, pelo portal do pagador e pela Stripe.",
+        "read.mdmRecord": "Lê os dados mestres do pagador sem copiá-los no título · hidrata o registro MDM apontado por pagadorId · usado pelo caixa, gerente financeiro e portal do pagador.",
+        "financeiro.listarTitulosVencidos": "Lista títulos vencidos que ainda têm saldo a receber · consulta vencimento anterior à data atual e saldo aberto positivo · usado pelo gerente financeiro.",
+        "financeiro.resumirRecebiveis": "Calcula o painel de recebíveis por período e origem · agrupa os títulos pelos critérios solicitados e soma seus saldos abertos · usado pelo gerente financeiro.",
+        "financeiro.emitirExtratoPorPagador": "Monta a posição financeira de um pagador · combina títulos e recebimentos vinculados ao pagador informado · usado pelo gerente financeiro."
+      },
+      "rules": [
+        "origemCobrancaUnica",
+        "saldoTituloConsistente"
       ],
+      "writer": "inbound",
+      "kind": "entity",
+      "class": "core",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "financeiro_tituloreceber",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "pagadorId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "Pagador"
+            ],
+            "title": "Pagador",
+            "description": "Pessoa responsável pelo pagamento deste título a receber.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "vencimento": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Vencimento",
+            "description": "Data limite prevista para o pagamento do título.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "saldoAberto": {
+            "type": "money",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Saldo em aberto",
+            "description": "Valor ainda a receber, recalculado a partir dos recebimentos não estornados vinculados ao título.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "origemModulo": {
+            "type": "string",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Módulo de origem",
+            "description": "Identificador do módulo que gerou a cobrança recebida.",
+            "pattern": "^[a-z][A-Za-z0-9]*$",
+            "maxLength": 100,
+            "min": 0,
+            "max": 0
+          },
+          "origemReferencia": {
+            "type": "string",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Referência da origem",
+            "description": "Identificador da cobrança ou do documento que originou este título no módulo de origem.",
+            "maxLength": 200,
+            "min": 0,
+            "max": 0
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "of": "Address",
+            "title": "Detalhes do título",
+            "description": "Dados financeiros próprios da cobrança que não são usados como critério de busca ou ordenação.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
+            "fields": {
+              "valorOriginal": {
+                "type": "money",
+                "required": true,
+                "of": "Address",
+                "title": "Valor original",
+                "description": "Valor total cobrado quando o título foi recebido do módulo de origem.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              }
+            }
+          }
+        }
+      },
       "uniqueKeys": [
         [
           "origemModulo",
           "origemReferencia"
         ]
-      ],
-      "details": {
-        "valorRecebido": {
-          "type": "money",
-          "description": "Soma dos recebimentos confirmados e não estornados vinculados ao título."
-        },
-        "saldoPendente": {
-          "type": "money",
-          "description": "Valor que ainda falta receber para quitar o título."
-        },
-        "situacaoCobranca": {
-          "type": "string",
-          "description": "Situação calculada do título conforme saldo pendente, vencimento e recebimentos."
-        }
-      },
-      "lifecycleStates": [],
-      "transitions": [],
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id"
-      },
-      "mutability": "appendOnly"
+      ]
     },
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-15-ns5-ontology-v3",
       "moduleName": "financeiro",
       "entityId": "Recebimento",
       "title": "Recebimento",
-      "description": "Registro de uma solicitação ou confirmação de valor recebido para um título, por dinheiro, Pix ou cartão.",
-      "kind": "event",
-      "party": "none",
-      "displayField": "numeroRecebimento",
-      "fields": [
-        {
-          "fieldId": "id",
-          "title": "Identificador",
-          "type": "uuid",
-          "required": true,
-          "description": "Identificador único do recebimento."
+      "description": "Registro de recebimento integral ou parcial de um título, inclusive pagamento por cartão processado pela Stripe e eventual estorno no mesmo dia.",
+      "displayField": "id",
+      "relationships": {
+        "titulo": {
+          "relationshipId": "recebimentoTitulo",
+          "to": "TituloReceber",
+          "via": "Recebimento.tituloId",
+          "cardinality": "N:1",
+          "title": "Título do recebimento",
+          "description": "Cada recebimento registra a baixa total ou parcial de um único título a receber.",
+          "mode": "fk",
+          "required": "Sempre",
+          "role": "Título baixado pelo recebimento."
         },
-        {
-          "fieldId": "numeroRecebimento",
-          "title": "Número do recebimento",
-          "type": "string",
-          "required": true,
-          "unique": true,
-          "description": "Número sequencial que identifica o recebimento."
-        },
-        {
-          "fieldId": "tituloReceberId",
-          "title": "Título a receber",
-          "type": "uuid",
-          "required": true,
-          "description": "Título a receber ao qual a solicitação, confirmação ou estorno está vinculado."
-        },
-        {
-          "fieldId": "valor",
-          "title": "Valor recebido",
-          "type": "money",
-          "required": true,
-          "description": "Valor da baixa ou da cobrança solicitada para o título."
-        },
-        {
-          "fieldId": "meioPagamento",
-          "title": "Meio de pagamento",
-          "type": "string",
-          "required": true,
-          "enum": [
-            {
-              "value": "dinheiro",
-              "title": "Dinheiro"
-            },
-            {
-              "value": "pix",
-              "title": "Pix"
-            },
-            {
-              "value": "cartao",
-              "title": "Cartão"
-            }
-          ],
-          "description": "Meio utilizado ou solicitado para o recebimento."
-        },
-        {
-          "fieldId": "status",
-          "title": "Situação",
-          "type": "string",
-          "required": true,
-          "enum": [
-            {
-              "value": "solicitado",
-              "title": "Solicitado"
-            },
-            {
-              "value": "confirmado",
-              "title": "Confirmado"
-            },
-            {
-              "value": "estornado",
-              "title": "Estornado"
-            }
-          ],
-          "description": "Situação atual da solicitação ou confirmação de recebimento."
-        },
-        {
-          "fieldId": "recebidoEm",
-          "title": "Recebido em",
-          "type": "datetime",
-          "required": false,
-          "description": "Data e hora em que o recebimento foi confirmado."
-        },
-        {
-          "fieldId": "stripePaymentId",
-          "title": "Identificador do pagamento Stripe",
-          "type": "string",
-          "required": false,
-          "description": "Identificador da cobrança processada pela Stripe quando o meio de pagamento for cartão."
-        },
-        {
-          "fieldId": "estornadoEm",
-          "title": "Estornado em",
-          "type": "datetime",
-          "required": false,
-          "description": "Data e hora em que o recebimento foi estornado."
+        "pagador": {
+          "relationshipId": "recebimentoPagador",
+          "to": "Pagador",
+          "via": "TituloReceber",
+          "cardinality": "N:1",
+          "title": "Pagador do recebimento",
+          "description": "O pagador é obtido indiretamente pelo título a receber vinculado ao recebimento.",
+          "mode": "throughTable",
+          "path": "Recebimento.tituloId -> TituloReceber.pagadorId",
+          "derived": true,
+          "required": "Sempre, por meio do título vinculado",
+          "role": "Pagador responsável pelo título vinculado."
         }
+      },
+      "capabilities": {
+        "read.byId": "Lê um recebimento pelo identificador da linha, via consulta por id, para caixa, gerente financeiro e pagador quando o acesso estiver no escopo permitido.",
+        "locate.byColumn": "Lista recebimentos por título, situação ou data e hora indexadas, com ordenação e paginação, para caixa, gerente financeiro e portal do pagador dentro do respectivo escopo.",
+        "count": "Conta os recebimentos que atendem aos filtros indexados, usando a mesma consulta da lista, para o gerente financeiro compor consultas e extratos.",
+        "listByForeignKey": "Lista os recebimentos vinculados a um título pelo campo tituloId, via consulta por chave estrangeira, para caixa, gerente financeiro e pagador visualizarem as baixas do título.",
+        "create": "Registra uma baixa total ou parcial em um título por inserção de recebimento, para caixa e pagador no pagamento por cartão confirmado.",
+        "transition": "Move um recebimento registrado para estornado pela atualização da situação, para o caixa estornar exclusivamente no mesmo dia.",
+        "transaction": "Executa de forma atômica o registro ou estorno do recebimento e a atualização do saldo do título, para caixa e pagamento por cartão do pagador.",
+        "financeiro.processarCartaoStripe": "Envia e confirma o pagamento por cartão na Stripe, guarda somente o identificador da transação retornada e então registra o recebimento, para o pagador no portal."
+      },
+      "rules": [
+        "receiptAmountPositive",
+        "receiptCannotExceedOpenBalance",
+        "cardPaymentRequiresStripeConfirmation",
+        "sameDayReversal"
       ],
+      "kind": "entity",
+      "class": "event",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "financeiro_recebimento",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "tituloId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "TituloReceber"
+            ],
+            "title": "Título a receber",
+            "description": "Título a receber ao qual esta baixa integral ou parcial se refere.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "status": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "values": [
+              {
+                "value": "registered",
+                "title": "Registrado",
+                "description": "Recebimento efetivado e considerado no saldo do título."
+              },
+              {
+                "value": "reversed",
+                "title": "Estornado",
+                "description": "Recebimento revertido no mesmo dia e desconsiderado do saldo do título."
+              }
+            ],
+            "title": "Situação",
+            "description": "Situação do recebimento, que permite distinguir um recebimento registrado de um estorno.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "recebidoEm": {
+            "type": "timestamp",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Data e hora do recebimento",
+            "description": "Momento em que o valor foi recebido; é usado para localizar recebimentos do dia e validar estornos no mesmo dia.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "of": "Address",
+            "title": "Dados do recebimento",
+            "description": "Dados financeiros e da forma de pagamento que não são usados como critério de busca.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
+            "fields": {
+              "valor": {
+                "type": "money",
+                "required": true,
+                "of": "Address",
+                "title": "Valor recebido",
+                "description": "Valor efetivamente recebido nesta baixa, que pode quitar o título total ou parcialmente.",
+                "maxLength": 0,
+                "min": 0.01,
+                "max": 0
+              },
+              "formaPagamento": {
+                "type": "enum",
+                "required": true,
+                "of": "Address",
+                "values": [
+                  {
+                    "value": "cash",
+                    "title": "Dinheiro",
+                    "description": "Valor recebido em dinheiro."
+                  },
+                  {
+                    "value": "pix",
+                    "title": "Pix",
+                    "description": "Valor recebido por Pix."
+                  },
+                  {
+                    "value": "card",
+                    "title": "Cartão",
+                    "description": "Valor recebido por cartão e processado pela Stripe."
+                  }
+                ],
+                "title": "Forma de pagamento",
+                "description": "Meio pelo qual o recebimento foi realizado.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "stripe": {
+                "type": "object",
+                "of": "Address",
+                "title": "Processamento Stripe",
+                "description": "Identificador do processamento da Stripe, informado somente para pagamento com cartão; não armazena dados do cartão.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0,
+                "fields": {
+                  "transacaoId": {
+                    "type": "string",
+                    "required": true,
+                    "of": "Address",
+                    "title": "Identificador da transação Stripe",
+                    "description": "Identificador retornado pela Stripe para confirmar o pagamento por cartão.",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 255,
+                    "min": 0,
+                    "max": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "lifecycleStates": [
         {
-          "state": "solicitado",
+          "state": "registered",
           "reachedBy": "actor"
         },
         {
-          "state": "confirmado",
-          "reachedBy": "actor"
-        },
-        {
-          "state": "estornado",
+          "state": "reversed",
           "reachedBy": "actor"
         }
       ],
       "transitions": [
         {
-          "transitionId": "confirmarPagamentoComCartao",
-          "from": [
-            "solicitado"
-          ],
-          "to": "confirmado",
-          "by": [
-            "stripe"
-          ],
-          "description": "Confirma o recebimento por cartão após o processamento da cobrança pela Stripe."
-        },
-        {
           "transitionId": "estornarRecebimento",
           "from": [
-            "confirmado"
+            "registered"
           ],
-          "to": "estornado",
+          "to": "reversed",
           "by": [
             "caixa"
           ],
-          "description": "Estorna um recebimento confirmado e permite a recomposição do saldo do título."
+          "description": "Estorna um recebimento registrado no mesmo dia, recompondo o saldo do título correspondente.",
+          "ruleRefs": [
+            "sameDayReversal"
+          ]
         }
-      ],
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id"
-      }
-    },
-    {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
-      "moduleName": "financeiro",
-      "entityId": "ExtratoPagador",
-      "title": "Extrato do pagador",
-      "description": "Extrato emitido para um pagador com os títulos e recebimentos considerados na emissão.",
-      "kind": "event",
-      "party": "none",
-      "displayField": "numeroExtrato",
-      "fields": [
-        {
-          "fieldId": "id",
-          "title": "Identificador",
-          "type": "uuid",
-          "required": true,
-          "description": "Identificador único do extrato emitido."
-        },
-        {
-          "fieldId": "numeroExtrato",
-          "title": "Número do extrato",
-          "type": "string",
-          "required": true,
-          "unique": true,
-          "description": "Número sequencial que identifica o extrato emitido."
-        },
-        {
-          "fieldId": "pagadorId",
-          "title": "Pagador",
-          "type": "uuid",
-          "required": true,
-          "description": "Referência ao pagador para o qual o extrato foi emitido."
-        },
-        {
-          "fieldId": "emitidoEm",
-          "title": "Emitido em",
-          "type": "datetime",
-          "required": true,
-          "description": "Data e hora de emissão do extrato."
-        },
-        {
-          "fieldId": "titulosConsiderados",
-          "title": "Títulos considerados",
-          "type": "json",
-          "required": true,
-          "description": "Retrato dos títulos do pagador considerados na emissão do extrato."
-        },
-        {
-          "fieldId": "recebimentosConsiderados",
-          "title": "Recebimentos considerados",
-          "type": "json",
-          "required": true,
-          "description": "Retrato dos recebimentos do pagador considerados na emissão do extrato."
-        }
-      ],
-      "details": {
-        "valorTotalTitulos": {
-          "type": "money",
-          "description": "Valor total dos títulos considerados no extrato."
-        },
-        "valorTotalRecebido": {
-          "type": "money",
-          "description": "Valor total dos recebimentos considerados no extrato."
-        },
-        "saldoEmAberto": {
-          "type": "money",
-          "description": "Saldo em aberto dos títulos considerados no momento da emissão."
-        }
-      },
-      "lifecycleStates": [],
-      "transitions": [],
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id"
-      },
-      "mutability": "appendOnly"
-    },
-    {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
-      "moduleName": "financeiro",
-      "entityId": "Pagador",
-      "title": "Pagador",
-      "description": "Pessoa responsável por títulos a receber e que pode consultar e pagar os próprios títulos no portal.",
-      "kind": "mdm",
-      "party": "person",
-      "mdmSubtype": "Person",
-      "displayField": "name",
-      "fields": [],
-      "lifecycleStates": [],
-      "transitions": [],
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "financeiro.Pagador"
-      },
-      "writer": "inbound"
+      ]
     }
   ],
   "relationships": [
     {
-      "relationshipId": "tituloTemPagador",
-      "fromEntity": "TituloReceber",
-      "toEntity": "Pagador",
+      "relationshipId": "tituloPagador",
+      "from": "TituloReceber",
+      "to": "Pagador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada título a receber possui um pagador responsável.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "TituloReceber",
-        "from": {
-          "entityId": "TituloReceber",
-          "fieldIds": [
-            "pagadorId"
-          ]
-        },
-        "to": {
-          "entityId": "Pagador",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada título a receber pertence a um único pagador; um pagador pode ter vários títulos.",
+      "field": "TituloReceber.pagadorId"
     },
     {
-      "relationshipId": "recebimentoDoTitulo",
-      "fromEntity": "Recebimento",
-      "toEntity": "TituloReceber",
+      "relationshipId": "recebimentoTitulo",
+      "from": "Recebimento",
+      "to": "TituloReceber",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada recebimento registra uma solicitação, confirmação ou estorno relativo a um título a receber.",
-      "persistence": {
-        "mode": "moduleReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Recebimento",
-        "from": {
-          "entityId": "Recebimento",
-          "fieldIds": [
-            "tituloReceberId"
-          ]
-        },
-        "to": {
-          "entityId": "TituloReceber",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada recebimento registra a baixa, total ou parcial, de um único título a receber.",
+      "field": "Recebimento.tituloId"
     },
     {
-      "relationshipId": "extratoDoPagador",
-      "fromEntity": "ExtratoPagador",
-      "toEntity": "Pagador",
+      "relationshipId": "recebimentoPagador",
+      "from": "Recebimento",
+      "to": "Pagador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada extrato emitido pertence ao pagador consultado.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "ExtratoPagador",
-        "from": {
-          "entityId": "ExtratoPagador",
-          "fieldIds": [
-            "pagadorId"
-          ]
-        },
-        "to": {
-          "entityId": "Pagador",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "throughTable",
+      "description": "O pagador de um recebimento é obtido pelo título a receber ao qual o recebimento está vinculado.",
+      "through": "TituloReceber",
+      "path": "Recebimento.tituloId -> TituloReceber.pagadorId",
+      "derived": true
     }
   ],
   "removedOrphans": [],
   "liftedAggregateEntities": [],
   "normalizations": [
     {
-      "kind": "dropCrud",
-      "entityId": "TituloReceber",
-      "detail": "writer inbound removed; an act writes this entity as entity or affects."
+      "kind": "derivedFromPlatform",
+      "entityId": "Pagador",
+      "detail": "roleTag financeiro.Pagador; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "kind": "writerDerived",
+      "kind": "derivedFromPlatform",
+      "entityId": "GerenteFinanceiro",
+      "detail": "roleTag financeiro.GerenteFinanceiro; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "TituloReceber",
+      "detail": "storage.table financeiro_tituloreceber"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "storage.table financeiro_recebimento"
+    },
+    {
+      "kind": "derivedFromPlatform",
       "entityId": "Pagador",
-      "detail": "attach via TituloReceber.tituloTemPagador",
-      "writerKind": "attach",
-      "via": {
-        "entityId": "TituloReceber",
-        "relationshipId": "tituloTemPagador",
-        "stepRef": "registrarBaixaDeTitulo.registrarRecebimento"
-      }
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Pagador",
+      "detail": "Pagador.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Pagador",
+      "detail": "Pagador.details.identification.docType.values"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Pagador",
+      "detail": "details.financeiro"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "GerenteFinanceiro",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "GerenteFinanceiro",
+      "detail": "GerenteFinanceiro.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "GerenteFinanceiro",
+      "detail": "GerenteFinanceiro.details.identification.docType.values"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "GerenteFinanceiro",
+      "detail": "details.financeiro"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "TituloReceber",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "record.fields.id, record.fields.version"
     }
   ]
 }

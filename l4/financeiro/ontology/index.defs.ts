@@ -1,101 +1,73 @@
 /// <mls fileReference="_102047_/l4/financeiro/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const financeiroOntologyIndex = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-15-ns5-ontology-v3",
   "moduleName": "financeiro",
-  "businessDomain": "Contas a receber da organização, incluindo títulos originados em outros módulos, recebimentos e consulta de extratos por pagador.",
+  "businessDomain": "Contas a receber e registro de recebimentos da organização.",
+  "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
+  "moduleNamespace": {
+    "key": "financeiro",
+    "description": "Branch details.financeiro of the master records this module has a role on; only this module writes it."
+  },
   "entities": [
-    "TituloReceber",
-    "Recebimento",
-    "ExtratoPagador",
-    "Pagador"
+    {
+      "entityId": "Pagador",
+      "kind": "role",
+      "subtype": "Person"
+    },
+    {
+      "entityId": "GerenteFinanceiro",
+      "kind": "role",
+      "subtype": "Person"
+    },
+    {
+      "entityId": "TituloReceber",
+      "kind": "entity",
+      "class": "core"
+    },
+    {
+      "entityId": "Recebimento",
+      "kind": "entity",
+      "class": "event"
+    }
   ],
   "relationships": [
     {
-      "relationshipId": "tituloTemPagador",
-      "fromEntity": "TituloReceber",
-      "toEntity": "Pagador",
+      "relationshipId": "tituloPagador",
+      "from": "TituloReceber",
+      "to": "Pagador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada título a receber possui um pagador responsável.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "TituloReceber",
-        "from": {
-          "entityId": "TituloReceber",
-          "fieldIds": [
-            "pagadorId"
-          ]
-        },
-        "to": {
-          "entityId": "Pagador",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada título a receber pertence a um único pagador; um pagador pode ter vários títulos.",
+      "field": "TituloReceber.pagadorId"
     },
     {
-      "relationshipId": "recebimentoDoTitulo",
-      "fromEntity": "Recebimento",
-      "toEntity": "TituloReceber",
+      "relationshipId": "recebimentoTitulo",
+      "from": "Recebimento",
+      "to": "TituloReceber",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada recebimento registra uma solicitação, confirmação ou estorno relativo a um título a receber.",
-      "persistence": {
-        "mode": "moduleReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Recebimento",
-        "from": {
-          "entityId": "Recebimento",
-          "fieldIds": [
-            "tituloReceberId"
-          ]
-        },
-        "to": {
-          "entityId": "TituloReceber",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada recebimento registra a baixa, total ou parcial, de um único título a receber.",
+      "field": "Recebimento.tituloId"
     },
     {
-      "relationshipId": "extratoDoPagador",
-      "fromEntity": "ExtratoPagador",
-      "toEntity": "Pagador",
+      "relationshipId": "recebimentoPagador",
+      "from": "Recebimento",
+      "to": "Pagador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada extrato emitido pertence ao pagador consultado.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "ExtratoPagador",
-        "from": {
-          "entityId": "ExtratoPagador",
-          "fieldIds": [
-            "pagadorId"
-          ]
-        },
-        "to": {
-          "entityId": "Pagador",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "throughTable",
+      "description": "O pagador de um recebimento é obtido pelo título a receber ao qual o recebimento está vinculado.",
+      "through": "TituloReceber",
+      "path": "Recebimento.tituloId -> TituloReceber.pagadorId",
+      "derived": true
     }
   ]
-} as const satisfies Ns5OntologyIndexArtifact;
+} as const satisfies Ns5OntologyIndexV3;
 
 export type FinanceiroOntologyIndexType = typeof financeiroOntologyIndex;
 

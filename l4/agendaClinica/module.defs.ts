@@ -5,7 +5,7 @@ import type { Ns5ModuleArtifact } from '/_102035_/l2/solution/types.js';
 export const agendaClinicaModule = {
   "schemaVersion": "2026-09-10-ns5-module-v2",
   "moduleName": "agendaClinica",
-  "title": "Agenda Clínica",
+  "title": "Agenda clínica",
   "userLanguage": "pt-BR",
   "productLanguages": [
     "pt-BR"

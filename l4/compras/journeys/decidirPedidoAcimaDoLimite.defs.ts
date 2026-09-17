@@ -8,50 +8,44 @@ export const decidirPedidoAcimaDoLimiteJourney = {
   "business": {
     "actorRef": "gerenteCompras",
     "title": "Decidir pedido acima do limite",
-    "goal": "Decidir pela aprovação ou rejeição de um pedido de compra que exige autorização.",
+    "goal": "Aprovar ou rejeitar um pedido de compra cujo valor ultrapassa o limite definido.",
     "entry": {
       "mode": "fromNotification"
     },
     "steps": [
       {
-        "stepId": "localizarPedidoPendente",
-        "kind": "locate",
-        "entity": "PedidoCompra",
-        "title": "x",
-        "description": "Abre o pedido indicado pela notificação ou o localiza entre os pedidos pendentes de aprovação."
-      },
-      {
-        "stepId": "inspecionarPedido",
+        "stepId": "consultarPedidoParaDecisao",
         "kind": "inspect",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Confere fornecedor, itens, quantidades, preços e valor total do pedido."
+        "description": "Analisa o fornecedor, os itens, as quantidades, os preços e o valor do pedido encaminhado para decisão."
       },
       {
-        "stepId": "decidirAprovacaoOuRejeicao",
+        "stepId": "decidirPedido",
         "kind": "decide",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Decide entre aprovar ou rejeitar o pedido."
+        "description": "Escolhe entre aprovar ou rejeitar o pedido de compra acima do limite."
       },
       {
-        "stepId": "registrarDecisao",
+        "stepId": "registrarDecisaoDoPedido",
         "kind": "act",
         "entity": "PedidoCompra",
         "effect": "transition",
-        "transitionRef": "decidirPedido",
+        "transitionRef": "decidirPedidoCompra",
         "title": "x",
-        "description": "Registra a aprovação ou a rejeição escolhida para o pedido."
+        "description": "Registra a aprovação ou a rejeição selecionada para o pedido."
       }
     ],
     "outcome": {
-      "statement": "A decisão de aprovar ou rejeitar o pedido acima do limite é registrada.",
+      "statement": "A decisão sobre o pedido acima do limite é registrada, autorizando-o para recebimento ou encerrando-o como rejeitado.",
       "evidence": [
-        "Situação de aprovação do pedido registrada como aprovada ou rejeitada."
+        "Decisão de aprovação ou rejeição registrada no pedido de compra.",
+        "Pedido aprovado disponível para recebimento ou pedido rejeitado identificado no acompanhamento de compras."
       ]
     }
   },
-  "businessHash": "sha256:3b1a3bd7a18697437c74576d4a49775533aed317544715e1be1d99d4bece4dd9"
+  "businessHash": "sha256:d0418da216adec7363bfb5082b16bb265c392d11c2a467b69d461d3229434655"
 } as const satisfies Ns5JourneyArtifact;
 
 export type DecidirPedidoAcimaDoLimiteJourneyType = typeof decidirPedidoAcimaDoLimiteJourney;

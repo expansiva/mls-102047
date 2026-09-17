@@ -8,29 +8,36 @@ export const gerarMensalidadesDoMesJourney = {
   "business": {
     "actorRef": "gerencia",
     "title": "Gerar mensalidades do mês",
-    "goal": "Criar uma mensalidade mensal para cada aluno com matrícula ativa.",
+    "goal": "Criar as mensalidades mensais dos alunos com matrícula ativa.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "gerarCobrancasMensais",
+        "stepId": "localizarMatriculasAtivas",
+        "kind": "locate",
+        "entity": "Matricula",
+        "title": "x",
+        "description": "Localiza as matrículas ativas que devem ter mensalidade gerada para a competência do mês."
+      },
+      {
+        "stepId": "gerarMensalidades",
         "kind": "act",
         "entity": "Mensalidade",
         "effect": "create",
-        "title": "Gerar as mensalidades do mês.",
-        "description": "Cria uma mensalidade por aluno ativo, com o valor do plano e o vencimento correspondente."
+        "title": "x",
+        "description": "Gera uma mensalidade para cada aluno com matrícula ativa, usando o valor do plano e o respectivo dia de vencimento."
       }
     ],
     "outcome": {
-      "statement": "As mensalidades do período foram geradas para os alunos ativos.",
+      "statement": "As mensalidades da competência são disponibilizadas para cobrança dos alunos ativos.",
       "evidence": [
-        "Cada aluno com matrícula ativa possui uma mensalidade do mês.",
-        "Cada mensalidade gerada mostra o valor do plano e a data de vencimento."
+        "Há uma mensalidade gerada para cada matrícula ativa elegível na competência.",
+        "Cada mensalidade apresenta o valor do plano e sua data de vencimento."
       ]
     }
   },
-  "businessHash": "sha256:8284a84a8f19c17f0fd7342c15b4412cb475bf42b93b39c7e58160c1067651db"
+  "businessHash": "sha256:eaa1a3797486a4fdc044e8bf104718b2d82675eed024a890b3542044b736cfd3"
 } as const satisfies Ns5JourneyArtifact;
 
 export type GerarMensalidadesDoMesJourneyType = typeof gerarMensalidadesDoMesJourney;

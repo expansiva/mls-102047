@@ -7,34 +7,34 @@ export const manutencaoFrotaJourneyIndex = {
   "moduleName": "manutencaoFrota",
   "journeys": [
     {
-      "journeyId": "cadastrarVeiculo",
-      "actorRef": "gestorFrota",
-      "title": "Cadastrar veículo na frota"
+      "journeyId": "consultarVeiculosAtribuidos",
+      "actorRef": "motorista",
+      "title": "Consultar veículos atribuídos"
     },
     {
       "journeyId": "registrarAbastecimento",
       "actorRef": "motorista",
-      "title": "Registrar abastecimento do veículo atribuído"
+      "title": "Registrar abastecimento"
     },
     {
       "journeyId": "cadastrarPlanoPreventivo",
-      "actorRef": "gestorFrota",
+      "actorRef": "gestor",
       "title": "Cadastrar plano de manutenção preventiva"
     },
     {
-      "journeyId": "abrirOrdemPorPreventivaVencida",
-      "actorRef": "gestorFrota",
-      "title": "Abrir ordem para preventiva vencida"
-    },
-    {
       "journeyId": "abrirOrdemPorDefeito",
-      "actorRef": "gestorFrota",
-      "title": "Abrir ordem por defeito"
+      "actorRef": "gestor",
+      "title": "Abrir ordem de manutenção por defeito"
     },
     {
-      "journeyId": "registrarConclusaoManutencao",
-      "actorRef": "gestorFrota",
-      "title": "Registrar conclusão de manutenção"
+      "journeyId": "tratarAlertaPreventivaVencida",
+      "actorRef": "gestor",
+      "title": "Tratar alerta de manutenção preventiva vencida"
+    },
+    {
+      "journeyId": "registrarConclusaoOrdemManutencao",
+      "actorRef": "gestor",
+      "title": "Registrar conclusão da ordem de manutenção"
     }
   ],
   "systemDecisions": []

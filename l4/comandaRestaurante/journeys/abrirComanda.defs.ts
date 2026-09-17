@@ -8,46 +8,36 @@ export const abrirComandaJourney = {
   "business": {
     "actorRef": "garcom",
     "title": "Abrir comanda para uma mesa",
-    "goal": "Iniciar uma comanda para uma mesa disponível.",
+    "goal": "Iniciar o atendimento de uma mesa disponível.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarMesa",
+        "stepId": "localizarMesaDisponivel",
         "kind": "locate",
         "entity": "Mesa",
-        "title": "x",
-        "description": "Localiza a mesa que receberá a comanda."
+        "title": "Localizar mesa disponível",
+        "description": "Localiza e seleciona uma mesa disponível para o novo atendimento."
       },
       {
-        "stepId": "inspecionarMesa",
-        "kind": "inspect",
-        "entity": "Mesa",
-        "title": "x",
-        "description": "Confirma que a mesa está disponível."
-      },
-      {
-        "stepId": "criarComanda",
+        "stepId": "abrirComandaParaMesa",
         "kind": "act",
         "entity": "Comanda",
-        "affects": [
-          "Mesa"
-        ],
         "effect": "create",
-        "title": "x",
-        "description": "Abre uma comanda vinculada à mesa e a deixa ocupada."
+        "title": "Abrir comanda",
+        "description": "Abre uma comanda vinculada à mesa selecionada; a mesa passa a estar ocupada."
       }
     ],
     "outcome": {
-      "statement": "A comanda fica aberta para a mesa selecionada.",
+      "statement": "Uma comanda aberta fica vinculada à mesa selecionada.",
       "evidence": [
-        "Comanda criada e vinculada à mesa.",
-        "Mesa identificada como ocupada."
+        "A comanda possui identificação, mesa vinculada e situação aberta.",
+        "A mesa é apresentada como ocupada."
       ]
     }
   },
-  "businessHash": "sha256:2829d350a65fa60859c7e2167b658e6240876990cae99fec884eed2ac3d72dad"
+  "businessHash": "sha256:548a6fcc6bd524ddb8f3a06cc6cebe7d7a68224ff3207f06f1451d85b1051c24"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AbrirComandaJourneyType = typeof abrirComandaJourney;

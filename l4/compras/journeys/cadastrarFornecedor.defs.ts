@@ -7,29 +7,38 @@ export const cadastrarFornecedorJourney = {
   "journeyId": "cadastrarFornecedor",
   "business": {
     "actorRef": "comprador",
-    "title": "Cadastrar fornecedor",
-    "goal": "Cadastrar ou vincular um fornecedor da organização a partir de seus dados empresariais.",
+    "title": "Cadastrar fornecedor e produtos fornecidos",
+    "goal": "Manter um fornecedor disponível para compras, com os produtos que fornece e os preços combinados.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "informarDadosFornecedor",
+        "stepId": "cadastrarFornecedor",
         "kind": "act",
         "entity": "Fornecedor",
         "effect": "create",
         "title": "x",
-        "description": "Informa CNPJ, razão social e contatos para criar ou vincular o cadastro mestre do fornecedor."
+        "description": "Cadastra ou vincula o fornecedor identificado pelo CNPJ, com razão social e contato."
+      },
+      {
+        "stepId": "registrarProdutosFornecidos",
+        "kind": "act",
+        "entity": "ProdutoFornecedor",
+        "effect": "create",
+        "title": "x",
+        "description": "Registra para o fornecedor os produtos que ele fornece e o preço combinado para cada produto."
       }
     ],
     "outcome": {
-      "statement": "O fornecedor fica disponível para ser utilizado nas compras da organização.",
+      "statement": "O fornecedor fica disponível para uso em pedidos de compra, com seu catálogo de produtos e preços combinados.",
       "evidence": [
-        "Cadastro do fornecedor identificado pelo CNPJ, com razão social e contatos disponíveis."
+        "Fornecedor identificado por CNPJ com razão social e contato cadastrados.",
+        "Produtos fornecidos e respectivos preços combinados registrados para o fornecedor."
       ]
     }
   },
-  "businessHash": "sha256:44edbdbaec2bd9cdadf04866fce22d2b96f3ecfecaeaf5c4e9e3263a632962b7"
+  "businessHash": "sha256:2af8b27df2e26f1d629f679e4acb030bffe72599ee67a9e63e7aee0cc3f2fa4d"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CadastrarFornecedorJourneyType = typeof cadastrarFornecedorJourney;

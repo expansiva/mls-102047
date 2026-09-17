@@ -8,7 +8,7 @@ export const lancarItemNaComandaJourney = {
   "business": {
     "actorRef": "garcom",
     "title": "Lançar item na comanda",
-    "goal": "Adicionar um item do cardápio à comanda aberta de uma mesa.",
+    "goal": "Registrar um pedido com quantidade e observação em uma comanda aberta.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,45 +17,34 @@ export const lancarItemNaComandaJourney = {
         "stepId": "localizarComandaAberta",
         "kind": "locate",
         "entity": "Comanda",
-        "title": "x",
-        "description": "Localiza a comanda aberta, usando a mesa ou a própria comanda."
+        "title": "Localizar comanda aberta",
+        "description": "Usa a comanda em contexto ou localiza uma comanda aberta da mesa atendida."
       },
       {
-        "stepId": "inspecionarComanda",
+        "stepId": "consultarItemDoCardapio",
         "kind": "inspect",
-        "entity": "Comanda",
-        "title": "x",
-        "description": "Confere a comanda aberta e seus lançamentos atuais."
-      },
-      {
-        "stepId": "localizarItemDoCardapio",
-        "kind": "locate",
         "entity": "ItemCardapio",
-        "title": "x",
-        "description": "Localiza o item solicitado no cardápio."
+        "title": "Consultar item do cardápio",
+        "description": "Consulta o item e o preço vigente no cardápio antes de incluí-lo no pedido."
       },
       {
-        "stepId": "criarLancamento",
+        "stepId": "registrarItemLancado",
         "kind": "act",
         "entity": "ItemComanda",
-        "affects": [
-          "Comanda",
-          "ItemCardapio"
-        ],
         "effect": "create",
-        "title": "x",
-        "description": "Lança o item com quantidade e observação na comanda aberta."
+        "title": "Lançar item",
+        "description": "Registra na comanda aberta o item escolhido, a quantidade e a observação informada."
       }
     ],
     "outcome": {
-      "statement": "O item solicitado é registrado na comanda aberta.",
+      "statement": "O item solicitado é lançado na comanda aberta.",
       "evidence": [
-        "Lançamento com item, quantidade e observação registrado na comanda.",
-        "Comanda apresenta o novo lançamento."
+        "Existe um lançamento de item com quantidade e observação na comanda.",
+        "O valor parcial e o total da comanda refletem o lançamento."
       ]
     }
   },
-  "businessHash": "sha256:92cb85895a3d372c0bbbde9897ff23f26dcd141cc1c9ccf9228d061f68a25ba7"
+  "businessHash": "sha256:76eeb6ec3118718f81a9ba7b4ba0dc411e6e29e3cbbf342c9058c6c428a47f1a"
 } as const satisfies Ns5JourneyArtifact;
 
 export type LancarItemNaComandaJourneyType = typeof lancarItemNaComandaJourney;

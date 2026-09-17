@@ -7,10 +7,10 @@ export const consultarMisOrdenesJourney = {
   "journeyId": "consultarMisOrdenes",
   "business": {
     "actorRef": "cliente",
-    "title": "Consultar mis órdenes de servicio",
-    "goal": "Ver el seguimiento de las órdenes propias desde el portal.",
+    "title": "Consultar mis órdenes",
+    "goal": "Conocer el estado y la información disponible de sus propias órdenes de servicio.",
     "entry": {
-      "mode": "coldStart"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
@@ -18,25 +18,25 @@ export const consultarMisOrdenesJourney = {
         "kind": "locate",
         "entity": "OrdenServicio",
         "title": "Localizar mis órdenes",
-        "description": "Localiza únicamente las órdenes de servicio propias."
+        "description": "Accede a las órdenes vinculadas a su propia identidad en el portal."
       },
       {
-        "stepId": "consultarEstadoYpresupuesto",
+        "stepId": "consultarDetalleDeOrden",
         "kind": "inspect",
         "entity": "OrdenServicio",
-        "title": "Consultar estado y presupuesto",
-        "description": "Consulta el estado, el diagnóstico y el valor del presupuesto de una orden propia, sin acceder al costo interno de las piezas ni a las anotaciones técnicas."
+        "title": "Consultar detalle de orden",
+        "description": "Revisa el estado, el diagnóstico y el valor del presupuesto de una de sus órdenes, sin ver costos internos de piezas ni anotaciones del técnico."
       }
     ],
     "outcome": {
-      "statement": "El cliente conoce el estado y la información visible de sus propias órdenes.",
+      "statement": "El cliente conoce el estado, diagnóstico y presupuesto de sus propias órdenes.",
       "evidence": [
-        "El portal muestra las órdenes asociadas al cliente autenticado.",
-        "Cada orden consultada muestra su estado, diagnóstico y valor del presupuesto."
+        "Listado de órdenes propias disponible.",
+        "Estado, diagnóstico y valor del presupuesto visibles para la orden consultada."
       ]
     }
   },
-  "businessHash": "sha256:bd87b28d25b94db61e9e7fb91b919f885a4123f47dd772248414141744adc90b"
+  "businessHash": "sha256:1e6cc25ed57ed6d2a85b95dcf3a3feb9f5d56de0a5a8221439ea74ed44d25328"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarMisOrdenesJourneyType = typeof consultarMisOrdenesJourney;

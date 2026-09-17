@@ -2,40 +2,47 @@
   "journeys": [
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "cadastrarVeiculo",
+      "journeyId": "consultarVeiculosAtribuidos",
       "business": {
-        "actorRef": "gestorFrota",
-        "title": "Cadastrar veículo na frota",
-        "goal": "Disponibilizar um veículo identificado para atribuição e gestão de manutenção.",
+        "actorRef": "motorista",
+        "title": "Consultar veículos atribuídos",
+        "goal": "Ver os dados dos veículos que estão atribuídos a si.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "registrarVeiculo",
-            "kind": "act",
-            "entity": "Veiculo",
-            "effect": "create",
-            "title": "Registrar os dados do veículo",
-            "description": "Informa placa, modelo, ano e quilometragem atual do veículo."
+            "stepId": "localizarVeiculosAtribuidos",
+            "kind": "locate",
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Localiza os veículos atribuídos ao próprio motorista."
+          },
+          {
+            "stepId": "inspecionarVeiculo",
+            "kind": "inspect",
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Consulta placa, modelo, ano e quilometragem atual de um veículo atribuído."
           }
         ],
         "outcome": {
-          "statement": "O veículo fica cadastrado para uso na gestão da frota.",
+          "statement": "O motorista consulta os veículos sob sua condução.",
           "evidence": [
-            "Veículo identificado pela placa e com modelo, ano e quilometragem atual registrados."
+            "Lista de veículos atribuídos apresentada ao motorista.",
+            "Dados do veículo selecionado disponíveis para consulta."
           ]
         }
       },
-      "businessHash": "sha256:27547deac1d2b1613364af5297f759260647b9148c526940c525dc7c64bbfe90"
+      "businessHash": "sha256:1fc63d04b3d79589c5e28e56f2507386b73f38f18ec0156f2d24fcd691465649"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
       "journeyId": "registrarAbastecimento",
       "business": {
         "actorRef": "motorista",
-        "title": "Registrar abastecimento do veículo atribuído",
-        "goal": "Registrar o consumo e atualizar a quilometragem do veículo que dirige.",
+        "title": "Registrar abastecimento",
+        "goal": "Registrar o abastecimento realizado em um veículo que dirige.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -43,46 +50,43 @@
           {
             "stepId": "localizarVeiculoAtribuido",
             "kind": "locate",
-            "entity": "Veiculo",
-            "title": "Localizar veículo atribuído",
-            "description": "Localiza um dos veículos atribuídos ao motorista."
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Localiza, ou usa o veículo já em contexto, entre os veículos atribuídos ao motorista."
           },
           {
-            "stepId": "inspecionarQuilometragem",
+            "stepId": "inspecionarQuilometragemVeiculo",
             "kind": "inspect",
-            "entity": "Veiculo",
-            "title": "Conferir veículo e quilometragem",
-            "description": "Confere a identificação do veículo e a quilometragem atualmente registrada."
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Confere o veículo e sua quilometragem atual antes do registro."
           },
           {
-            "stepId": "registrarAbastecimento",
+            "stepId": "criarAbastecimento",
             "kind": "act",
-            "entity": "Abastecimento",
-            "affects": [
-              "Veiculo"
-            ],
+            "entity": "Fueling",
             "effect": "create",
-            "title": "Registrar abastecimento",
-            "description": "Informa data, litros, valor e quilometragem exibida no painel."
+            "title": "x",
+            "description": "Registra data, litros, valor e quilometragem do painel do abastecimento para o veículo. O registro atualiza a quilometragem do veículo quando a leitura informada for mais recente."
           }
         ],
         "outcome": {
-          "statement": "O abastecimento é registrado no veículo atribuído e sua quilometragem é atualizada.",
+          "statement": "O abastecimento do veículo é registrado.",
           "evidence": [
-            "Registro de abastecimento com data, litros, valor e km no painel.",
-            "Quilometragem atual do veículo compatível com o km informado no abastecimento."
+            "Registro de abastecimento com data, litros, valor e quilometragem do painel.",
+            "Abastecimento associado ao veículo atribuído ao motorista."
           ]
         }
       },
-      "businessHash": "sha256:50a0c44f47c60636fe0700cd669154b6b1fc02de0109a7da7a9ba4be7a19ff8d"
+      "businessHash": "sha256:2acdf547e7201e1899688eca2e6692cf68601b88b6f5b5ca5a04c1077be02614"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
       "journeyId": "cadastrarPlanoPreventivo",
       "business": {
-        "actorRef": "gestorFrota",
+        "actorRef": "gestor",
         "title": "Cadastrar plano de manutenção preventiva",
-        "goal": "Definir quando a manutenção preventiva de um veículo deve ser realizada.",
+        "goal": "Definir a periodicidade de manutenção preventiva de um veículo.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -90,87 +94,43 @@
           {
             "stepId": "localizarVeiculo",
             "kind": "locate",
-            "entity": "Veiculo",
-            "title": "Localizar veículo",
-            "description": "Localiza o veículo que receberá o plano preventivo."
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Localiza, ou usa o veículo já em contexto, para o qual será definido o plano."
           },
           {
-            "stepId": "inspecionarDadosVeiculo",
+            "stepId": "inspecionarVeiculoParaPlano",
             "kind": "inspect",
-            "entity": "Veiculo",
-            "title": "Conferir dados do veículo",
-            "description": "Confere a identificação e a quilometragem atual do veículo."
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Consulta os dados e a quilometragem atual do veículo para definir a preventiva."
           },
           {
-            "stepId": "registrarPlanoPreventivo",
+            "stepId": "criarPlanoPreventivo",
             "kind": "act",
-            "entity": "PlanoManutencao",
+            "entity": "MaintenancePlan",
             "effect": "create",
-            "title": "Registrar plano preventivo",
-            "description": "Define o intervalo da preventiva por quilometragem, por meses ou pelos dois critérios."
+            "title": "x",
+            "description": "Cadastra o plano preventivo do veículo com a periodicidade por quilometragem, por meses, ou ambas."
           }
         ],
         "outcome": {
-          "statement": "O veículo passa a ter um plano de manutenção preventiva acompanhado pela frota.",
+          "statement": "O veículo passa a ter um plano de manutenção preventiva cadastrado.",
           "evidence": [
-            "Plano vinculado ao veículo com intervalo em quilômetros e/ou meses.",
-            "Próxima preventiva calculada a partir dos critérios registrados."
+            "Plano preventivo associado ao veículo.",
+            "Periodicidade em quilômetros e/ou meses registrada."
           ]
         }
       },
-      "businessHash": "sha256:417d8c129b6a0c3a8b42c45023031852431d8f0f83d04bfd867a7c6d45ab4a02"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "abrirOrdemPorPreventivaVencida",
-      "business": {
-        "actorRef": "gestorFrota",
-        "title": "Abrir ordem para preventiva vencida",
-        "goal": "Encaminhar um veículo para manutenção ao receber o aviso de preventiva vencida.",
-        "entry": {
-          "mode": "fromNotification"
-        },
-        "steps": [
-          {
-            "stepId": "inspecionarPlanoAvisado",
-            "kind": "inspect",
-            "entity": "PlanoManutencao",
-            "title": "Consultar plano avisado",
-            "description": "Verifica o plano cuja quilometragem prevista para a preventiva foi ultrapassada."
-          },
-          {
-            "stepId": "inspecionarVeiculo",
-            "kind": "inspect",
-            "entity": "Veiculo",
-            "title": "Consultar veículo",
-            "description": "Confere o veículo e sua quilometragem atual antes de encaminhá-lo à manutenção."
-          },
-          {
-            "stepId": "abrirOrdemPreventiva",
-            "kind": "act",
-            "entity": "OrdemManutencao",
-            "effect": "create",
-            "title": "Abrir ordem de manutenção preventiva",
-            "description": "Registra a oficina, a descrição do serviço e a data de entrada do veículo."
-          }
-        ],
-        "outcome": {
-          "statement": "Uma ordem de manutenção preventiva é aberta para o veículo avisado.",
-          "evidence": [
-            "Ordem vinculada ao veículo e ao plano preventivo vencido.",
-            "Ordem com oficina, descrição e data de entrada registradas."
-          ]
-        }
-      },
-      "businessHash": "sha256:123797b5034fd54ac2eead98bf75c1e1f2207abe1c71502c6c81c3073c579124"
+      "businessHash": "sha256:c164ef0eccb7bde66e87fdde03d4f0010eb20d241566f744c6d63c8b6e19ea8e"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
       "journeyId": "abrirOrdemPorDefeito",
       "business": {
-        "actorRef": "gestorFrota",
-        "title": "Abrir ordem por defeito",
-        "goal": "Registrar o encaminhamento de um veículo com defeito para manutenção.",
+        "actorRef": "gestor",
+        "title": "Abrir ordem de manutenção por defeito",
+        "goal": "Registrar uma ordem de manutenção para tratar um defeito informado ou identificado em um veículo.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -178,79 +138,123 @@
           {
             "stepId": "localizarVeiculoComDefeito",
             "kind": "locate",
-            "entity": "Veiculo",
-            "title": "Localizar veículo com defeito",
-            "description": "Localiza o veículo que apresentou defeito."
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Localiza, ou usa o veículo já em contexto, que apresenta o defeito."
           },
           {
             "stepId": "inspecionarVeiculoComDefeito",
             "kind": "inspect",
-            "entity": "Veiculo",
-            "title": "Conferir veículo",
-            "description": "Confere a identificação e a quilometragem do veículo antes da abertura da ordem."
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Consulta os dados e a quilometragem do veículo antes de abrir a ordem."
           },
           {
-            "stepId": "abrirOrdemCorretiva",
+            "stepId": "criarOrdemPorDefeito",
             "kind": "act",
-            "entity": "OrdemManutencao",
+            "entity": "MaintenanceOrder",
             "effect": "create",
-            "title": "Abrir ordem de manutenção corretiva",
-            "description": "Registra a oficina, a descrição do defeito ou serviço e a data de entrada."
+            "title": "x",
+            "description": "Abre a ordem de manutenção com oficina, descrição do defeito, custo quando disponível e data de entrada."
           }
         ],
         "outcome": {
-          "statement": "Uma ordem de manutenção é aberta para tratar o defeito informado.",
+          "statement": "Uma ordem de manutenção é aberta para o defeito do veículo.",
           "evidence": [
-            "Ordem vinculada ao veículo com oficina, descrição e data de entrada.",
-            "Registro da manutenção identificado como decorrente de defeito."
+            "Ordem vinculada ao veículo com oficina e descrição.",
+            "Data de entrada registrada na ordem."
           ]
         }
       },
-      "businessHash": "sha256:e93874ab548268f7476f982a0d0d16fd575cd0630807d586d4ae860e07b1e08a"
+      "businessHash": "sha256:011d9c9526b8d2f862acf1573d2bec103714a11ae2d80dc4b9f4ef58601c5c01"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "registrarConclusaoManutencao",
+      "journeyId": "tratarAlertaPreventivaVencida",
       "business": {
-        "actorRef": "gestorFrota",
-        "title": "Registrar conclusão de manutenção",
-        "goal": "Completar os dados de uma ordem após o serviço realizado.",
+        "actorRef": "gestor",
+        "title": "Tratar alerta de manutenção preventiva vencida",
+        "goal": "Abrir uma ordem de manutenção quando um veículo ultrapassar a quilometragem prevista para a preventiva.",
+        "entry": {
+          "mode": "fromNotification"
+        },
+        "steps": [
+          {
+            "stepId": "inspecionarPlanoEmAtraso",
+            "kind": "inspect",
+            "entity": "MaintenancePlan",
+            "title": "x",
+            "description": "Consulta o plano alertado, a quilometragem prevista e a quilometragem atual do veículo."
+          },
+          {
+            "stepId": "inspecionarVeiculoAlertado",
+            "kind": "inspect",
+            "entity": "Vehicle",
+            "title": "x",
+            "description": "Confere os dados do veículo associado ao plano em atraso."
+          },
+          {
+            "stepId": "criarOrdemPreventiva",
+            "kind": "act",
+            "entity": "MaintenanceOrder",
+            "effect": "create",
+            "title": "x",
+            "description": "Abre uma ordem de manutenção preventiva para o veículo, informando oficina, descrição, custo quando disponível e data de entrada."
+          }
+        ],
+        "outcome": {
+          "statement": "A manutenção preventiva vencida é encaminhada por uma ordem de manutenção.",
+          "evidence": [
+            "Alerta de quilometragem vencida consultado pelo gestor.",
+            "Ordem de manutenção preventiva vinculada ao veículo e ao plano."
+          ]
+        }
+      },
+      "businessHash": "sha256:04ca7e2189b53b9a1cf9b269760823564b03c1367beeb08099883c5e6d4b961c"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "registrarConclusaoOrdemManutencao",
+      "business": {
+        "actorRef": "gestor",
+        "title": "Registrar conclusão da ordem de manutenção",
+        "goal": "Atualizar uma ordem após a execução da manutenção.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarOrdemAberta",
+            "stepId": "localizarOrdemManutencao",
             "kind": "locate",
-            "entity": "OrdemManutencao",
-            "title": "Localizar ordem de manutenção",
-            "description": "Localiza a ordem referente ao serviço concluído."
+            "entity": "MaintenanceOrder",
+            "title": "x",
+            "description": "Localiza, ou usa a ordem já em contexto, cuja manutenção foi executada."
           },
           {
-            "stepId": "inspecionarOrdem",
+            "stepId": "inspecionarOrdemManutencao",
             "kind": "inspect",
-            "entity": "OrdemManutencao",
-            "title": "Conferir ordem",
-            "description": "Confere o veículo, a oficina, a descrição e os dados já registrados na ordem."
+            "entity": "MaintenanceOrder",
+            "title": "x",
+            "description": "Confere oficina, descrição, custo e data de entrada registrados na ordem."
           },
           {
-            "stepId": "registrarDadosConclusao",
+            "stepId": "atualizarOrdemConcluida",
             "kind": "act",
-            "entity": "OrdemManutencao",
+            "entity": "MaintenanceOrder",
             "effect": "update",
-            "title": "Registrar conclusão do serviço",
-            "description": "Informa o custo e a data de saída do veículo da oficina."
+            "title": "x",
+            "description": "Registra ou ajusta o custo e informa a data de saída da manutenção."
           }
         ],
         "outcome": {
-          "statement": "A ordem passa a registrar os dados finais da manutenção realizada.",
+          "statement": "A ordem de manutenção fica atualizada com a conclusão do serviço.",
           "evidence": [
-            "Ordem com custo e data de saída preenchidos.",
-            "Histórico da ordem preserva oficina, descrição e período de manutenção."
+            "Custo registrado ou atualizado na ordem.",
+            "Data de saída registrada na ordem de manutenção."
           ]
         }
       },
-      "businessHash": "sha256:6a9051cd7b43e6a77a30102eb4779c4b7cb30457210a98a916fbf6677995ecfb"
+      "businessHash": "sha256:c44e26a0f5ac7ff70fa33a8af35c5fd2a60fc4ddcd67ff3b8eae256f117afe2d"
     }
   ],
   "systemDecisions": [],
@@ -259,38 +263,32 @@
   "normalizations": [
     {
       "kind": "dropTransitionRef",
-      "journeyId": "cadastrarVeiculo",
-      "stepId": "registrarVeiculo",
-      "detail": "transitionRef x dropped; effect is create."
-    },
-    {
-      "kind": "dropTransitionRef",
       "journeyId": "registrarAbastecimento",
-      "stepId": "registrarAbastecimento",
+      "stepId": "criarAbastecimento",
       "detail": "transitionRef x dropped; effect is create."
     },
     {
       "kind": "dropTransitionRef",
       "journeyId": "cadastrarPlanoPreventivo",
-      "stepId": "registrarPlanoPreventivo",
-      "detail": "transitionRef x dropped; effect is create."
-    },
-    {
-      "kind": "dropTransitionRef",
-      "journeyId": "abrirOrdemPorPreventivaVencida",
-      "stepId": "abrirOrdemPreventiva",
+      "stepId": "criarPlanoPreventivo",
       "detail": "transitionRef x dropped; effect is create."
     },
     {
       "kind": "dropTransitionRef",
       "journeyId": "abrirOrdemPorDefeito",
-      "stepId": "abrirOrdemCorretiva",
+      "stepId": "criarOrdemPorDefeito",
       "detail": "transitionRef x dropped; effect is create."
     },
     {
       "kind": "dropTransitionRef",
-      "journeyId": "registrarConclusaoManutencao",
-      "stepId": "registrarDadosConclusao",
+      "journeyId": "tratarAlertaPreventivaVencida",
+      "stepId": "criarOrdemPreventiva",
+      "detail": "transitionRef x dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "journeyId": "registrarConclusaoOrdemManutencao",
+      "stepId": "atualizarOrdemConcluida",
       "detail": "transitionRef x dropped; effect is update."
     }
   ]

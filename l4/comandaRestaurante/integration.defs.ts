@@ -8,12 +8,12 @@ export const comandaRestauranteIntegration = {
   "inbound": [],
   "outbound": [
     {
-      "id": "comandaFechada",
+      "id": "fecharComanda",
       "kind": "event",
       "to": "controleEstoque",
-      "event": "comandaFechada",
+      "event": "fecharComanda",
       "on": "Comanda.fecharComanda",
-      "description": "Publica o fechamento da comanda, com os itens consumidos, para que o controle de estoque possa registrar a baixa correspondente.",
+      "description": "Publica o fechamento da comanda, incluindo os itens lançados, para que o controle de estoque possa registrar o consumo correspondente.",
       "entityRefs": [
         "Comanda",
         "ItemComanda"

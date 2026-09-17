@@ -7,38 +7,38 @@ export const manutencaoFrotaWorkflows = {
   "moduleName": "manutencaoFrota",
   "processes": [
     {
-      "processId": "notificarPreventivaVencida",
-      "title": "Notificar preventiva vencida",
-      "description": "Verifica planos preventivos vencidos por quilometragem e encaminha a abertura da ordem de manutenção.",
+      "processId": "alertarPreventivaVencida",
+      "title": "Alertar preventiva vencida",
+      "description": "Identifica planos cuja quilometragem prevista para a manutenção preventiva foi ultrapassada e encaminha o tratamento ao gestor de frota.",
       "trigger": {
         "kind": "scheduled",
-        "schedule": "Quando um veículo ultrapassar a quilometragem prevista para a próxima manutenção preventiva."
+        "schedule": "quando um veículo passou do km previsto para a próxima preventiva"
       },
       "tasks": [
         {
-          "taskId": "identificarPlanoVencido",
+          "taskId": "identificarPlanoEmAtraso",
           "kind": "mechanical",
-          "entityRef": "PlanoManutencao",
+          "entityRef": "MaintenancePlan",
           "effect": "update",
           "next": [
-            "abrirOrdemPreventiva"
+            "tratarAlertaPreventiva"
           ],
-          "description": "Identifica o plano preventivo cuja quilometragem prevista foi ultrapassada e registra o aviso ao gestor de frota."
+          "description": "Identifica o plano preventivo em atraso pela quilometragem atual do veículo e sinaliza o alerta correspondente."
         },
         {
-          "taskId": "abrirOrdemPreventiva",
+          "taskId": "tratarAlertaPreventiva",
           "kind": "human",
-          "actorRef": "gestorFrota",
-          "journeyRef": "abrirOrdemPorPreventivaVencida",
+          "actorRef": "gestor",
+          "journeyRef": "tratarAlertaPreventivaVencida",
           "next": [],
-          "description": "O gestor de frota analisa o aviso e abre a ordem de manutenção preventiva para o veículo."
+          "description": "O gestor avalia o plano alertado e abre a ordem de manutenção preventiva necessária."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "cadastrarVeiculo",
+      "journeyId": "consultarVeiculosAtribuidos",
       "inProcess": false
     },
     {
@@ -50,16 +50,16 @@ export const manutencaoFrotaWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "abrirOrdemPorPreventivaVencida",
-      "inProcess": true,
-      "processId": "notificarPreventivaVencida"
-    },
-    {
       "journeyId": "abrirOrdemPorDefeito",
       "inProcess": false
     },
     {
-      "journeyId": "registrarConclusaoManutencao",
+      "journeyId": "tratarAlertaPreventivaVencida",
+      "inProcess": true,
+      "processId": "alertarPreventivaVencida"
+    },
+    {
+      "journeyId": "registrarConclusaoOrdemManutencao",
       "inProcess": false
     }
   ]

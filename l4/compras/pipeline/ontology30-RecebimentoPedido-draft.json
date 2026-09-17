@@ -1,0 +1,158 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-15-ns5-ontology-v3",
+    "moduleName": "compras",
+    "entityId": "RecebimentoPedido",
+    "title": "Recebimento de pedido",
+    "description": "Registro de uma entrega total ou parcial de um pedido de compra e da entrada correspondente no estoque.",
+    "displayField": "receiptNumber",
+    "relationships": {
+      "pedidoCompra": {
+        "relationshipId": "recebimentoPedidoPedidoCompra",
+        "to": "PedidoCompra",
+        "via": "RecebimentoPedido.pedidoCompraId",
+        "cardinality": "N:1",
+        "title": "Pedido de compra",
+        "description": "Cada recebimento registra uma entrega total ou parcial de um pedido de compra.",
+        "mode": "fk",
+        "required": "Sempre.",
+        "role": "recebimento"
+      }
+    },
+    "capabilities": {
+      "read.byId": "Consulta um recebimento pelo identificador da linha para que o almoxarife ou o comprador veja seus itens e quantidades registradas.",
+      "locate.byColumn": "Lista recebimentos por pedido de compra ou número do recebimento, com paginação, para acompanhar as entregas já registradas.",
+      "count": "Conta os recebimentos que correspondem ao filtro informado para exibir totais nas listas de acompanhamento.",
+      "listByForeignKey": "Lista todos os recebimentos vinculados a um pedido de compra pelo campo pedidoCompraId para conferir entregas parciais.",
+      "create": "Grava um novo recebimento de pedido com seus itens conferidos, utilizado pelo almoxarife ao registrar uma entrega.",
+      "transaction": "Executa de forma atômica o registro do recebimento e a entrada no estoque dos itens recebidos, utilizado pelo almoxarife.",
+      "sequence.next": "Emite o próximo número sequencial de recebimento antes da gravação, utilizado pelo módulo compras.",
+      "compras.registrarRecebimento": "Registra a entrega total ou parcial, valida o saldo pendente de cada item e dá entrada no estoque em uma única operação, utilizado pelo almoxarife."
+    },
+    "rules": [
+      "quantidadeRecebidaPositiva",
+      "produtoDoPedido",
+      "quantidadeRecebidaNaoExcedeSaldoPendente",
+      "entradaEstoqueAtomica"
+    ],
+    "kind": "entity",
+    "class": "event",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "compras_recebimentopedido",
+      "kind": "relational"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "pedidoCompraId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "of": "Address",
+          "to": [
+            "PedidoCompra"
+          ],
+          "title": "Pedido de compra",
+          "description": "Pedido de compra ao qual esta entrega total ou parcial se refere.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "receiptNumber": {
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "indexed": true,
+          "of": "Address",
+          "title": "Número do recebimento",
+          "description": "Número sequencial emitido para identificar o registro de recebimento.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "of": "Address",
+          "title": "Detalhes do recebimento",
+          "description": "Dados da entrega conferida e das quantidades que entraram no estoque.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0,
+          "fields": {
+            "receivedAt": {
+              "type": "timestamp",
+              "required": true,
+              "of": "Address",
+              "title": "Data e hora do recebimento",
+              "description": "Momento em que o almoxarife registrou a entrega recebida.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0
+            },
+            "items": {
+              "type": "object",
+              "required": true,
+              "collection": true,
+              "of": "Address",
+              "title": "Itens recebidos",
+              "description": "Produtos e quantidades efetivamente recebidos nesta entrega.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0,
+              "fields": {
+                "produtoId": {
+                  "type": "record",
+                  "required": true,
+                  "of": "Address",
+                  "to": [
+                    "Produto"
+                  ],
+                  "title": "Produto",
+                  "description": "Produto do pedido que foi efetivamente recebido.",
+                  "maxLength": 0,
+                  "min": 0,
+                  "max": 0
+                },
+                "quantityReceived": {
+                  "type": "number",
+                  "required": true,
+                  "of": "Address",
+                  "title": "Quantidade recebida",
+                  "description": "Quantidade do produto entregue e destinada à entrada no estoque.",
+                  "maxLength": 0,
+                  "min": 0.000001,
+                  "max": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "uniqueKeys": [
+      [
+        "receiptNumber"
+      ]
+    ]
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "RecebimentoPedido",
+      "detail": "record.fields.id, record.fields.version"
+    }
+  ]
+}

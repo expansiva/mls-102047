@@ -7,29 +7,29 @@
       "kind": "internal",
       "origin": "named",
       "title": "Recepcionista",
-      "description": "Personal que abre órdenes de servicio y entrega los aparatos reparados a los clientes."
+      "description": "Recibe el aparato, abre la orden de servicio y registra su entrega final al cliente."
     },
     {
       "actorId": "tecnico",
       "kind": "internal",
       "origin": "named",
       "title": "Técnico",
-      "description": "Personal que analiza los aparatos, prepara presupuestos y realiza las reparaciones."
+      "description": "Analiza el aparato, registra el diagnóstico, el presupuesto y realiza la reparación."
     },
     {
       "actorId": "cliente",
       "kind": "external",
       "origin": "named",
       "title": "Cliente",
-      "description": "Persona que consulta sus órdenes y aprueba o rechaza presupuestos desde el portal."
+      "description": "Consulta sus propias órdenes en el portal y aprueba o rechaza el presupuesto."
     }
   ],
   "grants": [
     {
-      "grantId": "recepcionGestionaOrdenes",
+      "grantId": "recepcionistaGestionaOrdenes",
       "actorRef": "recepcionista",
       "title": "Gestionar recepción y entrega de órdenes",
-      "description": "Permite identificar clientes y aparatos, abrir órdenes de servicio y registrar la entrega final de los aparatos.",
+      "description": "Permite registrar la recepción de aparatos, consultar las órdenes necesarias para su entrega y registrar la entrega final al cliente.",
       "entityRefs": [
         "Cliente",
         "Aparato",
@@ -37,22 +37,40 @@
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Puede gestionar las recepciones y entregas de todas las órdenes de la organización."
+        "description": "Puede gestionar las órdenes y los registros maestros necesarios de toda la organización."
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "Puede consultar todos los datos de clientes, aparatos y órdenes necesarios para la recepción y entrega."
+        "mode": "fieldsOnly",
+        "description": "Muestra los datos de cliente y aparato requeridos para recepción y retiro, y los datos operativos de recepción y entrega; no muestra costos internos, notas técnicas ni detalles de reparación.",
+        "allowedFields": [
+          "Cliente.details.identification",
+          "Cliente.details.base",
+          "Cliente.details.person",
+          "Cliente.details.general",
+          "Cliente.details.ordenServicio",
+          "Aparato.details.identification",
+          "Aparato.details.base",
+          "Aparato.details.assetEquipment",
+          "Aparato.details.general",
+          "Aparato.details.ordenServicio",
+          "OrdenServicio.clienteId",
+          "OrdenServicio.aparatoId",
+          "OrdenServicio.orderNumber",
+          "OrdenServicio.status",
+          "OrdenServicio.receivedAt",
+          "OrdenServicio.details.reportedDefect",
+          "OrdenServicio.details.delivery"
+        ]
       }
     },
     {
-      "grantId": "tecnicoGestionaDiagnosticoReparacion",
+      "grantId": "tecnicoGestionaDiagnosticoYreparacion",
       "actorRef": "tecnico",
-      "title": "Gestionar diagnóstico, presupuesto y reparación",
-      "description": "Permite consultar órdenes y aparatos, registrar diagnósticos, piezas, costos internos, presupuestos y reparaciones.",
+      "title": "Gestionar diagnóstico y reparación",
+      "description": "Permite consultar aparatos y órdenes recibidas, registrar el diagnóstico, el presupuesto, las piezas internas y el trabajo de reparación.",
       "entityRefs": [
         "Aparato",
-        "OrdenServicio",
-        "BudgetPart"
+        "OrdenServicio"
       ],
       "dataScope": {
         "mode": "organization",
@@ -60,42 +78,30 @@
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Puede consultar todos los datos técnicos, presupuestarios y de piezas necesarios para diagnosticar y reparar."
+        "description": "Muestra toda la información técnica y operativa de los aparatos y las órdenes, incluidos costos internos y anotaciones técnicas."
       }
     },
     {
-      "grantId": "clienteConsultaYdecideSusOrdenes",
+      "grantId": "clienteConsultaYrespondeSusOrdenes",
       "actorRef": "cliente",
-      "title": "Consultar y responder presupuestos propios",
-      "description": "Permite consultar el estado, diagnóstico y valor presupuestado de las órdenes propias, y aprobar o rechazar el presupuesto.",
+      "title": "Consultar y responder mis órdenes",
+      "description": "Permite consultar las propias órdenes de servicio y aprobar o rechazar el presupuesto recibido.",
       "entityRefs": [
         "OrdenServicio"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Solo puede acceder a las órdenes vinculadas con su propio registro de cliente.",
+        "description": "Solo puede acceder a las órdenes vinculadas a su propia identidad de cliente.",
         "anchorEntity": "Cliente"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Puede ver únicamente la identificación, el estado, el diagnóstico y el valor del presupuesto; no puede ver costos internos ni anotaciones técnicas.",
+        "description": "Muestra el número, estado, diagnóstico y presupuesto de la orden, sin costos internos de piezas, anotaciones técnicas ni datos de reparación.",
         "allowedFields": [
-          "OrdenServicio.id",
-          "OrdenServicio.numeroOrden",
-          "OrdenServicio.diagnostico",
-          "OrdenServicio.valorPresupuesto",
-          "OrdenServicio.status"
-        ],
-        "deniedFields": [
-          "OrdenServicio.clienteId",
-          "OrdenServicio.aparatoId",
-          "OrdenServicio.defectoInformado",
-          "OrdenServicio.fotosRecepcion",
-          "OrdenServicio.recibidoEn",
-          "OrdenServicio.anotacionesTecnicas",
-          "OrdenServicio.reparacionRealizada",
-          "OrdenServicio.entregadoEn",
-          "OrdenServicio.details.costoInternoTotal"
+          "OrdenServicio.orderNumber",
+          "OrdenServicio.status",
+          "OrdenServicio.details.diagnosis",
+          "OrdenServicio.details.quote"
         ]
       }
     }
@@ -103,12 +109,12 @@
   "normalizations": [
     {
       "kind": "dropAnchorEntity",
-      "grantId": "recepcionGestionaOrdenes",
+      "grantId": "recepcionistaGestionaOrdenes",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
       "kind": "dropAnchorEntity",
-      "grantId": "tecnicoGestionaDiagnosticoReparacion",
+      "grantId": "tecnicoGestionaDiagnosticoYreparacion",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     }
   ]

@@ -7,22 +7,17 @@ export const financeiroJourneyIndex = {
   "moduleName": "financeiro",
   "journeys": [
     {
-      "journeyId": "registrarBaixaDeTitulo",
+      "journeyId": "registrarRecebimento",
       "actorRef": "caixa",
       "title": "Registrar recebimento de título"
     },
     {
-      "journeyId": "iniciarCobrancaPorCartaoNoCaixa",
+      "journeyId": "estornarRecebimentoNoMesmoDia",
       "actorRef": "caixa",
-      "title": "Cobrar título por cartão"
+      "title": "Estornar recebimento no mesmo dia"
     },
     {
-      "journeyId": "estornarRecebimentoDoMesmoDia",
-      "actorRef": "caixa",
-      "title": "Estornar recebimento do mesmo dia"
-    },
-    {
-      "journeyId": "acompanharPainelDeRecebiveis",
+      "journeyId": "acompanharPainelRecebiveis",
       "actorRef": "gerenteFinanceiro",
       "title": "Acompanhar painel de recebíveis"
     },
@@ -42,14 +37,9 @@ export const financeiroJourneyIndex = {
       "title": "Consultar meus títulos e recebimentos"
     },
     {
-      "journeyId": "pagarMeuTituloComCartao",
+      "journeyId": "pagarTituloComCartao",
       "actorRef": "pagador",
-      "title": "Pagar meu título com cartão"
-    },
-    {
-      "journeyId": "processarPagamentoPorCartao",
-      "actorRef": "stripe",
-      "title": "Processar pagamento por cartão"
+      "title": "Pagar título em aberto com cartão"
     }
   ],
   "systemDecisions": []

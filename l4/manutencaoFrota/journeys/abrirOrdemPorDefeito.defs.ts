@@ -6,9 +6,9 @@ export const abrirOrdemPorDefeitoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "journeyId": "abrirOrdemPorDefeito",
   "business": {
-    "actorRef": "gestorFrota",
-    "title": "Abrir ordem por defeito",
-    "goal": "Registrar o encaminhamento de um veículo com defeito para manutenção.",
+    "actorRef": "gestor",
+    "title": "Abrir ordem de manutenção por defeito",
+    "goal": "Registrar uma ordem de manutenção para tratar um defeito informado ou identificado em um veículo.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -16,35 +16,35 @@ export const abrirOrdemPorDefeitoJourney = {
       {
         "stepId": "localizarVeiculoComDefeito",
         "kind": "locate",
-        "entity": "Veiculo",
-        "title": "Localizar veículo com defeito",
-        "description": "Localiza o veículo que apresentou defeito."
+        "entity": "Vehicle",
+        "title": "x",
+        "description": "Localiza, ou usa o veículo já em contexto, que apresenta o defeito."
       },
       {
         "stepId": "inspecionarVeiculoComDefeito",
         "kind": "inspect",
-        "entity": "Veiculo",
-        "title": "Conferir veículo",
-        "description": "Confere a identificação e a quilometragem do veículo antes da abertura da ordem."
+        "entity": "Vehicle",
+        "title": "x",
+        "description": "Consulta os dados e a quilometragem do veículo antes de abrir a ordem."
       },
       {
-        "stepId": "abrirOrdemCorretiva",
+        "stepId": "criarOrdemPorDefeito",
         "kind": "act",
-        "entity": "OrdemManutencao",
+        "entity": "MaintenanceOrder",
         "effect": "create",
-        "title": "Abrir ordem de manutenção corretiva",
-        "description": "Registra a oficina, a descrição do defeito ou serviço e a data de entrada."
+        "title": "x",
+        "description": "Abre a ordem de manutenção com oficina, descrição do defeito, custo quando disponível e data de entrada."
       }
     ],
     "outcome": {
-      "statement": "Uma ordem de manutenção é aberta para tratar o defeito informado.",
+      "statement": "Uma ordem de manutenção é aberta para o defeito do veículo.",
       "evidence": [
-        "Ordem vinculada ao veículo com oficina, descrição e data de entrada.",
-        "Registro da manutenção identificado como decorrente de defeito."
+        "Ordem vinculada ao veículo com oficina e descrição.",
+        "Data de entrada registrada na ordem."
       ]
     }
   },
-  "businessHash": "sha256:e93874ab548268f7476f982a0d0d16fd575cd0630807d586d4ae860e07b1e08a"
+  "businessHash": "sha256:011d9c9526b8d2f862acf1573d2bec103714a11ae2d80dc4b9f4ef58601c5c01"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AbrirOrdemPorDefeitoJourneyType = typeof abrirOrdemPorDefeitoJourney;

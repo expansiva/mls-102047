@@ -1,41 +1,25 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteRules = {
-  "schemaVersion": "2026-09-10-ns5-rules-v1",
+  "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "comandaRestaurante",
-  "rules": [
-    {
-      "ruleId": "mesaDeveEstarDisponivelParaAbrirComanda",
-      "description": "Uma comanda só pode ser aberta para uma mesa disponível."
-    },
-    {
-      "ruleId": "comandaDeveEstarAbertaParaLancamento",
-      "description": "Um item do cardápio só pode ser lançado em uma comanda aberta."
-    },
-    {
-      "ruleId": "comandaDeveEstarAbertaParaCancelarItem",
-      "description": "Um lançamento de item só pode ser cancelado enquanto sua comanda estiver aberta."
-    },
-    {
-      "ruleId": "formaDePagamentoDeveSerRegistradaParaFecharComanda",
-      "description": "Uma comanda só pode ser fechada após o registro da forma de pagamento."
-    },
-    {
-      "ruleId": "subtotalDoItemComanda",
-      "description": "O subtotal de um lançamento de item é igual à sua quantidade multiplicada pelo preço unitário registrado."
-    },
-    {
-      "ruleId": "subtotalDaComanda",
-      "description": "O subtotal da comanda é igual à soma dos subtotais dos lançamentos não cancelados."
-    },
-    {
-      "ruleId": "totalDaComanda",
-      "description": "O total da comanda é igual ao seu subtotal menos o desconto aplicado, considerando desconto zero quando nenhum desconto for aplicado."
-    }
-  ]
-} as const satisfies Ns5RulesArtifact;
+  "rules": {
+    "fechamentoExigePagamento": "O fechamento de uma comanda exige o registro de uma forma de pagamento.",
+    "descontoNaoExcedeTotal": "O desconto aplicado no fechamento não pode exceder o total dos itens não cancelados da comanda.",
+    "mesaLiberadaNoFechamento": "A mesa vinculada à comanda deve ficar disponível quando a comanda for fechada.",
+    "cancelamentoItemComandaSomenteEmComandaAberta": "Um item lançado somente pode ser cancelado enquanto a comanda à qual pertence estiver aberta.",
+    "ruleForeignNamespaceRefused": "Dados de outros namespaces não podem ser aceitos como dados do namespace da comanda de restaurante.",
+    "ruleDocumentShapeValidated": "Os dados registrados devem obedecer à estrutura definida para o respectivo documento.",
+    "ruleIdentityNeverInNamespace": "A identidade do registro não pode ser armazenada nos dados específicos do namespace da comanda de restaurante.",
+    "comandaMesaDisponivel": "Uma comanda somente pode ser aberta para uma mesa ativa e disponível.",
+    "comandaUmaAbertaPorMesa": "Uma mesa não pode ter mais de uma comanda aberta simultaneamente.",
+    "totalConsideraItensAtivos": "O total dos itens da comanda deve ser calculado pela soma das quantidades multiplicadas pelos preços unitários dos itens não cancelados.",
+    "itemComandaSomenteEmComandaAberta": "Um item do cardápio somente pode ser lançado em uma comanda aberta.",
+    "precoItemComandaVigente": "O preço unitário registrado no lançamento deve ser o preço vigente do item no cardápio no momento do lançamento."
+  }
+} as const satisfies Ns5RulesArtifactV2;
 
 export type ComandaRestauranteRulesType = typeof comandaRestauranteRules;
 

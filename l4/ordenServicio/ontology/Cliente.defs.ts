@@ -1,33 +1,255 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/ontology/Cliente.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const ordenServicioEntityCliente = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-15-ns5-ontology-v3",
   "moduleName": "ordenServicio",
   "entityId": "Cliente",
   "title": "Cliente",
-  "description": "Persona cliente identificada para registrar sus órdenes de servicio y consultar sus propias órdenes desde el portal.",
-  "kind": "mdm",
-  "party": "person",
-  "mdmSubtype": "Person",
-  "displayField": "name",
-  "fields": [],
-  "fieldsBase": [
-    { "fieldId": "name", "title": "Nombre completo", "type": "string", "required": true, "description": "Nombre completo del cliente." },
-    { "fieldId": "docType", "title": "Tipo de documento", "type": "string", "required": true, "enum": [{ "value": "NationalId", "title": "Documento de identidad" }], "description": "Tipo de documento de identificación del cliente." },
-    { "fieldId": "docId", "title": "Documento de identidad", "type": "string", "required": true, "description": "Número del documento de identidad del cliente." },
-    { "fieldId": "contacts", "title": "Contactos", "type": "json", "required": true, "description": "Contactos del cliente (teléfono, correo electrónico)." }
+  "description": "Persona que entrega un aparato para servicio técnico, recibe el presupuesto y consulta o responde sus propias órdenes desde el portal.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "ordenesServicio": {
+      "relationshipId": "ordenServicioCliente",
+      "to": "OrdenServicio",
+      "via": "OrdenServicio.clienteId",
+      "cardinality": "1:N",
+      "title": "Órdenes de servicio del cliente",
+      "description": "Un cliente puede estar asociado a varias órdenes de servicio; cada orden corresponde a un único cliente.",
+      "mode": "fk",
+      "direction": "to",
+      "required": "Cuando se consulta una orden de servicio asociada a este cliente.",
+      "role": "cliente"
+    }
+  },
+  "capabilities": {
+    "read.byId": "Consulta un cliente por su identificador maestro para mostrarlo en una orden de servicio; lo usan recepción, técnico y portal según sus permisos.",
+    "locate.byName": "Busca clientes por nombre al abrir una orden de servicio; lo usa recepción para evitar registros duplicados.",
+    "locate.byDocument": "Localiza un cliente por su documento nacional antes de crear o vincular su rol; lo usa recepción para deduplicar el registro.",
+    "locate.byContact": "Localiza al cliente por un canal de contacto ya vinculado; lo usa recepción cuando el cliente no presenta documento.",
+    "register.createOrAttach": "Crea la persona si no existe o le adjunta el rol de Cliente de ordenServicio si ya existe; lo usa recepción al abrir una orden.",
+    "edit.platformFields": "Actualiza los datos maestros permitidos del cliente, como nombre, documento o consentimiento; lo usa recepción al corregir sus datos.",
+    "inactivate": "Inactiva o reactiva el registro maestro del cliente sin eliminarlo; lo usa recepción autorizada cuando el cliente deja de utilizar el servicio.",
+    "listLinks": "Lista las órdenes de servicio relacionadas con el cliente mediante la relación de la orden; lo usan recepción y el portal dentro de su alcance de datos.",
+    "invite.login": "Invita al cliente a iniciar sesión en el portal, creando su índice de acceso sin guardarlo en el módulo; lo usa recepción."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-identity-never-in-namespace",
+    "rule-document-shape-validated"
   ],
-  "lifecycleStates": [],
-  "transitions": [],
-  "storage": {
-    "target": "mdm",
-    "scope": "organization",
-    "idField": "id",
-    "mdmType": "ordenServicio.Cliente"
+  "kind": "role",
+  "subtype": "Person",
+  "roleTag": "ordenServicio.Cliente",
+  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true,
+        "description": "Bumped by the engine on every write; optimistic concurrency."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "description": "Registro maestro de la persona cliente, con datos de la plataforma y el espacio propio del módulo de órdenes de servicio.",
+        "fields": {
+          "identification": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "subtype": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Person",
+                    "title": "Persona",
+                    "description": "Persona que actúa como cliente del servicio técnico."
+                  }
+                ],
+                "description": "Indica que este registro maestro corresponde a una persona cliente.",
+                "title": "Tipo de registro",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "name": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "maxLength": 0,
+                "description": "Nombre con el que recepción identifica al cliente al abrir o consultar sus órdenes.",
+                "title": "Nombre",
+                "min": 0,
+                "max": 0
+              },
+              "status": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Active",
+                    "title": "Activo",
+                    "description": "El cliente puede utilizarse en nuevas órdenes."
+                  },
+                  {
+                    "value": "Inactive",
+                    "title": "Inactivo",
+                    "description": "El cliente no se utiliza en nuevas órdenes."
+                  },
+                  {
+                    "value": "Merged",
+                    "title": "Fusionado",
+                    "description": "El registro fue fusionado con otro registro maestro."
+                  },
+                  {
+                    "value": "Blocked",
+                    "title": "Bloqueado",
+                    "description": "El uso del registro está bloqueado por la plataforma."
+                  }
+                ],
+                "title": "Estado maestro",
+                "description": "Estado de actividad del registro maestro del cliente en la plataforma.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "docType": {
+                "type": "enum",
+                "indexed": true,
+                "values": [
+                  {
+                    "value": "SSN",
+                    "title": "SSN",
+                    "description": "Número de Seguro Social."
+                  },
+                  {
+                    "value": "EIN",
+                    "title": "EIN",
+                    "description": "Número de identificación fiscal de empresa."
+                  },
+                  {
+                    "value": "Passport",
+                    "title": "Pasaporte",
+                    "description": "Documento de pasaporte."
+                  },
+                  {
+                    "value": "DriversLicense",
+                    "title": "Licencia de conducir",
+                    "description": "Documento de licencia de conducir."
+                  },
+                  {
+                    "value": "NationalId",
+                    "title": "Documento nacional",
+                    "description": "Documento nacional de identidad."
+                  },
+                  {
+                    "value": "CPF",
+                    "title": "CPF",
+                    "description": "Registro de persona física."
+                  },
+                  {
+                    "value": "CNPJ",
+                    "title": "CNPJ",
+                    "description": "Registro nacional de persona jurídica."
+                  },
+                  {
+                    "value": "VAT",
+                    "title": "IVA",
+                    "description": "Identificación tributaria."
+                  },
+                  {
+                    "value": "Other",
+                    "title": "Otro",
+                    "description": "Otro tipo de documento admitido por la plataforma."
+                  }
+                ],
+                "title": "Tipo de documento",
+                "description": "Tipo de documento nacional utilizado para localizar o deduplicar al cliente cuando fue informado.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "docId": {
+                "type": "string",
+                "indexed": true,
+                "description": "Número del documento del cliente cuando fue informado para su identificación y deduplicación.",
+                "title": "Número de documento",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "countryCode": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "pattern": "^[A-Z]{2}$",
+                "maxLength": 2,
+                "default": "US",
+                "description": "Código ISO del país aplicable al documento y a las reglas del cliente.",
+                "title": "País",
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Datos de identificación de la persona usados para reconocer y localizar al cliente al abrir una orden."
+          },
+          "base": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "contacts": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "ContactSummary",
+                "derived": true,
+                "description": "Resumen derivado de los canales de contacto vinculados al cliente, utilizado por la plataforma para localizarlo o habilitar su acceso.",
+                "title": "Canales de contacto",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Datos base de plataforma que permiten contactar al cliente y reconocer sus relaciones."
+          },
+          "person": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {},
+            "description": "Datos propios de una persona que la plataforma conserva para el cliente cuando sean necesarios."
+          },
+          "general": {
+            "type": "object",
+            "owner": "organization",
+            "open": true,
+            "description": "Datos promovidos por la organización para uso compartido entre módulos; este módulo solo los consulta."
+          },
+          "ordenServicio": {
+            "type": "object",
+            "owner": "module",
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
+          }
+        }
+      }
+    }
   }
-} as const satisfies Ns5OntologyEntityArtifact;
+} as const satisfies Ns5OntologyEntityV3;
 
 export type OrdenServicioEntityClienteType = typeof ordenServicioEntityCliente;
 

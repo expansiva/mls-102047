@@ -7,8 +7,8 @@ export const fecharComandaJourney = {
   "journeyId": "fecharComanda",
   "business": {
     "actorRef": "caixa",
-    "title": "Fechar comanda e liberar mesa",
-    "goal": "Receber o pagamento, encerrar a comanda e liberar a mesa.",
+    "title": "Fechar comanda e registrar pagamento",
+    "goal": "Receber uma comanda aberta, aplicar desconto quando necessário e liberar a mesa.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,46 +17,35 @@ export const fecharComandaJourney = {
         "stepId": "localizarComandaParaFechamento",
         "kind": "locate",
         "entity": "Comanda",
-        "title": "x",
-        "description": "Localiza a comanda aberta apresentada para pagamento."
+        "title": "Localizar comanda aberta",
+        "description": "Usa a comanda em contexto ou localiza a comanda aberta que será encerrada."
       },
       {
-        "stepId": "inspecionarTotalDaComanda",
+        "stepId": "consultarTotalDaComanda",
         "kind": "inspect",
         "entity": "Comanda",
-        "title": "x",
-        "description": "Consulta os itens lançados e o total da comanda."
+        "title": "Consultar total",
+        "description": "Confere os itens válidos e o total a receber da comanda."
       },
       {
-        "stepId": "registrarDescontoEpagamento",
+        "stepId": "fecharEregistrarPagamento",
         "kind": "act",
         "entity": "Comanda",
-        "effect": "update",
-        "title": "x",
-        "description": "Registra o desconto opcional e a forma de pagamento."
-      },
-      {
-        "stepId": "encerrarComanda",
-        "kind": "act",
-        "entity": "Comanda",
-        "affects": [
-          "Mesa"
-        ],
         "effect": "transition",
         "transitionRef": "fecharComanda",
-        "title": "x",
-        "description": "Fecha a comanda paga e libera a mesa."
+        "title": "Fechar comanda",
+        "description": "Aplica desconto opcional, registra a forma de pagamento e encerra a comanda; a mesa vinculada fica livre."
       }
     ],
     "outcome": {
-      "statement": "A comanda é encerrada com o pagamento registrado e a mesa fica livre.",
+      "statement": "A comanda é encerrada com o pagamento registrado e a mesa é liberada.",
       "evidence": [
-        "Comanda registrada como fechada com total, desconto aplicado quando houver e forma de pagamento.",
-        "Mesa vinculada à comanda está disponível."
+        "A comanda apresenta situação fechada, desconto aplicado quando houver e forma de pagamento registrada.",
+        "A mesa vinculada é apresentada como disponível."
       ]
     }
   },
-  "businessHash": "sha256:c39255d59a716428cb8b0bdff5d68050fef135a669288bd57b00b76707aa4895"
+  "businessHash": "sha256:fa13c88de6d38f155b78106eccccd347b1a52e8f93440c9d5af87b8446deab58"
 } as const satisfies Ns5JourneyArtifact;
 
 export type FecharComandaJourneyType = typeof fecharComandaJourney;

@@ -14,41 +14,38 @@ export const cancelarItemLancadoJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarComandaParaCancelamento",
+        "stepId": "localizarComandaParaCorrecao",
         "kind": "locate",
         "entity": "Comanda",
-        "title": "x",
-        "description": "Localiza a comanda aberta que contém o lançamento incorreto."
+        "title": "Localizar comanda aberta",
+        "description": "Usa a comanda em contexto ou localiza a comanda aberta que precisa de correção."
       },
       {
-        "stepId": "inspecionarLancamentos",
+        "stepId": "inspecionarItensLancados",
         "kind": "inspect",
         "entity": "ItemComanda",
-        "title": "x",
-        "description": "Identifica o item lançado por engano na comanda."
+        "title": "Inspecionar itens lançados",
+        "description": "Confere os itens já lançados para identificar o lançamento feito por engano."
       },
       {
-        "stepId": "cancelarLancamento",
+        "stepId": "cancelarItem",
         "kind": "act",
         "entity": "ItemComanda",
-        "affects": [
-          "Comanda"
-        ],
         "effect": "transition",
         "transitionRef": "cancelarItemComanda",
-        "title": "x",
-        "description": "Cancela o lançamento incorreto enquanto a comanda permanece aberta."
+        "title": "Cancelar item",
+        "description": "Cancela o item lançado por engano enquanto a comanda permanece aberta."
       }
     ],
     "outcome": {
-      "statement": "O lançamento incorreto é cancelado e deixa de compor a comanda.",
+      "statement": "O lançamento incorreto é cancelado e deixa de compor a cobrança.",
       "evidence": [
-        "Item da comanda identificado como cancelado.",
-        "Total da comanda reflete a exclusão do lançamento cancelado."
+        "O item apresenta situação cancelada.",
+        "O total da comanda é recalculado sem o valor do item cancelado."
       ]
     }
   },
-  "businessHash": "sha256:b9b486a4dd4639f4b6b019d2e416c3348e522f64576e37ca888a796dd0dae71e"
+  "businessHash": "sha256:7333b3d3790d515c70f6ec212b54e97906b3b286da13ef8efbf1b420e25bd93b"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CancelarItemLancadoJourneyType = typeof cancelarItemLancadoJourney;

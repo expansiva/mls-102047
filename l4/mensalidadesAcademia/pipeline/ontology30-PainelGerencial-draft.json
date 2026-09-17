@@ -1,0 +1,163 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-15-ns5-ontology-v3",
+    "moduleName": "mensalidadesAcademia",
+    "entityId": "PainelGerencial",
+    "title": "Painel gerencial",
+    "description": "Resumo recalculado por competência dos valores a receber e recebidos e das quantidades de alunos ativos, bloqueados e inadimplentes.",
+    "displayField": "competence",
+    "relationships": {},
+    "capabilities": {
+      "aggregate.byWindow": "Consolida mensalmente as mensalidades, os pagamentos, as matrículas e os alunos em indicadores por competência, por meio de agregado temporal; a gerência acompanha o resultado no painel.",
+      "store.timeSeries": "Mantém os indicadores por competência como série temporal indexada, para leitura de cada mês sem consultar todas as transações; a gerência usa essa série no painel.",
+      "read.window": "Lê os indicadores de uma competência pelo campo indexado competence; a gerência consulta a posição financeira e a situação dos alunos.",
+      "refresh": "Atualiza automaticamente o resumo da competência quando mensalidades, pagamentos ou matrículas alteram seus dados de origem; a gerência visualiza indicadores atualizados."
+    },
+    "rules": [],
+    "kind": "entity",
+    "class": "supporting",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "mensalidadesAcademia_painelgerencial",
+      "kind": "timeSeries"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "competence": {
+          "type": "timestamp",
+          "required": true,
+          "indexed": true,
+          "of": "GeoPoint",
+          "title": "Competência",
+          "description": "Início do mês de competência ao qual os indicadores gerenciais se referem.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0,
+          "derived": true
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "of": "GeoPoint",
+          "title": "Indicadores do mês",
+          "description": "Medidas recalculadas a partir das mensalidades, pagamentos, matrículas e alunos da academia para a competência.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0,
+          "fields": {
+            "totalAReceber": {
+              "type": "number",
+              "required": true,
+              "of": "GeoPoint",
+              "title": "Total a receber",
+              "description": "Soma, em reais, dos valores das mensalidades geradas para a competência.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0,
+              "derived": true
+            },
+            "totalRecebido": {
+              "type": "number",
+              "required": true,
+              "of": "GeoPoint",
+              "title": "Total recebido",
+              "description": "Soma, em reais, dos pagamentos registrados para mensalidades da competência.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0,
+              "derived": true
+            },
+            "quantidadeAlunosAtivos": {
+              "type": "number",
+              "required": true,
+              "of": "GeoPoint",
+              "title": "Quantidade de alunos ativos",
+              "description": "Quantidade de alunos com matrícula ativa na competência.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0,
+              "derived": true
+            },
+            "quantidadeAlunosBloqueados": {
+              "type": "number",
+              "required": true,
+              "of": "GeoPoint",
+              "title": "Quantidade de alunos bloqueados",
+              "description": "Quantidade de alunos bloqueados por inadimplência na competência.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0,
+              "derived": true
+            },
+            "quantidadeAlunosInadimplentes": {
+              "type": "number",
+              "required": true,
+              "of": "GeoPoint",
+              "title": "Quantidade de alunos inadimplentes",
+              "description": "Quantidade de alunos com mensalidade vencida na competência.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0,
+              "derived": true
+            }
+          },
+          "derived": true
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelGerencial",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelGerencial",
+      "detail": "record.fields.competence.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelGerencial",
+      "detail": "record.fields.details.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelGerencial",
+      "detail": "record.fields.details.fields.totalAReceber.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelGerencial",
+      "detail": "record.fields.details.fields.totalRecebido.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelGerencial",
+      "detail": "record.fields.details.fields.quantidadeAlunosAtivos.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelGerencial",
+      "detail": "record.fields.details.fields.quantidadeAlunosBloqueados.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelGerencial",
+      "detail": "record.fields.details.fields.quantidadeAlunosInadimplentes.derived (ddm)"
+    }
+  ]
+}

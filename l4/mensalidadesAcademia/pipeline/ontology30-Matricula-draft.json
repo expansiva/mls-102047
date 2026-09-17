@@ -1,73 +1,194 @@
 {
-  "entityId": "Matricula",
-  "fields": [
-    {
-      "fieldId": "id",
-      "title": "Identificador",
-      "type": "uuid",
-      "required": true,
-      "description": "Identificador único da matrícula."
+  "entity": {
+    "schemaVersion": "2026-09-15-ns5-ontology-v3",
+    "moduleName": "mensalidadesAcademia",
+    "entityId": "Matricula",
+    "title": "Matrícula",
+    "description": "Vínculo de um aluno a um plano a partir de uma data, mantido ativo até o seu cancelamento.",
+    "displayField": "startDate",
+    "relationships": {
+      "aluno": {
+        "relationshipId": "matriculaAluno",
+        "to": "Aluno",
+        "via": "Matricula.alunoId",
+        "cardinality": "N:1",
+        "title": "Aluno da matrícula",
+        "description": "Cada matrícula pertence obrigatoriamente a um aluno.",
+        "mode": "fk",
+        "required": "Sempre"
+      },
+      "plano": {
+        "relationshipId": "matriculaPlano",
+        "to": "Plano",
+        "via": "Matricula.planoId",
+        "cardinality": "N:1",
+        "title": "Plano contratado",
+        "description": "Cada matrícula é contratada obrigatoriamente em um plano.",
+        "mode": "fk",
+        "required": "Sempre"
+      },
+      "mensalidades": {
+        "relationshipId": "matriculaMensalidades",
+        "to": "Mensalidade",
+        "via": "Mensalidade.matriculaId",
+        "cardinality": "1:N",
+        "title": "Mensalidades geradas",
+        "description": "Uma matrícula pode originar mensalidades para as competências geradas enquanto estiver ativa.",
+        "mode": "fk",
+        "required": "Quando houver competências geradas"
+      }
     },
-    {
-      "fieldId": "alunoId",
-      "title": "Aluno",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência ao aluno ao qual a matrícula pertence."
+    "capabilities": {
+      "read.byId": "Consulta uma matrícula pelo identificador, usando a chave primária da tabela, para telas que já possuem seu id.",
+      "locate.byColumn": "Lista matrículas por aluno, plano, data de início ou situação indexados, com ordenação e paginação, para a recepção e a gerência.",
+      "count": "Conta matrículas conforme filtros indexados, especialmente pela situação, para indicadores e listas da gerência.",
+      "listByForeignKey": "Lista as matrículas vinculadas a um aluno ou plano pela respectiva chave estrangeira, para consultas da recepção e da gerência.",
+      "create": "Registra uma nova matrícula com aluno, plano e data de início, inserindo a linha pela recepção.",
+      "transition": "Move a matrícula ativa para cancelada pela transição cancelarMatricula, para o aluno encerrar a própria matrícula.",
+      "read.mdmRecord": "Lê o registro mestre do aluno apontado por alunoId para exibir sua identificação nas consultas de matrícula."
     },
-    {
-      "fieldId": "planoId",
-      "title": "Plano",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência ao plano contratado na matrícula."
+    "rules": [
+      "matriculaAtivaUnicaPorAluno",
+      "cancelamentoEncerraGeracaoFutura"
+    ],
+    "kind": "entity",
+    "class": "core",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "mensalidadesAcademia_matricula",
+      "kind": "relational"
     },
-    {
-      "fieldId": "dataInicio",
-      "title": "Data de início",
-      "type": "date",
-      "required": true,
-      "description": "Data a partir da qual a matrícula passa a vigorar."
-    },
-    {
-      "fieldId": "status",
-      "title": "Situação",
-      "type": "string",
-      "required": true,
-      "enum": [
-        {
-          "value": "active",
-          "title": "Ativa"
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
         },
-        {
-          "value": "cancelled",
-          "title": "Cancelada"
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "alunoId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "of": "ContactSummary",
+          "to": [
+            "Aluno"
+          ],
+          "title": "Aluno",
+          "description": "Aluno ao qual esta matrícula pertence.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "planoId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "of": "ContactSummary",
+          "to": [
+            "Plano"
+          ],
+          "title": "Plano",
+          "description": "Plano contratado nesta matrícula.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "startDate": {
+          "type": "date",
+          "required": true,
+          "indexed": true,
+          "of": "ContactSummary",
+          "title": "Data de início",
+          "description": "Data a partir da qual o aluno passa a ter o plano contratado e pode receber mensalidades.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "status": {
+          "type": "enum",
+          "required": true,
+          "indexed": true,
+          "of": "ContactSummary",
+          "values": [
+            {
+              "value": "active",
+              "title": "Ativa",
+              "description": "Matrícula vigente e elegível à geração de mensalidades."
+            },
+            {
+              "value": "cancelled",
+              "title": "Cancelada",
+              "description": "Matrícula encerrada, sem geração de mensalidades futuras."
+            }
+          ],
+          "title": "Situação",
+          "description": "Situação da matrícula usada para identificar matrículas elegíveis à geração de mensalidades.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "of": "ContactSummary",
+          "title": "Detalhes da matrícula",
+          "description": "Informações complementares do encerramento da matrícula.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0,
+          "fields": {
+            "cancelledAt": {
+              "type": "timestamp",
+              "of": "ContactSummary",
+              "title": "Data e hora do cancelamento",
+              "description": "Momento em que o aluno cancelou esta matrícula.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0
+            }
+          }
         }
-      ],
-      "description": "Situação atual da matrícula."
-    }
-  ],
-  "lifecycleStates": [
-    {
-      "state": "active",
-      "reachedBy": "actor"
+      }
     },
+    "lifecycleStates": [
+      {
+        "state": "active",
+        "reachedBy": "actor"
+      },
+      {
+        "state": "cancelled",
+        "reachedBy": "actor"
+      }
+    ],
+    "transitions": [
+      {
+        "transitionId": "cancelarMatricula",
+        "from": [
+          "active"
+        ],
+        "to": "cancelled",
+        "by": [
+          "aluno"
+        ],
+        "description": "O aluno cancela a própria matrícula ativa, encerrando a geração de mensalidades futuras.",
+        "ruleRefs": [
+          "cancelamentoEncerraGeracaoFutura"
+        ]
+      }
+    ]
+  },
+  "normalizations": [
     {
-      "state": "cancelled",
-      "reachedBy": "actor"
-    }
-  ],
-  "transitions": [
-    {
-      "transitionId": "cancelarMatricula",
-      "from": [
-        "active"
-      ],
-      "to": "cancelled",
-      "by": [
-        "aluno"
-      ],
-      "description": "Encerra a matrícula ativa do próprio aluno e impede a geração de mensalidades futuras."
+      "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.id, record.fields.version"
     }
   ]
 }

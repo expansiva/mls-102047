@@ -1,31 +1,9 @@
 {
+  "schemaVersion": "2026-09-12-ns5-integration-v2",
+  "moduleName": "financeiro",
   "inbound": [
     {
-      "id": "comandaFechada",
-      "kind": "event",
-      "from": "comandaRestaurante",
-      "event": "comandaFechada",
-      "writes": [
-        "TituloReceber"
-      ],
-      "effect": "create",
-      "description": "Cria um título a receber a partir da comanda fechada, com pagador, valor, vencimento e referência de origem.",
-      "entityRefs": []
-    },
-    {
-      "id": "ordemServicoEntregue",
-      "kind": "event",
-      "from": "ordenServicio",
-      "event": "entregarYfinalizar",
-      "writes": [
-        "TituloReceber"
-      ],
-      "effect": "create",
-      "description": "Cria um título a receber a partir da ordem de serviço entregue e finalizada, preservando os dados de cobrança e a origem.",
-      "entityRefs": []
-    },
-    {
-      "id": "pagadorCriado",
+      "id": "pagadorCriadoNoCatalogo",
       "kind": "event",
       "from": "organization",
       "event": "mdmCreated",
@@ -33,11 +11,11 @@
         "Pagador"
       ],
       "effect": "create",
-      "description": "Cria a referência local do pagador quando o cadastro mestre de pessoa é criado para uso nos títulos e recebimentos.",
+      "description": "Cria o Pagador no financeiro quando seu cadastro é criado no catálogo da organização.",
       "entityRefs": []
     },
     {
-      "id": "pagadorAtualizado",
+      "id": "pagadorAtualizadoNoCatalogo",
       "kind": "event",
       "from": "organization",
       "event": "mdmUpdated",
@@ -45,70 +23,64 @@
         "Pagador"
       ],
       "effect": "update",
-      "description": "Atualiza a referência local do pagador conforme alterações no cadastro mestre de pessoa.",
+      "description": "Atualiza o Pagador no financeiro quando seu cadastro é atualizado no catálogo da organização.",
       "entityRefs": []
     },
     {
-      "id": "pagadorInativado",
+      "id": "comandaFechada",
       "kind": "event",
-      "from": "organization",
-      "event": "mdmInactivated",
+      "from": "comandaRestaurante",
+      "event": "fecharComanda",
       "writes": [
-        "Pagador"
+        "TituloReceber"
       ],
-      "effect": "update",
-      "description": "Atualiza a referência local do pagador para refletir a inativação no cadastro mestre de pessoa.",
+      "effect": "create",
+      "description": "Cria um TituloReceber a partir da comanda fechada, com pagador, valor, vencimento e a origem da cobrança.",
+      "entityRefs": []
+    },
+    {
+      "id": "ordemServicoEntregue",
+      "kind": "event",
+      "from": "ordenServicio",
+      "event": "entregaFinalizada",
+      "writes": [
+        "TituloReceber"
+      ],
+      "effect": "create",
+      "description": "Cria um TituloReceber a partir da ordem de serviço cuja entrega foi finalizada, registrando o pagador, valor, vencimento e origem.",
       "entityRefs": []
     }
   ],
-  "outbound": [
-    {
-      "id": "processarPagamentoCartao",
-      "kind": "external",
-      "to": "stripe",
-      "event": "processarPagamentoCartao",
-      "on": "Recebimento.confirmarPagamentoComCartao",
-      "description": "Envia à Stripe a solicitação de processamento do pagamento com cartão de um título a receber.",
-      "entityRefs": [
-        "Recebimento",
-        "TituloReceber"
-      ]
-    }
-  ],
+  "outbound": [],
   "plugins": [
     {
       "pluginId": "stripe",
-      "description": "Processa pagamentos com cartão realizados pelo pagador no portal.",
+      "description": "Processa o pagamento de título em aberto com cartão no portal do pagador.",
       "usedBy": [
-        "portalPagador.pagarTituloComCartao"
+        "pagarTituloComCartao.registrarPagamentoComCartao"
       ]
     }
   ],
   "normalizations": [
     {
       "kind": "dropTransitionRef",
+      "inboundId": "pagadorCriadoNoCatalogo",
+      "detail": "transitionRef unused dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "pagadorAtualizadoNoCatalogo",
+      "detail": "transitionRef unused dropped; effect is update."
+    },
+    {
+      "kind": "dropTransitionRef",
       "inboundId": "comandaFechada",
-      "detail": "transitionRef comandaFechada dropped; effect is create."
+      "detail": "transitionRef unused dropped; effect is create."
     },
     {
       "kind": "dropTransitionRef",
       "inboundId": "ordemServicoEntregue",
-      "detail": "transitionRef entregarYfinalizar dropped; effect is create."
-    },
-    {
-      "kind": "dropTransitionRef",
-      "inboundId": "pagadorCriado",
-      "detail": "transitionRef mdmCreated dropped; effect is create."
-    },
-    {
-      "kind": "dropTransitionRef",
-      "inboundId": "pagadorAtualizado",
-      "detail": "transitionRef mdmUpdated dropped; effect is update."
-    },
-    {
-      "kind": "dropTransitionRef",
-      "inboundId": "pagadorInativado",
-      "detail": "transitionRef mdmInactivated dropped; effect is update."
+      "detail": "transitionRef unused dropped; effect is create."
     }
   ]
 }

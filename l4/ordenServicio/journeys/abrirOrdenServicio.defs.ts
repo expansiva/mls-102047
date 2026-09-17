@@ -7,41 +7,31 @@ export const abrirOrdenServicioJourney = {
   "journeyId": "abrirOrdenServicio",
   "business": {
     "actorRef": "recepcionista",
-    "title": "Abrir orden de servicio",
-    "goal": "Registrar la recepción del aparato y abrir su orden de servicio.",
+    "title": "Abrir una orden de servicio",
+    "goal": "Registrar la recepción del aparato y dejar creada la orden para su análisis técnico.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "identificarClienteYaparato",
-        "kind": "locate",
-        "entity": "Cliente",
-        "title": "Identificar cliente y aparato",
-        "description": "Identifica al cliente y su aparato; si no existen previamente, los datos aportados permiten crear o asociar sus registros maestros."
-      },
-      {
         "stepId": "registrarRecepcion",
         "kind": "act",
         "entity": "OrdenServicio",
-        "affects": [
-          "Cliente",
-          "Aparato"
-        ],
         "effect": "create",
         "title": "Registrar recepción",
-        "description": "Abre la orden con el defecto informado, los datos de recepción y las fotografías del aparato."
+        "description": "Crea la orden con los datos del cliente, el aparato recibido, el defecto informado y las fotos aportadas; identifica o vincula los registros maestros necesarios."
       }
     ],
     "outcome": {
-      "statement": "La orden queda abierta y el aparato queda registrado para su análisis técnico.",
+      "statement": "La orden queda registrada y disponible para que el técnico la analice.",
       "evidence": [
-        "Existe una orden de servicio asociada al cliente y al aparato.",
-        "La orden conserva el defecto informado y las fotografías de recepción."
+        "Número de orden generado.",
+        "Datos de recepción, defecto informado y fotos asociados a la orden.",
+        "Orden remitida al técnico para análisis."
       ]
     }
   },
-  "businessHash": "sha256:82405cf01c03119c7ef464c7b7c34bb46af25bd566b8e13bafb0ccb2a765488d"
+  "businessHash": "sha256:e6e8248d57669abf278f48f8983f1e4553bc0b447a1a63518d37bfd24e4232be"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AbrirOrdenServicioJourneyType = typeof abrirOrdenServicioJourney;

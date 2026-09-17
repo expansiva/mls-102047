@@ -8,7 +8,7 @@ export const consultarTitulosVencidosJourney = {
   "business": {
     "actorRef": "gerenteFinanceiro",
     "title": "Consultar títulos vencidos",
-    "goal": "Identificar títulos a receber que estão vencidos.",
+    "goal": "Identificar os títulos da organização que estão vencidos e ainda possuem saldo em aberto.",
     "entry": {
       "mode": "coldStart"
     },
@@ -18,25 +18,25 @@ export const consultarTitulosVencidosJourney = {
         "kind": "locate",
         "entity": "TituloReceber",
         "title": "Localizar títulos vencidos",
-        "description": "Localizar títulos com vencimento passado e saldo pendente."
+        "description": "Consulta os títulos da organização com vencimento expirado e saldo pendente."
       },
       {
         "stepId": "inspecionarTitulosVencidos",
         "kind": "inspect",
         "entity": "TituloReceber",
-        "title": "Inspecionar títulos vencidos",
-        "description": "Inspecionar o pagador, o valor pendente, o vencimento e a origem de cada título vencido."
+        "title": "Examinar títulos vencidos",
+        "description": "Examina pagador, valor em aberto, vencimento e origem de cada título vencido."
       }
     ],
     "outcome": {
-      "statement": "Os títulos vencidos ficam disponíveis para acompanhamento financeiro.",
+      "statement": "O gerente financeiro identifica os títulos vencidos que exigem acompanhamento.",
       "evidence": [
-        "Lista de títulos vencidos apresentada.",
-        "Dados de vencimento e saldo pendente visíveis."
+        "A consulta apresenta títulos com vencimento anterior à data atual e saldo em aberto.",
+        "Cada título vencido exibe seu pagador, valor pendente e origem."
       ]
     }
   },
-  "businessHash": "sha256:cf81b0dbc1e8ac2b6bb2f30437f3d9955a371fa2cfbe97b53817dbeda786554d"
+  "businessHash": "sha256:a906293debcb34d8f9cc6533b183d40febf6a7920f836ac7ae184ce46c9eda3e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarTitulosVencidosJourneyType = typeof consultarTitulosVencidosJourney;

@@ -7,14 +7,14 @@ export const registrarAtendimentoJourney = {
   "journeyId": "registrarAtendimento",
   "business": {
     "actorRef": "profissional",
-    "title": "Registrar atendimento realizado",
+    "title": "Registrar atendimento",
     "goal": "Marcar uma consulta como atendida e registrar uma anotação do atendimento.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarConsultaDaAgenda",
+        "stepId": "localizarConsulta",
         "kind": "locate",
         "entity": "Consulta",
         "title": "x",
@@ -25,7 +25,7 @@ export const registrarAtendimentoJourney = {
         "kind": "inspect",
         "entity": "Consulta",
         "title": "x",
-        "description": "Confere os dados da consulta antes de concluir o atendimento."
+        "description": "Confere os dados da consulta antes de registrar o atendimento."
       },
       {
         "stepId": "registrarAtendimentoRealizado",
@@ -34,7 +34,7 @@ export const registrarAtendimentoJourney = {
         "effect": "transition",
         "transitionRef": "registrarAtendimento",
         "title": "x",
-        "description": "Marca a consulta como atendida e registra a anotação do atendimento."
+        "description": "Marca a consulta como atendida e registra a anotação do profissional."
       }
     ],
     "outcome": {
@@ -45,7 +45,7 @@ export const registrarAtendimentoJourney = {
       ]
     }
   },
-  "businessHash": "sha256:f4b141538e312c7e305b1dc0e259af89e509e35d60e80d682447516f9f08f2d7"
+  "businessHash": "sha256:d442d56c8d3344d80b1afa087bcfdc78e630f7c65e0061853f3d3974d872b0c4"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarAtendimentoJourneyType = typeof registrarAtendimentoJourney;

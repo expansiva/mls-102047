@@ -8,7 +8,7 @@ export const cancelarPropriaMatriculaJourney = {
   "business": {
     "actorRef": "aluno",
     "title": "Cancelar própria matrícula",
-    "goal": "Encerrar a própria matrícula para impedir a geração de mensalidades futuras.",
+    "goal": "Encerrar a matrícula para impedir a geração de mensalidades futuras.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,15 +17,15 @@ export const cancelarPropriaMatriculaJourney = {
         "stepId": "localizarPropriaMatricula",
         "kind": "locate",
         "entity": "Matricula",
-        "title": "Localizar a própria matrícula ativa.",
-        "description": "Acessa a matrícula vinculada ao aluno autenticado."
+        "title": "x",
+        "description": "Localiza a matrícula ativa do próprio aluno a partir do contexto da sua conta, com alternativa de busca quando necessário."
       },
       {
-        "stepId": "inspecionarPropriaMatricula",
+        "stepId": "consultarPropriaMatricula",
         "kind": "inspect",
         "entity": "Matricula",
-        "title": "Conferir os dados da matrícula.",
-        "description": "Visualiza o plano e a vigência da própria matrícula."
+        "title": "x",
+        "description": "Confere o plano e a situação da matrícula antes do cancelamento."
       },
       {
         "stepId": "cancelarMatricula",
@@ -33,19 +33,19 @@ export const cancelarPropriaMatriculaJourney = {
         "entity": "Matricula",
         "effect": "transition",
         "transitionRef": "cancelarMatricula",
-        "title": "Cancelar a matrícula.",
-        "description": "Encerra a matrícula ativa do aluno."
+        "title": "x",
+        "description": "Cancela a própria matrícula, encerrando sua elegibilidade para a geração de mensalidades futuras."
       }
     ],
     "outcome": {
-      "statement": "A matrícula do aluno é encerrada e não participa de gerações futuras de mensalidades.",
+      "statement": "A matrícula do aluno é cancelada e não gera novas mensalidades.",
       "evidence": [
-        "A matrícula apresenta situação de cancelada ou encerrada.",
-        "O aluno deixa de receber novas mensalidades após o encerramento."
+        "A matrícula registra o cancelamento.",
+        "A matrícula deixa de ser considerada ativa nas próximas gerações mensais."
       ]
     }
   },
-  "businessHash": "sha256:c2750452f82a0d0269be9bc25aa83595560eea4f394a14c1b965bc9cc5001ed9"
+  "businessHash": "sha256:e554d98e63ba436cbb8957d45052f9b7928d74028c0e475620517e8a35ee83ac"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CancelarPropriaMatriculaJourneyType = typeof cancelarPropriaMatriculaJourney;

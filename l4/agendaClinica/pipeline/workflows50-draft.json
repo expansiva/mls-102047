@@ -3,78 +3,59 @@
   "moduleName": "agendaClinica",
   "processes": [
     {
-      "processId": "acompanharConsultaAgendada",
-      "title": "Acompanhar consulta agendada",
-      "description": "Coordena a confirmação da consulta e o atendimento pelo profissional no horário marcado.",
+      "processId": "confirmacaoDeConsulta",
+      "title": "Confirmação de consulta",
+      "description": "Orquestra o registro da confirmação telefônica de uma consulta agendada.",
       "trigger": {
         "kind": "manual",
         "actorRef": "recepcionista"
       },
       "tasks": [
         {
-          "taskId": "agendarConsulta",
+          "taskId": "registrarConfirmacao",
           "kind": "human",
           "actorRef": "recepcionista",
-          "journeyRef": "agendarConsulta",
-          "next": [
-            "confirmarConsultaPorTelefone"
-          ],
-          "description": "A recepcionista agenda a consulta para o paciente com o profissional e horário definidos."
-        },
-        {
-          "taskId": "confirmarConsultaPorTelefone",
-          "kind": "human",
-          "actorRef": "recepcionista",
-          "journeyRef": "confirmarConsultaPorTelefone",
-          "next": [
-            "aguardarHorarioDaConsulta"
-          ],
-          "description": "A recepcionista registra a confirmação telefônica da consulta agendada."
-        },
-        {
-          "taskId": "aguardarHorarioDaConsulta",
-          "kind": "wait",
-          "next": [
-            "consultarAgendaDiaria"
-          ],
-          "description": "Aguarda o horário programado da consulta."
-        },
-        {
-          "taskId": "consultarAgendaDiaria",
-          "kind": "human",
-          "actorRef": "profissional",
-          "journeyRef": "consultarAgendaDiaria",
-          "next": [
-            "registrarAtendimento"
-          ],
-          "description": "O profissional consulta a própria agenda do dia para preparar o atendimento."
-        },
-        {
-          "taskId": "registrarAtendimento",
-          "kind": "human",
-          "actorRef": "profissional",
-          "journeyRef": "registrarAtendimento",
+          "journeyRef": "confirmarConsulta",
           "next": [],
-          "description": "O profissional registra o atendimento realizado e sua anotação."
+          "description": "A recepcionista confirma a consulta por telefone e registra a confirmação."
         }
       ]
     },
     {
-      "processId": "registrarAusenciaEmConsulta",
-      "title": "Registrar ausência em consulta",
-      "description": "Registra a falta do paciente quando ele não comparece à consulta.",
+      "processId": "registroDeFalta",
+      "title": "Registro de falta",
+      "description": "Orquestra o registro de não comparecimento do paciente à consulta.",
       "trigger": {
         "kind": "manual",
         "actorRef": "recepcionista"
       },
       "tasks": [
         {
-          "taskId": "registrarFaltaPaciente",
+          "taskId": "registrarNaoComparecimento",
           "kind": "human",
           "actorRef": "recepcionista",
-          "journeyRef": "registrarFaltaPaciente",
+          "journeyRef": "registrarFalta",
           "next": [],
-          "description": "A recepcionista marca a consulta como falta do paciente após o não comparecimento."
+          "description": "A recepcionista registra a falta do paciente na consulta."
+        }
+      ]
+    },
+    {
+      "processId": "registroDeAtendimento",
+      "title": "Registro de atendimento",
+      "description": "Orquestra o encerramento de uma consulta pelo profissional responsável.",
+      "trigger": {
+        "kind": "manual",
+        "actorRef": "profissional"
+      },
+      "tasks": [
+        {
+          "taskId": "registrarConsultaAtendida",
+          "kind": "human",
+          "actorRef": "profissional",
+          "journeyRef": "registrarAtendimento",
+          "next": [],
+          "description": "O profissional registra o atendimento realizado e sua anotação na consulta."
         }
       ]
     }
@@ -86,28 +67,26 @@
     },
     {
       "journeyId": "agendarConsulta",
-      "inProcess": true,
-      "processId": "acompanharConsultaAgendada"
+      "inProcess": false
     },
     {
-      "journeyId": "confirmarConsultaPorTelefone",
+      "journeyId": "confirmarConsulta",
       "inProcess": true,
-      "processId": "acompanharConsultaAgendada"
+      "processId": "confirmacaoDeConsulta"
     },
     {
-      "journeyId": "registrarFaltaPaciente",
+      "journeyId": "registrarFalta",
       "inProcess": true,
-      "processId": "registrarAusenciaEmConsulta"
+      "processId": "registroDeFalta"
     },
     {
-      "journeyId": "consultarAgendaDiaria",
-      "inProcess": true,
-      "processId": "acompanharConsultaAgendada"
+      "journeyId": "consultarAgendaDoDia",
+      "inProcess": false
     },
     {
       "journeyId": "registrarAtendimento",
       "inProcess": true,
-      "processId": "acompanharConsultaAgendada"
+      "processId": "registroDeAtendimento"
     }
   ]
 }

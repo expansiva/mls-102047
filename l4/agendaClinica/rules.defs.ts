@@ -1,33 +1,22 @@
 /// <mls fileReference="_102047_/l4/agendaClinica/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaRules = {
-  "schemaVersion": "2026-09-10-ns5-rules-v1",
+  "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "agendaClinica",
-  "rules": [
-    {
-      "ruleId": "horarioProfissionalExclusivo",
-      "description": "Não pode haver duas consultas para o mesmo profissional na mesma data e horário."
-    },
-    {
-      "ruleId": "anotacaoObrigatoriaNoAtendimento",
-      "description": "O registro de atendimento deve incluir uma anotação do atendimento."
-    },
-    {
-      "ruleId": "menorExigeResponsavel",
-      "description": "Paciente com menos de 18 anos precisa de pelo menos um responsável legal (vínculo GuardianOf ativo) antes da primeira consulta."
-    },
-    {
-      "ruleId": "inativoNaoAgenda",
-      "description": "Paciente ou profissional com situação Inativo não pode ter consulta agendada."
-    },
-    {
-      "ruleId": "contatoParaConfirmarConsulta",
-      "description": "Para confirmar consulta por telefone o paciente precisa de ao menos um canal de contato Phone ou WhatsApp ativo."
-    }
-  ]
-} as const satisfies Ns5RulesArtifact;
+  "rules": {
+    "transicaoConsultaPermitida": "A consulta só pode ser confirmada quando estiver agendada e só pode ser marcada como falta ou atendida quando estiver agendada ou confirmada.",
+    "anotacaoObrigatoriaNoAtendimento": "O registro de atendimento realizado exige uma anotação do profissional.",
+    "acessoProfissionalPropriaAgenda": "O profissional só pode consultar e registrar atendimento em consultas atribuídas a ele.",
+    "ruleForeignNamespaceRefused": "O módulo agendaClinica não pode gravar dados em namespaces pertencentes a outros módulos.",
+    "ruleDocumentShapeValidated": "Os documentos de registro devem respeitar a estrutura definida para cada tipo de cadastro.",
+    "ruleIdentityNeverInNamespace": "Dados de identidade mestre não podem ser mantidos no namespace do módulo agendaClinica.",
+    "rulePersonPrivacyConsentRequiredBrEu": "O consentimento de privacidade da pessoa é obrigatório quando aplicável no Brasil ou na União Europeia.",
+    "ruleContactValueUniquePerType": "O valor de um canal de contato deve ser único dentro do seu tipo de contato.",
+    "consultaSemConflitoHorario": "Não pode haver mais de uma consulta para o mesmo profissional na mesma data e horário."
+  }
+} as const satisfies Ns5RulesArtifactV2;
 
 export type AgendaClinicaRulesType = typeof agendaClinicaRules;
 

@@ -3,9 +3,9 @@
   "moduleName": "ordenServicio",
   "processes": [
     {
-      "processId": "abrirYPrepararPresupuesto",
-      "title": "Apertura y preparación de presupuesto",
-      "description": "Coordina la recepción del aparato y el análisis técnico hasta dejar el presupuesto disponible para el cliente.",
+      "processId": "gestionarOrdenServicio",
+      "title": "Gestionar orden de servicio",
+      "description": "Coordina la recepción, el diagnóstico, la decisión del cliente, la reparación o el retiro y la entrega final del aparato.",
       "trigger": {
         "kind": "manual",
         "actorRef": "recepcionista"
@@ -17,46 +17,47 @@
           "actorRef": "recepcionista",
           "journeyRef": "abrirOrdenServicio",
           "next": [
-            "prepararPresupuesto"
+            "diagnosticarYPresupuestar"
           ],
-          "description": "El recepcionista registra la recepción del aparato y abre la orden de servicio."
+          "description": "El recepcionista registra la recepción del aparato y crea la orden para su análisis técnico."
         },
         {
-          "taskId": "prepararPresupuesto",
+          "taskId": "diagnosticarYPresupuestar",
           "kind": "human",
           "actorRef": "tecnico",
-          "journeyRef": "prepararPresupuesto",
-          "next": [],
-          "description": "El técnico analiza el aparato, registra el diagnóstico y deja el presupuesto disponible para el cliente."
-        }
-      ]
-    },
-    {
-      "processId": "repararYEntregarAparato",
-      "title": "Reparación y entrega del aparato",
-      "description": "Coordina la reparación autorizada y la entrega final del aparato al cliente.",
-      "trigger": {
-        "kind": "event",
-        "event": "OrdenServicio.aprobarPresupuesto"
-      },
-      "tasks": [
-        {
-          "taskId": "realizarReparacion",
-          "kind": "human",
-          "actorRef": "tecnico",
-          "journeyRef": "realizarReparacion",
+          "journeyRef": "diagnosticarYpresupuestar",
           "next": [
-            "entregarAparato"
+            "responderPresupuesto"
           ],
-          "description": "El técnico realiza la reparación autorizada, registra el trabajo efectuado y deja el aparato listo para entrega."
+          "description": "El técnico analiza el aparato, registra el diagnóstico y emite el presupuesto para el cliente."
         },
         {
-          "taskId": "entregarAparato",
+          "taskId": "responderPresupuesto",
+          "kind": "human",
+          "actorRef": "cliente",
+          "journeyRef": "responderPresupuesto",
+          "next": [
+            "repararAparato"
+          ],
+          "description": "El cliente revisa el presupuesto disponible y registra su aprobación o rechazo desde el portal."
+        },
+        {
+          "taskId": "repararAparato",
+          "kind": "human",
+          "actorRef": "tecnico",
+          "journeyRef": "repararAparato",
+          "next": [
+            "entregarAparatoReparado"
+          ],
+          "description": "Si el presupuesto fue aprobado, el técnico realiza la reparación y deja la orden lista para entrega."
+        },
+        {
+          "taskId": "entregarAparatoReparado",
           "kind": "human",
           "actorRef": "recepcionista",
-          "journeyRef": "entregarAparatoReparado",
+          "journeyRef": "entregarYfinalizarOrden",
           "next": [],
-          "description": "El recepcionista verifica la entrega, entrega el aparato al cliente y finaliza la orden."
+          "description": "Cuando la reparación está lista, el recepcionista entrega el aparato al cliente y finaliza la orden."
         }
       ]
     }
@@ -65,34 +66,42 @@
     {
       "journeyId": "abrirOrdenServicio",
       "inProcess": true,
-      "processId": "abrirYPrepararPresupuesto"
+      "processId": "gestionarOrdenServicio"
     },
     {
-      "journeyId": "prepararPresupuesto",
+      "journeyId": "diagnosticarYpresupuestar",
       "inProcess": true,
-      "processId": "abrirYPrepararPresupuesto"
+      "processId": "gestionarOrdenServicio"
     },
     {
-      "journeyId": "aprobarPresupuesto",
-      "inProcess": false
-    },
-    {
-      "journeyId": "rechazarPresupuesto",
-      "inProcess": false
-    },
-    {
-      "journeyId": "realizarReparacion",
+      "journeyId": "responderPresupuesto",
       "inProcess": true,
-      "processId": "repararYEntregarAparato"
+      "processId": "gestionarOrdenServicio"
     },
     {
-      "journeyId": "entregarAparatoReparado",
+      "journeyId": "repararAparato",
       "inProcess": true,
-      "processId": "repararYEntregarAparato"
+      "processId": "gestionarOrdenServicio"
+    },
+    {
+      "journeyId": "entregarYfinalizarOrden",
+      "inProcess": true,
+      "processId": "gestionarOrdenServicio"
     },
     {
       "journeyId": "consultarMisOrdenes",
       "inProcess": false
+    }
+  ],
+  "systemDecisions": [
+    {
+      "decisionId": "dropDuplicateTaskEntregarAparatoRechazado",
+      "chosen": "drop",
+      "alternatives": [
+        "keep",
+        "drop"
+      ],
+      "decidedBy": "system"
     }
   ]
 }

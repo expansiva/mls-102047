@@ -21,121 +21,145 @@
       "kind": "external",
       "origin": "named",
       "title": "Pagador",
-      "description": "Pessoa que acessa o portal para consultar seus títulos e recebimentos e pagar títulos em aberto com cartão."
+      "description": "Pessoa que acessa o portal para consultar seus próprios títulos e recebimentos e pagar títulos em aberto com cartão."
     },
     {
       "actorId": "stripe",
       "kind": "system",
       "origin": "named",
       "title": "Stripe",
-      "description": "Sistema externo utilizado para processar pagamentos com cartão."
+      "description": "Sistema externo que processa pagamentos de títulos com cartão."
     }
   ],
   "grants": [
     {
-      "grantId": "caixaRecebimentos",
+      "grantId": "caixaRecebiveis",
       "actorRef": "caixa",
-      "title": "Operar recebimentos no caixa",
-      "description": "Permite ao caixa consultar títulos da organização, registrar recebimentos parciais ou totais em dinheiro, Pix ou cartão e estornar recebimentos realizados no mesmo dia.",
+      "title": "Receber e estornar títulos da organização",
+      "description": "Permite ao caixa consultar títulos, identificar seus pagadores, registrar recebimentos parciais ou integrais e conferir recebimentos para estorno no mesmo dia.",
       "entityRefs": [
+        "Pagador",
         "TituloReceber",
         "Recebimento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os títulos e recebimentos da organização necessários à operação do caixa."
+        "description": "Abrange os títulos, pagadores e recebimentos da organização."
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "O caixa pode consultar todos os dados dos títulos e recebimentos necessários para registrar, conferir e estornar baixas."
+        "mode": "fieldsOnly",
+        "description": "Exibe a identificação do pagador e os dados financeiros necessários para receber, conferir e estornar recebimentos, incluindo a confirmação de transação de cartão quando houver.",
+        "allowedFields": [
+          "Pagador.id",
+          "Pagador.details.identification",
+          "TituloReceber.id",
+          "TituloReceber.pagadorId",
+          "TituloReceber.vencimento",
+          "TituloReceber.saldoAberto",
+          "TituloReceber.origemModulo",
+          "TituloReceber.origemReferencia",
+          "TituloReceber.details.valorOriginal",
+          "Recebimento.id",
+          "Recebimento.tituloId",
+          "Recebimento.status",
+          "Recebimento.recebidoEm",
+          "Recebimento.details"
+        ]
       }
     },
     {
       "grantId": "gerenteFinanceiroRecebiveis",
       "actorRef": "gerenteFinanceiro",
-      "title": "Gerenciar recebíveis e extratos",
-      "description": "Permite ao gerente financeiro acompanhar os recebíveis, consultar títulos vencidos e emitir extratos por pagador para toda a organização.",
+      "title": "Gerenciar e analisar recebíveis",
+      "description": "Permite ao gerente financeiro acompanhar recebíveis, títulos vencidos e extratos por pagador em toda a organização, além de manter os registros de gerentes financeiros exigidos pelo módulo.",
       "entityRefs": [
+        "Pagador",
+        "GerenteFinanceiro",
         "TituloReceber",
-        "Recebimento",
-        "ExtratoPagador",
-        "Pagador"
+        "Recebimento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os pagadores, títulos, recebimentos e extratos da organização."
+        "description": "Abrange os registros financeiros e os cadastros de gerente financeiro da organização."
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "O gerente financeiro pode consultar todos os dados financeiros e os extratos necessários para análise e emissão."
+        "mode": "fieldsOnly",
+        "description": "Exibe a identificação necessária para extratos e os valores, vencimentos, origens, saldos e formas de pagamento necessários às análises financeiras, sem expor dados de privacidade ou identificadores de transações da Stripe.",
+        "allowedFields": [
+          "Pagador.id",
+          "Pagador.details.identification",
+          "GerenteFinanceiro.id",
+          "GerenteFinanceiro.details.identification",
+          "TituloReceber.id",
+          "TituloReceber.pagadorId",
+          "TituloReceber.vencimento",
+          "TituloReceber.saldoAberto",
+          "TituloReceber.origemModulo",
+          "TituloReceber.origemReferencia",
+          "TituloReceber.details.valorOriginal",
+          "Recebimento.id",
+          "Recebimento.tituloId",
+          "Recebimento.status",
+          "Recebimento.recebidoEm",
+          "Recebimento.details.valor",
+          "Recebimento.details.formaPagamento"
+        ]
       }
     },
     {
       "grantId": "pagadorMeusRecebiveis",
       "actorRef": "pagador",
       "title": "Consultar e pagar meus títulos",
-      "description": "Permite ao pagador consultar somente seus próprios títulos e recebimentos e solicitar pagamento por cartão para títulos em aberto.",
+      "description": "Permite ao pagador consultar somente seus títulos e recebimentos e pagar títulos em aberto com cartão.",
       "entityRefs": [
         "TituloReceber",
         "Recebimento"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Abrange somente títulos vinculados ao pagador da sessão e os respectivos recebimentos.",
+        "description": "Abrange exclusivamente títulos e recebimentos vinculados ao próprio pagador autenticado.",
         "anchorEntity": "Pagador"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "O pagador vê os valores, vencimentos, situações e dados de seus recebimentos, sem referências internas de origem nem identificadores técnicos de processamento.",
+        "description": "Exibe os valores, vencimentos, origens e saldos dos próprios títulos, bem como valores, datas e formas de pagamento dos próprios recebimentos.",
         "allowedFields": [
-          "TituloReceber.numeroTitulo",
-          "TituloReceber.valorOriginal",
+          "TituloReceber.id",
           "TituloReceber.vencimento",
-          "TituloReceber.details.valorRecebido",
-          "TituloReceber.details.saldoPendente",
-          "TituloReceber.details.situacaoCobranca",
-          "Recebimento.numeroRecebimento",
-          "Recebimento.valor",
-          "Recebimento.meioPagamento",
-          "Recebimento.status",
+          "TituloReceber.saldoAberto",
+          "TituloReceber.origemModulo",
+          "TituloReceber.origemReferencia",
+          "TituloReceber.details.valorOriginal",
+          "Recebimento.id",
+          "Recebimento.tituloId",
           "Recebimento.recebidoEm",
-          "Recebimento.estornadoEm"
+          "Recebimento.details.valor",
+          "Recebimento.details.formaPagamento"
         ]
       }
     },
     {
-      "grantId": "stripeProcessarCartoes",
+      "grantId": "stripeProcessamentoCartao",
       "actorRef": "stripe",
-      "title": "Processar cobranças por cartão",
-      "description": "Permite à Stripe consultar solicitações de cartão encaminhadas para processamento e confirmar os respectivos recebimentos.",
+      "title": "Processar pagamentos por cartão",
+      "description": "Permite à Stripe acessar somente os dados mínimos dos recebimentos por cartão em processamento para confirmar a transação.",
       "entityRefs": [
-        "TituloReceber",
         "Recebimento"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Abrange somente recebimentos por cartão vinculados ao pagador alcançado pelo título e os respectivos títulos.",
+        "description": "Abrange somente o recebimento por cartão ligado ao pagador do pagamento em processamento.",
         "anchorEntity": "Pagador"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "A Stripe recebe somente os dados financeiros e técnicos indispensáveis para processar e confirmar cobranças por cartão.",
+        "description": "Expõe apenas a referência do recebimento, o título, o valor, a forma de pagamento e o identificador de transação necessário à confirmação pela Stripe.",
         "allowedFields": [
-          "TituloReceber.id",
-          "TituloReceber.numeroTitulo",
-          "TituloReceber.valorOriginal",
-          "TituloReceber.vencimento",
-          "TituloReceber.details.valorRecebido",
-          "TituloReceber.details.saldoPendente",
-          "TituloReceber.details.situacaoCobranca",
           "Recebimento.id",
-          "Recebimento.numeroRecebimento",
-          "Recebimento.tituloReceberId",
-          "Recebimento.valor",
-          "Recebimento.meioPagamento",
-          "Recebimento.status",
-          "Recebimento.recebidoEm",
-          "Recebimento.stripePaymentId"
+          "Recebimento.tituloId",
+          "Recebimento.details.valor",
+          "Recebimento.details.formaPagamento",
+          "Recebimento.details.stripe"
         ]
       }
     }
@@ -143,7 +167,7 @@
   "normalizations": [
     {
       "kind": "dropAnchorEntity",
-      "grantId": "caixaRecebimentos",
+      "grantId": "caixaRecebiveis",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {

@@ -1,0 +1,220 @@
+/// <mls fileReference="_102047_/l4/manutencaoFrota/ontology/Driver.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+
+export const manutencaoFrotaEntityDriver = {
+  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "moduleName": "manutencaoFrota",
+  "entityId": "Driver",
+  "title": "Motorista",
+  "description": "Pessoa da transportadora que dirige veículos atribuídos e registra seus abastecimentos.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "vehicleAssignments": {
+      "relationshipId": "vehicleAssignmentDriver",
+      "to": "VehicleAssignment",
+      "via": "VehicleAssignment.driverId",
+      "cardinality": "1:N",
+      "title": "Atribuições de veículos",
+      "description": "Atribuições que vinculam este motorista aos veículos que está autorizado a dirigir.",
+      "mode": "fk",
+      "direction": "to",
+      "required": "Sempre que houver uma atribuição de veículo para este motorista."
+    },
+    "assignedVehicles": {
+      "relationshipId": "vehicleAssignedDrivers",
+      "to": "Vehicle",
+      "via": "VehicleAssignment",
+      "cardinality": "N:N",
+      "title": "Veículos atribuídos",
+      "description": "Veículos visíveis ao motorista, derivados das atribuições de veículo registradas para ele.",
+      "mode": "throughTable",
+      "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
+      "derived": true,
+      "direction": "to",
+      "required": "Quando existir uma atribuição ativa entre o motorista e o veículo."
+    },
+    "fuelings": {
+      "relationshipId": "fuelingDriver",
+      "to": "Fueling",
+      "via": "Fueling.driverId",
+      "cardinality": "1:N",
+      "title": "Abastecimentos realizados",
+      "description": "Abastecimentos registrados por este motorista.",
+      "mode": "fk",
+      "direction": "to",
+      "required": "Sempre que o motorista registrar um abastecimento."
+    }
+  },
+  "capabilities": {
+    "read.byId": "Consulta um motorista pelo identificador MDM, por leitura direta do registro mestre, para telas de atribuição, abastecimento e gestão de frota.",
+    "locate.byName": "Localiza motoristas pelo nome no índice MDM para o gestor selecionar a pessoa em atribuições de veículos.",
+    "locate.byDocument": "Localiza um motorista pelo documento nacional para evitar duplicidade ao cadastrá-lo ou vinculá-lo ao módulo.",
+    "locate.byContact": "Localiza a pessoa motorista por canal de contato para confirmar um cadastro existente antes de criar ou vincular seu papel.",
+    "register.createOrAttach": "Cria a pessoa quando ela não existe ou anexa o papel de Motorista ao registro existente, pela deduplicação por documento ou contato, para o gestor de frota manter os motoristas.",
+    "edit.platformFields": "Atualiza os dados de identificação permitidos do motorista no registro mestre, reindexando a identificação quando necessário, para o gestor de frota manter o cadastro.",
+    "inactivate": "Inativa ou reativa o papel de motorista sem apagar seu registro mestre, pela alteração de status MDM, para o gestor retirar motoristas de uso.",
+    "link.contact": "Vincula um canal de contato ao motorista criando um ContactChannel e a relação HasContact, para o gestor manter formas de contato sem gravá-las no módulo.",
+    "listLinks": "Lista vínculos ativos e históricos do motorista pelo serviço de relacionamentos MDM, para consultar suas relações cadastrais.",
+    "tag": "Aplica etiquetas livres no namespace do módulo no índice de tags, para o gestor organizar motoristas sem criar campos próprios.",
+    "audit": "Consulta quem alterou os dados do motorista e quando no log de auditoria MDM, para o gestor rastrear alterações cadastrais.",
+    "invite.login": "Convida o motorista para acesso, criando a linha de login no índice de tags e acionando a identidade da plataforma, para que ele consulte veículos atribuídos e registre abastecimentos."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-document-shape-validated",
+    "rule-identity-never-in-namespace",
+    "rule-person-privacy-consent-required-br-eu"
+  ],
+  "writer": "crud",
+  "kind": "role",
+  "subtype": "Person",
+  "roleTag": "manutencaoFrota.Driver",
+  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true,
+        "description": "Bumped by the engine on every write; optimistic concurrency."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "description": "Documento mestre da pessoa no MDM, com os dados de identificação usados pela manutenção de frota e o espaço exclusivo do módulo.",
+        "fields": {
+          "identification": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "name": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "maxLength": 0,
+                "description": "Nome pelo qual o motorista é identificado nas atribuições de veículos e nos abastecimentos.",
+                "title": "Nome",
+                "min": 0,
+                "max": 0
+              },
+              "docType": {
+                "type": "enum",
+                "indexed": true,
+                "values": [
+                  {
+                    "value": "SSN",
+                    "title": "SSN",
+                    "description": "Número de seguridade social dos Estados Unidos."
+                  },
+                  {
+                    "value": "EIN",
+                    "title": "EIN",
+                    "description": "Identificador fiscal de organização dos Estados Unidos."
+                  },
+                  {
+                    "value": "Passport",
+                    "title": "Passaporte",
+                    "description": "Documento de passaporte."
+                  },
+                  {
+                    "value": "DriversLicense",
+                    "title": "Carteira de motorista",
+                    "description": "Documento de habilitação para dirigir."
+                  },
+                  {
+                    "value": "NationalId",
+                    "title": "Documento nacional",
+                    "description": "Documento nacional de identificação."
+                  },
+                  {
+                    "value": "CPF",
+                    "title": "CPF",
+                    "description": "Cadastro de Pessoas Físicas do Brasil."
+                  },
+                  {
+                    "value": "CNPJ",
+                    "title": "CNPJ",
+                    "description": "Cadastro Nacional da Pessoa Jurídica do Brasil."
+                  },
+                  {
+                    "value": "VAT",
+                    "title": "Identificador fiscal",
+                    "description": "Identificador fiscal de outro país."
+                  },
+                  {
+                    "value": "Other",
+                    "title": "Outro",
+                    "description": "Outro tipo de documento aceito pela plataforma."
+                  }
+                ],
+                "title": "Tipo de documento",
+                "description": "Tipo do documento nacional usado para localizar ou deduplicar o cadastro do motorista.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "docId": {
+                "type": "string",
+                "indexed": true,
+                "description": "Número do documento nacional do motorista, usado na deduplicação do registro mestre.",
+                "title": "Número do documento",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "countryCode": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "pattern": "^[A-Z]{2}$",
+                "maxLength": 2,
+                "default": "US",
+                "description": "Código ISO do país que define as regras aplicáveis ao cadastro do motorista.",
+                "title": "País",
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Dados de identificação da pessoa que atua como motorista na transportadora."
+          },
+          "base": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {},
+            "description": "Dados básicos compartilhados da pessoa no MDM; este módulo não mantém campos próprios nesta seção."
+          },
+          "person": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {},
+            "description": "Dados pessoais da pessoa no MDM; nenhum campo adicional é necessário para o papel de motorista."
+          },
+          "general": {
+            "type": "object",
+            "owner": "organization",
+            "open": true,
+            "description": "Dados promovidos pela organização para uso compartilhado entre módulos; este módulo apenas os lê."
+          },
+          "manutencaoFrota": {
+            "type": "object",
+            "owner": "module",
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
+          }
+        }
+      }
+    }
+  }
+} as const satisfies Ns5OntologyEntityV3;
+
+export type ManutencaoFrotaEntityDriverType = typeof manutencaoFrotaEntityDriver;
+
+export default manutencaoFrotaEntityDriver;

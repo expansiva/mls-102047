@@ -1,34 +1,88 @@
 {
   "schemaVersion": "2026-09-12-ns5-integration-v2",
   "moduleName": "compras",
-  "inbound": [],
+  "inbound": [
+    {
+      "id": "produtoMdmCriado",
+      "kind": "event",
+      "from": "organization",
+      "event": "mdmCreated",
+      "writes": [
+        "Produto"
+      ],
+      "effect": "create",
+      "description": "Cria ou disponibiliza no módulo de compras o produto mestre cadastrado no catálogo organizacional.",
+      "entityRefs": []
+    },
+    {
+      "id": "produtoMdmAtualizado",
+      "kind": "event",
+      "from": "organization",
+      "event": "mdmUpdated",
+      "writes": [
+        "Produto"
+      ],
+      "effect": "update",
+      "description": "Atualiza no módulo de compras os dados do produto mestre alterados no catálogo organizacional.",
+      "entityRefs": []
+    },
+    {
+      "id": "produtoMdmInativado",
+      "kind": "event",
+      "from": "organization",
+      "event": "mdmInactivated",
+      "writes": [
+        "Produto"
+      ],
+      "effect": "update",
+      "description": "Atualiza a disponibilidade do produto no módulo de compras quando ele é inativado no catálogo organizacional.",
+      "entityRefs": []
+    }
+  ],
   "outbound": [
     {
-      "id": "registrarRecebimentoParcial",
+      "id": "entradaEstoquePorRecebimentoParcial",
       "kind": "event",
       "to": "controleEstoque",
-      "event": "registrarRecebimentoParcial",
+      "event": "entradaEstoquePorRecebimentoParcial",
       "on": "PedidoCompra.registrarRecebimentoParcial",
-      "description": "Comunica ao módulo de controle de estoque o recebimento parcial do pedido para registrar a entrada das quantidades recebidas.",
+      "description": "Comunica ao controle de estoque as quantidades de produtos efetivamente recebidas em um recebimento parcial para registrar a entrada no estoque.",
       "entityRefs": [
         "PedidoCompra",
-        "RecebimentoCompra",
-        "ItemRecebimentoCompra"
+        "RecebimentoPedido",
+        "Produto"
       ]
     },
     {
-      "id": "registrarRecebimentoTotal",
+      "id": "entradaEstoquePorRecebimentoTotal",
       "kind": "event",
       "to": "controleEstoque",
-      "event": "registrarRecebimentoTotal",
+      "event": "entradaEstoquePorRecebimentoTotal",
       "on": "PedidoCompra.registrarRecebimentoTotal",
-      "description": "Comunica ao módulo de controle de estoque o recebimento total do pedido para registrar a entrada dos produtos recebidos.",
+      "description": "Comunica ao controle de estoque as quantidades de produtos efetivamente recebidas em um recebimento total para registrar a entrada no estoque.",
       "entityRefs": [
         "PedidoCompra",
-        "RecebimentoCompra",
-        "ItemRecebimentoCompra"
+        "RecebimentoPedido",
+        "Produto"
       ]
     }
   ],
-  "plugins": []
+  "plugins": [],
+  "normalizations": [
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "produtoMdmCriado",
+      "detail": "transitionRef produtoMdmCriado dropped; effect is create."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "produtoMdmAtualizado",
+      "detail": "transitionRef produtoMdmAtualizado dropped; effect is update."
+    },
+    {
+      "kind": "dropTransitionRef",
+      "inboundId": "produtoMdmInativado",
+      "detail": "transitionRef produtoMdmInativado dropped; effect is update."
+    }
+  ]
 }

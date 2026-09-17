@@ -1,33 +1,146 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/ontology/Aparato.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const ordenServicioEntityAparato = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-15-ns5-ontology-v3",
   "moduleName": "ordenServicio",
   "entityId": "Aparato",
   "title": "Aparato",
-  "description": "Aparato electrónico recibido para diagnóstico, presupuesto, reparación o retiro.",
-  "kind": "mdm",
-  "party": "none",
-  "mdmSubtype": "AssetEquipment",
-  "displayField": "name",
-  "fields": [],
-  "fieldsBase": [
-    { "fieldId": "name", "title": "Nombre", "type": "string", "required": true, "description": "Nombre del aparato." },
-    { "fieldId": "serialNumber", "title": "Número de serie", "type": "string", "required": false, "description": "Número de serie del aparato." },
-    { "fieldId": "brand", "title": "Marca", "type": "string", "required": false, "description": "Marca del aparato." },
-    { "fieldId": "model", "title": "Modelo", "type": "string", "required": false, "description": "Modelo del aparato." }
+  "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior retiro.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "ordenesServicio": {
+      "relationshipId": "ordenServicioAparato",
+      "to": "OrdenServicio",
+      "via": "OrdenServicio.aparatoId",
+      "cardinality": "1:N",
+      "title": "Órdenes de servicio del aparato",
+      "description": "Órdenes de servicio registradas para este aparato a lo largo de su historial.",
+      "mode": "fk",
+      "direction": "to",
+      "required": "Cuando el aparato esté registrado en una orden de servicio.",
+      "role": "aparato atendido"
+    }
+  },
+  "capabilities": {
+    "read.byId": "Consulta un aparato por su identificador maestro para mostrar sus datos en la orden de servicio; lo usan recepción y el técnico.",
+    "locate.byName": "Busca aparatos por el nombre registrado al abrir o localizar una orden; lo usan recepción y el técnico.",
+    "register.createOrAttach": "Crea el registro maestro del aparato si no existe o le adjunta el rol del módulo al abrir una orden; lo usa recepción.",
+    "edit.platformFields": "Actualiza los datos maestros disponibles del equipo, como su nombre, marca, modelo o número de serie; lo usa recepción.",
+    "edit.moduleNamespace": "Actualiza exclusivamente el espacio del módulo asociado al aparato cuando fuera necesario; lo usa el módulo de órdenes de servicio.",
+    "inactivate": "Inactiva un aparato que ya no debe utilizarse en nuevas órdenes, manteniendo su historial; lo usa recepción.",
+    "listLinks": "Muestra las órdenes de servicio vinculadas al aparato para consultar su historial de atención; lo usan recepción y el técnico.",
+    "audit": "Permite revisar quién modificó los datos maestros del aparato y cuándo; lo usa el personal autorizado."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-document-shape-validated",
+    "rule-identity-never-in-namespace"
   ],
-  "lifecycleStates": [],
-  "transitions": [],
-  "storage": {
-    "target": "mdm",
-    "scope": "organization",
-    "idField": "id",
-    "mdmType": "ordenServicio.Aparato"
+  "kind": "role",
+  "subtype": "AssetEquipment",
+  "roleTag": "ordenServicio.Aparato",
+  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true,
+        "description": "Bumped by the engine on every write; optimistic concurrency."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "description": "Documento maestro del equipo electrónico atendido por el servicio técnico.",
+        "fields": {
+          "identification": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "name": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "maxLength": 0,
+                "description": "Nombre con el que recepción y el personal técnico reconocen el equipo en la orden de servicio.",
+                "title": "Nombre del aparato",
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Datos de identificación del equipo en el registro maestro."
+          },
+          "base": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {},
+            "description": "Datos base del registro maestro; este módulo no utiliza campos adicionales de esta rama."
+          },
+          "assetEquipment": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "serialNumber": {
+                "type": "string",
+                "title": "Número de serie",
+                "description": "Número de serie informado o verificado del aparato recibido.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "brand": {
+                "type": "string",
+                "title": "Marca",
+                "description": "Marca del aparato recibido para servicio técnico.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "model": {
+                "type": "string",
+                "title": "Modelo",
+                "description": "Modelo del aparato recibido para servicio técnico.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "category": {
+                "type": "string",
+                "title": "Categoría",
+                "description": "Clase de equipo electrónico que se recibe y analiza.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Características del equipo que el técnico consulta para identificarlo y analizarlo."
+          },
+          "general": {
+            "type": "object",
+            "owner": "organization",
+            "open": true,
+            "description": "Datos promovidos por la organización, disponibles para lectura y declarados fuera de este módulo."
+          },
+          "ordenServicio": {
+            "type": "object",
+            "owner": "module",
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
+          }
+        }
+      }
+    }
   }
-} as const satisfies Ns5OntologyEntityArtifact;
+} as const satisfies Ns5OntologyEntityV3;
 
 export type OrdenServicioEntityAparatoType = typeof ordenServicioEntityAparato;
 

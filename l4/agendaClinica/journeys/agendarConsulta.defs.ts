@@ -10,7 +10,7 @@ export const agendarConsultaJourney = {
     "title": "Agendar consulta",
     "goal": "Marcar uma consulta para um paciente com um profissional em data e horário disponíveis.",
     "entry": {
-      "mode": "coldStart"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
@@ -18,14 +18,14 @@ export const agendarConsultaJourney = {
         "kind": "locate",
         "entity": "Paciente",
         "title": "x",
-        "description": "Localiza o paciente que receberá a consulta."
+        "description": "Localiza o paciente já cadastrado para o agendamento."
       },
       {
         "stepId": "localizarProfissional",
         "kind": "locate",
         "entity": "Profissional",
         "title": "x",
-        "description": "Localiza o profissional que realizará a consulta."
+        "description": "Localiza o médico ou terapeuta que realizará a consulta."
       },
       {
         "stepId": "criarConsulta",
@@ -33,18 +33,18 @@ export const agendarConsultaJourney = {
         "entity": "Consulta",
         "effect": "create",
         "title": "x",
-        "description": "Registra a consulta com paciente, profissional, data e horário."
+        "description": "Registra a consulta com paciente, profissional, data e hora, somente em horário livre."
       }
     ],
     "outcome": {
-      "statement": "A consulta fica agendada para o paciente e o profissional no horário informado.",
+      "statement": "Uma consulta é marcada para o paciente com o profissional no horário escolhido.",
       "evidence": [
-        "Consulta criada com data, horário, paciente e profissional.",
-        "Horário do profissional passa a constar como ocupado."
+        "Consulta registrada com paciente, profissional, data e hora.",
+        "Horário do profissional permanece sem duplicidade de consulta."
       ]
     }
   },
-  "businessHash": "sha256:6799d2524c273213ff99272987c51f3fd9ac61dc388d0da06f8449f742856c26"
+  "businessHash": "sha256:95c355343f6a297a7b3ab793b212810cda73295768f0fc8f14466b8e4f42ae63"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AgendarConsultaJourneyType = typeof agendarConsultaJourney;

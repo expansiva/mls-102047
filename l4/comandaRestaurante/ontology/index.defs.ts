@@ -1,129 +1,71 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteOntologyIndex = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-15-ns5-ontology-v3",
   "moduleName": "comandaRestaurante",
-  "businessDomain": "Operação de comandas, cardápio, mesas e pagamentos de restaurante.",
+  "businessDomain": "Gestão de comandas e atendimento de restaurante",
+  "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
+  "moduleNamespace": {
+    "key": "comandaRestaurante",
+    "description": "Branch details.comandaRestaurante of the master records this module has a role on; only this module writes it."
+  },
   "entities": [
-    "Mesa",
-    "ItemCardapio",
-    "Garcom",
-    "Comanda",
-    "ItemComanda"
+    {
+      "entityId": "Mesa",
+      "kind": "role",
+      "subtype": "Location"
+    },
+    {
+      "entityId": "ItemCardapio",
+      "kind": "role",
+      "subtype": "Product"
+    },
+    {
+      "entityId": "Comanda",
+      "kind": "entity",
+      "class": "core"
+    },
+    {
+      "entityId": "ItemComanda",
+      "kind": "entity",
+      "class": "supporting"
+    }
   ],
   "relationships": [
     {
-      "relationshipId": "comandaMesa",
-      "fromEntity": "Comanda",
-      "toEntity": "Mesa",
+      "relationshipId": "comandaParaMesa",
+      "from": "Comanda",
+      "to": "Mesa",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada comanda é aberta para uma mesa do restaurante.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Comanda",
-        "from": {
-          "entityId": "Comanda",
-          "fieldIds": [
-            "mesaId"
-          ]
-        },
-        "to": {
-          "entityId": "Mesa",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada comanda é aberta obrigatoriamente para uma mesa, e uma mesa pode ter comandas em atendimentos distintos ao longo do tempo.",
+      "field": "Comanda.mesaId"
     },
     {
-      "relationshipId": "comandaGarcom",
-      "fromEntity": "Comanda",
-      "toEntity": "Garcom",
+      "relationshipId": "itemComandaParaComanda",
+      "from": "ItemComanda",
+      "to": "Comanda",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada comanda é aberta por um garçom responsável.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Comanda",
-        "from": {
-          "entityId": "Comanda",
-          "fieldIds": [
-            "garcomId"
-          ]
-        },
-        "to": {
-          "entityId": "Garcom",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada item lançado pertence obrigatoriamente a uma comanda, que pode reunir vários lançamentos.",
+      "field": "ItemComanda.comandaId"
     },
     {
-      "relationshipId": "itemComandaComanda",
-      "fromEntity": "ItemComanda",
-      "toEntity": "Comanda",
+      "relationshipId": "itemComandaParaItemCardapio",
+      "from": "ItemComanda",
+      "to": "ItemCardapio",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada item lançado pertence a uma comanda.",
-      "persistence": {
-        "mode": "moduleReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "ItemComanda",
-        "from": {
-          "entityId": "ItemComanda",
-          "fieldIds": [
-            "comandaId"
-          ]
-        },
-        "to": {
-          "entityId": "Comanda",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "itemComandaItemCardapio",
-      "fromEntity": "ItemComanda",
-      "toEntity": "ItemCardapio",
-      "type": "manyToOne",
-      "required": true,
-      "description": "Cada item lançado referencia um item do cardápio.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "ItemComanda",
-        "from": {
-          "entityId": "ItemComanda",
-          "fieldIds": [
-            "itemCardapioId"
-          ]
-        },
-        "to": {
-          "entityId": "ItemCardapio",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada lançamento referencia obrigatoriamente o item do cardápio escolhido, e um item do cardápio pode aparecer em vários lançamentos.",
+      "field": "ItemComanda.itemCardapioId"
     }
   ]
-} as const satisfies Ns5OntologyIndexArtifact;
+} as const satisfies Ns5OntologyIndexV3;
 
 export type ComandaRestauranteOntologyIndexType = typeof comandaRestauranteOntologyIndex;
 

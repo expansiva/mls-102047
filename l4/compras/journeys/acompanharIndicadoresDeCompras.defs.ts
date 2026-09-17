@@ -8,35 +8,43 @@ export const acompanharIndicadoresDeComprasJourney = {
   "business": {
     "actorRef": "gerenteCompras",
     "title": "Acompanhar indicadores de compras",
-    "goal": "Acompanhar pedidos em aberto, atrasados e o total comprado por fornecedor no mês.",
+    "goal": "Monitorar pedidos em aberto, atrasados e o total comprado por fornecedor no mês.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarPedidosParaPainel",
+        "stepId": "localizarPedidosParaAcompanhamento",
         "kind": "locate",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Consulta os pedidos em aberto e os pedidos atrasados no período."
+        "description": "Acessa os pedidos de compra da organização para acompanhamento dos pedidos em aberto e atrasados."
       },
       {
-        "stepId": "inspecionarIndicadores",
+        "stepId": "consultarIndicadoresDePedidos",
         "kind": "inspect",
         "entity": "PedidoCompra",
         "title": "x",
-        "description": "Visualiza os indicadores de pedidos em aberto, atrasados e totais mensais comprados por fornecedor."
+        "description": "Consulta os indicadores de pedidos em aberto e atrasados no painel de compras."
+      },
+      {
+        "stepId": "consultarTotalMensalPorFornecedor",
+        "kind": "inspect",
+        "entity": "Fornecedor",
+        "title": "x",
+        "description": "Consulta no painel o total comprado de cada fornecedor no mês."
       }
     ],
     "outcome": {
-      "statement": "O gerente acompanha a situação dos pedidos e o volume mensal comprado de cada fornecedor.",
+      "statement": "O gerente dispõe dos indicadores atuais para acompanhar a situação das compras e os valores comprados por fornecedor.",
       "evidence": [
-        "Indicadores de pedidos em aberto e atrasados exibidos.",
-        "Totais comprados por fornecedor no mês exibidos."
+        "Quantidade ou lista de pedidos em aberto apresentada.",
+        "Quantidade ou lista de pedidos atrasados apresentada.",
+        "Total comprado no mês apresentado por fornecedor."
       ]
     }
   },
-  "businessHash": "sha256:dba27bd970d952670ddbdea2907a5153022c68b43be857f723256f67cd2a4a0c"
+  "businessHash": "sha256:08224fafae3e538973018092310a3f67b9bf04d16af95a1cc9864930cf75f975"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AcompanharIndicadoresDeComprasJourneyType = typeof acompanharIndicadoresDeComprasJourney;

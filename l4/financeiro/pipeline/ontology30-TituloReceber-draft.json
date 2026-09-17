@@ -1,84 +1,171 @@
 {
-  "entityId": "TituloReceber",
-  "fields": [
-    {
-      "fieldId": "id",
-      "title": "Identificador",
-      "type": "uuid",
-      "required": true,
-      "description": "Identificador único do título a receber."
+  "entity": {
+    "schemaVersion": "2026-09-15-ns5-ontology-v3",
+    "moduleName": "financeiro",
+    "entityId": "TituloReceber",
+    "title": "Título a receber",
+    "description": "Cobrança originada em outro módulo, com pagador, valor, vencimento, origem e saldo a receber.",
+    "displayField": "id",
+    "relationships": {
+      "pagador": {
+        "relationshipId": "tituloPagador",
+        "to": "Pagador",
+        "via": "TituloReceber.pagadorId",
+        "cardinality": "N:1",
+        "title": "Pagador do título",
+        "description": "Cada título a receber pertence a um único pagador; um pagador pode ter vários títulos.",
+        "mode": "fk",
+        "required": "Sempre, para identificar quem deve o valor.",
+        "role": "pagador"
+      },
+      "recebimentos": {
+        "relationshipId": "recebimentoTitulo",
+        "to": "Recebimento",
+        "via": "Recebimento.tituloId",
+        "cardinality": "1:N",
+        "title": "Recebimentos do título",
+        "description": "Relaciona as baixas totais ou parciais registradas para este título.",
+        "mode": "fk",
+        "direction": "to",
+        "required": "Quando houver baixa ou estorno registrado para o título.",
+        "role": "recebimentos"
+      }
     },
-    {
-      "fieldId": "numeroTitulo",
-      "title": "Número do título",
-      "type": "string",
-      "required": true,
-      "unique": true,
-      "description": "Número sequencial que identifica o título a receber."
+    "capabilities": {
+      "read.byId": "Lê um título pelo identificador da linha · consulta o repositório por id · usado por caixa, gerente financeiro, pagador e integrações que já possuem o título selecionado.",
+      "locate.byColumn": "Lista títulos por pagador, vencimento, saldo em aberto ou origem · filtra e pagina pelas colunas indexadas · usado por caixa, gerente financeiro e pagador conforme seu escopo de dados.",
+      "count": "Conta os títulos que atendem aos critérios de consulta · executa a mesma filtragem da lista sem paginação · usado pelo gerente financeiro nos totais de listas e pelo portal do pagador.",
+      "listByForeignKey": "Lista os títulos vinculados a um pagador · consulta pela chave estrangeira pagadorId · usado pelo gerente financeiro para o extrato e pelo portal para os próprios títulos.",
+      "create": "Registra o título recebido de uma cobrança originada em outro módulo · insere a linha de entrada com pagador, valores, vencimento e referência de origem · usado pela integração interna de origem.",
+      "update": "Atualiza o saldo em aberto calculado do título · grava a alteração na mesma linha após um recebimento ou estorno · usado pelo processamento financeiro autorizado.",
+      "uniqueKey": "Impede a duplicação de uma cobrança recebida · aplica índice único sobre módulo e referência de origem · usado pelo motor em cada entrada inbound.",
+      "transaction": "Grava a baixa ou o estorno e o saldo correspondente de forma atômica · executa as escritas de título e recebimento em uma transação · usado pelo caixa, pelo portal do pagador e pela Stripe.",
+      "read.mdmRecord": "Lê os dados mestres do pagador sem copiá-los no título · hidrata o registro MDM apontado por pagadorId · usado pelo caixa, gerente financeiro e portal do pagador.",
+      "financeiro.listarTitulosVencidos": "Lista títulos vencidos que ainda têm saldo a receber · consulta vencimento anterior à data atual e saldo aberto positivo · usado pelo gerente financeiro.",
+      "financeiro.resumirRecebiveis": "Calcula o painel de recebíveis por período e origem · agrupa os títulos pelos critérios solicitados e soma seus saldos abertos · usado pelo gerente financeiro.",
+      "financeiro.emitirExtratoPorPagador": "Monta a posição financeira de um pagador · combina títulos e recebimentos vinculados ao pagador informado · usado pelo gerente financeiro."
     },
-    {
-      "fieldId": "pagadorId",
-      "title": "Pagador",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência ao pagador responsável pelo título."
+    "rules": [
+      "origemCobrancaUnica",
+      "saldoTituloConsistente"
+    ],
+    "writer": "inbound",
+    "kind": "entity",
+    "class": "core",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "financeiro_tituloreceber",
+      "kind": "relational"
     },
-    {
-      "fieldId": "valorOriginal",
-      "title": "Valor original",
-      "type": "money",
-      "required": true,
-      "description": "Valor total originalmente cobrado no título."
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "pagadorId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "of": "Address",
+          "to": [
+            "Pagador"
+          ],
+          "title": "Pagador",
+          "description": "Pessoa responsável pelo pagamento deste título a receber.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "vencimento": {
+          "type": "date",
+          "required": true,
+          "indexed": true,
+          "of": "Address",
+          "title": "Vencimento",
+          "description": "Data limite prevista para o pagamento do título.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "saldoAberto": {
+          "type": "money",
+          "required": true,
+          "indexed": true,
+          "of": "Address",
+          "title": "Saldo em aberto",
+          "description": "Valor ainda a receber, recalculado a partir dos recebimentos não estornados vinculados ao título.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "origemModulo": {
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "of": "Address",
+          "title": "Módulo de origem",
+          "description": "Identificador do módulo que gerou a cobrança recebida.",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "maxLength": 100,
+          "min": 0,
+          "max": 0
+        },
+        "origemReferencia": {
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "of": "Address",
+          "title": "Referência da origem",
+          "description": "Identificador da cobrança ou do documento que originou este título no módulo de origem.",
+          "maxLength": 200,
+          "min": 0,
+          "max": 0
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "of": "Address",
+          "title": "Detalhes do título",
+          "description": "Dados financeiros próprios da cobrança que não são usados como critério de busca ou ordenação.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0,
+          "fields": {
+            "valorOriginal": {
+              "type": "money",
+              "required": true,
+              "of": "Address",
+              "title": "Valor original",
+              "description": "Valor total cobrado quando o título foi recebido do módulo de origem.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0
+            }
+          }
+        }
+      }
     },
-    {
-      "fieldId": "vencimento",
-      "title": "Vencimento",
-      "type": "date",
-      "required": true,
-      "description": "Data limite prevista para o pagamento do título."
-    },
-    {
-      "fieldId": "origemModulo",
-      "title": "Módulo de origem",
-      "type": "string",
-      "required": true,
-      "description": "Identificador do módulo que gerou a cobrança."
-    },
-    {
-      "fieldId": "origemReferencia",
-      "title": "Referência da origem",
-      "type": "string",
-      "required": true,
-      "description": "Identificador do registro de origem que gerou a cobrança."
-    }
-  ],
-  "uniqueKeys": [
-    [
-      "origemModulo",
-      "origemReferencia"
+    "uniqueKeys": [
+      [
+        "origemModulo",
+        "origemReferencia"
+      ]
     ]
-  ],
-  "details": {
-    "valorRecebido": {
-      "type": "money",
-      "description": "Soma dos recebimentos confirmados e não estornados vinculados ao título."
-    },
-    "saldoPendente": {
-      "type": "money",
-      "description": "Valor que ainda falta receber para quitar o título."
-    },
-    "situacaoCobranca": {
-      "type": "string",
-      "description": "Situação calculada do título conforme saldo pendente, vencimento e recebimentos."
-    }
   },
-  "lifecycleStates": [],
-  "transitions": [],
   "normalizations": [
     {
-      "kind": "dropCrud",
+      "kind": "derivedFromPlatform",
       "entityId": "TituloReceber",
-      "detail": "writer inbound removed; an act writes this entity as entity or affects."
+      "detail": "record.fields.id, record.fields.version"
     }
   ]
 }

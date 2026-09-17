@@ -1,106 +1,216 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteEntityComanda = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-15-ns5-ontology-v3",
   "moduleName": "comandaRestaurante",
   "entityId": "Comanda",
   "title": "Comanda",
-  "description": "Registro de consumo aberto para uma mesa, encerrado após o pagamento.",
-  "kind": "core",
-  "party": "none",
-  "displayField": "number",
-  "fields": [
-    {
-      "fieldId": "id",
-      "title": "Identificador",
-      "type": "uuid",
-      "required": true,
-      "description": "Identificador único da comanda."
+  "description": "Atendimento aberto para uma mesa, que reúne os itens consumidos, o desconto eventual e o pagamento registrado no fechamento.",
+  "displayField": "numero",
+  "relationships": {
+    "mesa": {
+      "relationshipId": "comandaParaMesa",
+      "to": "Mesa",
+      "via": "Comanda.mesaId",
+      "cardinality": "N:1",
+      "title": "Mesa da comanda",
+      "description": "A comanda é aberta obrigatoriamente para uma mesa; a mesma mesa pode ter comandas em atendimentos distintos ao longo do tempo.",
+      "mode": "fk",
+      "required": "Sempre, ao abrir uma comanda."
     },
-    {
-      "fieldId": "number",
-      "title": "Número",
-      "type": "string",
-      "required": true,
-      "unique": true,
-      "description": "Número sequencial de identificação da comanda."
-    },
-    {
-      "fieldId": "mesaId",
-      "title": "Mesa",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência à mesa para a qual a comanda foi aberta."
-    },
-    {
-      "fieldId": "garcomId",
-      "title": "Garçom responsável",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência ao garçom que abriu a comanda."
-    },
-    {
-      "fieldId": "discountAmount",
-      "title": "Desconto",
-      "type": "money",
-      "required": false,
-      "description": "Valor opcional de desconto aplicado no fechamento da comanda."
-    },
-    {
-      "fieldId": "paymentMethod",
-      "title": "Forma de pagamento",
-      "type": "string",
-      "required": false,
-      "enum": [
-        {
-          "value": "cash",
-          "title": "Dinheiro"
-        },
-        {
-          "value": "creditCard",
-          "title": "Cartão de crédito"
-        },
-        {
-          "value": "debitCard",
-          "title": "Cartão de débito"
-        },
-        {
-          "value": "pix",
-          "title": "Pix"
-        }
-      ],
-      "description": "Forma de pagamento registrada ao fechar a comanda."
-    },
-    {
-      "fieldId": "status",
-      "title": "Situação",
-      "type": "string",
-      "required": true,
-      "enum": [
-        {
-          "value": "open",
-          "title": "Aberta"
-        },
-        {
-          "value": "closed",
-          "title": "Fechada"
-        }
-      ],
-      "description": "Situação atual da comanda."
-    }
-  ],
-  "details": {
-    "subtotalAmount": {
-      "type": "money",
-      "description": "Soma dos itens ativos lançados na comanda antes do desconto."
-    },
-    "totalAmount": {
-      "type": "money",
-      "description": "Valor total a pagar, calculado pelos itens ativos menos o desconto aplicado."
+    "itensLancados": {
+      "relationshipId": "itemComandaParaComanda",
+      "to": "ItemComanda",
+      "via": "ItemComanda.comandaId",
+      "cardinality": "1:N",
+      "title": "Itens lançados",
+      "description": "A comanda pode reunir vários itens lançados durante o atendimento.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
     }
   },
+  "capabilities": {
+    "read.byId": "Lê uma comanda pelo identificador já conhecido para o garçom ou o caixa consultar o atendimento em contexto.",
+    "locate.byColumn": "Localiza comandas por mesa e situação, com paginação, para o garçom atender ou o caixa encerrar uma comanda aberta.",
+    "count": "Conta comandas conforme os filtros de mesa e situação para apoiar as listas de atendimento do garçom e do caixa.",
+    "listByForeignKey": "Lista as comandas vinculadas a uma mesa pelo índice de mesa para consultar seus atendimentos.",
+    "create": "Cria uma comanda aberta vinculada à mesa selecionada para o garçom iniciar o atendimento.",
+    "transition": "Move a comanda de aberta para fechada, aplicando o fechamento registrado pelo caixa.",
+    "transaction": "Executa atomicamente a abertura ou o fechamento da comanda e a atualização da disponibilidade da mesa para garçom ou caixa.",
+    "read.mdmRecord": "Lê o registro mestre da mesa apontada por mesaId para exibir sua identificação e disponibilidade no atendimento.",
+    "sequence.next": "Emite o próximo número sequencial da comanda ao abrir o atendimento para o garçom identificar o registro.",
+    "comandaRestaurante.calcularTotal": "Calcula o total dos itens não cancelados e o total a receber após o desconto para o caixa consultar no fechamento."
+  },
+  "rules": [
+    "comandaMesaDisponivel",
+    "comandaUmaAbertaPorMesa",
+    "totalConsideraItensAtivos",
+    "fechamentoExigePagamento",
+    "descontoNaoExcedeTotal",
+    "mesaLiberadaNoFechamento"
+  ],
+  "kind": "entity",
+  "class": "core",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "comandaRestaurante_comanda",
+    "kind": "relational"
+  },
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "derived": true,
+        "indexed": true,
+        "title": "Id"
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true
+      },
+      "mesaId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "of": "Address",
+        "to": [
+          "Mesa"
+        ],
+        "title": "Mesa",
+        "description": "Mesa à qual a comanda pertence durante este atendimento.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "numero": {
+        "type": "integer",
+        "required": true,
+        "unique": true,
+        "indexed": true,
+        "of": "Address",
+        "title": "Número da comanda",
+        "description": "Número sequencial emitido para identificar a comanda no atendimento.",
+        "maxLength": 0,
+        "min": 1,
+        "max": 0
+      },
+      "status": {
+        "type": "enum",
+        "required": true,
+        "indexed": true,
+        "of": "Address",
+        "values": [
+          {
+            "value": "open",
+            "title": "Aberta",
+            "description": "A comanda aceita lançamentos e cancelamentos de itens."
+          },
+          {
+            "value": "closed",
+            "title": "Fechada",
+            "description": "A comanda foi paga e não aceita novos lançamentos."
+          }
+        ],
+        "title": "Situação",
+        "description": "Situação operacional da comanda.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "of": "Address",
+        "title": "Dados da comanda",
+        "description": "Dados do atendimento, valores calculados e informações registradas no fechamento.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0,
+        "fields": {
+          "totalItens": {
+            "type": "money",
+            "required": true,
+            "of": "Address",
+            "title": "Total dos itens",
+            "description": "Soma calculada dos itens não cancelados lançados na comanda.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "fechamento": {
+            "type": "object",
+            "of": "Address",
+            "title": "Fechamento",
+            "description": "Dados informados e valores calculados quando a comanda é encerrada.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
+            "fields": {
+              "desconto": {
+                "type": "money",
+                "of": "Address",
+                "title": "Desconto",
+                "description": "Valor opcional abatido do total dos itens no fechamento.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "formaPagamento": {
+                "type": "enum",
+                "of": "Address",
+                "values": [
+                  {
+                    "value": "cash",
+                    "title": "Dinheiro",
+                    "description": "Pagamento recebido em dinheiro."
+                  },
+                  {
+                    "value": "debitCard",
+                    "title": "Cartão de débito",
+                    "description": "Pagamento realizado com cartão de débito."
+                  },
+                  {
+                    "value": "creditCard",
+                    "title": "Cartão de crédito",
+                    "description": "Pagamento realizado com cartão de crédito."
+                  },
+                  {
+                    "value": "pix",
+                    "title": "Pix",
+                    "description": "Pagamento realizado por Pix."
+                  }
+                ],
+                "title": "Forma de pagamento",
+                "description": "Forma de pagamento registrada pelo caixa no fechamento.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "totalReceber": {
+                "type": "money",
+                "of": "Address",
+                "title": "Total a receber",
+                "description": "Valor calculado a receber após deduzir o desconto do total dos itens.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "uniqueKeys": [
+    [
+      "numero"
+    ]
+  ],
   "lifecycleStates": [
     {
       "state": "open",
@@ -121,15 +231,15 @@ export const comandaRestauranteEntityComanda = {
       "by": [
         "caixa"
       ],
-      "description": "Fecha a comanda após registrar o desconto opcional e a forma de pagamento."
+      "description": "Registra o desconto opcional e a forma de pagamento, encerra a comanda e libera a mesa vinculada.",
+      "ruleRefs": [
+        "fechamentoExigePagamento",
+        "descontoNaoExcedeTotal",
+        "mesaLiberadaNoFechamento"
+      ]
     }
-  ],
-  "storage": {
-    "target": "moduleDatabase",
-    "scope": "module",
-    "idField": "id"
-  }
-} as const satisfies Ns5OntologyEntityArtifact;
+  ]
+} as const satisfies Ns5OntologyEntityV3;
 
 export type ComandaRestauranteEntityComandaType = typeof comandaRestauranteEntityComanda;
 

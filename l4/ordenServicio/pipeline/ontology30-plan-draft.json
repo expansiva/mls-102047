@@ -1,123 +1,81 @@
 {
   "moduleName": "ordenServicio",
-  "businessDomain": "Gestión de órdenes de servicio para diagnóstico, presupuesto, reparación y entrega de aparatos electrónicos.",
+  "businessDomain": "Servicio técnico de electrónica",
   "entities": [
     {
       "entityId": "Cliente",
+      "kind": "role",
+      "family": "mdm",
       "title": "Cliente",
-      "description": "Persona cliente identificada para registrar sus órdenes de servicio y consultar sus propias órdenes desde el portal.",
-      "kind": "mdm",
-      "party": "person",
-      "mdmSubtype": "Person",
-      "displayField": "name",
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "ordenServicio.Cliente"
-      }
+      "description": "Persona que entrega un aparato para servicio técnico, recibe el presupuesto y consulta o responde sus propias órdenes desde el portal.",
+      "displayField": "details.identification.name",
+      "subtype": "Person",
+      "roleTag": "ordenServicio.Cliente",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "entityId": "Aparato",
+      "kind": "role",
+      "family": "mdm",
       "title": "Aparato",
-      "description": "Aparato electrónico recibido para diagnóstico, presupuesto, reparación o retiro.",
-      "kind": "mdm",
-      "party": "none",
-      "mdmSubtype": "AssetEquipment",
-      "displayField": "name",
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "ordenServicio.Aparato"
-      }
+      "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior retiro.",
+      "displayField": "details.identification.name",
+      "subtype": "AssetEquipment",
+      "roleTag": "ordenServicio.Aparato",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "entityId": "OrdenServicio",
+      "kind": "entity",
+      "family": "tdm",
       "title": "Orden de servicio",
-      "description": "Registro transaccional de la recepción, diagnóstico, presupuesto, decisión del cliente, reparación y entrega de un aparato.",
-      "kind": "core",
-      "party": "none",
-      "displayField": "numeroOrden",
+      "description": "Registro operativo de la recepción, diagnóstico, presupuesto, decisión del cliente, reparación y entrega de un aparato.",
+      "displayField": "orderNumber",
+      "class": "core",
       "storage": {
         "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id",
-        "mdmType": "ordenServicio.OrdenServicio"
-      }
-    },
-    {
-      "entityId": "BudgetPart",
-      "title": "Pieza presupuestada",
-      "description": "Pieza necesaria identificada durante el diagnóstico de una orden, incluyendo su costo interno para el servicio técnico.",
-      "kind": "supporting",
-      "party": "none",
-      "displayField": "descripcion",
-      "mutability": "appendOnly",
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id",
-        "mdmType": "ordenServicio.BudgetPart"
+        "table": "ordenServicio_ordenservicio",
+        "kind": "relational"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "customerOwnsEquipment",
-      "fromEntity": "Cliente",
-      "toEntity": "Aparato",
-      "type": "oneToMany",
-      "required": false,
-      "description": "El cliente es propietario del aparato que presenta al servicio técnico.",
-      "persistence": {
-        "mode": "mdmRelationship"
-      }
-    },
-    {
-      "relationshipId": "serviceOrderForCustomer",
-      "fromEntity": "OrdenServicio",
-      "toEntity": "Cliente",
+      "relationshipId": "ordenServicioCliente",
+      "from": "OrdenServicio",
+      "to": "Cliente",
       "type": "manyToOne",
       "required": true,
-      "description": "La orden de servicio corresponde al cliente que presentó el aparato.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      }
+      "mode": "fk",
+      "description": "Cada orden de servicio corresponde a un cliente; un cliente puede tener varias órdenes.",
+      "field": "OrdenServicio.clienteId"
     },
     {
-      "relationshipId": "serviceOrderForEquipment",
-      "fromEntity": "OrdenServicio",
-      "toEntity": "Aparato",
+      "relationshipId": "ordenServicioAparato",
+      "from": "OrdenServicio",
+      "to": "Aparato",
       "type": "manyToOne",
       "required": true,
-      "description": "La orden de servicio registra el aparato recibido para su atención.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      }
-    },
-    {
-      "relationshipId": "serviceOrderHasBudgetParts",
-      "fromEntity": "OrdenServicio",
-      "toEntity": "BudgetPart",
-      "type": "oneToMany",
-      "required": false,
-      "description": "La orden de servicio incluye las piezas necesarias consideradas para el presupuesto.",
-      "persistence": {
-        "mode": "moduleReference"
-      }
+      "mode": "fk",
+      "description": "Cada orden registra el aparato recibido; un aparato puede contar con varias órdenes de servicio a lo largo de su historial.",
+      "field": "OrdenServicio.aparatoId"
     }
   ],
   "normalizations": [
     {
-      "kind": "writerDerived",
-      "entityId": "BudgetPart",
-      "detail": "parent via OrdenServicio.serviceOrderHasBudgetParts",
-      "writerKind": "parent",
-      "via": {
-        "entityId": "OrdenServicio",
-        "relationshipId": "serviceOrderHasBudgetParts"
-      }
+      "kind": "derivedFromPlatform",
+      "entityId": "Cliente",
+      "detail": "roleTag ordenServicio.Cliente; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Aparato",
+      "detail": "roleTag ordenServicio.Aparato; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "OrdenServicio",
+      "detail": "storage.table ordenServicio_ordenservicio"
     }
   ]
 }

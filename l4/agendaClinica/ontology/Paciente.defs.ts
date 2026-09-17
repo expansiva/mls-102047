@@ -1,369 +1,288 @@
 /// <mls fileReference="_102047_/l4/agendaClinica/ontology/Paciente.defs.ts" enhancement="_blank"/>
-// ESCRITO À MÃO (planner, 15/09/2026) na forma nova — experimento de leitura antes da tela e do gerador.
-// Papel do módulo sobre o registro Person da plataforma: copia de /_102034_/l4/ontology/mdm.defs.ts só o que a clínica usa,
-// aperta o que precisa, e acrescenta o ramo details.agendaClinica. Tipo `satisfies` fica para a ns5_39; l4 não é compilado.
+
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaEntityPaciente = {
   "schemaVersion": "2026-09-15-ns5-ontology-v3",
   "moduleName": "agendaClinica",
   "entityId": "Paciente",
   "title": "Paciente",
-  "description": "Pessoa que recebe consultas na clínica. Não é tabela do módulo: é um papel sobre o registro Pessoa do cadastro mestre; o mesmo ser humano pode ser aluno na academia ou cliente na locadora, um registro só.",
+  "description": "Pessoa cadastrada para receber atendimento na clínica.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "consultas": {
+      "relationshipId": "consultaPaciente",
+      "to": "Consulta",
+      "via": "Consulta.pacienteId",
+      "cardinality": "1:N",
+      "title": "Consultas do paciente",
+      "description": "Consultas agendadas para este paciente.",
+      "mode": "fk",
+      "direction": "to",
+      "required": "Sempre que uma consulta for criada",
+      "role": "paciente"
+    },
+    "contatos": {
+      "relationshipId": "pacienteHasContact",
+      "to": "ContatoPaciente",
+      "via": "HasContact",
+      "cardinality": "1:N",
+      "title": "Canais de contato do paciente",
+      "description": "Canais de contato vinculados ao paciente para comunicação e confirmação de consultas.",
+      "required": "Quando houver telefone, WhatsApp ou e-mail para comunicação",
+      "role": "titular"
+    }
+  },
+  "capabilities": {
+    "read.byId": "Consulta o cadastro mestre do paciente pelo identificador para exibir seus dados no agendamento e na consulta · por get e hidratação do registro MDM · recepcionista e profissional.",
+    "locate.byName": "Localiza pacientes pelo nome para iniciar ou continuar o agendamento · por busca de nome no índice de pessoas · recepcionista.",
+    "locate.byDocument": "Localiza o paciente pelo documento nacional para evitar duplicidade no cadastro · por consulta do documento no índice MDM · recepcionista.",
+    "locate.byContact": "Localiza o paciente por telefone, WhatsApp ou e-mail quando a recepção precisa identificá-lo em uma comunicação · por busca do canal de contato vinculado · recepcionista.",
+    "register.createOrAttach": "Cria o registro de pessoa quando não existe ou vincula o já existente ao papel de paciente da agenda clínica · por deduplicação e anexação da tag agendaClinica.Paciente · recepcionista.",
+    "edit.platformFields": "Atualiza os dados de identificação do paciente necessários ao cadastro · por atualização dos campos mantidos pela plataforma MDM · recepcionista.",
+    "inactivate": "Inativa ou reativa o cadastro de paciente sem apagá-lo · por mudança do status do registro mestre · recepcionista.",
+    "link.contact": "Vincula telefone, WhatsApp ou e-mail ao paciente para comunicação e confirmação de consultas · por criação do canal de contato e relacionamento HasContact · recepcionista.",
+    "listLinks": "Exibe os canais de contato vinculados ao paciente e sua vigência · por consulta dos relacionamentos MDM · recepcionista.",
+    "audit": "Consulta quem alterou o cadastro mestre do paciente e quando · por leitura da auditoria da plataforma · recepcionista autorizada."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-document-shape-validated",
+    "rule-identity-never-in-namespace",
+    "rule-person-privacy-consent-required-br-eu"
+  ],
   "kind": "role",
   "subtype": "Person",
   "roleTag": "agendaClinica.Paciente",
   "source": "/_102034_/l4/ontology/mdm.defs.ts",
-  "displayField": "details.identification.name",
   "record": {
     "fields": {
       "id": {
         "type": "uuid",
         "required": true,
-        "derived": true,
         "indexed": true,
-        "description": "mdmId do registro mestre; é o que Consulta.pacienteId guarda."
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
       },
       "version": {
         "type": "integer",
         "required": true,
         "derived": true,
-        "description": "Incrementado pelo motor a cada escrita."
+        "description": "Bumped by the engine on every write; optimistic concurrency."
       },
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento da pessoa como o MDM guarda e devolve. Ramos: identification, base, person, general, agendaClinica.",
+        "description": "Documento mestre da pessoa atendida pela clínica.",
         "fields": {
           "identification": {
             "type": "object",
             "owner": "platform",
-            "description": "Colunas do índice: por onde se localiza e ordena.",
             "fields": {
+              "subtype": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Person",
+                    "title": "Pessoa física",
+                    "description": "Registro de uma pessoa."
+                  }
+                ],
+                "description": "Indica que este registro mestre é uma pessoa.",
+                "title": "Tipo de cadastro",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
               "name": {
                 "type": "string",
                 "required": true,
                 "indexed": true,
-                "title": "Nome completo",
-                "description": "Como a recepção reconhece o paciente; entra na busca por nome."
+                "maxLength": 0,
+                "description": "Nome pelo qual o paciente é identificado no cadastro e no agendamento.",
+                "title": "Nome",
+                "min": 0,
+                "max": 0
               },
-              "docType": {
+              "status": {
                 "type": "enum",
                 "required": true,
                 "indexed": true,
-                "title": "Tipo de documento",
+                "derived": true,
                 "values": [
-                  "CPF"
+                  {
+                    "value": "Active",
+                    "title": "Ativo",
+                    "description": "Cadastro disponível para uso."
+                  },
+                  {
+                    "value": "Inactive",
+                    "title": "Inativo",
+                    "description": "Cadastro fora de uso."
+                  },
+                  {
+                    "value": "Merged",
+                    "title": "Mesclado",
+                    "description": "Cadastro unificado a outro registro."
+                  },
+                  {
+                    "value": "Blocked",
+                    "title": "Bloqueado",
+                    "description": "Cadastro bloqueado pela plataforma."
+                  }
                 ],
-                "description": "A clínica só cadastra com CPF (a plataforma aceita outros; aqui apertado)."
+                "title": "Situação do cadastro",
+                "description": "Situação de atividade do registro mestre do paciente.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "docType": {
+                "type": "enum",
+                "indexed": true,
+                "values": [
+                  {
+                    "value": "SSN",
+                    "title": "SSN",
+                    "description": "Documento de seguridade social dos Estados Unidos."
+                  },
+                  {
+                    "value": "EIN",
+                    "title": "EIN",
+                    "description": "Identificador fiscal dos Estados Unidos."
+                  },
+                  {
+                    "value": "Passport",
+                    "title": "Passaporte",
+                    "description": "Documento de viagem."
+                  },
+                  {
+                    "value": "DriversLicense",
+                    "title": "Carteira de motorista",
+                    "description": "Documento de habilitação."
+                  },
+                  {
+                    "value": "NationalId",
+                    "title": "Documento nacional",
+                    "description": "Documento nacional de identidade."
+                  },
+                  {
+                    "value": "CPF",
+                    "title": "CPF",
+                    "description": "Cadastro de Pessoa Física."
+                  },
+                  {
+                    "value": "CNPJ",
+                    "title": "CNPJ",
+                    "description": "Cadastro Nacional da Pessoa Jurídica."
+                  },
+                  {
+                    "value": "VAT",
+                    "title": "Identificação fiscal",
+                    "description": "Identificação fiscal nacional."
+                  },
+                  {
+                    "value": "Other",
+                    "title": "Outro",
+                    "description": "Outro documento de identificação."
+                  }
+                ],
+                "title": "Tipo de documento",
+                "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do paciente.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
               },
               "docId": {
                 "type": "string",
-                "required": true,
                 "indexed": true,
-                "unique": true,
-                "title": "CPF",
-                "pattern": "^\\d{11}$",
-                "description": "Chave de deduplicação: duas pessoas com o mesmo CPF são a mesma pessoa."
+                "description": "Número do documento informado para localizar ou cadastrar o paciente sem duplicidade.",
+                "title": "Número do documento",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
               },
               "countryCode": {
                 "type": "string",
                 "required": true,
                 "indexed": true,
+                "pattern": "^[A-Z]{2}$",
+                "maxLength": 2,
+                "default": "US",
+                "description": "Código do país que orienta o documento e as regras aplicáveis ao paciente.",
                 "title": "País",
-                "default": "BR",
-                "maxLength": 2
-              },
-              "status": {
-                "type": "enum",
-                "required": true,
-                "derived": true,
-                "indexed": true,
-                "title": "Situação",
-                "values": [
-                  "Active",
-                  "Inactive",
-                  "Merged",
-                  "Blocked"
-                ],
-                "description": "Situação do registro mestre, não da consulta. Inativo não agenda."
-              },
-              "tags": {
-                "type": "string",
-                "collection": true,
-                "required": true,
-                "derived": true,
-                "title": "Papéis",
-                "description": "Contém agendaClinica.Paciente quando a pessoa é paciente. Escrito por attachRole."
+                "min": 0,
+                "max": 0
               }
-            }
+            },
+            "description": "Dados de identificação do paciente mantidos pela plataforma."
           },
           "base": {
             "type": "object",
             "owner": "platform",
-            "description": "O que toda pessoa tem, independente do módulo.",
             "fields": {
-              "aliases": {
-                "type": "string",
-                "collection": true,
-                "title": "Outros nomes",
-                "description": "Apelido, nome social. Atenção: hoje a busca por nome (locate.byName) NÃO consulta aliases — plataforma parcial."
-              },
-              "addresses": {
-                "type": "object",
-                "of": "Address",
-                "collection": true,
-                "title": "Endereços",
-                "description": "Lista dentro do documento. Subcampos que a clínica usa:",
-                "fields": {
-                  "type": {
-                    "type": "enum",
-                    "required": true,
-                    "title": "Tipo",
-                    "values": [
-                      {
-                        "value": "Residential",
-                        "title": "Residencial"
-                      },
-                      {
-                        "value": "Commercial",
-                        "title": "Comercial"
-                      }
-                    ]
-                  },
-                  "line1": {
-                    "type": "string",
-                    "required": true,
-                    "title": "Logradouro e número"
-                  },
-                  "line2": {
-                    "type": "string",
-                    "title": "Complemento"
-                  },
-                  "line3": {
-                    "type": "string",
-                    "title": "Bairro"
-                  },
-                  "city": {
-                    "type": "string",
-                    "required": true,
-                    "title": "Cidade"
-                  },
-                  "stateOrProvince": {
-                    "type": "string",
-                    "required": true,
-                    "title": "UF",
-                    "maxLength": 2
-                  },
-                  "postalCode": {
-                    "type": "string",
-                    "required": true,
-                    "title": "CEP",
-                    "pattern": "^\\d{5}-?\\d{3}$"
-                  },
-                  "countryCode": {
-                    "type": "string",
-                    "required": true,
-                    "title": "País",
-                    "default": "BR"
-                  },
-                  "isPrimary": {
-                    "type": "boolean",
-                    "required": true,
-                    "title": "Principal"
-                  }
-                }
-              },
               "contacts": {
                 "type": "object",
-                "of": "ContactSummary",
+                "required": true,
                 "collection": true,
+                "of": "ContactSummary",
                 "derived": true,
+                "description": "Resumo derivado dos canais de contato vinculados ao paciente, usado na comunicação e confirmação de consultas.",
                 "title": "Canais de contato",
-                "description": "Referências aos registros ContactChannel ligados por HasContact (ver relationships.contatos). O motor preenche; para incluir um, capacidade link.contact."
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
               },
               "relationshipRefs": {
                 "type": "object",
+                "required": true,
                 "derived": true,
-                "title": "Vínculos (resumo)",
-                "description": "Chaves compactas recalculadas pelo motor a cada link/unlink. Não se edita."
+                "description": "Referências compactas derivadas dos relacionamentos ativos do paciente.",
+                "title": "Referências de relacionamentos",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
               }
-            }
+            },
+            "description": "Dados comuns do registro mestre que a clínica consulta para comunicação com o paciente."
           },
           "person": {
             "type": "object",
             "owner": "platform",
-            "description": "Campos que só uma Pessoa tem.",
             "fields": {
-              "birthDate": {
-                "type": "date",
-                "required": true,
-                "title": "Data de nascimento",
-                "description": "A plataforma trata como opcional; a clínica exige (idade define responsável)."
-              },
-              "gender": {
-                "type": "enum",
-                "title": "Sexo",
-                "values": [
-                  {
-                    "value": "Male",
-                    "title": "Masculino"
-                  },
-                  {
-                    "value": "Female",
-                    "title": "Feminino"
-                  },
-                  {
-                    "value": "NotDisclosed",
-                    "title": "Não informado"
-                  }
-                ],
-                "description": "Subconjunto do domínio da plataforma."
-              },
               "privacyConsent": {
                 "type": "object",
                 "of": "PrivacyConsent",
-                "required": true,
-                "title": "Consentimento LGPD",
-                "description": "Obrigatório para pessoa no Brasil; sem ele o motor deixa o registro Inativo.",
-                "fields": {
-                  "consentedAt": {
-                    "type": "timestamp",
-                    "required": true,
-                    "title": "Consentido em"
-                  },
-                  "consentVersion": {
-                    "type": "string",
-                    "required": true,
-                    "title": "Versão da política"
-                  },
-                  "channel": {
-                    "type": "enum",
-                    "required": true,
-                    "title": "Canal",
-                    "values": [
-                      {
-                        "value": "paper-form",
-                        "title": "Formulário em papel"
-                      },
-                      {
-                        "value": "web-signup",
-                        "title": "Cadastro no site"
-                      },
-                      {
-                        "value": "verbal",
-                        "title": "Verbal, registrado pela recepção"
-                      }
-                    ]
-                  },
-                  "revokedAt": {
-                    "type": "timestamp",
-                    "title": "Revogado em"
-                  }
-                }
+                "description": "Consentimento de privacidade do paciente, exigido quando aplicável pela LGPD ou GDPR.",
+                "title": "Consentimento de privacidade",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
               }
-            }
+            },
+            "description": "Dados pessoais do paciente mantidos pela plataforma."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Campos promovidos pela organização quando dois módulos precisam do mesmo dado. Hoje vazio para a clínica."
+            "description": "Dados promovidos pela organização, somente para leitura pelo módulo."
           },
           "agendaClinica": {
             "type": "object",
             "owner": "module",
             "fields": {},
-            "description": "Namespace da clínica dentro do documento da pessoa: só o que ninguém mais precisa saber, e só este módulo escreve. O prompt não pediu dado próprio da clínica sobre a pessoa, então está vazio; se pedir (convênio, prontuário), entra aqui, como árvore."
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
           }
         }
       }
     }
-  },
-  "relationships": {
-    "contatos": {
-      "to": "ContactChannel",
-      "via": "HasContact",
-      "cardinality": "1:N",
-      "title": "Telefones e e-mail",
-      "description": "Canais do próprio paciente; cada um é um registro ContactChannel. É por eles que a recepção confirma consulta e a plataforma deduplica.",
-      "target": {
-        "contactType": [
-          "Phone",
-          "WhatsApp",
-          "Email"
-        ]
-      },
-      "relationshipId": "pacienteContatos"
-    },
-    "responsavel": {
-      "to": "Person",
-      "via": "GuardianOf",
-      "direction": "to",
-      "cardinality": "N:1",
-      "required": "quando menor de 18 anos",
-      "roles": [
-        "parent",
-        "guardian"
-      ],
-      "title": "Responsável legal",
-      "description": "Pai, mãe ou tutor: outra Pessoa do cadastro mestre. Visto do paciente é N:1 (vários pacientes podem ter o mesmo responsável); no índice o vínculo é GuardianOf de Person para Paciente, oneToMany.",
-      "relationshipId": "pacienteResponsavel"
-    },
-    "contatoEmergencia": {
-      "to": "Person",
-      "via": "Family",
-      "role": "emergency",
-      "cardinality": "N:N",
-      "title": "Para quem ligar",
-      "description": "Pessoa a avisar em emergência; não é telefone, é outro registro Pessoa com os canais dela.",
-      "relationshipId": "pacienteContatoEmergencia"
-    },
-    "consultas": {
-      "to": "Consulta",
-      "via": "Consulta.pacienteId",
-      "mode": "fk",
-      "cardinality": "1:N",
-      "title": "Consultas",
-      "description": "Tabela do módulo com FK para o paciente. Ordenar por scheduledAt desc dá as últimas consultas.",
-      "relationshipId": "consultaPaciente"
-    },
-    "profissionais": {
-      "to": "Profissional",
-      "via": "Consulta",
-      "path": "Consulta.pacienteId = id → Consulta.profissionalId",
-      "mode": "throughTable",
-      "derived": true,
-      "cardinality": "N:N",
-      "title": "Profissionais que me atenderam",
-      "description": "Derivado pelas consultas com status attended.",
-      "relationshipId": "pacienteProfissionais"
-    }
-  },
-  "capabilities": {
-    "locate.byName": "Recepção localiza o paciente pelo nome ou apelido ao agendar ou confirmar · busca por nome no índice · recepcionista",
-    "locate.byDocument": "Recepção localiza pelo CPF antes de cadastrar, para não duplicar · docType+docId · recepcionista",
-    "locate.byContact": "Recepção descobre quem é o paciente pelo telefone de quem ligou · ContactChannel.value · recepcionista",
-    "register.createOrAttach": "Cadastrar paciente: cria a pessoa se o CPF não existe, ou só anexa o papel agendaClinica.Paciente · recepcionista",
-    "edit.platformFields": "Recepção corrige nome, nascimento, endereço e consentimento · recepcionista",
-    "edit.moduleNamespace": "Recepção mantém o convênio (details.agendaClinica) · recepcionista",
-    "inactivate": "Recepção inativa o paciente que deixou a clínica; inativo não agenda · recepcionista",
-    "link.contact": "Recepção adiciona telefone, WhatsApp ou e-mail do paciente · recepcionista",
-    "link": "Recepção registra responsável legal (GuardianOf), familiar e contato de emergência (Family) · recepcionista",
-    "listLinks": "Tela do paciente mostra contatos, responsável, família · recepcionista, profissional",
-    "attach.document": "Recepção guarda foto, carteirinha do convênio e laudo externo · categorias: foto, carteirinha, laudo · recepcionista, profissional",
-    "comment": "Nota da recepção sobre o paciente (não clínica) · recepcionista",
-    "statusHistory.read": "Quando ficou ativo ou inativo e por quem · recepcionista",
-    "agendaClinica.listarConsultas": "Consultas do paciente por período e situação · Consulta where pacienteId = id order by scheduledAt desc · recepcionista, profissional · módulo",
-    "agendaClinica.listarProfissionais": "Médicos e terapeutas que já atenderam o paciente · distinct Consulta.profissionalId where status attended · recepcionista · módulo"
-  },
-  "rules": [
-    "rule-person-privacy-consent-required-br-eu",
-    "rule-identity-never-in-namespace",
-    "rule-foreign-namespace-refused",
-    "menorExigeResponsavel",
-    "inativoNaoAgenda",
-    "contatoParaConfirmarConsulta"
-  ]
-} as const;
+  }
+} as const satisfies Ns5OntologyEntityV3;
+
+export type AgendaClinicaEntityPacienteType = typeof agendaClinicaEntityPaciente;
 
 export default agendaClinicaEntityPaciente;

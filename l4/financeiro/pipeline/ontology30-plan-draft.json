@@ -1,124 +1,115 @@
 {
   "moduleName": "financeiro",
-  "businessDomain": "Contas a receber da organização, incluindo títulos originados em outros módulos, recebimentos e consulta de extratos por pagador.",
+  "businessDomain": "Contas a receber e registro de recebimentos da organização.",
   "entities": [
     {
+      "entityId": "Pagador",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Pagador",
+      "description": "Pessoa responsável pelos títulos a receber e que acessa o portal para consultar e pagar os próprios débitos.",
+      "displayField": "details.identification.name",
+      "writer": "inbound",
+      "subtype": "Person",
+      "roleTag": "financeiro.Pagador",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "entityId": "GerenteFinanceiro",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Gerente financeiro",
+      "description": "Pessoa da organização usada para delimitar o escopo pessoal do gerente financeiro quando aplicável.",
+      "displayField": "details.identification.name",
+      "writer": "crud",
+      "subtype": "Person",
+      "roleTag": "financeiro.GerenteFinanceiro",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
       "entityId": "TituloReceber",
+      "kind": "entity",
+      "family": "tdm",
       "title": "Título a receber",
-      "description": "Cobrança a receber originada em outro módulo da organização, com valor, vencimento, pagador e referência à origem.",
-      "kind": "core",
-      "party": "none",
-      "displayField": "numeroTitulo",
-      "mutability": "appendOnly",
+      "description": "Cobrança originada em outro módulo, com pagador, valor, vencimento, origem e saldo a receber.",
+      "displayField": "id",
+      "writer": "inbound",
+      "class": "core",
       "storage": {
         "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id",
-        "mdmType": "financeiro.TituloReceber"
+        "table": "financeiro_tituloreceber",
+        "kind": "relational"
       }
     },
     {
       "entityId": "Recebimento",
+      "kind": "entity",
+      "family": "tdm",
       "title": "Recebimento",
-      "description": "Registro de uma solicitação ou confirmação de valor recebido para um título, por dinheiro, Pix ou cartão.",
-      "kind": "event",
-      "party": "none",
-      "displayField": "numeroRecebimento",
+      "description": "Registro de recebimento integral ou parcial de um título, inclusive pagamento por cartão processado pela Stripe e eventual estorno no mesmo dia.",
+      "displayField": "id",
+      "class": "event",
       "storage": {
         "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id",
-        "mdmType": "financeiro.Recebimento"
-      }
-    },
-    {
-      "entityId": "ExtratoPagador",
-      "title": "Extrato do pagador",
-      "description": "Extrato emitido para um pagador com os títulos e recebimentos considerados na emissão.",
-      "kind": "event",
-      "party": "none",
-      "displayField": "numeroExtrato",
-      "mutability": "appendOnly",
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id",
-        "mdmType": "financeiro.ExtratoPagador"
-      }
-    },
-    {
-      "entityId": "Pagador",
-      "title": "Pagador",
-      "description": "Pessoa responsável por títulos a receber e que pode consultar e pagar os próprios títulos no portal.",
-      "kind": "mdm",
-      "party": "person",
-      "mdmSubtype": "Person",
-      "displayField": "name",
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "financeiro.Pagador"
+        "table": "financeiro_recebimento",
+        "kind": "relational"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "tituloTemPagador",
-      "fromEntity": "TituloReceber",
-      "toEntity": "Pagador",
+      "relationshipId": "tituloPagador",
+      "from": "TituloReceber",
+      "to": "Pagador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada título a receber possui um pagador responsável.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      }
+      "mode": "fk",
+      "description": "Cada título a receber pertence a um único pagador; um pagador pode ter vários títulos.",
+      "field": "TituloReceber.pagadorId"
     },
     {
-      "relationshipId": "recebimentoDoTitulo",
-      "fromEntity": "Recebimento",
-      "toEntity": "TituloReceber",
+      "relationshipId": "recebimentoTitulo",
+      "from": "Recebimento",
+      "to": "TituloReceber",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada recebimento registra uma solicitação, confirmação ou estorno relativo a um título a receber.",
-      "persistence": {
-        "mode": "moduleReference"
-      }
+      "mode": "fk",
+      "description": "Cada recebimento registra a baixa, total ou parcial, de um único título a receber.",
+      "field": "Recebimento.tituloId"
     },
     {
-      "relationshipId": "extratoDoPagador",
-      "fromEntity": "ExtratoPagador",
-      "toEntity": "Pagador",
+      "relationshipId": "recebimentoPagador",
+      "from": "Recebimento",
+      "to": "Pagador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada extrato emitido pertence ao pagador consultado.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      }
+      "mode": "throughTable",
+      "description": "O pagador de um recebimento é obtido pelo título a receber ao qual o recebimento está vinculado.",
+      "through": "TituloReceber",
+      "path": "Recebimento.tituloId -> TituloReceber.pagadorId",
+      "derived": true
     }
   ],
-  "moduleDetails": {
-    "recebiveisPorPeriodoEorigem": {
-      "type": "json",
-      "description": "Indicadores calculados dos recebíveis da organização, agrupados por período e por origem."
-    }
-  },
   "normalizations": [
     {
-      "kind": "dropCrud",
-      "entityId": "TituloReceber",
-      "detail": "writer inbound removed; an act writes this entity as entity or affects."
+      "kind": "derivedFromPlatform",
+      "entityId": "Pagador",
+      "detail": "roleTag financeiro.Pagador; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "kind": "writerDerived",
-      "entityId": "Pagador",
-      "detail": "attach via TituloReceber.tituloTemPagador",
-      "writerKind": "attach",
-      "via": {
-        "entityId": "TituloReceber",
-        "relationshipId": "tituloTemPagador",
-        "stepRef": "registrarBaixaDeTitulo.registrarRecebimento"
-      }
+      "kind": "derivedFromPlatform",
+      "entityId": "GerenteFinanceiro",
+      "detail": "roleTag financeiro.GerenteFinanceiro; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "TituloReceber",
+      "detail": "storage.table financeiro_tituloreceber"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "storage.table financeiro_recebimento"
     }
   ]
 }

@@ -11,72 +11,98 @@ export const comandaRestauranteAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Garçom",
-      "description": "Profissional do restaurante que abre comandas para mesas, lança itens e cancela lançamentos realizados por engano enquanto a comanda está aberta."
+      "description": "Abre comandas para mesas, lança itens e cancela itens lançados por engano enquanto a comanda está aberta."
     },
     {
       "actorId": "caixa",
       "kind": "internal",
       "origin": "named",
       "title": "Caixa",
-      "description": "Profissional do restaurante que fecha comandas, aplica descontos opcionais, registra a forma de pagamento e libera a mesa."
+      "description": "Fecha comandas, consulta o total, aplica descontos opcionais e registra a forma de pagamento."
     }
   ],
   "grants": [
     {
-      "grantId": "garcomRecursosRestaurante",
+      "grantId": "garcomAtendimento",
       "actorRef": "garcom",
-      "title": "Consultar mesas e cardápio",
-      "description": "Permite ao garçom consultar todas as mesas do restaurante e os itens disponíveis no cardápio para abrir comandas e registrar pedidos.",
+      "title": "Atendimento de comandas",
+      "description": "Permite ao garçom consultar mesas e itens do cardápio, abrir comandas e registrar ou cancelar lançamentos durante o atendimento.",
       "entityRefs": [
         "Mesa",
-        "ItemCardapio"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Mesas e itens do cardápio de todo o restaurante."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Exibe todos os campos disponíveis de mesas e itens do cardápio."
-      }
-    },
-    {
-      "grantId": "garcomPropriasComandas",
-      "actorRef": "garcom",
-      "title": "Gerenciar próprias comandas",
-      "description": "Permite ao garçom manter seu próprio cadastro funcional, abrir comandas vinculadas a ele, lançar itens e cancelar lançamentos de suas comandas abertas.",
-      "entityRefs": [
-        "Garcom",
+        "ItemCardapio",
         "Comanda",
         "ItemComanda"
       ],
       "dataScope": {
-        "mode": "own",
-        "description": "Acesso ao cadastro do garçom autenticado e às comandas e lançamentos vinculados a ele.",
-        "anchorEntity": "Garcom"
+        "mode": "organization",
+        "description": "A operação do garçom abrange as mesas, comandas e lançamentos do restaurante."
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "Exibe todos os campos disponíveis das próprias comandas e de seus lançamentos."
+        "mode": "fieldsOnly",
+        "description": "O garçom vê a identificação e localização das mesas, o nome e preço dos itens, e os dados necessários para conduzir comandas e seus lançamentos; não vê dados de fechamento e pagamento.",
+        "allowedFields": [
+          "Mesa.id",
+          "Mesa.version",
+          "Mesa.details.identification",
+          "Mesa.details.location",
+          "ItemCardapio.id",
+          "ItemCardapio.version",
+          "ItemCardapio.details.identification",
+          "ItemCardapio.details.comandaRestaurante",
+          "Comanda.id",
+          "Comanda.version",
+          "Comanda.mesaId",
+          "Comanda.numero",
+          "Comanda.status",
+          "Comanda.details.totalItens",
+          "ItemComanda.id",
+          "ItemComanda.version",
+          "ItemComanda.comandaId",
+          "ItemComanda.itemCardapioId",
+          "ItemComanda.status",
+          "ItemComanda.details"
+        ]
       }
     },
     {
-      "grantId": "caixaFechamentoComandas",
+      "grantId": "caixaFechamento",
       "actorRef": "caixa",
-      "title": "Fechar comandas do restaurante",
-      "description": "Permite ao caixa consultar mesas, comandas e lançamentos de todo o restaurante para registrar pagamento, aplicar desconto, encerrar a comanda e liberar a mesa.",
+      "title": "Fechamento e pagamento de comandas",
+      "description": "Permite ao caixa consultar comandas e itens lançados, calcular o valor devido, aplicar desconto, registrar o pagamento e encerrar o atendimento.",
       "entityRefs": [
         "Mesa",
+        "ItemCardapio",
         "Comanda",
         "ItemComanda"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Comandas, lançamentos e mesas de todo o restaurante."
+        "description": "O caixa atende as comandas abertas de todas as mesas do restaurante."
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "Exibe todos os campos disponíveis necessários para conferir e fechar as comandas."
+        "mode": "fieldsOnly",
+        "description": "O caixa vê a mesa, os itens e preços lançados, o total e todos os dados de fechamento necessários para registrar o pagamento e encerrar a comanda.",
+        "allowedFields": [
+          "Mesa.id",
+          "Mesa.version",
+          "Mesa.details.identification",
+          "Mesa.details.location",
+          "ItemCardapio.id",
+          "ItemCardapio.details.identification",
+          "ItemCardapio.details.comandaRestaurante",
+          "Comanda.id",
+          "Comanda.version",
+          "Comanda.mesaId",
+          "Comanda.numero",
+          "Comanda.status",
+          "Comanda.details",
+          "ItemComanda.id",
+          "ItemComanda.version",
+          "ItemComanda.comandaId",
+          "ItemComanda.itemCardapioId",
+          "ItemComanda.status",
+          "ItemComanda.details"
+        ]
       }
     }
   ]

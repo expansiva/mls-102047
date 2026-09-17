@@ -6,9 +6,9 @@ export const cadastrarPlanoPreventivoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "journeyId": "cadastrarPlanoPreventivo",
   "business": {
-    "actorRef": "gestorFrota",
+    "actorRef": "gestor",
     "title": "Cadastrar plano de manutenção preventiva",
-    "goal": "Definir quando a manutenção preventiva de um veículo deve ser realizada.",
+    "goal": "Definir a periodicidade de manutenção preventiva de um veículo.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -16,35 +16,35 @@ export const cadastrarPlanoPreventivoJourney = {
       {
         "stepId": "localizarVeiculo",
         "kind": "locate",
-        "entity": "Veiculo",
-        "title": "Localizar veículo",
-        "description": "Localiza o veículo que receberá o plano preventivo."
+        "entity": "Vehicle",
+        "title": "x",
+        "description": "Localiza, ou usa o veículo já em contexto, para o qual será definido o plano."
       },
       {
-        "stepId": "inspecionarDadosVeiculo",
+        "stepId": "inspecionarVeiculoParaPlano",
         "kind": "inspect",
-        "entity": "Veiculo",
-        "title": "Conferir dados do veículo",
-        "description": "Confere a identificação e a quilometragem atual do veículo."
+        "entity": "Vehicle",
+        "title": "x",
+        "description": "Consulta os dados e a quilometragem atual do veículo para definir a preventiva."
       },
       {
-        "stepId": "registrarPlanoPreventivo",
+        "stepId": "criarPlanoPreventivo",
         "kind": "act",
-        "entity": "PlanoManutencao",
+        "entity": "MaintenancePlan",
         "effect": "create",
-        "title": "Registrar plano preventivo",
-        "description": "Define o intervalo da preventiva por quilometragem, por meses ou pelos dois critérios."
+        "title": "x",
+        "description": "Cadastra o plano preventivo do veículo com a periodicidade por quilometragem, por meses, ou ambas."
       }
     ],
     "outcome": {
-      "statement": "O veículo passa a ter um plano de manutenção preventiva acompanhado pela frota.",
+      "statement": "O veículo passa a ter um plano de manutenção preventiva cadastrado.",
       "evidence": [
-        "Plano vinculado ao veículo com intervalo em quilômetros e/ou meses.",
-        "Próxima preventiva calculada a partir dos critérios registrados."
+        "Plano preventivo associado ao veículo.",
+        "Periodicidade em quilômetros e/ou meses registrada."
       ]
     }
   },
-  "businessHash": "sha256:417d8c129b6a0c3a8b42c45023031852431d8f0f83d04bfd867a7c6d45ab4a02"
+  "businessHash": "sha256:c164ef0eccb7bde66e87fdde03d4f0010eb20d241566f744c6d63c8b6e19ea8e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CadastrarPlanoPreventivoJourneyType = typeof cadastrarPlanoPreventivoJourney;

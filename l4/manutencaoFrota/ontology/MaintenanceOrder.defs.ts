@@ -1,0 +1,171 @@
+/// <mls fileReference="_102047_/l4/manutencaoFrota/ontology/MaintenanceOrder.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+
+export const manutencaoFrotaEntityMaintenanceOrder = {
+  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "moduleName": "manutencaoFrota",
+  "entityId": "MaintenanceOrder",
+  "title": "Ordem de manutenção",
+  "description": "Ordem aberta para manutenção preventiva vencida ou para correção de defeito de um veículo.",
+  "displayField": "id",
+  "relationships": {
+    "vehicle": {
+      "relationshipId": "maintenanceOrderVehicle",
+      "to": "Vehicle",
+      "via": "MaintenanceOrder.vehicleId",
+      "cardinality": "N:1",
+      "title": "Veículo da ordem",
+      "description": "Cada ordem de manutenção trata um único veículo.",
+      "mode": "fk",
+      "required": "Sempre"
+    },
+    "workshop": {
+      "relationshipId": "maintenanceOrderWorkshop",
+      "to": "Workshop",
+      "via": "MaintenanceOrder.workshopId",
+      "cardinality": "N:1",
+      "title": "Oficina responsável",
+      "description": "Cada ordem informa a oficina responsável pela execução do serviço.",
+      "mode": "fk",
+      "required": "Sempre"
+    },
+    "maintenancePlan": {
+      "relationshipId": "maintenanceOrderPlan",
+      "to": "MaintenancePlan",
+      "via": "MaintenanceOrder.maintenancePlanId",
+      "cardinality": "N:1",
+      "title": "Plano preventivo de origem",
+      "description": "Uma ordem preventiva pode decorrer de um plano de manutenção vencido.",
+      "mode": "fk",
+      "required": "Quando a ordem decorrer de manutenção preventiva vencida"
+    }
+  },
+  "capabilities": {
+    "read.byId": "Lê uma ordem de manutenção pelo identificador, para o gestor consultar uma ordem já selecionada.",
+    "locate.byColumn": "Lista ordens de manutenção pelos veículos, oficinas ou planos associados, com paginação, para o gestor localizar a ordem desejada.",
+    "listByForeignKey": "Lista as ordens vinculadas a um veículo, oficina ou plano de manutenção, para consulta operacional do gestor.",
+    "create": "Cria uma ordem de manutenção para um veículo, por defeito ou por plano preventivo vencido, usada pelo gestor de frota.",
+    "update": "Atualiza a descrição, o custo e a data de saída de uma ordem após a execução da manutenção, usada pelo gestor de frota.",
+    "read.mdmRecord": "Lê os registros mestres do veículo e da oficina referenciados pela ordem, para o gestor visualizar seus dados sem copiá-los para a ordem."
+  },
+  "rules": [],
+  "kind": "entity",
+  "class": "core",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "manutencaoFrota_maintenanceorder",
+    "kind": "relational"
+  },
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "derived": true,
+        "indexed": true,
+        "title": "Id"
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true
+      },
+      "vehicleId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "of": "Address",
+        "to": [
+          "Vehicle"
+        ],
+        "title": "Veículo",
+        "description": "Veículo que receberá a manutenção.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "workshopId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "of": "Address",
+        "to": [
+          "Workshop"
+        ],
+        "title": "Oficina",
+        "description": "Oficina responsável pela execução do serviço de manutenção.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "maintenancePlanId": {
+        "type": "record",
+        "indexed": true,
+        "of": "Address",
+        "to": [
+          "MaintenancePlan"
+        ],
+        "title": "Plano de manutenção",
+        "description": "Plano preventivo vencido que motivou a ordem, quando aplicável.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "of": "Address",
+        "title": "Dados da ordem de manutenção",
+        "description": "Informações operacionais registradas para a manutenção do veículo.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0,
+        "fields": {
+          "description": {
+            "type": "text",
+            "required": true,
+            "of": "Address",
+            "title": "Descrição",
+            "description": "Descrição do defeito informado ou do serviço preventivo a executar.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "cost": {
+            "type": "money",
+            "of": "Address",
+            "title": "Custo",
+            "description": "Custo da manutenção, informado ou ajustado quando disponível.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "entryDate": {
+            "type": "date",
+            "required": true,
+            "of": "Address",
+            "title": "Data de entrada",
+            "description": "Data em que o veículo entrou para manutenção.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "exitDate": {
+            "type": "date",
+            "of": "Address",
+            "title": "Data de saída",
+            "description": "Data em que a manutenção foi concluída e o veículo saiu da oficina.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          }
+        }
+      }
+    }
+  }
+} as const satisfies Ns5OntologyEntityV3;
+
+export type ManutencaoFrotaEntityMaintenanceOrderType = typeof manutencaoFrotaEntityMaintenanceOrder;
+
+export default manutencaoFrotaEntityMaintenanceOrder;

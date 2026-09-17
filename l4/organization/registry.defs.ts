@@ -42,63 +42,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-12T19:32:37.338Z"
     },
     {
-      "moduleName": "agendaClinica",
-      "actors": [
-        {
-          "actorId": "recepcionista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "profissional",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "agendaClinica.Paciente",
-          "namespace": "agendaClinica"
-        },
-        {
-          "mdmSubtype": "Person",
-          "role": "agendaClinica.Profissional",
-          "namespace": "agendaClinica"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Paciente",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "Profissional",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "Consulta",
-          "kind": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "consultaConfirmada",
-          "on": "Consulta.confirmarConsulta"
-        },
-        {
-          "eventId": "consultaComFaltaRegistrada",
-          "on": "Consulta.registrarFalta"
-        },
-        {
-          "eventId": "consultaAtendida",
-          "on": "Consulta.registrarAtendimento"
-        }
-      ],
-      "updatedAt": "2026-09-12T19:43:15.338Z"
-    },
-    {
       "moduleName": "reembolsoDespesas",
       "actors": [
         {
@@ -219,201 +162,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-12T19:59:56.097Z"
     },
     {
-      "moduleName": "manutencaoFrota",
-      "actors": [
-        {
-          "actorId": "motorista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gestorFrota",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "manutencaoFrota.Motorista",
-          "namespace": "manutencaoFrota"
-        },
-        {
-          "mdmSubtype": "Company",
-          "role": "manutencaoFrota.Oficina",
-          "namespace": "manutencaoFrota"
-        },
-        {
-          "mdmSubtype": "AssetVehicle",
-          "role": "manutencaoFrota.Veiculo",
-          "namespace": "manutencaoFrota"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Abastecimento",
-          "kind": "event"
-        },
-        {
-          "entityId": "Motorista",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "Oficina",
-          "kind": "mdm",
-          "mdmSubtype": "Company"
-        },
-        {
-          "entityId": "Veiculo",
-          "kind": "mdm",
-          "mdmSubtype": "AssetVehicle"
-        },
-        {
-          "entityId": "PlanoManutencao",
-          "kind": "core"
-        },
-        {
-          "entityId": "OrdemManutencao",
-          "kind": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "preventivaVencida",
-          "on": "Abastecimento.create"
-        }
-      ],
-      "updatedAt": "2026-09-12T20:05:09.582Z"
-    },
-    {
-      "moduleName": "mensalidadesAcademia",
-      "actors": [
-        {
-          "actorId": "recepcao",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gerencia",
-          "kind": "internal"
-        },
-        {
-          "actorId": "aluno",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "mensalidadesAcademia.Aluno",
-          "namespace": "mensalidadesAcademia"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Plano",
-          "kind": "core"
-        },
-        {
-          "entityId": "Aluno",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "Matricula",
-          "kind": "core"
-        },
-        {
-          "entityId": "Mensalidade",
-          "kind": "event"
-        },
-        {
-          "entityId": "Pagamento",
-          "kind": "event"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "matriculaCancelada",
-          "on": "Matricula.cancelarMatricula"
-        }
-      ],
-      "updatedAt": "2026-09-12T20:09:09.008Z"
-    },
-    {
-      "moduleName": "ordenServicio",
-      "actors": [
-        {
-          "actorId": "recepcionista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "tecnico",
-          "kind": "internal"
-        },
-        {
-          "actorId": "cliente",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "ordenServicio.Cliente",
-          "namespace": "ordenServicio"
-        },
-        {
-          "mdmSubtype": "AssetEquipment",
-          "role": "ordenServicio.Aparato",
-          "namespace": "ordenServicio"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Cliente",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "Aparato",
-          "kind": "mdm",
-          "mdmSubtype": "AssetEquipment"
-        },
-        {
-          "entityId": "OrdenServicio",
-          "kind": "core"
-        },
-        {
-          "entityId": "BudgetPart",
-          "kind": "supporting"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "enviarPresupuesto",
-          "on": "OrdenServicio.enviarPresupuesto"
-        },
-        {
-          "eventId": "aprobarPresupuesto",
-          "on": "OrdenServicio.aprobarPresupuesto"
-        },
-        {
-          "eventId": "rechazarPresupuesto",
-          "on": "OrdenServicio.rechazarPresupuesto"
-        },
-        {
-          "eventId": "marcarLista",
-          "on": "OrdenServicio.marcarLista"
-        },
-        {
-          "eventId": "entregarYfinalizar",
-          "on": "OrdenServicio.entregarYfinalizar"
-        }
-      ],
-      "updatedAt": "2026-09-12T21:31:27.732Z"
-    },
-    {
       "moduleName": "locacaoEquipamentos",
       "actors": [
         {
@@ -528,6 +276,202 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-12T21:37:59.069Z"
     },
     {
+      "moduleName": "agendaClinica",
+      "actors": [
+        {
+          "actorId": "recepcionista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "profissional",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "agendaClinica.Paciente",
+          "namespace": "agendaClinica"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "agendaClinica.Profissional",
+          "namespace": "agendaClinica"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "agendaClinica.ContatoPaciente",
+          "namespace": "agendaClinica"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Paciente",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Profissional",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "ContatoPaciente",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Consulta",
+          "kind": "entity",
+          "class": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "confirmarConsulta",
+          "on": "Consulta.confirmarConsulta"
+        },
+        {
+          "eventId": "registrarFalta",
+          "on": "Consulta.registrarFalta"
+        },
+        {
+          "eventId": "registrarAtendimento",
+          "on": "Consulta.registrarAtendimento"
+        }
+      ],
+      "updatedAt": "2026-09-17T01:05:28.778Z"
+    },
+    {
+      "moduleName": "ordenServicio",
+      "actors": [
+        {
+          "actorId": "recepcionista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "tecnico",
+          "kind": "internal"
+        },
+        {
+          "actorId": "cliente",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "ordenServicio.Cliente",
+          "namespace": "ordenServicio"
+        },
+        {
+          "subtype": "AssetEquipment",
+          "roleTag": "ordenServicio.Aparato",
+          "namespace": "ordenServicio"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Cliente",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Aparato",
+          "kind": "role",
+          "mdmSubtype": "AssetEquipment",
+          "class": "mdm"
+        },
+        {
+          "entityId": "OrdenServicio",
+          "kind": "entity",
+          "class": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "presupuestoEmitido",
+          "on": "OrdenServicio.emitirPresupuesto"
+        },
+        {
+          "eventId": "presupuestoResuelto",
+          "on": "OrdenServicio.resolverPresupuesto"
+        },
+        {
+          "eventId": "reparacionListaParaEntrega",
+          "on": "OrdenServicio.marcarListaParaEntrega"
+        },
+        {
+          "eventId": "entregaFinalizada",
+          "on": "OrdenServicio.finalizarEntrega"
+        }
+      ],
+      "updatedAt": "2026-09-17T03:44:40.081Z"
+    },
+    {
+      "moduleName": "comandaRestaurante",
+      "actors": [
+        {
+          "actorId": "garcom",
+          "kind": "internal"
+        },
+        {
+          "actorId": "caixa",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Location",
+          "roleTag": "comandaRestaurante.Mesa",
+          "namespace": "comandaRestaurante"
+        },
+        {
+          "subtype": "Product",
+          "roleTag": "comandaRestaurante.ItemCardapio",
+          "namespace": "comandaRestaurante"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Mesa",
+          "kind": "role",
+          "mdmSubtype": "Location",
+          "class": "mdm"
+        },
+        {
+          "entityId": "ItemCardapio",
+          "kind": "role",
+          "mdmSubtype": "Product",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Comanda",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "ItemComanda",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "fecharComanda",
+          "on": "Comanda.fecharComanda"
+        }
+      ],
+      "updatedAt": "2026-09-17T04:13:38.255Z"
+    },
+    {
       "moduleName": "compras",
       "actors": [
         {
@@ -545,131 +489,146 @@ export const solutionRegistry = {
       ],
       "roles": [
         {
-          "mdmSubtype": "Person",
-          "role": "compras.Comprador",
+          "subtype": "Company",
+          "roleTag": "compras.Fornecedor",
           "namespace": "compras"
         },
         {
-          "mdmSubtype": "Company",
-          "role": "compras.Fornecedor",
+          "subtype": "Product",
+          "roleTag": "compras.Produto",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "compras.ContatoFornecedor",
           "namespace": "compras"
         }
       ],
       "generalFields": [],
       "entities": [
         {
-          "entityId": "Comprador",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
           "entityId": "Fornecedor",
-          "kind": "mdm",
-          "mdmSubtype": "Company"
+          "kind": "role",
+          "mdmSubtype": "Company",
+          "class": "mdm"
         },
         {
           "entityId": "Produto",
-          "kind": "supporting"
+          "kind": "role",
+          "mdmSubtype": "Product",
+          "class": "mdm"
         },
         {
-          "entityId": "EstoqueProduto",
-          "kind": "supporting"
+          "entityId": "ContatoFornecedor",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
         },
         {
-          "entityId": "FornecimentoProduto",
-          "kind": "supporting"
+          "entityId": "ProdutoFornecedor",
+          "kind": "entity",
+          "class": "supporting"
         },
         {
           "entityId": "PedidoCompra",
-          "kind": "core"
+          "kind": "entity",
+          "class": "core"
         },
         {
-          "entityId": "ItemPedidoCompra",
-          "kind": "supporting"
-        },
-        {
-          "entityId": "RecebimentoCompra",
-          "kind": "event"
-        },
-        {
-          "entityId": "ItemRecebimentoCompra",
-          "kind": "supporting"
+          "entityId": "RecebimentoPedido",
+          "kind": "entity",
+          "class": "event"
         }
       ],
       "events": [
         {
-          "eventId": "registrarRecebimentoParcial",
+          "eventId": "entradaEstoquePorRecebimentoParcial",
           "on": "PedidoCompra.registrarRecebimentoParcial"
         },
         {
-          "eventId": "registrarRecebimentoTotal",
+          "eventId": "entradaEstoquePorRecebimentoTotal",
           "on": "PedidoCompra.registrarRecebimentoTotal"
         }
       ],
-      "updatedAt": "2026-09-12T21:43:47.888Z"
+      "updatedAt": "2026-09-17T05:16:45.865Z"
     },
     {
-      "moduleName": "comandaRestaurante",
+      "moduleName": "manutencaoFrota",
       "actors": [
         {
-          "actorId": "garcom",
+          "actorId": "motorista",
           "kind": "internal"
         },
         {
-          "actorId": "caixa",
+          "actorId": "gestor",
           "kind": "internal"
         }
       ],
       "roles": [
         {
-          "mdmSubtype": "AssetEquipment",
-          "role": "comandaRestaurante.Mesa",
-          "namespace": "comandaRestaurante"
+          "subtype": "AssetVehicle",
+          "roleTag": "manutencaoFrota.Vehicle",
+          "namespace": "manutencaoFrota"
         },
         {
-          "mdmSubtype": "Product",
-          "role": "comandaRestaurante.ItemCardapio",
-          "namespace": "comandaRestaurante"
+          "subtype": "Person",
+          "roleTag": "manutencaoFrota.Driver",
+          "namespace": "manutencaoFrota"
         },
         {
-          "mdmSubtype": "Person",
-          "role": "comandaRestaurante.Garcom",
-          "namespace": "comandaRestaurante"
+          "subtype": "Company",
+          "roleTag": "manutencaoFrota.Workshop",
+          "namespace": "manutencaoFrota"
         }
       ],
       "generalFields": [],
       "entities": [
         {
-          "entityId": "Mesa",
-          "kind": "mdm",
-          "mdmSubtype": "AssetEquipment"
+          "entityId": "Vehicle",
+          "kind": "role",
+          "mdmSubtype": "AssetVehicle",
+          "class": "mdm"
         },
         {
-          "entityId": "ItemCardapio",
-          "kind": "mdm",
-          "mdmSubtype": "Product"
+          "entityId": "Driver",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
         },
         {
-          "entityId": "Garcom",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
+          "entityId": "Workshop",
+          "kind": "role",
+          "mdmSubtype": "Company",
+          "class": "mdm"
         },
         {
-          "entityId": "Comanda",
-          "kind": "core"
+          "entityId": "VehicleAssignment",
+          "kind": "entity",
+          "class": "supporting"
         },
         {
-          "entityId": "ItemComanda",
-          "kind": "supporting"
+          "entityId": "Fueling",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "MaintenancePlan",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "MaintenanceOrder",
+          "kind": "entity",
+          "class": "core"
         }
       ],
       "events": [
         {
-          "eventId": "comandaFechada",
-          "on": "Comanda.fecharComanda"
+          "eventId": "alertaPreventivaVencida",
+          "on": "MaintenanceOrder.create"
         }
       ],
-      "updatedAt": "2026-09-12T21:48:01.323Z"
+      "updatedAt": "2026-09-17T05:22:14.967Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

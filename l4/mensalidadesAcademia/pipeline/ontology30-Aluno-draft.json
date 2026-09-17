@@ -1,6 +1,232 @@
 {
-  "entityId": "Aluno",
-  "fields": [],
-  "lifecycleStates": [],
-  "transitions": []
+  "entity": {
+    "schemaVersion": "2026-09-15-ns5-ontology-v3",
+    "moduleName": "mensalidadesAcademia",
+    "entityId": "Aluno",
+    "title": "Aluno",
+    "description": "Pessoa participante da academia, vinculada a uma matrícula e sujeita à situação de bloqueio calculada pelas mensalidades vencidas.",
+    "displayField": "details.identification.name",
+    "relationships": {
+      "matriculaAluno": {
+        "relationshipId": "matriculaAluno",
+        "to": "Matricula",
+        "via": "Matricula.alunoId",
+        "cardinality": "1:N",
+        "title": "Matrículas do aluno",
+        "description": "Matrículas que pertencem a este aluno na academia.",
+        "mode": "fk",
+        "direction": "to",
+        "required": "Sempre que uma matrícula for registrada.",
+        "role": "aluno"
+      }
+    },
+    "capabilities": {
+      "read.byId": "Consulta o cadastro mestre do aluno pelo identificador, para exibir seus dados nas telas de matrícula e de mensalidades, usada pela recepção e pela gerência.",
+      "locate.byName": "Localiza aluno pelo nome no índice de pessoas para iniciar uma matrícula, usada pela recepção.",
+      "locate.byDocument": "Localiza o aluno pelo documento nacional para evitar cadastro duplicado durante a matrícula, usada pela recepção.",
+      "locate.byContact": "Localiza o aluno por um canal de contato já vinculado ao cadastro mestre quando necessário identificá-lo, usada pela recepção.",
+      "register.createOrAttach": "Cria a pessoa quando ainda não existir ou vincula a pessoa existente ao papel de aluno da academia por documento ou contato, usada pela recepção ao registrar a matrícula.",
+      "edit.platformFields": "Atualiza os dados de identificação e o consentimento de privacidade mantidos pela plataforma no cadastro do aluno, usada pela recepção.",
+      "link.contact": "Vincula um canal de contato ao aluno por meio de um registro ContactChannel e da relação HasContact, usada pela recepção.",
+      "invite.login": "Concede ao aluno um acesso de login vinculado ao seu cadastro mestre para que possa cancelar a própria matrícula, usado pela recepção."
+    },
+    "rules": [
+      "rule-foreign-namespace-refused",
+      "rule-document-shape-validated",
+      "rule-identity-never-in-namespace",
+      "rule-person-privacy-consent-required-br-eu",
+      "alunoBloqueadoPorDuasMensalidadesVencidas"
+    ],
+    "kind": "role",
+    "subtype": "Person",
+    "roleTag": "mensalidadesAcademia.Aluno",
+    "source": "/_102034_/l4/ontology/mdm.defs.ts",
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "indexed": true,
+          "derived": true,
+          "description": "mdmId; stable through promotion and merge."
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true,
+          "description": "Bumped by the engine on every write; optimistic concurrency."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "description": "Documento mestre da pessoa participante da academia, com dados de identificação da plataforma e o espaço exclusivo do módulo.",
+          "fields": {
+            "identification": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "subtype": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    {
+                      "value": "Person",
+                      "title": "Pessoa",
+                      "description": "Pessoa física cadastrada na academia."
+                    }
+                  ],
+                  "description": "Indica que este registro mestre é uma pessoa.",
+                  "title": "Tipo de cadastro",
+                  "maxLength": 0,
+                  "min": 0,
+                  "max": 0
+                },
+                "name": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "maxLength": 0,
+                  "description": "Nome pelo qual o aluno é identificado pela recepção e nas matrículas.",
+                  "title": "Nome",
+                  "min": 0,
+                  "max": 0
+                },
+                "docType": {
+                  "type": "enum",
+                  "indexed": true,
+                  "values": [
+                    {
+                      "value": "SSN",
+                      "title": "SSN",
+                      "description": "Número de seguridade social dos Estados Unidos."
+                    },
+                    {
+                      "value": "EIN",
+                      "title": "EIN",
+                      "description": "Identificador fiscal empresarial dos Estados Unidos."
+                    },
+                    {
+                      "value": "Passport",
+                      "title": "Passaporte",
+                      "description": "Documento de passaporte."
+                    },
+                    {
+                      "value": "DriversLicense",
+                      "title": "Carteira de motorista",
+                      "description": "Documento de habilitação."
+                    },
+                    {
+                      "value": "NationalId",
+                      "title": "Documento nacional",
+                      "description": "Documento nacional de identificação."
+                    },
+                    {
+                      "value": "CPF",
+                      "title": "CPF",
+                      "description": "Cadastro de Pessoas Físicas."
+                    },
+                    {
+                      "value": "CNPJ",
+                      "title": "CNPJ",
+                      "description": "Cadastro Nacional da Pessoa Jurídica."
+                    },
+                    {
+                      "value": "VAT",
+                      "title": "Identificação fiscal",
+                      "description": "Identificação fiscal estrangeira."
+                    },
+                    {
+                      "value": "Other",
+                      "title": "Outro",
+                      "description": "Outro documento de identificação aceito pela plataforma."
+                    }
+                  ],
+                  "title": "Tipo de documento",
+                  "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do aluno.",
+                  "maxLength": 0,
+                  "min": 0,
+                  "max": 0
+                },
+                "docId": {
+                  "type": "string",
+                  "indexed": true,
+                  "description": "Número do documento do aluno, associado ao tipo informado para deduplicação.",
+                  "title": "Número do documento",
+                  "maxLength": 0,
+                  "min": 0,
+                  "max": 0
+                },
+                "countryCode": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "pattern": "^[A-Z]{2}$",
+                  "maxLength": 0,
+                  "default": "US",
+                  "description": "Código ISO do país ao qual pertencem o documento e as regras aplicáveis ao aluno.",
+                  "title": "País",
+                  "min": 0,
+                  "max": 0
+                }
+              },
+              "description": "Dados de identificação usados para reconhecer e localizar o aluno no cadastro mestre."
+            },
+            "base": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {},
+              "description": "Campos comuns do cadastro mestre da pessoa que podem ser consultados pela academia."
+            },
+            "person": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "privacyConsent": {
+                  "type": "object",
+                  "of": "PrivacyConsent",
+                  "description": "Consentimento de privacidade do aluno, aplicável conforme a legislação do país.",
+                  "title": "Consentimento de privacidade",
+                  "maxLength": 0,
+                  "min": 0,
+                  "max": 0
+                }
+              },
+              "description": "Dados próprios de pessoa física disponíveis no cadastro mestre."
+            },
+            "general": {
+              "type": "object",
+              "owner": "organization",
+              "open": true,
+              "description": "Dados promovidos pela organização para uso compartilhado entre módulos, somente para leitura neste módulo."
+            },
+            "mensalidadesAcademia": {
+              "type": "object",
+              "owner": "module",
+              "fields": {},
+              "description": "Module namespace; the prompt asked for no data of this module about the record."
+            }
+          }
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Aluno",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Aluno",
+      "detail": "Aluno.details.identification.subtype.values"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Aluno",
+      "detail": "details.mensalidadesAcademia"
+    }
+  ]
 }

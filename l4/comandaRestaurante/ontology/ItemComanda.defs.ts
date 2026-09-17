@@ -1,91 +1,162 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteEntityItemComanda = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-15-ns5-ontology-v3",
   "moduleName": "comandaRestaurante",
   "entityId": "ItemComanda",
   "title": "Item da comanda",
-  "description": "Lançamento de um item do cardápio em uma comanda, com quantidade e observação.",
-  "kind": "supporting",
-  "party": "none",
-  "displayField": "description",
-  "fields": [
-    {
-      "fieldId": "id",
-      "title": "Identificador",
-      "type": "uuid",
-      "required": true,
-      "description": "Identificador único do lançamento de item na comanda."
+  "description": "Lançamento de um item do cardápio em uma comanda, com quantidade, observação, preço registrado e possibilidade de cancelamento enquanto a comanda estiver aberta.",
+  "displayField": "id",
+  "relationships": {
+    "comanda": {
+      "relationshipId": "itemComandaParaComanda",
+      "to": "Comanda",
+      "via": "ItemComanda.comandaId",
+      "cardinality": "N:1",
+      "title": "Comanda do lançamento",
+      "description": "Cada item lançado pertence obrigatoriamente a uma comanda, que pode reunir vários lançamentos.",
+      "mode": "fk",
+      "required": "sempre"
     },
-    {
-      "fieldId": "comandaId",
-      "title": "Comanda",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência à comanda à qual o lançamento pertence."
-    },
-    {
-      "fieldId": "itemCardapioId",
-      "title": "Item do cardápio",
-      "type": "uuid",
-      "required": true,
-      "description": "Referência ao item do cardápio lançado na comanda."
-    },
-    {
-      "fieldId": "description",
-      "title": "Descrição",
-      "type": "string",
-      "required": true,
-      "description": "Descrição do item do cardápio registrada no lançamento para identificação na comanda."
-    },
-    {
-      "fieldId": "quantity",
-      "title": "Quantidade",
-      "type": "integer",
-      "required": true,
-      "constraints": {
-        "min": 1
-      },
-      "description": "Quantidade solicitada do item do cardápio."
-    },
-    {
-      "fieldId": "unitPrice",
-      "title": "Preço unitário",
-      "type": "money",
-      "required": true,
-      "description": "Preço unitário do item no momento em que foi lançado na comanda."
-    },
-    {
-      "fieldId": "observation",
-      "title": "Observação",
-      "type": "text",
-      "required": false,
-      "description": "Orientação ou observação informada para o preparo do item."
-    },
-    {
-      "fieldId": "status",
-      "title": "Situação",
-      "type": "string",
-      "required": true,
-      "enum": [
-        {
-          "value": "lancado",
-          "title": "Lançado"
-        },
-        {
-          "value": "cancelado",
-          "title": "Cancelado"
-        }
-      ],
-      "description": "Situação atual do lançamento na comanda."
+    "itemCardapio": {
+      "relationshipId": "itemComandaParaItemCardapio",
+      "to": "ItemCardapio",
+      "via": "ItemComanda.itemCardapioId",
+      "cardinality": "N:1",
+      "title": "Item do cardápio lançado",
+      "description": "Cada lançamento referencia obrigatoriamente o item do cardápio escolhido, que pode aparecer em vários lançamentos.",
+      "mode": "fk",
+      "required": "sempre"
     }
+  },
+  "capabilities": {
+    "read.byId": "Lê um lançamento pelo identificador da linha · consulta por id no repositório ItemComanda · garçom e caixa ao conferirem um item específico.",
+    "locate.byColumn": "Localiza lançamentos por comanda, item do cardápio ou situação · filtra as colunas indexadas com paginação · garçom e caixa ao consultarem lançamentos.",
+    "listByForeignKey": "Lista os itens vinculados a uma comanda · busca por comandaId e permite carregar vários lançamentos de uma vez · garçom e caixa na tela da comanda.",
+    "create": "Registra um novo item lançado · insere o lançamento com quantidade, observação e preço unitário vigente · garçom ao lançar um pedido em comanda aberta.",
+    "transition": "Cancela um item lançado · altera o status de lancado para cancelado conforme a transição cancelarItemComanda · garçom ao corrigir lançamento em comanda aberta.",
+    "read.mdmRecord": "Lê o item mestre do cardápio referenciado · hidrata ItemCardapio a partir de itemCardapioId · garçom e caixa ao exibirem o item e conferirem o preço registrado."
+  },
+  "rules": [
+    "itemComandaSomenteEmComandaAberta",
+    "cancelamentoItemComandaSomenteEmComandaAberta",
+    "precoItemComandaVigente"
   ],
-  "details": {
-    "subtotal": {
-      "type": "money",
-      "description": "Valor do lançamento calculado pela quantidade multiplicada pelo preço unitário, desconsiderado quando cancelado."
+  "kind": "entity",
+  "class": "supporting",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "comandaRestaurante_itemcomanda",
+    "kind": "relational"
+  },
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "derived": true,
+        "indexed": true,
+        "title": "Id"
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true
+      },
+      "comandaId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "of": "ContactSummary",
+        "to": [
+          "Comanda"
+        ],
+        "title": "Comanda",
+        "description": "Comanda à qual este lançamento pertence.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "itemCardapioId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "of": "ContactSummary",
+        "to": [
+          "ItemCardapio"
+        ],
+        "title": "Item do cardápio",
+        "description": "Item do cardápio escolhido para o lançamento.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "status": {
+        "type": "enum",
+        "required": true,
+        "indexed": true,
+        "of": "ContactSummary",
+        "values": [
+          {
+            "value": "lancado",
+            "title": "Lançado",
+            "description": "Item ativo e considerado na comanda."
+          },
+          {
+            "value": "cancelado",
+            "title": "Cancelado",
+            "description": "Item cancelado por lançamento incorreto e não considerado no total."
+          }
+        ],
+        "title": "Situação",
+        "description": "Situação do lançamento na comanda.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "of": "ContactSummary",
+        "title": "Dados do lançamento",
+        "description": "Dados registrados para o item lançado na comanda.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0,
+        "fields": {
+          "quantidade": {
+            "type": "integer",
+            "required": true,
+            "of": "ContactSummary",
+            "title": "Quantidade",
+            "description": "Quantidade solicitada do item do cardápio.",
+            "maxLength": 0,
+            "min": 1,
+            "max": 0
+          },
+          "observacao": {
+            "type": "text",
+            "of": "ContactSummary",
+            "title": "Observação",
+            "description": "Orientação ou observação informada para o preparo do item.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "precoUnitario": {
+            "type": "money",
+            "required": true,
+            "of": "ContactSummary",
+            "title": "Preço unitário registrado",
+            "description": "Preço unitário vigente do item no momento em que foi lançado na comanda.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          }
+        }
+      }
     }
   },
   "lifecycleStates": [
@@ -108,15 +179,13 @@ export const comandaRestauranteEntityItemComanda = {
       "by": [
         "garcom"
       ],
-      "description": "Cancela um item lançado por engano enquanto a comanda permanece aberta."
+      "description": "Cancela um item lançado por engano enquanto a comanda permanece aberta.",
+      "ruleRefs": [
+        "cancelamentoItemComandaSomenteEmComandaAberta"
+      ]
     }
-  ],
-  "storage": {
-    "target": "moduleDatabase",
-    "scope": "module",
-    "idField": "id"
-  }
-} as const satisfies Ns5OntologyEntityArtifact;
+  ]
+} as const satisfies Ns5OntologyEntityV3;
 
 export type ComandaRestauranteEntityItemComandaType = typeof comandaRestauranteEntityItemComanda;
 
