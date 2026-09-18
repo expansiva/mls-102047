@@ -7,112 +7,105 @@
       "kind": "internal",
       "origin": "named",
       "title": "Colaborador",
-      "description": "Colaborador que registra, envia e acompanha suas próprias despesas para reembolso."
+      "description": "Registra, envia, corrige e consulta as próprias despesas para reembolso."
     },
     {
       "actorId": "gestorEquipe",
       "kind": "internal",
       "origin": "named",
       "title": "Gestor da equipe",
-      "description": "Gestor que avalia as despesas dos colaboradores de sua equipe e as aprova ou rejeita."
+      "description": "Avalia as despesas da equipe, aprovando-as ou rejeitando-as com um motivo."
     },
     {
       "actorId": "financeiro",
       "kind": "internal",
       "origin": "named",
       "title": "Financeiro",
-      "description": "Profissional do financeiro que consulta despesas aprovadas e registra seus pagamentos."
+      "description": "Consulta as despesas aprovadas e registra a data de pagamento."
     }
   ],
   "grants": [
     {
-      "grantId": "colaboradorGerenciaPerfil",
-      "actorRef": "colaborador",
-      "title": "Gerenciar meu cadastro de colaborador",
-      "description": "Permite ao colaborador criar ou vincular e manter seu próprio papel de colaborador no módulo de reembolsos.",
-      "entityRefs": [
-        "Colaborador"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Somente o papel de colaborador associado à pessoa autenticada.",
-        "anchorEntity": "Colaborador"
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Acesso ao registro completo do próprio papel de colaborador."
-      }
-    },
-    {
       "grantId": "colaboradorGerenciaPropriasDespesas",
       "actorRef": "colaborador",
-      "title": "Registrar e acompanhar minhas despesas",
-      "description": "Permite ao colaborador registrar, enviar, corrigir uma vez quando rejeitada e acompanhar exclusivamente suas próprias solicitações de reembolso.",
+      "title": "Gerenciar próprias despesas",
+      "description": "Permite ao colaborador registrar, enviar, corrigir, reenviar e consultar exclusivamente as suas solicitações de reembolso, incluindo decisões e pagamentos vinculados.",
       "entityRefs": [
         "Despesa"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Somente despesas vinculadas ao colaborador correspondente à pessoa autenticada.",
+        "description": "Somente despesas vinculadas ao registro de pessoa do colaborador autenticado.",
         "anchorEntity": "Colaborador"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Acesso ao registro completo das próprias despesas, incluindo decisão, motivo de rejeição e data de pagamento."
+        "description": "O colaborador pode consultar todos os dados de suas próprias despesas, inclusive motivo de rejeição e data de pagamento."
       }
     },
     {
-      "grantId": "gestorGerenciaPerfil",
+      "grantId": "gestorGerenciaProprioCadastro",
       "actorRef": "gestorEquipe",
-      "title": "Gerenciar meu cadastro de gestor",
-      "description": "Permite ao gestor criar ou vincular e manter seu próprio papel de gestor de equipe no módulo de reembolsos.",
+      "title": "Gerenciar próprio cadastro de gestor",
+      "description": "Permite ao gestor manter o próprio papel de gestor de equipe no cadastro mestre do módulo.",
       "entityRefs": [
         "GestorEquipe"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Somente o papel de gestor associado à pessoa autenticada.",
+        "description": "Somente o registro mestre da pessoa autenticada no papel de gestor de equipe.",
         "anchorEntity": "GestorEquipe"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Acesso ao registro completo do próprio papel de gestor de equipe."
+        "description": "O gestor pode consultar integralmente o seu próprio registro de gestor."
       }
     },
     {
       "grantId": "gestorAvaliaDespesasDaEquipe",
       "actorRef": "gestorEquipe",
       "title": "Avaliar despesas da equipe",
-      "description": "Permite ao gestor consultar e registrar a decisão sobre despesas dos colaboradores que se reportam a ele.",
+      "description": "Permite ao gestor consultar e decidir sobre as despesas dos colaboradores vinculados à sua equipe.",
       "entityRefs": [
         "Despesa"
       ],
       "dataScope": {
         "mode": "related",
-        "description": "Somente despesas de colaboradores que possuem relacionamento de reporte com o gestor autenticado.",
-        "anchorEntity": "GestorEquipe"
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Acesso aos dados completos necessários para avaliar a despesa, consultar o comprovante e registrar aprovação ou rejeição."
-      }
-    },
-    {
-      "grantId": "financeiroRegistraPagamentosAprovados",
-      "actorRef": "financeiro",
-      "title": "Consultar e pagar despesas aprovadas",
-      "description": "Permite ao financeiro consultar despesas aprovadas e registrar a data de pagamento do reembolso.",
-      "entityRefs": [
-        "Despesa"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Somente despesas vinculadas ao colaborador correspondente à pessoa autenticada.",
+        "description": "Somente despesas de colaboradores que possuem vínculo organizacional de equipe com o gestor autenticado.",
         "anchorEntity": "Colaborador"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Acesso aos dados completos da despesa aprovada, incluindo comprovante e data de pagamento."
+        "description": "O gestor pode consultar todos os dados das despesas de sua equipe necessários para avaliá-las, inclusive situação, descrição e informações de decisão ou pagamento."
+      }
+    },
+    {
+      "grantId": "financeiroRegistraPagamentoDeDespesasAprovadas",
+      "actorRef": "financeiro",
+      "title": "Registrar pagamento de despesas aprovadas",
+      "description": "Permite ao financeiro consultar despesas aprovadas disponíveis para pagamento e registrar a respectiva data de pagamento.",
+      "entityRefs": [
+        "Despesa"
+      ],
+      "dataScope": {
+        "mode": "related",
+        "description": "Somente despesas aprovadas de colaboradores relacionados ao profissional financeiro autenticado e disponíveis para registro de pagamento.",
+        "anchorEntity": "Colaborador"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "O financeiro visualiza os dados da despesa necessários para identificar e efetuar o pagamento, sem acessar o motivo de rejeição nem a contagem de reenvios.",
+        "allowedFields": [
+          "Despesa.id",
+          "Despesa.version",
+          "Despesa.colaboradorId",
+          "Despesa.status",
+          "Despesa.details.expenseDate",
+          "Despesa.details.category",
+          "Despesa.details.amount",
+          "Despesa.details.description",
+          "Despesa.details.paymentDate"
+        ]
       }
     }
   ]

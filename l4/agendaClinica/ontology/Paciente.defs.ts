@@ -3,52 +3,54 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaEntityPaciente = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
   "entityId": "Paciente",
   "title": "Paciente",
-  "description": "Pessoa cadastrada para receber atendimento na clínica.",
+  "description": "Pessoa cadastrada ou associada à clínica para receber consultas.",
   "displayField": "details.identification.name",
   "relationships": {
+    "contatos": {
+      "relationshipId": "patientContacts",
+      "to": "ContatoPaciente",
+      "via": "HasContact",
+      "cardinality": "1:N",
+      "title": "Contatos do paciente",
+      "description": "Canais de contato do paciente, incluindo telefone para confirmação da consulta.",
+      "required": "sempre que o paciente estiver associado à clínica",
+      "role": "HasContact"
+    },
     "consultas": {
-      "relationshipId": "consultaPaciente",
+      "relationshipId": "appointmentPatient",
       "to": "Consulta",
-      "via": "Consulta.pacienteId",
+      "via": "Consulta.patientId",
       "cardinality": "1:N",
       "title": "Consultas do paciente",
       "description": "Consultas agendadas para este paciente.",
       "mode": "fk",
       "direction": "to",
-      "required": "Sempre que uma consulta for criada",
+      "required": "sempre que houver uma consulta agendada para o paciente",
       "role": "paciente"
-    },
-    "contatos": {
-      "relationshipId": "pacienteHasContact",
-      "to": "ContatoPaciente",
-      "via": "HasContact",
-      "cardinality": "1:N",
-      "title": "Canais de contato do paciente",
-      "description": "Canais de contato vinculados ao paciente para comunicação e confirmação de consultas.",
-      "required": "Quando houver telefone, WhatsApp ou e-mail para comunicação",
-      "role": "titular"
     }
   },
   "capabilities": {
-    "read.byId": "Consulta o cadastro mestre do paciente pelo identificador para exibir seus dados no agendamento e na consulta · por get e hidratação do registro MDM · recepcionista e profissional.",
-    "locate.byName": "Localiza pacientes pelo nome para iniciar ou continuar o agendamento · por busca de nome no índice de pessoas · recepcionista.",
-    "locate.byDocument": "Localiza o paciente pelo documento nacional para evitar duplicidade no cadastro · por consulta do documento no índice MDM · recepcionista.",
-    "locate.byContact": "Localiza o paciente por telefone, WhatsApp ou e-mail quando a recepção precisa identificá-lo em uma comunicação · por busca do canal de contato vinculado · recepcionista.",
-    "register.createOrAttach": "Cria o registro de pessoa quando não existe ou vincula o já existente ao papel de paciente da agenda clínica · por deduplicação e anexação da tag agendaClinica.Paciente · recepcionista.",
-    "edit.platformFields": "Atualiza os dados de identificação do paciente necessários ao cadastro · por atualização dos campos mantidos pela plataforma MDM · recepcionista.",
-    "inactivate": "Inativa ou reativa o cadastro de paciente sem apagá-lo · por mudança do status do registro mestre · recepcionista.",
-    "link.contact": "Vincula telefone, WhatsApp ou e-mail ao paciente para comunicação e confirmação de consultas · por criação do canal de contato e relacionamento HasContact · recepcionista.",
-    "listLinks": "Exibe os canais de contato vinculados ao paciente e sua vigência · por consulta dos relacionamentos MDM · recepcionista.",
-    "audit": "Consulta quem alterou o cadastro mestre do paciente e quando · por leitura da auditoria da plataforma · recepcionista autorizada."
+    "read.byId": "Consulta um paciente pelo identificador mestre para exibir seus dados cadastrais à recepcionista durante o agendamento.",
+    "locate.byName": "Localiza pacientes pelo nome para a recepcionista identificar a pessoa antes de cadastrá-la ou agendar uma consulta.",
+    "locate.byDocument": "Localiza um paciente pelo documento nacional para a recepcionista evitar cadastros duplicados.",
+    "locate.byContact": "Localiza o paciente pelo telefone ou outro canal de contato para a recepcionista confirmar consultas.",
+    "register.createOrAttach": "Cria ou associa uma pessoa ao papel de paciente da agenda clínica, por documento ou contato, para a recepcionista cadastrá-la sem duplicidade.",
+    "edit.platformFields": "Atualiza os dados cadastrais mestres do paciente para a recepcionista manter o cadastro correto.",
+    "inactivate": "Inativa ou reativa o papel de paciente sem apagar seu histórico de consultas, para a recepcionista manter o cadastro utilizável.",
+    "link.contact": "Vincula um canal de contato, incluindo telefone, ao paciente para a recepcionista poder confirmar consultas.",
+    "listLinks": "Lista contatos e consultas relacionados ao paciente para a recepcionista consultar as informações necessárias ao atendimento.",
+    "audit": "Consulta as alterações do cadastro mestre do paciente para auditoria administrativa da clínica."
   },
   "rules": [
     "rule-foreign-namespace-refused",
+    "rule-delete-blocked-by-relationships",
     "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
+    "rule-person-ssn-unique-for-us",
     "rule-person-privacy-consent-required-br-eu"
   ],
   "kind": "role",
@@ -73,7 +75,7 @@ export const agendaClinicaEntityPaciente = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre da pessoa atendida pela clínica.",
+        "description": "Dados mestres da pessoa associada à clínica como paciente.",
         "fields": {
           "identification": {
             "type": "object",
@@ -87,12 +89,12 @@ export const agendaClinicaEntityPaciente = {
                 "values": [
                   {
                     "value": "Person",
-                    "title": "Pessoa física",
-                    "description": "Registro de uma pessoa."
+                    "title": "Pessoa",
+                    "description": "Pessoa natural."
                   }
                 ],
-                "description": "Indica que este registro mestre é uma pessoa.",
-                "title": "Tipo de cadastro",
+                "description": "Subtipo mestre da pessoa cadastrada como paciente.",
+                "title": "Subtipo",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -102,7 +104,7 @@ export const agendaClinicaEntityPaciente = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nome pelo qual o paciente é identificado no cadastro e no agendamento.",
+                "description": "Nome pelo qual o paciente é identificado pela clínica.",
                 "title": "Nome",
                 "min": 0,
                 "max": 0
@@ -116,26 +118,26 @@ export const agendaClinicaEntityPaciente = {
                   {
                     "value": "Active",
                     "title": "Ativo",
-                    "description": "Cadastro disponível para uso."
+                    "description": "Registro ativo."
                   },
                   {
                     "value": "Inactive",
                     "title": "Inativo",
-                    "description": "Cadastro fora de uso."
+                    "description": "Registro inativo."
                   },
                   {
                     "value": "Merged",
                     "title": "Mesclado",
-                    "description": "Cadastro unificado a outro registro."
+                    "description": "Registro unido a outro registro mestre."
                   },
                   {
                     "value": "Blocked",
                     "title": "Bloqueado",
-                    "description": "Cadastro bloqueado pela plataforma."
+                    "description": "Registro bloqueado pela plataforma."
                   }
                 ],
-                "title": "Situação do cadastro",
-                "description": "Situação de atividade do registro mestre do paciente.",
+                "title": "Situação",
+                "description": "Situação mestre que indica se o paciente está ativo para uso na clínica.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -147,32 +149,32 @@ export const agendaClinicaEntityPaciente = {
                   {
                     "value": "SSN",
                     "title": "SSN",
-                    "description": "Documento de seguridade social dos Estados Unidos."
+                    "description": "Documento SSN."
                   },
                   {
                     "value": "EIN",
                     "title": "EIN",
-                    "description": "Identificador fiscal dos Estados Unidos."
+                    "description": "Documento EIN."
                   },
                   {
                     "value": "Passport",
                     "title": "Passaporte",
-                    "description": "Documento de viagem."
+                    "description": "Passaporte."
                   },
                   {
                     "value": "DriversLicense",
                     "title": "Carteira de motorista",
-                    "description": "Documento de habilitação."
+                    "description": "Carteira de motorista."
                   },
                   {
                     "value": "NationalId",
                     "title": "Documento nacional",
-                    "description": "Documento nacional de identidade."
+                    "description": "Documento nacional de identificação."
                   },
                   {
                     "value": "CPF",
                     "title": "CPF",
-                    "description": "Cadastro de Pessoa Física."
+                    "description": "Cadastro de Pessoas Físicas."
                   },
                   {
                     "value": "CNPJ",
@@ -181,17 +183,17 @@ export const agendaClinicaEntityPaciente = {
                   },
                   {
                     "value": "VAT",
-                    "title": "Identificação fiscal",
-                    "description": "Identificação fiscal nacional."
+                    "title": "VAT",
+                    "description": "Documento fiscal VAT."
                   },
                   {
                     "value": "Other",
                     "title": "Outro",
-                    "description": "Outro documento de identificação."
+                    "description": "Outro documento aceito pela plataforma."
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do paciente.",
+                "description": "Tipo do documento nacional usado para localizar ou evitar duplicidade do paciente.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -199,7 +201,7 @@ export const agendaClinicaEntityPaciente = {
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento informado para localizar ou cadastrar o paciente sem duplicidade.",
+                "description": "Número do documento nacional usado na identificação do paciente.",
                 "title": "Número do documento",
                 "maxLength": 0,
                 "min": 0,
@@ -210,28 +212,38 @@ export const agendaClinicaEntityPaciente = {
                 "required": true,
                 "indexed": true,
                 "pattern": "^[A-Z]{2}$",
-                "maxLength": 2,
+                "maxLength": 0,
                 "default": "US",
-                "description": "Código do país que orienta o documento e as regras aplicáveis ao paciente.",
+                "description": "País que define as regras aplicáveis ao documento e à privacidade do paciente.",
                 "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação do paciente mantidos pela plataforma."
+            "description": "Dados de identificação e situação do paciente no cadastro mestre."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {
+              "aliases": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "description": "Nomes alternativos pelos quais o paciente pode ser reconhecido.",
+                "title": "Outros nomes",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
               "contacts": {
                 "type": "object",
                 "required": true,
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Resumo derivado dos canais de contato vinculados ao paciente, usado na comunicação e confirmação de consultas.",
-                "title": "Canais de contato",
+                "description": "Resumo derivado dos canais de contato vinculados ao paciente, incluindo o telefone usado na confirmação de consultas.",
+                "title": "Contatos",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -240,14 +252,22 @@ export const agendaClinicaEntityPaciente = {
                 "type": "object",
                 "required": true,
                 "derived": true,
-                "description": "Referências compactas derivadas dos relacionamentos ativos do paciente.",
+                "description": "Referências compactas derivadas dos relacionamentos do paciente.",
                 "title": "Referências de relacionamentos",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 0,
+                "title": "Observações",
+                "description": "Observações gerais mantidas no cadastro mestre do paciente.",
+                "min": 0,
+                "max": 0
               }
             },
-            "description": "Dados comuns do registro mestre que a clínica consulta para comunicação com o paciente."
+            "description": "Dados básicos do cadastro mestre usados pela clínica."
           },
           "person": {
             "type": "object",
@@ -256,20 +276,20 @@ export const agendaClinicaEntityPaciente = {
               "privacyConsent": {
                 "type": "object",
                 "of": "PrivacyConsent",
-                "description": "Consentimento de privacidade do paciente, exigido quando aplicável pela LGPD ou GDPR.",
+                "description": "Consentimento de privacidade do paciente, aplicável conforme o país informado.",
                 "title": "Consentimento de privacidade",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados pessoais do paciente mantidos pela plataforma."
+            "description": "Dados próprios de pessoa natural aplicáveis ao paciente."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização, somente para leitura pelo módulo."
+            "description": "Dados promovidos pela organização, disponíveis apenas para leitura neste módulo."
           },
           "agendaClinica": {
             "type": "object",

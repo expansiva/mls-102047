@@ -1,100 +1,59 @@
 /// <mls fileReference="_102047_/l4/reembolsoDespesas/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const reembolsoDespesasOntologyIndex = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "reembolsoDespesas",
-  "businessDomain": "Reembolso de despesas de colaboradores, incluindo envio para aprovação, decisão do gestor e registro de pagamento.",
+  "businessDomain": "Reembolso de despesas",
+  "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
+  "moduleNamespace": {
+    "key": "reembolsoDespesas",
+    "description": "Branch details.reembolsoDespesas of the master records this module has a role on; only this module writes it."
+  },
   "entities": [
-    "Despesa",
-    "Colaborador",
-    "GestorEquipe"
+    {
+      "entityId": "Colaborador",
+      "kind": "role",
+      "subtype": "Person"
+    },
+    {
+      "entityId": "GestorEquipe",
+      "kind": "role",
+      "subtype": "Person"
+    },
+    {
+      "entityId": "Despesa",
+      "kind": "entity",
+      "class": "core"
+    }
   ],
   "relationships": [
     {
-      "relationshipId": "despesaPertenceAoColaborador",
-      "fromEntity": "Despesa",
-      "toEntity": "Colaborador",
+      "relationshipId": "despesaDoColaborador",
+      "from": "Despesa",
+      "to": "Colaborador",
       "type": "manyToOne",
       "required": true,
-      "description": "Cada despesa é registrada por um colaborador responsável pelo seu reembolso.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Despesa",
-        "from": {
-          "entityId": "Despesa",
-          "fieldIds": [
-            "colaboradorId"
-          ]
-        },
-        "to": {
-          "entityId": "Colaborador",
-          "fieldIds": [
-            "colaboradorId"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada despesa pertence obrigatoriamente ao colaborador que a registrou.",
+      "field": "Despesa.colaboradorId"
     },
     {
-      "relationshipId": "despesaAvaliadaPeloGestor",
-      "fromEntity": "Despesa",
-      "toEntity": "GestorEquipe",
+      "relationshipId": "colaboradorReportaGestor",
+      "from": "Colaborador",
+      "to": "GestorEquipe",
       "type": "manyToOne",
       "required": false,
-      "description": "Uma despesa pode ser avaliada pelo gestor responsável pela equipe do colaborador.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Despesa",
-        "from": {
-          "entityId": "Despesa",
-          "fieldIds": [
-            "gestorEquipeId"
-          ]
-        },
-        "to": {
-          "entityId": "GestorEquipe",
-          "fieldIds": [
-            "gestorEquipeId"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "colaboradorReportaAoGestor",
-      "fromEntity": "Colaborador",
-      "toEntity": "GestorEquipe",
-      "type": "manyToOne",
-      "required": true,
-      "description": "Cada colaborador reporta-se a um gestor da equipe para fins de aprovação de despesas.",
-      "persistence": {
-        "mode": "mdmRelationship"
-      },
-      "realization": {
-        "kind": "mdmRelationship",
-        "ownerEntity": "Colaborador",
-        "from": {
-          "entityId": "Colaborador",
-          "fieldIds": [
-            "colaboradorId"
-          ]
-        },
-        "to": {
-          "entityId": "GestorEquipe",
-          "fieldIds": [
-            "gestorEquipeId"
-          ]
-        }
-      }
+      "mode": "mdmRelationship",
+      "description": "O colaborador reporta-se ao gestor da equipe que pode avaliar suas despesas.",
+      "catalogType": "ReportsTo",
+      "roles": [
+        "direct-report"
+      ]
     }
   ]
-} as const satisfies Ns5OntologyIndexArtifact;
+} as const satisfies Ns5OntologyIndexV3;
 
 export type ReembolsoDespesasOntologyIndexType = typeof reembolsoDespesasOntologyIndex;
 

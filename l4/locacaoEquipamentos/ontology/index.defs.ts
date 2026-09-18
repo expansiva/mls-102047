@@ -1,129 +1,83 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosOntologyIndex = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "locacaoEquipamentos",
-  "businessDomain": "Locação de equipamentos para construção, incluindo contratos, devoluções e acompanhamento da situação dos equipamentos.",
+  "businessDomain": "Locação de equipamentos para construção",
+  "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
+  "moduleNamespace": {
+    "key": "locacaoEquipamentos",
+    "description": "Branch details.locacaoEquipamentos of the master records this module has a role on; only this module writes it."
+  },
   "entities": [
-    "Cliente",
-    "Equipamento",
-    "Atendente",
-    "ContratoLocacao",
-    "RentalItem"
+    {
+      "entityId": "Cliente",
+      "kind": "role",
+      "subtype": "Person"
+    },
+    {
+      "entityId": "Equipamento",
+      "kind": "entity",
+      "class": "core"
+    },
+    {
+      "entityId": "ContratoLocacao",
+      "kind": "entity",
+      "class": "core"
+    },
+    {
+      "entityId": "ItemContratoLocacao",
+      "kind": "entity",
+      "class": "supporting"
+    }
   ],
   "relationships": [
     {
-      "relationshipId": "clientHasRentalContracts",
-      "fromEntity": "Cliente",
-      "toEntity": "ContratoLocacao",
-      "type": "oneToMany",
-      "required": true,
-      "description": "O cliente é titular dos contratos de locação realizados em seu nome.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "ContratoLocacao",
-        "from": {
-          "entityId": "Cliente",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "ContratoLocacao",
-          "fieldIds": [
-            "clienteId"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "attendantCreatesRentalContracts",
-      "fromEntity": "Atendente",
-      "toEntity": "ContratoLocacao",
-      "type": "oneToMany",
-      "required": true,
-      "description": "O atendente é responsável pelos contratos de locação que cria.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "ContratoLocacao",
-        "from": {
-          "entityId": "Atendente",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "ContratoLocacao",
-          "fieldIds": [
-            "atendenteId"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "rentalContractIncludesItems",
-      "fromEntity": "ContratoLocacao",
-      "toEntity": "RentalItem",
-      "type": "oneToMany",
-      "required": true,
-      "description": "O contrato de locação contém um ou mais itens de locação.",
-      "persistence": {
-        "mode": "moduleReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "RentalItem",
-        "from": {
-          "entityId": "ContratoLocacao",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "RentalItem",
-          "fieldIds": [
-            "rentalContract"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "rentalItemReservesEquipment",
-      "fromEntity": "RentalItem",
-      "toEntity": "Equipamento",
+      "relationshipId": "contratoLocacaoCliente",
+      "from": "ContratoLocacao",
+      "to": "Cliente",
       "type": "manyToOne",
       "required": true,
-      "description": "O item de locação reserva um equipamento específico para o contrato.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "RentalItem",
-        "from": {
-          "entityId": "RentalItem",
-          "fieldIds": [
-            "equipment"
-          ]
-        },
-        "to": {
-          "entityId": "Equipamento",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada contrato de locação pertence a um cliente.",
+      "field": "ContratoLocacao.clienteId"
+    },
+    {
+      "relationshipId": "contratoLocacaoItens",
+      "from": "ContratoLocacao",
+      "to": "ItemContratoLocacao",
+      "type": "oneToMany",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada contrato de locação possui um ou mais itens de equipamentos.",
+      "field": "ItemContratoLocacao.contratoLocacaoId"
+    },
+    {
+      "relationshipId": "itemContratoLocacaoEquipamento",
+      "from": "ItemContratoLocacao",
+      "to": "Equipamento",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada item do contrato identifica o equipamento locado.",
+      "field": "ItemContratoLocacao.equipamentoId"
+    },
+    {
+      "relationshipId": "contratoLocacaoEquipamentos",
+      "from": "ContratoLocacao",
+      "to": "Equipamento",
+      "type": "manyToMany",
+      "required": true,
+      "mode": "throughTable",
+      "description": "Os equipamentos de um contrato são obtidos pelos seus itens de locação.",
+      "through": "ItemContratoLocacao",
+      "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
+      "derived": true
     }
   ]
-} as const satisfies Ns5OntologyIndexArtifact;
+} as const satisfies Ns5OntologyIndexV3;
 
 export type LocacaoEquipamentosOntologyIndexType = typeof locacaoEquipamentosOntologyIndex;
 

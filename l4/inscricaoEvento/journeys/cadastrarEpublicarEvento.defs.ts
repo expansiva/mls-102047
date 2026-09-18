@@ -8,7 +8,7 @@ export const cadastrarEpublicarEventoJourney = {
   "business": {
     "actorRef": "organizador",
     "title": "Cadastrar e publicar evento",
-    "goal": "Disponibilizar um evento com suas informações e capacidade para inscrição pública.",
+    "goal": "Disponibilizar um evento com suas informações e capacidade para inscrições públicas.",
     "entry": {
       "mode": "coldStart"
     },
@@ -18,8 +18,8 @@ export const cadastrarEpublicarEventoJourney = {
         "kind": "act",
         "entity": "Evento",
         "effect": "create",
-        "title": "Criar evento",
-        "description": "Cadastra o título, a descrição, a data, o local e o número de vagas do evento."
+        "title": "Cadastrar evento",
+        "description": "Informa título, descrição, data, local e número de vagas do evento."
       },
       {
         "stepId": "publicarEvento",
@@ -28,18 +28,18 @@ export const cadastrarEpublicarEventoJourney = {
         "effect": "transition",
         "transitionRef": "publicarEvento",
         "title": "Publicar evento",
-        "description": "Publica o evento para disponibilizar sua página de inscrição pública."
+        "description": "Publica o evento para disponibilizar sua página pública de inscrição."
       }
     ],
     "outcome": {
-      "statement": "O evento fica publicado e disponível para receber inscrições.",
+      "statement": "O evento é publicado e fica disponível para inscrições públicas.",
       "evidence": [
-        "Evento publicado com título, descrição, data, local e número de vagas.",
-        "Página pública de inscrição disponível para o evento."
+        "Evento com status publicado.",
+        "Página pública do evento disponível com título, data, local e vagas."
       ]
     }
   },
-  "businessHash": "sha256:49b25d2dac280c5a3077c558a79f2acefaadc6f2829015f864a57d65a4f987b9"
+  "businessHash": "sha256:cac9effd8f825650081d93d9cd7362496fd50b20b8e9b534d21e6039afb27f92"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CadastrarEpublicarEventoJourneyType = typeof cadastrarEpublicarEventoJourney;

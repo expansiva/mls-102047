@@ -1,45 +1,41 @@
 /// <mls fileReference="_102047_/l4/controleEstoque/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const controleEstoqueOntologyIndex = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "controleEstoque",
-  "businessDomain": "Controle de estoque de produtos, movimentações de entrada e saída, saldo disponível e alerta de estoque baixo.",
+  "businessDomain": "Controle de estoque",
+  "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
+  "moduleNamespace": {
+    "key": "controleEstoque",
+    "description": "Branch details.controleEstoque of the master records this module has a role on; only this module writes it."
+  },
   "entities": [
-    "Produto",
-    "MovimentacaoEstoque"
+    {
+      "entityId": "Produto",
+      "kind": "role",
+      "subtype": "Product"
+    },
+    {
+      "entityId": "MovimentacaoEstoque",
+      "kind": "entity",
+      "class": "event"
+    }
   ],
   "relationships": [
     {
-      "relationshipId": "movimentacaoEstoqueProduto",
-      "fromEntity": "MovimentacaoEstoque",
-      "toEntity": "Produto",
-      "type": "manyToOne",
+      "relationshipId": "produtoMovimentacoesEstoque",
+      "from": "Produto",
+      "to": "MovimentacaoEstoque",
+      "type": "oneToMany",
       "required": true,
-      "description": "Cada movimentação de estoque registra a entrada ou saída de um produto.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "MovimentacaoEstoque",
-        "from": {
-          "entityId": "MovimentacaoEstoque",
-          "fieldIds": [
-            "produtoId"
-          ]
-        },
-        "to": {
-          "entityId": "Produto",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Um produto possui movimentações de estoque registradas, e cada movimentação refere-se obrigatoriamente a um produto.",
+      "field": "MovimentacaoEstoque.produtoId"
     }
   ]
-} as const satisfies Ns5OntologyIndexArtifact;
+} as const satisfies Ns5OntologyIndexV3;
 
 export type ControleEstoqueOntologyIndexType = typeof controleEstoqueOntologyIndex;
 

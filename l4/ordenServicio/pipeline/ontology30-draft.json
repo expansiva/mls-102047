@@ -8,7 +8,7 @@
         "kind": "role",
         "family": "mdm",
         "title": "Cliente",
-        "description": "Persona que entrega un aparato para servicio técnico, recibe el presupuesto y consulta o responde sus propias órdenes desde el portal.",
+        "description": "Persona que entrega un aparato al servicio técnico, consulta sus propias órdenes y decide sobre el presupuesto desde el portal.",
         "displayField": "details.identification.name",
         "subtype": "Person",
         "roleTag": "ordenServicio.Cliente",
@@ -19,7 +19,7 @@
         "kind": "role",
         "family": "mdm",
         "title": "Aparato",
-        "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior retiro.",
+        "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior entrega.",
         "displayField": "details.identification.name",
         "subtype": "AssetEquipment",
         "roleTag": "ordenServicio.Aparato",
@@ -30,8 +30,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Orden de servicio",
-        "description": "Registro operativo de la recepción, diagnóstico, presupuesto, decisión del cliente, reparación y entrega de un aparato.",
-        "displayField": "orderNumber",
+        "description": "Atención técnica de un aparato desde su recepción, análisis y presupuesto hasta su rechazo, reparación y entrega final.",
+        "displayField": "serviceOrderNumber",
         "class": "core",
         "storage": {
           "target": "moduleDatabase",
@@ -42,24 +42,24 @@
     ],
     "relationships": [
       {
-        "relationshipId": "ordenServicioCliente",
+        "relationshipId": "serviceOrderCustomer",
         "from": "OrdenServicio",
         "to": "Cliente",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada orden de servicio corresponde a un cliente; un cliente puede tener varias órdenes.",
-        "field": "OrdenServicio.clienteId"
+        "description": "Cada orden de servicio corresponde al cliente que entregó el aparato y que puede consultar y decidir sobre su presupuesto.",
+        "field": "OrdenServicio.customerId"
       },
       {
-        "relationshipId": "ordenServicioAparato",
+        "relationshipId": "serviceOrderDevice",
         "from": "OrdenServicio",
         "to": "Aparato",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada orden registra el aparato recibido; un aparato puede contar con varias órdenes de servicio a lo largo de su historial.",
-        "field": "OrdenServicio.aparatoId"
+        "description": "Cada orden de servicio registra el aparato recibido para su diagnóstico, reparación o retiro.",
+        "field": "OrdenServicio.deviceId"
       }
     ],
     "normalizations": [
@@ -82,41 +82,46 @@
   },
   "entities": [
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "ordenServicio",
       "entityId": "Cliente",
       "title": "Cliente",
-      "description": "Persona que entrega un aparato para servicio técnico, recibe el presupuesto y consulta o responde sus propias órdenes desde el portal.",
+      "description": "Persona que entrega un aparato al servicio técnico, consulta sus propias órdenes y decide sobre el presupuesto desde el portal.",
       "displayField": "details.identification.name",
       "relationships": {
-        "ordenesServicio": {
-          "relationshipId": "ordenServicioCliente",
+        "serviceOrders": {
+          "relationshipId": "serviceOrderCustomer",
           "to": "OrdenServicio",
-          "via": "OrdenServicio.clienteId",
+          "via": "OrdenServicio.customerId",
           "cardinality": "1:N",
           "title": "Órdenes de servicio del cliente",
-          "description": "Un cliente puede estar asociado a varias órdenes de servicio; cada orden corresponde a un único cliente.",
+          "description": "Órdenes de servicio asociadas a este cliente, quien puede consultarlas y decidir sobre sus presupuestos.",
           "mode": "fk",
           "direction": "to",
-          "required": "Cuando se consulta una orden de servicio asociada a este cliente.",
+          "required": true,
           "role": "cliente"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta un cliente por su identificador maestro para mostrarlo en una orden de servicio; lo usan recepción, técnico y portal según sus permisos.",
-        "locate.byName": "Busca clientes por nombre al abrir una orden de servicio; lo usa recepción para evitar registros duplicados.",
-        "locate.byDocument": "Localiza un cliente por su documento nacional antes de crear o vincular su rol; lo usa recepción para deduplicar el registro.",
-        "locate.byContact": "Localiza al cliente por un canal de contacto ya vinculado; lo usa recepción cuando el cliente no presenta documento.",
-        "register.createOrAttach": "Crea la persona si no existe o le adjunta el rol de Cliente de ordenServicio si ya existe; lo usa recepción al abrir una orden.",
-        "edit.platformFields": "Actualiza los datos maestros permitidos del cliente, como nombre, documento o consentimiento; lo usa recepción al corregir sus datos.",
-        "inactivate": "Inactiva o reactiva el registro maestro del cliente sin eliminarlo; lo usa recepción autorizada cuando el cliente deja de utilizar el servicio.",
-        "listLinks": "Lista las órdenes de servicio relacionadas con el cliente mediante la relación de la orden; lo usan recepción y el portal dentro de su alcance de datos.",
-        "invite.login": "Invita al cliente a iniciar sesión en el portal, creando su índice de acceso sin guardarlo en el módulo; lo usa recepción."
+        "read.byId": "Consulta un cliente por su identificador maestro para mostrarlo en la orden o en el portal; usa lectura directa por id; lo usan recepcionista, técnico y cliente dentro de sus permisos.",
+        "locate.byName": "Busca un cliente por una parte de su nombre al abrir una orden; usa el índice de nombre; lo usa el recepcionista.",
+        "locate.byDocument": "Localiza un cliente por su documento para evitar registros duplicados antes de abrir una orden; usa el índice de documento; lo usa el recepcionista.",
+        "locate.byContact": "Localiza un cliente por un canal de contacto al identificarlo en recepción; busca sus canales de contacto vinculados; lo usa el recepcionista.",
+        "register.createOrAttach": "Crea o vincula el registro maestro de la persona y le asigna el rol de cliente del módulo; deduplica por documento o contacto y adjunta el rol; lo usa el recepcionista al abrir una orden.",
+        "edit.platformFields": "Actualiza los datos de identificación, dirección y consentimiento administrados por la plataforma; reindexa la identificación cuando corresponde; lo usa el recepcionista.",
+        "link.contact": "Vincula un canal de contacto del cliente para comunicaciones y acceso al portal; crea el ContactChannel y la relación HasContact; lo usa el recepcionista.",
+        "invite.login": "Invita al cliente a iniciar sesión en el portal para consultar únicamente sus propias órdenes y decidir sobre presupuestos; crea el índice de acceso; lo usa el recepcionista.",
+        "listLinks": "Muestra las relaciones vigentes del cliente, incluidas sus órdenes asociadas; consulta las relaciones y sus vigencias; lo usan recepcionista y técnico según sus permisos.",
+        "inactivate": "Inactiva o reactiva el registro maestro del cliente sin eliminarlo; cambia el estado administrado por la plataforma; lo usa el recepcionista autorizado.",
+        "attach.document": "Adjunta documentación o imágenes que correspondan al registro maestro del cliente; almacena el archivo mediante la plataforma; lo usa el recepcionista.",
+        "audit": "Consulta quién modificó los datos maestros del cliente y cuándo; lee la auditoría de la plataforma; lo usa el personal autorizado."
       },
       "rules": [
         "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-document-shape-validated"
+        "rule-person-ssn-unique-for-us",
+        "rule-person-privacy-consent-required-br-eu"
       ],
       "kind": "role",
       "subtype": "Person",
@@ -140,7 +145,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Registro maestro de la persona cliente, con datos de la plataforma y el espacio propio del módulo de órdenes de servicio.",
+            "description": "Registro maestro de la persona cliente utilizado por el módulo de órdenes de servicio.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -155,7 +160,7 @@
                       {
                         "value": "Person",
                         "title": "Persona",
-                        "description": "Persona que actúa como cliente del servicio técnico."
+                        "description": "Persona natural registrada como cliente."
                       }
                     ],
                     "description": "Indica que este registro maestro corresponde a una persona cliente.",
@@ -169,7 +174,7 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nombre con el que recepción identifica al cliente al abrir o consultar sus órdenes.",
+                    "description": "Nombre con el que se identifica al cliente al abrir y consultar sus órdenes de servicio.",
                     "title": "Nombre",
                     "min": 0,
                     "max": 0
@@ -183,12 +188,12 @@
                       {
                         "value": "Active",
                         "title": "Activo",
-                        "description": "El cliente puede utilizarse en nuevas órdenes."
+                        "description": "El cliente puede utilizarse en órdenes de servicio."
                       },
                       {
                         "value": "Inactive",
                         "title": "Inactivo",
-                        "description": "El cliente no se utiliza en nuevas órdenes."
+                        "description": "El cliente no está disponible para nuevos usos."
                       },
                       {
                         "value": "Merged",
@@ -198,11 +203,11 @@
                       {
                         "value": "Blocked",
                         "title": "Bloqueado",
-                        "description": "El uso del registro está bloqueado por la plataforma."
+                        "description": "El registro está bloqueado por la plataforma."
                       }
                     ],
-                    "title": "Estado maestro",
-                    "description": "Estado de actividad del registro maestro del cliente en la plataforma.",
+                    "title": "Estado del registro",
+                    "description": "Disponibilidad del registro maestro del cliente en la plataforma.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -214,12 +219,12 @@
                       {
                         "value": "SSN",
                         "title": "SSN",
-                        "description": "Número de Seguro Social."
+                        "description": "Número de seguridad social."
                       },
                       {
                         "value": "EIN",
                         "title": "EIN",
-                        "description": "Número de identificación fiscal de empresa."
+                        "description": "Número de identificación fiscal estadounidense."
                       },
                       {
                         "value": "Passport",
@@ -229,7 +234,7 @@
                       {
                         "value": "DriversLicense",
                         "title": "Licencia de conducir",
-                        "description": "Documento de licencia de conducir."
+                        "description": "Licencia de conducir."
                       },
                       {
                         "value": "NationalId",
@@ -239,17 +244,17 @@
                       {
                         "value": "CPF",
                         "title": "CPF",
-                        "description": "Registro de persona física."
+                        "description": "Documento CPF."
                       },
                       {
                         "value": "CNPJ",
                         "title": "CNPJ",
-                        "description": "Registro nacional de persona jurídica."
+                        "description": "Documento CNPJ."
                       },
                       {
                         "value": "VAT",
                         "title": "IVA",
-                        "description": "Identificación tributaria."
+                        "description": "Identificador fiscal de IVA."
                       },
                       {
                         "value": "Other",
@@ -258,7 +263,7 @@
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo de documento nacional utilizado para localizar o deduplicar al cliente cuando fue informado.",
+                    "description": "Tipo de documento nacional usado para identificar y evitar duplicar al cliente.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -266,7 +271,7 @@
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número del documento del cliente cuando fue informado para su identificación y deduplicación.",
+                    "description": "Número del documento del cliente, usado para localizarlo y evitar duplicados.",
                     "title": "Número de documento",
                     "maxLength": 0,
                     "min": 0,
@@ -279,44 +284,75 @@
                     "pattern": "^[A-Z]{2}$",
                     "maxLength": 2,
                     "default": "US",
-                    "description": "Código ISO del país aplicable al documento y a las reglas del cliente.",
+                    "description": "Código de país que determina el contexto del documento y las reglas aplicables al cliente.",
                     "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Datos de identificación de la persona usados para reconocer y localizar al cliente al abrir una orden."
+                "description": "Datos de identificación del cliente administrados por la plataforma."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {
+                  "addresses": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "Address",
+                    "title": "Direcciones",
+                    "description": "Direcciones del cliente que la recepción puede consultar o actualizar cuando sean necesarias.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
                   "contacts": {
                     "type": "object",
                     "required": true,
                     "collection": true,
                     "of": "ContactSummary",
                     "derived": true,
-                    "description": "Resumen derivado de los canales de contacto vinculados al cliente, utilizado por la plataforma para localizarlo o habilitar su acceso.",
-                    "title": "Canales de contacto",
+                    "description": "Resumen derivado de los canales de contacto vinculados al cliente, usado para enviarle el acceso al portal y comunicaciones de la orden.",
+                    "title": "Contactos",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Referencias compactas derivadas de las relaciones del cliente con otros registros maestros.",
+                    "title": "Referencias de relaciones",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Datos base de plataforma que permiten contactar al cliente y reconocer sus relaciones."
+                "description": "Datos generales del cliente administrados por la plataforma."
               },
               "person": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {},
-                "description": "Datos propios de una persona que la plataforma conserva para el cliente cuando sean necesarios."
+                "fields": {
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consentimiento de privacidad del cliente cuando corresponda por su residencia.",
+                    "title": "Consentimiento de privacidad",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Datos propios de la persona que pueden ser necesarios para las obligaciones de privacidad del cliente."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Datos promovidos por la organización para uso compartido entre módulos; este módulo solo los consulta."
+                "description": "Datos promovidos por la organización que el módulo puede consultar, sin declararlos ni modificarlos."
               },
               "ordenServicio": {
                 "type": "object",
@@ -330,38 +366,38 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "ordenServicio",
       "entityId": "Aparato",
       "title": "Aparato",
-      "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior retiro.",
+      "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior entrega.",
       "displayField": "details.identification.name",
       "relationships": {
-        "ordenesServicio": {
-          "relationshipId": "ordenServicioAparato",
+        "serviceOrders": {
+          "relationshipId": "serviceOrderDevice",
           "to": "OrdenServicio",
-          "via": "OrdenServicio.aparatoId",
+          "via": "OrdenServicio.deviceId",
           "cardinality": "1:N",
           "title": "Órdenes de servicio del aparato",
-          "description": "Órdenes de servicio registradas para este aparato a lo largo de su historial.",
+          "description": "Órdenes de servicio que registran este aparato como el equipo recibido para diagnóstico, reparación o retiro.",
           "mode": "fk",
           "direction": "to",
-          "required": "Cuando el aparato esté registrado en una orden de servicio.",
-          "role": "aparato atendido"
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Consulta un aparato por su identificador maestro para mostrar sus datos en la orden de servicio; lo usan recepción y el técnico.",
-        "locate.byName": "Busca aparatos por el nombre registrado al abrir o localizar una orden; lo usan recepción y el técnico.",
-        "register.createOrAttach": "Crea el registro maestro del aparato si no existe o le adjunta el rol del módulo al abrir una orden; lo usa recepción.",
-        "edit.platformFields": "Actualiza los datos maestros disponibles del equipo, como su nombre, marca, modelo o número de serie; lo usa recepción.",
-        "edit.moduleNamespace": "Actualiza exclusivamente el espacio del módulo asociado al aparato cuando fuera necesario; lo usa el módulo de órdenes de servicio.",
-        "inactivate": "Inactiva un aparato que ya no debe utilizarse en nuevas órdenes, manteniendo su historial; lo usa recepción.",
-        "listLinks": "Muestra las órdenes de servicio vinculadas al aparato para consultar su historial de atención; lo usan recepción y el técnico.",
-        "audit": "Permite revisar quién modificó los datos maestros del aparato y cuándo; lo usa el personal autorizado."
+        "read.byId": "Consulta un aparato por su identificador maestro mediante lectura directa; lo usan recepción y técnicos al abrir o atender una orden de servicio.",
+        "locate.byName": "Busca aparatos por el nombre registrado en el índice maestro; lo usa recepción para localizar un aparato antes de abrir una orden.",
+        "register.createOrAttach": "Crea el aparato si no existe o le asigna el rol de Aparato de ordenServicio mediante identificación del registro maestro; lo usa recepción al recibir un equipo.",
+        "edit.platformFields": "Actualiza los datos maestros del aparato, como nombre, marca, modelo, categoría o número de serie, mediante la edición del registro; lo usa recepción al corregir la identificación del equipo.",
+        "inactivate": "Inactiva o reactiva el registro maestro sin eliminarlo mediante el cambio de estado de MDM; lo usa recepción cuando un aparato ya no debe utilizarse.",
+        "attach.document": "Adjunta fotografías del aparato y de su estado de recepción al registro maestro por categoría documental; lo usa recepción al recibir el equipo.",
+        "statusHistory.read": "Consulta los cambios de estado maestro del aparato mediante su historial de estado; lo usa recepción al revisar su disponibilidad administrativa.",
+        "audit": "Consulta quién modificó los datos maestros del aparato y cuándo mediante la auditoría de MDM; lo usa personal autorizado para seguimiento."
       },
       "rules": [
         "rule-foreign-namespace-refused",
+        "rule-delete-blocked-by-relationships",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace"
       ],
@@ -387,30 +423,93 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento maestro del equipo electrónico atendido por el servicio técnico.",
+            "description": "Documento maestro del aparato con sus datos de identificación, base, equipo y el espacio propio de órdenes de servicio.",
             "fields": {
               "identification": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "AssetEquipment",
+                        "title": "Equipo o aparato",
+                        "description": "Equipo, dispositivo o infraestructura."
+                      }
+                    ],
+                    "description": "Indica que este registro maestro corresponde a un equipo o aparato.",
+                    "title": "Subtipo",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nombre con el que recepción y el personal técnico reconocen el equipo en la orden de servicio.",
+                    "description": "Nombre con el que recepción identifica el aparato al abrir y consultar una orden de servicio.",
                     "title": "Nombre del aparato",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Activo",
+                        "description": "El aparato puede utilizarse en órdenes de servicio."
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inactivo",
+                        "description": "El aparato se conserva pero no se utiliza."
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Fusionado",
+                        "description": "El registro fue fusionado con otro registro maestro."
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado",
+                        "description": "El registro está bloqueado por la plataforma."
+                      }
+                    ],
+                    "title": "Estado maestro",
+                    "description": "Estado de actividad del registro maestro del aparato.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 0,
+                    "default": "US",
+                    "description": "Código ISO del país aplicable al registro maestro del aparato.",
+                    "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Datos de identificación del equipo en el registro maestro."
+                "description": "Datos de identificación y estado del aparato en el registro maestro."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Datos base del registro maestro; este módulo no utiliza campos adicionales de esta rama."
+                "description": "Rama base de la plataforma para datos comunes del registro maestro; este módulo no utiliza campos propios de esta rama."
               },
               "assetEquipment": {
                 "type": "object",
@@ -419,7 +518,7 @@
                   "serialNumber": {
                     "type": "string",
                     "title": "Número de serie",
-                    "description": "Número de serie informado o verificado del aparato recibido.",
+                    "description": "Número de serie informado o visible en el aparato recibido.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -427,7 +526,7 @@
                   "brand": {
                     "type": "string",
                     "title": "Marca",
-                    "description": "Marca del aparato recibido para servicio técnico.",
+                    "description": "Marca del aparato electrónico.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -435,7 +534,7 @@
                   "model": {
                     "type": "string",
                     "title": "Modelo",
-                    "description": "Modelo del aparato recibido para servicio técnico.",
+                    "description": "Modelo comercial o técnico del aparato.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -443,19 +542,19 @@
                   "category": {
                     "type": "string",
                     "title": "Categoría",
-                    "description": "Clase de equipo electrónico que se recibe y analiza.",
+                    "description": "Categoría del aparato, como teléfono, computadora, televisor u otro equipo electrónico.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Características del equipo que el técnico consulta para identificarlo y analizarlo."
+                "description": "Características del equipo electrónico recibidas para identificarlo durante el diagnóstico, reparación y entrega."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Datos promovidos por la organización, disponibles para lectura y declarados fuera de este módulo."
+                "description": "Rama de datos promovidos por la organización, disponible para lectura y declarada fuera de este módulo."
               },
               "ordenServicio": {
                 "type": "object",
@@ -469,51 +568,57 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "ordenServicio",
       "entityId": "OrdenServicio",
       "title": "Orden de servicio",
-      "description": "Registro operativo de la recepción, diagnóstico, presupuesto, decisión del cliente, reparación y entrega de un aparato.",
-      "displayField": "orderNumber",
+      "description": "Atención técnica de un aparato desde su recepción, análisis y presupuesto hasta su rechazo, reparación y entrega final.",
+      "displayField": "serviceOrderNumber",
       "relationships": {
-        "cliente": {
-          "relationshipId": "ordenServicioCliente",
+        "customer": {
+          "relationshipId": "serviceOrderCustomer",
           "to": "Cliente",
-          "via": "OrdenServicio.clienteId",
+          "via": "OrdenServicio.customerId",
           "cardinality": "N:1",
           "title": "Cliente de la orden",
-          "description": "Cada orden corresponde a un cliente, que puede consultar únicamente sus propias órdenes.",
+          "description": "Cliente que entregó el aparato, consulta únicamente sus propias órdenes y decide sobre el presupuesto.",
           "mode": "fk",
-          "required": "Siempre"
+          "required": "siempre",
+          "role": "cliente"
         },
-        "aparato": {
-          "relationshipId": "ordenServicioAparato",
+        "device": {
+          "relationshipId": "serviceOrderDevice",
           "to": "Aparato",
-          "via": "OrdenServicio.aparatoId",
+          "via": "OrdenServicio.deviceId",
           "cardinality": "N:1",
           "title": "Aparato de la orden",
-          "description": "Cada orden registra el aparato recibido; un aparato puede tener varias órdenes durante su historial.",
+          "description": "Aparato recibido que se diagnostica, repara, entrega o deja disponible para retiro.",
           "mode": "fk",
-          "required": "Siempre"
+          "required": "siempre",
+          "role": "aparato recibido"
         }
       },
       "capabilities": {
-        "read.byId": "Lee una orden por su identificador mediante el repositorio para mostrar su detalle a quien ya posee el id.",
-        "locate.byColumn": "Lista órdenes por cliente, aparato, estado, número de orden o fecha de recepción mediante columnas indexadas para recepción, técnica y portal según su alcance de datos.",
-        "count": "Cuenta las órdenes que cumplen los filtros de columnas para mostrar totales en las listas operativas y del portal.",
-        "listByForeignKey": "Lista las órdenes vinculadas a un cliente o a un aparato mediante clienteId o aparatoId para sus historiales y el portal del cliente.",
-        "create": "Crea la orden recibida con cliente, aparato y defecto informado mediante inserción por el recepcionista.",
-        "update": "Actualiza el diagnóstico, las piezas con costo interno, el presupuesto y los datos de reparación mediante una actualización parcial por el técnico autorizado.",
-        "transition": "Cambia el estado indexado conforme a las transiciones definidas y sus reglas para técnico, cliente o recepcionista.",
-        "read.mdmRecord": "Lee los registros maestros referidos por clienteId y aparatoId para mostrar sus datos sin duplicarlos en la orden.",
-        "sequence.next": "Emite el número consecutivo de orden mediante la secuencia de la plataforma al crearla el recepcionista.",
-        "attach.document": "Adjunta fotos del aparato y de su estado a la orden por categoría documental para quien registra o analiza la recepción."
+        "read.byId": "Lee una orden por su identificador para mostrar su información según los permisos de quien la consulta.",
+        "locate.byColumn": "Lista órdenes filtradas por número, estado, cliente o aparato para que recepción, técnica y portal encuentren las órdenes pertinentes.",
+        "count": "Cuenta las órdenes que cumplen los filtros aplicados para mostrar totales en los listados del módulo.",
+        "listByForeignKey": "Lista las órdenes asociadas a un cliente o a un aparato mediante sus claves foráneas, respetando el alcance de acceso.",
+        "create": "Crea la orden al recibir el aparato, vinculando cliente y aparato, registrando el defecto informado e iniciándola en análisis; la usa la recepcionista.",
+        "update": "Actualiza el diagnóstico, las piezas con costos internos, el valor presupuestado y las anotaciones o reparación registrada; la usa el técnico según el estado de la orden.",
+        "transition": "Cambia el estado de la orden al emitir, aprobar o rechazar el presupuesto, marcarla lista o finalizar la entrega; lo usan los actores autorizados en cada transición.",
+        "uniqueKey": "Garantiza que no existan dos órdenes con el mismo número consecutivo de orden.",
+        "read.mdmRecord": "Lee los registros maestros vinculados de cliente y aparato para mostrar sus datos sin copiarlos en la orden.",
+        "sequence.next": "Emite el siguiente número consecutivo de orden al abrir una recepción; lo usa el módulo para identificar la orden.",
+        "attach.document": "Adjunta fotos de recepción y otros documentos de soporte a la orden por categoría; lo usan recepción y personal técnico autorizado."
       },
       "rules": [
-        "presupuestoRequiereDiagnostico",
-        "respuestaPresupuestoValida",
-        "reparacionRequiereAprobacion",
-        "entregaSoloAparatoDisponible"
+        "receptionRequiresCustomerDeviceAndDefect",
+        "emitBudgetRequiresAnalysis",
+        "customerCanDecideOwnBudget",
+        "repairRequiresApprovedBudget",
+        "repairCompletionRequiresWorkRecorded",
+        "deliveryRequiresReadyOrder",
+        "customerDisclosureExcludesInternalData"
       ],
       "kind": "entity",
       "class": "core",
@@ -536,7 +641,19 @@
             "required": true,
             "derived": true
           },
-          "clienteId": {
+          "serviceOrderNumber": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Número de orden",
+            "description": "Número consecutivo emitido para identificar y consultar la orden de servicio.",
+            "maxLength": 40,
+            "min": 0,
+            "max": 0
+          },
+          "customerId": {
             "type": "record",
             "required": true,
             "indexed": true,
@@ -545,12 +662,12 @@
               "Cliente"
             ],
             "title": "Cliente",
-            "description": "Cliente titular de la orden de servicio.",
+            "description": "Cliente que entregó el aparato y que consulta y decide el presupuesto desde el portal.",
             "maxLength": 0,
             "min": 0,
             "max": 0
           },
-          "aparatoId": {
+          "deviceId": {
             "type": "record",
             "required": true,
             "indexed": true,
@@ -559,20 +676,8 @@
               "Aparato"
             ],
             "title": "Aparato",
-            "description": "Aparato recibido para diagnóstico, reparación y posterior entrega.",
+            "description": "Aparato recibido para diagnóstico, reparación, entrega o retiro.",
             "maxLength": 0,
-            "min": 0,
-            "max": 0
-          },
-          "orderNumber": {
-            "type": "string",
-            "required": true,
-            "unique": true,
-            "indexed": true,
-            "of": "Address",
-            "title": "Número de orden",
-            "description": "Número consecutivo de la orden, emitido por la secuencia de la plataforma y utilizado para localizarla.",
-            "maxLength": 40,
             "min": 0,
             "max": 0
           },
@@ -583,49 +688,38 @@
             "of": "Address",
             "values": [
               {
-                "value": "received",
-                "title": "Recibida",
-                "description": "El aparato fue recibido y espera análisis técnico."
+                "value": "underAnalysis",
+                "title": "En análisis",
+                "description": "El aparato fue recibido y espera o está siendo analizado por el técnico."
               },
               {
-                "value": "awaitingCustomerDecision",
-                "title": "Pendiente de decisión",
-                "description": "El presupuesto fue emitido y espera la aprobación o el rechazo del cliente."
+                "value": "budgetSent",
+                "title": "Presupuesto enviado",
+                "description": "El presupuesto está disponible para que el cliente lo apruebe o rechace."
               },
               {
                 "value": "approved",
-                "title": "Aprobada",
-                "description": "El cliente aprobó el presupuesto y la reparación está autorizada."
+                "title": "Presupuesto aprobado",
+                "description": "El cliente autorizó la reparación y la orden espera reparación técnica."
               },
               {
                 "value": "rejected",
-                "title": "Rechazada",
-                "description": "El cliente rechazó el presupuesto; el aparato queda disponible para retiro."
+                "title": "Presupuesto rechazado",
+                "description": "El cliente rechazó el presupuesto y el aparato quedó disponible para retiro."
               },
               {
                 "value": "readyForPickup",
                 "title": "Lista para entrega",
-                "description": "La reparación terminó y el aparato está listo para ser entregado."
+                "description": "La reparación fue terminada y el aparato está disponible para entrega al cliente."
               },
               {
                 "value": "completed",
                 "title": "Finalizada",
-                "description": "El aparato fue entregado al cliente y la orden quedó cerrada."
+                "description": "El aparato reparado fue entregado al cliente y la atención terminó."
               }
             ],
             "title": "Estado",
-            "description": "Etapa operativa actual de la orden de servicio.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
-          },
-          "receivedAt": {
-            "type": "timestamp",
-            "required": true,
-            "indexed": true,
-            "of": "Address",
-            "title": "Fecha y hora de recepción",
-            "description": "Momento en que recepción abrió la orden y recibió el aparato.",
+            "description": "Etapa vigente de la atención técnica de la orden.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -634,8 +728,8 @@
             "type": "object",
             "required": true,
             "of": "Address",
-            "title": "Detalle de la orden",
-            "description": "Información operativa de recepción, análisis, presupuesto, reparación y entrega que no requiere índice propio.",
+            "title": "Datos de la orden",
+            "description": "Información no indexada de recepción, análisis, presupuesto y reparación de la orden de servicio.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
@@ -645,7 +739,7 @@
                 "required": true,
                 "of": "Address",
                 "title": "Defecto informado",
-                "description": "Falla o síntoma informado por el cliente al entregar el aparato.",
+                "description": "Falla o problema del aparato descrito al momento de la recepción.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -654,26 +748,17 @@
                 "type": "text",
                 "of": "Address",
                 "title": "Diagnóstico",
-                "description": "Diagnóstico técnico comunicado al cliente y disponible en el portal.",
+                "description": "Diagnóstico técnico de la falla del aparato que se informa al cliente junto con el presupuesto.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
-              "technicalNotes": {
-                "type": "text",
-                "of": "Address",
-                "title": "Anotaciones técnicas",
-                "description": "Observaciones internas del técnico que no se divulgan al cliente.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
-              "parts": {
+              "requiredParts": {
                 "type": "object",
                 "collection": true,
                 "of": "Address",
                 "title": "Piezas necesarias",
-                "description": "Piezas identificadas durante el diagnóstico, con su costo interno para uso técnico.",
+                "description": "Piezas previstas por el técnico para realizar la reparación, con sus costos internos.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0,
@@ -682,20 +767,20 @@
                     "type": "string",
                     "required": true,
                     "of": "Address",
-                    "title": "Descripción de la pieza",
-                    "description": "Identificación de la pieza necesaria para la reparación.",
-                    "maxLength": 200,
+                    "title": "Pieza",
+                    "description": "Nombre o descripción de la pieza necesaria.",
+                    "maxLength": 160,
                     "min": 0,
                     "max": 0
                   },
                   "quantity": {
-                    "type": "number",
+                    "type": "integer",
                     "required": true,
                     "of": "Address",
                     "title": "Cantidad",
-                    "description": "Cantidad de unidades requeridas de la pieza.",
+                    "description": "Cantidad de unidades de la pieza necesarias para la reparación.",
                     "maxLength": 0,
-                    "min": 0.001,
+                    "min": 1,
                     "max": 0
                   },
                   "internalCost": {
@@ -703,125 +788,45 @@
                     "required": true,
                     "of": "Address",
                     "title": "Costo interno",
-                    "description": "Costo interno de la pieza, visible únicamente para el personal autorizado.",
+                    "description": "Costo interno estimado de esta pieza, visible solamente para el personal interno autorizado.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 }
               },
-              "quote": {
-                "type": "object",
+              "budgetAmount": {
+                "type": "money",
                 "of": "Address",
-                "title": "Presupuesto",
-                "description": "Importe ofrecido al cliente y registro de su decisión.",
+                "title": "Valor del presupuesto",
+                "description": "Valor propuesto al cliente para autorizar la reparación.",
                 "maxLength": 0,
                 "min": 0,
-                "max": 0,
-                "fields": {
-                  "customerAmount": {
-                    "type": "money",
-                    "required": true,
-                    "of": "Address",
-                    "title": "Valor del presupuesto",
-                    "description": "Importe del presupuesto comunicado al cliente.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "issuedAt": {
-                    "type": "timestamp",
-                    "required": true,
-                    "of": "Address",
-                    "title": "Fecha de emisión",
-                    "description": "Momento en que el presupuesto quedó disponible para el cliente.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "customerResponse": {
-                    "type": "enum",
-                    "of": "Address",
-                    "values": [
-                      {
-                        "value": "approved",
-                        "title": "Aprobado",
-                        "description": "El cliente autorizó la reparación."
-                      },
-                      {
-                        "value": "rejected",
-                        "title": "Rechazado",
-                        "description": "El cliente rechazó el presupuesto."
-                      }
-                    ],
-                    "title": "Respuesta del cliente",
-                    "description": "Decisión registrada por el cliente sobre el presupuesto.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "respondedAt": {
-                    "type": "timestamp",
-                    "of": "Address",
-                    "title": "Fecha de respuesta",
-                    "description": "Momento en que el cliente aprobó o rechazó el presupuesto.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                }
+                "max": 0
               },
-              "repair": {
-                "type": "object",
+              "technicianNotes": {
+                "type": "text",
                 "of": "Address",
-                "title": "Reparación",
-                "description": "Registro del trabajo realizado después de la aprobación del cliente.",
+                "title": "Anotaciones técnicas",
+                "description": "Observaciones internas del técnico sobre el análisis o la reparación, no visibles para el cliente.",
                 "maxLength": 0,
                 "min": 0,
-                "max": 0,
-                "fields": {
-                  "workPerformed": {
-                    "type": "text",
-                    "required": true,
-                    "of": "Address",
-                    "title": "Trabajo realizado",
-                    "description": "Descripción de las acciones efectuadas para reparar el aparato.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "completedAt": {
-                    "type": "timestamp",
-                    "required": true,
-                    "of": "Address",
-                    "title": "Fecha de reparación terminada",
-                    "description": "Momento en que el técnico marcó la orden como lista para entrega.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                }
+                "max": 0
               },
-              "delivery": {
-                "type": "object",
+              "repairPerformed": {
+                "type": "text",
                 "of": "Address",
-                "title": "Entrega",
-                "description": "Constancia de la entrega final del aparato al cliente.",
+                "title": "Reparación realizada",
+                "description": "Trabajo efectuado por el técnico para dejar el aparato listo para entrega.",
                 "maxLength": 0,
                 "min": 0,
-                "max": 0,
-                "fields": {
-                  "deliveredAt": {
-                    "type": "timestamp",
-                    "required": true,
-                    "of": "Address",
-                    "title": "Fecha y hora de entrega",
-                    "description": "Momento en que recepción entregó el aparato y finalizó la orden.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                }
+                "max": 0
+              },
+              "availableForPickup": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Aparato disponible para retiro",
+                "description": "El aparato está disponible para retiro cuando el presupuesto fue rechazado o cuando la reparación está lista para entrega."
               }
             }
           }
@@ -829,16 +834,16 @@
       },
       "uniqueKeys": [
         [
-          "orderNumber"
+          "serviceOrderNumber"
         ]
       ],
       "lifecycleStates": [
         {
-          "state": "received",
+          "state": "underAnalysis",
           "reachedBy": "actor"
         },
         {
-          "state": "awaitingCustomerDecision",
+          "state": "budgetSent",
           "reachedBy": "actor"
         },
         {
@@ -862,47 +867,47 @@
         {
           "transitionId": "emitirPresupuesto",
           "from": [
-            "received"
+            "underAnalysis"
           ],
-          "to": "awaitingCustomerDecision",
+          "to": "budgetSent",
           "by": [
             "tecnico"
           ],
-          "description": "El técnico emite el presupuesto para que el cliente pueda decidir sobre la reparación.",
+          "description": "El técnico emite el presupuesto con el diagnóstico, las piezas necesarias y el valor propuesto para decisión del cliente.",
           "ruleRefs": [
-            "presupuestoRequiereDiagnostico"
+            "emitBudgetRequiresAnalysis"
           ]
         },
         {
-          "transitionId": "resolverPresupuesto",
+          "transitionId": "aprobarPresupuesto",
           "from": [
-            "awaitingCustomerDecision"
+            "budgetSent"
           ],
           "to": "approved",
           "by": [
             "cliente"
           ],
-          "description": "El cliente aprueba el presupuesto y autoriza la reparación.",
+          "description": "El cliente de la orden aprueba el presupuesto desde el portal y autoriza la reparación.",
           "ruleRefs": [
-            "respuestaPresupuestoValida"
+            "customerCanDecideOwnBudget"
           ]
         },
         {
-          "transitionId": "resolverPresupuesto",
+          "transitionId": "rechazarPresupuesto",
           "from": [
-            "awaitingCustomerDecision"
+            "budgetSent"
           ],
           "to": "rejected",
           "by": [
             "cliente"
           ],
-          "description": "El cliente rechaza el presupuesto; la orden se cierra como rechazada y el aparato queda disponible para retiro.",
+          "description": "El cliente de la orden rechaza el presupuesto desde el portal; la orden se cierra y el aparato queda disponible para retiro.",
           "ruleRefs": [
-            "respuestaPresupuestoValida"
+            "customerCanDecideOwnBudget"
           ]
         },
         {
-          "transitionId": "marcarListaParaEntrega",
+          "transitionId": "marcarLista",
           "from": [
             "approved"
           ],
@@ -910,24 +915,24 @@
           "by": [
             "tecnico"
           ],
-          "description": "El técnico registra el trabajo realizado y deja el aparato listo para entrega.",
+          "description": "El técnico registra la reparación realizada y deja el aparato listo para entrega.",
           "ruleRefs": [
-            "reparacionRequiereAprobacion"
+            "repairRequiresApprovedBudget",
+            "repairCompletionRequiresWorkRecorded"
           ]
         },
         {
-          "transitionId": "finalizarEntrega",
+          "transitionId": "entregarYfinalizar",
           "from": [
-            "readyForPickup",
-            "rejected"
+            "readyForPickup"
           ],
           "to": "completed",
           "by": [
             "recepcionista"
           ],
-          "description": "El recepcionista entrega el aparato al cliente y finaliza la orden.",
+          "description": "El recepcionista entrega al cliente el aparato reparado y finaliza la orden.",
           "ruleRefs": [
-            "entregaSoloAparatoDisponible"
+            "deliveryRequiresReadyOrder"
           ]
         }
       ]
@@ -935,24 +940,24 @@
   ],
   "relationships": [
     {
-      "relationshipId": "ordenServicioCliente",
+      "relationshipId": "serviceOrderCustomer",
       "from": "OrdenServicio",
       "to": "Cliente",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada orden de servicio corresponde a un cliente; un cliente puede tener varias órdenes.",
-      "field": "OrdenServicio.clienteId"
+      "description": "Cada orden de servicio corresponde al cliente que entregó el aparato y que puede consultar y decidir sobre su presupuesto.",
+      "field": "OrdenServicio.customerId"
     },
     {
-      "relationshipId": "ordenServicioAparato",
+      "relationshipId": "serviceOrderDevice",
       "from": "OrdenServicio",
       "to": "Aparato",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada orden registra el aparato recibido; un aparato puede contar con varias órdenes de servicio a lo largo de su historial.",
-      "field": "OrdenServicio.aparatoId"
+      "description": "Cada orden de servicio registra el aparato recibido para su diagnóstico, reparación o retiro.",
+      "field": "OrdenServicio.deviceId"
     }
   ],
   "removedOrphans": [],
@@ -994,6 +999,11 @@
       "detail": "record.fields.id, record.fields.version"
     },
     {
+      "kind": "tightened",
+      "entityId": "Aparato",
+      "detail": "Aparato.details.identification.subtype.values"
+    },
+    {
       "kind": "namespaceEmpty",
       "entityId": "Aparato",
       "detail": "details.ordenServicio"
@@ -1002,6 +1012,11 @@
       "kind": "derivedFromPlatform",
       "entityId": "OrdenServicio",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "OrdenServicio",
+      "detail": "record.fields.details.fields.availableForPickup.derived (derived[])"
     }
   ]
 }

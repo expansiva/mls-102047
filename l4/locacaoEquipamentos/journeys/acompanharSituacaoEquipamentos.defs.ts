@@ -8,34 +8,34 @@ export const acompanharSituacaoEquipamentosJourney = {
   "business": {
     "actorRef": "gerente",
     "title": "Acompanhar situação dos equipamentos",
-    "goal": "Visualizar quais equipamentos estão disponíveis, locados ou em manutenção.",
+    "goal": "Ver quais equipamentos estão disponíveis, locados ou em manutenção.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarEquipamentos",
+        "stepId": "localizarEquipamentosPorSituacao",
         "kind": "locate",
         "entity": "Equipamento",
         "title": "x",
-        "description": "Localiza os equipamentos da locadora."
+        "description": "Localiza os equipamentos e consulta sua situação atual."
       },
       {
-        "stepId": "inspecionarSituacoes",
+        "stepId": "consultarSituacaoEquipamento",
         "kind": "inspect",
         "entity": "Equipamento",
         "title": "x",
-        "description": "Consulta a situação de cada equipamento, identificando os disponíveis, locados e em manutenção."
+        "description": "Visualiza a identificação, o valor da diária e a situação de disponibilidade, locação ou manutenção de cada equipamento."
       }
     ],
     "outcome": {
-      "statement": "O gerente obtém a visão da disponibilidade e da situação operacional dos equipamentos.",
+      "statement": "O gerente acompanha a situação atual dos equipamentos da locadora.",
       "evidence": [
-        "Lista de equipamentos com suas situações de disponível, locado ou em manutenção."
+        "Relação de equipamentos exibida com suas situações de disponível, locado ou em manutenção."
       ]
     }
   },
-  "businessHash": "sha256:f20dae9a0affca28e1ce7fa922ab9aac67ff30b21c977be9cf2379fe6717fb0a"
+  "businessHash": "sha256:32acd34a2544f13ee1ecbd4b14688b3db2ae8a2420fd72625235b7f558fc9e12"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AcompanharSituacaoEquipamentosJourneyType = typeof acompanharSituacaoEquipamentosJourney;

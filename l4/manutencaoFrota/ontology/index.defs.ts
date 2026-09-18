@@ -3,7 +3,7 @@
 import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaOntologyIndex = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "manutencaoFrota",
   "businessDomain": "Gestão de manutenção de frota para transportadora",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
@@ -66,7 +66,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a dirigir o veículo.",
+      "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a conduzir o veículo.",
       "field": "VehicleAssignment.driverId"
     },
     {
@@ -76,7 +76,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Os veículos visíveis ao motorista são derivados das atribuições de veículo registradas para ele.",
+      "description": "Os motoristas que podem consultar e conduzir um veículo são obtidos pelas suas atribuições de veículo.",
       "through": "VehicleAssignment",
       "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
       "derived": true
@@ -88,7 +88,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada abastecimento é registrado para um único veículo.",
+      "description": "Todo abastecimento é registrado para um único veículo atribuído.",
       "field": "Fueling.vehicleId"
     },
     {
@@ -98,7 +98,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada abastecimento registra o motorista que o realizou.",
+      "description": "Todo abastecimento identifica o motorista que o registrou.",
       "field": "Fueling.driverId"
     },
     {
@@ -108,7 +108,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada plano preventivo define a periodicidade de manutenção de um veículo.",
+      "description": "Cada plano preventivo é definido para um veículo da frota.",
       "field": "MaintenancePlan.vehicleId"
     },
     {
@@ -118,18 +118,8 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada ordem de manutenção trata um único veículo.",
+      "description": "Cada ordem de manutenção pertence a um único veículo.",
       "field": "MaintenanceOrder.vehicleId"
-    },
-    {
-      "relationshipId": "maintenanceOrderWorkshop",
-      "from": "MaintenanceOrder",
-      "to": "Workshop",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada ordem de manutenção informa a oficina responsável pela execução do serviço.",
-      "field": "MaintenanceOrder.workshopId"
     },
     {
       "relationshipId": "maintenanceOrderPlan",
@@ -138,8 +128,18 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Uma ordem preventiva pode decorrer de um plano de manutenção vencido; ordens por defeito não precisam de plano.",
+      "description": "Uma ordem preventiva pode decorrer de um plano de manutenção; ordens por defeito não exigem plano.",
       "field": "MaintenanceOrder.maintenancePlanId"
+    },
+    {
+      "relationshipId": "maintenanceOrderWorkshop",
+      "from": "MaintenanceOrder",
+      "to": "Workshop",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada ordem de manutenção informa a oficina responsável pelo serviço.",
+      "field": "MaintenanceOrder.workshopId"
     }
   ]
 } as const satisfies Ns5OntologyIndexV3;

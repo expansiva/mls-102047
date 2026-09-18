@@ -3,7 +3,7 @@
 import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const ordenServicioOntologyIndex = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "ordenServicio",
   "businessDomain": "Servicio técnico de electrónica",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
@@ -30,24 +30,24 @@ export const ordenServicioOntologyIndex = {
   ],
   "relationships": [
     {
-      "relationshipId": "ordenServicioCliente",
+      "relationshipId": "serviceOrderCustomer",
       "from": "OrdenServicio",
       "to": "Cliente",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada orden de servicio corresponde a un cliente; un cliente puede tener varias órdenes.",
-      "field": "OrdenServicio.clienteId"
+      "description": "Cada orden de servicio corresponde al cliente que entregó el aparato y que puede consultar y decidir sobre su presupuesto.",
+      "field": "OrdenServicio.customerId"
     },
     {
-      "relationshipId": "ordenServicioAparato",
+      "relationshipId": "serviceOrderDevice",
       "from": "OrdenServicio",
       "to": "Aparato",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada orden registra el aparato recibido; un aparato puede contar con varias órdenes de servicio a lo largo de su historial.",
-      "field": "OrdenServicio.aparatoId"
+      "description": "Cada orden de servicio registra el aparato recibido para su diagnóstico, reparación o retiro.",
+      "field": "OrdenServicio.deviceId"
     }
   ]
 } as const satisfies Ns5OntologyIndexV3;

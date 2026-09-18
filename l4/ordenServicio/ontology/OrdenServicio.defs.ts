@@ -3,51 +3,57 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const ordenServicioEntityOrdenServicio = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "ordenServicio",
   "entityId": "OrdenServicio",
   "title": "Orden de servicio",
-  "description": "Registro operativo de la recepción, diagnóstico, presupuesto, decisión del cliente, reparación y entrega de un aparato.",
-  "displayField": "orderNumber",
+  "description": "Atención técnica de un aparato desde su recepción, análisis y presupuesto hasta su rechazo, reparación y entrega final.",
+  "displayField": "serviceOrderNumber",
   "relationships": {
-    "cliente": {
-      "relationshipId": "ordenServicioCliente",
+    "customer": {
+      "relationshipId": "serviceOrderCustomer",
       "to": "Cliente",
-      "via": "OrdenServicio.clienteId",
+      "via": "OrdenServicio.customerId",
       "cardinality": "N:1",
       "title": "Cliente de la orden",
-      "description": "Cada orden corresponde a un cliente, que puede consultar únicamente sus propias órdenes.",
+      "description": "Cliente que entregó el aparato, consulta únicamente sus propias órdenes y decide sobre el presupuesto.",
       "mode": "fk",
-      "required": "Siempre"
+      "required": "siempre",
+      "role": "cliente"
     },
-    "aparato": {
-      "relationshipId": "ordenServicioAparato",
+    "device": {
+      "relationshipId": "serviceOrderDevice",
       "to": "Aparato",
-      "via": "OrdenServicio.aparatoId",
+      "via": "OrdenServicio.deviceId",
       "cardinality": "N:1",
       "title": "Aparato de la orden",
-      "description": "Cada orden registra el aparato recibido; un aparato puede tener varias órdenes durante su historial.",
+      "description": "Aparato recibido que se diagnostica, repara, entrega o deja disponible para retiro.",
       "mode": "fk",
-      "required": "Siempre"
+      "required": "siempre",
+      "role": "aparato recibido"
     }
   },
   "capabilities": {
-    "read.byId": "Lee una orden por su identificador mediante el repositorio para mostrar su detalle a quien ya posee el id.",
-    "locate.byColumn": "Lista órdenes por cliente, aparato, estado, número de orden o fecha de recepción mediante columnas indexadas para recepción, técnica y portal según su alcance de datos.",
-    "count": "Cuenta las órdenes que cumplen los filtros de columnas para mostrar totales en las listas operativas y del portal.",
-    "listByForeignKey": "Lista las órdenes vinculadas a un cliente o a un aparato mediante clienteId o aparatoId para sus historiales y el portal del cliente.",
-    "create": "Crea la orden recibida con cliente, aparato y defecto informado mediante inserción por el recepcionista.",
-    "update": "Actualiza el diagnóstico, las piezas con costo interno, el presupuesto y los datos de reparación mediante una actualización parcial por el técnico autorizado.",
-    "transition": "Cambia el estado indexado conforme a las transiciones definidas y sus reglas para técnico, cliente o recepcionista.",
-    "read.mdmRecord": "Lee los registros maestros referidos por clienteId y aparatoId para mostrar sus datos sin duplicarlos en la orden.",
-    "sequence.next": "Emite el número consecutivo de orden mediante la secuencia de la plataforma al crearla el recepcionista.",
-    "attach.document": "Adjunta fotos del aparato y de su estado a la orden por categoría documental para quien registra o analiza la recepción."
+    "read.byId": "Lee una orden por su identificador para mostrar su información según los permisos de quien la consulta.",
+    "locate.byColumn": "Lista órdenes filtradas por número, estado, cliente o aparato para que recepción, técnica y portal encuentren las órdenes pertinentes.",
+    "count": "Cuenta las órdenes que cumplen los filtros aplicados para mostrar totales en los listados del módulo.",
+    "listByForeignKey": "Lista las órdenes asociadas a un cliente o a un aparato mediante sus claves foráneas, respetando el alcance de acceso.",
+    "create": "Crea la orden al recibir el aparato, vinculando cliente y aparato, registrando el defecto informado e iniciándola en análisis; la usa la recepcionista.",
+    "update": "Actualiza el diagnóstico, las piezas con costos internos, el valor presupuestado y las anotaciones o reparación registrada; la usa el técnico según el estado de la orden.",
+    "transition": "Cambia el estado de la orden al emitir, aprobar o rechazar el presupuesto, marcarla lista o finalizar la entrega; lo usan los actores autorizados en cada transición.",
+    "uniqueKey": "Garantiza que no existan dos órdenes con el mismo número consecutivo de orden.",
+    "read.mdmRecord": "Lee los registros maestros vinculados de cliente y aparato para mostrar sus datos sin copiarlos en la orden.",
+    "sequence.next": "Emite el siguiente número consecutivo de orden al abrir una recepción; lo usa el módulo para identificar la orden.",
+    "attach.document": "Adjunta fotos de recepción y otros documentos de soporte a la orden por categoría; lo usan recepción y personal técnico autorizado."
   },
   "rules": [
-    "presupuestoRequiereDiagnostico",
-    "respuestaPresupuestoValida",
-    "reparacionRequiereAprobacion",
-    "entregaSoloAparatoDisponible"
+    "receptionRequiresCustomerDeviceAndDefect",
+    "emitBudgetRequiresAnalysis",
+    "customerCanDecideOwnBudget",
+    "repairRequiresApprovedBudget",
+    "repairCompletionRequiresWorkRecorded",
+    "deliveryRequiresReadyOrder",
+    "customerDisclosureExcludesInternalData"
   ],
   "kind": "entity",
   "class": "core",
@@ -70,7 +76,19 @@ export const ordenServicioEntityOrdenServicio = {
         "required": true,
         "derived": true
       },
-      "clienteId": {
+      "serviceOrderNumber": {
+        "type": "string",
+        "required": true,
+        "unique": true,
+        "indexed": true,
+        "of": "Address",
+        "title": "Número de orden",
+        "description": "Número consecutivo emitido para identificar y consultar la orden de servicio.",
+        "maxLength": 40,
+        "min": 0,
+        "max": 0
+      },
+      "customerId": {
         "type": "record",
         "required": true,
         "indexed": true,
@@ -79,12 +97,12 @@ export const ordenServicioEntityOrdenServicio = {
           "Cliente"
         ],
         "title": "Cliente",
-        "description": "Cliente titular de la orden de servicio.",
+        "description": "Cliente que entregó el aparato y que consulta y decide el presupuesto desde el portal.",
         "maxLength": 0,
         "min": 0,
         "max": 0
       },
-      "aparatoId": {
+      "deviceId": {
         "type": "record",
         "required": true,
         "indexed": true,
@@ -93,20 +111,8 @@ export const ordenServicioEntityOrdenServicio = {
           "Aparato"
         ],
         "title": "Aparato",
-        "description": "Aparato recibido para diagnóstico, reparación y posterior entrega.",
+        "description": "Aparato recibido para diagnóstico, reparación, entrega o retiro.",
         "maxLength": 0,
-        "min": 0,
-        "max": 0
-      },
-      "orderNumber": {
-        "type": "string",
-        "required": true,
-        "unique": true,
-        "indexed": true,
-        "of": "Address",
-        "title": "Número de orden",
-        "description": "Número consecutivo de la orden, emitido por la secuencia de la plataforma y utilizado para localizarla.",
-        "maxLength": 40,
         "min": 0,
         "max": 0
       },
@@ -117,49 +123,38 @@ export const ordenServicioEntityOrdenServicio = {
         "of": "Address",
         "values": [
           {
-            "value": "received",
-            "title": "Recibida",
-            "description": "El aparato fue recibido y espera análisis técnico."
+            "value": "underAnalysis",
+            "title": "En análisis",
+            "description": "El aparato fue recibido y espera o está siendo analizado por el técnico."
           },
           {
-            "value": "awaitingCustomerDecision",
-            "title": "Pendiente de decisión",
-            "description": "El presupuesto fue emitido y espera la aprobación o el rechazo del cliente."
+            "value": "budgetSent",
+            "title": "Presupuesto enviado",
+            "description": "El presupuesto está disponible para que el cliente lo apruebe o rechace."
           },
           {
             "value": "approved",
-            "title": "Aprobada",
-            "description": "El cliente aprobó el presupuesto y la reparación está autorizada."
+            "title": "Presupuesto aprobado",
+            "description": "El cliente autorizó la reparación y la orden espera reparación técnica."
           },
           {
             "value": "rejected",
-            "title": "Rechazada",
-            "description": "El cliente rechazó el presupuesto; el aparato queda disponible para retiro."
+            "title": "Presupuesto rechazado",
+            "description": "El cliente rechazó el presupuesto y el aparato quedó disponible para retiro."
           },
           {
             "value": "readyForPickup",
             "title": "Lista para entrega",
-            "description": "La reparación terminó y el aparato está listo para ser entregado."
+            "description": "La reparación fue terminada y el aparato está disponible para entrega al cliente."
           },
           {
             "value": "completed",
             "title": "Finalizada",
-            "description": "El aparato fue entregado al cliente y la orden quedó cerrada."
+            "description": "El aparato reparado fue entregado al cliente y la atención terminó."
           }
         ],
         "title": "Estado",
-        "description": "Etapa operativa actual de la orden de servicio.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
-      },
-      "receivedAt": {
-        "type": "timestamp",
-        "required": true,
-        "indexed": true,
-        "of": "Address",
-        "title": "Fecha y hora de recepción",
-        "description": "Momento en que recepción abrió la orden y recibió el aparato.",
+        "description": "Etapa vigente de la atención técnica de la orden.",
         "maxLength": 0,
         "min": 0,
         "max": 0
@@ -168,8 +163,8 @@ export const ordenServicioEntityOrdenServicio = {
         "type": "object",
         "required": true,
         "of": "Address",
-        "title": "Detalle de la orden",
-        "description": "Información operativa de recepción, análisis, presupuesto, reparación y entrega que no requiere índice propio.",
+        "title": "Datos de la orden",
+        "description": "Información no indexada de recepción, análisis, presupuesto y reparación de la orden de servicio.",
         "maxLength": 0,
         "min": 0,
         "max": 0,
@@ -179,7 +174,7 @@ export const ordenServicioEntityOrdenServicio = {
             "required": true,
             "of": "Address",
             "title": "Defecto informado",
-            "description": "Falla o síntoma informado por el cliente al entregar el aparato.",
+            "description": "Falla o problema del aparato descrito al momento de la recepción.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -188,26 +183,17 @@ export const ordenServicioEntityOrdenServicio = {
             "type": "text",
             "of": "Address",
             "title": "Diagnóstico",
-            "description": "Diagnóstico técnico comunicado al cliente y disponible en el portal.",
+            "description": "Diagnóstico técnico de la falla del aparato que se informa al cliente junto con el presupuesto.",
             "maxLength": 0,
             "min": 0,
             "max": 0
           },
-          "technicalNotes": {
-            "type": "text",
-            "of": "Address",
-            "title": "Anotaciones técnicas",
-            "description": "Observaciones internas del técnico que no se divulgan al cliente.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
-          },
-          "parts": {
+          "requiredParts": {
             "type": "object",
             "collection": true,
             "of": "Address",
             "title": "Piezas necesarias",
-            "description": "Piezas identificadas durante el diagnóstico, con su costo interno para uso técnico.",
+            "description": "Piezas previstas por el técnico para realizar la reparación, con sus costos internos.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
@@ -216,20 +202,20 @@ export const ordenServicioEntityOrdenServicio = {
                 "type": "string",
                 "required": true,
                 "of": "Address",
-                "title": "Descripción de la pieza",
-                "description": "Identificación de la pieza necesaria para la reparación.",
-                "maxLength": 200,
+                "title": "Pieza",
+                "description": "Nombre o descripción de la pieza necesaria.",
+                "maxLength": 160,
                 "min": 0,
                 "max": 0
               },
               "quantity": {
-                "type": "number",
+                "type": "integer",
                 "required": true,
                 "of": "Address",
                 "title": "Cantidad",
-                "description": "Cantidad de unidades requeridas de la pieza.",
+                "description": "Cantidad de unidades de la pieza necesarias para la reparación.",
                 "maxLength": 0,
-                "min": 0.001,
+                "min": 1,
                 "max": 0
               },
               "internalCost": {
@@ -237,125 +223,45 @@ export const ordenServicioEntityOrdenServicio = {
                 "required": true,
                 "of": "Address",
                 "title": "Costo interno",
-                "description": "Costo interno de la pieza, visible únicamente para el personal autorizado.",
+                "description": "Costo interno estimado de esta pieza, visible solamente para el personal interno autorizado.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             }
           },
-          "quote": {
-            "type": "object",
+          "budgetAmount": {
+            "type": "money",
             "of": "Address",
-            "title": "Presupuesto",
-            "description": "Importe ofrecido al cliente y registro de su decisión.",
+            "title": "Valor del presupuesto",
+            "description": "Valor propuesto al cliente para autorizar la reparación.",
             "maxLength": 0,
             "min": 0,
-            "max": 0,
-            "fields": {
-              "customerAmount": {
-                "type": "money",
-                "required": true,
-                "of": "Address",
-                "title": "Valor del presupuesto",
-                "description": "Importe del presupuesto comunicado al cliente.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
-              "issuedAt": {
-                "type": "timestamp",
-                "required": true,
-                "of": "Address",
-                "title": "Fecha de emisión",
-                "description": "Momento en que el presupuesto quedó disponible para el cliente.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
-              "customerResponse": {
-                "type": "enum",
-                "of": "Address",
-                "values": [
-                  {
-                    "value": "approved",
-                    "title": "Aprobado",
-                    "description": "El cliente autorizó la reparación."
-                  },
-                  {
-                    "value": "rejected",
-                    "title": "Rechazado",
-                    "description": "El cliente rechazó el presupuesto."
-                  }
-                ],
-                "title": "Respuesta del cliente",
-                "description": "Decisión registrada por el cliente sobre el presupuesto.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
-              "respondedAt": {
-                "type": "timestamp",
-                "of": "Address",
-                "title": "Fecha de respuesta",
-                "description": "Momento en que el cliente aprobó o rechazó el presupuesto.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              }
-            }
+            "max": 0
           },
-          "repair": {
-            "type": "object",
+          "technicianNotes": {
+            "type": "text",
             "of": "Address",
-            "title": "Reparación",
-            "description": "Registro del trabajo realizado después de la aprobación del cliente.",
+            "title": "Anotaciones técnicas",
+            "description": "Observaciones internas del técnico sobre el análisis o la reparación, no visibles para el cliente.",
             "maxLength": 0,
             "min": 0,
-            "max": 0,
-            "fields": {
-              "workPerformed": {
-                "type": "text",
-                "required": true,
-                "of": "Address",
-                "title": "Trabajo realizado",
-                "description": "Descripción de las acciones efectuadas para reparar el aparato.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
-              "completedAt": {
-                "type": "timestamp",
-                "required": true,
-                "of": "Address",
-                "title": "Fecha de reparación terminada",
-                "description": "Momento en que el técnico marcó la orden como lista para entrega.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              }
-            }
+            "max": 0
           },
-          "delivery": {
-            "type": "object",
+          "repairPerformed": {
+            "type": "text",
             "of": "Address",
-            "title": "Entrega",
-            "description": "Constancia de la entrega final del aparato al cliente.",
+            "title": "Reparación realizada",
+            "description": "Trabajo efectuado por el técnico para dejar el aparato listo para entrega.",
             "maxLength": 0,
             "min": 0,
-            "max": 0,
-            "fields": {
-              "deliveredAt": {
-                "type": "timestamp",
-                "required": true,
-                "of": "Address",
-                "title": "Fecha y hora de entrega",
-                "description": "Momento en que recepción entregó el aparato y finalizó la orden.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              }
-            }
+            "max": 0
+          },
+          "availableForPickup": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Aparato disponible para retiro",
+            "description": "El aparato está disponible para retiro cuando el presupuesto fue rechazado o cuando la reparación está lista para entrega."
           }
         }
       }
@@ -363,16 +269,16 @@ export const ordenServicioEntityOrdenServicio = {
   },
   "uniqueKeys": [
     [
-      "orderNumber"
+      "serviceOrderNumber"
     ]
   ],
   "lifecycleStates": [
     {
-      "state": "received",
+      "state": "underAnalysis",
       "reachedBy": "actor"
     },
     {
-      "state": "awaitingCustomerDecision",
+      "state": "budgetSent",
       "reachedBy": "actor"
     },
     {
@@ -396,47 +302,47 @@ export const ordenServicioEntityOrdenServicio = {
     {
       "transitionId": "emitirPresupuesto",
       "from": [
-        "received"
+        "underAnalysis"
       ],
-      "to": "awaitingCustomerDecision",
+      "to": "budgetSent",
       "by": [
         "tecnico"
       ],
-      "description": "El técnico emite el presupuesto para que el cliente pueda decidir sobre la reparación.",
+      "description": "El técnico emite el presupuesto con el diagnóstico, las piezas necesarias y el valor propuesto para decisión del cliente.",
       "ruleRefs": [
-        "presupuestoRequiereDiagnostico"
+        "emitBudgetRequiresAnalysis"
       ]
     },
     {
-      "transitionId": "resolverPresupuesto",
+      "transitionId": "aprobarPresupuesto",
       "from": [
-        "awaitingCustomerDecision"
+        "budgetSent"
       ],
       "to": "approved",
       "by": [
         "cliente"
       ],
-      "description": "El cliente aprueba el presupuesto y autoriza la reparación.",
+      "description": "El cliente de la orden aprueba el presupuesto desde el portal y autoriza la reparación.",
       "ruleRefs": [
-        "respuestaPresupuestoValida"
+        "customerCanDecideOwnBudget"
       ]
     },
     {
-      "transitionId": "resolverPresupuesto",
+      "transitionId": "rechazarPresupuesto",
       "from": [
-        "awaitingCustomerDecision"
+        "budgetSent"
       ],
       "to": "rejected",
       "by": [
         "cliente"
       ],
-      "description": "El cliente rechaza el presupuesto; la orden se cierra como rechazada y el aparato queda disponible para retiro.",
+      "description": "El cliente de la orden rechaza el presupuesto desde el portal; la orden se cierra y el aparato queda disponible para retiro.",
       "ruleRefs": [
-        "respuestaPresupuestoValida"
+        "customerCanDecideOwnBudget"
       ]
     },
     {
-      "transitionId": "marcarListaParaEntrega",
+      "transitionId": "marcarLista",
       "from": [
         "approved"
       ],
@@ -444,24 +350,24 @@ export const ordenServicioEntityOrdenServicio = {
       "by": [
         "tecnico"
       ],
-      "description": "El técnico registra el trabajo realizado y deja el aparato listo para entrega.",
+      "description": "El técnico registra la reparación realizada y deja el aparato listo para entrega.",
       "ruleRefs": [
-        "reparacionRequiereAprobacion"
+        "repairRequiresApprovedBudget",
+        "repairCompletionRequiresWorkRecorded"
       ]
     },
     {
-      "transitionId": "finalizarEntrega",
+      "transitionId": "entregarYfinalizar",
       "from": [
-        "readyForPickup",
-        "rejected"
+        "readyForPickup"
       ],
       "to": "completed",
       "by": [
         "recepcionista"
       ],
-      "description": "El recepcionista entrega el aparato al cliente y finaliza la orden.",
+      "description": "El recepcionista entrega al cliente el aparato reparado y finaliza la orden.",
       "ruleRefs": [
-        "entregaSoloAparatoDisponible"
+        "deliveryRequiresReadyOrder"
       ]
     }
   ]

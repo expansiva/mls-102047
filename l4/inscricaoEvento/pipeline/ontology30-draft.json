@@ -1,156 +1,280 @@
 {
   "plan": {
     "moduleName": "inscricaoEvento",
-    "businessDomain": "Gestão de eventos publicados e inscrições públicas, incluindo lista de espera e cancelamentos.",
+    "businessDomain": "Inscrição e gestão de eventos",
     "entities": [
       {
         "entityId": "Evento",
+        "kind": "entity",
+        "family": "tdm",
         "title": "Evento",
-        "description": "Evento cadastrado pelo organizador, com informações, capacidade e publicação para inscrições públicas.",
-        "kind": "core",
-        "party": "none",
-        "displayField": "title",
+        "description": "Evento organizado e publicado para receber inscrições públicas, com informações, capacidade e situação de publicação.",
+        "displayField": "titulo",
+        "class": "core",
         "storage": {
           "target": "moduleDatabase",
-          "scope": "module",
-          "idField": "id",
-          "mdmType": "inscricaoEvento.Evento"
+          "table": "inscricaoEvento_evento",
+          "kind": "relational"
         }
       },
       {
         "entityId": "Inscricao",
+        "kind": "entity",
+        "family": "tdm",
         "title": "Inscrição",
-        "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmação, espera ou cancelamento.",
-        "kind": "core",
-        "party": "none",
+        "description": "Registro da inscrição de uma pessoa em um evento, incluindo sua situação de confirmação, espera ou cancelamento.",
         "displayField": "id",
+        "class": "event",
         "storage": {
           "target": "moduleDatabase",
-          "scope": "module",
-          "idField": "id",
-          "mdmType": "inscricaoEvento.Inscricao"
+          "table": "inscricaoEvento_inscricao",
+          "kind": "relational"
         }
       },
       {
         "entityId": "Participante",
+        "kind": "role",
+        "family": "mdm",
         "title": "Participante",
-        "description": "Pessoa inscrita ou em lista de espera para eventos deste módulo.",
-        "kind": "mdm",
-        "party": "person",
-        "mdmSubtype": "Person",
-        "displayField": "name",
-        "storage": {
-          "target": "mdm",
-          "scope": "organization",
-          "idField": "id",
-          "mdmType": "inscricaoEvento.Participante"
-        }
+        "description": "Pessoa participante identificada no cadastro mestre para realizar ou manter uma inscrição em evento.",
+        "displayField": "details.identification.name",
+        "subtype": "Person",
+        "roleTag": "inscricaoEvento.Participante",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "entityId": "EmailParticipante",
+        "kind": "role",
+        "family": "mdm",
+        "title": "E-mail do participante",
+        "description": "Canal de contato por e-mail do participante, usado para identificá-lo e impedir inscrição duplicada no mesmo evento.",
+        "displayField": "details.contactChannel.value",
+        "subtype": "ContactChannel",
+        "roleTag": "inscricaoEvento.EmailParticipante",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
       }
     ],
     "relationships": [
       {
-        "relationshipId": "eventoInscricoes",
-        "fromEntity": "Evento",
-        "toEntity": "Inscricao",
-        "type": "oneToMany",
+        "relationshipId": "inscricaoDoEvento",
+        "from": "Inscricao",
+        "to": "Evento",
+        "type": "manyToOne",
         "required": true,
-        "description": "Um evento possui as inscrições realizadas para sua participação.",
-        "persistence": {
-          "mode": "moduleReference"
-        }
+        "mode": "fk",
+        "description": "Cada inscrição pertence obrigatoriamente a um evento.",
+        "field": "Inscricao.eventoId"
       },
       {
-        "relationshipId": "participanteInscricoes",
-        "fromEntity": "Participante",
-        "toEntity": "Inscricao",
+        "relationshipId": "participanteDaInscricao",
+        "from": "Inscricao",
+        "to": "Participante",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Cada inscrição identifica obrigatoriamente a pessoa participante.",
+        "field": "Inscricao.participanteId"
+      },
+      {
+        "relationshipId": "emailDaInscricao",
+        "from": "Inscricao",
+        "to": "EmailParticipante",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Cada inscrição referencia obrigatoriamente o e-mail informado pelo participante.",
+        "field": "Inscricao.emailParticipanteId"
+      },
+      {
+        "relationshipId": "contatoDoParticipante",
+        "from": "Participante",
+        "to": "EmailParticipante",
         "type": "oneToMany",
         "required": true,
-        "description": "Um participante pode possuir inscrições em eventos.",
-        "persistence": {
-          "mode": "crossStoreReference"
-        }
+        "mode": "mdmRelationship",
+        "description": "O participante possui um ou mais canais de contato, incluindo o e-mail usado na inscrição.",
+        "catalogType": "HasContact"
+      }
+    ],
+    "normalizations": [
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Evento",
+        "detail": "storage.table inscricaoEvento_evento"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Inscricao",
+        "detail": "storage.table inscricaoEvento_inscricao"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Participante",
+        "detail": "roleTag inscricaoEvento.Participante; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "EmailParticipante",
+        "detail": "roleTag inscricaoEvento.EmailParticipante; source /_102034_/l4/ontology/mdm.defs.ts"
       }
     ]
   },
   "entities": [
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "inscricaoEvento",
       "entityId": "Evento",
       "title": "Evento",
-      "description": "Evento cadastrado pelo organizador, com informações, capacidade e publicação para inscrições públicas.",
-      "kind": "core",
-      "party": "none",
-      "displayField": "title",
-      "fields": [
-        {
-          "fieldId": "id",
-          "title": "Identificador",
-          "type": "uuid",
-          "required": true,
-          "description": "Identificador único do evento."
-        },
-        {
-          "fieldId": "title",
-          "title": "Título",
-          "type": "string",
-          "required": true,
-          "description": "Título de divulgação do evento."
-        },
-        {
-          "fieldId": "description",
-          "title": "Descrição",
-          "type": "text",
-          "required": true,
-          "description": "Descrição com as informações do evento."
-        },
-        {
-          "fieldId": "eventDate",
-          "title": "Data do evento",
-          "type": "date",
-          "required": true,
-          "description": "Data em que o evento será realizado."
-        },
-        {
-          "fieldId": "location",
-          "title": "Local",
-          "type": "string",
-          "required": true,
-          "description": "Local de realização do evento."
-        },
-        {
-          "fieldId": "capacity",
-          "title": "Número de vagas",
-          "type": "integer",
-          "required": true,
-          "description": "Quantidade de vagas disponíveis para inscrições confirmadas."
-        },
-        {
-          "fieldId": "status",
-          "title": "Status",
-          "type": "string",
-          "required": true,
-          "enum": [
-            {
-              "value": "draft",
-              "title": "Rascunho"
-            },
-            {
-              "value": "published",
-              "title": "Publicado"
-            }
-          ],
-          "description": "Situação de cadastro e publicação do evento."
+      "description": "Evento organizado e publicado para receber inscrições públicas, com informações, capacidade e situação de publicação.",
+      "displayField": "titulo",
+      "relationships": {
+        "inscricoes": {
+          "relationshipId": "inscricaoDoEvento",
+          "to": "Inscricao",
+          "via": "Inscricao.eventoId",
+          "cardinality": "1:N",
+          "title": "Inscrições do evento",
+          "description": "Inscrições registradas para este evento, incluindo as confirmadas e as que aguardam na lista de espera.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
         }
+      },
+      "capabilities": {
+        "read.byId": "Lê um evento pelo identificador já conhecido no repositório da tabela, para telas que já têm o evento em contexto.",
+        "locate.byColumn": "Localiza eventos por situação de publicação ou data do evento, com ordenação e paginação, para o organizador e para a página pública.",
+        "locate.byText": "Encontra eventos pelo texto do título, por busca sem diferenciação entre maiúsculas e minúsculas, para o organizador localizar eventos cadastrados.",
+        "count": "Conta os eventos que correspondem aos filtros de situação ou data, para a listagem do organizador.",
+        "listByForeignKey": "Lista as inscrições que apontam para este evento pela chave estrangeira, para o organizador consultar inscritos e situações.",
+        "create": "Cria um evento em cadastro com título, descrição, data, local e número de vagas, para o organizador.",
+        "update": "Atualiza as informações de um evento ainda em cadastro pelo identificador, para o organizador corrigir seus dados antes da publicação.",
+        "transition": "Move a situação indexada do evento de em cadastro para publicado, para o organizador disponibilizar a página pública.",
+        "inscricaoEvento.exportarInscricoesCsv": "Gera e baixa em CSV a lista de inscrições vinculadas ao evento, para o organizador acompanhar e exportar os inscritos."
+      },
+      "rules": [
+        "eventoCompletoParaPublicacao",
+        "inscricoesConfirmadasOcupamVagas"
       ],
-      "details": {
-        "occupiedSeats": {
-          "type": "integer",
-          "description": "Total de vagas ocupadas por inscrições confirmadas no evento."
-        },
-        "availableSeats": {
-          "type": "integer",
-          "description": "Quantidade de vagas ainda disponíveis para inscrições confirmadas no evento."
+      "kind": "entity",
+      "class": "core",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "inscricaoEvento_evento",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "titulo": {
+            "type": "string",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Título",
+            "description": "Título pelo qual o organizador e o público identificam o evento.",
+            "maxLength": 200,
+            "min": 0,
+            "max": 0
+          },
+          "dataEvento": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Data do evento",
+            "description": "Data em que o evento será realizado, usada para localizar e organizar os eventos.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "status": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "values": [
+              {
+                "value": "draft",
+                "title": "Em cadastro",
+                "description": "Evento cadastrado, ainda não disponível para inscrições públicas."
+              },
+              {
+                "value": "published",
+                "title": "Publicado",
+                "description": "Evento disponível na página pública para receber inscrições."
+              }
+            ],
+            "title": "Situação de publicação",
+            "description": "Situação que indica se o evento ainda está em cadastro ou se já está disponível na página pública.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "of": "Address",
+            "title": "Informações do evento",
+            "description": "Informações informadas pelo organizador para apresentar e realizar o evento.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
+            "fields": {
+              "descricao": {
+                "type": "text",
+                "required": true,
+                "of": "Address",
+                "title": "Descrição",
+                "description": "Descrição apresentada ao público com as informações do evento.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "local": {
+                "type": "string",
+                "required": true,
+                "of": "Address",
+                "title": "Local",
+                "description": "Local informado para a realização do evento.",
+                "maxLength": 300,
+                "min": 0,
+                "max": 0
+              },
+              "numeroVagas": {
+                "type": "integer",
+                "required": true,
+                "of": "Address",
+                "title": "Número de vagas",
+                "description": "Quantidade máxima de inscrições confirmadas que o evento comporta.",
+                "maxLength": 0,
+                "min": 1,
+                "max": 0
+              },
+              "vagasOcupadas": {
+                "type": "integer",
+                "derived": true,
+                "title": "Vagas ocupadas",
+                "description": "Quantidade de inscrições confirmadas deste evento."
+              },
+              "vagasDisponiveis": {
+                "type": "integer",
+                "derived": true,
+                "title": "Vagas disponíveis",
+                "description": "Número de vagas do evento menos a quantidade de inscrições confirmadas deste evento."
+              }
+            }
+          }
         }
       },
       "lifecycleStates": [
@@ -173,79 +297,190 @@
           "by": [
             "organizador"
           ],
-          "description": "Publica o evento e disponibiliza sua página para inscrições públicas."
+          "description": "Publica o evento e disponibiliza sua página para inscrições públicas.",
+          "ruleRefs": [
+            "eventoCompletoParaPublicacao"
+          ]
         }
-      ],
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id"
-      }
+      ]
     },
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "inscricaoEvento",
       "entityId": "Inscricao",
       "title": "Inscrição",
-      "description": "Registro da participação de uma pessoa em um evento, incluindo sua situação de confirmação, espera ou cancelamento.",
-      "kind": "core",
-      "party": "none",
+      "description": "Registro da inscrição de uma pessoa em um evento, incluindo sua situação de confirmação, espera ou cancelamento.",
       "displayField": "id",
-      "fields": [
-        {
-          "fieldId": "id",
-          "title": "Identificador da inscrição",
-          "type": "uuid",
-          "required": true,
-          "description": "Identificador único da inscrição."
+      "relationships": {
+        "evento": {
+          "relationshipId": "inscricaoDoEvento",
+          "to": "Evento",
+          "via": "Inscricao.eventoId",
+          "cardinality": "N:1",
+          "title": "Evento da inscrição",
+          "description": "Cada inscrição pertence obrigatoriamente a um evento.",
+          "mode": "fk",
+          "required": "Sempre"
         },
-        {
-          "fieldId": "eventoId",
-          "title": "Evento",
-          "type": "uuid",
-          "required": true,
-          "description": "Referência ao evento ao qual a pessoa se inscreveu."
+        "participante": {
+          "relationshipId": "participanteDaInscricao",
+          "to": "Participante",
+          "via": "Inscricao.participanteId",
+          "cardinality": "N:1",
+          "title": "Participante da inscrição",
+          "description": "Cada inscrição identifica obrigatoriamente a pessoa participante.",
+          "mode": "fk",
+          "required": "Sempre"
         },
-        {
-          "fieldId": "participanteId",
-          "title": "Participante",
-          "type": "uuid",
-          "required": true,
-          "description": "Referência ao participante associado à inscrição."
-        },
-        {
-          "fieldId": "status",
-          "title": "Situação",
-          "type": "string",
-          "required": true,
-          "enum": [
-            {
-              "value": "confirmed",
-              "title": "Confirmada"
-            },
-            {
-              "value": "waitlisted",
-              "title": "Em lista de espera"
-            },
-            {
-              "value": "cancelled",
-              "title": "Cancelada"
-            }
-          ],
-          "description": "Situação atual da inscrição no evento."
-        },
-        {
-          "fieldId": "registeredAt",
-          "title": "Data e hora da inscrição",
-          "type": "datetime",
-          "required": true,
-          "description": "Data e hora em que a inscrição foi registrada, usada para ordenar a lista de espera."
+        "emailParticipante": {
+          "relationshipId": "emailDaInscricao",
+          "to": "EmailParticipante",
+          "via": "Inscricao.emailParticipanteId",
+          "cardinality": "N:1",
+          "title": "E-mail informado",
+          "description": "Cada inscrição referencia obrigatoriamente o e-mail informado pelo participante.",
+          "mode": "fk",
+          "required": "Sempre"
         }
+      },
+      "capabilities": {
+        "read.byId": "Consulta uma inscrição pelo seu identificador, usando a chave primária da tabela, para o público acessar a confirmação recebida.",
+        "locate.byColumn": "Localiza inscrições por evento, participante, e-mail ou situação em colunas indexadas, com ordenação e paginação, para o público e o organizador encontrarem registros pertinentes.",
+        "count": "Conta inscrições conforme os filtros indexados, especialmente as confirmadas de um evento, para o organizador acompanhar a ocupação das vagas.",
+        "listByForeignKey": "Lista as inscrições vinculadas a um evento por eventoId, ordenadas pela data e hora de inscrição, para o organizador acompanhar inscritos e lista de espera.",
+        "create": "Cria uma inscrição com participante e e-mail vinculados ao evento publicado, registrando-a como confirmada ou em lista de espera, para o público.",
+        "transition": "Move a inscrição entre as situações permitidas com validação das regras do módulo, para o público cancelar e para o processo promover a lista de espera.",
+        "uniqueKey": "Impede uma segunda inscrição com o mesmo e-mail no mesmo evento pelo índice único de evento e e-mail, para o público.",
+        "transaction": "Grava a inscrição e aplica de forma atômica a verificação de vagas ou a promoção após cancelamento, para o público e os processos do módulo.",
+        "read.mdmRecord": "Lê os registros mestre do participante e do e-mail referenciados pelas chaves estrangeiras, para mostrar os dados do inscrito ao organizador sem copiá-los na inscrição.",
+        "inscricaoEvento.exportarCsv": "Exporta em CSV a lista de inscrições de um evento consultada pelas chaves indexadas, para o organizador baixar os inscritos e suas situações."
+      },
+      "rules": [
+        "inscricaoUnicaPorEmailNoEvento",
+        "inscricaoSomenteEmEventoPublicado",
+        "confirmarQuandoHouverVaga",
+        "listaEsperaPorOrdemDeChegada",
+        "cancelamentoLiberaVaga",
+        "promoverPrimeiroDaListaEspera"
       ],
+      "kind": "entity",
+      "class": "event",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "inscricaoEvento_inscricao",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "eventoId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "Evento"
+            ],
+            "title": "Evento",
+            "description": "Evento ao qual esta inscrição pertence.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "participanteId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "Participante"
+            ],
+            "title": "Participante",
+            "description": "Pessoa participante identificada para esta inscrição.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "emailParticipanteId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "EmailParticipante"
+            ],
+            "title": "E-mail do participante",
+            "description": "Canal de e-mail informado pelo participante e usado para impedir inscrição duplicada no evento.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "status": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "values": [
+              {
+                "value": "confirmed",
+                "title": "Confirmada",
+                "description": "A inscrição ocupa uma vaga do evento."
+              },
+              {
+                "value": "waitlisted",
+                "title": "Lista de espera",
+                "description": "A inscrição aguarda uma vaga, respeitando a ordem de chegada."
+              },
+              {
+                "value": "cancelled",
+                "title": "Cancelada",
+                "description": "A inscrição foi cancelada e não ocupa vaga."
+              }
+            ],
+            "title": "Situação da inscrição",
+            "description": "Situação atual da inscrição no evento.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "createdAt": {
+            "type": "timestamp",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Data e hora da inscrição",
+            "description": "Momento de criação da inscrição, usado para ordenar a lista de espera por chegada.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "of": "Address",
+            "title": "Detalhes da inscrição",
+            "description": "Informações próprias da inscrição que não exigem filtro, ordenação ou deduplicação.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          }
+        }
+      },
       "uniqueKeys": [
         [
           "eventoId",
-          "participanteId"
+          "emailParticipanteId"
         ]
       ],
       "lifecycleStates": [
@@ -273,101 +508,570 @@
           "by": [
             "publico"
           ],
-          "description": "Cancela a inscrição do participante no evento."
+          "description": "Cancela a inscrição; se ela ocupava uma vaga, inicia a promoção da primeira pessoa da lista de espera.",
+          "ruleRefs": [
+            "cancelamentoLiberaVaga",
+            "promoverPrimeiroDaListaEspera"
+          ]
         },
         {
-          "transitionId": "promoverListaEspera",
+          "transitionId": "promoverDaListaEspera",
           "from": [
             "waitlisted"
           ],
           "to": "confirmed",
-          "by": "system",
-          "description": "Promove automaticamente a primeira inscrição da lista de espera quando uma vaga é liberada."
+          "by": [],
+          "description": "Promove automaticamente a primeira inscrição da lista de espera quando uma vaga é liberada.",
+          "ruleRefs": [
+            "promoverPrimeiroDaListaEspera"
+          ]
         }
-      ],
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id"
-      }
+      ]
     },
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "inscricaoEvento",
       "entityId": "Participante",
       "title": "Participante",
-      "description": "Pessoa inscrita ou em lista de espera para eventos deste módulo.",
-      "kind": "mdm",
-      "party": "person",
-      "mdmSubtype": "Person",
-      "displayField": "name",
-      "fields": [],
-      "lifecycleStates": [],
-      "transitions": [],
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "inscricaoEvento.Participante"
+      "description": "Pessoa participante identificada no cadastro mestre para realizar ou manter uma inscrição em evento.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "participanteDaInscricao": {
+          "relationshipId": "participanteDaInscricao",
+          "to": "Inscricao",
+          "via": "Inscricao.participanteId",
+          "cardinality": "1:N",
+          "title": "Inscrições do participante",
+          "description": "Inscrições em eventos que identificam esta pessoa participante.",
+          "mode": "fk",
+          "direction": "to",
+          "required": "ao criar ou manter uma inscrição",
+          "role": "participante"
+        },
+        "contatoDoParticipante": {
+          "relationshipId": "contatoDoParticipante",
+          "to": "EmailParticipante",
+          "via": "HasContact",
+          "cardinality": "1:N",
+          "title": "E-mails do participante",
+          "description": "Canais de contato vinculados à pessoa participante, incluindo o e-mail utilizado para a inscrição.",
+          "required": "ao realizar uma inscrição",
+          "role": "titular"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Consulta um participante pelo identificador mestre para apresentar seus dados na inscrição; usa leitura direta pelo mdmId; utilizado pelo organizador e pelos fluxos de inscrição.",
+        "locate.byContact": "Localiza a pessoa participante pelo e-mail já vinculado como canal de contato para evitar duplicidade de pessoa; usa a busca de proprietário do ContactChannel; utilizado pelo público ao se inscrever e pelo fluxo de inscrição.",
+        "register.createOrAttach": "Cria ou vincula a pessoa participante encontrada pelo contato disponível e anexa o papel do módulo; usa criação ou associação no cadastro mestre seguida da marca de papel; utilizado pelo público durante a inscrição.",
+        "register.asProspect": "Registra uma pessoa interessada sem documento nacional para permitir a inscrição pública com nome e e-mail; usa cadastro de prospecto no MDM; utilizado pelo público na página publicada do evento.",
+        "link.contact": "Vincula o e-mail informado pela pessoa ao seu cadastro mestre; cria ou associa o ContactChannel por HasContact; utilizado pelo público durante a inscrição.",
+        "listLinks": "Lista os canais de contato vinculados ao participante para conferir o e-mail associado; usa consulta de relacionamentos ativos; utilizado pelos fluxos de inscrição.",
+        "edit.platformFields": "Atualiza os dados de identificação permitidos da pessoa participante quando necessário; usa atualização do cadastro mestre e do índice de identificação; utilizado pelo organizador.",
+        "edit.moduleNamespace": "Mantém exclusivamente o espaço do módulo no cadastro mestre do participante quando houver dado específico autorizado; usa atualização de details.inscricaoEvento; utilizado pelo módulo de inscrições.",
+        "inactivate": "Inativa ou reativa o cadastro mestre do participante sem removê-lo; usa a alteração de situação do MDM; utilizado pelo organizador quando a pessoa não puder mais ser usada.",
+        "audit": "Consulta quem alterou os dados do cadastro mestre do participante e quando; usa o histórico de auditoria do MDM; utilizado pelo organizador para acompanhamento administrativo."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "rule-person-privacy-consent-required-br-eu"
+      ],
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "inscricaoEvento.Participante",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "Documento mestre da pessoa participante, com dados de identificação, dados de pessoa e o espaço exclusivo do módulo de inscrições.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Pessoa",
+                        "description": "Pessoa física no cadastro mestre."
+                      }
+                    ],
+                    "description": "Indica que este cadastro mestre é uma pessoa participante.",
+                    "title": "Tipo de cadastro",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 0,
+                    "description": "Nome pelo qual a pessoa participante é identificada na inscrição do evento.",
+                    "title": "Nome",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo",
+                        "description": "Cadastro mestre disponível para uso."
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo",
+                        "description": "Cadastro mestre fora de uso."
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado",
+                        "description": "Cadastro mestre unido a outro cadastro."
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado",
+                        "description": "Cadastro mestre bloqueado pela plataforma."
+                      }
+                    ],
+                    "title": "Situação do cadastro",
+                    "description": "Situação de atividade do cadastro mestre da pessoa participante.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 0,
+                    "default": "US",
+                    "description": "Código ISO do país aplicável aos dados e regras da pessoa participante.",
+                    "title": "País",
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados de identificação da pessoa participante no cadastro mestre."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "contacts": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "ContactSummary",
+                    "derived": true,
+                    "description": "Resumo derivado dos canais de contato vinculados à pessoa, incluindo o e-mail usado na inscrição.",
+                    "title": "Canais de contato",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Referências derivadas dos relacionamentos ativos da pessoa participante.",
+                    "title": "Referências de relacionamentos",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados básicos de plataforma usados para relacionar a pessoa participante ao seu e-mail de inscrição."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {},
+                "description": "Dados próprios de pessoa física disponíveis no cadastro mestre."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Dados promovidos pela organização para uso comum entre módulos; este módulo apenas os consulta."
+              },
+              "inscricaoEvento": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "inscricaoEvento",
+      "entityId": "EmailParticipante",
+      "title": "E-mail do participante",
+      "description": "Canal de contato por e-mail do participante, usado para identificá-lo e impedir inscrição duplicada no mesmo evento.",
+      "displayField": "details.contactChannel.value",
+      "relationships": {
+        "inscricoesPorEmail": {
+          "relationshipId": "emailDaInscricao",
+          "to": "Inscricao",
+          "via": "Inscricao.emailParticipanteId",
+          "cardinality": "1:N",
+          "title": "Inscrições realizadas com este e-mail",
+          "description": "Inscrições que referenciam obrigatoriamente este e-mail de participante.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true,
+          "role": "e-mail informado na inscrição"
+        },
+        "participanteDoContato": {
+          "relationshipId": "contatoDoParticipante",
+          "to": "Participante",
+          "via": "HasContact",
+          "cardinality": "N:1",
+          "title": "Participante titular do contato",
+          "description": "Participante que possui este canal de e-mail por meio do relacionamento HasContact.",
+          "direction": "to",
+          "required": "quando o e-mail for usado por um participante",
+          "role": "e-mail"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Lê o canal de e-mail pelo identificador MDM já conhecido · consulta direta pelo id no índice e no documento MDM · listas de inscrições e telas do organizador.",
+        "locate.byContact": "Localiza um canal pelo endereço de e-mail informado · busca o valor do contato para reaproveitar o mesmo registro mestre · inscrição pública e processamento da inscrição.",
+        "register.createOrAttach": "Cria o canal de e-mail quando ainda não existir ou anexa o papel EmailParticipante ao registro encontrado · resolve o contato e grava somente o namespace do módulo · inscrição pública.",
+        "link": "Vincula o canal de e-mail ao participante pela relação HasContact · cria o vínculo versionado no MDM · processamento da inscrição ao associar o contato ao participante.",
+        "listLinks": "Lista participantes e inscrições relacionados a este e-mail · consulta os vínculos ativos e seu histórico no MDM · organizador ao conferir os inscritos."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "rule-contact-value-unique-per-type"
+      ],
+      "kind": "role",
+      "subtype": "ContactChannel",
+      "roleTag": "inscricaoEvento.EmailParticipante",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "Documento MDM do canal de contato usado nas inscrições em eventos.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "ContactChannel",
+                        "title": "Canal de contato",
+                        "description": "Canal de contato do MDM."
+                      }
+                    ],
+                    "description": "Indica que este registro mestre é um canal de contato.",
+                    "title": "Subtipo",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 254,
+                    "description": "Texto pelo qual o organizador reconhece o canal; para este papel, identifica o e-mail informado pelo participante.",
+                    "title": "Nome de identificação",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo",
+                        "description": "Canal disponível para uso."
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo",
+                        "description": "Canal fora de uso."
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado",
+                        "description": "Canal incorporado a outro registro mestre."
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado",
+                        "description": "Canal bloqueado pela plataforma."
+                      }
+                    ],
+                    "title": "Situação",
+                    "description": "Situação do registro mestre do canal de e-mail, administrada pela plataforma.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "Código ISO do país associado ao canal de contato.",
+                    "title": "País",
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados de identificação e situação do canal de e-mail no MDM."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {},
+                "description": "Dados base compartilhados do MDM; este papel não utiliza campos adicionais desta seção."
+              },
+              "contactChannel": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "contactType": {
+                    "type": "enum",
+                    "required": true,
+                    "values": [
+                      {
+                        "value": "Email",
+                        "title": "E-mail",
+                        "description": "Endereço de e-mail."
+                      }
+                    ],
+                    "title": "Tipo de contato",
+                    "description": "Tipo do canal utilizado na inscrição; neste papel é sempre e-mail.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "value": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Endereço de e-mail informado pelo participante e usado para impedir duplicidade de inscrição no mesmo evento.",
+                    "title": "E-mail",
+                    "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+                    "maxLength": 254,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "isVerified": {
+                    "type": "boolean",
+                    "required": true,
+                    "title": "E-mail verificado",
+                    "description": "Indica se a plataforma registrou a verificação deste canal de e-mail.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados do e-mail fornecido pelo participante para realizar inscrições."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Campos promovidos pela organização e somente lidos por este módulo."
+              },
+              "inscricaoEvento": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "eventoInscricoes",
-      "fromEntity": "Evento",
-      "toEntity": "Inscricao",
-      "type": "oneToMany",
+      "relationshipId": "inscricaoDoEvento",
+      "from": "Inscricao",
+      "to": "Evento",
+      "type": "manyToOne",
       "required": true,
-      "description": "Um evento possui as inscrições realizadas para sua participação.",
-      "persistence": {
-        "mode": "moduleReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Inscricao",
-        "from": {
-          "entityId": "Evento",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "Inscricao",
-          "fieldIds": [
-            "eventoId"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada inscrição pertence obrigatoriamente a um evento.",
+      "field": "Inscricao.eventoId"
     },
     {
-      "relationshipId": "participanteInscricoes",
-      "fromEntity": "Participante",
-      "toEntity": "Inscricao",
+      "relationshipId": "participanteDaInscricao",
+      "from": "Inscricao",
+      "to": "Participante",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada inscrição identifica obrigatoriamente a pessoa participante.",
+      "field": "Inscricao.participanteId"
+    },
+    {
+      "relationshipId": "emailDaInscricao",
+      "from": "Inscricao",
+      "to": "EmailParticipante",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada inscrição referencia obrigatoriamente o e-mail informado pelo participante.",
+      "field": "Inscricao.emailParticipanteId"
+    },
+    {
+      "relationshipId": "contatoDoParticipante",
+      "from": "Participante",
+      "to": "EmailParticipante",
       "type": "oneToMany",
       "required": true,
-      "description": "Um participante pode possuir inscrições em eventos.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "Inscricao",
-        "from": {
-          "entityId": "Participante",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "Inscricao",
-          "fieldIds": [
-            "participanteId"
-          ]
-        }
-      }
+      "mode": "mdmRelationship",
+      "description": "O participante possui um ou mais canais de contato, incluindo o e-mail usado na inscrição.",
+      "catalogType": "HasContact"
     }
   ],
   "removedOrphans": [],
-  "liftedAggregateEntities": []
+  "liftedAggregateEntities": [],
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Evento",
+      "detail": "storage.table inscricaoEvento_evento"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Inscricao",
+      "detail": "storage.table inscricaoEvento_inscricao"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Participante",
+      "detail": "roleTag inscricaoEvento.Participante; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "EmailParticipante",
+      "detail": "roleTag inscricaoEvento.EmailParticipante; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Evento",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Evento",
+      "detail": "record.fields.details.fields.vagasOcupadas.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Evento",
+      "detail": "record.fields.details.fields.vagasDisponiveis.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Inscricao",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Participante",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Participante",
+      "detail": "Participante.details.identification.subtype.values"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Participante",
+      "detail": "details.inscricaoEvento"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "EmailParticipante",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "EmailParticipante",
+      "detail": "EmailParticipante.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "EmailParticipante",
+      "detail": "EmailParticipante.details.contactChannel.contactType.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "EmailParticipante",
+      "detail": "EmailParticipante.details.contactChannel.value.pattern"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "EmailParticipante",
+      "detail": "details.inscricaoEvento"
+    }
+  ]
 }

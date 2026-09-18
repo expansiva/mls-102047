@@ -5,7 +5,7 @@ import type { Ns5ModuleArtifact } from '/_102035_/l2/solution/types.js';
 export const mensalidadesAcademiaModule = {
   "schemaVersion": "2026-09-10-ns5-module-v2",
   "moduleName": "mensalidadesAcademia",
-  "title": "Mensalidades da Academia",
+  "title": "Mensalidades da academia",
   "userLanguage": "pt-BR",
   "productLanguages": [
     "pt-BR"

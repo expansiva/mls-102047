@@ -3,26 +3,26 @@
 import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
 
 export const inscricaoEventoWorkflows = {
-  "schemaVersion": "2026-09-12-ns5-workflows-v2",
+  "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "inscricaoEvento",
   "processes": [
     {
-      "processId": "promoverPrimeiroListaEspera",
-      "title": "Promover participante da lista de espera",
-      "description": "Promove automaticamente o primeiro participante elegível da lista de espera quando uma inscrição é cancelada e uma vaga é liberada.",
+      "processId": "promoverListaEsperaAposCancelamento",
+      "title": "Promover lista de espera após cancelamento",
+      "description": "Promove automaticamente o primeiro inscrito da lista de espera quando um cancelamento libera uma vaga.",
       "trigger": {
         "kind": "event",
         "event": "Inscricao.cancelarInscricao"
       },
       "tasks": [
         {
-          "taskId": "promoverInscricaoEmEspera",
+          "taskId": "promoverPrimeiraInscricaoEmEspera",
           "kind": "mechanical",
           "entityRef": "Inscricao",
           "effect": "transition",
-          "transitionRef": "promoverListaEspera",
+          "transitionRef": "promoverDaListaEspera",
           "next": [],
-          "description": "Promove o primeiro participante da lista de espera para confirmar sua inscrição quando houver vaga disponível."
+          "description": "Quando o cancelamento liberar uma vaga, promove a primeira inscrição da lista de espera pela ordem de chegada."
         }
       ]
     }
@@ -33,7 +33,7 @@ export const inscricaoEventoWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "realizarInscricaoPublica",
+      "journeyId": "inscreverSeEmEvento",
       "inProcess": false
     },
     {
@@ -41,7 +41,7 @@ export const inscricaoEventoWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "acompanharInscricoesDoEvento",
+      "journeyId": "acompanharEexportarInscricoes",
       "inProcess": false
     }
   ]

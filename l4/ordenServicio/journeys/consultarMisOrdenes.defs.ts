@@ -7,8 +7,8 @@ export const consultarMisOrdenesJourney = {
   "journeyId": "consultarMisOrdenes",
   "business": {
     "actorRef": "cliente",
-    "title": "Consultar mis órdenes",
-    "goal": "Conocer el estado y la información disponible de sus propias órdenes de servicio.",
+    "title": "Consultar mis órdenes de servicio",
+    "goal": "Conocer el avance y el presupuesto de sus propias órdenes desde el portal.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,25 +18,25 @@ export const consultarMisOrdenesJourney = {
         "kind": "locate",
         "entity": "OrdenServicio",
         "title": "Localizar mis órdenes",
-        "description": "Accede a las órdenes vinculadas a su propia identidad en el portal."
+        "description": "Localiza únicamente sus propias órdenes de servicio en el portal."
       },
       {
         "stepId": "consultarDetalleDeOrden",
         "kind": "inspect",
         "entity": "OrdenServicio",
-        "title": "Consultar detalle de orden",
-        "description": "Revisa el estado, el diagnóstico y el valor del presupuesto de una de sus órdenes, sin ver costos internos de piezas ni anotaciones del técnico."
+        "title": "Consultar el detalle de la orden",
+        "description": "Consulta el estado, el diagnóstico y el valor del presupuesto de una de sus órdenes, sin ver costos internos de piezas ni anotaciones del técnico."
       }
     ],
     "outcome": {
       "statement": "El cliente conoce el estado, diagnóstico y presupuesto de sus propias órdenes.",
       "evidence": [
-        "Listado de órdenes propias disponible.",
-        "Estado, diagnóstico y valor del presupuesto visibles para la orden consultada."
+        "El portal muestra al Cliente únicamente sus OrdenServicio.",
+        "El detalle visible incluye estado, diagnóstico y valor del presupuesto, sin costos internos ni anotaciones técnicas."
       ]
     }
   },
-  "businessHash": "sha256:1e6cc25ed57ed6d2a85b95dcf3a3feb9f5d56de0a5a8221439ea74ed44d25328"
+  "businessHash": "sha256:82025fa7fc5f1d9ee3ed774253b05b06b4edc19d9ecbfdbbcff779f35cc147e4"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarMisOrdenesJourneyType = typeof consultarMisOrdenesJourney;

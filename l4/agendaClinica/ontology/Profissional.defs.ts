@@ -3,35 +3,37 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaEntityProfissional = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
   "entityId": "Profissional",
   "title": "Profissional",
-  "description": "Médico ou terapeuta da clínica que realiza atendimentos e consulta a própria agenda.",
+  "description": "Médico ou terapeuta da clínica que realiza consultas e acessa a própria agenda.",
   "displayField": "details.identification.name",
   "relationships": {
     "consultas": {
-      "relationshipId": "consultaProfissional",
+      "relationshipId": "appointmentProfessional",
       "to": "Consulta",
-      "via": "Consulta.profissionalId",
+      "via": "Consulta.professionalId",
       "cardinality": "1:N",
-      "title": "Consultas do profissional",
-      "description": "Consultas atribuídas a este profissional como responsável pelo atendimento.",
+      "title": "Consultas realizadas",
+      "description": "Consultas da agenda realizadas por este profissional.",
       "mode": "fk",
       "direction": "to",
-      "required": true,
+      "required": "Não é obrigatório para o profissional; toda consulta vinculada exige um profissional responsável.",
       "role": "profissional responsável"
     }
   },
   "capabilities": {
-    "read.byId": "Lê o profissional pelo identificador mestre para apresentar seus dados ao carregar uma consulta; usado pela recepcionista e pelo profissional.",
-    "locate.byName": "Localiza médicos e terapeutas pelo nome no índice de pessoas para selecionar o responsável ao agendar; usado pela recepcionista.",
-    "locate.byDocument": "Localiza um profissional pelo documento nacional para evitar duplicidade antes do seu cadastro; usado pela equipe autorizada da clínica.",
-    "register.createOrAttach": "Cria a pessoa quando ausente ou anexa o papel de Profissional ao registro mestre existente, usando documento quando informado; usado pela equipe autorizada da clínica.",
-    "edit.platformFields": "Atualiza os dados de identificação e os demais dados de plataforma do profissional no registro mestre; usado pela equipe autorizada da clínica.",
-    "edit.moduleNamespace": "Atualiza exclusivamente a categoria de atuação em details.agendaClinica; usado pela equipe autorizada da clínica.",
-    "inactivate": "Inativa ou reativa o registro mestre do profissional para retirá-lo ou devolvê-lo ao uso sem apagá-lo; usado pela equipe autorizada da clínica.",
-    "agendaClinica.listarConsultas": "Lista as consultas vinculadas por Consulta.profissionalId, restringindo a agenda do dia ao próprio profissional autenticado; usado pelo profissional."
+    "read.byId": "Lê um profissional pelo identificador mestre · consulta direta pelo mdmId · usada pela recepcionista ao agendar e pela agenda do próprio profissional.",
+    "locate.byName": "Localiza profissionais pelo nome · busca textual no índice de pessoas ativas · usada pela recepcionista para selecionar médico ou terapeuta no agendamento.",
+    "locate.byDocument": "Localiza um profissional pelo documento nacional · consulta de deduplicação no índice mestre · usada pela recepcionista ao cadastrar ou vincular um profissional.",
+    "locate.byTag": "Lista os registros com o papel agendaClinica.Profissional · consulta indexada de tags do MDM · usada pela recepcionista para limitar a seleção aos profissionais da clínica.",
+    "register.createOrAttach": "Cria ou vincula a pessoa existente ao papel de profissional · deduplica por documento e anexa a tag do módulo · usada pela recepcionista ao cadastrar um profissional da clínica.",
+    "edit.platformFields": "Atualiza os dados de plataforma usados pelo profissional, incluindo nome, documento, profissão e consentimento · atualização do registro mestre e de seu índice · usada pela recepcionista na manutenção cadastral.",
+    "inactivate": "Inativa ou reativa o profissional sem apagar seu registro mestre · alteração da situação no MDM · usada pela recepcionista quando o profissional deixa ou retoma a clínica.",
+    "invite.login": "Concede acesso de login ao profissional · convite que cria o identificador de login no índice da organização · usado pela recepcionista para permitir o acesso à própria agenda.",
+    "statusHistory.read": "Exibe as mudanças de situação do profissional · leitura do histórico de status do MDM · usada pela recepcionista na conferência cadastral.",
+    "audit": "Mostra quem alterou os dados do profissional e quando · leitura da auditoria do registro mestre · usada pela recepcionista na conferência cadastral."
   },
   "rules": [
     "rule-foreign-namespace-refused",
@@ -62,7 +64,7 @@ export const agendaClinicaEntityProfissional = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre da pessoa que atua como profissional na agenda clínica.",
+        "description": "Registro mestre da pessoa que atua como médico ou terapeuta na clínica.",
         "fields": {
           "identification": {
             "type": "object",
@@ -77,10 +79,10 @@ export const agendaClinicaEntityProfissional = {
                   {
                     "value": "Person",
                     "title": "Pessoa",
-                    "description": "Pessoa física cadastrada no MDM."
+                    "description": "Pessoa física."
                   }
                 ],
-                "description": "Indica que este registro mestre é uma pessoa.",
+                "description": "Classifica este registro mestre como pessoa.",
                 "title": "Subtipo",
                 "maxLength": 0,
                 "min": 0,
@@ -91,7 +93,7 @@ export const agendaClinicaEntityProfissional = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nome pelo qual o médico ou terapeuta é localizado para o agendamento.",
+                "description": "Nome pelo qual o profissional é localizado e apresentado na agenda.",
                 "title": "Nome",
                 "min": 0,
                 "max": 0
@@ -105,7 +107,7 @@ export const agendaClinicaEntityProfissional = {
                   {
                     "value": "Active",
                     "title": "Ativo",
-                    "description": "Registro disponível para uso."
+                    "description": "Registro em uso."
                   },
                   {
                     "value": "Inactive",
@@ -115,7 +117,7 @@ export const agendaClinicaEntityProfissional = {
                   {
                     "value": "Merged",
                     "title": "Mesclado",
-                    "description": "Registro incorporado a outro registro mestre."
+                    "description": "Registro unido a outro registro mestre."
                   },
                   {
                     "value": "Blocked",
@@ -123,8 +125,8 @@ export const agendaClinicaEntityProfissional = {
                     "description": "Registro bloqueado pela plataforma."
                   }
                 ],
-                "title": "Situação no MDM",
-                "description": "Situação de atividade do registro mestre do profissional, controlada pela plataforma.",
+                "title": "Situação",
+                "description": "Situação do registro mestre do profissional na plataforma.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -136,12 +138,12 @@ export const agendaClinicaEntityProfissional = {
                   {
                     "value": "SSN",
                     "title": "SSN",
-                    "description": "Documento nacional SSN."
+                    "description": "Documento nacional dos Estados Unidos."
                   },
                   {
                     "value": "EIN",
                     "title": "EIN",
-                    "description": "Documento EIN."
+                    "description": "Identificador fiscal dos Estados Unidos."
                   },
                   {
                     "value": "Passport",
@@ -156,12 +158,12 @@ export const agendaClinicaEntityProfissional = {
                   {
                     "value": "NationalId",
                     "title": "Documento nacional",
-                    "description": "Documento nacional de identificação."
+                    "description": "Documento nacional de identidade."
                   },
                   {
                     "value": "CPF",
                     "title": "CPF",
-                    "description": "Cadastro de Pessoas Físicas."
+                    "description": "Cadastro de Pessoa Física."
                   },
                   {
                     "value": "CNPJ",
@@ -171,16 +173,16 @@ export const agendaClinicaEntityProfissional = {
                   {
                     "value": "VAT",
                     "title": "VAT",
-                    "description": "Identificação fiscal VAT."
+                    "description": "Identificador fiscal de valor agregado."
                   },
                   {
                     "value": "Other",
                     "title": "Outro",
-                    "description": "Outro documento aceito pela plataforma."
+                    "description": "Outro tipo de documento."
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional usado para deduplicar o profissional quando informado.",
+                "description": "Tipo do documento nacional usado para localizar ou deduplicar o profissional.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -188,7 +190,7 @@ export const agendaClinicaEntityProfissional = {
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento nacional do profissional, quando informado.",
+                "description": "Número do documento nacional do profissional.",
                 "title": "Número do documento",
                 "maxLength": 0,
                 "min": 0,
@@ -201,19 +203,19 @@ export const agendaClinicaEntityProfissional = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 0,
                 "default": "US",
-                "description": "Código ISO do país aplicável ao documento e às regras da pessoa profissional.",
+                "description": "Código ISO do país aplicável ao documento e às regras legais do profissional.",
                 "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação da pessoa usados para localizar e manter o profissional."
+            "description": "Dados de identificação do registro mestre do profissional."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados comuns da pessoa mantidos pela plataforma; nenhum dado base adicional é usado pela agenda clínica."
+            "description": "Dados comuns de plataforma do registro mestre; nenhum dado básico adicional é usado pela agenda clínica."
           },
           "person": {
             "type": "object",
@@ -222,57 +224,35 @@ export const agendaClinicaEntityProfissional = {
               "occupation": {
                 "type": "string",
                 "maxLength": 0,
-                "title": "Ocupação",
-                "description": "Ocupação profissional registrada pela plataforma, quando necessária para identificar a atuação clínica.",
+                "title": "Profissão",
+                "description": "Profissão exercida na clínica, identificando a atuação como médico ou terapeuta.",
+                "required": true,
                 "min": 0,
                 "max": 0
               },
               "privacyConsent": {
                 "type": "object",
                 "of": "PrivacyConsent",
-                "description": "Consentimento de privacidade da pessoa, quando exigido pelas regras aplicáveis.",
+                "description": "Consentimento de privacidade do profissional quando exigido pela legislação aplicável.",
                 "title": "Consentimento de privacidade",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados próprios de pessoa física relevantes para a atuação do profissional."
+            "description": "Dados próprios de pessoa física usados para caracterizar a atuação clínica."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização e apenas lidos pela agenda clínica."
+            "description": "Dados promovidos pela organização, somente para leitura neste módulo."
           },
           "agendaClinica": {
             "type": "object",
             "owner": "module",
-            "fields": {
-              "categoria": {
-                "type": "enum",
-                "required": true,
-                "of": "Address",
-                "values": [
-                  {
-                    "value": "medico",
-                    "title": "Médico",
-                    "description": "Profissional que atua como médico na clínica."
-                  },
-                  {
-                    "value": "terapeuta",
-                    "title": "Terapeuta",
-                    "description": "Profissional que atua como terapeuta na clínica."
-                  }
-                ],
-                "title": "Categoria profissional",
-                "description": "Indica se o profissional atua na clínica como médico ou terapeuta.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              }
-            },
-            "description": "Dados exclusivos da agenda clínica sobre a atuação da pessoa como profissional."
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
           }
         }
       }

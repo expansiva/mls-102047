@@ -7,231 +7,181 @@
       "kind": "internal",
       "origin": "named",
       "title": "Comprador",
-      "description": "Profissional da organização que cadastra fornecedores e abre pedidos de compra."
+      "description": "Cadastra fornecedores e suas condições de fornecimento, abre pedidos de compra e os envia."
     },
     {
       "actorId": "gerenteCompras",
       "kind": "internal",
       "origin": "named",
       "title": "Gerente de compras",
-      "description": "Responsável por aprovar ou rejeitar pedidos de compra acima do valor limite e acompanhar os indicadores de compras."
+      "description": "Aprova ou rejeita pedidos de compra acima do valor limite e acompanha os indicadores de compras."
     },
     {
       "actorId": "almoxarife",
       "kind": "internal",
       "origin": "named",
       "title": "Almoxarife",
-      "description": "Profissional que registra o recebimento total ou parcial dos pedidos e a entrada dos produtos no estoque."
+      "description": "Registra o recebimento total ou parcial dos pedidos de compra."
     }
   ],
   "grants": [
     {
-      "grantId": "compradorCadastrosCompras",
+      "grantId": "compradorPerfilProprio",
       "actorRef": "comprador",
-      "title": "Manter cadastros de compras",
-      "description": "Permite ao comprador cadastrar e consultar fornecedores, seus canais de contato e os produtos disponíveis para compra, usando os dados necessários ao processo de compras.",
+      "title": "Consultar próprio cadastro de comprador",
+      "description": "Permite ao comprador consultar o seu próprio cadastro mestre vinculado ao módulo de compras.",
       "entityRefs": [
-        "Fornecedor",
-        "ContatoFornecedor",
-        "Produto"
+        "Buyer"
       ],
       "dataScope": {
-        "mode": "organization",
-        "description": "Abrange os cadastros de fornecedores, contatos e produtos de toda a organização."
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Expõe apenas a identificação, os contatos, os dados empresariais do fornecedor e as características de catálogo necessárias para as compras.",
-        "allowedFields": [
-          "Fornecedor.details.identification",
-          "Fornecedor.details.base",
-          "Fornecedor.details.company",
-          "ContatoFornecedor.details.identification",
-          "ContatoFornecedor.details.contactChannel",
-          "Produto.details.identification",
-          "Produto.details.product"
-        ]
-      }
-    },
-    {
-      "grantId": "compradorCondicoesEpedidos",
-      "actorRef": "comprador",
-      "title": "Registrar condições e pedidos de compra",
-      "description": "Permite ao comprador registrar condições comerciais por fornecedor, abrir pedidos de compra e enviá-los.",
-      "entityRefs": [
-        "ProdutoFornecedor",
-        "PedidoCompra"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Abrange as condições comerciais e os pedidos de compra da organização."
+        "mode": "own",
+        "description": "Somente o registro de pessoa compradora correspondente ao login da sessão.",
+        "anchorEntity": "Buyer"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Expõe todos os dados das condições comerciais e dos pedidos necessários para seu registro e envio."
+        "description": "O comprador pode consultar integralmente o seu próprio registro de comprador."
       }
     },
     {
-      "grantId": "gerenteDecidirPedidos",
-      "actorRef": "gerenteCompras",
-      "title": "Decidir pedidos de compra",
-      "description": "Permite ao gerente de compras consultar pedidos encaminhados para decisão e registrar sua aprovação ou rejeição.",
+      "grantId": "compradorCadastrosDeCompra",
+      "actorRef": "comprador",
+      "title": "Cadastrar fornecedores e consultar produtos",
+      "description": "Permite ao comprador cadastrar ou vincular fornecedores e seus canais de contato, além de consultar produtos disponíveis para compra.",
       "entityRefs": [
-        "PedidoCompra"
+        "Supplier",
+        "SupplierContact",
+        "Product"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange todos os pedidos de compra da organização sujeitos ao acompanhamento gerencial."
+        "description": "Abrange os cadastros de fornecedores, canais de contato e produtos da organização necessários às compras."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Expõe todos os dados do pedido, incluindo itens, valores e decisão de aprovação, para análise e decisão."
+        "description": "O comprador pode consultar integralmente os dados cadastrais necessários de fornecedores, contatos e produtos."
       }
     },
     {
-      "grantId": "gerenteConsultarFornecedores",
-      "actorRef": "gerenteCompras",
-      "title": "Consultar fornecedores nas decisões",
-      "description": "Permite ao gerente de compras identificar e consultar os dados empresariais dos fornecedores vinculados aos pedidos analisados.",
+      "grantId": "compradorCondicoesProprias",
+      "actorRef": "comprador",
+      "title": "Gerir próprias condições de fornecimento",
+      "description": "Permite ao comprador registrar e consultar as condições comerciais que cadastrou para fornecedores e produtos.",
       "entityRefs": [
-        "Fornecedor"
+        "SupplierOffering"
       ],
       "dataScope": {
-        "mode": "organization",
-        "description": "Abrange os fornecedores cadastrados para a organização."
+        "mode": "own",
+        "description": "Somente condições de fornecimento vinculadas ao cadastro de comprador correspondente ao login da sessão.",
+        "anchorEntity": "Buyer"
       },
       "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Expõe a identificação e os dados empresariais do fornecedor necessários para analisar pedidos.",
-        "allowedFields": [
-          "Fornecedor.details.identification",
-          "Fornecedor.details.company"
-        ]
+        "mode": "fullRecord",
+        "description": "O comprador pode consultar integralmente as próprias condições de fornecimento, incluindo fornecedor, produto e preço combinado."
       }
     },
     {
-      "grantId": "gerenteAcompanharIndicadores",
-      "actorRef": "gerenteCompras",
-      "title": "Acompanhar indicadores de compras",
-      "description": "Permite ao gerente de compras consultar os totais mensais comprados por fornecedor no painel de compras.",
+      "grantId": "compradorPedidosDeCompra",
+      "actorRef": "comprador",
+      "title": "Abrir e enviar pedidos de compra",
+      "description": "Permite ao comprador abrir, consultar e enviar pedidos de compra da organização.",
       "entityRefs": [
-        "Fornecedor"
+        "PurchaseOrder"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os indicadores de compras de todos os fornecedores da organização."
+        "description": "Abrange os pedidos de compra da organização necessários para abertura e envio."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O comprador pode consultar integralmente os pedidos de compra, seus itens, valores e situação."
+      }
+    },
+    {
+      "grantId": "gerentePedidosDeCompra",
+      "actorRef": "gerenteCompras",
+      "title": "Decidir e acompanhar pedidos de compra",
+      "description": "Permite ao gerente de compras consultar pedidos, fornecedores e produtos para aprovar ou rejeitar pedidos acima do limite.",
+      "entityRefs": [
+        "PurchaseOrder",
+        "Supplier",
+        "Product"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange os pedidos de compra e os cadastros relacionados de toda a organização."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O gerente de compras pode consultar integralmente os pedidos, fornecedores e produtos necessários à decisão."
+      }
+    },
+    {
+      "grantId": "gerenteIndicadoresDeCompras",
+      "actorRef": "gerenteCompras",
+      "title": "Consultar indicadores de compras",
+      "description": "Permite ao gerente de compras acompanhar os indicadores mensais de pedidos em aberto, atrasados e total comprado por fornecedor.",
+      "entityRefs": [
+        "PurchaseOrderDashboard"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange os indicadores agregados de compras de toda a organização."
       },
       "disclosure": {
         "mode": "aggregateOnly",
-        "description": "Expõe somente totais e contagens agregados dos indicadores de compras por fornecedor."
-      }
-    },
-    {
-      "grantId": "almoxarifeConsultarPedidos",
-      "actorRef": "almoxarife",
-      "title": "Consultar pedidos para recebimento",
-      "description": "Permite ao almoxarife localizar e conferir os pedidos de compra antes de registrar o recebimento.",
-      "entityRefs": [
-        "PedidoCompra"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Abrange os pedidos de compra da organização disponíveis para conferência e recebimento."
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Expõe a identificação, situação, datas e itens do pedido necessários para a conferência do recebimento.",
+        "description": "O gerente visualiza somente o período, o fornecedor agrupado e as medidas agregadas do painel.",
         "allowedFields": [
-          "PedidoCompra.orderNumber",
-          "PedidoCompra.fornecedorId",
-          "PedidoCompra.status",
-          "PedidoCompra.orderDate",
-          "PedidoCompra.expectedDeliveryDate",
-          "PedidoCompra.details.items"
+          "PurchaseOrderDashboard.period",
+          "PurchaseOrderDashboard.groupKey",
+          "PurchaseOrderDashboard.details"
         ]
       }
     },
     {
-      "grantId": "almoxarifeConsultarReferencias",
+      "grantId": "almoxarifeRecebimentos",
       "actorRef": "almoxarife",
-      "title": "Consultar referências de recebimento",
-      "description": "Permite ao almoxarife identificar fornecedores e produtos relacionados aos pedidos que serão recebidos.",
+      "title": "Registrar recebimentos de mercadorias",
+      "description": "Permite ao almoxarife consultar pedidos e produtos e registrar recebimentos totais ou parciais.",
       "entityRefs": [
-        "Fornecedor",
-        "Produto"
+        "PurchaseOrder",
+        "GoodsReceipt",
+        "Product"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os fornecedores e produtos de referência usados nos recebimentos da organização."
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Expõe a identificação do fornecedor e as características de catálogo do produto necessárias para conferência e entrada em estoque.",
-        "allowedFields": [
-          "Fornecedor.details.identification",
-          "Fornecedor.details.company",
-          "Produto.details.identification",
-          "Produto.details.product"
-        ]
-      }
-    },
-    {
-      "grantId": "almoxarifeRegistrarRecebimentos",
-      "actorRef": "almoxarife",
-      "title": "Registrar recebimentos de pedidos",
-      "description": "Permite ao almoxarife registrar recebimentos totais ou parciais e as quantidades destinadas à entrada no estoque.",
-      "entityRefs": [
-        "RecebimentoPedido"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Abrange os registros de recebimento de pedidos da organização."
+        "description": "Abrange os pedidos, produtos e recebimentos da organização necessários para a conferência e entrada de mercadorias."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Expõe todos os dados do recebimento necessários para registrar a entrega e suas quantidades."
+        "description": "O almoxarife pode consultar integralmente os pedidos, produtos e registros de recebimento necessários ao trabalho de almoxarifado."
       }
     }
   ],
   "normalizations": [
     {
       "kind": "dropAnchorEntity",
-      "grantId": "compradorCadastrosCompras",
+      "grantId": "compradorCadastrosDeCompra",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
       "kind": "dropAnchorEntity",
-      "grantId": "compradorCondicoesEpedidos",
+      "grantId": "compradorPedidosDeCompra",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
       "kind": "dropAnchorEntity",
-      "grantId": "gerenteDecidirPedidos",
+      "grantId": "gerentePedidosDeCompra",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
       "kind": "dropAnchorEntity",
-      "grantId": "gerenteConsultarFornecedores",
+      "grantId": "gerenteIndicadoresDeCompras",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
       "kind": "dropAnchorEntity",
-      "grantId": "gerenteAcompanharIndicadores",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
-    },
-    {
-      "kind": "dropAnchorEntity",
-      "grantId": "almoxarifeConsultarPedidos",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
-    },
-    {
-      "kind": "dropAnchorEntity",
-      "grantId": "almoxarifeConsultarReferencias",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
-    },
-    {
-      "kind": "dropAnchorEntity",
-      "grantId": "almoxarifeRegistrarRecebimentos",
+      "grantId": "almoxarifeRecebimentos",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     }
   ]

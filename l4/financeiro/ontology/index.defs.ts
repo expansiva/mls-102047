@@ -3,9 +3,9 @@
 import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const financeiroOntologyIndex = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "financeiro",
-  "businessDomain": "Contas a receber e registro de recebimentos da organização.",
+  "businessDomain": "Contas a receber e recebimentos financeiros",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "financeiro",
@@ -31,39 +31,59 @@ export const financeiroOntologyIndex = {
       "entityId": "Recebimento",
       "kind": "entity",
       "class": "event"
+    },
+    {
+      "entityId": "ExtratoPagador",
+      "kind": "entity",
+      "class": "supporting"
+    },
+    {
+      "entityId": "PainelRecebiveis",
+      "kind": "entity",
+      "class": "supporting"
     }
   ],
   "relationships": [
     {
-      "relationshipId": "tituloPagador",
+      "relationshipId": "tituloTemPagador",
       "from": "TituloReceber",
       "to": "Pagador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada título a receber pertence a um único pagador; um pagador pode ter vários títulos.",
+      "description": "Cada título a receber pertence obrigatoriamente a um pagador.",
       "field": "TituloReceber.pagadorId"
     },
     {
-      "relationshipId": "recebimentoTitulo",
+      "relationshipId": "recebimentoDoTitulo",
       "from": "Recebimento",
       "to": "TituloReceber",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento registra a baixa, total ou parcial, de um único título a receber.",
-      "field": "Recebimento.tituloId"
+      "description": "Cada recebimento é lançado obrigatoriamente para um título a receber.",
+      "field": "Recebimento.tituloReceberId"
     },
     {
-      "relationshipId": "recebimentoPagador",
-      "from": "Recebimento",
+      "relationshipId": "extratoDoPagador",
+      "from": "ExtratoPagador",
       "to": "Pagador",
       "type": "manyToOne",
       "required": true,
+      "mode": "fk",
+      "description": "Cada extrato emitido referencia obrigatoriamente o pagador a que se destina.",
+      "field": "ExtratoPagador.pagadorId"
+    },
+    {
+      "relationshipId": "pagadorTemRecebimentos",
+      "from": "Pagador",
+      "to": "Recebimento",
+      "type": "oneToMany",
+      "required": false,
       "mode": "throughTable",
-      "description": "O pagador de um recebimento é obtido pelo título a receber ao qual o recebimento está vinculado.",
-      "through": "TituloReceber",
-      "path": "Recebimento.tituloId -> TituloReceber.pagadorId",
+      "description": "Os recebimentos de um pagador são obtidos pelos títulos a receber vinculados a ele.",
+      "through": "Recebimento",
+      "path": "Pagador <- TituloReceber.pagadorId; Recebimento.tituloReceberId -> TituloReceber",
       "derived": true
     }
   ]

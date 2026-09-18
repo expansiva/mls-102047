@@ -3,54 +3,58 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaEntityConsulta = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
   "entityId": "Consulta",
   "title": "Consulta",
-  "description": "Agendamento de atendimento de um paciente com um profissional em data e horário definidos.",
+  "description": "Agendamento clínico de um paciente com um profissional em data e horário determinados, acompanhado até o atendimento ou a falta.",
   "displayField": "scheduledAt",
   "relationships": {
-    "paciente": {
-      "relationshipId": "consultaPaciente",
+    "patient": {
+      "relationshipId": "appointmentPatient",
       "to": "Paciente",
-      "via": "Consulta.pacienteId",
+      "via": "Consulta.patientId",
       "cardinality": "N:1",
       "title": "Paciente da consulta",
-      "description": "Cada consulta é agendada para um paciente.",
+      "description": "Cada consulta é agendada para um único paciente.",
       "mode": "fk",
-      "required": "Sempre"
+      "required": "sempre",
+      "role": "paciente"
     },
-    "profissional": {
-      "relationshipId": "consultaProfissional",
+    "professional": {
+      "relationshipId": "appointmentProfessional",
       "to": "Profissional",
-      "via": "Consulta.profissionalId",
+      "via": "Consulta.professionalId",
       "cardinality": "N:1",
-      "title": "Profissional responsável",
-      "description": "Cada consulta é atribuída a um profissional responsável pelo atendimento.",
+      "title": "Profissional da consulta",
+      "description": "Cada consulta é realizada por um único profissional.",
       "mode": "fk",
-      "required": "Sempre"
+      "required": "sempre",
+      "role": "responsável"
     }
   },
   "capabilities": {
-    "agendaClinica.localizarConsultas": "Localiza consultas por paciente, profissional, data, horário ou situação usando os índices da agenda; a recepcionista consulta a agenda da clínica e o profissional somente a própria agenda.",
-    "agendaClinica.agendarConsulta": "Cria uma consulta com paciente, profissional e data e horário, verificando a chave única do profissional; a recepcionista usa esta ação para realizar agendamentos.",
-    "agendaClinica.inspecionarConsulta": "Exibe os dados da consulta e a anotação quando existente pela rota da consulta; a recepcionista e o profissional responsável usam esta consulta conforme seu escopo.",
-    "agendaClinica.consultarAgendaDoDia": "Lista as consultas de uma data pelo índice de profissional e horário; o profissional usa a ação apenas para visualizar sua própria agenda do dia.",
-    "agendaClinica.confirmarConsulta": "Altera uma consulta agendada para confirmada pela transição confirmarConsulta; a recepcionista registra a confirmação feita por telefone.",
-    "agendaClinica.registrarFalta": "Altera uma consulta agendada ou confirmada para falta pela transição registrarFalta; a recepcionista registra o não comparecimento do paciente.",
-    "agendaClinica.registrarAtendimento": "Altera uma consulta da própria agenda para atendida pela transição registrarAtendimento e grava a anotação; o profissional responsável usa esta ação."
+    "read.byId": "Lê uma consulta pelo identificador da linha no repositório de consultas, para a recepcionista e o profissional abrirem um agendamento já localizado.",
+    "locate.byColumn": "Lista consultas por paciente, profissional, data e situação usando as colunas indexadas, para a recepcionista consultar disponibilidade e para o profissional ver a própria agenda diária.",
+    "count": "Conta as consultas que correspondem aos filtros de profissional, data ou situação, para as telas de agenda da recepcionista e do profissional.",
+    "listByForeignKey": "Lista as consultas vinculadas a um paciente ou profissional pela chave estrangeira, para a recepcionista consultar históricos de agendamento e o profissional consultar sua agenda.",
+    "create": "Cria uma consulta com paciente, profissional, data e horário no repositório de consultas, para a recepcionista realizar o agendamento.",
+    "transition": "Atualiza a situação da consulta pela transição permitida, para a recepcionista confirmar ou registrar falta e para o profissional registrar o atendimento.",
+    "uniqueKey": "Impede outra consulta do mesmo profissional no mesmo data e horário pelo índice único de profissional e data/hora, para a recepcionista concluir apenas agendamentos disponíveis.",
+    "read.mdmRecord": "Lê os registros mestres do paciente e do profissional referenciados pelas chaves da consulta, para a recepcionista e o profissional visualizarem os dados necessários da agenda."
   },
   "rules": [
-    "consultaSemConflitoHorario",
-    "transicaoConsultaPermitida",
-    "anotacaoObrigatoriaNoAtendimento",
-    "acessoProfissionalPropriaAgenda"
+    "uniqueProfessionalSchedule",
+    "consultationTransitionFlow",
+    "attendanceNoteRequired",
+    "professionalOwnAppointment"
   ],
   "kind": "entity",
-  "class": "core",
+  "class": "event",
   "storage": {
     "target": "moduleDatabase",
-    "table": "agendaClinica_consulta"
+    "table": "agendaClinica_consulta",
+    "kind": "relational"
   },
   "record": {
     "fields": {
@@ -66,11 +70,11 @@ export const agendaClinicaEntityConsulta = {
         "required": true,
         "derived": true
       },
-      "pacienteId": {
+      "patientId": {
         "type": "record",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "to": [
           "Paciente"
         ],
@@ -80,16 +84,16 @@ export const agendaClinicaEntityConsulta = {
         "min": 0,
         "max": 0
       },
-      "profissionalId": {
+      "professionalId": {
         "type": "record",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "to": [
           "Profissional"
         ],
         "title": "Profissional",
-        "description": "Médico ou terapeuta responsável pelo atendimento.",
+        "description": "Médico ou terapeuta responsável pela realização da consulta.",
         "maxLength": 0,
         "min": 0,
         "max": 0
@@ -98,9 +102,9 @@ export const agendaClinicaEntityConsulta = {
         "type": "timestamp",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "title": "Data e horário",
-        "description": "Data e horário programados para o início da consulta.",
+        "description": "Data e horário marcados para a consulta.",
         "maxLength": 0,
         "min": 0,
         "max": 0
@@ -109,12 +113,12 @@ export const agendaClinicaEntityConsulta = {
         "type": "enum",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "values": [
           {
             "value": "scheduled",
             "title": "Agendada",
-            "description": "Consulta marcada e ainda não confirmada."
+            "description": "Consulta marcada e ainda sem confirmação."
           },
           {
             "value": "confirmed",
@@ -129,11 +133,11 @@ export const agendaClinicaEntityConsulta = {
           {
             "value": "attended",
             "title": "Atendida",
-            "description": "Atendimento realizado pelo profissional."
+            "description": "Consulta realizada e registrada pelo profissional."
           }
         ],
         "title": "Situação",
-        "description": "Situação atual da consulta no fluxo de agendamento e atendimento.",
+        "description": "Situação do agendamento, atualizada pela recepcionista ou pelo profissional conforme sua atuação.",
         "maxLength": 0,
         "min": 0,
         "max": 0
@@ -141,18 +145,18 @@ export const agendaClinicaEntityConsulta = {
       "details": {
         "type": "object",
         "required": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "title": "Detalhes da consulta",
-        "description": "Informações do atendimento que não são usadas para pesquisa, ordenação ou unicidade.",
+        "description": "Informações clínicas registradas para esta consulta que não são usadas em filtros ou ordenações.",
         "maxLength": 0,
         "min": 0,
         "max": 0,
         "fields": {
           "attendanceNote": {
             "type": "text",
-            "of": "ContactSummary",
+            "of": "Address",
             "title": "Anotação do atendimento",
-            "description": "Registro feito pelo profissional sobre o atendimento realizado.",
+            "description": "Anotação registrada pelo profissional sobre o atendimento realizado.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -163,7 +167,7 @@ export const agendaClinicaEntityConsulta = {
   },
   "uniqueKeys": [
     [
-      "profissionalId",
+      "professionalId",
       "scheduledAt"
     ]
   ],
@@ -195,9 +199,9 @@ export const agendaClinicaEntityConsulta = {
       "by": [
         "recepcionista"
       ],
-      "description": "A recepcionista registra a confirmação telefônica da consulta.",
+      "description": "Registra a confirmação da consulta por telefone.",
       "ruleRefs": [
-        "transicaoConsultaPermitida"
+        "consultationTransitionFlow"
       ]
     },
     {
@@ -210,9 +214,9 @@ export const agendaClinicaEntityConsulta = {
       "by": [
         "recepcionista"
       ],
-      "description": "A recepcionista registra que o paciente não compareceu.",
+      "description": "Registra a falta quando o paciente não comparece à consulta.",
       "ruleRefs": [
-        "transicaoConsultaPermitida"
+        "consultationTransitionFlow"
       ]
     },
     {
@@ -225,11 +229,11 @@ export const agendaClinicaEntityConsulta = {
       "by": [
         "profissional"
       ],
-      "description": "O profissional registra a realização do atendimento e sua anotação.",
+      "description": "Conclui a própria consulta como atendida e exige a anotação do atendimento.",
       "ruleRefs": [
-        "transicaoConsultaPermitida",
-        "anotacaoObrigatoriaNoAtendimento",
-        "acessoProfissionalPropriaAgenda"
+        "consultationTransitionFlow",
+        "attendanceNoteRequired",
+        "professionalOwnAppointment"
       ]
     }
   ]

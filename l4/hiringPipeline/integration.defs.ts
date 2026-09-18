@@ -8,47 +8,14 @@ export const hiringPipelineIntegration = {
   "inbound": [],
   "outbound": [
     {
-      "id": "applicationAdvancedToInterview",
+      "id": "closeFilledPosition",
       "kind": "event",
       "to": "any",
-      "event": "advanceToInterview",
-      "on": "Application.advanceToInterview",
-      "description": "Publishes when an application advances to the interview stage.",
+      "event": "closeFilledPosition",
+      "on": "JobPosition.closeFilledPosition",
+      "description": "Publishes when a job position closes because its headcount has been filled.",
       "entityRefs": [
-        "Application"
-      ]
-    },
-    {
-      "id": "applicationOfferIssued",
-      "kind": "event",
-      "to": "any",
-      "event": "issueOffer",
-      "on": "Application.issueOffer",
-      "description": "Publishes when an offer is issued for an application.",
-      "entityRefs": [
-        "Application"
-      ]
-    },
-    {
-      "id": "applicationMarkedHired",
-      "kind": "event",
-      "to": "any",
-      "event": "markHired",
-      "on": "Application.markHired",
-      "description": "Publishes when an application is marked as hired.",
-      "entityRefs": [
-        "Application"
-      ]
-    },
-    {
-      "id": "applicationRejected",
-      "kind": "event",
-      "to": "any",
-      "event": "rejectApplication",
-      "on": "Application.rejectApplication",
-      "description": "Publishes when an application is rejected, including its rejection reason.",
-      "entityRefs": [
-        "Application"
+        "JobPosition"
       ]
     }
   ],

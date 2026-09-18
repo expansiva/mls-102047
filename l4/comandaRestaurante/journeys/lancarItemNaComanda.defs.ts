@@ -8,7 +8,7 @@ export const lancarItemNaComandaJourney = {
   "business": {
     "actorRef": "garcom",
     "title": "Lançar item na comanda",
-    "goal": "Registrar um pedido com quantidade e observação em uma comanda aberta.",
+    "goal": "Registrar o consumo solicitado em uma comanda aberta.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,33 +18,33 @@ export const lancarItemNaComandaJourney = {
         "kind": "locate",
         "entity": "Comanda",
         "title": "Localizar comanda aberta",
-        "description": "Usa a comanda em contexto ou localiza uma comanda aberta da mesa atendida."
+        "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa."
       },
       {
-        "stepId": "consultarItemDoCardapio",
+        "stepId": "consultarCardapio",
         "kind": "inspect",
         "entity": "ItemCardapio",
         "title": "Consultar item do cardápio",
-        "description": "Consulta o item e o preço vigente no cardápio antes de incluí-lo no pedido."
+        "description": "Consulta o item e o preço vigente no cardápio para atender ao pedido."
       },
       {
-        "stepId": "registrarItemLancado",
+        "stepId": "registrarItem",
         "kind": "act",
         "entity": "ItemComanda",
         "effect": "create",
         "title": "Lançar item",
-        "description": "Registra na comanda aberta o item escolhido, a quantidade e a observação informada."
+        "description": "Registra na comanda aberta o item solicitado, sua quantidade e eventual observação."
       }
     ],
     "outcome": {
-      "statement": "O item solicitado é lançado na comanda aberta.",
+      "statement": "O item solicitado é incluído no consumo da comanda aberta.",
       "evidence": [
-        "Existe um lançamento de item com quantidade e observação na comanda.",
-        "O valor parcial e o total da comanda refletem o lançamento."
+        "A comanda apresenta o lançamento com item, quantidade e observação informada.",
+        "O total da comanda considera o lançamento realizado."
       ]
     }
   },
-  "businessHash": "sha256:76eeb6ec3118718f81a9ba7b4ba0dc411e6e29e3cbbf342c9058c6c428a47f1a"
+  "businessHash": "sha256:29368bcb11f4ba43a834e8eb6362681b2526df4dcc4a40252116970dd46c3169"
 } as const satisfies Ns5JourneyArtifact;
 
 export type LancarItemNaComandaJourneyType = typeof lancarItemNaComandaJourney;

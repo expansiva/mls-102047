@@ -4,277 +4,8 @@ import type { Ns4SolutionRegistryArtifact } from '/_102035_/l2/agentNewSolution/
 
 export const solutionRegistry = {
   "schemaVersion": "ns4-solution-registry-v1",
-  "level1SchemaVersion": "ns4-level1-v1",
+  "level1SchemaVersion": "2026-09-15-mdm-ontology-v2",
   "modules": [
-    {
-      "moduleName": "controleEstoque",
-      "actors": [
-        {
-          "actorId": "estoquista",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Product",
-          "role": "controleEstoque.Produto",
-          "namespace": "controleEstoque"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Produto",
-          "kind": "mdm",
-          "mdmSubtype": "Product"
-        },
-        {
-          "entityId": "MovimentacaoEstoque",
-          "kind": "event"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "estoqueAbaixoDoMinimo",
-          "on": "MovimentacaoEstoque.create"
-        }
-      ],
-      "updatedAt": "2026-09-12T19:32:37.338Z"
-    },
-    {
-      "moduleName": "reembolsoDespesas",
-      "actors": [
-        {
-          "actorId": "colaborador",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gestorEquipe",
-          "kind": "internal"
-        },
-        {
-          "actorId": "financeiro",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "reembolsoDespesas.Colaborador",
-          "namespace": "reembolsoDespesas"
-        },
-        {
-          "mdmSubtype": "Person",
-          "role": "reembolsoDespesas.GestorEquipe",
-          "namespace": "reembolsoDespesas"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Despesa",
-          "kind": "core"
-        },
-        {
-          "entityId": "Colaborador",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "GestorEquipe",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "despesaEnviadaParaAprovacao",
-          "on": "Despesa.submitForApproval"
-        },
-        {
-          "eventId": "despesaReenviadaParaAprovacao",
-          "on": "Despesa.resubmitForApproval"
-        },
-        {
-          "eventId": "decisaoDeAprovacaoRegistrada",
-          "on": "Despesa.recordApprovalDecision"
-        },
-        {
-          "eventId": "pagamentoDeDespesaRegistrado",
-          "on": "Despesa.registerPayment"
-        }
-      ],
-      "updatedAt": "2026-09-12T19:47:57.034Z"
-    },
-    {
-      "moduleName": "hiringPipeline",
-      "actors": [
-        {
-          "actorId": "recruiter",
-          "kind": "internal"
-        },
-        {
-          "actorId": "hiringManager",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "hiringPipeline.Candidate",
-          "namespace": "hiringPipeline"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "JobPosition",
-          "kind": "core"
-        },
-        {
-          "entityId": "Candidate",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "Application",
-          "kind": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "advanceToInterview",
-          "on": "Application.advanceToInterview"
-        },
-        {
-          "eventId": "issueOffer",
-          "on": "Application.issueOffer"
-        },
-        {
-          "eventId": "markHired",
-          "on": "Application.markHired"
-        },
-        {
-          "eventId": "rejectApplication",
-          "on": "Application.rejectApplication"
-        }
-      ],
-      "updatedAt": "2026-09-12T19:59:56.097Z"
-    },
-    {
-      "moduleName": "locacaoEquipamentos",
-      "actors": [
-        {
-          "actorId": "atendente",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gerente",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "locacaoEquipamentos.Cliente",
-          "namespace": "locacaoEquipamentos"
-        },
-        {
-          "mdmSubtype": "AssetEquipment",
-          "role": "locacaoEquipamentos.Equipamento",
-          "namespace": "locacaoEquipamentos"
-        },
-        {
-          "mdmSubtype": "Person",
-          "role": "locacaoEquipamentos.Atendente",
-          "namespace": "locacaoEquipamentos"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Cliente",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "Equipamento",
-          "kind": "mdm",
-          "mdmSubtype": "AssetEquipment"
-        },
-        {
-          "entityId": "Atendente",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        },
-        {
-          "entityId": "ContratoLocacao",
-          "kind": "core"
-        },
-        {
-          "entityId": "RentalItem",
-          "kind": "supporting"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "registrarDevolucao",
-          "on": "ContratoLocacao.registrarDevolucao"
-        }
-      ],
-      "updatedAt": "2026-09-12T21:34:32.288Z"
-    },
-    {
-      "moduleName": "inscricaoEvento",
-      "actors": [
-        {
-          "actorId": "organizador",
-          "kind": "internal"
-        },
-        {
-          "actorId": "publico",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "mdmSubtype": "Person",
-          "role": "inscricaoEvento.Participante",
-          "namespace": "inscricaoEvento"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Evento",
-          "kind": "core"
-        },
-        {
-          "entityId": "Inscricao",
-          "kind": "core"
-        },
-        {
-          "entityId": "Participante",
-          "kind": "mdm",
-          "mdmSubtype": "Person"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "publicarEvento",
-          "on": "Evento.publicarEvento"
-        },
-        {
-          "eventId": "cancelarInscricao",
-          "on": "Inscricao.cancelarInscricao"
-        },
-        {
-          "eventId": "promoverListaEspera",
-          "on": "Inscricao.promoverListaEspera"
-        }
-      ],
-      "updatedAt": "2026-09-12T21:37:59.069Z"
-    },
     {
       "moduleName": "agendaClinica",
       "actors": [
@@ -299,6 +30,11 @@ export const solutionRegistry = {
           "namespace": "agendaClinica"
         },
         {
+          "subtype": "Person",
+          "roleTag": "agendaClinica.Recepcionista",
+          "namespace": "agendaClinica"
+        },
+        {
           "subtype": "ContactChannel",
           "roleTag": "agendaClinica.ContatoPaciente",
           "namespace": "agendaClinica"
@@ -319,6 +55,12 @@ export const solutionRegistry = {
           "class": "mdm"
         },
         {
+          "entityId": "Recepcionista",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
           "entityId": "ContatoPaciente",
           "kind": "role",
           "mdmSubtype": "ContactChannel",
@@ -327,92 +69,24 @@ export const solutionRegistry = {
         {
           "entityId": "Consulta",
           "kind": "entity",
-          "class": "core"
+          "class": "event"
         }
       ],
       "events": [
         {
-          "eventId": "confirmarConsulta",
+          "eventId": "consultaConfirmada",
           "on": "Consulta.confirmarConsulta"
         },
         {
-          "eventId": "registrarFalta",
+          "eventId": "faltaPacienteRegistrada",
           "on": "Consulta.registrarFalta"
         },
         {
-          "eventId": "registrarAtendimento",
+          "eventId": "atendimentoRegistrado",
           "on": "Consulta.registrarAtendimento"
         }
       ],
-      "updatedAt": "2026-09-17T01:05:28.778Z"
-    },
-    {
-      "moduleName": "ordenServicio",
-      "actors": [
-        {
-          "actorId": "recepcionista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "tecnico",
-          "kind": "internal"
-        },
-        {
-          "actorId": "cliente",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "ordenServicio.Cliente",
-          "namespace": "ordenServicio"
-        },
-        {
-          "subtype": "AssetEquipment",
-          "roleTag": "ordenServicio.Aparato",
-          "namespace": "ordenServicio"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Cliente",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Aparato",
-          "kind": "role",
-          "mdmSubtype": "AssetEquipment",
-          "class": "mdm"
-        },
-        {
-          "entityId": "OrdenServicio",
-          "kind": "entity",
-          "class": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "presupuestoEmitido",
-          "on": "OrdenServicio.emitirPresupuesto"
-        },
-        {
-          "eventId": "presupuestoResuelto",
-          "on": "OrdenServicio.resolverPresupuesto"
-        },
-        {
-          "eventId": "reparacionListaParaEntrega",
-          "on": "OrdenServicio.marcarListaParaEntrega"
-        },
-        {
-          "eventId": "entregaFinalizada",
-          "on": "OrdenServicio.finalizarEntrega"
-        }
-      ],
-      "updatedAt": "2026-09-17T03:44:40.081Z"
+      "updatedAt": "2026-09-18T07:12:10.397Z"
     },
     {
       "moduleName": "comandaRestaurante",
@@ -428,11 +102,6 @@ export const solutionRegistry = {
       ],
       "roles": [
         {
-          "subtype": "Location",
-          "roleTag": "comandaRestaurante.Mesa",
-          "namespace": "comandaRestaurante"
-        },
-        {
           "subtype": "Product",
           "roleTag": "comandaRestaurante.ItemCardapio",
           "namespace": "comandaRestaurante"
@@ -442,9 +111,8 @@ export const solutionRegistry = {
       "entities": [
         {
           "entityId": "Mesa",
-          "kind": "role",
-          "mdmSubtype": "Location",
-          "class": "mdm"
+          "kind": "entity",
+          "class": "supporting"
         },
         {
           "entityId": "ItemCardapio",
@@ -469,7 +137,7 @@ export const solutionRegistry = {
           "on": "Comanda.fecharComanda"
         }
       ],
-      "updatedAt": "2026-09-17T04:13:38.255Z"
+      "updatedAt": "2026-09-18T06:37:29.224Z"
     },
     {
       "moduleName": "compras",
@@ -490,28 +158,97 @@ export const solutionRegistry = {
       "roles": [
         {
           "subtype": "Company",
-          "roleTag": "compras.Fornecedor",
-          "namespace": "compras"
-        },
-        {
-          "subtype": "Product",
-          "roleTag": "compras.Produto",
+          "roleTag": "compras.Supplier",
           "namespace": "compras"
         },
         {
           "subtype": "ContactChannel",
-          "roleTag": "compras.ContatoFornecedor",
+          "roleTag": "compras.SupplierContact",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "Product",
+          "roleTag": "compras.Product",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "compras.Buyer",
           "namespace": "compras"
         }
       ],
       "generalFields": [],
       "entities": [
         {
-          "entityId": "Fornecedor",
+          "entityId": "Supplier",
           "kind": "role",
           "mdmSubtype": "Company",
           "class": "mdm"
         },
+        {
+          "entityId": "SupplierContact",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Product",
+          "kind": "role",
+          "mdmSubtype": "Product",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Buyer",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "SupplierOffering",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "PurchaseOrder",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "GoodsReceipt",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PurchaseOrderDashboard",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "recebimentoRegistrado",
+          "on": "GoodsReceipt.create"
+        }
+      ],
+      "updatedAt": "2026-09-18T08:58:16.019Z"
+    },
+    {
+      "moduleName": "controleEstoque",
+      "actors": [
+        {
+          "actorId": "estoquista",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Product",
+          "roleTag": "controleEstoque.Produto",
+          "namespace": "controleEstoque"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
         {
           "entityId": "Produto",
           "kind": "role",
@@ -519,38 +256,268 @@ export const solutionRegistry = {
           "class": "mdm"
         },
         {
-          "entityId": "ContatoFornecedor",
-          "kind": "role",
-          "mdmSubtype": "ContactChannel",
-          "class": "mdm"
-        },
-        {
-          "entityId": "ProdutoFornecedor",
-          "kind": "entity",
-          "class": "supporting"
-        },
-        {
-          "entityId": "PedidoCompra",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "RecebimentoPedido",
+          "entityId": "MovimentacaoEstoque",
           "kind": "entity",
           "class": "event"
         }
       ],
       "events": [
         {
-          "eventId": "entradaEstoquePorRecebimentoParcial",
-          "on": "PedidoCompra.registrarRecebimentoParcial"
-        },
-        {
-          "eventId": "entradaEstoquePorRecebimentoTotal",
-          "on": "PedidoCompra.registrarRecebimentoTotal"
+          "eventId": "saldoAbaixoDoMinimo",
+          "on": "MovimentacaoEstoque.create"
         }
       ],
-      "updatedAt": "2026-09-17T05:16:45.865Z"
+      "updatedAt": "2026-09-18T07:17:29.018Z"
+    },
+    {
+      "moduleName": "financeiro",
+      "actors": [
+        {
+          "actorId": "caixa",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerenteFinanceiro",
+          "kind": "internal"
+        },
+        {
+          "actorId": "pagador",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "financeiro.Pagador",
+          "namespace": "financeiro"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "financeiro.GerenteFinanceiro",
+          "namespace": "financeiro"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Pagador",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "GerenteFinanceiro",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "TituloReceber",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Recebimento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "ExtratoPagador",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "PainelRecebiveis",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [],
+      "updatedAt": "2026-09-18T06:51:58.885Z"
+    },
+    {
+      "moduleName": "hiringPipeline",
+      "actors": [
+        {
+          "actorId": "recruiter",
+          "kind": "internal"
+        },
+        {
+          "actorId": "hiringManager",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "hiringPipeline.Candidate",
+          "namespace": "hiringPipeline"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "hiringPipeline.CandidateContact",
+          "namespace": "hiringPipeline"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "hiringPipeline.HiringManager",
+          "namespace": "hiringPipeline"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Candidate",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "CandidateContact",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        },
+        {
+          "entityId": "HiringManager",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "JobPosition",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Application",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "closeFilledPosition",
+          "on": "JobPosition.closeFilledPosition"
+        }
+      ],
+      "updatedAt": "2026-09-18T07:46:42.977Z"
+    },
+    {
+      "moduleName": "inscricaoEvento",
+      "actors": [
+        {
+          "actorId": "organizador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "publico",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "inscricaoEvento.Participante",
+          "namespace": "inscricaoEvento"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "inscricaoEvento.EmailParticipante",
+          "namespace": "inscricaoEvento"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Evento",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Inscricao",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "Participante",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "EmailParticipante",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "publicarEvento",
+          "on": "Evento.publicarEvento"
+        },
+        {
+          "eventId": "cancelarInscricao",
+          "on": "Inscricao.cancelarInscricao"
+        },
+        {
+          "eventId": "promoverDaListaEspera",
+          "on": "Inscricao.promoverDaListaEspera"
+        }
+      ],
+      "updatedAt": "2026-09-18T07:31:01.171Z"
+    },
+    {
+      "moduleName": "locacaoEquipamentos",
+      "actors": [
+        {
+          "actorId": "atendente",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerente",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "locacaoEquipamentos.Cliente",
+          "namespace": "locacaoEquipamentos"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Cliente",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Equipamento",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "ContratoLocacao",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "ItemContratoLocacao",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "multaCalculada",
+          "on": "ContratoLocacao.registrarDevolucao"
+        }
+      ],
+      "updatedAt": "2026-09-18T07:39:17.826Z"
     },
     {
       "moduleName": "manutencaoFrota",
@@ -625,10 +592,203 @@ export const solutionRegistry = {
       "events": [
         {
           "eventId": "alertaPreventivaVencida",
-          "on": "MaintenanceOrder.create"
+          "on": "Fueling.create"
         }
       ],
-      "updatedAt": "2026-09-17T05:22:14.967Z"
+      "updatedAt": "2026-09-18T08:19:42.172Z"
+    },
+    {
+      "moduleName": "mensalidadesAcademia",
+      "actors": [
+        {
+          "actorId": "recepcao",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerencia",
+          "kind": "internal"
+        },
+        {
+          "actorId": "aluno",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "mensalidadesAcademia.Aluno",
+          "namespace": "mensalidadesAcademia"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Aluno",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Plano",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "Matricula",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Mensalidade",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Pagamento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "IndicadoresAcademia",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "cancelarMatricula",
+          "on": "Matricula.cancelarMatricula"
+        }
+      ],
+      "updatedAt": "2026-09-18T06:32:22.971Z"
+    },
+    {
+      "moduleName": "ordenServicio",
+      "actors": [
+        {
+          "actorId": "recepcionista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "tecnico",
+          "kind": "internal"
+        },
+        {
+          "actorId": "cliente",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "ordenServicio.Cliente",
+          "namespace": "ordenServicio"
+        },
+        {
+          "subtype": "AssetEquipment",
+          "roleTag": "ordenServicio.Aparato",
+          "namespace": "ordenServicio"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Cliente",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Aparato",
+          "kind": "role",
+          "mdmSubtype": "AssetEquipment",
+          "class": "mdm"
+        },
+        {
+          "entityId": "OrdenServicio",
+          "kind": "entity",
+          "class": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "emitirPresupuesto",
+          "on": "OrdenServicio.emitirPresupuesto"
+        },
+        {
+          "eventId": "aprobarPresupuesto",
+          "on": "OrdenServicio.aprobarPresupuesto"
+        },
+        {
+          "eventId": "rechazarPresupuesto",
+          "on": "OrdenServicio.rechazarPresupuesto"
+        },
+        {
+          "eventId": "marcarLista",
+          "on": "OrdenServicio.marcarLista"
+        },
+        {
+          "eventId": "entregarYfinalizar",
+          "on": "OrdenServicio.entregarYfinalizar"
+        }
+      ],
+      "updatedAt": "2026-09-18T08:27:38.096Z"
+    },
+    {
+      "moduleName": "reembolsoDespesas",
+      "actors": [
+        {
+          "actorId": "colaborador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gestorEquipe",
+          "kind": "internal"
+        },
+        {
+          "actorId": "financeiro",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "reembolsoDespesas.Colaborador",
+          "namespace": "reembolsoDespesas"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "reembolsoDespesas.GestorEquipe",
+          "namespace": "reembolsoDespesas"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Colaborador",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "GestorEquipe",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Despesa",
+          "kind": "entity",
+          "class": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "despesaAprovada",
+          "on": "Despesa.registrarDecisaoDaDespesa"
+        }
+      ],
+      "updatedAt": "2026-09-18T07:25:13.858Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

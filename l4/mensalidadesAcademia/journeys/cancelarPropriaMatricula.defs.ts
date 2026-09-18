@@ -8,7 +8,7 @@ export const cancelarPropriaMatriculaJourney = {
   "business": {
     "actorRef": "aluno",
     "title": "Cancelar própria matrícula",
-    "goal": "Encerrar a matrícula para impedir a geração de mensalidades futuras.",
+    "goal": "Encerrar a própria matrícula para interromper a geração de mensalidades futuras.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,14 +18,14 @@ export const cancelarPropriaMatriculaJourney = {
         "kind": "locate",
         "entity": "Matricula",
         "title": "x",
-        "description": "Localiza a matrícula ativa do próprio aluno a partir do contexto da sua conta, com alternativa de busca quando necessário."
+        "description": "Localiza a matrícula vinculada ao próprio aluno."
       },
       {
-        "stepId": "consultarPropriaMatricula",
+        "stepId": "inspecionarPropriaMatricula",
         "kind": "inspect",
         "entity": "Matricula",
         "title": "x",
-        "description": "Confere o plano e a situação da matrícula antes do cancelamento."
+        "description": "Confere o plano e a situação da própria matrícula antes do cancelamento."
       },
       {
         "stepId": "cancelarMatricula",
@@ -34,18 +34,18 @@ export const cancelarPropriaMatriculaJourney = {
         "effect": "transition",
         "transitionRef": "cancelarMatricula",
         "title": "x",
-        "description": "Cancela a própria matrícula, encerrando sua elegibilidade para a geração de mensalidades futuras."
+        "description": "Cancela a matrícula, encerrando a geração de mensalidades futuras."
       }
     ],
     "outcome": {
-      "statement": "A matrícula do aluno é cancelada e não gera novas mensalidades.",
+      "statement": "A matrícula do aluno é cancelada e deixa de gerar mensalidades futuras.",
       "evidence": [
-        "A matrícula registra o cancelamento.",
-        "A matrícula deixa de ser considerada ativa nas próximas gerações mensais."
+        "Matrícula registrada como cancelada.",
+        "Não são geradas novas mensalidades após o cancelamento."
       ]
     }
   },
-  "businessHash": "sha256:e554d98e63ba436cbb8957d45052f9b7928d74028c0e475620517e8a35ee83ac"
+  "businessHash": "sha256:2cce1d7cc5e606a96894f84fc40cc1d0a6b73fb2f419b1b7e9c342ee666c813e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CancelarPropriaMatriculaJourneyType = typeof cancelarPropriaMatriculaJourney;

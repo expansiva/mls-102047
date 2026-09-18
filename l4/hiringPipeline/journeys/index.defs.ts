@@ -19,7 +19,7 @@ export const hiringPipelineJourneyIndex = {
     {
       "journeyId": "startApplicationScreening",
       "actorRef": "recruiter",
-      "title": "Start candidate screening"
+      "title": "Start screening an application"
     },
     {
       "journeyId": "advanceApplicationToInterview",
@@ -27,19 +27,19 @@ export const hiringPipelineJourneyIndex = {
       "title": "Advance an application to interview"
     },
     {
-      "journeyId": "issueOffer",
+      "journeyId": "decideOffer",
       "actorRef": "hiringManager",
-      "title": "Decide and issue an offer"
+      "title": "Decide whether to make an offer"
     },
     {
-      "journeyId": "hireCandidate",
+      "journeyId": "decideHiringOutcome",
       "actorRef": "hiringManager",
-      "title": "Decide and record a hire"
+      "title": "Decide the hiring outcome"
     },
     {
-      "journeyId": "rejectApplication",
+      "journeyId": "recordApplicationRejection",
       "actorRef": "recruiter",
-      "title": "Reject an application"
+      "title": "Record an application rejection"
     }
   ],
   "systemDecisions": []

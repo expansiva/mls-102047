@@ -3,7 +3,7 @@
 import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteWorkflows = {
-  "schemaVersion": "2026-09-12-ns5-workflows-v2",
+  "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "comandaRestaurante",
   "processes": [],
   "journeyDecisions": [

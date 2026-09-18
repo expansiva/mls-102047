@@ -8,7 +8,7 @@ export const consultarVeiculosAtribuidosJourney = {
   "business": {
     "actorRef": "motorista",
     "title": "Consultar veículos atribuídos",
-    "goal": "Ver os dados dos veículos que estão atribuídos a si.",
+    "goal": "Ver os veículos que estão atribuídos ao próprio motorista e suas informações de operação.",
     "entry": {
       "mode": "coldStart"
     },
@@ -18,25 +18,25 @@ export const consultarVeiculosAtribuidosJourney = {
         "kind": "locate",
         "entity": "Vehicle",
         "title": "x",
-        "description": "Localiza os veículos atribuídos ao próprio motorista."
+        "description": "Localiza somente os veículos atribuídos ao próprio motorista."
       },
       {
-        "stepId": "inspecionarVeiculo",
+        "stepId": "inspecionarVeiculoAtribuido",
         "kind": "inspect",
         "entity": "Vehicle",
         "title": "x",
-        "description": "Consulta placa, modelo, ano e quilometragem atual de um veículo atribuído."
+        "description": "Consulta placa, modelo, ano e quilometragem atual do veículo selecionado."
       }
     ],
     "outcome": {
-      "statement": "O motorista consulta os veículos sob sua condução.",
+      "statement": "O motorista consulta os dados de um veículo que lhe está atribuído.",
       "evidence": [
-        "Lista de veículos atribuídos apresentada ao motorista.",
-        "Dados do veículo selecionado disponíveis para consulta."
+        "O veículo consultado está vinculado ao motorista.",
+        "A placa, o modelo, o ano e a quilometragem atual ficam disponíveis para consulta."
       ]
     }
   },
-  "businessHash": "sha256:1fc63d04b3d79589c5e28e56f2507386b73f38f18ec0156f2d24fcd691465649"
+  "businessHash": "sha256:74ecbc93a09c3f191a1716248dfc0d1fcf0751f71babf08dac8a806dce8cf72d"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarVeiculosAtribuidosJourneyType = typeof consultarVeiculosAtribuidosJourney;

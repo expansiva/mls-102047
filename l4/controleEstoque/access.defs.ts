@@ -11,15 +11,15 @@ export const controleEstoqueAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Estoquista",
-      "description": "Profissional responsável por operar o controle de estoque, registrando entradas e saídas de produtos."
+      "description": "Profissional responsável por registrar e acompanhar as movimentações e os saldos de estoque."
     }
   ],
   "grants": [
     {
-      "grantId": "operarEstoque",
+      "grantId": "estoquistaControleEstoque",
       "actorRef": "estoquista",
-      "title": "Operar controle de estoque",
-      "description": "Permite ao estoquista cadastrar e acompanhar produtos de estoque, definir quantidades mínimas e registrar e consultar movimentações de entrada e saída.",
+      "title": "Controlar estoque",
+      "description": "Permite cadastrar produtos no controle de estoque, registrar movimentações imutáveis e acompanhar saldos, avisos de reposição e movimentações de todos os produtos da organização.",
       "entityRefs": [
         "Produto",
         "MovimentacaoEstoque"
@@ -29,8 +29,19 @@ export const controleEstoqueAccess = {
         "description": "Abrange os produtos e as movimentações de estoque de toda a organização."
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "Permite visualizar todos os dados dos produtos controlados e das movimentações de estoque."
+        "mode": "fieldsOnly",
+        "description": "Permite consultar a identificação e a unidade do produto, a configuração e os indicadores de estoque do módulo, além de todos os dados das movimentações registradas.",
+        "allowedFields": [
+          "Produto.id",
+          "Produto.details.identification",
+          "Produto.details.product",
+          "Produto.details.controleEstoque",
+          "MovimentacaoEstoque.id",
+          "MovimentacaoEstoque.version",
+          "MovimentacaoEstoque.produtoId",
+          "MovimentacaoEstoque.occurredAt",
+          "MovimentacaoEstoque.details"
+        ]
       }
     }
   ]

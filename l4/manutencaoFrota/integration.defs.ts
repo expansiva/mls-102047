@@ -12,10 +12,12 @@ export const manutencaoFrotaIntegration = {
       "kind": "event",
       "to": "any",
       "event": "alertaPreventivaVencida",
-      "on": "MaintenanceOrder.create",
-      "description": "Publica um alerta para consumidores interessados quando é aberta uma ordem de manutenção preventiva para veículo com quilometragem acima da prevista.",
+      "on": "Fueling.create",
+      "description": "Publica um alerta de preventiva vencida quando o abastecimento registrado indicar que o veículo ultrapassou a quilometragem prevista no plano de manutenção preventiva.",
       "entityRefs": [
-        "MaintenanceOrder"
+        "Fueling",
+        "Vehicle",
+        "MaintenancePlan"
       ]
     }
   ],

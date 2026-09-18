@@ -8,28 +8,35 @@ export const cadastrarPacienteJourney = {
   "business": {
     "actorRef": "recepcionista",
     "title": "Cadastrar paciente",
-    "goal": "Registrar um paciente para viabilizar seu atendimento na clínica.",
+    "goal": "Registrar ou associar o paciente à clínica para que possa receber consultas.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
+      {
+        "stepId": "localizarPaciente",
+        "kind": "locate",
+        "entity": "Paciente",
+        "title": "x",
+        "description": "Busca o paciente pelos dados disponíveis para evitar um cadastro duplicado."
+      },
       {
         "stepId": "registrarPaciente",
         "kind": "act",
         "entity": "Paciente",
         "effect": "create",
         "title": "x",
-        "description": "Cadastra ou vincula o paciente usando seus dados de identificação e contato."
+        "description": "Cadastra ou associa o paciente encontrado à clínica, mantendo seus dados cadastrais atualizados."
       }
     ],
     "outcome": {
-      "statement": "O paciente fica disponível para agendamento na clínica.",
+      "statement": "O paciente fica disponível na agenda da clínica.",
       "evidence": [
-        "Cadastro do paciente disponível para consulta e seleção em um agendamento."
+        "Cadastro do paciente localizado ou criado e associado à clínica."
       ]
     }
   },
-  "businessHash": "sha256:e0e174fc65898091e092ec09d3e1fad04a1a185238bcf725c7389f7e7448bf2c"
+  "businessHash": "sha256:5eb5e8ae725c989c7e48287ea2c80d60e51e59fd834cc2b1228ad6784bcbd2db"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CadastrarPacienteJourneyType = typeof cadastrarPacienteJourney;

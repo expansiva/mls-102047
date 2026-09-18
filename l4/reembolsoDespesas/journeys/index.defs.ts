@@ -12,9 +12,9 @@ export const reembolsoDespesasJourneyIndex = {
       "title": "Registrar e enviar despesa para aprovação"
     },
     {
-      "journeyId": "acompanharMinhasDespesas",
+      "journeyId": "consultarPropriasDespesas",
       "actorRef": "colaborador",
-      "title": "Acompanhar minhas despesas"
+      "title": "Consultar próprias despesas"
     },
     {
       "journeyId": "corrigirEreenviarDespesa",
@@ -27,7 +27,7 @@ export const reembolsoDespesasJourneyIndex = {
       "title": "Avaliar despesa da equipe"
     },
     {
-      "journeyId": "registrarPagamentoDespesa",
+      "journeyId": "registrarPagamentoDeDespesa",
       "actorRef": "financeiro",
       "title": "Registrar pagamento de despesa aprovada"
     }

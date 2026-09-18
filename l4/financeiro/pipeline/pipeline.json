@@ -2,11 +2,11 @@
   "schemaVersion": "2026-09-10-ns5-pipeline-v1",
   "flowId": "agentNewSolution5",
   "moduleName": "financeiro",
-  "status": "failed",
+  "status": "complete",
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:47:30.676Z",
+      "updatedAt": "2026-09-18T06:44:42.650Z",
       "artifactPaths": [
         "l4/financeiro/module.defs.ts"
       ],
@@ -16,40 +16,31 @@
           "kind": "internal",
           "origin": "named",
           "title": "Caixa",
-          "description": "Profissional da organização que recebe títulos, registra baixas parciais e estorna recebimentos no mesmo dia."
+          "description": "Recebe títulos por dinheiro, Pix ou cartão, registra baixas parciais e estorna recebimentos no mesmo dia."
         },
         {
           "actorId": "gerenteFinanceiro",
           "kind": "internal",
           "origin": "named",
           "title": "Gerente financeiro",
-          "description": "Profissional da organização que acompanha os recebíveis, títulos vencidos e extratos por pagador."
+          "description": "Acompanha os recebíveis, títulos vencidos e emite extratos por pagador."
         },
         {
           "actorId": "pagador",
           "kind": "external",
           "origin": "named",
           "title": "Pagador",
-          "description": "Pessoa que acessa o portal para consultar seus próprios títulos e recebimentos e pagar títulos em aberto com cartão."
-        },
-        {
-          "actorId": "stripe",
-          "kind": "system",
-          "origin": "named",
-          "title": "Stripe",
-          "description": "Sistema externo que processa pagamentos de títulos com cartão."
+          "description": "Acessa o portal para consultar os próprios títulos e recebimentos e pagar títulos em aberto com cartão."
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:49:12.404Z",
+      "updatedAt": "2026-09-18T06:45:46.574Z",
       "artifactPaths": [
-        "l4/financeiro/journeys/registrarRecebimento.defs.ts",
+        "l4/financeiro/journeys/receberTitulo.defs.ts",
         "l4/financeiro/journeys/estornarRecebimentoNoMesmoDia.defs.ts",
-        "l4/financeiro/journeys/acompanharPainelRecebiveis.defs.ts",
-        "l4/financeiro/journeys/consultarTitulosVencidos.defs.ts",
+        "l4/financeiro/journeys/acompanharRecebiveis.defs.ts",
         "l4/financeiro/journeys/emitirExtratoPorPagador.defs.ts",
         "l4/financeiro/journeys/consultarMeusTitulosErecebimentos.defs.ts",
         "l4/financeiro/journeys/pagarTituloComCartao.defs.ts",
@@ -60,31 +51,47 @@
       "normalizations": [
         {
           "kind": "dropTransitionRef",
-          "journeyId": "registrarRecebimento",
+          "journeyId": "receberTitulo",
           "stepId": "registrarRecebimento",
           "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
+          "journeyId": "emitirExtratoPorPagador",
+          "stepId": "gerarExtratoDoPagador",
+          "detail": "transitionRef x dropped; effect is create."
+        },
+        {
+          "kind": "dropTransitionRef",
           "journeyId": "pagarTituloComCartao",
-          "stepId": "registrarPagamentoComCartao",
+          "stepId": "pagarTituloComCartao",
           "detail": "transitionRef x dropped; effect is create."
         }
+      ]
+    },
+    "workflows50": {
+      "status": "approved",
+      "updatedAt": "2026-09-18T06:45:46.746Z",
+      "artifactPaths": [
+        "l4/financeiro/workflows.defs.ts"
       ],
-      "autoReason": "fast"
+      "noProcessSignal": true
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:51:33.575Z",
+      "updatedAt": "2026-09-18T06:49:58.653Z",
       "artifactPaths": [
         "l4/financeiro/ontology/Pagador.defs.ts",
         "l4/financeiro/ontology/GerenteFinanceiro.defs.ts",
         "l4/financeiro/ontology/TituloReceber.defs.ts",
         "l4/financeiro/ontology/Recebimento.defs.ts",
+        "l4/financeiro/ontology/ExtratoPagador.defs.ts",
+        "l4/financeiro/ontology/PainelRecebiveis.defs.ts",
         "l4/financeiro/ontology/index.defs.ts"
       ],
       "uncitedEntities": [
-        "GerenteFinanceiro"
+        "GerenteFinanceiro",
+        "PainelRecebiveis"
       ],
       "liftedAggregateEntities": [],
       "normalizations": [
@@ -107,6 +114,16 @@
           "kind": "derivedFromPlatform",
           "entityId": "Recebimento",
           "detail": "storage.table financeiro_recebimento"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ExtratoPagador",
+          "detail": "storage.table financeiro_extratopagador"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "storage.table financeiro_painelrecebiveis"
         },
         {
           "kind": "derivedFromPlatform",
@@ -144,6 +161,16 @@
           "detail": "GerenteFinanceiro.details.identification.docType.values"
         },
         {
+          "kind": "tightened",
+          "entityId": "GerenteFinanceiro",
+          "detail": "GerenteFinanceiro.details.identification.docType.required"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "GerenteFinanceiro",
+          "detail": "GerenteFinanceiro.details.identification.docId.required"
+        },
+        {
           "kind": "namespaceEmpty",
           "entityId": "GerenteFinanceiro",
           "detail": "details.financeiro"
@@ -155,27 +182,144 @@
         },
         {
           "kind": "derivedFromPlatform",
+          "entityId": "TituloReceber",
+          "detail": "record.fields.details.fields.totalReceived.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "TituloReceber",
+          "detail": "record.fields.details.fields.outstandingBalance.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "TituloReceber",
+          "detail": "record.fields.details.fields.situation.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "TituloReceber",
+          "detail": "record.fields.details.fields.overdue.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "Recebimento",
           "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ExtratoPagador",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ExtratoPagador",
+          "detail": "record.fields.details.fields.totalTitulos.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ExtratoPagador",
+          "detail": "record.fields.details.fields.totalRecebido.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ExtratoPagador",
+          "detail": "record.fields.details.fields.saldoEmAberto.derived (derived[])"
+        },
+        {
+          "kind": "derivedOnDdmIgnored",
+          "entityId": "PainelRecebiveis",
+          "detail": "derived.quantidadeTitulosEmAberto"
+        },
+        {
+          "kind": "derivedOnDdmIgnored",
+          "entityId": "PainelRecebiveis",
+          "detail": "derived.valorEmAberto"
+        },
+        {
+          "kind": "derivedOnDdmIgnored",
+          "entityId": "PainelRecebiveis",
+          "detail": "derived.valorRecebido"
+        },
+        {
+          "kind": "derivedOnDdmIgnored",
+          "entityId": "PainelRecebiveis",
+          "detail": "derived.quantidadeTitulosVencidos"
+        },
+        {
+          "kind": "derivedOnDdmIgnored",
+          "entityId": "PainelRecebiveis",
+          "detail": "derived.valorVencido"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.period.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.groupKey.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.details.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.details.fields.quantidadeTitulosEmAberto.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.details.fields.valorEmAberto.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.details.fields.valorRecebido.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.details.fields.quantidadeTitulosVencidos.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelRecebiveis",
+          "detail": "record.fields.details.fields.valorVencido.derived (ddm)"
         }
       ],
       "citedRules": [
         "rule-foreign-namespace-refused",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-person-ssn-unique-for-us",
         "rule-person-privacy-consent-required-br-eu",
-        "origemCobrancaUnica",
-        "saldoTituloConsistente",
-        "receiptAmountPositive",
-        "receiptCannotExceedOpenBalance",
-        "cardPaymentRequiresStripeConfirmation",
-        "sameDayReversal"
+        "rule-person-ssn-unique-for-us",
+        "tituloOrigemUnico",
+        "saldoTituloCalculado",
+        "valorRecebimentoNaoExcedeSaldo",
+        "receiptTitleMustBeOpen",
+        "receivedAmountPositive",
+        "receivedAmountDoesNotExceedTitleBalance",
+        "cardPaymentRequiresStripePaymentId",
+        "sameDayReversal",
+        "receiptReversalRecomposesTitleBalance",
+        "numeroExtratoUnico",
+        "periodoExtratoValido",
+        "movimentacoesDoPagadorNoPeriodo"
       ],
       "citedCapabilities": [
         "read.byId",
         "locate.byName",
         "locate.byDocument",
+        "locate.byContact",
         "register.createOrAttach",
         "edit.platformFields",
         "inactivate",
@@ -188,45 +332,38 @@
         "count",
         "listByForeignKey",
         "create",
-        "update",
         "uniqueKey",
         "transaction",
         "read.mdmRecord",
-        "financeiro.listarTitulosVencidos",
-        "financeiro.resumirRecebiveis",
-        "financeiro.emitirExtratoPorPagador",
+        "sequence.next",
+        "financeiro.localizarTitulosEmAberto",
         "transition",
-        "financeiro.processarCartaoStripe"
-      ],
-      "autoReason": "fast"
-    },
-    "workflows50": {
-      "status": "approved",
-      "updatedAt": "2026-09-17T04:51:33.925Z",
-      "artifactPaths": [
-        "l4/financeiro/workflows.defs.ts"
-      ],
-      "noProcessSignal": true,
-      "autoReason": "fast"
+        "financeiro.processarPagamentoCartao",
+        "financeiro.emitirExtrato",
+        "aggregate.byWindow",
+        "store.timeSeries",
+        "read.window",
+        "refresh",
+        "rebuild"
+      ]
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:52:07.046Z",
+      "updatedAt": "2026-09-18T06:50:59.016Z",
       "artifactPaths": [
         "l4/financeiro/rules.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:53:13.033Z",
+      "updatedAt": "2026-09-18T06:51:31.839Z",
       "artifactPaths": [
         "l4/financeiro/access.defs.ts"
       ],
       "normalizations": [
         {
           "kind": "dropAnchorEntity",
-          "grantId": "caixaRecebiveis",
+          "grantId": "caixaRecebimentos",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         },
         {
@@ -234,77 +371,98 @@
           "grantId": "gerenteFinanceiroRecebiveis",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:54:06.497Z",
+      "updatedAt": "2026-09-18T06:51:58.689Z",
       "artifactPaths": [
         "l4/financeiro/integration.defs.ts"
       ],
       "normalizations": [
         {
           "kind": "dropTransitionRef",
-          "inboundId": "pagadorCriadoNoCatalogo",
-          "detail": "transitionRef unused dropped; effect is create."
+          "inboundId": "pagadorCriado",
+          "detail": "transitionRef none dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
-          "inboundId": "pagadorAtualizadoNoCatalogo",
-          "detail": "transitionRef unused dropped; effect is update."
+          "inboundId": "pagadorAtualizado",
+          "detail": "transitionRef none dropped; effect is update."
         },
         {
           "kind": "dropTransitionRef",
           "inboundId": "comandaFechada",
-          "detail": "transitionRef unused dropped; effect is create."
+          "detail": "transitionRef none dropped; effect is create."
+        },
+        {
+          "kind": "dropTransitionRef",
+          "inboundId": "mensalidadeGerada",
+          "detail": "transitionRef none dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
           "inboundId": "ordemServicoEntregue",
-          "detail": "transitionRef unused dropped; effect is create."
+          "detail": "transitionRef none dropped; effect is create."
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "finalize80": {
-      "status": "failed",
-      "updatedAt": "2026-09-17T04:54:06.693Z",
-      "error": "NS5_FINALIZE_I3 access.actors.stripe: Actor stripe has no journey.\nNS5_FINALIZE_I8_LOGIN_PERSON_WITHOUT_REGISTRATION access.grants[2]: Person Pagador is the own login anchor of grant pagadorMeusRecebiveis but is not registered: no internal actor writes that entity (act entity or affects), it is not writer: 'crud' with an internal-actor grant, and the grant's own external actor does not write it (self-registration).\nNS5_FINALIZE_I8_LOGIN_PERSON_WITHOUT_REGISTRATION access.grants[3]: Person Pagador is the own login anchor of grant stripeProcessamentoCartao but is not registered: no internal actor writes that entity (act entity or affects), it is not writer: 'crud' with an internal-actor grant, and the grant's own external actor does not write it (self-registration).",
+      "status": "approved",
+      "updatedAt": "2026-09-18T06:51:58.885Z",
       "artifactPaths": [
-        "l4/financeiro/pipeline/finalize-report.json"
+        "l4/financeiro/pipeline/finalize-report.json",
+        "l4/organization/registry.defs.ts",
+        "l4/mensalidadesAcademia/tobe/integration/financeiro--mensalidadeGerada.defs.ts",
+        "l5/config.json",
+        "l5/project.json"
       ]
     }
   },
   "sourcePrompt": "criar o módulo financeiro em português. é o contas a receber da organização: toda cobrança nasce em outro módulo — a comanda fechada no restaurante, a mensalidade gerada na academia, a ordem de serviço entregue na assistência técnica — e aparece aqui como um título a receber com pagador, valor, vencimento e origem. o caixa recebe títulos (dinheiro, pix ou cartão via Stripe), pode dar baixa parcial e estornar um recebimento no mesmo dia. o gerente financeiro vê o painel de recebíveis por período e por origem, os títulos vencidos, e emite um extrato por pagador. o pagador acessa um portal e vê só os próprios títulos e recebimentos, e pode pagar um título em aberto com cartão. perfis: caixa, gerente financeiro e pagador.",
   "invocation": {
-    "fast": true,
+    "fast": false,
     "module": "financeiro",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-17T04:54:06.693Z",
+  "updatedAt": "2026-09-18T06:51:58.885Z",
   "rebuildAll": {
     "deleted": [
-      "l4/financeiro/journeys/acompanharRecebiveisEvencidos.defs.ts",
+      "l4/financeiro/access.defs.ts",
+      "l4/financeiro/integration.defs.ts",
+      "l4/financeiro/journeys/acompanharPainelRecebiveis.defs.ts",
       "l4/financeiro/journeys/consultarMeusTitulosErecebimentos.defs.ts",
+      "l4/financeiro/journeys/consultarTitulosVencidos.defs.ts",
       "l4/financeiro/journeys/emitirExtratoPorPagador.defs.ts",
       "l4/financeiro/journeys/estornarRecebimentoNoMesmoDia.defs.ts",
       "l4/financeiro/journeys/index.defs.ts",
-      "l4/financeiro/journeys/iniciarRecebimentoComCartaoNoCaixa.defs.ts",
-      "l4/financeiro/journeys/pagarMeuTituloComCartao.defs.ts",
-      "l4/financeiro/journeys/processarPagamentoComCartao.defs.ts",
-      "l4/financeiro/journeys/receberTituloEmDinheiroOuPix.defs.ts",
+      "l4/financeiro/journeys/pagarTituloComCartao.defs.ts",
+      "l4/financeiro/journeys/registrarRecebimento.defs.ts",
       "l4/financeiro/module.defs.ts",
+      "l4/financeiro/ontology/GerenteFinanceiro.defs.ts",
+      "l4/financeiro/ontology/Pagador.defs.ts",
+      "l4/financeiro/ontology/Recebimento.defs.ts",
+      "l4/financeiro/ontology/TituloReceber.defs.ts",
+      "l4/financeiro/ontology/index.defs.ts",
+      "l4/financeiro/pipeline/access60-draft.json",
+      "l4/financeiro/pipeline/finalize-report.json",
+      "l4/financeiro/pipeline/integration70-draft.json",
       "l4/financeiro/pipeline/journeys20-draft.json",
       "l4/financeiro/pipeline/module10-draft.json",
       "l4/financeiro/pipeline/ontology30-GerenteFinanceiro-draft.json",
       "l4/financeiro/pipeline/ontology30-Pagador-draft.json",
       "l4/financeiro/pipeline/ontology30-Recebimento-draft.json",
       "l4/financeiro/pipeline/ontology30-TituloReceber-draft.json",
+      "l4/financeiro/pipeline/ontology30-draft.json",
       "l4/financeiro/pipeline/ontology30-plan-draft.json",
-      "l4/financeiro/pipeline/pipeline.json"
+      "l4/financeiro/pipeline/pipeline.json",
+      "l4/financeiro/pipeline/rules40-draft.json",
+      "l4/financeiro/pipeline/run01_newsolution5.json",
+      "l4/financeiro/pipeline/workflows50-draft.json",
+      "l4/financeiro/rules.defs.ts",
+      "l4/financeiro/workflows.defs.ts"
     ],
     "edited": [],
-    "at": "2026-09-17T04:47:19.171Z"
+    "at": "2026-09-18T06:44:42.639Z"
   }
 }

@@ -1,77 +1,220 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/ontology/Equipamento.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosEntityEquipamento = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "locacaoEquipamentos",
   "entityId": "Equipamento",
   "title": "Equipamento",
-  "description": "Equipamento de construção disponibilizado para locação, com situação operacional acompanhada pela locadora.",
-  "kind": "mdm",
-  "party": "none",
-  "mdmSubtype": "AssetEquipment",
-  "displayField": "name",
-  "fields": [
-    {
-      "fieldId": "rentalCode",
-      "title": "Código do equipamento",
-      "type": "string",
-      "required": true,
-      "unique": true,
-      "constraints": {
-        "maxLength": 100
-      },
-      "description": "Código interno usado pela locadora para identificar o equipamento."
+  "description": "Equipamento de construção operado pela locadora, identificado por código, com diária e situação operacional acompanhada no módulo.",
+  "displayField": "code",
+  "relationships": {
+    "itensContratoLocacao": {
+      "relationshipId": "itemContratoLocacaoEquipamento",
+      "to": "ItemContratoLocacao",
+      "via": "ItemContratoLocacao.equipamentoId",
+      "cardinality": "1:N",
+      "title": "Itens de contrato de locação",
+      "description": "Itens de contratos de locação que identificam este equipamento.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
     },
-    {
-      "fieldId": "dailyRate",
-      "title": "Valor da diária",
-      "type": "money",
-      "required": true,
-      "constraints": {
+    "contratosLocacao": {
+      "relationshipId": "contratoLocacaoEquipamentos",
+      "to": "ContratoLocacao",
+      "via": "ItemContratoLocacao",
+      "cardinality": "N:N",
+      "title": "Contratos de locação",
+      "description": "Contratos que incluem este equipamento por meio dos respectivos itens de locação.",
+      "mode": "throughTable",
+      "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
+      "derived": true,
+      "direction": "to",
+      "required": true
+    }
+  },
+  "capabilities": {
+    "read.byId": "Consulta um equipamento pelo identificador da linha no repositório, para telas que já possuem esse identificador.",
+    "locate.byColumn": "Lista equipamentos por código ou situação indexada, com ordenação e paginação, para o atendente localizar equipamentos e o gerente acompanhar sua situação.",
+    "count": "Conta os equipamentos que atendem ao filtro de situação, para os indicadores de disponibilidade do gerente.",
+    "create": "Cadastra um equipamento com código, descrição, valor da diária e situação inicial, para o gerente manter a frota de locação.",
+    "update": "Altera a descrição ou o valor da diária do equipamento no repositório, para o gerente manter seus dados comerciais.",
+    "transition": "Move a situação indexada entre disponível, locado e em manutenção, conforme a locação, devolução ou manutenção registrada por atendente ou gerente.",
+    "uniqueKey": "Garante por índice único que não existam dois equipamentos com o mesmo código na locadora.",
+    "locacaoEquipamentos.consultarDisponibilidadePeriodo": "Verifica nos itens de contratos se o equipamento está livre no período solicitado, para o atendente incluí-lo somente quando não houver locação com período sobreposto."
+  },
+  "rules": [
+    "periodosLocacaoSemSobreposicao",
+    "equipamentoEmManutencaoNaoPodeSerLocado"
+  ],
+  "writer": "crud",
+  "kind": "entity",
+  "class": "core",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "locacaoEquipamentos_equipamento",
+    "kind": "relational"
+  },
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "derived": true,
+        "indexed": true,
+        "title": "Id"
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true
+      },
+      "code": {
+        "type": "string",
+        "required": true,
+        "unique": true,
+        "indexed": true,
+        "of": "Address",
+        "title": "Código",
+        "description": "Código único usado pela locadora para identificar e localizar o equipamento.",
+        "maxLength": 0,
         "min": 0,
-        "precision": 2
+        "max": 0
       },
-      "description": "Valor cobrado por dia de locação do equipamento."
+      "status": {
+        "type": "enum",
+        "required": true,
+        "indexed": true,
+        "of": "Address",
+        "values": [
+          {
+            "value": "available",
+            "title": "Disponível",
+            "description": "Equipamento disponível para uma nova locação."
+          },
+          {
+            "value": "rented",
+            "title": "Locado",
+            "description": "Equipamento atualmente em locação."
+          },
+          {
+            "value": "maintenance",
+            "title": "Em manutenção",
+            "description": "Equipamento indisponível enquanto passa por manutenção."
+          }
+        ],
+        "title": "Situação",
+        "description": "Situação operacional atual do equipamento para acompanhamento da disponibilidade pela locadora.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "of": "Address",
+        "title": "Dados do equipamento",
+        "description": "Informações descritivas e comerciais do equipamento que não são usadas como índice de consulta.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0,
+        "fields": {
+          "description": {
+            "type": "text",
+            "required": true,
+            "of": "Address",
+            "title": "Descrição",
+            "description": "Descrição do equipamento de construção oferecido para locação.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "dailyRate": {
+            "type": "money",
+            "required": true,
+            "of": "Address",
+            "title": "Valor da diária",
+            "description": "Valor cobrado por dia de locação do equipamento.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          }
+        }
+      }
+    }
+  },
+  "uniqueKeys": [
+    [
+      "code"
+    ]
+  ],
+  "lifecycleStates": [
+    {
+      "state": "available",
+      "reachedBy": "actor"
     },
     {
-      "fieldId": "operationalSituation",
-      "title": "Situação operacional",
-      "type": "string",
-      "required": true,
-      "enum": [
-        {
-          "value": "available",
-          "title": "Disponível"
-        },
-        {
-          "value": "rented",
-          "title": "Locado"
-        },
-        {
-          "value": "maintenance",
-          "title": "Em manutenção"
-        }
-      ],
-      "description": "Situação operacional atual do equipamento para fins de locação."
+      "state": "rented",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "maintenance",
+      "reachedBy": "actor"
     }
   ],
-  "fieldsBase": [
-    { "fieldId": "name", "title": "Nome", "type": "string", "required": true, "description": "Nome do equipamento." },
-    { "fieldId": "serialNumber", "title": "Número de série", "type": "string", "required": false, "description": "Número de série do equipamento." },
-    { "fieldId": "brand", "title": "Marca", "type": "string", "required": false, "description": "Marca do equipamento." },
-    { "fieldId": "model", "title": "Modelo", "type": "string", "required": false, "description": "Modelo do equipamento." }
-  ],
-  "lifecycleStates": [],
-  "transitions": [],
-  "storage": {
-    "target": "mdm",
-    "scope": "organization",
-    "idField": "id",
-    "mdmType": "locacaoEquipamentos.Equipamento"
-  }
-} as const satisfies Ns5OntologyEntityArtifact;
+  "transitions": [
+    {
+      "transitionId": "registrarLocacao",
+      "from": [
+        "available"
+      ],
+      "to": "rented",
+      "by": [
+        "atendente"
+      ],
+      "description": "Registra que o equipamento foi entregue para locação.",
+      "ruleRefs": [
+        "periodosLocacaoSemSobreposicao",
+        "equipamentoEmManutencaoNaoPodeSerLocado"
+      ]
+    },
+    {
+      "transitionId": "registrarDevolucao",
+      "from": [
+        "rented"
+      ],
+      "to": "available",
+      "by": [
+        "atendente"
+      ],
+      "description": "Registra a devolução do equipamento e o torna disponível novamente."
+    },
+    {
+      "transitionId": "iniciarManutencao",
+      "from": [
+        "available"
+      ],
+      "to": "maintenance",
+      "by": [
+        "gerente"
+      ],
+      "description": "Coloca o equipamento em manutenção, impedindo novas locações."
+    },
+    {
+      "transitionId": "concluirManutencao",
+      "from": [
+        "maintenance"
+      ],
+      "to": "available",
+      "by": [
+        "gerente"
+      ],
+      "description": "Conclui a manutenção e libera o equipamento para locação."
+    }
+  ]
+} as const satisfies Ns5OntologyEntityV3;
 
 export type LocacaoEquipamentosEntityEquipamentoType = typeof locacaoEquipamentosEntityEquipamento;
 

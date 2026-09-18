@@ -3,41 +3,46 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const ordenServicioEntityCliente = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "ordenServicio",
   "entityId": "Cliente",
   "title": "Cliente",
-  "description": "Persona que entrega un aparato para servicio técnico, recibe el presupuesto y consulta o responde sus propias órdenes desde el portal.",
+  "description": "Persona que entrega un aparato al servicio técnico, consulta sus propias órdenes y decide sobre el presupuesto desde el portal.",
   "displayField": "details.identification.name",
   "relationships": {
-    "ordenesServicio": {
-      "relationshipId": "ordenServicioCliente",
+    "serviceOrders": {
+      "relationshipId": "serviceOrderCustomer",
       "to": "OrdenServicio",
-      "via": "OrdenServicio.clienteId",
+      "via": "OrdenServicio.customerId",
       "cardinality": "1:N",
       "title": "Órdenes de servicio del cliente",
-      "description": "Un cliente puede estar asociado a varias órdenes de servicio; cada orden corresponde a un único cliente.",
+      "description": "Órdenes de servicio asociadas a este cliente, quien puede consultarlas y decidir sobre sus presupuestos.",
       "mode": "fk",
       "direction": "to",
-      "required": "Cuando se consulta una orden de servicio asociada a este cliente.",
+      "required": true,
       "role": "cliente"
     }
   },
   "capabilities": {
-    "read.byId": "Consulta un cliente por su identificador maestro para mostrarlo en una orden de servicio; lo usan recepción, técnico y portal según sus permisos.",
-    "locate.byName": "Busca clientes por nombre al abrir una orden de servicio; lo usa recepción para evitar registros duplicados.",
-    "locate.byDocument": "Localiza un cliente por su documento nacional antes de crear o vincular su rol; lo usa recepción para deduplicar el registro.",
-    "locate.byContact": "Localiza al cliente por un canal de contacto ya vinculado; lo usa recepción cuando el cliente no presenta documento.",
-    "register.createOrAttach": "Crea la persona si no existe o le adjunta el rol de Cliente de ordenServicio si ya existe; lo usa recepción al abrir una orden.",
-    "edit.platformFields": "Actualiza los datos maestros permitidos del cliente, como nombre, documento o consentimiento; lo usa recepción al corregir sus datos.",
-    "inactivate": "Inactiva o reactiva el registro maestro del cliente sin eliminarlo; lo usa recepción autorizada cuando el cliente deja de utilizar el servicio.",
-    "listLinks": "Lista las órdenes de servicio relacionadas con el cliente mediante la relación de la orden; lo usan recepción y el portal dentro de su alcance de datos.",
-    "invite.login": "Invita al cliente a iniciar sesión en el portal, creando su índice de acceso sin guardarlo en el módulo; lo usa recepción."
+    "read.byId": "Consulta un cliente por su identificador maestro para mostrarlo en la orden o en el portal; usa lectura directa por id; lo usan recepcionista, técnico y cliente dentro de sus permisos.",
+    "locate.byName": "Busca un cliente por una parte de su nombre al abrir una orden; usa el índice de nombre; lo usa el recepcionista.",
+    "locate.byDocument": "Localiza un cliente por su documento para evitar registros duplicados antes de abrir una orden; usa el índice de documento; lo usa el recepcionista.",
+    "locate.byContact": "Localiza un cliente por un canal de contacto al identificarlo en recepción; busca sus canales de contacto vinculados; lo usa el recepcionista.",
+    "register.createOrAttach": "Crea o vincula el registro maestro de la persona y le asigna el rol de cliente del módulo; deduplica por documento o contacto y adjunta el rol; lo usa el recepcionista al abrir una orden.",
+    "edit.platformFields": "Actualiza los datos de identificación, dirección y consentimiento administrados por la plataforma; reindexa la identificación cuando corresponde; lo usa el recepcionista.",
+    "link.contact": "Vincula un canal de contacto del cliente para comunicaciones y acceso al portal; crea el ContactChannel y la relación HasContact; lo usa el recepcionista.",
+    "invite.login": "Invita al cliente a iniciar sesión en el portal para consultar únicamente sus propias órdenes y decidir sobre presupuestos; crea el índice de acceso; lo usa el recepcionista.",
+    "listLinks": "Muestra las relaciones vigentes del cliente, incluidas sus órdenes asociadas; consulta las relaciones y sus vigencias; lo usan recepcionista y técnico según sus permisos.",
+    "inactivate": "Inactiva o reactiva el registro maestro del cliente sin eliminarlo; cambia el estado administrado por la plataforma; lo usa el recepcionista autorizado.",
+    "attach.document": "Adjunta documentación o imágenes que correspondan al registro maestro del cliente; almacena el archivo mediante la plataforma; lo usa el recepcionista.",
+    "audit": "Consulta quién modificó los datos maestros del cliente y cuándo; lee la auditoría de la plataforma; lo usa el personal autorizado."
   },
   "rules": [
     "rule-foreign-namespace-refused",
+    "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
-    "rule-document-shape-validated"
+    "rule-person-ssn-unique-for-us",
+    "rule-person-privacy-consent-required-br-eu"
   ],
   "kind": "role",
   "subtype": "Person",
@@ -61,7 +66,7 @@ export const ordenServicioEntityCliente = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Registro maestro de la persona cliente, con datos de la plataforma y el espacio propio del módulo de órdenes de servicio.",
+        "description": "Registro maestro de la persona cliente utilizado por el módulo de órdenes de servicio.",
         "fields": {
           "identification": {
             "type": "object",
@@ -76,7 +81,7 @@ export const ordenServicioEntityCliente = {
                   {
                     "value": "Person",
                     "title": "Persona",
-                    "description": "Persona que actúa como cliente del servicio técnico."
+                    "description": "Persona natural registrada como cliente."
                   }
                 ],
                 "description": "Indica que este registro maestro corresponde a una persona cliente.",
@@ -90,7 +95,7 @@ export const ordenServicioEntityCliente = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nombre con el que recepción identifica al cliente al abrir o consultar sus órdenes.",
+                "description": "Nombre con el que se identifica al cliente al abrir y consultar sus órdenes de servicio.",
                 "title": "Nombre",
                 "min": 0,
                 "max": 0
@@ -104,12 +109,12 @@ export const ordenServicioEntityCliente = {
                   {
                     "value": "Active",
                     "title": "Activo",
-                    "description": "El cliente puede utilizarse en nuevas órdenes."
+                    "description": "El cliente puede utilizarse en órdenes de servicio."
                   },
                   {
                     "value": "Inactive",
                     "title": "Inactivo",
-                    "description": "El cliente no se utiliza en nuevas órdenes."
+                    "description": "El cliente no está disponible para nuevos usos."
                   },
                   {
                     "value": "Merged",
@@ -119,11 +124,11 @@ export const ordenServicioEntityCliente = {
                   {
                     "value": "Blocked",
                     "title": "Bloqueado",
-                    "description": "El uso del registro está bloqueado por la plataforma."
+                    "description": "El registro está bloqueado por la plataforma."
                   }
                 ],
-                "title": "Estado maestro",
-                "description": "Estado de actividad del registro maestro del cliente en la plataforma.",
+                "title": "Estado del registro",
+                "description": "Disponibilidad del registro maestro del cliente en la plataforma.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -135,12 +140,12 @@ export const ordenServicioEntityCliente = {
                   {
                     "value": "SSN",
                     "title": "SSN",
-                    "description": "Número de Seguro Social."
+                    "description": "Número de seguridad social."
                   },
                   {
                     "value": "EIN",
                     "title": "EIN",
-                    "description": "Número de identificación fiscal de empresa."
+                    "description": "Número de identificación fiscal estadounidense."
                   },
                   {
                     "value": "Passport",
@@ -150,7 +155,7 @@ export const ordenServicioEntityCliente = {
                   {
                     "value": "DriversLicense",
                     "title": "Licencia de conducir",
-                    "description": "Documento de licencia de conducir."
+                    "description": "Licencia de conducir."
                   },
                   {
                     "value": "NationalId",
@@ -160,17 +165,17 @@ export const ordenServicioEntityCliente = {
                   {
                     "value": "CPF",
                     "title": "CPF",
-                    "description": "Registro de persona física."
+                    "description": "Documento CPF."
                   },
                   {
                     "value": "CNPJ",
                     "title": "CNPJ",
-                    "description": "Registro nacional de persona jurídica."
+                    "description": "Documento CNPJ."
                   },
                   {
                     "value": "VAT",
                     "title": "IVA",
-                    "description": "Identificación tributaria."
+                    "description": "Identificador fiscal de IVA."
                   },
                   {
                     "value": "Other",
@@ -179,7 +184,7 @@ export const ordenServicioEntityCliente = {
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo de documento nacional utilizado para localizar o deduplicar al cliente cuando fue informado.",
+                "description": "Tipo de documento nacional usado para identificar y evitar duplicar al cliente.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -187,7 +192,7 @@ export const ordenServicioEntityCliente = {
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número del documento del cliente cuando fue informado para su identificación y deduplicación.",
+                "description": "Número del documento del cliente, usado para localizarlo y evitar duplicados.",
                 "title": "Número de documento",
                 "maxLength": 0,
                 "min": 0,
@@ -200,44 +205,75 @@ export const ordenServicioEntityCliente = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "Código ISO del país aplicable al documento y a las reglas del cliente.",
+                "description": "Código de país que determina el contexto del documento y las reglas aplicables al cliente.",
                 "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Datos de identificación de la persona usados para reconocer y localizar al cliente al abrir una orden."
+            "description": "Datos de identificación del cliente administrados por la plataforma."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {
+              "addresses": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "Address",
+                "title": "Direcciones",
+                "description": "Direcciones del cliente que la recepción puede consultar o actualizar cuando sean necesarias.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
               "contacts": {
                 "type": "object",
                 "required": true,
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Resumen derivado de los canales de contacto vinculados al cliente, utilizado por la plataforma para localizarlo o habilitar su acceso.",
-                "title": "Canales de contacto",
+                "description": "Resumen derivado de los canales de contacto vinculados al cliente, usado para enviarle el acceso al portal y comunicaciones de la orden.",
+                "title": "Contactos",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "relationshipRefs": {
+                "type": "object",
+                "required": true,
+                "derived": true,
+                "description": "Referencias compactas derivadas de las relaciones del cliente con otros registros maestros.",
+                "title": "Referencias de relaciones",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Datos base de plataforma que permiten contactar al cliente y reconocer sus relaciones."
+            "description": "Datos generales del cliente administrados por la plataforma."
           },
           "person": {
             "type": "object",
             "owner": "platform",
-            "fields": {},
-            "description": "Datos propios de una persona que la plataforma conserva para el cliente cuando sean necesarios."
+            "fields": {
+              "privacyConsent": {
+                "type": "object",
+                "of": "PrivacyConsent",
+                "description": "Consentimiento de privacidad del cliente cuando corresponda por su residencia.",
+                "title": "Consentimiento de privacidad",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Datos propios de la persona que pueden ser necesarios para las obligaciones de privacidad del cliente."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Datos promovidos por la organización para uso compartido entre módulos; este módulo solo los consulta."
+            "description": "Datos promovidos por la organización que el módulo puede consultar, sin declararlos ni modificarlos."
           },
           "ordenServicio": {
             "type": "object",

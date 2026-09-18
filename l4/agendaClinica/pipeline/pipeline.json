@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-17T01:01:41.504Z",
+      "updatedAt": "2026-09-18T07:03:40.922Z",
       "artifactPaths": [
         "l4/agendaClinica/module.defs.ts"
       ],
@@ -16,14 +16,14 @@
           "kind": "internal",
           "origin": "named",
           "title": "Recepcionista",
-          "description": "Profissional da clínica que cadastra pacientes, agenda e confirma consultas e registra faltas."
+          "description": "Cadastra pacientes, agenda consultas, confirma consultas por telefone e registra faltas."
         },
         {
           "actorId": "profissional",
           "kind": "internal",
           "origin": "named",
           "title": "Profissional",
-          "description": "Médico ou terapeuta da clínica que consulta a própria agenda e registra o atendimento."
+          "description": "Consulta a própria agenda diária e registra o atendimento com uma anotação."
         }
       ],
       "normalizations": [
@@ -31,18 +31,17 @@
           "kind": "ptToPtBR",
           "detail": "pt→pt-BR"
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-17T01:02:08.574Z",
+      "updatedAt": "2026-09-18T07:06:15.294Z",
       "artifactPaths": [
         "l4/agendaClinica/journeys/cadastrarPaciente.defs.ts",
         "l4/agendaClinica/journeys/agendarConsulta.defs.ts",
         "l4/agendaClinica/journeys/confirmarConsulta.defs.ts",
         "l4/agendaClinica/journeys/registrarFalta.defs.ts",
-        "l4/agendaClinica/journeys/consultarAgendaDoDia.defs.ts",
+        "l4/agendaClinica/journeys/consultarAgendaDiaria.defs.ts",
         "l4/agendaClinica/journeys/registrarAtendimento.defs.ts",
         "l4/agendaClinica/journeys/index.defs.ts"
       ],
@@ -53,7 +52,7 @@
           "kind": "dropTransitionRef",
           "journeyId": "cadastrarPaciente",
           "stepId": "registrarPaciente",
-          "detail": "transitionRef invalidOops dropped; effect is create."
+          "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
@@ -61,20 +60,28 @@
           "stepId": "criarConsulta",
           "detail": "transitionRef x dropped; effect is create."
         }
-      ],
-      "autoReason": "fast"
+      ]
+    },
+    "workflows50": {
+      "status": "approved",
+      "updatedAt": "2026-09-18T07:06:26.229Z",
+      "artifactPaths": [
+        "l4/agendaClinica/workflows.defs.ts"
+      ]
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-17T01:03:53.296Z",
+      "updatedAt": "2026-09-18T07:09:15.721Z",
       "artifactPaths": [
         "l4/agendaClinica/ontology/Paciente.defs.ts",
         "l4/agendaClinica/ontology/Profissional.defs.ts",
+        "l4/agendaClinica/ontology/Recepcionista.defs.ts",
         "l4/agendaClinica/ontology/ContatoPaciente.defs.ts",
         "l4/agendaClinica/ontology/Consulta.defs.ts",
         "l4/agendaClinica/ontology/index.defs.ts"
       ],
       "uncitedEntities": [
+        "Recepcionista",
         "ContatoPaciente"
       ],
       "liftedAggregateEntities": [],
@@ -88,6 +95,11 @@
           "kind": "derivedFromPlatform",
           "entityId": "Profissional",
           "detail": "roleTag agendaClinica.Profissional; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Recepcionista",
+          "detail": "roleTag agendaClinica.Recepcionista; source /_102034_/l4/ontology/mdm.defs.ts"
         },
         {
           "kind": "derivedFromPlatform",
@@ -125,14 +137,39 @@
           "detail": "Profissional.details.identification.subtype.values"
         },
         {
+          "kind": "tightened",
+          "entityId": "Profissional",
+          "detail": "Profissional.details.person.occupation.required"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "Profissional",
+          "detail": "details.agendaClinica"
+        },
+        {
           "kind": "derivedFromPlatform",
-          "entityId": "ContatoPaciente",
+          "entityId": "Recepcionista",
           "detail": "record.fields.id, record.fields.version"
         },
         {
           "kind": "tightened",
+          "entityId": "Recepcionista",
+          "detail": "Recepcionista.details.identification.subtype.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Recepcionista",
+          "detail": "Recepcionista.details.identification.docType.values"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "Recepcionista",
+          "detail": "details.agendaClinica"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "ContatoPaciente",
-          "detail": "ContatoPaciente.details.identification.subtype.values"
+          "detail": "record.fields.id, record.fields.version"
         },
         {
           "kind": "tightened",
@@ -152,14 +189,16 @@
       ],
       "citedRules": [
         "rule-foreign-namespace-refused",
+        "rule-delete-blocked-by-relationships",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "rule-person-ssn-unique-for-us",
         "rule-person-privacy-consent-required-br-eu",
         "rule-contact-value-unique-per-type",
-        "consultaSemConflitoHorario",
-        "transicaoConsultaPermitida",
-        "anotacaoObrigatoriaNoAtendimento",
-        "acessoProfissionalPropriaAgenda"
+        "uniqueProfessionalSchedule",
+        "consultationTransitionFlow",
+        "attendanceNoteRequired",
+        "professionalOwnAppointment"
       ],
       "citedCapabilities": [
         "read.byId",
@@ -172,88 +211,77 @@
         "link.contact",
         "listLinks",
         "audit",
+        "locate.byTag",
+        "invite.login",
+        "statusHistory.read",
         "edit.moduleNamespace",
-        "agendaClinica.listarConsultas",
         "link",
         "unlink",
-        "agendaClinica.localizarConsultas",
-        "agendaClinica.agendarConsulta",
-        "agendaClinica.inspecionarConsulta",
-        "agendaClinica.consultarAgendaDoDia",
-        "agendaClinica.confirmarConsulta",
-        "agendaClinica.registrarFalta",
-        "agendaClinica.registrarAtendimento"
-      ],
-      "autoReason": "fast"
-    },
-    "workflows50": {
-      "status": "approved",
-      "updatedAt": "2026-09-17T01:04:27.650Z",
-      "artifactPaths": [
-        "l4/agendaClinica/workflows.defs.ts"
-      ],
-      "autoReason": "fast"
+        "locate.byColumn",
+        "count",
+        "listByForeignKey",
+        "create",
+        "transition",
+        "uniqueKey",
+        "read.mdmRecord"
+      ]
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-17T01:04:21.920Z",
+      "updatedAt": "2026-09-18T07:09:43.366Z",
       "artifactPaths": [
         "l4/agendaClinica/rules.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-17T01:05:12.277Z",
+      "updatedAt": "2026-09-18T07:11:32.498Z",
       "artifactPaths": [
         "l4/agendaClinica/access.defs.ts"
       ],
       "normalizations": [
         {
           "kind": "dropAnchorEntity",
-          "grantId": "recepcionistaPacientes",
+          "grantId": "recepcionistaCadastroPacientes",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         },
         {
           "kind": "dropAnchorEntity",
-          "grantId": "recepcionistaProfissionais",
+          "grantId": "recepcionistaAgendaConsultas",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         },
         {
           "kind": "dropAnchorEntity",
-          "grantId": "recepcionistaConsultas",
+          "grantId": "recepcionistaLocalizarProfissionais",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-17T01:05:28.574Z",
+      "updatedAt": "2026-09-18T07:12:10.213Z",
       "artifactPaths": [
         "l4/agendaClinica/integration.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-17T01:05:28.788Z",
+      "updatedAt": "2026-09-18T07:12:10.397Z",
       "artifactPaths": [
         "l4/agendaClinica/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
         "l5/config.json",
         "l5/project.json"
-      ],
-      "autoReason": "fast"
+      ]
     }
   },
   "sourcePrompt": "criar o módulo agendaClinica em português. a clínica tem profissionais (médicos e terapeutas) e pacientes. a recepcionista cadastra pacientes, marca consultas para um profissional em data e hora, confirma por telefone, e registra falta quando o paciente não vem. o profissional vê só a própria agenda do dia e marca a consulta como atendida com uma anotação. não pode haver duas consultas do mesmo profissional no mesmo horário. dois perfis: recepcionista e profissional.",
   "invocation": {
-    "fast": true,
+    "fast": false,
     "module": "agendaClinica",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-17T01:05:28.788Z",
+  "updatedAt": "2026-09-18T07:12:10.397Z",
   "rebuildAll": {
     "deleted": [
       "l4/agendaClinica/access.defs.ts",
@@ -261,16 +289,15 @@
       "l4/agendaClinica/journeys/agendarConsulta.defs.ts",
       "l4/agendaClinica/journeys/cadastrarPaciente.defs.ts",
       "l4/agendaClinica/journeys/confirmarConsulta.defs.ts",
-      "l4/agendaClinica/journeys/consultarAgendaDiaria.defs.ts",
+      "l4/agendaClinica/journeys/consultarAgendaDoDia.defs.ts",
       "l4/agendaClinica/journeys/index.defs.ts",
       "l4/agendaClinica/journeys/registrarAtendimento.defs.ts",
-      "l4/agendaClinica/journeys/registrarFaltaPaciente.defs.ts",
+      "l4/agendaClinica/journeys/registrarFalta.defs.ts",
       "l4/agendaClinica/module.defs.ts",
       "l4/agendaClinica/ontology/Consulta.defs.ts",
-      "l4/agendaClinica/ontology/Contato.defs.ts",
+      "l4/agendaClinica/ontology/ContatoPaciente.defs.ts",
       "l4/agendaClinica/ontology/Paciente.defs.ts",
       "l4/agendaClinica/ontology/Profissional.defs.ts",
-      "l4/agendaClinica/ontology/Recepcionista.defs.ts",
       "l4/agendaClinica/ontology/index.defs.ts",
       "l4/agendaClinica/pipeline/access60-draft.json",
       "l4/agendaClinica/pipeline/finalize-report.json",
@@ -278,10 +305,9 @@
       "l4/agendaClinica/pipeline/journeys20-draft.json",
       "l4/agendaClinica/pipeline/module10-draft.json",
       "l4/agendaClinica/pipeline/ontology30-Consulta-draft.json",
-      "l4/agendaClinica/pipeline/ontology30-Contato-draft.json",
+      "l4/agendaClinica/pipeline/ontology30-ContatoPaciente-draft.json",
       "l4/agendaClinica/pipeline/ontology30-Paciente-draft.json",
       "l4/agendaClinica/pipeline/ontology30-Profissional-draft.json",
-      "l4/agendaClinica/pipeline/ontology30-Recepcionista-draft.json",
       "l4/agendaClinica/pipeline/ontology30-draft.json",
       "l4/agendaClinica/pipeline/ontology30-plan-draft.json",
       "l4/agendaClinica/pipeline/pipeline.json",
@@ -296,6 +322,6 @@
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-09-17T01:01:29.220Z"
+    "at": "2026-09-18T07:03:40.912Z"
   }
 }

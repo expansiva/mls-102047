@@ -3,7 +3,7 @@
 import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const comprasOntologyIndex = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "compras",
   "businessDomain": "Compras",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
@@ -13,51 +13,61 @@ export const comprasOntologyIndex = {
   },
   "entities": [
     {
-      "entityId": "Fornecedor",
+      "entityId": "Supplier",
       "kind": "role",
       "subtype": "Company"
     },
     {
-      "entityId": "Produto",
-      "kind": "role",
-      "subtype": "Product"
-    },
-    {
-      "entityId": "ContatoFornecedor",
+      "entityId": "SupplierContact",
       "kind": "role",
       "subtype": "ContactChannel"
     },
     {
-      "entityId": "ProdutoFornecedor",
+      "entityId": "Product",
+      "kind": "role",
+      "subtype": "Product"
+    },
+    {
+      "entityId": "Buyer",
+      "kind": "role",
+      "subtype": "Person"
+    },
+    {
+      "entityId": "SupplierOffering",
       "kind": "entity",
       "class": "supporting"
     },
     {
-      "entityId": "PedidoCompra",
+      "entityId": "PurchaseOrder",
       "kind": "entity",
       "class": "core"
     },
     {
-      "entityId": "RecebimentoPedido",
+      "entityId": "GoodsReceipt",
       "kind": "entity",
       "class": "event"
+    },
+    {
+      "entityId": "PurchaseOrderDashboard",
+      "kind": "entity",
+      "class": "supporting"
     }
   ],
   "relationships": [
     {
-      "relationshipId": "fornecedorHasContact",
-      "from": "Fornecedor",
-      "to": "ContatoFornecedor",
+      "relationshipId": "supplierHasContact",
+      "from": "Supplier",
+      "to": "SupplierContact",
       "type": "oneToMany",
       "required": false,
       "mode": "mdmRelationship",
-      "description": "Um fornecedor pode ter vários canais de contato vinculados para a comunicação de compras.",
+      "description": "Um fornecedor pode ter canais de contato vinculados para sua comunicação comercial.",
       "catalogType": "HasContact"
     },
     {
-      "relationshipId": "fornecedorSuppliesProduct",
-      "from": "Fornecedor",
-      "to": "Produto",
+      "relationshipId": "supplierSuppliesProduct",
+      "from": "Supplier",
+      "to": "Product",
       "type": "manyToMany",
       "required": false,
       "mode": "mdmRelationship",
@@ -65,44 +75,54 @@ export const comprasOntologyIndex = {
       "catalogType": "SuppliesProduct"
     },
     {
-      "relationshipId": "produtoFornecedorFornecedor",
-      "from": "ProdutoFornecedor",
-      "to": "Fornecedor",
+      "relationshipId": "supplierOfferingSupplier",
+      "from": "SupplierOffering",
+      "to": "Supplier",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição comercial de produto fornecido pertence a um fornecedor.",
-      "field": "ProdutoFornecedor.fornecedorId"
+      "description": "Cada condição de fornecimento pertence a um fornecedor.",
+      "field": "SupplierOffering.supplierId"
     },
     {
-      "relationshipId": "produtoFornecedorProduto",
-      "from": "ProdutoFornecedor",
-      "to": "Produto",
+      "relationshipId": "supplierOfferingProduct",
+      "from": "SupplierOffering",
+      "to": "Product",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição comercial registra o produto disponibilizado pelo fornecedor.",
-      "field": "ProdutoFornecedor.produtoId"
+      "description": "Cada condição de fornecimento define o preço combinado para um produto.",
+      "field": "SupplierOffering.productId"
     },
     {
-      "relationshipId": "pedidoCompraFornecedor",
-      "from": "PedidoCompra",
-      "to": "Fornecedor",
+      "relationshipId": "supplierOfferingBuyer",
+      "from": "SupplierOffering",
+      "to": "Buyer",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada pedido de compra é aberto para um único fornecedor.",
-      "field": "PedidoCompra.fornecedorId"
+      "description": "Cada condição de fornecimento é cadastrada por um comprador para permitir o escopo pessoal do cadastro.",
+      "field": "SupplierOffering.buyerId"
     },
     {
-      "relationshipId": "recebimentoPedidoPedidoCompra",
-      "from": "RecebimentoPedido",
-      "to": "PedidoCompra",
+      "relationshipId": "purchaseOrderSupplier",
+      "from": "PurchaseOrder",
+      "to": "Supplier",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento registra uma entrega total ou parcial de um pedido de compra.",
-      "field": "RecebimentoPedido.pedidoCompraId"
+      "description": "Cada pedido de compra é aberto para um fornecedor.",
+      "field": "PurchaseOrder.supplierId"
+    },
+    {
+      "relationshipId": "goodsReceiptPurchaseOrder",
+      "from": "GoodsReceipt",
+      "to": "PurchaseOrder",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada recebimento registra a entrega total ou parcial de um pedido de compra.",
+      "field": "GoodsReceipt.purchaseOrderId"
     }
   ]
 } as const satisfies Ns5OntologyIndexV3;

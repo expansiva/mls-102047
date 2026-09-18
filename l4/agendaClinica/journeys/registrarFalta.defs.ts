@@ -8,36 +8,36 @@ export const registrarFaltaJourney = {
   "business": {
     "actorRef": "recepcionista",
     "title": "Registrar falta do paciente",
-    "goal": "Informar que o paciente não compareceu à consulta.",
+    "goal": "Registrar que o paciente não compareceu à consulta.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarConsultaDoDia",
+        "stepId": "localizarConsultaParaFalta",
         "kind": "locate",
         "entity": "Consulta",
         "title": "x",
-        "description": "Localiza a consulta do paciente que não compareceu."
+        "description": "Localiza a consulta para a qual o paciente não compareceu."
       },
       {
-        "stepId": "registrarNaoComparecimento",
+        "stepId": "registrarFaltaPaciente",
         "kind": "act",
         "entity": "Consulta",
         "effect": "transition",
         "transitionRef": "registrarFalta",
         "title": "x",
-        "description": "Marca a consulta como falta do paciente."
+        "description": "Marca a consulta como falta porque o paciente não compareceu."
       }
     ],
     "outcome": {
-      "statement": "O não comparecimento do paciente fica registrado na consulta.",
+      "statement": "A ausência do paciente fica registrada na consulta.",
       "evidence": [
-        "Situação da consulta indica falta do paciente."
+        "Situação da consulta registrada como falta."
       ]
     }
   },
-  "businessHash": "sha256:906d7648c7182d023bdcfb78806d5be726418da8df0eb3ec71b0ed1acbc55439"
+  "businessHash": "sha256:cd0542f6fc78ba5c17f445e7ecdc1c2199191e0aaa07a35f79089c3ea61bac3f"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarFaltaJourneyType = typeof registrarFaltaJourney;

@@ -8,7 +8,7 @@ export const emitirExtratoPorPagadorJourney = {
   "business": {
     "actorRef": "gerenteFinanceiro",
     "title": "Emitir extrato por pagador",
-    "goal": "Gerar a posição de títulos e recebimentos de um pagador.",
+    "goal": "Gerar um extrato dos títulos e recebimentos de um pagador.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,33 +17,34 @@ export const emitirExtratoPorPagadorJourney = {
         "stepId": "localizarPagador",
         "kind": "locate",
         "entity": "Pagador",
-        "title": "Localizar pagador",
-        "description": "Localiza o pagador a partir do contexto disponível ou por consulta na organização."
+        "title": "x",
+        "description": "Localiza o pagador para o qual o extrato será emitido."
       },
       {
-        "stepId": "inspecionarTitulosDoPagador",
+        "stepId": "consultarMovimentacoesDoPagador",
         "kind": "inspect",
         "entity": "TituloReceber",
-        "title": "Consultar títulos do pagador",
-        "description": "Consulta os títulos do pagador, incluindo valores, vencimentos, origens e saldos."
+        "title": "x",
+        "description": "Confere os títulos, saldos e recebimentos associados ao pagador selecionado."
       },
       {
-        "stepId": "inspecionarRecebimentosDoPagador",
-        "kind": "inspect",
-        "entity": "Recebimento",
-        "title": "Emitir extrato do pagador",
-        "description": "Consulta os recebimentos vinculados aos títulos do pagador e emite o extrato consolidado."
+        "stepId": "gerarExtratoDoPagador",
+        "kind": "act",
+        "entity": "ExtratoPagador",
+        "effect": "create",
+        "title": "x",
+        "description": "Emite o extrato do pagador com seus títulos e recebimentos."
       }
     ],
     "outcome": {
-      "statement": "O extrato do pagador é emitido com seus títulos e recebimentos.",
+      "statement": "O extrato do pagador é emitido com a movimentação financeira consultada.",
       "evidence": [
-        "O extrato identifica o pagador consultado.",
-        "O extrato apresenta títulos, saldos e recebimentos relacionados ao pagador."
+        "Extrato gerado para o pagador selecionado.",
+        "Extrato apresenta títulos, recebimentos e saldos correspondentes."
       ]
     }
   },
-  "businessHash": "sha256:9dce2144ae906b1438174be29dac147c6a49c4fa2b618a35b386bd854b884ab0"
+  "businessHash": "sha256:aab4d856be67482e82d2944a0345916230269b377b653b67311cff60c1a6a27d"
 } as const satisfies Ns5JourneyArtifact;
 
 export type EmitirExtratoPorPagadorJourneyType = typeof emitirExtratoPorPagadorJourney;

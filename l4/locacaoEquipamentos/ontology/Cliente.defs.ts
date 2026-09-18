@@ -1,34 +1,252 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/ontology/Cliente.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosEntityCliente = {
-  "schemaVersion": "2026-09-11-ns5-ontology-v2",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "locacaoEquipamentos",
   "entityId": "Cliente",
   "title": "Cliente",
-  "description": "Pessoa cadastrada como cliente da locadora e vinculada aos seus contratos de locação.",
-  "kind": "mdm",
-  "party": "person",
-  "mdmSubtype": "Person",
-  "displayField": "name",
-  "fields": [],
-  "fieldsBase": [
-    { "fieldId": "name", "title": "Nome completo", "type": "string", "required": true, "description": "Nome completo do cliente." },
-    { "fieldId": "docType", "title": "Tipo de documento", "type": "string", "required": true, "enum": [{ "value": "CPF", "title": "CPF" }], "description": "Tipo de documento de identificação do cliente." },
-    { "fieldId": "docId", "title": "CPF", "type": "string", "required": true, "description": "Número do CPF do cliente." },
-    { "fieldId": "contacts", "title": "Contatos", "type": "json", "required": true, "description": "Contatos do cliente (telefone, e-mail)." },
-    { "fieldId": "addresses", "title": "Endereços", "type": "json", "required": true, "description": "Endereços do cliente." }
+  "description": "Pessoa cadastrada na organização que realiza contratos de locação de equipamentos.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "contratosLocacao": {
+      "relationshipId": "contratoLocacaoCliente",
+      "to": "ContratoLocacao",
+      "via": "ContratoLocacao.clienteId",
+      "cardinality": "1:N",
+      "title": "Contratos de locação do cliente",
+      "description": "Contratos de locação vinculados a este cliente; cada contrato pertence obrigatoriamente a um cliente.",
+      "mode": "fk",
+      "direction": "to",
+      "required": "Nunca é obrigatório que o cliente já possua contratos de locação.",
+      "role": "cliente"
+    }
+  },
+  "capabilities": {
+    "read.byId": "Lê o cadastro mestre de um cliente pelo identificador conhecido · usa leitura por mdmId no índice e no documento · atendente e gerente ao consultar dados de um contrato.",
+    "locate.byName": "Localiza clientes pelo nome informado · pesquisa o índice de pessoas por nome e situação · atendente antes de criar um contrato de locação.",
+    "locate.byDocument": "Localiza um cliente pelo documento nacional · consulta o índice por tipo e número de documento para evitar duplicidade · atendente ao cadastrar ou selecionar o cliente.",
+    "register.createOrAttach": "Cria a pessoa quando ainda não existe ou associa a pessoa existente ao papel de Cliente · deduplica pelo documento e anexa a tag locacaoEquipamentos.Cliente · atendente ao registrar cliente para uma locação.",
+    "edit.platformFields": "Atualiza os dados de identificação do cliente mantidos pela plataforma · grava os campos da camada mestre e atualiza seu índice quando necessário · atendente na manutenção do cadastro.",
+    "inactivate": "Inativa ou reativa o cadastro mestre do cliente sem excluí-lo · altera a situação ativa ou inativa do registro · gerente ao impedir ou restabelecer o uso do cliente em novas locações.",
+    "comment": "Registra uma observação sobre o cadastro do cliente · cria comentário vinculado ao registro mestre no módulo · atendente e gerente quando precisarem contextualizar o atendimento.",
+    "audit": "Consulta as alterações realizadas no cadastro do cliente · lê a trilha de auditoria do registro mestre · gerente ao acompanhar a manutenção cadastral."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-document-shape-validated",
+    "rule-identity-never-in-namespace",
+    "rule-person-privacy-consent-required-br-eu"
   ],
-  "lifecycleStates": [],
-  "transitions": [],
-  "storage": {
-    "target": "mdm",
-    "scope": "organization",
-    "idField": "id",
-    "mdmType": "locacaoEquipamentos.Cliente"
+  "kind": "role",
+  "subtype": "Person",
+  "roleTag": "locacaoEquipamentos.Cliente",
+  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true,
+        "description": "Bumped by the engine on every write; optimistic concurrency."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "description": "Documento mestre da pessoa que atua como cliente nas locações de equipamentos.",
+        "fields": {
+          "identification": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "subtype": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Person",
+                    "title": "Pessoa",
+                    "description": "Pessoa física cadastrada como cliente."
+                  }
+                ],
+                "description": "Indica que este registro mestre é uma pessoa.",
+                "title": "Tipo de cadastro",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "name": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "maxLength": 0,
+                "description": "Nome pelo qual o cliente é identificado durante a locação.",
+                "title": "Nome",
+                "min": 0,
+                "max": 0
+              },
+              "status": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Active",
+                    "title": "Ativo",
+                    "description": "Cadastro disponível para uso."
+                  },
+                  {
+                    "value": "Inactive",
+                    "title": "Inativo",
+                    "description": "Cadastro fora de uso para novas locações."
+                  },
+                  {
+                    "value": "Merged",
+                    "title": "Mesclado",
+                    "description": "Cadastro unido a outro registro mestre."
+                  },
+                  {
+                    "value": "Blocked",
+                    "title": "Bloqueado",
+                    "description": "Cadastro bloqueado pela plataforma."
+                  }
+                ],
+                "title": "Situação do cadastro",
+                "description": "Situação mestre que define se o cliente pode ser utilizado em novos contratos.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "docType": {
+                "type": "enum",
+                "indexed": true,
+                "values": [
+                  {
+                    "value": "SSN",
+                    "title": "SSN",
+                    "description": "Documento social dos Estados Unidos."
+                  },
+                  {
+                    "value": "EIN",
+                    "title": "EIN",
+                    "description": "Identificador empresarial dos Estados Unidos."
+                  },
+                  {
+                    "value": "Passport",
+                    "title": "Passaporte",
+                    "description": "Passaporte."
+                  },
+                  {
+                    "value": "DriversLicense",
+                    "title": "Carteira de habilitação",
+                    "description": "Documento de habilitação."
+                  },
+                  {
+                    "value": "NationalId",
+                    "title": "Identidade nacional",
+                    "description": "Documento de identidade nacional."
+                  },
+                  {
+                    "value": "CPF",
+                    "title": "CPF",
+                    "description": "Cadastro de Pessoa Física."
+                  },
+                  {
+                    "value": "CNPJ",
+                    "title": "CNPJ",
+                    "description": "Cadastro Nacional da Pessoa Jurídica."
+                  },
+                  {
+                    "value": "VAT",
+                    "title": "VAT",
+                    "description": "Identificador tributário."
+                  },
+                  {
+                    "value": "Other",
+                    "title": "Outro",
+                    "description": "Outro documento aceito pela organização."
+                  }
+                ],
+                "title": "Tipo de documento",
+                "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do cliente.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "docId": {
+                "type": "string",
+                "indexed": true,
+                "description": "Número do documento apresentado para identificar o cliente e localizar cadastro já existente.",
+                "title": "Número do documento",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "countryCode": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "pattern": "^[A-Z]{2}$",
+                "maxLength": 0,
+                "default": "US",
+                "description": "Código do país ao qual se aplicam o documento e as regras do cliente.",
+                "title": "País do cadastro",
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Dados de identificação do cadastro mestre usados para reconhecer e localizar o cliente."
+          },
+          "base": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {},
+            "description": "Dados comuns do cadastro mestre da pessoa; nenhum campo adicional é usado especificamente nesta locação."
+          },
+          "person": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "privacyConsent": {
+                "type": "object",
+                "of": "PrivacyConsent",
+                "description": "Consentimento de privacidade do cliente quando exigido pelas regras aplicáveis.",
+                "title": "Consentimento de privacidade",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Dados próprios de pessoa física aplicáveis ao cliente."
+          },
+          "general": {
+            "type": "object",
+            "owner": "organization",
+            "open": true,
+            "description": "Dados promovidos pela organização e compartilhados entre módulos; este módulo apenas os lê."
+          },
+          "locacaoEquipamentos": {
+            "type": "object",
+            "owner": "module",
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
+          }
+        }
+      }
+    }
   }
-} as const satisfies Ns5OntologyEntityArtifact;
+} as const satisfies Ns5OntologyEntityV3;
 
 export type LocacaoEquipamentosEntityClienteType = typeof locacaoEquipamentosEntityCliente;
 

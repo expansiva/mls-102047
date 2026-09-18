@@ -3,47 +3,47 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaEntityFueling = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "manutencaoFrota",
   "entityId": "Fueling",
   "title": "Abastecimento",
-  "description": "Registro de combustível abastecido por um motorista em um veículo, com leitura do painel.",
-  "displayField": "id",
+  "description": "Registro de abastecimento realizado por um motorista em um veículo atribuído.",
+  "displayField": "details.fuelingDate",
   "relationships": {
-    "vehicle": {
+    "veiculo": {
       "relationshipId": "fuelingVehicle",
       "to": "Vehicle",
       "via": "Fueling.vehicleId",
       "cardinality": "N:1",
       "title": "Veículo abastecido",
-      "description": "Cada abastecimento é registrado para um único veículo.",
+      "description": "Todo abastecimento é registrado para um único veículo atribuído.",
       "mode": "fk",
-      "required": "Sempre, para registrar o abastecimento."
+      "required": "Sempre"
     },
-    "driver": {
+    "motorista": {
       "relationshipId": "fuelingDriver",
       "to": "Driver",
       "via": "Fueling.driverId",
       "cardinality": "N:1",
       "title": "Motorista responsável",
-      "description": "Cada abastecimento registra o motorista que o realizou.",
+      "description": "Todo abastecimento identifica o motorista que o registrou.",
       "mode": "fk",
-      "required": "Sempre, para identificar quem realizou o registro."
+      "required": "Sempre"
     }
   },
   "capabilities": {
-    "read.byId": "Lê um abastecimento pelo identificador da linha para exibir seus dados ao motorista ou gestor de frota.",
-    "locate.byColumn": "Lista abastecimentos por veículo, motorista ou data, com ordenação e paginação, para consultas da frota.",
-    "count": "Conta os abastecimentos que correspondem aos filtros de veículo, motorista e data em uma lista da frota.",
-    "listByForeignKey": "Lista os abastecimentos vinculados a um veículo ou a um motorista para compor o histórico correspondente.",
-    "create": "Registra um abastecimento com veículo, motorista, data, litros, valor e leitura do painel para o motorista.",
-    "read.mdmRecord": "Lê os registros mestres do veículo e do motorista referenciados para apresentar seus dados nas consultas de abastecimento.",
-    "transaction": "Grava o abastecimento e atualiza a quilometragem atual do veículo na mesma operação quando a nova leitura for mais recente."
+    "read.byId": "Consulta um abastecimento pelo identificador da linha para exibir seus dados ao motorista ou ao gestor de frota.",
+    "locate.byColumn": "Lista abastecimentos por veículo ou motorista, usando as colunas indexadas e paginação, para consultas da frota.",
+    "count": "Conta os abastecimentos que correspondem aos filtros de veículo ou motorista para os totais das listas.",
+    "listByForeignKey": "Lista os abastecimentos vinculados a um veículo ou a um motorista para o histórico consultado por motoristas e gestores.",
+    "create": "Registra um novo abastecimento com data, litros, valor e quilometragem do painel para o veículo atribuído ao motorista.",
+    "update": "Corrige os dados de um abastecimento já registrado quando necessário, preservando o veículo e o motorista responsáveis.",
+    "transaction": "Grava o abastecimento e atualiza a quilometragem atual do veículo na mesma operação para manter a frota consistente.",
+    "read.mdmRecord": "Lê os registros mestres do veículo e do motorista apontados pelo abastecimento para mostrar seus dados nas consultas."
   },
   "rules": [
-    "fuelingDriverMustBeAssignedToVehicle",
-    "fuelingOdometerReadingCannotBeNegative",
-    "fuelingUpdatesVehicleMileageWhenMoreRecent"
+    "motoristaAbasteceVeiculoAtribuido",
+    "quilometragemAbastecimentoNaoMenorQueAtual"
   ],
   "kind": "entity",
   "class": "event",
@@ -75,7 +75,7 @@ export const manutencaoFrotaEntityFueling = {
           "Vehicle"
         ],
         "title": "Veículo",
-        "description": "Veículo abastecido, usado para listar os abastecimentos e conferir sua quilometragem.",
+        "description": "Veículo da frota abastecido.",
         "maxLength": 0,
         "min": 0,
         "max": 0
@@ -94,35 +94,34 @@ export const manutencaoFrotaEntityFueling = {
         "min": 0,
         "max": 0
       },
-      "fuelingDate": {
-        "type": "date",
-        "required": true,
-        "indexed": true,
-        "of": "Address",
-        "title": "Data do abastecimento",
-        "description": "Data em que o combustível foi abastecido, usada para ordenar e consultar os registros.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
-      },
       "details": {
         "type": "object",
         "required": true,
         "of": "Address",
         "title": "Dados do abastecimento",
-        "description": "Dados informados pelo motorista no registro do abastecimento.",
+        "description": "Informações registradas no abastecimento do veículo.",
         "maxLength": 0,
         "min": 0,
         "max": 0,
         "fields": {
+          "fuelingDate": {
+            "type": "date",
+            "required": true,
+            "of": "Address",
+            "title": "Data do abastecimento",
+            "description": "Data em que o abastecimento foi realizado.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
           "liters": {
             "type": "number",
             "required": true,
             "of": "Address",
             "title": "Litros abastecidos",
-            "description": "Quantidade de combustível abastecida em litros.",
+            "description": "Quantidade de combustível abastecida, em litros.",
             "maxLength": 0,
-            "min": 0.01,
+            "min": 0,
             "max": 0
           },
           "amount": {
@@ -135,12 +134,12 @@ export const manutencaoFrotaEntityFueling = {
             "min": 0,
             "max": 0
           },
-          "odometerReading": {
+          "odometerKm": {
             "type": "integer",
             "required": true,
             "of": "Address",
             "title": "Quilometragem no painel",
-            "description": "Leitura do odômetro do veículo no momento do abastecimento.",
+            "description": "Quilometragem indicada no painel do veículo no momento do abastecimento.",
             "maxLength": 0,
             "min": 0,
             "max": 0

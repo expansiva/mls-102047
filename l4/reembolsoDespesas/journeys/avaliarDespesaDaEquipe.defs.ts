@@ -8,7 +8,7 @@ export const avaliarDespesaDaEquipeJourney = {
   "business": {
     "actorRef": "gestorEquipe",
     "title": "Avaliar despesa da equipe",
-    "goal": "Avaliar uma despesa de colaborador da equipe e decidir por sua aprovação para pagamento ou rejeição com motivo.",
+    "goal": "Avaliar uma despesa pendente da equipe e decidir por sua aprovação ou rejeição.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,50 +18,41 @@ export const avaliarDespesaDaEquipeJourney = {
         "kind": "locate",
         "entity": "Despesa",
         "title": "Localizar despesa pendente",
-        "description": "Localiza uma despesa pendente de aprovação de colaborador da equipe."
+        "description": "Localiza uma despesa pendente de avaliação de um colaborador da equipe."
       },
       {
-        "stepId": "consultarDespesaPendente",
+        "stepId": "inspecionarDespesaPendente",
         "kind": "inspect",
         "entity": "Despesa",
-        "title": "Consultar despesa",
-        "description": "Consulta os dados, a descrição e o comprovante da despesa."
+        "title": "Inspecionar despesa pendente",
+        "description": "Consulta os dados informados e o comprovante da despesa."
       },
       {
-        "stepId": "decidirAprovacaoOuRejeicao",
+        "stepId": "decidirAvaliacao",
         "kind": "decide",
         "entity": "Despesa",
-        "title": "Decidir sobre a despesa",
-        "description": "Escolhe aprovar a despesa para pagamento ou rejeitá-la, informando o motivo da rejeição quando essa for a decisão."
+        "title": "Decidir aprovação ou rejeição",
+        "description": "Escolhe aprovar a despesa para pagamento ou rejeitá-la, informando o motivo da rejeição."
       },
       {
         "stepId": "registrarDecisaoDaDespesa",
         "kind": "act",
         "entity": "Despesa",
         "effect": "transition",
-        "transitionRef": "recordApprovalDecision",
+        "transitionRef": "registrarDecisaoDaDespesa",
         "title": "Registrar decisão",
-        "description": "Registra a aprovação para pagamento ou a rejeição com seu motivo e encaminha a despesa ao responsável pela próxima tratativa."
-      },
-      {
-        "stepId": "encaminharDespesaAposDecisao",
-        "kind": "handoff",
-        "entity": "Despesa",
-        "title": "Encaminhar após decisão",
-        "description": "A despesa aprovada segue para o financeiro; a rejeitada retorna ao colaborador.",
-        "handoffTo": "financeiro"
+        "description": "Registra a aprovação para encaminhamento ao financeiro ou a rejeição com o motivo disponível ao colaborador."
       }
     ],
     "outcome": {
-      "statement": "A decisão do gestor sobre a despesa da equipe fica registrada, com aprovação para pagamento ou rejeição motivada.",
+      "statement": "A despesa da equipe é aprovada para pagamento ou rejeitada com um motivo.",
       "evidence": [
-        "Decisão de aprovação ou rejeição fica registrada na despesa.",
-        "Motivo da rejeição pode ser consultado quando a despesa for rejeitada.",
-        "Despesa aprovada fica disponível para pagamento e despesa rejeitada fica disponível ao colaborador."
+        "A despesa aprovada pode ser localizada pelo financeiro.",
+        "A despesa rejeitada contém o motivo informado pelo gestor."
       ]
     }
   },
-  "businessHash": "sha256:edd9fbf41940eb8b331606377d32248e65b72ce698a6edf05a5319d23ff57ec3"
+  "businessHash": "sha256:773867de18c72931b624d9a621db7927b5fb71c729bc5826501da0b826f78cc1"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AvaliarDespesaDaEquipeJourneyType = typeof avaliarDespesaDaEquipeJourney;

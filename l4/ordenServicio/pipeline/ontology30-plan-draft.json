@@ -7,7 +7,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Cliente",
-      "description": "Persona que entrega un aparato para servicio técnico, recibe el presupuesto y consulta o responde sus propias órdenes desde el portal.",
+      "description": "Persona que entrega un aparato al servicio técnico, consulta sus propias órdenes y decide sobre el presupuesto desde el portal.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "ordenServicio.Cliente",
@@ -18,7 +18,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Aparato",
-      "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior retiro.",
+      "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior entrega.",
       "displayField": "details.identification.name",
       "subtype": "AssetEquipment",
       "roleTag": "ordenServicio.Aparato",
@@ -29,8 +29,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Orden de servicio",
-      "description": "Registro operativo de la recepción, diagnóstico, presupuesto, decisión del cliente, reparación y entrega de un aparato.",
-      "displayField": "orderNumber",
+      "description": "Atención técnica de un aparato desde su recepción, análisis y presupuesto hasta su rechazo, reparación y entrega final.",
+      "displayField": "serviceOrderNumber",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
@@ -41,24 +41,24 @@
   ],
   "relationships": [
     {
-      "relationshipId": "ordenServicioCliente",
+      "relationshipId": "serviceOrderCustomer",
       "from": "OrdenServicio",
       "to": "Cliente",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada orden de servicio corresponde a un cliente; un cliente puede tener varias órdenes.",
-      "field": "OrdenServicio.clienteId"
+      "description": "Cada orden de servicio corresponde al cliente que entregó el aparato y que puede consultar y decidir sobre su presupuesto.",
+      "field": "OrdenServicio.customerId"
     },
     {
-      "relationshipId": "ordenServicioAparato",
+      "relationshipId": "serviceOrderDevice",
       "from": "OrdenServicio",
       "to": "Aparato",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada orden registra el aparato recibido; un aparato puede contar con varias órdenes de servicio a lo largo de su historial.",
-      "field": "OrdenServicio.aparatoId"
+      "description": "Cada orden de servicio registra el aparato recibido para su diagnóstico, reparación o retiro.",
+      "field": "OrdenServicio.deviceId"
     }
   ],
   "normalizations": [

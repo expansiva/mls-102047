@@ -7,14 +7,14 @@ export const manutencaoFrotaJourneyIndex = {
   "moduleName": "manutencaoFrota",
   "journeys": [
     {
+      "journeyId": "registrarAbastecimento",
+      "actorRef": "motorista",
+      "title": "Registrar abastecimento do veículo dirigido"
+    },
+    {
       "journeyId": "consultarVeiculosAtribuidos",
       "actorRef": "motorista",
       "title": "Consultar veículos atribuídos"
-    },
-    {
-      "journeyId": "registrarAbastecimento",
-      "actorRef": "motorista",
-      "title": "Registrar abastecimento"
     },
     {
       "journeyId": "cadastrarPlanoPreventivo",
@@ -32,9 +32,9 @@ export const manutencaoFrotaJourneyIndex = {
       "title": "Tratar alerta de manutenção preventiva vencida"
     },
     {
-      "journeyId": "registrarConclusaoOrdemManutencao",
+      "journeyId": "atualizarOrdemManutencao",
       "actorRef": "gestor",
-      "title": "Registrar conclusão da ordem de manutenção"
+      "title": "Atualizar ordem de manutenção"
     }
   ],
   "systemDecisions": []

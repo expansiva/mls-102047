@@ -8,7 +8,7 @@ export const pagarTituloComCartaoJourney = {
   "business": {
     "actorRef": "pagador",
     "title": "Pagar título em aberto com cartão",
-    "goal": "Quitar total ou parcialmente um dos próprios títulos em aberto usando cartão.",
+    "goal": "Quitar ou abater um título próprio em aberto usando cartão.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,34 +17,34 @@ export const pagarTituloComCartaoJourney = {
         "stepId": "localizarMeuTituloEmAberto",
         "kind": "locate",
         "entity": "TituloReceber",
-        "title": "Localizar título em aberto",
-        "description": "Localiza um dos próprios títulos em aberto, pelo contexto recebido ou por consulta no portal."
+        "title": "x",
+        "description": "Localiza um título em aberto vinculado ao próprio pagador."
       },
       {
-        "stepId": "inspecionarMeuTituloEmAberto",
+        "stepId": "conferirMeuTituloParaPagamento",
         "kind": "inspect",
         "entity": "TituloReceber",
-        "title": "Conferir título em aberto",
-        "description": "Confere o valor em aberto, o vencimento e a origem do título selecionado."
+        "title": "x",
+        "description": "Confere o valor, o vencimento e o saldo do título antes do pagamento."
       },
       {
-        "stepId": "registrarPagamentoComCartao",
+        "stepId": "pagarTituloComCartao",
         "kind": "act",
         "entity": "Recebimento",
         "effect": "create",
-        "title": "Registrar pagamento com cartão",
-        "description": "Registra o pagamento por cartão processado pela Stripe, vinculando-o ao título e atualizando seu saldo conforme o valor recebido."
+        "title": "x",
+        "description": "Registra o pagamento do título por cartão e atualiza seu saldo conforme o valor recebido."
       }
     ],
     "outcome": {
-      "statement": "O pagamento com cartão é registrado para o título do pagador.",
+      "statement": "O pagamento com cartão é registrado e o título reflete o novo saldo ou a quitação.",
       "evidence": [
-        "Há um recebimento por cartão vinculado ao título pago.",
-        "O título apresenta o saldo atualizado após o pagamento."
+        "Recebimento por cartão registrado para o título.",
+        "Saldo do título atualizado após o pagamento."
       ]
     }
   },
-  "businessHash": "sha256:f966cd2374cbcc15dcf34929f5cabbfb742855446d42b5df99f4c4434075ec6c"
+  "businessHash": "sha256:19138d25825cde4f2ff9481551e3b46b5567f9d4f11adc0b027c91c1efcf05cd"
 } as const satisfies Ns5JourneyArtifact;
 
 export type PagarTituloComCartaoJourneyType = typeof pagarTituloComCartaoJourney;

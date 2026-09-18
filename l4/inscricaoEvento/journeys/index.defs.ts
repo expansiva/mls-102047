@@ -12,9 +12,9 @@ export const inscricaoEventoJourneyIndex = {
       "title": "Cadastrar e publicar evento"
     },
     {
-      "journeyId": "realizarInscricaoPublica",
+      "journeyId": "inscreverSeEmEvento",
       "actorRef": "publico",
-      "title": "Realizar inscrição em evento"
+      "title": "Inscrever-se em evento"
     },
     {
       "journeyId": "cancelarInscricao",
@@ -22,9 +22,9 @@ export const inscricaoEventoJourneyIndex = {
       "title": "Cancelar inscrição"
     },
     {
-      "journeyId": "acompanharInscricoesDoEvento",
+      "journeyId": "acompanharEexportarInscricoes",
       "actorRef": "organizador",
-      "title": "Acompanhar inscritos e exportar lista"
+      "title": "Acompanhar e exportar inscrições"
     }
   ],
   "systemDecisions": []

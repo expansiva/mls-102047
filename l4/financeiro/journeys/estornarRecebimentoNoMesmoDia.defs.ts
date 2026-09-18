@@ -7,25 +7,25 @@ export const estornarRecebimentoNoMesmoDiaJourney = {
   "journeyId": "estornarRecebimentoNoMesmoDia",
   "business": {
     "actorRef": "caixa",
-    "title": "Estornar recebimento no mesmo dia",
-    "goal": "Cancelar um recebimento registrado no dia quando ele precisar ser revertido.",
+    "title": "Estornar um recebimento no mesmo dia",
+    "goal": "Cancelar um recebimento lançado indevidamente no dia do seu registro.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarRecebimento",
+        "stepId": "localizarRecebimentoDoDia",
         "kind": "locate",
         "entity": "Recebimento",
-        "title": "Localizar recebimento",
-        "description": "Localiza o recebimento do dia a ser estornado, a partir do contexto ou por consulta entre os recebimentos da organização."
+        "title": "x",
+        "description": "Localiza o recebimento registrado no mesmo dia que precisa ser estornado."
       },
       {
-        "stepId": "inspecionarRecebimento",
+        "stepId": "conferirRecebimentoDoDia",
         "kind": "inspect",
         "entity": "Recebimento",
-        "title": "Conferir recebimento",
-        "description": "Confere o título, o valor, a forma de pagamento e a data do recebimento antes do estorno."
+        "title": "x",
+        "description": "Confere o título, o valor e a data do recebimento antes do estorno."
       },
       {
         "stepId": "estornarRecebimento",
@@ -33,19 +33,19 @@ export const estornarRecebimentoNoMesmoDiaJourney = {
         "entity": "Recebimento",
         "effect": "transition",
         "transitionRef": "estornarRecebimento",
-        "title": "Estornar recebimento",
-        "description": "Estorna o recebimento realizado no mesmo dia, recompondo o saldo correspondente do título."
+        "title": "x",
+        "description": "Estorna o recebimento no mesmo dia, recompondo o saldo do título correspondente."
       }
     ],
     "outcome": {
-      "statement": "O recebimento do dia é estornado e o valor correspondente volta a compor o saldo do título.",
+      "statement": "O recebimento do dia é estornado e o saldo do título é recomposto.",
       "evidence": [
-        "O recebimento está marcado como estornado.",
-        "O saldo do título reflete a reversão do recebimento."
+        "Recebimento identificado como estornado.",
+        "Saldo pendente do título atualizado."
       ]
     }
   },
-  "businessHash": "sha256:cac403c77422586e64c40abcf7ed92d584e094470eb615bd940d710a348451b6"
+  "businessHash": "sha256:a368b563a1e04d20ede48e752d3b8682cffcce9942a3d5be8982953e37494f42"
 } as const satisfies Ns5JourneyArtifact;
 
 export type EstornarRecebimentoNoMesmoDiaJourneyType = typeof estornarRecebimentoNoMesmoDiaJourney;

@@ -7,14 +7,9 @@ export const controleEstoqueJourneyIndex = {
   "moduleName": "controleEstoque",
   "journeys": [
     {
-      "journeyId": "cadastrarProdutoEstoque",
+      "journeyId": "cadastrarProduto",
       "actorRef": "estoquista",
       "title": "Cadastrar produto para controle de estoque"
-    },
-    {
-      "journeyId": "atualizarQuantidadeMinima",
-      "actorRef": "estoquista",
-      "title": "Atualizar quantidade mínima do produto"
     },
     {
       "journeyId": "registrarMovimentacaoEstoque",
@@ -22,14 +17,14 @@ export const controleEstoqueJourneyIndex = {
       "title": "Registrar movimentação de estoque"
     },
     {
-      "journeyId": "consultarSaldoProduto",
+      "journeyId": "acompanharSaldoProdutos",
       "actorRef": "estoquista",
-      "title": "Consultar saldo de produto"
+      "title": "Acompanhar saldos de estoque"
     },
     {
-      "journeyId": "tratarAvisoEstoqueBaixo",
+      "journeyId": "tratarAvisoSaldoBaixo",
       "actorRef": "estoquista",
-      "title": "Verificar aviso de estoque baixo"
+      "title": "Verificar aviso de saldo baixo"
     }
   ],
   "systemDecisions": []

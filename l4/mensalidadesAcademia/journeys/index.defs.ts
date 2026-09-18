@@ -7,7 +7,7 @@ export const mensalidadesAcademiaJourneyIndex = {
   "moduleName": "mensalidadesAcademia",
   "journeys": [
     {
-      "journeyId": "matricularAlunoEmPlano",
+      "journeyId": "matricularAluno",
       "actorRef": "recepcao",
       "title": "Matricular aluno em um plano"
     },
@@ -17,12 +17,12 @@ export const mensalidadesAcademiaJourneyIndex = {
       "title": "Gerar mensalidades do mês"
     },
     {
-      "journeyId": "registrarPagamentoDeMensalidade",
+      "journeyId": "registrarPagamentoMensalidade",
       "actorRef": "recepcao",
       "title": "Registrar pagamento de mensalidade"
     },
     {
-      "journeyId": "acompanharIndicadoresDaAcademia",
+      "journeyId": "acompanharIndicadoresAcademia",
       "actorRef": "gerencia",
       "title": "Acompanhar indicadores da academia"
     },

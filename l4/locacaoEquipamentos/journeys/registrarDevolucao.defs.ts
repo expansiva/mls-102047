@@ -8,7 +8,7 @@ export const registrarDevolucaoJourney = {
   "business": {
     "actorRef": "atendente",
     "title": "Registrar devolução de equipamentos",
-    "goal": "Registrar a devolução efetiva e concluir a locação, incluindo a multa por atraso quando aplicável.",
+    "goal": "Registrar a data real de devolução de uma locação e apurar eventual multa por atraso.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,45 +18,34 @@ export const registrarDevolucaoJourney = {
         "kind": "locate",
         "entity": "ContratoLocacao",
         "title": "x",
-        "description": "Localiza o contrato em aberto, caso ele não esteja previamente em contexto."
+        "description": "Localiza o contrato de locação em devolução quando ele não estiver previamente em contexto."
       },
       {
-        "stepId": "conferirContrato",
+        "stepId": "consultarContrato",
         "kind": "inspect",
         "entity": "ContratoLocacao",
         "title": "x",
-        "description": "Confere os equipamentos locados e a data prevista de devolução."
+        "description": "Confere os equipamentos locados e a data prevista de devolução do contrato."
       },
       {
-        "stepId": "registrarDevolucaoReal",
+        "stepId": "confirmarDevolucao",
         "kind": "act",
         "entity": "ContratoLocacao",
-        "affects": [
-          "Equipamento"
-        ],
         "effect": "transition",
         "transitionRef": "registrarDevolucao",
         "title": "x",
-        "description": "Registra a data real de devolução, conclui o contrato e torna os equipamentos devolvidos disponíveis conforme sua situação."
-      },
-      {
-        "stepId": "consultarMultaCalculada",
-        "kind": "inspect",
-        "entity": "ContratoLocacao",
-        "title": "x",
-        "description": "Consulta a multa calculada quando a devolução ocorreu após a data prevista."
+        "description": "Registra a data real de devolução e encerra a locação; caso haja atraso, o sistema calcula a multa pela diária de cada equipamento multiplicada pelos dias de atraso e por 1,5."
       }
     ],
     "outcome": {
-      "statement": "A devolução é registrada e a multa por atraso, quando houver, fica disponível no contrato.",
+      "statement": "A devolução é registrada e a multa por atraso, quando aplicável, fica apurada no contrato.",
       "evidence": [
         "Contrato marcado como devolvido com a data real de devolução.",
-        "Multa exibida no contrato quando houver dias de atraso.",
-        "Equipamentos devolvidos deixam de constar como locados."
+        "Valor da multa calculado quando a devolução ocorreu após a data prevista."
       ]
     }
   },
-  "businessHash": "sha256:5c8eceb98d96a9dbf6b273f31fb176d4ac3b2e34a0dc0690192fe52f03cf9a07"
+  "businessHash": "sha256:240300fd9f8ad6e6806ebe1a572ff671e47011b48675f7f82065a3b05d3b3222"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarDevolucaoJourneyType = typeof registrarDevolucaoJourney;

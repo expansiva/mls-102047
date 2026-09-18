@@ -8,28 +8,36 @@ export const registerCandidateJourney = {
   "business": {
     "actorRef": "recruiter",
     "title": "Register a candidate",
-    "goal": "Add a candidate to the hiring pipeline.",
+    "goal": "Create or attach the candidate's master record so it can be used in hiring applications.",
     "entry": {
-      "mode": "coldStart"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "captureCandidateDetails",
+        "stepId": "locateCandidate",
+        "kind": "locate",
+        "entity": "Candidate",
+        "title": "x",
+        "description": "Look up the person by available identifying contact information before registration."
+      },
+      {
+        "stepId": "registerCandidateRecord",
         "kind": "act",
         "entity": "Candidate",
         "effect": "create",
-        "title": "Capture candidate details.",
-        "description": "Register the candidate's name, email, resume link, and source."
+        "title": "x",
+        "description": "Create or attach the candidate record, record the recruitment source, and associate the candidate's resume through the platform-managed attachment service."
       }
     ],
     "outcome": {
-      "statement": "The candidate is available to be considered for job positions.",
+      "statement": "The candidate is available as a single master record for hiring activities.",
       "evidence": [
-        "The candidate record shows the name, email, resume link, and source."
+        "A candidate record displays the person's name and email.",
+        "The candidate has a recruitment source and an associated resume attachment."
       ]
     }
   },
-  "businessHash": "sha256:84d48c38dd2ebd84d6fd485164df286baba6c55f39694db7645b91df1736bf1e"
+  "businessHash": "sha256:ac9932e3a53930b0f1f07970077edb9268c8ec95e72ab3380deb27a2fed90bae"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegisterCandidateJourneyType = typeof registerCandidateJourney;

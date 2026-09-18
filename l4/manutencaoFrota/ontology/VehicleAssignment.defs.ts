@@ -3,12 +3,12 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaEntityVehicleAssignment = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "manutencaoFrota",
   "entityId": "VehicleAssignment",
   "title": "Atribuição de veículo",
-  "description": "Registro operacional que vincula um motorista aos veículos que pode dirigir.",
-  "displayField": "id",
+  "description": "Registro operacional que vincula um veículo da frota ao motorista autorizado a conduzi-lo.",
+  "displayField": "details.assignmentLabel",
   "relationships": {
     "vehicle": {
       "relationshipId": "vehicleAssignmentVehicle",
@@ -18,7 +18,8 @@ export const manutencaoFrotaEntityVehicleAssignment = {
       "title": "Veículo atribuído",
       "description": "Cada atribuição vincula obrigatoriamente um veículo da frota.",
       "mode": "fk",
-      "required": "Sempre"
+      "required": "sempre",
+      "role": "veículo da frota"
     },
     "driver": {
       "relationshipId": "vehicleAssignmentDriver",
@@ -26,21 +27,22 @@ export const manutencaoFrotaEntityVehicleAssignment = {
       "via": "VehicleAssignment.driverId",
       "cardinality": "N:1",
       "title": "Motorista autorizado",
-      "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a dirigir o veículo.",
+      "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a conduzir o veículo.",
       "mode": "fk",
-      "required": "Sempre"
+      "required": "sempre",
+      "role": "motorista autorizado"
     }
   },
   "capabilities": {
-    "read.byId": "Consulta uma atribuição pelo identificador da linha para o motorista ou gestor que já a selecionou.",
-    "locate.byColumn": "Lista atribuições pelos veículos ou motoristas indexados, com paginação, para o gestor de frota.",
-    "count": "Conta as atribuições que correspondem aos filtros de veículo ou motorista para o gestor de frota.",
-    "listByForeignKey": "Lista os veículos atribuídos a um motorista ou os motoristas atribuídos a um veículo pela chave estrangeira, para aplicar o escopo do motorista e para o gestor.",
-    "create": "Cria a vinculação operacional entre veículo e motorista, informando as duas chaves estrangeiras, para o gestor de frota.",
-    "update": "Altera os dados da vinculação operacional pelo identificador para o gestor de frota.",
-    "delete": "Remove uma atribuição de veículo e motorista pelo identificador quando a autorização deixar de valer, para o gestor de frota.",
-    "uniqueKey": "Impede uma segunda atribuição idêntica do mesmo veículo ao mesmo motorista pelo índice único, para manter o cadastro do gestor consistente.",
-    "read.mdmRecord": "Lê os registros mestres de veículo e motorista apontados pelas chaves da atribuição para exibir seus dados ao motorista e ao gestor de frota."
+    "read.byId": "Lê uma atribuição pelo identificador da linha no repositório, para o gestor de frota e para o motorista dentro do seu escopo de veículos atribuídos.",
+    "locate.byColumn": "Lista atribuições filtradas pelos índices de veículo ou motorista, com paginação, para o gestor de frota e para as consultas do motorista limitadas às suas atribuições.",
+    "count": "Conta atribuições conforme os filtros de veículo ou motorista, para o gestor de frota acompanhar os vínculos cadastrados.",
+    "listByForeignKey": "Lista as atribuições que apontam para um veículo ou motorista pelos respectivos identificadores, para telas de veículos, motoristas e controle de acesso.",
+    "create": "Cria a vinculação operacional entre um veículo e um motorista autorizado, gravando a linha de atribuição, para o gestor de frota.",
+    "update": "Atualiza a identificação operacional de uma atribuição existente pelo identificador da linha, para o gestor de frota.",
+    "delete": "Remove uma atribuição operacional cadastrada pelo identificador da linha, para o gestor de frota quando o vínculo deixar de valer.",
+    "uniqueKey": "Recusa uma segunda atribuição com a mesma combinação de veículo e motorista pelo índice único, para manter um único vínculo operacional idêntico.",
+    "read.mdmRecord": "Lê os registros mestres do veículo e do motorista apontados pela atribuição, pelos seus identificadores MDM, para exibir os dados nas telas da frota."
   },
   "rules": [],
   "writer": "crud",
@@ -69,12 +71,12 @@ export const manutencaoFrotaEntityVehicleAssignment = {
         "type": "record",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "to": [
           "Vehicle"
         ],
         "title": "Veículo",
-        "description": "Veículo da frota autorizado nesta atribuição.",
+        "description": "Veículo da frota vinculado a esta atribuição operacional.",
         "maxLength": 0,
         "min": 0,
         "max": 0
@@ -83,12 +85,12 @@ export const manutencaoFrotaEntityVehicleAssignment = {
         "type": "record",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "to": [
           "Driver"
         ],
         "title": "Motorista",
-        "description": "Motorista autorizado a dirigir o veículo nesta atribuição.",
+        "description": "Motorista autorizado a conduzir o veículo nesta atribuição.",
         "maxLength": 0,
         "min": 0,
         "max": 0
@@ -96,12 +98,24 @@ export const manutencaoFrotaEntityVehicleAssignment = {
       "details": {
         "type": "object",
         "required": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "title": "Detalhes da atribuição",
-        "description": "Namespace operacional da atribuição; não há dados adicionais solicitados.",
+        "description": "Informações operacionais da vinculação entre o veículo e o motorista.",
         "maxLength": 0,
         "min": 0,
-        "max": 0
+        "max": 0,
+        "fields": {
+          "assignmentLabel": {
+            "type": "string",
+            "required": true,
+            "of": "Address",
+            "title": "Identificação da atribuição",
+            "description": "Identificação operacional da atribuição para apresentação nas telas da frota.",
+            "maxLength": 120,
+            "min": 0,
+            "max": 0
+          }
+        }
       }
     }
   },

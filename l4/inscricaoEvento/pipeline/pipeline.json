@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-12T21:35:09.199Z",
+      "updatedAt": "2026-09-18T07:25:32.186Z",
       "artifactPaths": [
         "l4/inscricaoEvento/module.defs.ts"
       ],
@@ -16,14 +16,14 @@
           "kind": "internal",
           "origin": "named",
           "title": "Organizador",
-          "description": "Pessoa da organização que cadastra, publica e acompanha eventos e inscrições."
+          "description": "Cadastra e publica eventos, acompanha inscritos e exporta a lista de inscrições."
         },
         {
           "actorId": "publico",
           "kind": "external",
           "origin": "named",
           "title": "Público",
-          "description": "Pessoa que acessa a página pública de um evento para realizar ou cancelar sua inscrição."
+          "description": "Acessa a página pública do evento e realiza sua inscrição."
         }
       ],
       "normalizations": [
@@ -31,17 +31,16 @@
           "kind": "ptToPtBR",
           "detail": "pt→pt-BR"
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-12T21:35:41.370Z",
+      "updatedAt": "2026-09-18T07:26:04.299Z",
       "artifactPaths": [
         "l4/inscricaoEvento/journeys/cadastrarEpublicarEvento.defs.ts",
-        "l4/inscricaoEvento/journeys/realizarInscricaoPublica.defs.ts",
+        "l4/inscricaoEvento/journeys/inscreverSeEmEvento.defs.ts",
         "l4/inscricaoEvento/journeys/cancelarInscricao.defs.ts",
-        "l4/inscricaoEvento/journeys/acompanharInscricoesDoEvento.defs.ts",
+        "l4/inscricaoEvento/journeys/acompanharEexportarInscricoes.defs.ts",
         "l4/inscricaoEvento/journeys/index.defs.ts"
       ],
       "decideStepCount": 0,
@@ -51,98 +50,221 @@
           "kind": "dropTransitionRef",
           "journeyId": "cadastrarEpublicarEvento",
           "stepId": "criarEvento",
-          "detail": "transitionRef null dropped; effect is create."
+          "detail": "transitionRef criarEvento dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
-          "journeyId": "realizarInscricaoPublica",
-          "stepId": "criarInscricao",
-          "detail": "transitionRef null dropped; effect is create."
+          "journeyId": "inscreverSeEmEvento",
+          "stepId": "registrarInscricao",
+          "detail": "transitionRef registrarInscricao dropped; effect is create."
         }
-      ],
-      "autoReason": "fast"
+      ]
+    },
+    "workflows50": {
+      "status": "approved",
+      "updatedAt": "2026-09-18T07:26:41.676Z",
+      "artifactPaths": [
+        "l4/inscricaoEvento/workflows.defs.ts"
+      ]
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-12T21:37:08.587Z",
+      "updatedAt": "2026-09-18T07:29:18.469Z",
       "artifactPaths": [
         "l4/inscricaoEvento/ontology/Evento.defs.ts",
         "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
         "l4/inscricaoEvento/ontology/Participante.defs.ts",
+        "l4/inscricaoEvento/ontology/EmailParticipante.defs.ts",
         "l4/inscricaoEvento/ontology/index.defs.ts"
       ],
-      "uncitedEntities": [],
-      "liftedAggregateEntities": [],
-      "autoReason": "fast"
-    },
-    "workflows50": {
-      "status": "approved",
-      "updatedAt": "2026-09-12T21:37:26.191Z",
-      "artifactPaths": [
-        "l4/inscricaoEvento/workflows.defs.ts"
+      "uncitedEntities": [
+        "Participante",
+        "EmailParticipante"
       ],
-      "autoReason": "fast"
+      "liftedAggregateEntities": [],
+      "normalizations": [
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Evento",
+          "detail": "storage.table inscricaoEvento_evento"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Inscricao",
+          "detail": "storage.table inscricaoEvento_inscricao"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Participante",
+          "detail": "roleTag inscricaoEvento.Participante; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "EmailParticipante",
+          "detail": "roleTag inscricaoEvento.EmailParticipante; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Evento",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Evento",
+          "detail": "record.fields.details.fields.vagasOcupadas.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Evento",
+          "detail": "record.fields.details.fields.vagasDisponiveis.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Inscricao",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Participante",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Participante",
+          "detail": "Participante.details.identification.subtype.values"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "Participante",
+          "detail": "details.inscricaoEvento"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "EmailParticipante",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "EmailParticipante",
+          "detail": "EmailParticipante.details.identification.subtype.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "EmailParticipante",
+          "detail": "EmailParticipante.details.contactChannel.contactType.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "EmailParticipante",
+          "detail": "EmailParticipante.details.contactChannel.value.pattern"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "EmailParticipante",
+          "detail": "details.inscricaoEvento"
+        }
+      ],
+      "citedRules": [
+        "eventoCompletoParaPublicacao",
+        "inscricoesConfirmadasOcupamVagas",
+        "inscricaoUnicaPorEmailNoEvento",
+        "inscricaoSomenteEmEventoPublicado",
+        "confirmarQuandoHouverVaga",
+        "listaEsperaPorOrdemDeChegada",
+        "cancelamentoLiberaVaga",
+        "promoverPrimeiroDaListaEspera",
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "rule-person-privacy-consent-required-br-eu",
+        "rule-contact-value-unique-per-type"
+      ],
+      "citedCapabilities": [
+        "read.byId",
+        "locate.byColumn",
+        "locate.byText",
+        "count",
+        "listByForeignKey",
+        "create",
+        "update",
+        "transition",
+        "inscricaoEvento.exportarInscricoesCsv",
+        "uniqueKey",
+        "transaction",
+        "read.mdmRecord",
+        "inscricaoEvento.exportarCsv",
+        "locate.byContact",
+        "register.createOrAttach",
+        "register.asProspect",
+        "link.contact",
+        "listLinks",
+        "edit.platformFields",
+        "edit.moduleNamespace",
+        "inactivate",
+        "audit",
+        "link"
+      ]
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-12T21:37:36.976Z",
+      "updatedAt": "2026-09-18T07:29:51.544Z",
       "artifactPaths": [
         "l4/inscricaoEvento/rules.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-12T21:37:42.474Z",
+      "updatedAt": "2026-09-18T07:30:44.770Z",
       "artifactPaths": [
         "l4/inscricaoEvento/access.defs.ts"
       ],
       "normalizations": [
         {
           "kind": "dropAnchorEntity",
-          "grantId": "organizadorGerenciaEventosEinscricoes",
+          "grantId": "organizadorGerenciarEventos",
+          "detail": "anchorEntity removed; organization is not own/assigned/related."
+        },
+        {
+          "kind": "dropAnchorEntity",
+          "grantId": "organizadorAcompanharInscricoes",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-12T21:37:58.735Z",
+      "updatedAt": "2026-09-18T07:31:00.980Z",
       "artifactPaths": [
         "l4/inscricaoEvento/integration.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-12T21:37:59.076Z",
+      "updatedAt": "2026-09-18T07:31:01.171Z",
       "artifactPaths": [
         "l4/inscricaoEvento/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
         "l5/config.json",
         "l5/project.json"
-      ],
-      "autoReason": "fast"
+      ]
     }
   },
   "sourcePrompt": "módulo inscricaoEvento, em português e inglês. o organizador cadastra eventos com título, descrição, data, local e número de vagas, e publica. cada evento publicado tem uma página pública onde qualquer pessoa se inscreve com nome e e-mail; o mesmo e-mail só pode se inscrever uma vez por evento. quando as vagas acabam, novas inscrições entram em lista de espera na ordem de chegada; se um inscrito cancelar, o primeiro da lista de espera é promovido. o organizador vê os inscritos, o total de vagas ocupadas e baixa a lista em CSV. perfis: organizador e público.",
   "invocation": {
-    "fast": true,
+    "fast": false,
     "module": "inscricaoEvento",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-12T21:37:59.076Z",
+  "updatedAt": "2026-09-18T07:31:01.171Z",
   "rebuildAll": {
     "deleted": [
       "l4/inscricaoEvento/access.defs.ts",
       "l4/inscricaoEvento/integration.defs.ts",
       "l4/inscricaoEvento/journeys/acompanharInscricoesDoEvento.defs.ts",
-      "l4/inscricaoEvento/journeys/cadastrarEvento.defs.ts",
+      "l4/inscricaoEvento/journeys/cadastrarEpublicarEvento.defs.ts",
       "l4/inscricaoEvento/journeys/cancelarInscricao.defs.ts",
       "l4/inscricaoEvento/journeys/index.defs.ts",
-      "l4/inscricaoEvento/journeys/inscreverEmEvento.defs.ts",
-      "l4/inscricaoEvento/journeys/publicarEvento.defs.ts",
+      "l4/inscricaoEvento/journeys/realizarInscricaoPublica.defs.ts",
       "l4/inscricaoEvento/module.defs.ts",
       "l4/inscricaoEvento/ontology/Evento.defs.ts",
       "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
@@ -166,7 +288,10 @@
       "l4/inscricaoEvento/rules.defs.ts",
       "l4/inscricaoEvento/workflows.defs.ts"
     ],
-    "edited": [],
-    "at": "2026-09-12T21:34:57.843Z"
+    "edited": [
+      "l4/organization/registry.defs.ts",
+      "l5/project.json"
+    ],
+    "at": "2026-09-18T07:25:32.177Z"
   }
 }

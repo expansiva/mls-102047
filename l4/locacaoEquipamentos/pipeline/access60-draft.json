@@ -7,82 +7,85 @@
       "kind": "internal",
       "origin": "named",
       "title": "Atendente",
-      "description": "Profissional da locadora que cria contratos de locação e registra devoluções."
+      "description": "Cria contratos de locação para clientes e registra a devolução dos equipamentos."
     },
     {
       "actorId": "gerente",
       "kind": "internal",
       "origin": "named",
       "title": "Gerente",
-      "description": "Responsável por acompanhar a disponibilidade, locações e manutenção dos equipamentos."
+      "description": "Acompanha a disponibilidade, locação e manutenção dos equipamentos."
     }
   ],
   "grants": [
     {
-      "grantId": "atendenteGerenciaLocacoes",
+      "grantId": "atendenteLocacoes",
       "actorRef": "atendente",
-      "title": "Gerenciar contratos de locação",
-      "description": "Permite ao atendente localizar clientes e equipamentos, criar contratos e itens de locação, registrar devoluções e consultar os valores calculados da locação.",
+      "title": "Atender locações e devoluções",
+      "description": "Permite localizar clientes e equipamentos, registrar contratos de locação e registrar devoluções em toda a organização.",
       "entityRefs": [
         "Cliente",
         "Equipamento",
         "ContratoLocacao",
-        "RentalItem"
+        "ItemContratoLocacao"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os clientes, equipamentos, contratos e itens de locação da locadora."
+        "description": "Abrange os clientes, equipamentos, contratos e itens de contrato da organização necessários ao atendimento de locações e devoluções."
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "Permite consultar todos os campos dos registros necessários para formalizar e encerrar locações."
+        "mode": "fieldsOnly",
+        "description": "Exibe a identificação do cliente, os dados comerciais e operacionais dos equipamentos e todos os dados necessários dos contratos e de seus itens; não expõe dados pessoais adicionais do cadastro mestre do cliente.",
+        "allowedFields": [
+          "Cliente.details.identification",
+          "Equipamento.id",
+          "Equipamento.version",
+          "Equipamento.code",
+          "Equipamento.status",
+          "Equipamento.details",
+          "ContratoLocacao.id",
+          "ContratoLocacao.version",
+          "ContratoLocacao.clienteId",
+          "ContratoLocacao.status",
+          "ContratoLocacao.dataRetirada",
+          "ContratoLocacao.dataPrevistaDevolucao",
+          "ContratoLocacao.dataRealDevolucao",
+          "ContratoLocacao.details",
+          "ItemContratoLocacao.id",
+          "ItemContratoLocacao.version",
+          "ItemContratoLocacao.contratoLocacaoId",
+          "ItemContratoLocacao.equipamentoId",
+          "ItemContratoLocacao.details"
+        ]
       }
     },
     {
-      "grantId": "atendenteConsultaCadastroProprio",
-      "actorRef": "atendente",
-      "title": "Consultar cadastro próprio de atendente",
-      "description": "Permite ao atendente acessar seu próprio vínculo cadastral na locadora.",
-      "entityRefs": [
-        "Atendente"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Restringe o acesso ao registro de atendente vinculado à pessoa autenticada.",
-        "anchorEntity": "Atendente"
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Permite consultar integralmente o próprio registro de atendente."
-      }
-    },
-    {
-      "grantId": "gerenteAcompanhaEquipamentos",
+      "grantId": "gerenteEquipamentos",
       "actorRef": "gerente",
-      "title": "Acompanhar situação dos equipamentos",
-      "description": "Permite ao gerente localizar e consultar os equipamentos para acompanhar sua disponibilidade, locação ou manutenção.",
+      "title": "Acompanhar equipamentos",
+      "description": "Permite acompanhar a disponibilidade, locação e manutenção dos equipamentos da organização.",
       "entityRefs": [
         "Equipamento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange todos os equipamentos cadastrados pela locadora."
+        "description": "Abrange todos os equipamentos cadastrados na organização para acompanhamento gerencial."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Permite consultar todos os dados cadastrais e a situação operacional dos equipamentos."
+        "description": "Exibe integralmente o cadastro operacional e comercial de cada equipamento."
       }
     }
   ],
   "normalizations": [
     {
       "kind": "dropAnchorEntity",
-      "grantId": "atendenteGerenciaLocacoes",
+      "grantId": "atendenteLocacoes",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
       "kind": "dropAnchorEntity",
-      "grantId": "gerenteAcompanhaEquipamentos",
+      "grantId": "gerenteEquipamentos",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     }
   ]

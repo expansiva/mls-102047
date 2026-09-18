@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:56:07.854Z",
+      "updatedAt": "2026-09-18T07:39:41.252Z",
       "artifactPaths": [
         "l4/hiringPipeline/module.defs.ts"
       ],
@@ -16,29 +16,28 @@
           "kind": "internal",
           "origin": "named",
           "title": "Recruiter",
-          "description": "Internal staff member who opens job positions, registers candidates, and handles hiring pipeline activities other than offer and hiring decisions."
+          "description": "Opens job positions, registers candidates, manages applications through screening and interview, and records rejections."
         },
         {
           "actorId": "hiringManager",
           "kind": "internal",
           "origin": "named",
           "title": "Hiring Manager",
-          "description": "Internal manager responsible for deciding offers and hiring for job positions."
+          "description": "Decides offers and hiring outcomes for applications to the positions they manage."
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:57:54.758Z",
+      "updatedAt": "2026-09-18T07:41:49.144Z",
       "artifactPaths": [
         "l4/hiringPipeline/journeys/openJobPosition.defs.ts",
         "l4/hiringPipeline/journeys/registerCandidate.defs.ts",
         "l4/hiringPipeline/journeys/startApplicationScreening.defs.ts",
         "l4/hiringPipeline/journeys/advanceApplicationToInterview.defs.ts",
-        "l4/hiringPipeline/journeys/issueOffer.defs.ts",
-        "l4/hiringPipeline/journeys/hireCandidate.defs.ts",
-        "l4/hiringPipeline/journeys/rejectApplication.defs.ts",
+        "l4/hiringPipeline/journeys/decideOffer.defs.ts",
+        "l4/hiringPipeline/journeys/decideHiringOutcome.defs.ts",
+        "l4/hiringPipeline/journeys/recordApplicationRejection.defs.ts",
         "l4/hiringPipeline/journeys/index.defs.ts"
       ],
       "decideStepCount": 2,
@@ -47,111 +46,250 @@
         {
           "kind": "dropTransitionRef",
           "journeyId": "openJobPosition",
-          "stepId": "enterPositionDetails",
-          "detail": "transitionRef invalid dropped; effect is create."
+          "stepId": "createJobPosition",
+          "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
           "journeyId": "registerCandidate",
-          "stepId": "captureCandidateDetails",
-          "detail": "transitionRef invalid dropped; effect is create."
+          "stepId": "registerCandidateRecord",
+          "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
           "journeyId": "startApplicationScreening",
           "stepId": "createApplication",
-          "detail": "transitionRef invalid dropped; effect is create."
+          "detail": "transitionRef x dropped; effect is create."
         }
-      ],
-      "autoReason": "fast"
+      ]
+    },
+    "workflows50": {
+      "status": "approved",
+      "updatedAt": "2026-09-18T07:42:37.094Z",
+      "artifactPaths": [
+        "l4/hiringPipeline/workflows.defs.ts"
+      ]
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:59:11.304Z",
+      "updatedAt": "2026-09-18T07:44:47.798Z",
       "artifactPaths": [
-        "l4/hiringPipeline/ontology/JobPosition.defs.ts",
         "l4/hiringPipeline/ontology/Candidate.defs.ts",
+        "l4/hiringPipeline/ontology/CandidateContact.defs.ts",
+        "l4/hiringPipeline/ontology/HiringManager.defs.ts",
+        "l4/hiringPipeline/ontology/JobPosition.defs.ts",
         "l4/hiringPipeline/ontology/Application.defs.ts",
         "l4/hiringPipeline/ontology/index.defs.ts"
       ],
-      "uncitedEntities": [],
+      "uncitedEntities": [
+        "CandidateContact",
+        "HiringManager"
+      ],
       "liftedAggregateEntities": [],
-      "autoReason": "fast"
+      "normalizations": [
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Candidate",
+          "detail": "roleTag hiringPipeline.Candidate; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "CandidateContact",
+          "detail": "roleTag hiringPipeline.CandidateContact; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "HiringManager",
+          "detail": "roleTag hiringPipeline.HiringManager; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "JobPosition",
+          "detail": "storage.table hiringPipeline_jobposition"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Application",
+          "detail": "storage.table hiringPipeline_application"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Candidate",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Candidate",
+          "detail": "Candidate.details.identification.subtype.values"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "CandidateContact",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "CandidateContact",
+          "detail": "CandidateContact.details.identification.subtype.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "CandidateContact",
+          "detail": "CandidateContact.details.contactChannel.contactType.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "CandidateContact",
+          "detail": "CandidateContact.details.contactChannel.value.pattern"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "CandidateContact",
+          "detail": "details.hiringPipeline"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "HiringManager",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "HiringManager",
+          "detail": "HiringManager.details.identification.subtype.values"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "HiringManager",
+          "detail": "details.hiringPipeline"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "JobPosition",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "JobPosition",
+          "detail": "record.fields.details.fields.filledHeadcount.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "JobPosition",
+          "detail": "record.fields.details.fields.remainingHeadcount.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Application",
+          "detail": "record.fields.id, record.fields.version"
+        }
+      ],
+      "citedRules": [
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "rule-person-privacy-consent-required-br-eu",
+        "candidateRequiresEmailContact",
+        "rule-contact-value-unique-per-type",
+        "closePositionWhenHeadcountFilled",
+        "applicationUniqueCandidatePosition",
+        "applicationRequiresOpenPosition",
+        "applicationStageOrder",
+        "hiringManagerManagesPosition",
+        "jobPositionHasRemainingHeadcount",
+        "rejectionReasonRequired"
+      ],
+      "citedCapabilities": [
+        "read.byId",
+        "locate.byName",
+        "locate.byDocument",
+        "locate.byContact",
+        "register.createOrAttach",
+        "edit.platformFields",
+        "edit.moduleNamespace",
+        "inactivate",
+        "link.contact",
+        "listLinks",
+        "attach.document",
+        "audit",
+        "link",
+        "unlink",
+        "locate.byTag",
+        "statusHistory.read",
+        "locate.byColumn",
+        "locate.byText",
+        "count",
+        "listByForeignKey",
+        "create",
+        "update",
+        "transition",
+        "read.mdmRecord",
+        "uniqueKey",
+        "transaction"
+      ]
+    },
+    "rules40": {
+      "status": "approved",
+      "updatedAt": "2026-09-18T07:45:10.036Z",
+      "artifactPaths": [
+        "l4/hiringPipeline/rules.defs.ts"
+      ]
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:59:28.331Z",
+      "updatedAt": "2026-09-18T07:46:26.565Z",
       "artifactPaths": [
         "l4/hiringPipeline/access.defs.ts"
       ],
       "normalizations": [
         {
           "kind": "dropAnchorEntity",
-          "grantId": "recruiterPipelineManagement",
+          "grantId": "recruiterCandidateRegistry",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         },
         {
           "kind": "dropAnchorEntity",
-          "grantId": "hiringManagerHiringDecisions",
+          "grantId": "recruiterPositionsAndApplications",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
-      ],
-      "autoReason": "fast"
-    },
-    "rules40": {
-      "status": "approved",
-      "updatedAt": "2026-09-12T19:59:39.099Z",
-      "artifactPaths": [
-        "l4/hiringPipeline/rules.defs.ts"
-      ],
-      "autoReason": "fast"
-    },
-    "workflows50": {
-      "status": "approved",
-      "updatedAt": "2026-09-12T19:59:44.570Z",
-      "artifactPaths": [
-        "l4/hiringPipeline/workflows.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:59:55.774Z",
+      "updatedAt": "2026-09-18T07:46:42.780Z",
       "artifactPaths": [
         "l4/hiringPipeline/integration.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-12T19:59:56.105Z",
+      "updatedAt": "2026-09-18T07:46:42.977Z",
       "artifactPaths": [
         "l4/hiringPipeline/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
         "l5/config.json",
         "l5/project.json"
-      ],
-      "autoReason": "fast"
+      ]
     }
   },
   "sourcePrompt": "create the hiringPipeline module, in English. recruiters open job positions with title, department, description and headcount. candidates are registered with name, email, resume link and source. a candidate applies to a position and the application moves through stages: screening, interview, offer, then hired or rejected (with a reason). the hiring manager of the position decides offer and hired; the recruiter does everything else. a position closes automatically when its headcount is filled. profiles: recruiter and hiring manager.",
   "invocation": {
-    "fast": true,
+    "fast": false,
     "module": "hiringPipeline",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-12T19:59:56.105Z",
+  "updatedAt": "2026-09-18T07:46:42.977Z",
   "rebuildAll": {
     "deleted": [
       "l4/hiringPipeline/access.defs.ts",
       "l4/hiringPipeline/integration.defs.ts",
-      "l4/hiringPipeline/journeys/decideHiring.defs.ts",
-      "l4/hiringPipeline/journeys/decideOffer.defs.ts",
+      "l4/hiringPipeline/journeys/advanceApplicationToInterview.defs.ts",
+      "l4/hiringPipeline/journeys/hireCandidate.defs.ts",
       "l4/hiringPipeline/journeys/index.defs.ts",
+      "l4/hiringPipeline/journeys/issueOffer.defs.ts",
       "l4/hiringPipeline/journeys/openJobPosition.defs.ts",
-      "l4/hiringPipeline/journeys/recordApplicationRejection.defs.ts",
       "l4/hiringPipeline/journeys/registerCandidate.defs.ts",
-      "l4/hiringPipeline/journeys/startAndProgressApplication.defs.ts",
+      "l4/hiringPipeline/journeys/rejectApplication.defs.ts",
+      "l4/hiringPipeline/journeys/startApplicationScreening.defs.ts",
       "l4/hiringPipeline/module.defs.ts",
       "l4/hiringPipeline/ontology/Application.defs.ts",
       "l4/hiringPipeline/ontology/Candidate.defs.ts",
@@ -177,9 +315,8 @@
     ],
     "edited": [
       "l4/organization/registry.defs.ts",
-      "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-09-12T19:55:35.302Z"
+    "at": "2026-09-18T07:39:41.241Z"
   }
 }

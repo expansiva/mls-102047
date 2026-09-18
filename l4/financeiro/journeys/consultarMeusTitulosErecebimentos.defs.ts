@@ -8,7 +8,7 @@ export const consultarMeusTitulosErecebimentosJourney = {
   "business": {
     "actorRef": "pagador",
     "title": "Consultar meus títulos e recebimentos",
-    "goal": "Visualizar no portal somente os próprios títulos e recebimentos.",
+    "goal": "Visualizar somente os próprios títulos a receber e os próprios recebimentos no portal.",
     "entry": {
       "mode": "coldStart"
     },
@@ -17,40 +17,40 @@ export const consultarMeusTitulosErecebimentosJourney = {
         "stepId": "localizarMeusTitulos",
         "kind": "locate",
         "entity": "TituloReceber",
-        "title": "Localizar meus títulos",
-        "description": "Consulta os próprios títulos no portal."
+        "title": "x",
+        "description": "Localiza os títulos vinculados ao próprio pagador."
       },
       {
-        "stepId": "inspecionarMeusTitulos",
+        "stepId": "consultarMeusTitulos",
         "kind": "inspect",
         "entity": "TituloReceber",
-        "title": "Visualizar meus títulos",
-        "description": "Visualiza valores, vencimentos, origens e saldos dos próprios títulos."
+        "title": "x",
+        "description": "Consulta valores, vencimentos, origem, situação e saldo dos próprios títulos."
       },
       {
         "stepId": "localizarMeusRecebimentos",
         "kind": "locate",
         "entity": "Recebimento",
-        "title": "Localizar meus recebimentos",
-        "description": "Consulta os próprios recebimentos vinculados aos seus títulos."
+        "title": "x",
+        "description": "Localiza os recebimentos vinculados ao próprio pagador."
       },
       {
-        "stepId": "inspecionarMeusRecebimentos",
+        "stepId": "consultarMeusRecebimentos",
         "kind": "inspect",
         "entity": "Recebimento",
-        "title": "Visualizar meus recebimentos",
-        "description": "Visualiza os valores, datas e formas de pagamento dos próprios recebimentos."
+        "title": "x",
+        "description": "Consulta os valores, datas e formas dos próprios recebimentos."
       }
     ],
     "outcome": {
-      "statement": "O pagador consulta sua situação financeira sem acessar dados de outros pagadores.",
+      "statement": "O pagador visualiza exclusivamente sua situação financeira e seus recebimentos.",
       "evidence": [
-        "São exibidos apenas títulos vinculados ao pagador da sessão.",
-        "São exibidos apenas recebimentos vinculados aos títulos do pagador da sessão."
+        "Lista de títulos próprios com saldo e vencimento disponível.",
+        "Lista de recebimentos próprios disponível."
       ]
     }
   },
-  "businessHash": "sha256:77ef98a7e77bf718a756a7f6cfd971446e22daf77e911d9e4f12d39c4cf2ef21"
+  "businessHash": "sha256:6fab04126ac8b2f22065a1083edf037e51142f3e8f5b71e889c0b29670129771"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarMeusTitulosErecebimentosJourneyType = typeof consultarMeusTitulosErecebimentosJourney;

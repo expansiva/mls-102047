@@ -14,30 +14,23 @@ export const gerarMensalidadesDoMesJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarMatriculasAtivas",
-        "kind": "locate",
-        "entity": "Matricula",
-        "title": "x",
-        "description": "Localiza as matrículas ativas que devem ter mensalidade gerada para a competência do mês."
-      },
-      {
-        "stepId": "gerarMensalidades",
+        "stepId": "criarMensalidades",
         "kind": "act",
         "entity": "Mensalidade",
         "effect": "create",
         "title": "x",
-        "description": "Gera uma mensalidade para cada aluno com matrícula ativa, usando o valor do plano e o respectivo dia de vencimento."
+        "description": "Gera uma mensalidade para cada aluno com matrícula ativa, usando o valor do plano e o dia de vencimento correspondente ao mês."
       }
     ],
     "outcome": {
-      "statement": "As mensalidades da competência são disponibilizadas para cobrança dos alunos ativos.",
+      "statement": "As mensalidades do período são geradas para todos os alunos ativos.",
       "evidence": [
-        "Há uma mensalidade gerada para cada matrícula ativa elegível na competência.",
-        "Cada mensalidade apresenta o valor do plano e sua data de vencimento."
+        "Existe uma mensalidade do mês para cada matrícula ativa.",
+        "Cada mensalidade apresenta valor e data de vencimento definidos pelo plano."
       ]
     }
   },
-  "businessHash": "sha256:eaa1a3797486a4fdc044e8bf104718b2d82675eed024a890b3542044b736cfd3"
+  "businessHash": "sha256:c32e4d42a0c3164e2dd1e930e0a70f9022e25cb98841bcc48857264dec1da46b"
 } as const satisfies Ns5JourneyArtifact;
 
 export type GerarMensalidadesDoMesJourneyType = typeof gerarMensalidadesDoMesJourney;

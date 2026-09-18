@@ -5,7 +5,7 @@ import type { Ns5ModuleArtifact } from '/_102035_/l2/solution/types.js';
 export const locacaoEquipamentosModule = {
   "schemaVersion": "2026-09-10-ns5-module-v2",
   "moduleName": "locacaoEquipamentos",
-  "title": "Locação de Equipamentos",
+  "title": "Locação de equipamentos para construção",
   "userLanguage": "pt-BR",
   "productLanguages": [
     "pt-BR"

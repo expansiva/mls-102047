@@ -8,44 +8,44 @@ export const cancelarItemLancadoJourney = {
   "business": {
     "actorRef": "garcom",
     "title": "Cancelar item lançado por engano",
-    "goal": "Cancelar um lançamento incorreto enquanto a comanda estiver aberta.",
+    "goal": "Retirar um lançamento incorreto de uma comanda que ainda está aberta.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarComandaParaCorrecao",
+        "stepId": "localizarComandaParaCancelamento",
         "kind": "locate",
         "entity": "Comanda",
         "title": "Localizar comanda aberta",
-        "description": "Usa a comanda em contexto ou localiza a comanda aberta que precisa de correção."
+        "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa."
       },
       {
-        "stepId": "inspecionarItensLancados",
+        "stepId": "inspecionarLancamento",
         "kind": "inspect",
         "entity": "ItemComanda",
-        "title": "Inspecionar itens lançados",
-        "description": "Confere os itens já lançados para identificar o lançamento feito por engano."
+        "title": "Inspecionar lançamento",
+        "description": "Confere o lançamento que foi registrado por engano antes de cancelá-lo."
       },
       {
-        "stepId": "cancelarItem",
+        "stepId": "cancelarLancamento",
         "kind": "act",
         "entity": "ItemComanda",
         "effect": "transition",
-        "transitionRef": "cancelarItemComanda",
+        "transitionRef": "cancelarItem",
         "title": "Cancelar item",
         "description": "Cancela o item lançado por engano enquanto a comanda permanece aberta."
       }
     ],
     "outcome": {
-      "statement": "O lançamento incorreto é cancelado e deixa de compor a cobrança.",
+      "statement": "O lançamento incorreto deixa de compor o consumo da comanda.",
       "evidence": [
-        "O item apresenta situação cancelada.",
-        "O total da comanda é recalculado sem o valor do item cancelado."
+        "O item consta como cancelado na comanda.",
+        "O total da comanda é recalculado sem o item cancelado."
       ]
     }
   },
-  "businessHash": "sha256:7333b3d3790d515c70f6ec212b54e97906b3b286da13ef8efbf1b420e25bd93b"
+  "businessHash": "sha256:52c2163f74e0f4b849c6fdf39370c707b2c657b62b0dfafdef8ee81e4157d70d"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CancelarItemLancadoJourneyType = typeof cancelarItemLancadoJourney;

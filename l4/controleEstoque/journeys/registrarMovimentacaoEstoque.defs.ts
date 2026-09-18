@@ -8,46 +8,43 @@ export const registrarMovimentacaoEstoqueJourney = {
   "business": {
     "actorRef": "estoquista",
     "title": "Registrar movimentação de estoque",
-    "goal": "Registrar uma entrada ou saída de unidades de um produto e manter seu saldo disponível atualizado.",
+    "goal": "Registrar uma entrada ou saída de unidades de um produto e atualizar seu saldo disponível.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarProdutoMovimentacao",
+        "stepId": "localizarProduto",
         "kind": "locate",
         "entity": "Produto",
         "title": "Localizar produto",
-        "description": "Localizar o produto que receberá uma entrada ou terá unidades retiradas."
+        "description": "Localiza o produto que receberá uma entrada ou terá unidades retiradas."
       },
       {
-        "stepId": "inspecionarProdutoMovimentacao",
+        "stepId": "consultarSaldoProduto",
         "kind": "inspect",
         "entity": "Produto",
-        "title": "Consultar produto",
-        "description": "Consultar o saldo atual do produto antes do registro da movimentação."
+        "title": "Consultar saldo do produto",
+        "description": "Confere o saldo atual disponível do produto antes de registrar a movimentação."
       },
       {
         "stepId": "registrarMovimentacao",
         "kind": "act",
         "entity": "MovimentacaoEstoque",
-        "affects": [
-          "Produto"
-        ],
         "effect": "create",
         "title": "Registrar movimentação",
-        "description": "Registrar a movimentação, informando se é entrada ou saída, o produto, a quantidade e os dados do registro."
+        "description": "Registra uma entrada ou saída com produto, quantidade e as informações necessárias; o registro permanece imutável após ser realizado."
       }
     ],
     "outcome": {
-      "statement": "A movimentação fica registrada de forma imutável e o saldo do produto é atualizado conforme o tipo informado.",
+      "statement": "A entrada ou saída é registrada de forma definitiva e o saldo atual do produto é atualizado.",
       "evidence": [
-        "Uma movimentação de entrada ou saída é exibida no histórico do produto.",
-        "O saldo atual do produto aumenta para entradas e diminui para saídas pela quantidade registrada."
+        "Há uma movimentação de entrada ou saída registrada para o produto.",
+        "O saldo atual exibido para o produto reflete a quantidade movimentada."
       ]
     }
   },
-  "businessHash": "sha256:38ddcf66d42e3c143d43f7bc3d342a73dd19f6906118877f1e452b5a92e8d2bf"
+  "businessHash": "sha256:3ddc7b95c4b6e8faaa0124826c6c3fb4c5ea2b09f2e029cbc28cf699caf3888b"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarMovimentacaoEstoqueJourneyType = typeof registrarMovimentacaoEstoqueJourney;

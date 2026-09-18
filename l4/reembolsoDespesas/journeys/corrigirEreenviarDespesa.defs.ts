@@ -8,7 +8,7 @@ export const corrigirEreenviarDespesaJourney = {
   "business": {
     "actorRef": "colaborador",
     "title": "Corrigir e reenviar despesa rejeitada",
-    "goal": "Corrigir uma despesa rejeitada e reenviá-la uma única vez para nova aprovação.",
+    "goal": "Ajustar uma despesa rejeitada e reenviá-la para nova aprovação.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,13 +18,13 @@ export const corrigirEreenviarDespesaJourney = {
         "kind": "locate",
         "entity": "Despesa",
         "title": "Localizar despesa rejeitada",
-        "description": "Localiza uma despesa própria rejeitada que ainda pode ser reenviada."
+        "description": "Localiza uma despesa própria rejeitada que ainda pode ser corrigida e reenviada."
       },
       {
-        "stepId": "consultarMotivoRejeicao",
+        "stepId": "inspecionarMotivoRejeicao",
         "kind": "inspect",
         "entity": "Despesa",
-        "title": "Consultar motivo da rejeição",
+        "title": "Inspecionar motivo da rejeição",
         "description": "Consulta o motivo informado pelo gestor para a rejeição."
       },
       {
@@ -33,36 +33,28 @@ export const corrigirEreenviarDespesaJourney = {
         "entity": "Despesa",
         "effect": "update",
         "title": "Corrigir despesa",
-        "description": "Corrige os dados ou o comprovante da despesa conforme necessário."
+        "description": "Corrige os dados necessários da própria despesa rejeitada."
       },
       {
         "stepId": "reenviarDespesa",
         "kind": "act",
         "entity": "Despesa",
         "effect": "transition",
-        "transitionRef": "resubmitForApproval",
-        "title": "Reenviar para aprovação",
-        "description": "Reenvia a despesa corrigida para nova avaliação do gestor."
-      },
-      {
-        "stepId": "encaminharDespesaReenviada",
-        "kind": "handoff",
-        "entity": "Despesa",
-        "title": "Encaminhar despesa reenviada",
-        "description": "A despesa corrigida segue para nova avaliação do gestor da equipe.",
-        "handoffTo": "gestorEquipe"
+        "transitionRef": "reenviarParaAprovacao",
+        "title": "Reenviar despesa",
+        "description": "Reenvia a despesa corrigida para nova avaliação, respeitando o único reenvio permitido."
       }
     ],
     "outcome": {
-      "statement": "A despesa rejeitada é corrigida e reenviada para uma única nova avaliação.",
+      "statement": "A despesa rejeitada é corrigida e reenviada uma única vez para aprovação.",
       "evidence": [
-        "Alterações da despesa ficam registradas.",
-        "Despesa passa novamente para aprovação.",
-        "Reenvio da despesa é identificado como realizado."
+        "A despesa contém os dados corrigidos.",
+        "A despesa volta a ficar disponível para avaliação do gestor.",
+        "O reenvio da despesa fica registrado."
       ]
     }
   },
-  "businessHash": "sha256:210ae97b6f01738f5e82d4315051823abd445b362499fcd9e2bdd7f89f91467e"
+  "businessHash": "sha256:c49dcaf1ccfe892a8c8aecdc1f7335ab9f653409d1f034af1c5e3ef10e83586f"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CorrigirEreenviarDespesaJourneyType = typeof corrigirEreenviarDespesaJourney;

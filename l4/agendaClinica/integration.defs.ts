@@ -8,34 +8,34 @@ export const agendaClinicaIntegration = {
   "inbound": [],
   "outbound": [
     {
-      "id": "confirmarConsulta",
+      "id": "consultaConfirmada",
       "kind": "event",
       "to": "any",
-      "event": "confirmarConsulta",
+      "event": "consultaConfirmada",
       "on": "Consulta.confirmarConsulta",
-      "description": "Publica a confirmação da consulta para módulos que precisem acompanhar o agendamento.",
+      "description": "Publica que uma consulta foi confirmada por telefone, para que outros módulos interessados possam reagir.",
       "entityRefs": [
         "Consulta"
       ]
     },
     {
-      "id": "registrarFalta",
+      "id": "faltaPacienteRegistrada",
       "kind": "event",
       "to": "any",
-      "event": "registrarFalta",
+      "event": "faltaPacienteRegistrada",
       "on": "Consulta.registrarFalta",
-      "description": "Publica o registro de falta do paciente na consulta.",
+      "description": "Publica o registro de falta do paciente em uma consulta, para uso por outros módulos interessados.",
       "entityRefs": [
         "Consulta"
       ]
     },
     {
-      "id": "registrarAtendimento",
+      "id": "atendimentoRegistrado",
       "kind": "event",
       "to": "any",
-      "event": "registrarAtendimento",
+      "event": "atendimentoRegistrado",
       "on": "Consulta.registrarAtendimento",
-      "description": "Publica o registro de atendimento concluído pelo profissional.",
+      "description": "Publica que uma consulta foi atendida e teve sua anotação registrada, para que outros módulos interessados possam reagir.",
       "entityRefs": [
         "Consulta"
       ]

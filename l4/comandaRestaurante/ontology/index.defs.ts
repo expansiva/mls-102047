@@ -3,7 +3,7 @@
 import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteOntologyIndex = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "comandaRestaurante",
   "businessDomain": "Gestão de comandas e atendimento de restaurante",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
@@ -14,8 +14,8 @@ export const comandaRestauranteOntologyIndex = {
   "entities": [
     {
       "entityId": "Mesa",
-      "kind": "role",
-      "subtype": "Location"
+      "kind": "entity",
+      "class": "supporting"
     },
     {
       "entityId": "ItemCardapio",
@@ -35,33 +35,33 @@ export const comandaRestauranteOntologyIndex = {
   ],
   "relationships": [
     {
-      "relationshipId": "comandaParaMesa",
+      "relationshipId": "comandaMesa",
       "from": "Comanda",
       "to": "Mesa",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada comanda é aberta obrigatoriamente para uma mesa, e uma mesa pode ter comandas em atendimentos distintos ao longo do tempo.",
+      "description": "Cada comanda é aberta para uma mesa, e uma mesa pode receber diversas comandas ao longo do tempo.",
       "field": "Comanda.mesaId"
     },
     {
-      "relationshipId": "itemComandaParaComanda",
+      "relationshipId": "itemComandaComanda",
       "from": "ItemComanda",
       "to": "Comanda",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item lançado pertence obrigatoriamente a uma comanda, que pode reunir vários lançamentos.",
+      "description": "Cada lançamento pertence a uma única comanda, que pode reunir vários itens lançados.",
       "field": "ItemComanda.comandaId"
     },
     {
-      "relationshipId": "itemComandaParaItemCardapio",
+      "relationshipId": "itemComandaItemCardapio",
       "from": "ItemComanda",
       "to": "ItemCardapio",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada lançamento referencia obrigatoriamente o item do cardápio escolhido, e um item do cardápio pode aparecer em vários lançamentos.",
+      "description": "Cada lançamento registra o item do cardápio solicitado, usando o preço vigente no momento do lançamento.",
       "field": "ItemComanda.itemCardapioId"
     }
   ]

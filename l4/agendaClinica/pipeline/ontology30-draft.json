@@ -1,13 +1,14 @@
 {
   "plan": {
     "moduleName": "agendaClinica",
-    "businessDomain": "Agenda clínica para cadastro de pacientes, agendamento e acompanhamento de consultas",
+    "businessDomain": "Agenda clínica",
     "entities": [
       {
         "entityId": "Paciente",
         "kind": "role",
+        "family": "mdm",
         "title": "Paciente",
-        "description": "Pessoa cadastrada para receber atendimento na clínica.",
+        "description": "Pessoa cadastrada ou associada à clínica para receber consultas.",
         "displayField": "details.identification.name",
         "subtype": "Person",
         "roleTag": "agendaClinica.Paciente",
@@ -16,8 +17,9 @@
       {
         "entityId": "Profissional",
         "kind": "role",
+        "family": "mdm",
         "title": "Profissional",
-        "description": "Médico ou terapeuta da clínica que realiza atendimentos e consulta a própria agenda.",
+        "description": "Médico ou terapeuta da clínica que realiza consultas e acessa a própria agenda.",
         "displayField": "details.identification.name",
         "writer": "crud",
         "subtype": "Person",
@@ -25,11 +27,24 @@
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
       },
       {
+        "entityId": "Recepcionista",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Recepcionista",
+        "description": "Pessoa da clínica que cadastra pacientes e administra os agendamentos.",
+        "displayField": "details.identification.name",
+        "writer": "crud",
+        "subtype": "Person",
+        "roleTag": "agendaClinica.Recepcionista",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
         "entityId": "ContatoPaciente",
         "kind": "role",
+        "family": "mdm",
         "title": "Contato do paciente",
-        "description": "Canal de contato do paciente utilizado pela recepção para confirmação de consultas.",
-        "displayField": "details.contactChannel.value",
+        "description": "Canal de contato do paciente, usado para a confirmação telefônica da consulta.",
+        "displayField": "details.identification.name",
         "subtype": "ContactChannel",
         "roleTag": "agendaClinica.ContatoPaciente",
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
@@ -37,46 +52,48 @@
       {
         "entityId": "Consulta",
         "kind": "entity",
+        "family": "tdm",
         "title": "Consulta",
-        "description": "Agendamento de atendimento de um paciente com um profissional em data e horário definidos.",
+        "description": "Agendamento clínico de um paciente com um profissional em data e horário determinados, acompanhado até o atendimento ou a falta.",
         "displayField": "scheduledAt",
-        "class": "core",
+        "class": "event",
         "storage": {
           "target": "moduleDatabase",
-          "table": "agendaClinica_consulta"
+          "table": "agendaClinica_consulta",
+          "kind": "relational"
         }
       }
     ],
     "relationships": [
       {
-        "relationshipId": "consultaPaciente",
+        "relationshipId": "patientContacts",
+        "from": "Paciente",
+        "to": "ContatoPaciente",
+        "type": "oneToMany",
+        "required": true,
+        "mode": "mdmRelationship",
+        "description": "O paciente possui canais de contato, incluindo telefone para confirmação da consulta.",
+        "catalogType": "HasContact"
+      },
+      {
+        "relationshipId": "appointmentPatient",
         "from": "Consulta",
         "to": "Paciente",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada consulta é agendada para um paciente.",
-        "field": "Consulta.pacienteId"
+        "description": "Cada consulta é agendada para um único paciente.",
+        "field": "Consulta.patientId"
       },
       {
-        "relationshipId": "consultaProfissional",
+        "relationshipId": "appointmentProfessional",
         "from": "Consulta",
         "to": "Profissional",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada consulta é atribuída a um profissional responsável pelo atendimento.",
-        "field": "Consulta.profissionalId"
-      },
-      {
-        "relationshipId": "pacienteHasContact",
-        "from": "Paciente",
-        "to": "ContatoPaciente",
-        "type": "oneToMany",
-        "required": false,
-        "mode": "mdmRelationship",
-        "description": "O paciente possui canais de contato usados para comunicação e confirmação de consultas.",
-        "catalogType": "HasContact"
+        "description": "Cada consulta é realizada por um único profissional.",
+        "field": "Consulta.professionalId"
       }
     ],
     "normalizations": [
@@ -92,6 +109,11 @@
       },
       {
         "kind": "derivedFromPlatform",
+        "entityId": "Recepcionista",
+        "detail": "roleTag agendaClinica.Recepcionista; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
         "entityId": "ContatoPaciente",
         "detail": "roleTag agendaClinica.ContatoPaciente; source /_102034_/l4/ontology/mdm.defs.ts"
       },
@@ -104,52 +126,54 @@
   },
   "entities": [
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "agendaClinica",
       "entityId": "Paciente",
       "title": "Paciente",
-      "description": "Pessoa cadastrada para receber atendimento na clínica.",
+      "description": "Pessoa cadastrada ou associada à clínica para receber consultas.",
       "displayField": "details.identification.name",
       "relationships": {
+        "contatos": {
+          "relationshipId": "patientContacts",
+          "to": "ContatoPaciente",
+          "via": "HasContact",
+          "cardinality": "1:N",
+          "title": "Contatos do paciente",
+          "description": "Canais de contato do paciente, incluindo telefone para confirmação da consulta.",
+          "required": "sempre que o paciente estiver associado à clínica",
+          "role": "HasContact"
+        },
         "consultas": {
-          "relationshipId": "consultaPaciente",
+          "relationshipId": "appointmentPatient",
           "to": "Consulta",
-          "via": "Consulta.pacienteId",
+          "via": "Consulta.patientId",
           "cardinality": "1:N",
           "title": "Consultas do paciente",
           "description": "Consultas agendadas para este paciente.",
           "mode": "fk",
           "direction": "to",
-          "required": "Sempre que uma consulta for criada",
+          "required": "sempre que houver uma consulta agendada para o paciente",
           "role": "paciente"
-        },
-        "contatos": {
-          "relationshipId": "pacienteHasContact",
-          "to": "ContatoPaciente",
-          "via": "HasContact",
-          "cardinality": "1:N",
-          "title": "Canais de contato do paciente",
-          "description": "Canais de contato vinculados ao paciente para comunicação e confirmação de consultas.",
-          "required": "Quando houver telefone, WhatsApp ou e-mail para comunicação",
-          "role": "titular"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta o cadastro mestre do paciente pelo identificador para exibir seus dados no agendamento e na consulta · por get e hidratação do registro MDM · recepcionista e profissional.",
-        "locate.byName": "Localiza pacientes pelo nome para iniciar ou continuar o agendamento · por busca de nome no índice de pessoas · recepcionista.",
-        "locate.byDocument": "Localiza o paciente pelo documento nacional para evitar duplicidade no cadastro · por consulta do documento no índice MDM · recepcionista.",
-        "locate.byContact": "Localiza o paciente por telefone, WhatsApp ou e-mail quando a recepção precisa identificá-lo em uma comunicação · por busca do canal de contato vinculado · recepcionista.",
-        "register.createOrAttach": "Cria o registro de pessoa quando não existe ou vincula o já existente ao papel de paciente da agenda clínica · por deduplicação e anexação da tag agendaClinica.Paciente · recepcionista.",
-        "edit.platformFields": "Atualiza os dados de identificação do paciente necessários ao cadastro · por atualização dos campos mantidos pela plataforma MDM · recepcionista.",
-        "inactivate": "Inativa ou reativa o cadastro de paciente sem apagá-lo · por mudança do status do registro mestre · recepcionista.",
-        "link.contact": "Vincula telefone, WhatsApp ou e-mail ao paciente para comunicação e confirmação de consultas · por criação do canal de contato e relacionamento HasContact · recepcionista.",
-        "listLinks": "Exibe os canais de contato vinculados ao paciente e sua vigência · por consulta dos relacionamentos MDM · recepcionista.",
-        "audit": "Consulta quem alterou o cadastro mestre do paciente e quando · por leitura da auditoria da plataforma · recepcionista autorizada."
+        "read.byId": "Consulta um paciente pelo identificador mestre para exibir seus dados cadastrais à recepcionista durante o agendamento.",
+        "locate.byName": "Localiza pacientes pelo nome para a recepcionista identificar a pessoa antes de cadastrá-la ou agendar uma consulta.",
+        "locate.byDocument": "Localiza um paciente pelo documento nacional para a recepcionista evitar cadastros duplicados.",
+        "locate.byContact": "Localiza o paciente pelo telefone ou outro canal de contato para a recepcionista confirmar consultas.",
+        "register.createOrAttach": "Cria ou associa uma pessoa ao papel de paciente da agenda clínica, por documento ou contato, para a recepcionista cadastrá-la sem duplicidade.",
+        "edit.platformFields": "Atualiza os dados cadastrais mestres do paciente para a recepcionista manter o cadastro correto.",
+        "inactivate": "Inativa ou reativa o papel de paciente sem apagar seu histórico de consultas, para a recepcionista manter o cadastro utilizável.",
+        "link.contact": "Vincula um canal de contato, incluindo telefone, ao paciente para a recepcionista poder confirmar consultas.",
+        "listLinks": "Lista contatos e consultas relacionados ao paciente para a recepcionista consultar as informações necessárias ao atendimento.",
+        "audit": "Consulta as alterações do cadastro mestre do paciente para auditoria administrativa da clínica."
       },
       "rules": [
         "rule-foreign-namespace-refused",
+        "rule-delete-blocked-by-relationships",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "rule-person-ssn-unique-for-us",
         "rule-person-privacy-consent-required-br-eu"
       ],
       "kind": "role",
@@ -174,7 +198,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da pessoa atendida pela clínica.",
+            "description": "Dados mestres da pessoa associada à clínica como paciente.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -188,12 +212,12 @@
                     "values": [
                       {
                         "value": "Person",
-                        "title": "Pessoa física",
-                        "description": "Registro de uma pessoa."
+                        "title": "Pessoa",
+                        "description": "Pessoa natural."
                       }
                     ],
-                    "description": "Indica que este registro mestre é uma pessoa.",
-                    "title": "Tipo de cadastro",
+                    "description": "Subtipo mestre da pessoa cadastrada como paciente.",
+                    "title": "Subtipo",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -203,7 +227,7 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome pelo qual o paciente é identificado no cadastro e no agendamento.",
+                    "description": "Nome pelo qual o paciente é identificado pela clínica.",
                     "title": "Nome",
                     "min": 0,
                     "max": 0
@@ -217,26 +241,26 @@
                       {
                         "value": "Active",
                         "title": "Ativo",
-                        "description": "Cadastro disponível para uso."
+                        "description": "Registro ativo."
                       },
                       {
                         "value": "Inactive",
                         "title": "Inativo",
-                        "description": "Cadastro fora de uso."
+                        "description": "Registro inativo."
                       },
                       {
                         "value": "Merged",
                         "title": "Mesclado",
-                        "description": "Cadastro unificado a outro registro."
+                        "description": "Registro unido a outro registro mestre."
                       },
                       {
                         "value": "Blocked",
                         "title": "Bloqueado",
-                        "description": "Cadastro bloqueado pela plataforma."
+                        "description": "Registro bloqueado pela plataforma."
                       }
                     ],
-                    "title": "Situação do cadastro",
-                    "description": "Situação de atividade do registro mestre do paciente.",
+                    "title": "Situação",
+                    "description": "Situação mestre que indica se o paciente está ativo para uso na clínica.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -248,32 +272,32 @@
                       {
                         "value": "SSN",
                         "title": "SSN",
-                        "description": "Documento de seguridade social dos Estados Unidos."
+                        "description": "Documento SSN."
                       },
                       {
                         "value": "EIN",
                         "title": "EIN",
-                        "description": "Identificador fiscal dos Estados Unidos."
+                        "description": "Documento EIN."
                       },
                       {
                         "value": "Passport",
                         "title": "Passaporte",
-                        "description": "Documento de viagem."
+                        "description": "Passaporte."
                       },
                       {
                         "value": "DriversLicense",
                         "title": "Carteira de motorista",
-                        "description": "Documento de habilitação."
+                        "description": "Carteira de motorista."
                       },
                       {
                         "value": "NationalId",
                         "title": "Documento nacional",
-                        "description": "Documento nacional de identidade."
+                        "description": "Documento nacional de identificação."
                       },
                       {
                         "value": "CPF",
                         "title": "CPF",
-                        "description": "Cadastro de Pessoa Física."
+                        "description": "Cadastro de Pessoas Físicas."
                       },
                       {
                         "value": "CNPJ",
@@ -282,17 +306,17 @@
                       },
                       {
                         "value": "VAT",
-                        "title": "Identificação fiscal",
-                        "description": "Identificação fiscal nacional."
+                        "title": "VAT",
+                        "description": "Documento fiscal VAT."
                       },
                       {
                         "value": "Other",
                         "title": "Outro",
-                        "description": "Outro documento de identificação."
+                        "description": "Outro documento aceito pela plataforma."
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do paciente.",
+                    "description": "Tipo do documento nacional usado para localizar ou evitar duplicidade do paciente.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -300,7 +324,7 @@
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do documento informado para localizar ou cadastrar o paciente sem duplicidade.",
+                    "description": "Número do documento nacional usado na identificação do paciente.",
                     "title": "Número do documento",
                     "maxLength": 0,
                     "min": 0,
@@ -311,28 +335,38 @@
                     "required": true,
                     "indexed": true,
                     "pattern": "^[A-Z]{2}$",
-                    "maxLength": 2,
+                    "maxLength": 0,
                     "default": "US",
-                    "description": "Código do país que orienta o documento e as regras aplicáveis ao paciente.",
+                    "description": "País que define as regras aplicáveis ao documento e à privacidade do paciente.",
                     "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação do paciente mantidos pela plataforma."
+                "description": "Dados de identificação e situação do paciente no cadastro mestre."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Nomes alternativos pelos quais o paciente pode ser reconhecido.",
+                    "title": "Outros nomes",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
                   "contacts": {
                     "type": "object",
                     "required": true,
                     "collection": true,
                     "of": "ContactSummary",
                     "derived": true,
-                    "description": "Resumo derivado dos canais de contato vinculados ao paciente, usado na comunicação e confirmação de consultas.",
-                    "title": "Canais de contato",
+                    "description": "Resumo derivado dos canais de contato vinculados ao paciente, incluindo o telefone usado na confirmação de consultas.",
+                    "title": "Contatos",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -341,14 +375,22 @@
                     "type": "object",
                     "required": true,
                     "derived": true,
-                    "description": "Referências compactas derivadas dos relacionamentos ativos do paciente.",
+                    "description": "Referências compactas derivadas dos relacionamentos do paciente.",
                     "title": "Referências de relacionamentos",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
+                  },
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 0,
+                    "title": "Observações",
+                    "description": "Observações gerais mantidas no cadastro mestre do paciente.",
+                    "min": 0,
+                    "max": 0
                   }
                 },
-                "description": "Dados comuns do registro mestre que a clínica consulta para comunicação com o paciente."
+                "description": "Dados básicos do cadastro mestre usados pela clínica."
               },
               "person": {
                 "type": "object",
@@ -357,20 +399,20 @@
                   "privacyConsent": {
                     "type": "object",
                     "of": "PrivacyConsent",
-                    "description": "Consentimento de privacidade do paciente, exigido quando aplicável pela LGPD ou GDPR.",
+                    "description": "Consentimento de privacidade do paciente, aplicável conforme o país informado.",
                     "title": "Consentimento de privacidade",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados pessoais do paciente mantidos pela plataforma."
+                "description": "Dados próprios de pessoa natural aplicáveis ao paciente."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização, somente para leitura pelo módulo."
+                "description": "Dados promovidos pela organização, disponíveis apenas para leitura neste módulo."
               },
               "agendaClinica": {
                 "type": "object",
@@ -384,35 +426,37 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "agendaClinica",
       "entityId": "Profissional",
       "title": "Profissional",
-      "description": "Médico ou terapeuta da clínica que realiza atendimentos e consulta a própria agenda.",
+      "description": "Médico ou terapeuta da clínica que realiza consultas e acessa a própria agenda.",
       "displayField": "details.identification.name",
       "relationships": {
         "consultas": {
-          "relationshipId": "consultaProfissional",
+          "relationshipId": "appointmentProfessional",
           "to": "Consulta",
-          "via": "Consulta.profissionalId",
+          "via": "Consulta.professionalId",
           "cardinality": "1:N",
-          "title": "Consultas do profissional",
-          "description": "Consultas atribuídas a este profissional como responsável pelo atendimento.",
+          "title": "Consultas realizadas",
+          "description": "Consultas da agenda realizadas por este profissional.",
           "mode": "fk",
           "direction": "to",
-          "required": true,
+          "required": "Não é obrigatório para o profissional; toda consulta vinculada exige um profissional responsável.",
           "role": "profissional responsável"
         }
       },
       "capabilities": {
-        "read.byId": "Lê o profissional pelo identificador mestre para apresentar seus dados ao carregar uma consulta; usado pela recepcionista e pelo profissional.",
-        "locate.byName": "Localiza médicos e terapeutas pelo nome no índice de pessoas para selecionar o responsável ao agendar; usado pela recepcionista.",
-        "locate.byDocument": "Localiza um profissional pelo documento nacional para evitar duplicidade antes do seu cadastro; usado pela equipe autorizada da clínica.",
-        "register.createOrAttach": "Cria a pessoa quando ausente ou anexa o papel de Profissional ao registro mestre existente, usando documento quando informado; usado pela equipe autorizada da clínica.",
-        "edit.platformFields": "Atualiza os dados de identificação e os demais dados de plataforma do profissional no registro mestre; usado pela equipe autorizada da clínica.",
-        "edit.moduleNamespace": "Atualiza exclusivamente a categoria de atuação em details.agendaClinica; usado pela equipe autorizada da clínica.",
-        "inactivate": "Inativa ou reativa o registro mestre do profissional para retirá-lo ou devolvê-lo ao uso sem apagá-lo; usado pela equipe autorizada da clínica.",
-        "agendaClinica.listarConsultas": "Lista as consultas vinculadas por Consulta.profissionalId, restringindo a agenda do dia ao próprio profissional autenticado; usado pelo profissional."
+        "read.byId": "Lê um profissional pelo identificador mestre · consulta direta pelo mdmId · usada pela recepcionista ao agendar e pela agenda do próprio profissional.",
+        "locate.byName": "Localiza profissionais pelo nome · busca textual no índice de pessoas ativas · usada pela recepcionista para selecionar médico ou terapeuta no agendamento.",
+        "locate.byDocument": "Localiza um profissional pelo documento nacional · consulta de deduplicação no índice mestre · usada pela recepcionista ao cadastrar ou vincular um profissional.",
+        "locate.byTag": "Lista os registros com o papel agendaClinica.Profissional · consulta indexada de tags do MDM · usada pela recepcionista para limitar a seleção aos profissionais da clínica.",
+        "register.createOrAttach": "Cria ou vincula a pessoa existente ao papel de profissional · deduplica por documento e anexa a tag do módulo · usada pela recepcionista ao cadastrar um profissional da clínica.",
+        "edit.platformFields": "Atualiza os dados de plataforma usados pelo profissional, incluindo nome, documento, profissão e consentimento · atualização do registro mestre e de seu índice · usada pela recepcionista na manutenção cadastral.",
+        "inactivate": "Inativa ou reativa o profissional sem apagar seu registro mestre · alteração da situação no MDM · usada pela recepcionista quando o profissional deixa ou retoma a clínica.",
+        "invite.login": "Concede acesso de login ao profissional · convite que cria o identificador de login no índice da organização · usado pela recepcionista para permitir o acesso à própria agenda.",
+        "statusHistory.read": "Exibe as mudanças de situação do profissional · leitura do histórico de status do MDM · usada pela recepcionista na conferência cadastral.",
+        "audit": "Mostra quem alterou os dados do profissional e quando · leitura da auditoria do registro mestre · usada pela recepcionista na conferência cadastral."
       },
       "rules": [
         "rule-foreign-namespace-refused",
@@ -443,7 +487,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da pessoa que atua como profissional na agenda clínica.",
+            "description": "Registro mestre da pessoa que atua como médico ou terapeuta na clínica.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -458,10 +502,10 @@
                       {
                         "value": "Person",
                         "title": "Pessoa",
-                        "description": "Pessoa física cadastrada no MDM."
+                        "description": "Pessoa física."
                       }
                     ],
-                    "description": "Indica que este registro mestre é uma pessoa.",
+                    "description": "Classifica este registro mestre como pessoa.",
                     "title": "Subtipo",
                     "maxLength": 0,
                     "min": 0,
@@ -472,7 +516,250 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome pelo qual o médico ou terapeuta é localizado para o agendamento.",
+                    "description": "Nome pelo qual o profissional é localizado e apresentado na agenda.",
+                    "title": "Nome",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo",
+                        "description": "Registro em uso."
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo",
+                        "description": "Registro fora de uso."
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado",
+                        "description": "Registro unido a outro registro mestre."
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado",
+                        "description": "Registro bloqueado pela plataforma."
+                      }
+                    ],
+                    "title": "Situação",
+                    "description": "Situação do registro mestre do profissional na plataforma.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "docType": {
+                    "type": "enum",
+                    "indexed": true,
+                    "values": [
+                      {
+                        "value": "SSN",
+                        "title": "SSN",
+                        "description": "Documento nacional dos Estados Unidos."
+                      },
+                      {
+                        "value": "EIN",
+                        "title": "EIN",
+                        "description": "Identificador fiscal dos Estados Unidos."
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte",
+                        "description": "Documento de passaporte."
+                      },
+                      {
+                        "value": "DriversLicense",
+                        "title": "Carteira de motorista",
+                        "description": "Documento de habilitação."
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento nacional",
+                        "description": "Documento nacional de identidade."
+                      },
+                      {
+                        "value": "CPF",
+                        "title": "CPF",
+                        "description": "Cadastro de Pessoa Física."
+                      },
+                      {
+                        "value": "CNPJ",
+                        "title": "CNPJ",
+                        "description": "Cadastro Nacional da Pessoa Jurídica."
+                      },
+                      {
+                        "value": "VAT",
+                        "title": "VAT",
+                        "description": "Identificador fiscal de valor agregado."
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro",
+                        "description": "Outro tipo de documento."
+                      }
+                    ],
+                    "title": "Tipo de documento",
+                    "description": "Tipo do documento nacional usado para localizar ou deduplicar o profissional.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "docId": {
+                    "type": "string",
+                    "indexed": true,
+                    "description": "Número do documento nacional do profissional.",
+                    "title": "Número do documento",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 0,
+                    "default": "US",
+                    "description": "Código ISO do país aplicável ao documento e às regras legais do profissional.",
+                    "title": "País",
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados de identificação do registro mestre do profissional."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {},
+                "description": "Dados comuns de plataforma do registro mestre; nenhum dado básico adicional é usado pela agenda clínica."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "occupation": {
+                    "type": "string",
+                    "maxLength": 0,
+                    "title": "Profissão",
+                    "description": "Profissão exercida na clínica, identificando a atuação como médico ou terapeuta.",
+                    "required": true,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consentimento de privacidade do profissional quando exigido pela legislação aplicável.",
+                    "title": "Consentimento de privacidade",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados próprios de pessoa física usados para caracterizar a atuação clínica."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Dados promovidos pela organização, somente para leitura neste módulo."
+              },
+              "agendaClinica": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "agendaClinica",
+      "entityId": "Recepcionista",
+      "title": "Recepcionista",
+      "description": "Pessoa da clínica que cadastra pacientes e administra os agendamentos.",
+      "displayField": "details.identification.name",
+      "relationships": {},
+      "capabilities": {
+        "read.byId": "Lê a recepcionista pelo identificador mestre, por consulta direta no índice e no documento, para telas internas que já possuem seu registro.",
+        "locate.byName": "Localiza recepcionistas pelo nome, pesquisando o índice de pessoas, para quem administra os cadastros da clínica.",
+        "locate.byDocument": "Localiza uma recepcionista pelo documento nacional, para evitar duplicidade durante seu cadastro interno.",
+        "register.createOrAttach": "Cria ou vincula a pessoa existente ao papel de recepcionista, conferindo documento e aplicando a tag do módulo, para o responsável interno pelo cadastro.",
+        "edit.platformFields": "Atualiza nome, documento e demais dados mantidos pela plataforma, reindexando a identificação quando necessário, para quem mantém o cadastro da recepcionista.",
+        "edit.moduleNamespace": "Atualiza somente o espaço agendaClinica da recepcionista, protegido da escrita de outros módulos, para a administração do módulo.",
+        "inactivate": "Inativa ou reativa a recepcionista sem apagar seu registro mestre, alterando a situação da plataforma, para quem mantém os cadastros internos.",
+        "audit": "Exibe quem alterou os dados da recepcionista e quando, pela auditoria do registro mestre, para a administração da clínica.",
+        "invite.login": "Concede convite de acesso à recepcionista, criando o identificador de login no índice da organização, para quem administra os acessos internos."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "rule-person-privacy-consent-required-br-eu"
+      ],
+      "writer": "crud",
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "agendaClinica.Recepcionista",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "Documento mestre da pessoa, com dados da plataforma e o espaço exclusivo do módulo agenda clínica.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Pessoa",
+                        "description": "Pessoa física."
+                      }
+                    ],
+                    "description": "Indica que este registro mestre representa uma pessoa.",
+                    "title": "Tipo de registro",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 0,
+                    "description": "Nome pelo qual a recepcionista é identificada na clínica.",
                     "title": "Nome",
                     "min": 0,
                     "max": 0
@@ -501,11 +788,11 @@
                       {
                         "value": "Blocked",
                         "title": "Bloqueado",
-                        "description": "Registro bloqueado pela plataforma."
+                        "description": "Registro bloqueado pela organização."
                       }
                     ],
-                    "title": "Situação no MDM",
-                    "description": "Situação de atividade do registro mestre do profissional, controlada pela plataforma.",
+                    "title": "Situação do cadastro",
+                    "description": "Situação ativa, inativa, mesclada ou bloqueada do registro mestre da recepcionista.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -515,24 +802,14 @@
                     "indexed": true,
                     "values": [
                       {
-                        "value": "SSN",
-                        "title": "SSN",
-                        "description": "Documento nacional SSN."
-                      },
-                      {
-                        "value": "EIN",
-                        "title": "EIN",
-                        "description": "Documento EIN."
+                        "value": "CPF",
+                        "title": "CPF",
+                        "description": "Cadastro de Pessoas Físicas."
                       },
                       {
                         "value": "Passport",
                         "title": "Passaporte",
-                        "description": "Documento de passaporte."
-                      },
-                      {
-                        "value": "DriversLicense",
-                        "title": "Carteira de motorista",
-                        "description": "Documento de habilitação."
+                        "description": "Documento de viagem."
                       },
                       {
                         "value": "NationalId",
@@ -540,28 +817,13 @@
                         "description": "Documento nacional de identificação."
                       },
                       {
-                        "value": "CPF",
-                        "title": "CPF",
-                        "description": "Cadastro de Pessoas Físicas."
-                      },
-                      {
-                        "value": "CNPJ",
-                        "title": "CNPJ",
-                        "description": "Cadastro Nacional da Pessoa Jurídica."
-                      },
-                      {
-                        "value": "VAT",
-                        "title": "VAT",
-                        "description": "Identificação fiscal VAT."
-                      },
-                      {
                         "value": "Other",
                         "title": "Outro",
-                        "description": "Outro documento aceito pela plataforma."
+                        "description": "Outro documento de identificação."
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional usado para deduplicar o profissional quando informado.",
+                    "description": "Tipo do documento nacional usado para identificar a recepcionista.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -569,7 +831,7 @@
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do documento nacional do profissional, quando informado.",
+                    "description": "Número do documento nacional da recepcionista.",
                     "title": "Número do documento",
                     "maxLength": 0,
                     "min": 0,
@@ -580,80 +842,39 @@
                     "required": true,
                     "indexed": true,
                     "pattern": "^[A-Z]{2}$",
-                    "maxLength": 0,
+                    "maxLength": 2,
                     "default": "US",
-                    "description": "Código ISO do país aplicável ao documento e às regras da pessoa profissional.",
+                    "description": "Código ISO do país ao qual se aplicam o documento e as regras da recepcionista.",
                     "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação da pessoa usados para localizar e manter o profissional."
+                "description": "Dados de identificação da pessoa usados pela clínica para reconhecer e manter a recepcionista."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados comuns da pessoa mantidos pela plataforma; nenhum dado base adicional é usado pela agenda clínica."
+                "description": "Dados básicos da plataforma para esta pessoa; não há dado adicional deste grupo usado pela agenda clínica."
               },
               "person": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {
-                  "occupation": {
-                    "type": "string",
-                    "maxLength": 0,
-                    "title": "Ocupação",
-                    "description": "Ocupação profissional registrada pela plataforma, quando necessária para identificar a atuação clínica.",
-                    "min": 0,
-                    "max": 0
-                  },
-                  "privacyConsent": {
-                    "type": "object",
-                    "of": "PrivacyConsent",
-                    "description": "Consentimento de privacidade da pessoa, quando exigido pelas regras aplicáveis.",
-                    "title": "Consentimento de privacidade",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Dados próprios de pessoa física relevantes para a atuação do profissional."
+                "fields": {},
+                "description": "Dados pessoais da plataforma; a agenda clínica não usa campos adicionais deste grupo para a recepcionista."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização e apenas lidos pela agenda clínica."
+                "description": "Dados promovidos pela organização, somente para leitura pela agenda clínica."
               },
               "agendaClinica": {
                 "type": "object",
                 "owner": "module",
-                "fields": {
-                  "categoria": {
-                    "type": "enum",
-                    "required": true,
-                    "of": "Address",
-                    "values": [
-                      {
-                        "value": "medico",
-                        "title": "Médico",
-                        "description": "Profissional que atua como médico na clínica."
-                      },
-                      {
-                        "value": "terapeuta",
-                        "title": "Terapeuta",
-                        "description": "Profissional que atua como terapeuta na clínica."
-                      }
-                    ],
-                    "title": "Categoria profissional",
-                    "description": "Indica se o profissional atua na clínica como médico ou terapeuta.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Dados exclusivos da agenda clínica sobre a atuação da pessoa como profissional."
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
               }
             }
           }
@@ -661,34 +882,35 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "agendaClinica",
       "entityId": "ContatoPaciente",
       "title": "Contato do paciente",
-      "description": "Canal de contato do paciente utilizado pela recepção para confirmação de consultas.",
-      "displayField": "details.contactChannel.value",
+      "description": "Canal de contato do paciente, usado para a confirmação telefônica da consulta.",
+      "displayField": "details.identification.name",
       "relationships": {
         "paciente": {
-          "relationshipId": "pacienteHasContact",
+          "relationshipId": "patientContacts",
           "to": "Paciente",
           "via": "HasContact",
           "cardinality": "N:1",
           "title": "Paciente do contato",
-          "description": "Canal de contato vinculado ao paciente para comunicação e confirmação de consultas.",
+          "description": "Vínculo HasContact que associa este canal de contato ao paciente para confirmação de consultas.",
           "direction": "to",
+          "required": "Sempre que o canal for usado para confirmar consultas do paciente.",
           "role": "HasContact"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um canal de contato pelo identificador mestre para exibir o telefone do paciente à recepção.",
-        "locate.byContact": "Localiza um canal pelo número de telefone para a recepção identificar o paciente em uma comunicação.",
-        "register.createOrAttach": "Cria ou vincula o canal telefônico existente ao papel Contato do paciente na agenda clínica, evitando duplicidade do contato.",
-        "edit.platformFields": "Atualiza o nome de reconhecimento, país e dados do telefone do canal no cadastro mestre pela recepção.",
-        "inactivate": "Inativa um telefone que não deve mais ser usado para comunicação com o paciente pela recepção.",
-        "link": "Vincula este canal de telefone ao paciente pela relação mestre HasContact para permitir confirmação de consultas.",
-        "unlink": "Encerra o vínculo deste telefone com o paciente, preservando o histórico do relacionamento.",
-        "listLinks": "Lista o paciente vinculado a este canal de contato para a recepção confirmar a quem pertence o telefone.",
-        "audit": "Permite à administração consultar quem alterou o canal de contato do paciente e quando."
+        "read.byId": "Consulta um canal de contato pelo identificador, por leitura direta do cadastro mestre, para a recepcionista visualizar o telefone do paciente.",
+        "locate.byContact": "Localiza o canal pelo número de telefone informado, pela busca de contato no cadastro mestre, para a recepcionista identificar o paciente ao confirmar uma consulta.",
+        "register.createOrAttach": "Cria ou vincula um canal telefônico já existente pelo tipo e número do contato, associando o papel da agenda clínica, para a recepcionista cadastrar o telefone do paciente.",
+        "edit.platformFields": "Atualiza o nome e o número do canal telefônico nos campos da plataforma, para a recepcionista manter o contato do paciente correto.",
+        "inactivate": "Inativa um canal telefônico que não deve mais ser usado, pela alteração de status do cadastro mestre, para a recepcionista manter os contatos do paciente atualizados.",
+        "link": "Vincula este canal ao paciente por meio do relacionamento HasContact, para a recepcionista disponibilizar o telefone na confirmação de consultas.",
+        "unlink": "Encerra o vínculo HasContact entre o canal e o paciente preservando seu histórico, para a recepcionista remover um telefone que deixou de pertencer ao paciente.",
+        "listLinks": "Lista os vínculos do canal de contato e sua vigência pelo relacionamento HasContact, para a recepcionista conferir a qual paciente o telefone pertence.",
+        "audit": "Consulta quem alterou o canal de contato e quando no histórico de auditoria, para a recepcionista ou a administração rastrear manutenções do cadastro."
       },
       "rules": [
         "rule-foreign-namespace-refused",
@@ -718,70 +940,19 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Registro mestre do canal de contato usado pela recepção para comunicar-se com o paciente e confirmar consultas.",
+            "description": "Dados do canal de contato do paciente mantidos no cadastro mestre.",
             "fields": {
               "identification": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {
-                  "subtype": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "ContactChannel",
-                        "title": "Canal de contato",
-                        "description": "Registro de canal de contato."
-                      }
-                    ],
-                    "description": "Identifica este registro mestre como um canal de contato.",
-                    "title": "Subtipo",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome de reconhecimento do canal de contato do paciente pela recepção.",
+                    "description": "Nome pelo qual a clínica reconhece o canal de contato do paciente.",
                     "title": "Nome do contato",
-                    "min": 0,
-                    "max": 0
-                  },
-                  "status": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Active",
-                        "title": "Ativo",
-                        "description": "Canal disponível para uso."
-                      },
-                      {
-                        "value": "Inactive",
-                        "title": "Inativo",
-                        "description": "Canal não disponível para uso."
-                      },
-                      {
-                        "value": "Merged",
-                        "title": "Mesclado",
-                        "description": "Canal mesclado a outro registro."
-                      },
-                      {
-                        "value": "Blocked",
-                        "title": "Bloqueado",
-                        "description": "Canal bloqueado."
-                      }
-                    ],
-                    "title": "Situação",
-                    "description": "Situação de atividade do canal de contato no cadastro mestre.",
-                    "maxLength": 0,
                     "min": 0,
                     "max": 0
                   },
@@ -792,19 +963,19 @@
                     "pattern": "^[A-Z]{2}$",
                     "maxLength": 0,
                     "default": "US",
-                    "description": "País associado ao canal de contato do paciente.",
+                    "description": "País ao qual o canal de contato está associado.",
                     "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação do canal de contato no cadastro mestre."
+                "description": "Identificação do canal de contato no cadastro mestre."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados básicos compartilhados do registro mestre; nenhum dado adicional é usado pela agenda clínica."
+                "description": "Dados comuns do cadastro mestre; nenhum dado base adicional é usado pela agenda clínica neste papel."
               },
               "contactChannel": {
                 "type": "object",
@@ -817,11 +988,11 @@
                       {
                         "value": "Phone",
                         "title": "Telefone",
-                        "description": "Número de telefone para contato com o paciente."
+                        "description": "Número telefônico para contato com o paciente."
                       }
                     ],
                     "title": "Tipo de contato",
-                    "description": "Tipo de canal usado para confirmação de consulta; nesta agenda é telefone.",
+                    "description": "Tipo do canal usado para confirmação telefônica das consultas.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -829,7 +1000,7 @@
                   "value": {
                     "type": "string",
                     "required": true,
-                    "description": "Número de telefone do paciente usado pela recepção para confirmar consultas.",
+                    "description": "Número de telefone do paciente utilizado pela recepcionista na confirmação da consulta.",
                     "title": "Telefone",
                     "maxLength": 0,
                     "min": 0,
@@ -839,19 +1010,19 @@
                     "type": "boolean",
                     "required": true,
                     "title": "Contato verificado",
-                    "description": "Indica se o número de telefone foi verificado no cadastro mestre.",
+                    "description": "Indica se o canal de contato foi verificado.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Telefone do paciente utilizado pela recepção para confirmação de consultas."
+                "description": "Telefone do paciente usado pela recepcionista para confirmar consultas."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização e somente lidos pela agenda clínica."
+                "description": "Dados promovidos pela organização, apenas lidos pela agenda clínica."
               },
               "agendaClinica": {
                 "type": "object",
@@ -865,54 +1036,58 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "agendaClinica",
       "entityId": "Consulta",
       "title": "Consulta",
-      "description": "Agendamento de atendimento de um paciente com um profissional em data e horário definidos.",
+      "description": "Agendamento clínico de um paciente com um profissional em data e horário determinados, acompanhado até o atendimento ou a falta.",
       "displayField": "scheduledAt",
       "relationships": {
-        "paciente": {
-          "relationshipId": "consultaPaciente",
+        "patient": {
+          "relationshipId": "appointmentPatient",
           "to": "Paciente",
-          "via": "Consulta.pacienteId",
+          "via": "Consulta.patientId",
           "cardinality": "N:1",
           "title": "Paciente da consulta",
-          "description": "Cada consulta é agendada para um paciente.",
+          "description": "Cada consulta é agendada para um único paciente.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": "sempre",
+          "role": "paciente"
         },
-        "profissional": {
-          "relationshipId": "consultaProfissional",
+        "professional": {
+          "relationshipId": "appointmentProfessional",
           "to": "Profissional",
-          "via": "Consulta.profissionalId",
+          "via": "Consulta.professionalId",
           "cardinality": "N:1",
-          "title": "Profissional responsável",
-          "description": "Cada consulta é atribuída a um profissional responsável pelo atendimento.",
+          "title": "Profissional da consulta",
+          "description": "Cada consulta é realizada por um único profissional.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": "sempre",
+          "role": "responsável"
         }
       },
       "capabilities": {
-        "agendaClinica.localizarConsultas": "Localiza consultas por paciente, profissional, data, horário ou situação usando os índices da agenda; a recepcionista consulta a agenda da clínica e o profissional somente a própria agenda.",
-        "agendaClinica.agendarConsulta": "Cria uma consulta com paciente, profissional e data e horário, verificando a chave única do profissional; a recepcionista usa esta ação para realizar agendamentos.",
-        "agendaClinica.inspecionarConsulta": "Exibe os dados da consulta e a anotação quando existente pela rota da consulta; a recepcionista e o profissional responsável usam esta consulta conforme seu escopo.",
-        "agendaClinica.consultarAgendaDoDia": "Lista as consultas de uma data pelo índice de profissional e horário; o profissional usa a ação apenas para visualizar sua própria agenda do dia.",
-        "agendaClinica.confirmarConsulta": "Altera uma consulta agendada para confirmada pela transição confirmarConsulta; a recepcionista registra a confirmação feita por telefone.",
-        "agendaClinica.registrarFalta": "Altera uma consulta agendada ou confirmada para falta pela transição registrarFalta; a recepcionista registra o não comparecimento do paciente.",
-        "agendaClinica.registrarAtendimento": "Altera uma consulta da própria agenda para atendida pela transição registrarAtendimento e grava a anotação; o profissional responsável usa esta ação."
+        "read.byId": "Lê uma consulta pelo identificador da linha no repositório de consultas, para a recepcionista e o profissional abrirem um agendamento já localizado.",
+        "locate.byColumn": "Lista consultas por paciente, profissional, data e situação usando as colunas indexadas, para a recepcionista consultar disponibilidade e para o profissional ver a própria agenda diária.",
+        "count": "Conta as consultas que correspondem aos filtros de profissional, data ou situação, para as telas de agenda da recepcionista e do profissional.",
+        "listByForeignKey": "Lista as consultas vinculadas a um paciente ou profissional pela chave estrangeira, para a recepcionista consultar históricos de agendamento e o profissional consultar sua agenda.",
+        "create": "Cria uma consulta com paciente, profissional, data e horário no repositório de consultas, para a recepcionista realizar o agendamento.",
+        "transition": "Atualiza a situação da consulta pela transição permitida, para a recepcionista confirmar ou registrar falta e para o profissional registrar o atendimento.",
+        "uniqueKey": "Impede outra consulta do mesmo profissional no mesmo data e horário pelo índice único de profissional e data/hora, para a recepcionista concluir apenas agendamentos disponíveis.",
+        "read.mdmRecord": "Lê os registros mestres do paciente e do profissional referenciados pelas chaves da consulta, para a recepcionista e o profissional visualizarem os dados necessários da agenda."
       },
       "rules": [
-        "consultaSemConflitoHorario",
-        "transicaoConsultaPermitida",
-        "anotacaoObrigatoriaNoAtendimento",
-        "acessoProfissionalPropriaAgenda"
+        "uniqueProfessionalSchedule",
+        "consultationTransitionFlow",
+        "attendanceNoteRequired",
+        "professionalOwnAppointment"
       ],
       "kind": "entity",
-      "class": "core",
+      "class": "event",
       "storage": {
         "target": "moduleDatabase",
-        "table": "agendaClinica_consulta"
+        "table": "agendaClinica_consulta",
+        "kind": "relational"
       },
       "record": {
         "fields": {
@@ -928,11 +1103,11 @@
             "required": true,
             "derived": true
           },
-          "pacienteId": {
+          "patientId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "to": [
               "Paciente"
             ],
@@ -942,16 +1117,16 @@
             "min": 0,
             "max": 0
           },
-          "profissionalId": {
+          "professionalId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "to": [
               "Profissional"
             ],
             "title": "Profissional",
-            "description": "Médico ou terapeuta responsável pelo atendimento.",
+            "description": "Médico ou terapeuta responsável pela realização da consulta.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -960,9 +1135,9 @@
             "type": "timestamp",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "title": "Data e horário",
-            "description": "Data e horário programados para o início da consulta.",
+            "description": "Data e horário marcados para a consulta.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -971,12 +1146,12 @@
             "type": "enum",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "values": [
               {
                 "value": "scheduled",
                 "title": "Agendada",
-                "description": "Consulta marcada e ainda não confirmada."
+                "description": "Consulta marcada e ainda sem confirmação."
               },
               {
                 "value": "confirmed",
@@ -991,11 +1166,11 @@
               {
                 "value": "attended",
                 "title": "Atendida",
-                "description": "Atendimento realizado pelo profissional."
+                "description": "Consulta realizada e registrada pelo profissional."
               }
             ],
             "title": "Situação",
-            "description": "Situação atual da consulta no fluxo de agendamento e atendimento.",
+            "description": "Situação do agendamento, atualizada pela recepcionista ou pelo profissional conforme sua atuação.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -1003,18 +1178,18 @@
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "title": "Detalhes da consulta",
-            "description": "Informações do atendimento que não são usadas para pesquisa, ordenação ou unicidade.",
+            "description": "Informações clínicas registradas para esta consulta que não são usadas em filtros ou ordenações.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
               "attendanceNote": {
                 "type": "text",
-                "of": "ContactSummary",
+                "of": "Address",
                 "title": "Anotação do atendimento",
-                "description": "Registro feito pelo profissional sobre o atendimento realizado.",
+                "description": "Anotação registrada pelo profissional sobre o atendimento realizado.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -1025,7 +1200,7 @@
       },
       "uniqueKeys": [
         [
-          "profissionalId",
+          "professionalId",
           "scheduledAt"
         ]
       ],
@@ -1057,9 +1232,9 @@
           "by": [
             "recepcionista"
           ],
-          "description": "A recepcionista registra a confirmação telefônica da consulta.",
+          "description": "Registra a confirmação da consulta por telefone.",
           "ruleRefs": [
-            "transicaoConsultaPermitida"
+            "consultationTransitionFlow"
           ]
         },
         {
@@ -1072,9 +1247,9 @@
           "by": [
             "recepcionista"
           ],
-          "description": "A recepcionista registra que o paciente não compareceu.",
+          "description": "Registra a falta quando o paciente não comparece à consulta.",
           "ruleRefs": [
-            "transicaoConsultaPermitida"
+            "consultationTransitionFlow"
           ]
         },
         {
@@ -1087,11 +1262,11 @@
           "by": [
             "profissional"
           ],
-          "description": "O profissional registra a realização do atendimento e sua anotação.",
+          "description": "Conclui a própria consulta como atendida e exige a anotação do atendimento.",
           "ruleRefs": [
-            "transicaoConsultaPermitida",
-            "anotacaoObrigatoriaNoAtendimento",
-            "acessoProfissionalPropriaAgenda"
+            "consultationTransitionFlow",
+            "attendanceNoteRequired",
+            "professionalOwnAppointment"
           ]
         }
       ]
@@ -1099,34 +1274,34 @@
   ],
   "relationships": [
     {
-      "relationshipId": "consultaPaciente",
+      "relationshipId": "patientContacts",
+      "from": "Paciente",
+      "to": "ContatoPaciente",
+      "type": "oneToMany",
+      "required": true,
+      "mode": "mdmRelationship",
+      "description": "O paciente possui canais de contato, incluindo telefone para confirmação da consulta.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "appointmentPatient",
       "from": "Consulta",
       "to": "Paciente",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é agendada para um paciente.",
-      "field": "Consulta.pacienteId"
+      "description": "Cada consulta é agendada para um único paciente.",
+      "field": "Consulta.patientId"
     },
     {
-      "relationshipId": "consultaProfissional",
+      "relationshipId": "appointmentProfessional",
       "from": "Consulta",
       "to": "Profissional",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é atribuída a um profissional responsável pelo atendimento.",
-      "field": "Consulta.profissionalId"
-    },
-    {
-      "relationshipId": "pacienteHasContact",
-      "from": "Paciente",
-      "to": "ContatoPaciente",
-      "type": "oneToMany",
-      "required": false,
-      "mode": "mdmRelationship",
-      "description": "O paciente possui canais de contato usados para comunicação e confirmação de consultas.",
-      "catalogType": "HasContact"
+      "description": "Cada consulta é realizada por um único profissional.",
+      "field": "Consulta.professionalId"
     }
   ],
   "removedOrphans": [],
@@ -1141,6 +1316,11 @@
       "kind": "derivedFromPlatform",
       "entityId": "Profissional",
       "detail": "roleTag agendaClinica.Profissional; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recepcionista",
+      "detail": "roleTag agendaClinica.Recepcionista; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1178,14 +1358,39 @@
       "detail": "Profissional.details.identification.subtype.values"
     },
     {
+      "kind": "tightened",
+      "entityId": "Profissional",
+      "detail": "Profissional.details.person.occupation.required"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Profissional",
+      "detail": "details.agendaClinica"
+    },
+    {
       "kind": "derivedFromPlatform",
-      "entityId": "ContatoPaciente",
+      "entityId": "Recepcionista",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "tightened",
+      "entityId": "Recepcionista",
+      "detail": "Recepcionista.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Recepcionista",
+      "detail": "Recepcionista.details.identification.docType.values"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Recepcionista",
+      "detail": "details.agendaClinica"
+    },
+    {
+      "kind": "derivedFromPlatform",
       "entityId": "ContatoPaciente",
-      "detail": "ContatoPaciente.details.identification.subtype.values"
+      "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "tightened",

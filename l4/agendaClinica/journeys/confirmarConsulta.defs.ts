@@ -14,21 +14,21 @@ export const confirmarConsultaJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarConsulta",
+        "stepId": "localizarConsultaParaConfirmacao",
         "kind": "locate",
         "entity": "Consulta",
         "title": "x",
-        "description": "Localiza a consulta agendada que será confirmada."
+        "description": "Localiza a consulta que será confirmada por telefone."
       },
       {
-        "stepId": "inspecionarConsulta",
+        "stepId": "inspecionarConsultaParaConfirmacao",
         "kind": "inspect",
         "entity": "Consulta",
         "title": "x",
-        "description": "Confere os dados da consulta e do contato do paciente."
+        "description": "Confere os dados da consulta antes de registrar o contato."
       },
       {
-        "stepId": "confirmarPorTelefone",
+        "stepId": "registrarConfirmacao",
         "kind": "act",
         "entity": "Consulta",
         "effect": "transition",
@@ -38,14 +38,14 @@ export const confirmarConsultaJourney = {
       }
     ],
     "outcome": {
-      "statement": "A consulta fica registrada como confirmada.",
+      "statement": "A consulta passa a constar como confirmada.",
       "evidence": [
-        "Situação da consulta indica confirmação.",
-        "Registro da consulta identifica a confirmação por telefone."
+        "Situação da consulta registrada como confirmada.",
+        "Registro da confirmação telefônica disponível na consulta."
       ]
     }
   },
-  "businessHash": "sha256:f8c610c5108e08e4d4ac982e762e76b5df8d477bc208a77cd7c8836e0ea2c492"
+  "businessHash": "sha256:7a8c0ba995c336953b9ae3dc14ad1cb4842ecf689b66ea733a72fa1c8fa1fdb6"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConfirmarConsultaJourneyType = typeof confirmarConsultaJourney;

@@ -3,12 +3,12 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaEntityMaintenancePlan = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "manutencaoFrota",
   "entityId": "MaintenancePlan",
   "title": "Plano de manutenção preventiva",
-  "description": "Periodicidade preventiva de um veículo por quilometragem, meses ou ambas.",
-  "displayField": "id",
+  "description": "Definição da periodicidade preventiva de manutenção de um veículo por quilometragem, meses ou ambos.",
+  "displayField": "details.name",
   "relationships": {
     "vehicle": {
       "relationshipId": "maintenancePlanVehicle",
@@ -16,9 +16,9 @@ export const manutencaoFrotaEntityMaintenancePlan = {
       "via": "MaintenancePlan.vehicleId",
       "cardinality": "N:1",
       "title": "Veículo do plano",
-      "description": "Cada plano preventivo define a periodicidade de manutenção de um veículo.",
+      "description": "Veículo da frota para o qual a periodicidade preventiva foi definida.",
       "mode": "fk",
-      "required": "Sempre."
+      "required": "Sempre"
     },
     "maintenanceOrders": {
       "relationshipId": "maintenanceOrderPlan",
@@ -26,27 +26,25 @@ export const manutencaoFrotaEntityMaintenancePlan = {
       "via": "MaintenanceOrder.maintenancePlanId",
       "cardinality": "1:N",
       "title": "Ordens de manutenção do plano",
-      "description": "Ordens preventivas podem ser abertas a partir deste plano quando ele vence; ordens por defeito não precisam estar vinculadas a um plano.",
+      "description": "Ordens de manutenção preventiva que foram abertas a partir deste plano.",
       "mode": "fk",
       "direction": "to",
-      "required": "Quando uma ordem de manutenção preventiva decorrer deste plano."
+      "required": "Nunca"
     }
   },
   "capabilities": {
-    "read.byId": "Consulta um plano preventivo pelo identificador da linha, usando findOne por id, para o gestor de frota.",
-    "locate.byColumn": "Lista planos preventivos por veículo, com ordenação e paginação sobre a coluna indexada vehicleId, para o gestor de frota.",
-    "count": "Conta os planos preventivos que correspondem ao filtro de veículo, usando a mesma condição de listagem, para o gestor de frota.",
-    "listByForeignKey": "Lista os planos preventivos vinculados a um ou mais veículos pela chave estrangeira vehicleId, para as telas do gestor de frota.",
-    "create": "Cria um plano preventivo com periodicidade por quilômetros, meses ou ambas, inserindo a linha para o gestor de frota.",
-    "update": "Altera as periodicidades e as referências previstas de um plano, aplicando atualização parcial da linha para o gestor de frota.",
-    "delete": "Remove um plano preventivo que não deve mais ser utilizado, excluindo fisicamente a linha para o gestor de frota.",
-    "read.mdmRecord": "Lê o registro mestre do veículo indicado por vehicleId para mostrar seus dados e a quilometragem atual ao gestor de frota.",
-    "manutencaoFrota.alertOverduePreventive": "Identifica planos cuja próxima quilometragem prevista foi ultrapassada pela quilometragem atual do veículo e gera o aviso para o gestor de frota."
+    "read.byId": "Lê um plano preventivo pelo identificador da linha · consulta o repositório pelo id · gestor de frota ao abrir os detalhes do plano.",
+    "locate.byColumn": "Lista planos preventivos pelo veículo, com ordenação e paginação · filtra pela coluna indexada do veículo · gestor de frota ao consultar os planos da frota.",
+    "count": "Conta os planos preventivos que correspondem ao veículo informado · aplica o mesmo filtro da listagem · gestor de frota no resumo da frota.",
+    "listByForeignKey": "Lista os planos preventivos vinculados a um veículo · consulta as linhas pela chave estrangeira do veículo · gestor de frota na tela do veículo.",
+    "create": "Cadastra um plano de manutenção preventiva para um veículo · grava o veículo e as periodicidades informadas · gestor de frota ao definir a preventiva.",
+    "update": "Atualiza a periodicidade ou as referências de um plano preventivo · altera parcialmente a linha do plano · gestor de frota ao revisar o planejamento.",
+    "read.mdmRecord": "Lê o registro mestre do veículo vinculado ao plano · hidrata o veículo pela chave estrangeira no MDM · gestor de frota ao conferir dados e quilometragem atual.",
+    "manutencaoFrota.alertarPreventivaVencida": "Sinaliza planos cuja preventiva está vencida · calcula a condição a partir dos intervalos do plano, de suas referências e da quilometragem atual do veículo · gestor de frota ao tratar alertas preventivos."
   },
   "rules": [
-    "maintenancePlanRequiresInterval",
-    "maintenancePlanPositiveInterval",
-    "maintenancePlanCalculatedSchedule"
+    "maintenanceIntervalRequired",
+    "preventiveMileageAlert"
   ],
   "kind": "entity",
   "class": "core",
@@ -73,12 +71,12 @@ export const manutencaoFrotaEntityMaintenancePlan = {
         "type": "record",
         "required": true,
         "indexed": true,
-        "of": "Address",
+        "of": "ContactSummary",
         "to": [
           "Vehicle"
         ],
         "title": "Veículo",
-        "description": "Veículo ao qual se aplica a periodicidade de manutenção preventiva.",
+        "description": "Veículo da frota ao qual este plano de manutenção preventiva se aplica.",
         "maxLength": 0,
         "min": 0,
         "max": 0
@@ -86,48 +84,78 @@ export const manutencaoFrotaEntityMaintenancePlan = {
       "details": {
         "type": "object",
         "required": true,
-        "of": "Address",
+        "of": "ContactSummary",
         "title": "Dados do plano preventivo",
-        "description": "Periodicidades e referências calculadas da manutenção preventiva do veículo.",
+        "description": "Periodicidade e referências usadas para acompanhar a próxima manutenção preventiva do veículo.",
         "maxLength": 0,
         "min": 0,
         "max": 0,
         "fields": {
-          "intervalKm": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "of": "ContactSummary",
+            "title": "Nome do plano",
+            "description": "Identificação do plano preventivo para uso do gestor de frota.",
+            "maxLength": 120,
+            "min": 0,
+            "max": 0
+          },
+          "intervalKilometers": {
             "type": "integer",
-            "of": "Address",
-            "title": "Periodicidade por quilometragem",
-            "description": "Quantidade de quilômetros entre manutenções preventivas, quando a preventiva é controlada por quilometragem.",
+            "of": "ContactSummary",
+            "title": "Intervalo em quilômetros",
+            "description": "Quantidade de quilômetros entre manutenções preventivas, quando o plano é controlado por quilometragem.",
             "maxLength": 0,
             "min": 1,
             "max": 0
           },
           "intervalMonths": {
             "type": "integer",
-            "of": "Address",
-            "title": "Periodicidade por meses",
-            "description": "Quantidade de meses entre manutenções preventivas, quando a preventiva é controlada por tempo.",
+            "of": "ContactSummary",
+            "title": "Intervalo em meses",
+            "description": "Quantidade de meses entre manutenções preventivas, quando o plano é controlado por tempo.",
             "maxLength": 0,
             "min": 1,
             "max": 0
           },
-          "nextMaintenanceKm": {
+          "referenceMileage": {
             "type": "integer",
-            "of": "Address",
-            "title": "Próxima quilometragem prevista",
-            "description": "Quilometragem calculada para a próxima manutenção preventiva; serve de referência para o alerta de vencimento.",
+            "required": true,
+            "of": "ContactSummary",
+            "title": "Quilometragem de referência",
+            "description": "Quilometragem do veículo que inicia a contagem do próximo ciclo preventivo.",
             "maxLength": 0,
             "min": 0,
             "max": 0
           },
-          "nextMaintenanceDate": {
+          "referenceDate": {
             "type": "date",
-            "of": "Address",
-            "title": "Próxima data prevista",
-            "description": "Data calculada para a próxima manutenção preventiva quando houver periodicidade por meses.",
+            "required": true,
+            "of": "ContactSummary",
+            "title": "Data de referência",
+            "description": "Data que inicia a contagem do próximo ciclo preventivo por tempo.",
             "maxLength": 0,
             "min": 0,
             "max": 0
+          },
+          "nextPreventiveMileage": {
+            "type": "integer",
+            "derived": true,
+            "title": "Próxima quilometragem preventiva",
+            "description": "Quilometragem prevista para a próxima manutenção, calculada a partir da quilometragem de referência e do intervalo em quilômetros quando o plano usa quilometragem."
+          },
+          "nextPreventiveDate": {
+            "type": "date",
+            "derived": true,
+            "title": "Próxima data preventiva",
+            "description": "Data prevista para a próxima manutenção, calculada a partir da data de referência e do intervalo em meses quando o plano usa tempo."
+          },
+          "preventiveOverdue": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Preventiva vencida",
+            "description": "O veículo atingiu ou ultrapassou a próxima quilometragem preventiva, ou alcançou a próxima data preventiva, conforme os intervalos definidos neste plano e a quilometragem atual do veículo."
           }
         }
       }

@@ -8,24 +8,24 @@ export const registrarAtendimentoJourney = {
   "business": {
     "actorRef": "profissional",
     "title": "Registrar atendimento",
-    "goal": "Marcar uma consulta como atendida e registrar uma anotação do atendimento.",
+    "goal": "Marcar uma consulta própria como atendida e registrar uma anotação do atendimento.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarConsulta",
+        "stepId": "localizarMinhaConsulta",
         "kind": "locate",
         "entity": "Consulta",
         "title": "x",
-        "description": "Localiza uma consulta da própria agenda."
+        "description": "Localiza uma consulta vinculada ao próprio profissional."
       },
       {
-        "stepId": "inspecionarConsulta",
+        "stepId": "inspecionarMinhaConsulta",
         "kind": "inspect",
         "entity": "Consulta",
         "title": "x",
-        "description": "Confere os dados da consulta antes de registrar o atendimento."
+        "description": "Confere os dados da própria consulta antes de concluir o atendimento."
       },
       {
         "stepId": "registrarAtendimentoRealizado",
@@ -34,18 +34,18 @@ export const registrarAtendimentoJourney = {
         "effect": "transition",
         "transitionRef": "registrarAtendimento",
         "title": "x",
-        "description": "Marca a consulta como atendida e registra a anotação do profissional."
+        "description": "Marca a consulta como atendida e registra a anotação do profissional sobre o atendimento."
       }
     ],
     "outcome": {
       "statement": "A consulta fica registrada como atendida com a anotação do profissional.",
       "evidence": [
-        "Situação da consulta indica atendimento realizado.",
-        "Anotação do atendimento está registrada na consulta."
+        "Situação da consulta registrada como atendida.",
+        "Anotação do atendimento disponível na consulta."
       ]
     }
   },
-  "businessHash": "sha256:d442d56c8d3344d80b1afa087bcfdc78e630f7c65e0061853f3d3974d872b0c4"
+  "businessHash": "sha256:ed3afb283a60e389c01776d5c9f233e59e9467dd340e45b58264aa738dd0fe5e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarAtendimentoJourneyType = typeof registrarAtendimentoJourney;

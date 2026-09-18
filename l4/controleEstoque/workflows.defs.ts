@@ -3,16 +3,12 @@
 import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
 
 export const controleEstoqueWorkflows = {
-  "schemaVersion": "2026-09-12-ns5-workflows-v2",
+  "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "controleEstoque",
   "processes": [],
   "journeyDecisions": [
     {
-      "journeyId": "cadastrarProdutoEstoque",
-      "inProcess": false
-    },
-    {
-      "journeyId": "atualizarQuantidadeMinima",
+      "journeyId": "cadastrarProduto",
       "inProcess": false
     },
     {
@@ -20,11 +16,11 @@ export const controleEstoqueWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "consultarSaldoProduto",
+      "journeyId": "acompanharSaldoProdutos",
       "inProcess": false
     },
     {
-      "journeyId": "tratarAvisoEstoqueBaixo",
+      "journeyId": "tratarAvisoSaldoBaixo",
       "inProcess": false
     }
   ]

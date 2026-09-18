@@ -8,43 +8,43 @@ export const cadastrarPlanoPreventivoJourney = {
   "business": {
     "actorRef": "gestor",
     "title": "Cadastrar plano de manutenção preventiva",
-    "goal": "Definir a periodicidade de manutenção preventiva de um veículo.",
+    "goal": "Definir a periodicidade de manutenção preventiva de um veículo da frota.",
     "entry": {
-      "mode": "contextOrLookup"
+      "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarVeiculo",
+        "stepId": "localizarVeiculoDaFrota",
         "kind": "locate",
         "entity": "Vehicle",
         "title": "x",
-        "description": "Localiza, ou usa o veículo já em contexto, para o qual será definido o plano."
+        "description": "Localiza o veículo da frota que receberá o plano preventivo."
       },
       {
-        "stepId": "inspecionarVeiculoParaPlano",
+        "stepId": "inspecionarVeiculoDaFrota",
         "kind": "inspect",
         "entity": "Vehicle",
         "title": "x",
-        "description": "Consulta os dados e a quilometragem atual do veículo para definir a preventiva."
+        "description": "Confere os dados e a quilometragem atual do veículo para definir a manutenção preventiva."
       },
       {
-        "stepId": "criarPlanoPreventivo",
+        "stepId": "cadastrarPlano",
         "kind": "act",
         "entity": "MaintenancePlan",
         "effect": "create",
         "title": "x",
-        "description": "Cadastra o plano preventivo do veículo com a periodicidade por quilometragem, por meses, ou ambas."
+        "description": "Cadastra para o veículo o intervalo de manutenção por quilometragem, por meses, ou ambos."
       }
     ],
     "outcome": {
-      "statement": "O veículo passa a ter um plano de manutenção preventiva cadastrado.",
+      "statement": "Um plano de manutenção preventiva é cadastrado para o veículo.",
       "evidence": [
-        "Plano preventivo associado ao veículo.",
-        "Periodicidade em quilômetros e/ou meses registrada."
+        "Há um plano vinculado ao veículo com o intervalo em quilômetros e/ou meses.",
+        "A próxima manutenção preventiva pode ser acompanhada a partir do plano."
       ]
     }
   },
-  "businessHash": "sha256:c164ef0eccb7bde66e87fdde03d4f0010eb20d241566f744c6d63c8b6e19ea8e"
+  "businessHash": "sha256:8309c09a5769090e58acea54eb659551fba44b76972d71cb9c8d77ae5f118630"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CadastrarPlanoPreventivoJourneyType = typeof cadastrarPlanoPreventivoJourney;

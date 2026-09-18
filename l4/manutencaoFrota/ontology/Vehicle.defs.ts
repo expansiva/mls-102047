@@ -3,38 +3,37 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaEntityVehicle = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "manutencaoFrota",
   "entityId": "Vehicle",
   "title": "Veículo",
-  "description": "Veículo da frota, identificado pela placa e usado nos abastecimentos e nas manutenções.",
+  "description": "Veículo da frota, mantido como ativo veicular compartilhado da organização, com dados de operação específicos deste módulo.",
   "displayField": "details.identification.name",
   "relationships": {
-    "vehicleAssignmentVehicle": {
+    "vehicleAssignments": {
       "relationshipId": "vehicleAssignmentVehicle",
       "to": "VehicleAssignment",
       "via": "VehicleAssignment.vehicleId",
       "cardinality": "1:N",
       "title": "Atribuições do veículo",
-      "description": "Atribuições que vinculam este veículo a motoristas da transportadora.",
+      "description": "Atribuições que vinculam este veículo a motoristas da frota.",
       "mode": "fk",
       "direction": "to",
-      "required": true,
-      "role": "veículo atribuído"
+      "required": "Nunca é obrigatório para a existência do veículo."
     },
-    "vehicleAssignedDrivers": {
+    "assignedDrivers": {
       "relationshipId": "vehicleAssignedDrivers",
       "to": "Driver",
       "via": "VehicleAssignment",
       "cardinality": "N:N",
       "title": "Motoristas atribuídos",
-      "description": "Motoristas visíveis para este veículo, derivados das atribuições de veículo registradas.",
+      "description": "Motoristas que podem conduzir e consultar este veículo, obtidos pelas atribuições de veículo.",
       "mode": "throughTable",
       "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
       "derived": true,
-      "role": "veículo dirigido"
+      "required": "Nunca é obrigatório para a existência do veículo."
     },
-    "fuelingVehicle": {
+    "fuelings": {
       "relationshipId": "fuelingVehicle",
       "to": "Fueling",
       "via": "Fueling.vehicleId",
@@ -43,10 +42,9 @@ export const manutencaoFrotaEntityVehicle = {
       "description": "Abastecimentos registrados para este veículo.",
       "mode": "fk",
       "direction": "to",
-      "required": true,
-      "role": "veículo abastecido"
+      "required": "Nunca é obrigatório para a existência do veículo."
     },
-    "maintenancePlanVehicle": {
+    "maintenancePlans": {
       "relationshipId": "maintenancePlanVehicle",
       "to": "MaintenancePlan",
       "via": "MaintenancePlan.vehicleId",
@@ -55,10 +53,9 @@ export const manutencaoFrotaEntityVehicle = {
       "description": "Planos de manutenção preventiva definidos para este veículo.",
       "mode": "fk",
       "direction": "to",
-      "required": true,
-      "role": "veículo planejado"
+      "required": "Nunca é obrigatório para a existência do veículo."
     },
-    "maintenanceOrderVehicle": {
+    "maintenanceOrders": {
       "relationshipId": "maintenanceOrderVehicle",
       "to": "MaintenanceOrder",
       "via": "MaintenanceOrder.vehicleId",
@@ -67,26 +64,25 @@ export const manutencaoFrotaEntityVehicle = {
       "description": "Ordens de manutenção abertas para este veículo.",
       "mode": "fk",
       "direction": "to",
-      "required": true,
-      "role": "veículo em manutenção"
+      "required": "Nunca é obrigatório para a existência do veículo."
     }
   },
   "capabilities": {
-    "read.byId": "Consulta um veículo pelo identificador mestre · usa leitura direta pelo mdmId · motorista e gestor usam ao abrir um veículo já selecionado.",
-    "locate.byName": "Localiza veículos pelo nome de reconhecimento · pesquisa o índice de nomes do subtipo AssetVehicle · motorista e gestor usam para encontrar um veículo.",
-    "locate.byTag": "Lista os veículos que têm o papel manutencaoFrota.Vehicle · consulta a tag do módulo no índice MDM · gestor usa para localizar veículos cadastrados na frota.",
-    "register.createOrAttach": "Cadastra ou associa um veículo existente ao papel de veículo da frota · cria quando ausente e grava a tag e o espaço manutencaoFrota · gestor usa ao incluir veículo na frota.",
-    "edit.platformFields": "Atualiza placa, modelo, ano e demais dados de plataforma permitidos do veículo · altera os campos do registro mestre e seu índice quando aplicável · gestor usa na manutenção cadastral.",
-    "edit.moduleNamespace": "Atualiza a quilometragem atual específica da frota · grava somente details.manutencaoFrota do veículo · sistema atualiza a partir de abastecimentos mais recentes e gestor pode manter o dado.",
-    "inactivate": "Retira um veículo do uso sem apagá-lo · altera a situação mestre para inativo, com possibilidade de reativação · gestor usa quando o veículo deixa a frota.",
-    "statusHistory.read": "Consulta o histórico de situações do veículo · lê as mudanças de status registradas pela plataforma · gestor usa para acompanhar ativações e inativações.",
-    "audit": "Consulta quem alterou os dados do veículo e quando · lê a trilha de auditoria do registro mestre · gestor usa para conferência administrativa."
+    "read.byId": "Lê um veículo pelo identificador mestre, por consulta direta ao MDM, para motorista e gestor visualizarem um veículo já selecionado.",
+    "locate.byName": "Localiza veículos pelo nome de identificação indexado, para motorista encontrar somente veículos atribuídos e gestor localizar veículos da frota.",
+    "locate.byTag": "Lista os registros com a etiqueta de papel manutencaoFrota.Vehicle no índice de tags do MDM, para o módulo compor a relação de veículos da frota.",
+    "register.createOrAttach": "Cria ou anexa o papel de veículo da frota a um registro mestre pelo fluxo create-or-attach do MDM, para o gestor cadastrar veículos.",
+    "edit.platformFields": "Atualiza placa, modelo, ano e demais dados veiculares da plataforma no documento mestre, para o gestor manter o cadastro do veículo.",
+    "edit.moduleNamespace": "Atualiza a quilometragem operacional no namespace manutencaoFrota do documento mestre, para o módulo manter a quilometragem atualizada após os registros de abastecimento.",
+    "inactivate": "Inativa ou reativa o registro mestre pela situação do MDM, para o gestor retirar temporariamente um veículo de uso sem apagar seu histórico.",
+    "statusHistory.read": "Exibe o histórico de mudanças de situação do registro mestre, pela consulta de histórico de status, para o gestor acompanhar a disponibilidade cadastral do veículo.",
+    "audit": "Consulta quem alterou os dados do veículo e quando no log de auditoria do MDM, para o gestor rastrear alterações cadastrais."
   },
   "rules": [
     "rule-foreign-namespace-refused",
     "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
-    "vehicleMileageUpdatedFromLatestFueling"
+    "preventiveMaintenanceMileageAlert"
   ],
   "writer": "crud",
   "kind": "role",
@@ -111,7 +107,7 @@ export const manutencaoFrotaEntityVehicle = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre do veículo da frota, com dados da plataforma e informações específicas da manutenção de frota.",
+        "description": "Documento mestre do veículo, com dados de identificação, dados veiculares da plataforma e informações operacionais deste módulo.",
         "fields": {
           "identification": {
             "type": "object",
@@ -126,10 +122,10 @@ export const manutencaoFrotaEntityVehicle = {
                   {
                     "value": "AssetVehicle",
                     "title": "Veículo",
-                    "description": "Veículo da frota."
+                    "description": "Ativo veicular."
                   }
                 ],
-                "description": "Subtipo mestre que identifica este registro como veículo.",
+                "description": "Indica que este registro mestre é um veículo da frota.",
                 "title": "Subtipo",
                 "maxLength": 0,
                 "min": 0,
@@ -140,8 +136,8 @@ export const manutencaoFrotaEntityVehicle = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nome de reconhecimento do veículo nas consultas da frota.",
-                "title": "Nome",
+                "description": "Nome pelo qual o veículo é localizado e reconhecido na frota.",
+                "title": "Nome de identificação",
                 "min": 0,
                 "max": 0
               },
@@ -154,26 +150,26 @@ export const manutencaoFrotaEntityVehicle = {
                   {
                     "value": "Active",
                     "title": "Ativo",
-                    "description": "Veículo ativo no cadastro mestre."
+                    "description": "Registro disponível para uso."
                   },
                   {
                     "value": "Inactive",
                     "title": "Inativo",
-                    "description": "Veículo fora de uso no cadastro mestre."
+                    "description": "Registro fora de uso."
                   },
                   {
                     "value": "Merged",
                     "title": "Mesclado",
-                    "description": "Registro mesclado a outro veículo mestre."
+                    "description": "Registro incorporado a outro registro mestre."
                   },
                   {
                     "value": "Blocked",
                     "title": "Bloqueado",
-                    "description": "Registro bloqueado pela plataforma."
+                    "description": "Registro bloqueado pela organização."
                   }
                 ],
-                "title": "Situação",
-                "description": "Situação do registro mestre do veículo para uso na frota.",
+                "title": "Situação do registro",
+                "description": "Situação do veículo no cadastro mestre da organização.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -182,22 +178,22 @@ export const manutencaoFrotaEntityVehicle = {
                 "type": "string",
                 "required": true,
                 "indexed": true,
-                "pattern": "^BR$",
+                "pattern": "^[A-Z]{2}$",
                 "maxLength": 0,
                 "default": "US",
-                "description": "País do cadastro e das regras aplicáveis à identificação do veículo.",
+                "description": "Código do país aplicável ao registro mestre do veículo.",
                 "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação e situação do veículo no cadastro mestre."
+            "description": "Dados de identificação e situação do registro mestre do veículo."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados base compartilhados do registro mestre do veículo; não há campos desse ramo usados pela manutenção de frota."
+            "description": "Dados comuns do registro mestre, mantidos pela plataforma."
           },
           "assetVehicle": {
             "type": "object",
@@ -206,9 +202,8 @@ export const manutencaoFrotaEntityVehicle = {
               "plate": {
                 "type": "string",
                 "title": "Placa",
-                "description": "Placa brasileira que identifica o veículo da frota.",
+                "description": "Placa de identificação do veículo da frota.",
                 "required": true,
-                "pattern": "^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -216,7 +211,7 @@ export const manutencaoFrotaEntityVehicle = {
               "model": {
                 "type": "string",
                 "title": "Modelo",
-                "description": "Modelo do veículo consultado por motoristas e gestores.",
+                "description": "Modelo informado para identificação do veículo.",
                 "required": true,
                 "maxLength": 0,
                 "min": 0,
@@ -225,37 +220,43 @@ export const manutencaoFrotaEntityVehicle = {
               "year": {
                 "type": "integer",
                 "title": "Ano",
-                "description": "Ano de fabricação ou modelo informado para o veículo.",
+                "description": "Ano do veículo da frota.",
                 "required": true,
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Características de plataforma usadas para identificar o veículo da frota."
+            "description": "Características do ativo veicular usadas para identificar o veículo da frota."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização, somente para leitura pela manutenção de frota."
+            "description": "Dados promovidos pela organização para uso compartilhado entre módulos."
           },
           "manutencaoFrota": {
             "type": "object",
             "owner": "module",
             "fields": {
-              "currentMileage": {
-                "type": "number",
+              "currentMileageKm": {
+                "type": "integer",
                 "required": true,
                 "of": "Address",
                 "title": "Quilometragem atual",
-                "description": "Quilometragem mais recente conhecida do veículo, usada para consulta e para acompanhar o vencimento das preventivas.",
+                "description": "Última quilometragem conhecida no painel do veículo, em quilômetros.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
+              },
+              "preventiveMaintenanceMileageOverdue": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Preventiva por quilometragem vencida",
+                "description": "Há plano preventivo ativo por quilometragem e a quilometragem atual do veículo passou da quilometragem prevista para a próxima manutenção."
               }
             },
-            "description": "Informações específicas da manutenção de frota; somente este módulo pode alterá-las."
+            "description": "Informações operacionais do veículo mantidas exclusivamente pelo módulo de manutenção de frota."
           }
         }
       }

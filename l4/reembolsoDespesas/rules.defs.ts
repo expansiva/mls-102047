@@ -1,29 +1,24 @@
 /// <mls fileReference="_102047_/l4/reembolsoDespesas/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
 
 export const reembolsoDespesasRules = {
-  "schemaVersion": "2026-09-10-ns5-rules-v1",
+  "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "reembolsoDespesas",
-  "rules": [
-    {
-      "ruleId": "resubmissionOnlyWhenRejected",
-      "description": "Uma despesa só pode ser reenviada para aprovação quando tiver sido rejeitada."
-    },
-    {
-      "ruleId": "onlyOneResubmission",
-      "description": "Uma despesa rejeitada pode ser corrigida e reenviada para aprovação apenas uma vez."
-    },
-    {
-      "ruleId": "rejectionRequiresReason",
-      "description": "A rejeição de uma despesa exige o registro de um motivo."
-    },
-    {
-      "ruleId": "paymentOnlyForApprovedExpense",
-      "description": "O pagamento só pode ser registrado para uma despesa aprovada."
-    }
-  ]
-} as const satisfies Ns5RulesArtifact;
+  "rules": {
+    "unicoReenvioPermitido": "Uma despesa rejeitada pode ser corrigida e reenviada para aprovação somente uma vez.",
+    "despesaPropria": "O colaborador pode registrar, consultar, corrigir e reenviar somente despesas vinculadas a ele próprio.",
+    "despesaDaEquipe": "O gestor da equipe pode avaliar somente despesas de colaboradores vinculados à sua equipe.",
+    "motivoRejeicaoObrigatorio": "A rejeição de uma despesa deve informar um motivo.",
+    "pagamentoApenasAprovada": "O pagamento pode ser registrado somente para uma despesa aprovada.",
+    "dataPagamentoObrigatoria": "O registro de pagamento de uma despesa deve informar a data do pagamento.",
+    "ruleForeignNamespaceRefused": "Dados pertencentes a outro domínio não podem ser registrados como dados de reembolso de despesas.",
+    "ruleDocumentShapeValidated": "Os dados informados em uma despesa devem atender à estrutura exigida para seu registro.",
+    "ruleIdentityNeverInNamespace": "Dados de identificação pessoal não podem ser mantidos nos dados de reembolso de despesas.",
+    "rulePersonPrivacyConsentRequiredBrEu": "O tratamento de dados pessoais de colaboradores deve observar o consentimento exigido no Brasil e na União Europeia.",
+    "comprovanteObrigatorio": "Toda despesa registrada para reembolso deve incluir um comprovante."
+  }
+} as const satisfies Ns5RulesArtifactV2;
 
 export type ReembolsoDespesasRulesType = typeof reembolsoDespesasRules;
 

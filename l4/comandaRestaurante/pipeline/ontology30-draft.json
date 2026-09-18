@@ -5,21 +5,25 @@
     "entities": [
       {
         "entityId": "Mesa",
-        "kind": "role",
-        "family": "mdm",
+        "kind": "entity",
+        "family": "tdm",
         "title": "Mesa",
-        "description": "Mesa física do restaurante utilizada para vincular e identificar o atendimento por comanda; sua disponibilidade é derivada das comandas abertas.",
+        "description": "Mesa operada pelo restaurante, disponível ou ocupada conforme as comandas abertas vinculadas a ela.",
         "displayField": "details.identification.name",
-        "subtype": "Location",
-        "roleTag": "comandaRestaurante.Mesa",
-        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+        "writer": "crud",
+        "class": "supporting",
+        "storage": {
+          "target": "moduleDatabase",
+          "table": "comandaRestaurante_mesa",
+          "kind": "relational"
+        }
       },
       {
         "entityId": "ItemCardapio",
         "kind": "role",
         "family": "mdm",
         "title": "Item do cardápio",
-        "description": "Produto oferecido no cardápio do restaurante, com o preço vigente específico do módulo.",
+        "description": "Produto disponibilizado no cardápio do restaurante, com preço definido para este módulo.",
         "displayField": "details.identification.name",
         "writer": "crud",
         "subtype": "Product",
@@ -31,8 +35,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Comanda",
-        "description": "Atendimento aberto para uma mesa, que reúne os itens consumidos, o desconto eventual e o pagamento registrado no fechamento.",
-        "displayField": "numero",
+        "description": "Registro do atendimento aberto para uma mesa, que reúne os itens consumidos, o desconto e o fechamento com pagamento.",
+        "displayField": "details.number",
         "class": "core",
         "storage": {
           "target": "moduleDatabase",
@@ -45,8 +49,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Item da comanda",
-        "description": "Lançamento de um item do cardápio em uma comanda, com quantidade, observação, preço registrado e possibilidade de cancelamento enquanto a comanda estiver aberta.",
-        "displayField": "id",
+        "description": "Lançamento de um item do cardápio em uma comanda, com quantidade, observação e possibilidade de cancelamento enquanto a comanda estiver aberta.",
+        "displayField": "details.description",
         "class": "supporting",
         "storage": {
           "target": "moduleDatabase",
@@ -57,33 +61,33 @@
     ],
     "relationships": [
       {
-        "relationshipId": "comandaParaMesa",
+        "relationshipId": "comandaMesa",
         "from": "Comanda",
         "to": "Mesa",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada comanda é aberta obrigatoriamente para uma mesa, e uma mesa pode ter comandas em atendimentos distintos ao longo do tempo.",
+        "description": "Cada comanda é aberta para uma mesa, e uma mesa pode receber diversas comandas ao longo do tempo.",
         "field": "Comanda.mesaId"
       },
       {
-        "relationshipId": "itemComandaParaComanda",
+        "relationshipId": "itemComandaComanda",
         "from": "ItemComanda",
         "to": "Comanda",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada item lançado pertence obrigatoriamente a uma comanda, que pode reunir vários lançamentos.",
+        "description": "Cada lançamento pertence a uma única comanda, que pode reunir vários itens lançados.",
         "field": "ItemComanda.comandaId"
       },
       {
-        "relationshipId": "itemComandaParaItemCardapio",
+        "relationshipId": "itemComandaItemCardapio",
         "from": "ItemComanda",
         "to": "ItemCardapio",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada lançamento referencia obrigatoriamente o item do cardápio escolhido, e um item do cardápio pode aparecer em vários lançamentos.",
+        "description": "Cada lançamento registra o item do cardápio solicitado, usando o preço vigente no momento do lançamento.",
         "field": "ItemComanda.itemCardapioId"
       }
     ],
@@ -91,7 +95,7 @@
       {
         "kind": "derivedFromPlatform",
         "entityId": "Mesa",
-        "detail": "roleTag comandaRestaurante.Mesa; source /_102034_/l4/ontology/mdm.defs.ts"
+        "detail": "storage.table comandaRestaurante_mesa"
       },
       {
         "kind": "derivedFromPlatform",
@@ -112,222 +116,157 @@
   },
   "entities": [
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "comandaRestaurante",
       "entityId": "Mesa",
       "title": "Mesa",
-      "description": "Mesa física do restaurante utilizada para vincular e identificar o atendimento por comanda; sua disponibilidade é derivada das comandas abertas.",
+      "description": "Mesa operada pelo restaurante, disponível ou ocupada conforme as comandas abertas vinculadas a ela.",
       "displayField": "details.identification.name",
       "relationships": {
-        "comandaParaMesa": {
-          "relationshipId": "comandaParaMesa",
+        "comandas": {
+          "relationshipId": "comandaMesa",
           "to": "Comanda",
           "via": "Comanda.mesaId",
           "cardinality": "1:N",
           "title": "Comandas da mesa",
-          "description": "Comandas abertas e encerradas que foram vinculadas a esta mesa em atendimentos distintos.",
+          "description": "Comandas abertas ou já encerradas para esta mesa ao longo dos atendimentos.",
           "mode": "fk",
           "direction": "to",
-          "required": "Ao abrir uma comanda para a mesa."
+          "required": "Não é obrigatória; uma mesa pode não ter comandas vinculadas.",
+          "role": "mesa"
         }
       },
       "capabilities": {
-        "read.byId": "Lê uma mesa pelo identificador mestre, por consulta direta do registro, para o garçom carregar a mesa já selecionada.",
-        "locate.byName": "Localiza mesas pelo nome no índice de localizações, para o garçom selecionar a mesa do atendimento.",
-        "register.createOrAttach": "Cria ou vincula a mesa física ao papel do módulo após localizar o registro mestre, para o garçom iniciar atendimento em uma mesa cadastrada.",
-        "edit.platformFields": "Atualiza nome, código e demais dados de localização permitidos no registro mestre, pela atualização do documento, para a manutenção operacional das mesas.",
-        "inactivate": "Inativa ou reativa uma mesa pelo status mestre, impedindo ou permitindo seu uso em novos atendimentos, para a manutenção operacional.",
-        "listLinks": "Lista as comandas relacionadas à mesa pela relação comandaParaMesa, para consulta do histórico de atendimentos.",
-        "statusHistory.read": "Consulta as alterações de status do cadastro mestre da mesa no histórico da plataforma, para a manutenção operacional.",
-        "audit": "Consulta quem alterou o cadastro mestre da mesa e quando no registro de auditoria, para a conferência administrativa.",
-        "comandaRestaurante.locateAvailable": "Lista mesas ativas sem comanda aberta por consulta das comandas vinculadas, para o garçom selecionar uma mesa disponível antes de abrir o atendimento."
+        "read.byId": "Consulta uma mesa pelo identificador da linha no repositório de mesas para as telas que já possuem seu id, usada pelo garçom e pelo caixa.",
+        "locate.byColumn": "Localiza mesas pelo número indexado, com ordenação e paginação, para o garçom selecionar uma mesa antes de abrir a comanda.",
+        "count": "Conta as mesas que atendem aos critérios de número no repositório para a lista de mesas usada por usuários internos autorizados.",
+        "listByForeignKey": "Lista as comandas que apontam para esta mesa pela chave estrangeira de Comanda para conferir seus atendimentos, usada pelo caixa.",
+        "create": "Cadastra uma mesa com número único e nome de apresentação no repositório de mesas, usado por usuário interno autorizado a manter o salão.",
+        "update": "Altera o número ou o nome de apresentação de uma mesa no repositório de mesas, usado por usuário interno autorizado a manter o salão.",
+        "uniqueKey": "Recusa o cadastro de outra mesa com o mesmo número pelo índice único da tabela, aplicado pelo motor em toda gravação."
       },
       "rules": [
-        "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
-        "rule-identity-never-in-namespace"
+        "mesaDisponivelParaAbrirComanda"
       ],
-      "kind": "role",
-      "subtype": "Location",
-      "roleTag": "comandaRestaurante.Mesa",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "writer": "crud",
+      "kind": "entity",
+      "class": "supporting",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "comandaRestaurante_mesa",
+        "kind": "relational"
+      },
       "record": {
         "fields": {
           "id": {
             "type": "uuid",
             "required": true,
-            "indexed": true,
             "derived": true,
-            "description": "mdmId; stable through promotion and merge."
+            "indexed": true,
+            "title": "Id"
           },
           "version": {
             "type": "integer",
             "required": true,
-            "derived": true,
-            "description": "Bumped by the engine on every write; optimistic concurrency."
+            "derived": true
+          },
+          "number": {
+            "type": "integer",
+            "required": true,
+            "unique": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Número da mesa",
+            "description": "Número que identifica a mesa no restaurante e permite localizá-la no atendimento.",
+            "maxLength": 0,
+            "min": 1,
+            "max": 0
           },
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da mesa física usada nos atendimentos do restaurante.",
+            "of": "Address",
+            "title": "Detalhes da mesa",
+            "description": "Informações descritivas da mesa que não são usadas como filtro.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
             "fields": {
               "identification": {
                 "type": "object",
-                "owner": "platform",
+                "required": true,
+                "of": "Address",
+                "title": "Identificação",
+                "description": "Identificação apresentada da mesa no restaurante.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0,
                 "fields": {
-                  "subtype": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Location",
-                        "title": "Localização física do restaurante.",
-                        "description": "Registro mestre de local físico."
-                      }
-                    ],
-                    "description": "Subtipo mestre Location que identifica este registro como local físico.",
-                    "title": "Subtipo",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
                   "name": {
                     "type": "string",
                     "required": true,
-                    "indexed": true,
-                    "maxLength": 0,
-                    "description": "Nome pelo qual o garçom reconhece e seleciona a mesa para abrir uma comanda.",
+                    "of": "Address",
                     "title": "Nome da mesa",
-                    "min": 0,
-                    "max": 0
-                  },
-                  "status": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Active",
-                        "title": "Ativa",
-                        "description": "Mesa disponível para uso no cadastro mestre."
-                      },
-                      {
-                        "value": "Inactive",
-                        "title": "Inativa",
-                        "description": "Mesa retirada de uso no cadastro mestre."
-                      },
-                      {
-                        "value": "Merged",
-                        "title": "Mesclada",
-                        "description": "Registro mestre mesclado a outro registro."
-                      },
-                      {
-                        "value": "Blocked",
-                        "title": "Bloqueada",
-                        "description": "Registro mestre bloqueado pela plataforma."
-                      }
-                    ],
-                    "title": "Status do cadastro",
-                    "description": "Situação mestre da mesa; mesas inativas não devem ser usadas em novos atendimentos.",
-                    "maxLength": 0,
+                    "description": "Nome apresentado para a mesa nas telas de atendimento.",
+                    "maxLength": 80,
                     "min": 0,
                     "max": 0
                   }
-                },
-                "description": "Dados de identificação da mesa no cadastro mestre."
+                }
               },
-              "base": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {},
-                "description": "Dados básicos da plataforma mantidos para a mesa quando aplicáveis."
-              },
-              "location": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {
-                  "locationType": {
-                    "type": "enum",
-                    "required": true,
-                    "values": [
-                      {
-                        "value": "Other",
-                        "title": "Outro local físico",
-                        "description": "Classificação de plataforma para uma mesa de restaurante."
-                      }
-                    ],
-                    "title": "Tipo de localização",
-                    "description": "Classificação de localização usada para representar a mesa física do restaurante.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "locationCode": {
-                    "type": "string",
-                    "title": "Código da mesa",
-                    "description": "Código de identificação operacional da mesa, como seu número no salão.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Características de localização física da mesa no restaurante."
-              },
-              "general": {
-                "type": "object",
-                "owner": "organization",
-                "open": true,
-                "description": "Dados promovidos pela organização, somente para leitura pelo módulo."
-              },
-              "comandaRestaurante": {
-                "type": "object",
-                "owner": "module",
-                "fields": {},
-                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              "available": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Disponível",
+                "description": "A mesa está disponível quando não possui comanda aberta vinculada."
               }
             }
           }
         }
-      }
+      },
+      "uniqueKeys": [
+        [
+          "number"
+        ]
+      ]
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "comandaRestaurante",
       "entityId": "ItemCardapio",
       "title": "Item do cardápio",
-      "description": "Produto oferecido no cardápio do restaurante, com o preço vigente específico do módulo.",
+      "description": "Produto disponibilizado no cardápio do restaurante, com preço definido para este módulo.",
       "displayField": "details.identification.name",
       "relationships": {
-        "itensComanda": {
-          "relationshipId": "itemComandaParaItemCardapio",
+        "itemComandaItemCardapio": {
+          "relationshipId": "itemComandaItemCardapio",
           "to": "ItemComanda",
           "via": "ItemComanda.itemCardapioId",
           "cardinality": "1:N",
-          "title": "Lançamentos em comanda",
-          "description": "Lançamentos de comanda que referenciam este item do cardápio.",
+          "title": "Lançamentos deste item",
+          "description": "Lançamentos de comanda que registram este item do cardápio e preservam o preço vigente no momento do pedido.",
           "mode": "fk",
           "direction": "to",
-          "required": "Não obrigatório; um item do cardápio pode ainda não ter sido lançado em nenhuma comanda.",
-          "role": "item do cardápio"
+          "required": "Quando um ItemComanda é registrado, ele deve referenciar um item do cardápio.",
+          "role": "itemLancado"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um item do cardápio pelo identificador mestre, por leitura direta no MDM, para o garçom conferir o item e seu preço vigente antes do lançamento.",
-        "locate.byName": "Localiza itens do cardápio pelo nome no índice de produtos, para o garçom encontrar o item escolhido pelo cliente.",
-        "register.createOrAttach": "Cria o produto mestre quando ausente ou anexa seu papel de item do cardápio, por deduplicação e atribuição da tag do módulo, para usuários autorizados que mantêm o cardápio.",
-        "edit.platformFields": "Atualiza os dados de plataforma mantidos deste produto, com atualização do índice de identificação quando aplicável, para usuários autorizados que mantêm o cardápio.",
-        "edit.moduleNamespace": "Atualiza exclusivamente o preço vigente em details.comandaRestaurante, pela escrita autorizada no namespace do módulo, para usuários autorizados que mantêm o cardápio.",
-        "inactivate": "Inativa ou reativa o registro mestre sem removê-lo, pela mudança de situação no MDM, para usuários autorizados retirarem ou devolverem um item ao uso.",
-        "listLinks": "Lista os lançamentos de comanda relacionados a este item, pela consulta dos vínculos disponíveis, para usuários autorizados verificarem onde ele foi utilizado.",
-        "audit": "Consulta quem alterou os dados do item e quando, pelo log de auditoria do MDM, para usuários autorizados acompanharem a manutenção do cardápio."
+        "read.byId": "Consulta um item do cardápio pelo identificador mestre, por leitura direta do MDM, para o garçom e o caixa exibirem seus dados em uma comanda.",
+        "locate.byName": "Localiza itens do cardápio pelo nome digitado, pesquisando o índice de nomes de produtos, para o garçom encontrar o pedido solicitado.",
+        "register.createOrAttach": "Cadastra ou associa um produto existente ao papel de item do cardápio, por criação ou associação no MDM e gravação do preço do módulo, para o pessoal autorizado manter o cardápio.",
+        "edit.platformFields": "Atualiza o nome e demais dados de plataforma mantidos para o produto, reindexando a identificação quando necessário, para o pessoal autorizado manter o cadastro do item.",
+        "edit.moduleNamespace": "Atualiza o preço atual em details.comandaRestaurante, restrito ao namespace deste módulo, para o pessoal autorizado ajustar o cardápio.",
+        "inactivate": "Inativa ou reativa o produto no MDM pela situação do registro, retirando-o ou devolvendo-o ao uso, para o pessoal autorizado controlar a disponibilidade do item.",
+        "listLinks": "Lista os lançamentos de comanda relacionados ao item por sua referência obrigatória, para o caixa e o pessoal autorizado consultarem onde ele foi utilizado.",
+        "statusHistory.read": "Exibe o histórico de alterações de situação do registro mestre, pela consulta de histórico do MDM, para o pessoal autorizado acompanhar ativações e inativações.",
+        "audit": "Consulta quem alterou os dados do item e quando, pelo log de auditoria do MDM, para o pessoal autorizado conferir a manutenção do cardápio."
       },
       "rules": [
         "rule-foreign-namespace-refused",
         "rule-document-shape-validated",
-        "rule-identity-never-in-namespace"
+        "rule-identity-never-in-namespace",
+        "itemCardapioAtivoParaLancamento"
       ],
       "writer": "crud",
       "kind": "role",
@@ -352,7 +291,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre do produto utilizado como item do cardápio neste módulo.",
+            "description": "Documento mestre do produto usado como item do cardápio do restaurante.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -367,10 +306,10 @@
                       {
                         "value": "Product",
                         "title": "Produto",
-                        "description": "Produto do catálogo mestre."
+                        "description": "Produto utilizado como item do cardápio."
                       }
                     ],
-                    "description": "Indica que este registro mestre é um produto usado como item do cardápio.",
+                    "description": "Classifica este registro mestre como produto.",
                     "title": "Subtipo",
                     "maxLength": 0,
                     "min": 0,
@@ -381,8 +320,8 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome pelo qual o garçom reconhece e seleciona o item no cardápio.",
-                    "title": "Nome",
+                    "description": "Nome pelo qual o garçom e o caixa identificam o item no cardápio.",
+                    "title": "Nome do item",
                     "min": 0,
                     "max": 0
                   },
@@ -395,26 +334,26 @@
                       {
                         "value": "Active",
                         "title": "Ativo",
-                        "description": "Registro mestre ativo."
+                        "description": "Produto disponível para uso."
                       },
                       {
                         "value": "Inactive",
                         "title": "Inativo",
-                        "description": "Registro mestre inativo."
+                        "description": "Produto retirado de uso."
                       },
                       {
                         "value": "Merged",
                         "title": "Mesclado",
-                        "description": "Registro mestre mesclado a outro."
+                        "description": "Produto incorporado a outro registro mestre."
                       },
                       {
                         "value": "Blocked",
                         "title": "Bloqueado",
-                        "description": "Registro mestre bloqueado."
+                        "description": "Produto bloqueado no cadastro mestre."
                       }
                     ],
-                    "title": "Situação",
-                    "description": "Situação mestre que determina se o item pode permanecer em uso no cardápio.",
+                    "title": "Situação no cadastro mestre",
+                    "description": "Indica se o produto está ativo, inativo, mesclado ou bloqueado no MDM; somente item ativo pode ser lançado em comanda.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -424,50 +363,61 @@
                     "required": true,
                     "indexed": true,
                     "pattern": "^[A-Z]{2}$",
-                    "maxLength": 0,
+                    "maxLength": 2,
                     "default": "US",
-                    "description": "Código ISO do país aplicável ao registro mestre do produto.",
+                    "description": "Código ISO do país ao qual o cadastro mestre do produto pertence.",
                     "title": "País",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Etiquetas derivadas pelo MDM, incluindo o papel comandaRestaurante.ItemCardapio deste produto.",
+                    "title": "Etiquetas de papel",
+                    "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação do produto mestre exibidos e consultados no cardápio."
+                "description": "Dados de identificação do produto no cadastro mestre, usados para reconhecê-lo e disponibilizá-lo no cardápio."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados básicos compartilhados do registro mestre do produto; nenhum campo desta camada é usado especificamente pelo cardápio."
+                "description": "Dados comuns do produto mantidos pela plataforma; este módulo não utiliza campos adicionais desta seção."
               },
               "product": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados próprios do subtipo Produto da plataforma; nenhum campo desta camada é necessário para o lançamento no cardápio."
+                "description": "Dados próprios do subtipo Produto mantidos pela plataforma; este módulo não utiliza campos adicionais desta seção."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização, legíveis pelo módulo e definidos no registro central."
+                "description": "Dados promovidos pela organização para uso compartilhado, lidos conforme o cadastro corporativo."
               },
               "comandaRestaurante": {
                 "type": "object",
                 "owner": "module",
                 "fields": {
-                  "precoVigente": {
+                  "preco": {
                     "type": "money",
                     "required": true,
                     "of": "Address",
-                    "title": "Preço vigente",
-                    "description": "Preço atualmente praticado para este item no cardápio e consultado antes de seu lançamento em uma comanda.",
+                    "title": "Preço do cardápio",
+                    "description": "Preço atual cobrado por uma unidade deste item no cardápio; o lançamento da comanda registra o preço vigente naquele momento.",
                     "maxLength": 0,
-                    "min": 0,
+                    "min": 0.01,
                     "max": 0
                   }
                 },
-                "description": "Dados específicos deste módulo sobre o produto oferecido no cardápio."
+                "description": "Informações deste módulo que definem a oferta do produto no cardápio."
               }
             }
           }
@@ -475,54 +425,53 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "comandaRestaurante",
       "entityId": "Comanda",
       "title": "Comanda",
-      "description": "Atendimento aberto para uma mesa, que reúne os itens consumidos, o desconto eventual e o pagamento registrado no fechamento.",
-      "displayField": "numero",
+      "description": "Registro do atendimento aberto para uma mesa, que reúne os itens consumidos, o desconto e o fechamento com pagamento.",
+      "displayField": "details.number",
       "relationships": {
         "mesa": {
-          "relationshipId": "comandaParaMesa",
+          "relationshipId": "comandaMesa",
           "to": "Mesa",
           "via": "Comanda.mesaId",
           "cardinality": "N:1",
           "title": "Mesa da comanda",
-          "description": "A comanda é aberta obrigatoriamente para uma mesa; a mesma mesa pode ter comandas em atendimentos distintos ao longo do tempo.",
+          "description": "Mesa para a qual a comanda foi aberta; uma mesa pode ter comandas em atendimentos diferentes ao longo do tempo.",
           "mode": "fk",
-          "required": "Sempre, ao abrir uma comanda."
+          "required": "sempre",
+          "role": "mesa"
         },
-        "itensLancados": {
-          "relationshipId": "itemComandaParaComanda",
+        "itens": {
+          "relationshipId": "itemComandaComanda",
           "to": "ItemComanda",
           "via": "ItemComanda.comandaId",
           "cardinality": "1:N",
           "title": "Itens lançados",
-          "description": "A comanda pode reunir vários itens lançados durante o atendimento.",
+          "description": "Lançamentos de itens que pertencem a esta comanda.",
           "mode": "fk",
           "direction": "to",
-          "required": true
+          "required": "quando houver itens lançados",
+          "role": "comanda"
         }
       },
       "capabilities": {
-        "read.byId": "Lê uma comanda pelo identificador já conhecido para o garçom ou o caixa consultar o atendimento em contexto.",
-        "locate.byColumn": "Localiza comandas por mesa e situação, com paginação, para o garçom atender ou o caixa encerrar uma comanda aberta.",
-        "count": "Conta comandas conforme os filtros de mesa e situação para apoiar as listas de atendimento do garçom e do caixa.",
-        "listByForeignKey": "Lista as comandas vinculadas a uma mesa pelo índice de mesa para consultar seus atendimentos.",
+        "read.byId": "Lê uma comanda pelo identificador da linha para o garçom ou caixa que já a tenha em contexto.",
+        "locate.byColumn": "Lista comandas por mesa e situação indexadas, para o garçom localizar a comanda aberta ou o caixa localizar a comanda a fechar.",
+        "count": "Conta comandas conforme mesa ou situação para apoiar as listas de atendimento do garçom e do caixa.",
+        "listByForeignKey": "Lista as comandas vinculadas a uma mesa pela chave estrangeira mesaId para consultar os atendimentos dessa mesa.",
         "create": "Cria uma comanda aberta vinculada à mesa selecionada para o garçom iniciar o atendimento.",
-        "transition": "Move a comanda de aberta para fechada, aplicando o fechamento registrado pelo caixa.",
-        "transaction": "Executa atomicamente a abertura ou o fechamento da comanda e a atualização da disponibilidade da mesa para garçom ou caixa.",
-        "read.mdmRecord": "Lê o registro mestre da mesa apontada por mesaId para exibir sua identificação e disponibilidade no atendimento.",
-        "sequence.next": "Emite o próximo número sequencial da comanda ao abrir o atendimento para o garçom identificar o registro.",
-        "comandaRestaurante.calcularTotal": "Calcula o total dos itens não cancelados e o total a receber após o desconto para o caixa consultar no fechamento."
+        "transition": "Move a comanda de aberta para fechada no fechamento realizado pelo caixa, registrando pagamento, desconto eventual e a liberação da mesa.",
+        "sequence.next": "Emite o próximo número sequencial da comanda no momento em que o garçom abre o atendimento.",
+        "transaction": "Executa atomicamente a abertura ou o fechamento da comanda e a atualização correspondente da disponibilidade da mesa para o garçom ou caixa."
       },
       "rules": [
         "comandaMesaDisponivel",
-        "comandaUmaAbertaPorMesa",
-        "totalConsideraItensAtivos",
-        "fechamentoExigePagamento",
+        "umaComandaAbertaPorMesa",
+        "formaPagamentoObrigatoriaNoFechamento",
         "descontoNaoExcedeTotal",
-        "mesaLiberadaNoFechamento"
+        "fechamentoLiberaMesa"
       ],
       "kind": "entity",
       "class": "core",
@@ -554,21 +503,9 @@
               "Mesa"
             ],
             "title": "Mesa",
-            "description": "Mesa à qual a comanda pertence durante este atendimento.",
+            "description": "Mesa para a qual esta comanda foi aberta.",
             "maxLength": 0,
             "min": 0,
-            "max": 0
-          },
-          "numero": {
-            "type": "integer",
-            "required": true,
-            "unique": true,
-            "indexed": true,
-            "of": "Address",
-            "title": "Número da comanda",
-            "description": "Número sequencial emitido para identificar a comanda no atendimento.",
-            "maxLength": 0,
-            "min": 1,
             "max": 0
           },
           "status": {
@@ -580,16 +517,16 @@
               {
                 "value": "open",
                 "title": "Aberta",
-                "description": "A comanda aceita lançamentos e cancelamentos de itens."
+                "description": "Comanda em atendimento, disponível para lançamento e cancelamento de itens."
               },
               {
                 "value": "closed",
                 "title": "Fechada",
-                "description": "A comanda foi paga e não aceita novos lançamentos."
+                "description": "Comanda paga e concluída, com a mesa liberada."
               }
             ],
             "title": "Situação",
-            "description": "Situação operacional da comanda.",
+            "description": "Situação do atendimento da mesa: aberta enquanto recebe lançamentos ou fechada após o pagamento.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -599,90 +536,71 @@
             "required": true,
             "of": "Address",
             "title": "Dados da comanda",
-            "description": "Dados do atendimento, valores calculados e informações registradas no fechamento.",
+            "description": "Dados do atendimento, do fechamento e do pagamento que não precisam de índice.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
-              "totalItens": {
-                "type": "money",
+              "number": {
+                "type": "integer",
                 "required": true,
                 "of": "Address",
-                "title": "Total dos itens",
-                "description": "Soma calculada dos itens não cancelados lançados na comanda.",
+                "title": "Número da comanda",
+                "description": "Número sequencial emitido para identificar a comanda no atendimento.",
+                "maxLength": 0,
+                "min": 1,
+                "max": 0
+              },
+              "discount": {
+                "type": "money",
+                "of": "Address",
+                "title": "Desconto",
+                "description": "Valor de desconto aplicado pelo caixa no fechamento, quando houver.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
-              "fechamento": {
-                "type": "object",
+              "paymentMethod": {
+                "type": "enum",
                 "of": "Address",
-                "title": "Fechamento",
-                "description": "Dados informados e valores calculados quando a comanda é encerrada.",
+                "values": [
+                  {
+                    "value": "cash",
+                    "title": "Dinheiro",
+                    "description": "Pagamento realizado em dinheiro."
+                  },
+                  {
+                    "value": "debitCard",
+                    "title": "Cartão de débito",
+                    "description": "Pagamento realizado com cartão de débito."
+                  },
+                  {
+                    "value": "creditCard",
+                    "title": "Cartão de crédito",
+                    "description": "Pagamento realizado com cartão de crédito."
+                  },
+                  {
+                    "value": "pix",
+                    "title": "Pix",
+                    "description": "Pagamento realizado por Pix."
+                  }
+                ],
+                "title": "Forma de pagamento",
+                "description": "Forma de pagamento registrada pelo caixa ao fechar a comanda.",
                 "maxLength": 0,
                 "min": 0,
-                "max": 0,
-                "fields": {
-                  "desconto": {
-                    "type": "money",
-                    "of": "Address",
-                    "title": "Desconto",
-                    "description": "Valor opcional abatido do total dos itens no fechamento.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "formaPagamento": {
-                    "type": "enum",
-                    "of": "Address",
-                    "values": [
-                      {
-                        "value": "cash",
-                        "title": "Dinheiro",
-                        "description": "Pagamento recebido em dinheiro."
-                      },
-                      {
-                        "value": "debitCard",
-                        "title": "Cartão de débito",
-                        "description": "Pagamento realizado com cartão de débito."
-                      },
-                      {
-                        "value": "creditCard",
-                        "title": "Cartão de crédito",
-                        "description": "Pagamento realizado com cartão de crédito."
-                      },
-                      {
-                        "value": "pix",
-                        "title": "Pix",
-                        "description": "Pagamento realizado por Pix."
-                      }
-                    ],
-                    "title": "Forma de pagamento",
-                    "description": "Forma de pagamento registrada pelo caixa no fechamento.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "totalReceber": {
-                    "type": "money",
-                    "of": "Address",
-                    "title": "Total a receber",
-                    "description": "Valor calculado a receber após deduzir o desconto do total dos itens.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                }
+                "max": 0
+              },
+              "total": {
+                "type": "money",
+                "derived": true,
+                "title": "Total da comanda",
+                "description": "Soma dos valores dos itens válidos lançados na comanda, menos o desconto aplicado quando houver."
               }
             }
           }
         }
       },
-      "uniqueKeys": [
-        [
-          "numero"
-        ]
-      ],
       "lifecycleStates": [
         {
           "state": "open",
@@ -703,56 +621,55 @@
           "by": [
             "caixa"
           ],
-          "description": "Registra o desconto opcional e a forma de pagamento, encerra a comanda e libera a mesa vinculada.",
+          "description": "Fecha a comanda após registrar a forma de pagamento e o eventual desconto, liberando a mesa para novo atendimento.",
           "ruleRefs": [
-            "fechamentoExigePagamento",
+            "formaPagamentoObrigatoriaNoFechamento",
             "descontoNaoExcedeTotal",
-            "mesaLiberadaNoFechamento"
+            "fechamentoLiberaMesa"
           ]
         }
       ]
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "comandaRestaurante",
       "entityId": "ItemComanda",
       "title": "Item da comanda",
-      "description": "Lançamento de um item do cardápio em uma comanda, com quantidade, observação, preço registrado e possibilidade de cancelamento enquanto a comanda estiver aberta.",
-      "displayField": "id",
+      "description": "Lançamento de um item do cardápio em uma comanda, com quantidade, observação e possibilidade de cancelamento enquanto a comanda estiver aberta.",
+      "displayField": "details.description",
       "relationships": {
         "comanda": {
-          "relationshipId": "itemComandaParaComanda",
+          "relationshipId": "itemComandaComanda",
           "to": "Comanda",
           "via": "ItemComanda.comandaId",
           "cardinality": "N:1",
-          "title": "Comanda do lançamento",
-          "description": "Cada item lançado pertence obrigatoriamente a uma comanda, que pode reunir vários lançamentos.",
+          "title": "Pertence à comanda",
+          "description": "Cada lançamento pertence a uma única comanda, que pode reunir vários itens lançados.",
           "mode": "fk",
-          "required": "sempre"
+          "required": "Sempre"
         },
         "itemCardapio": {
-          "relationshipId": "itemComandaParaItemCardapio",
+          "relationshipId": "itemComandaItemCardapio",
           "to": "ItemCardapio",
           "via": "ItemComanda.itemCardapioId",
           "cardinality": "N:1",
-          "title": "Item do cardápio lançado",
-          "description": "Cada lançamento referencia obrigatoriamente o item do cardápio escolhido, que pode aparecer em vários lançamentos.",
+          "title": "Refere-se ao item do cardápio",
+          "description": "Cada lançamento registra o item do cardápio solicitado, usando o preço vigente no momento do lançamento.",
           "mode": "fk",
-          "required": "sempre"
+          "required": "Sempre"
         }
       },
       "capabilities": {
-        "read.byId": "Lê um lançamento pelo identificador da linha · consulta por id no repositório ItemComanda · garçom e caixa ao conferirem um item específico.",
-        "locate.byColumn": "Localiza lançamentos por comanda, item do cardápio ou situação · filtra as colunas indexadas com paginação · garçom e caixa ao consultarem lançamentos.",
-        "listByForeignKey": "Lista os itens vinculados a uma comanda · busca por comandaId e permite carregar vários lançamentos de uma vez · garçom e caixa na tela da comanda.",
-        "create": "Registra um novo item lançado · insere o lançamento com quantidade, observação e preço unitário vigente · garçom ao lançar um pedido em comanda aberta.",
-        "transition": "Cancela um item lançado · altera o status de lancado para cancelado conforme a transição cancelarItemComanda · garçom ao corrigir lançamento em comanda aberta.",
-        "read.mdmRecord": "Lê o item mestre do cardápio referenciado · hidrata ItemCardapio a partir de itemCardapioId · garçom e caixa ao exibirem o item e conferirem o preço registrado."
+        "read.byId": "Lê um lançamento pelo identificador da linha · consulta a linha pelo id no repositório · garçom e caixa nas telas que já possuem o lançamento em contexto.",
+        "locate.byColumn": "Localiza lançamentos por comanda, item do cardápio ou situação · filtra as colunas indexadas com paginação · garçom e caixa ao consultar consumos.",
+        "listByForeignKey": "Lista os itens vinculados a uma comanda ou a um item do cardápio · consulta pelas chaves estrangeiras indexadas · garçom e caixa na visualização da comanda.",
+        "create": "Registra um item solicitado em uma comanda aberta · insere o lançamento com quantidade, preço vigente e observação · garçom ao atender o pedido.",
+        "transition": "Cancela um lançamento lançado por engano · altera a situação de lançado para cancelado sob as regras da comanda aberta · garçom.",
+        "read.mdmRecord": "Lê o registro mestre do item do cardápio apontado pelo lançamento · hidrata o produto pelo identificador mestre · garçom e caixa para exibir o item solicitado."
       },
       "rules": [
-        "itemComandaSomenteEmComandaAberta",
-        "cancelamentoItemComandaSomenteEmComandaAberta",
-        "precoItemComandaVigente"
+        "itemComandaRequiresOpenComanda",
+        "itemComandaCancellationRequiresOpenComanda"
       ],
       "kind": "entity",
       "class": "supporting",
@@ -779,12 +696,12 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "to": [
               "Comanda"
             ],
             "title": "Comanda",
-            "description": "Comanda à qual este lançamento pertence.",
+            "description": "Comanda à qual este lançamento de consumo pertence.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -793,12 +710,12 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "to": [
               "ItemCardapio"
             ],
             "title": "Item do cardápio",
-            "description": "Item do cardápio escolhido para o lançamento.",
+            "description": "Item do cardápio solicitado e registrado neste lançamento.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -807,17 +724,17 @@
             "type": "enum",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "values": [
               {
-                "value": "lancado",
+                "value": "launched",
                 "title": "Lançado",
-                "description": "Item ativo e considerado na comanda."
+                "description": "Item ativo e considerado no consumo da comanda."
               },
               {
-                "value": "cancelado",
+                "value": "cancelled",
                 "title": "Cancelado",
-                "description": "Item cancelado por lançamento incorreto e não considerado no total."
+                "description": "Item retirado por engano e não considerado no consumo da comanda."
               }
             ],
             "title": "Situação",
@@ -829,41 +746,57 @@
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "title": "Dados do lançamento",
-            "description": "Dados registrados para o item lançado na comanda.",
+            "description": "Informações registradas para o item lançado na comanda.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
-              "quantidade": {
-                "type": "integer",
+              "description": {
+                "type": "string",
                 "required": true,
-                "of": "ContactSummary",
+                "of": "Address",
+                "title": "Descrição",
+                "description": "Descrição do lançamento exibida na comanda.",
+                "maxLength": 200,
+                "min": 0,
+                "max": 0
+              },
+              "quantity": {
+                "type": "number",
+                "required": true,
+                "of": "Address",
                 "title": "Quantidade",
                 "description": "Quantidade solicitada do item do cardápio.",
                 "maxLength": 0,
                 "min": 1,
                 "max": 0
               },
-              "observacao": {
-                "type": "text",
-                "of": "ContactSummary",
-                "title": "Observação",
-                "description": "Orientação ou observação informada para o preparo do item.",
+              "unitPrice": {
+                "type": "money",
+                "required": true,
+                "of": "Address",
+                "title": "Preço unitário",
+                "description": "Preço vigente do item do cardápio no momento em que foi lançado.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
-              "precoUnitario": {
-                "type": "money",
-                "required": true,
-                "of": "ContactSummary",
-                "title": "Preço unitário registrado",
-                "description": "Preço unitário vigente do item no momento em que foi lançado na comanda.",
-                "maxLength": 0,
+              "observation": {
+                "type": "text",
+                "of": "Address",
+                "title": "Observação",
+                "description": "Orientação eventual do cliente para o preparo ou serviço do item.",
+                "maxLength": 500,
                 "min": 0,
                 "max": 0
+              },
+              "subtotal": {
+                "type": "money",
+                "derived": true,
+                "title": "Subtotal do item",
+                "description": "Quantidade do item multiplicada pelo preço unitário registrado; é zero quando o lançamento está cancelado."
               }
             }
           }
@@ -871,27 +804,27 @@
       },
       "lifecycleStates": [
         {
-          "state": "lancado",
+          "state": "launched",
           "reachedBy": "actor"
         },
         {
-          "state": "cancelado",
+          "state": "cancelled",
           "reachedBy": "actor"
         }
       ],
       "transitions": [
         {
-          "transitionId": "cancelarItemComanda",
+          "transitionId": "cancelarItem",
           "from": [
-            "lancado"
+            "launched"
           ],
-          "to": "cancelado",
+          "to": "cancelled",
           "by": [
             "garcom"
           ],
-          "description": "Cancela um item lançado por engano enquanto a comanda permanece aberta.",
+          "description": "Cancela um lançamento feito por engano enquanto a comanda permanece aberta.",
           "ruleRefs": [
-            "cancelamentoItemComandaSomenteEmComandaAberta"
+            "itemComandaCancellationRequiresOpenComanda"
           ]
         }
       ]
@@ -899,33 +832,33 @@
   ],
   "relationships": [
     {
-      "relationshipId": "comandaParaMesa",
+      "relationshipId": "comandaMesa",
       "from": "Comanda",
       "to": "Mesa",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada comanda é aberta obrigatoriamente para uma mesa, e uma mesa pode ter comandas em atendimentos distintos ao longo do tempo.",
+      "description": "Cada comanda é aberta para uma mesa, e uma mesa pode receber diversas comandas ao longo do tempo.",
       "field": "Comanda.mesaId"
     },
     {
-      "relationshipId": "itemComandaParaComanda",
+      "relationshipId": "itemComandaComanda",
       "from": "ItemComanda",
       "to": "Comanda",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item lançado pertence obrigatoriamente a uma comanda, que pode reunir vários lançamentos.",
+      "description": "Cada lançamento pertence a uma única comanda, que pode reunir vários itens lançados.",
       "field": "ItemComanda.comandaId"
     },
     {
-      "relationshipId": "itemComandaParaItemCardapio",
+      "relationshipId": "itemComandaItemCardapio",
       "from": "ItemComanda",
       "to": "ItemCardapio",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada lançamento referencia obrigatoriamente o item do cardápio escolhido, e um item do cardápio pode aparecer em vários lançamentos.",
+      "description": "Cada lançamento registra o item do cardápio solicitado, usando o preço vigente no momento do lançamento.",
       "field": "ItemComanda.itemCardapioId"
     }
   ],
@@ -935,7 +868,7 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Mesa",
-      "detail": "roleTag comandaRestaurante.Mesa; source /_102034_/l4/ontology/mdm.defs.ts"
+      "detail": "storage.table comandaRestaurante_mesa"
     },
     {
       "kind": "derivedFromPlatform",
@@ -958,19 +891,9 @@
       "detail": "record.fields.id, record.fields.version"
     },
     {
-      "kind": "tightened",
+      "kind": "derivedFromPlatform",
       "entityId": "Mesa",
-      "detail": "Mesa.details.identification.subtype.values"
-    },
-    {
-      "kind": "tightened",
-      "entityId": "Mesa",
-      "detail": "Mesa.details.location.locationType.values"
-    },
-    {
-      "kind": "namespaceEmpty",
-      "entityId": "Mesa",
-      "detail": "details.comandaRestaurante"
+      "detail": "record.fields.details.fields.available.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
@@ -989,8 +912,18 @@
     },
     {
       "kind": "derivedFromPlatform",
+      "entityId": "Comanda",
+      "detail": "record.fields.details.fields.total.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
       "entityId": "ItemComanda",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemComanda",
+      "detail": "record.fields.details.fields.subtotal.derived (derived[])"
     }
   ]
 }

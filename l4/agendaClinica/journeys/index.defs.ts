@@ -27,9 +27,9 @@ export const agendaClinicaJourneyIndex = {
       "title": "Registrar falta do paciente"
     },
     {
-      "journeyId": "consultarAgendaDoDia",
+      "journeyId": "consultarAgendaDiaria",
       "actorRef": "profissional",
-      "title": "Consultar agenda do dia"
+      "title": "Consultar agenda diária"
     },
     {
       "journeyId": "registrarAtendimento",

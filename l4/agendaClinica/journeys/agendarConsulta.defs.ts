@@ -10,15 +10,15 @@ export const agendarConsultaJourney = {
     "title": "Agendar consulta",
     "goal": "Marcar uma consulta para um paciente com um profissional em data e horário disponíveis.",
     "entry": {
-      "mode": "contextOrLookup"
+      "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarPaciente",
+        "stepId": "localizarPacienteParaAgendamento",
         "kind": "locate",
         "entity": "Paciente",
         "title": "x",
-        "description": "Localiza o paciente já cadastrado para o agendamento."
+        "description": "Localiza o paciente que receberá a consulta."
       },
       {
         "stepId": "localizarProfissional",
@@ -28,23 +28,30 @@ export const agendarConsultaJourney = {
         "description": "Localiza o médico ou terapeuta que realizará a consulta."
       },
       {
+        "stepId": "consultarDisponibilidade",
+        "kind": "inspect",
+        "entity": "Consulta",
+        "title": "x",
+        "description": "Consulta os horários já ocupados do profissional na data pretendida."
+      },
+      {
         "stepId": "criarConsulta",
         "kind": "act",
         "entity": "Consulta",
         "effect": "create",
         "title": "x",
-        "description": "Registra a consulta com paciente, profissional, data e hora, somente em horário livre."
+        "description": "Registra a consulta para o paciente e o profissional selecionados, com data e hora. O agendamento somente é concluído se não houver outra consulta do mesmo profissional no mesmo horário."
       }
     ],
     "outcome": {
-      "statement": "Uma consulta é marcada para o paciente com o profissional no horário escolhido.",
+      "statement": "A consulta fica marcada em um horário disponível do profissional.",
       "evidence": [
-        "Consulta registrada com paciente, profissional, data e hora.",
-        "Horário do profissional permanece sem duplicidade de consulta."
+        "Consulta criada com paciente, profissional, data e hora.",
+        "Não há outra consulta do profissional no mesmo horário."
       ]
     }
   },
-  "businessHash": "sha256:95c355343f6a297a7b3ab793b212810cda73295768f0fc8f14466b8e4f42ae63"
+  "businessHash": "sha256:92c7882e6189d1b4c7692c0e14545635cf3bd5f909a1437cbbf2b35545383c77"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AgendarConsultaJourneyType = typeof agendarConsultaJourney;

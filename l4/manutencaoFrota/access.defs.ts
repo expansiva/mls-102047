@@ -11,36 +11,34 @@ export const manutencaoFrotaAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Motorista",
-      "description": "Motorista da transportadora que registra abastecimentos dos veículos que dirige e consulta os veículos atribuídos a si."
+      "description": "Registra abastecimentos dos veículos que dirige e consulta apenas os veículos a ele atribuídos."
     },
     {
       "actorId": "gestor",
       "kind": "internal",
       "origin": "named",
       "title": "Gestor de frota",
-      "description": "Gestor responsável por cadastrar planos de manutenção preventiva e abrir ordens de manutenção dos veículos."
+      "description": "Gerencia planos de manutenção preventiva e abre ordens de manutenção para os veículos da frota."
     }
   ],
   "grants": [
     {
-      "grantId": "motoristaConsultaVeiculosAtribuidos",
+      "grantId": "motoristaVeiculosAtribuidos",
       "actorRef": "motorista",
       "title": "Consultar veículos atribuídos",
-      "description": "Permite ao motorista consultar os dados operacionais dos veículos para os quais possui uma atribuição de condução.",
+      "description": "Permite ao motorista consultar os dados operacionais dos veículos atribuídos a ele.",
       "entityRefs": [
         "Vehicle"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Somente veículos alcançados pelas atribuições vinculadas ao motorista da sessão.",
+        "description": "Somente veículos alcançados pela atribuição vinculada ao cadastro de motorista correspondente à pessoa da sessão.",
         "anchorEntity": "Driver"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Exibe a identificação do veículo, placa, modelo, ano e quilometragem atual necessários à condução.",
+        "description": "Exibe a identificação, as características veiculares e a quilometragem operacional necessárias ao motorista.",
         "allowedFields": [
-          "Vehicle.id",
-          "Vehicle.version",
           "Vehicle.details.identification",
           "Vehicle.details.assetVehicle",
           "Vehicle.details.manutencaoFrota"
@@ -48,77 +46,43 @@ export const manutencaoFrotaAccess = {
       }
     },
     {
-      "grantId": "motoristaConsultaAtribuicoes",
+      "grantId": "motoristaAbastecimentosProprios",
       "actorRef": "motorista",
-      "title": "Consultar próprias atribuições",
-      "description": "Permite ao motorista consultar as atribuições de veículos vinculadas ao seu próprio cadastro.",
-      "entityRefs": [
-        "VehicleAssignment"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Somente atribuições cujo motorista é a pessoa da sessão.",
-        "anchorEntity": "Driver"
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Exibe integralmente os dados operacionais das próprias atribuições de veículos."
-      }
-    },
-    {
-      "grantId": "motoristaRegistraPropriosAbastecimentos",
-      "actorRef": "motorista",
-      "title": "Registrar próprios abastecimentos",
-      "description": "Permite ao motorista registrar e consultar abastecimentos informados em seu próprio nome para veículos que dirige.",
+      "title": "Registrar e consultar próprios abastecimentos",
+      "description": "Permite ao motorista registrar e consultar abastecimentos vinculados ao seu próprio cadastro de motorista.",
       "entityRefs": [
         "Fueling"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Somente abastecimentos cujo motorista é a pessoa da sessão.",
+        "description": "Somente abastecimentos cujo motorista vinculado corresponde à pessoa da sessão.",
         "anchorEntity": "Driver"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Exibe integralmente os dados do abastecimento, incluindo veículo, data, litros, valor e leitura do odômetro."
+        "description": "Exibe integralmente os dados dos abastecimentos do próprio motorista."
       }
     },
     {
-      "grantId": "gestorAdministraCadastrosFrota",
+      "grantId": "gestorGerenciarFrota",
       "actorRef": "gestor",
-      "title": "Administrar cadastros da frota",
-      "description": "Permite ao gestor manter os veículos, motoristas, oficinas e atribuições de condução utilizados pela operação de manutenção da frota.",
+      "title": "Gerenciar manutenção da frota",
+      "description": "Permite ao gestor cadastrar os cadastros operacionais da frota, definir planos preventivos e abrir ou atualizar ordens de manutenção.",
       "entityRefs": [
         "Vehicle",
         "Driver",
         "Workshop",
-        "VehicleAssignment"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Abrange os cadastros de toda a organização."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Exibe integralmente os registros mestres e operacionais necessários para administrar a frota e suas atribuições."
-      }
-    },
-    {
-      "grantId": "gestorAdministraManutencoes",
-      "actorRef": "gestor",
-      "title": "Administrar manutenções preventivas e ordens",
-      "description": "Permite ao gestor cadastrar planos preventivos, consultar alertas de vencimento e abrir ou concluir ordens de manutenção para toda a frota.",
-      "entityRefs": [
+        "VehicleAssignment",
         "MaintenancePlan",
         "MaintenanceOrder"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os planos e as ordens de manutenção de todos os veículos da organização."
+        "description": "Abrange os registros de manutenção de toda a organização."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Exibe integralmente as periodicidades preventivas, referências calculadas e dados das ordens de manutenção."
+        "description": "Exibe integralmente os dados necessários para administrar a frota e suas manutenções."
       }
     }
   ]

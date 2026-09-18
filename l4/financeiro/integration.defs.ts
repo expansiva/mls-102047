@@ -7,7 +7,7 @@ export const financeiroIntegration = {
   "moduleName": "financeiro",
   "inbound": [
     {
-      "id": "pagadorCriadoNoCatalogo",
+      "id": "pagadorCriado",
       "kind": "event",
       "from": "organization",
       "event": "mdmCreated",
@@ -15,11 +15,11 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "create",
-      "description": "Cria o Pagador no financeiro quando seu cadastro é criado no catálogo da organização.",
+      "description": "Recebe a criação de um pagador no catálogo da organização para vinculá-lo aos títulos a receber.",
       "entityRefs": []
     },
     {
-      "id": "pagadorAtualizadoNoCatalogo",
+      "id": "pagadorAtualizado",
       "kind": "event",
       "from": "organization",
       "event": "mdmUpdated",
@@ -27,7 +27,7 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "update",
-      "description": "Atualiza o Pagador no financeiro quando seu cadastro é atualizado no catálogo da organização.",
+      "description": "Recebe a atualização cadastral de um pagador no catálogo da organização.",
       "entityRefs": []
     },
     {
@@ -39,7 +39,19 @@ export const financeiroIntegration = {
         "TituloReceber"
       ],
       "effect": "create",
-      "description": "Cria um TituloReceber a partir da comanda fechada, com pagador, valor, vencimento e a origem da cobrança.",
+      "description": "Cria um título a receber a partir da comanda fechada no restaurante.",
+      "entityRefs": []
+    },
+    {
+      "id": "mensalidadeGerada",
+      "kind": "event",
+      "from": "mensalidadesAcademia",
+      "event": "mensalidadeGerada",
+      "writes": [
+        "TituloReceber"
+      ],
+      "effect": "create",
+      "description": "Cria um título a receber a partir da mensalidade gerada na academia.",
       "entityRefs": []
     },
     {
@@ -51,7 +63,7 @@ export const financeiroIntegration = {
         "TituloReceber"
       ],
       "effect": "create",
-      "description": "Cria um TituloReceber a partir da ordem de serviço cuja entrega foi finalizada, registrando o pagador, valor, vencimento e origem.",
+      "description": "Cria um título a receber a partir da ordem de serviço entregue pela assistência técnica.",
       "entityRefs": []
     }
   ],
@@ -59,9 +71,10 @@ export const financeiroIntegration = {
   "plugins": [
     {
       "pluginId": "stripe",
-      "description": "Processa o pagamento de título em aberto com cartão no portal do pagador.",
+      "description": "Processa pagamentos com cartão via Stripe para títulos a receber.",
       "usedBy": [
-        "pagarTituloComCartao.registrarPagamentoComCartao"
+        "receberTitulo.registrarRecebimento",
+        "pagarTituloComCartao.pagarTituloComCartao"
       ]
     }
   ]

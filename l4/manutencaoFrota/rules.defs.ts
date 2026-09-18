@@ -6,20 +6,21 @@ export const manutencaoFrotaRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "manutencaoFrota",
   "rules": {
-    "ruleForeignNamespaceRefused": "Dados de manutenção de frota não podem ser gravados em espaços de dados pertencentes a outros módulos.",
-    "ruleDocumentShapeValidated": "Os dados cadastrais de veículos, motoristas e oficinas devem respeitar a estrutura aplicável ao seu tipo de registro.",
-    "ruleIdentityNeverInNamespace": "Dados de identidade de veículos, motoristas e oficinas não podem ser mantidos no espaço de dados específico da manutenção de frota.",
-    "vehicleMileageUpdatedFromLatestFueling": "A quilometragem atual do veículo deve refletir a leitura mais recente registrada em seus abastecimentos.",
-    "rulePersonPrivacyConsentRequiredBrEu": "O uso de dados pessoais de motoristas no Brasil e na União Europeia requer o consentimento aplicável.",
-    "ruleCompanyLegalNameRequired": "A oficina cadastrada como empresa deve possuir razão social informada.",
-    "fuelingDriverMustBeAssignedToVehicle": "Um abastecimento somente pode ser registrado por motorista que tenha atribuição ao veículo abastecido.",
-    "fuelingOdometerReadingCannotBeNegative": "A leitura do odômetro informada em um abastecimento não pode ser negativa.",
-    "fuelingUpdatesVehicleMileageWhenMoreRecent": "O registro de abastecimento deve atualizar a quilometragem atual do veículo quando sua leitura for mais recente que a quilometragem conhecida.",
-    "maintenancePlanRequiresInterval": "Todo plano de manutenção preventiva deve definir periodicidade por quilômetros, por meses ou por ambas.",
-    "maintenancePlanPositiveInterval": "As periodicidades por quilômetros e por meses informadas em um plano de manutenção preventiva devem ser maiores que zero.",
-    "maintenancePlanCalculatedSchedule": "As referências da próxima manutenção preventiva devem ser calculadas conforme as periodicidades definidas no plano.",
-    "driverCanViewOnlyAssignedVehicles": "O motorista somente pode consultar veículos que estejam atribuídos a ele.",
-    "preventiveMaintenanceOverdueMileageAlert": "Deve haver alerta de manutenção preventiva quando a quilometragem atual do veículo ultrapassar a quilometragem prevista para a próxima preventiva."
+    "ruleForeignNamespaceRefused": "Dados de outros módulos não podem ser gravados no espaço de dados de manutenção de frota.",
+    "ruleDocumentShapeValidated": "Todo registro deve respeitar a estrutura de dados definida para seu tipo.",
+    "ruleIdentityNeverInNamespace": "Identificadores imutáveis dos registros não podem ser mantidos no espaço de dados do módulo.",
+    "preventiveMaintenanceMileageAlert": "O veículo deve ser sinalizado quando sua quilometragem atual ultrapassar a quilometragem prevista para a próxima manutenção preventiva.",
+    "rulePersonSsnUniqueForUs": "O número de seguridade social deve ser único entre pessoas cujo país seja os Estados Unidos.",
+    "rulePersonPrivacyConsentRequiredBrEu": "O consentimento de privacidade é obrigatório para pessoas do Brasil ou da União Europeia.",
+    "ruleCompanyEinUniqueForUs": "O número de identificação fiscal empresarial deve ser único entre empresas cujo país seja os Estados Unidos.",
+    "ruleCompanyLegalNameRequired": "A razão social é obrigatória para empresas.",
+    "motoristaAbasteceVeiculoAtribuido": "Um motorista somente pode registrar abastecimento para veículo que esteja atribuído a ele.",
+    "quilometragemAbastecimentoNaoMenorQueAtual": "A quilometragem informada em um abastecimento não pode ser menor que a quilometragem atual conhecida do veículo.",
+    "maintenanceIntervalRequired": "Um plano de manutenção preventiva deve definir intervalo por quilometragem, por meses ou por ambos.",
+    "preventiveMileageAlert": "Um plano preventivo fica vencido quando a quilometragem atual do veículo atinge ou ultrapassa a próxima quilometragem prevista, ou quando a data atual alcança a próxima data preventiva aplicável.",
+    "preventiveOrderRequiresPlan": "Uma ordem de manutenção preventiva deve estar vinculada a um plano de manutenção preventiva.",
+    "repairOrderDoesNotRequirePlan": "Uma ordem de manutenção para reparo de defeito não exige vínculo com plano de manutenção preventiva.",
+    "completionRequiresExitDateAndFinalCost": "A conclusão de uma ordem de manutenção exige o registro da data de saída e do custo final."
   }
 } as const satisfies Ns5RulesArtifactV2;
 

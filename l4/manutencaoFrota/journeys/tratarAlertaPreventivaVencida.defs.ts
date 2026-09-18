@@ -8,43 +8,36 @@ export const tratarAlertaPreventivaVencidaJourney = {
   "business": {
     "actorRef": "gestor",
     "title": "Tratar alerta de manutenção preventiva vencida",
-    "goal": "Abrir uma ordem de manutenção quando um veículo ultrapassar a quilometragem prevista para a preventiva.",
+    "goal": "Abrir uma ordem de manutenção para um veículo que ultrapassou a quilometragem prevista no plano preventivo.",
     "entry": {
       "mode": "fromNotification"
     },
     "steps": [
       {
-        "stepId": "inspecionarPlanoEmAtraso",
+        "stepId": "inspecionarAlertaPreventivo",
         "kind": "inspect",
         "entity": "MaintenancePlan",
         "title": "x",
-        "description": "Consulta o plano alertado, a quilometragem prevista e a quilometragem atual do veículo."
+        "description": "Consulta o plano e a quilometragem do veículo indicado no alerta de preventiva vencida."
       },
       {
-        "stepId": "inspecionarVeiculoAlertado",
-        "kind": "inspect",
-        "entity": "Vehicle",
-        "title": "x",
-        "description": "Confere os dados do veículo associado ao plano em atraso."
-      },
-      {
-        "stepId": "criarOrdemPreventiva",
+        "stepId": "abrirOrdemPreventiva",
         "kind": "act",
         "entity": "MaintenanceOrder",
         "effect": "create",
         "title": "x",
-        "description": "Abre uma ordem de manutenção preventiva para o veículo, informando oficina, descrição, custo quando disponível e data de entrada."
+        "description": "Abre uma ordem de manutenção preventiva para o veículo indicado, informando oficina, descrição, custo previsto quando disponível e data de entrada."
       }
     ],
     "outcome": {
       "statement": "A manutenção preventiva vencida é encaminhada por uma ordem de manutenção.",
       "evidence": [
-        "Alerta de quilometragem vencida consultado pelo gestor.",
-        "Ordem de manutenção preventiva vinculada ao veículo e ao plano."
+        "O alerta identifica que o veículo ultrapassou a quilometragem prevista.",
+        "Há uma ordem de manutenção preventiva vinculada ao veículo e ao plano vencido."
       ]
     }
   },
-  "businessHash": "sha256:04ca7e2189b53b9a1cf9b269760823564b03c1367beeb08099883c5e6d4b961c"
+  "businessHash": "sha256:24d3a0105c839d734d5d614533495c8e6624d46e79105094fbc388e0b402ac58"
 } as const satisfies Ns5JourneyArtifact;
 
 export type TratarAlertaPreventivaVencidaJourneyType = typeof tratarAlertaPreventivaVencidaJourney;

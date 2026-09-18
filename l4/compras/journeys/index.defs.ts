@@ -9,7 +9,7 @@ export const comprasJourneyIndex = {
     {
       "journeyId": "cadastrarFornecedor",
       "actorRef": "comprador",
-      "title": "Cadastrar fornecedor e produtos fornecidos"
+      "title": "Cadastrar fornecedor e condições de fornecimento"
     },
     {
       "journeyId": "abrirEenviarPedidoCompra",
@@ -19,12 +19,12 @@ export const comprasJourneyIndex = {
     {
       "journeyId": "decidirPedidoAcimaDoLimite",
       "actorRef": "gerenteCompras",
-      "title": "Decidir pedido acima do limite"
+      "title": "Decidir pedido de compra acima do limite"
     },
     {
       "journeyId": "registrarRecebimentoPedido",
       "actorRef": "almoxarife",
-      "title": "Registrar recebimento de pedido"
+      "title": "Registrar recebimento total ou parcial"
     },
     {
       "journeyId": "acompanharIndicadoresDeCompras",

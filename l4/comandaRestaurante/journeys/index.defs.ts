@@ -24,7 +24,7 @@ export const comandaRestauranteJourneyIndex = {
     {
       "journeyId": "fecharComanda",
       "actorRef": "caixa",
-      "title": "Fechar comanda e registrar pagamento"
+      "title": "Fechar comanda e liberar mesa"
     }
   ],
   "systemDecisions": []

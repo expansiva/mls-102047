@@ -8,7 +8,7 @@ export const registrarEenviarDespesaJourney = {
   "business": {
     "actorRef": "colaborador",
     "title": "Registrar e enviar despesa para aprovação",
-    "goal": "Registrar uma despesa própria com seus dados e comprovante e encaminhá-la ao gestor da equipe.",
+    "goal": "Cadastrar uma despesa própria e encaminhá-la ao gestor da equipe.",
     "entry": {
       "mode": "coldStart"
     },
@@ -19,36 +19,18 @@ export const registrarEenviarDespesaJourney = {
         "entity": "Despesa",
         "effect": "create",
         "title": "Registrar despesa",
-        "description": "Informa data, categoria, valor, descrição e comprovante da despesa."
-      },
-      {
-        "stepId": "enviarParaAprovacao",
-        "kind": "act",
-        "entity": "Despesa",
-        "effect": "transition",
-        "transitionRef": "submitForApproval",
-        "title": "Enviar para aprovação",
-        "description": "Encaminha a despesa registrada para avaliação do gestor da equipe."
-      },
-      {
-        "stepId": "encaminharAoGestor",
-        "kind": "handoff",
-        "entity": "Despesa",
-        "title": "Encaminhar ao gestor",
-        "description": "A despesa enviada passa para a avaliação do gestor da equipe.",
-        "handoffTo": "gestorEquipe"
+        "description": "Informa data, categoria, valor, descrição e comprovante da própria despesa e a envia para avaliação do gestor da equipe."
       }
     ],
     "outcome": {
-      "statement": "A despesa própria fica registrada e enviada para aprovação do gestor da equipe.",
+      "statement": "A despesa própria é registrada e enviada para avaliação do gestor da equipe.",
       "evidence": [
-        "Despesa criada com data, categoria, valor, descrição e comprovante.",
-        "Despesa identificada como enviada para aprovação.",
-        "Gestor da equipe recebe a responsabilidade de avaliá-la."
+        "Existe uma despesa registrada com data, categoria, valor, descrição e comprovante.",
+        "A despesa está disponível para avaliação pelo gestor da equipe."
       ]
     }
   },
-  "businessHash": "sha256:ce14ccc28f1d87c980d7595f2e45d7d6a0674e464c81591c4e11b61a7b90ff5e"
+  "businessHash": "sha256:daf110e2b12913d0e987805b4c2c56a82fc492c44460c75086b732c5f43420bc"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarEenviarDespesaJourneyType = typeof registrarEenviarDespesaJourney;

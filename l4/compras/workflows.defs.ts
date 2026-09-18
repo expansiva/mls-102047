@@ -3,25 +3,35 @@
 import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
 
 export const comprasWorkflows = {
-  "schemaVersion": "2026-09-12-ns5-workflows-v2",
+  "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "compras",
   "processes": [
     {
-      "processId": "decidirPedidosAcimaDoLimite",
-      "title": "Decidir pedidos acima do limite",
-      "description": "Encaminha ao gerente de compras os pedidos enviados que exigem aprovação por ultrapassarem o valor limite.",
+      "processId": "aprovarPedidoAcimaDoLimite",
+      "title": "Aprovação de pedido de compra acima do limite",
+      "description": "Orquestra o encaminhamento de pedidos de compra acima do limite para a decisão do gerente de compras.",
       "trigger": {
-        "kind": "event",
-        "event": "PedidoCompra.enviarPedidoCompra"
+        "kind": "manual",
+        "actorRef": "comprador"
       },
       "tasks": [
         {
-          "taskId": "decidirPedido",
+          "taskId": "enviarEEncaminharPedido",
+          "kind": "human",
+          "actorRef": "comprador",
+          "journeyRef": "abrirEenviarPedidoCompra",
+          "next": [
+            "decidirPedidoEncaminhado"
+          ],
+          "description": "O comprador envia o pedido de compra e encaminha ao gerente de compras aqueles cujo valor exige aprovação."
+        },
+        {
+          "taskId": "decidirPedidoEncaminhado",
           "kind": "human",
           "actorRef": "gerenteCompras",
           "journeyRef": "decidirPedidoAcimaDoLimite",
           "next": [],
-          "description": "O gerente de compras analisa e registra a aprovação ou rejeição dos pedidos encaminhados por ultrapassarem o limite."
+          "description": "O gerente de compras avalia o pedido encaminhado e registra sua aprovação ou rejeição."
         }
       ]
     }
@@ -33,12 +43,13 @@ export const comprasWorkflows = {
     },
     {
       "journeyId": "abrirEenviarPedidoCompra",
-      "inProcess": false
+      "inProcess": true,
+      "processId": "aprovarPedidoAcimaDoLimite"
     },
     {
       "journeyId": "decidirPedidoAcimaDoLimite",
       "inProcess": true,
-      "processId": "decidirPedidosAcimaDoLimite"
+      "processId": "aprovarPedidoAcimaDoLimite"
     },
     {
       "journeyId": "registrarRecebimentoPedido",

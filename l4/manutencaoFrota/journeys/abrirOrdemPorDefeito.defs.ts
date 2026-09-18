@@ -8,9 +8,9 @@ export const abrirOrdemPorDefeitoJourney = {
   "business": {
     "actorRef": "gestor",
     "title": "Abrir ordem de manutenção por defeito",
-    "goal": "Registrar uma ordem de manutenção para tratar um defeito informado ou identificado em um veículo.",
+    "goal": "Registrar uma ordem para reparar um defeito identificado em um veículo da frota.",
     "entry": {
-      "mode": "contextOrLookup"
+      "mode": "coldStart"
     },
     "steps": [
       {
@@ -18,33 +18,33 @@ export const abrirOrdemPorDefeitoJourney = {
         "kind": "locate",
         "entity": "Vehicle",
         "title": "x",
-        "description": "Localiza, ou usa o veículo já em contexto, que apresenta o defeito."
+        "description": "Localiza o veículo da frota que apresentou defeito."
       },
       {
         "stepId": "inspecionarVeiculoComDefeito",
         "kind": "inspect",
         "entity": "Vehicle",
         "title": "x",
-        "description": "Consulta os dados e a quilometragem do veículo antes de abrir a ordem."
+        "description": "Confere os dados do veículo antes de abrir a ordem de manutenção."
       },
       {
-        "stepId": "criarOrdemPorDefeito",
+        "stepId": "abrirOrdemPorDefeito",
         "kind": "act",
         "entity": "MaintenanceOrder",
         "effect": "create",
         "title": "x",
-        "description": "Abre a ordem de manutenção com oficina, descrição do defeito, custo quando disponível e data de entrada."
+        "description": "Abre a ordem de manutenção vinculada ao veículo, informando oficina, descrição do defeito, custo previsto quando disponível e data de entrada."
       }
     ],
     "outcome": {
-      "statement": "Uma ordem de manutenção é aberta para o defeito do veículo.",
+      "statement": "Uma ordem de manutenção por defeito é aberta para o veículo.",
       "evidence": [
-        "Ordem vinculada ao veículo com oficina e descrição.",
-        "Data de entrada registrada na ordem."
+        "Há uma ordem vinculada ao veículo com a oficina, a descrição e a data de entrada.",
+        "O custo e a data de saída podem ser registrados na ordem conforme o serviço avança."
       ]
     }
   },
-  "businessHash": "sha256:011d9c9526b8d2f862acf1573d2bec103714a11ae2d80dc4b9f4ef58601c5c01"
+  "businessHash": "sha256:97ecd6069b3817928940017423eadd3be6a320cea67d1e42847dd53f2339aa1e"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AbrirOrdemPorDefeitoJourneyType = typeof abrirOrdemPorDefeitoJourney;

@@ -11,72 +11,86 @@ export const inscricaoEventoAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Organizador",
-      "description": "Pessoa da organização que cadastra, publica e acompanha eventos e inscrições."
+      "description": "Cadastra e publica eventos, acompanha inscritos e exporta a lista de inscrições."
     },
     {
       "actorId": "publico",
       "kind": "external",
       "origin": "named",
       "title": "Público",
-      "description": "Pessoa que acessa a página pública de um evento para realizar ou cancelar sua inscrição."
+      "description": "Acessa a página pública do evento e realiza sua inscrição."
     }
   ],
   "grants": [
     {
-      "grantId": "organizadorGerenciaEventosEinscricoes",
+      "grantId": "organizadorGerenciarEventos",
       "actorRef": "organizador",
-      "title": "Gerenciar eventos e inscrições",
-      "description": "Permite cadastrar, publicar e acompanhar os eventos da organização, incluindo as inscrições e os participantes vinculados.",
+      "title": "Gerenciar eventos",
+      "description": "Permite ao organizador cadastrar, publicar e consultar todos os eventos da organização, incluindo capacidade e ocupação.",
       "entityRefs": [
-        "Evento",
-        "Inscricao",
-        "Participante"
+        "Evento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os eventos, inscrições e participantes de toda a organização."
+        "description": "Abrange todos os eventos da organização."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Permite consultar todos os campos dos registros necessários para administrar eventos e inscrições."
+        "description": "O organizador visualiza todas as informações do evento necessárias para seu cadastro, publicação e acompanhamento."
       }
     },
     {
-      "grantId": "publicoConsultaEgerenciaPropriaInscricao",
-      "actorRef": "publico",
-      "title": "Consultar e gerenciar a própria inscrição",
-      "description": "Permite consultar os dados do evento relacionado e realizar ou cancelar apenas a própria inscrição.",
+      "grantId": "organizadorAcompanharInscricoes",
+      "actorRef": "organizador",
+      "title": "Acompanhar inscrições",
+      "description": "Permite ao organizador consultar e exportar as inscrições dos eventos, com o nome e o e-mail dos participantes.",
       "entityRefs": [
-        "Evento",
+        "Inscricao",
+        "Participante",
+        "EmailParticipante"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Abrange todas as inscrições e os dados de participantes vinculados a eventos da organização."
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "O organizador visualiza a situação e a data das inscrições, o nome do participante e o endereço de e-mail informado para contato e exportação.",
+        "allowedFields": [
+          "Inscricao.id",
+          "Inscricao.eventoId",
+          "Inscricao.participanteId",
+          "Inscricao.emailParticipanteId",
+          "Inscricao.status",
+          "Inscricao.createdAt",
+          "Participante.details.identification",
+          "EmailParticipante.details.contactChannel"
+        ]
+      }
+    },
+    {
+      "grantId": "publicoConsultarPropriaInscricao",
+      "actorRef": "publico",
+      "title": "Consultar e cancelar a própria inscrição",
+      "description": "Permite ao público consultar a situação da própria inscrição e cancelá-la quando necessário.",
+      "entityRefs": [
         "Inscricao",
         "Participante"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Abrange somente a inscrição e o participante associados à pessoa identificada na sessão, bem como o evento dessa inscrição.",
+        "description": "Abrange somente inscrições vinculadas ao participante da sessão.",
         "anchorEntity": "Participante"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Exibe os dados de divulgação e disponibilidade do evento e os dados da própria inscrição, sem expor identificadores internos do evento.",
+        "description": "O participante visualiza sua própria identificação e os dados necessários para conferir a situação de sua inscrição.",
         "allowedFields": [
-          "Evento.title",
-          "Evento.description",
-          "Evento.eventDate",
-          "Evento.location",
-          "Evento.capacity",
-          "Evento.status",
-          "Evento.details.occupiedSeats",
-          "Evento.details.availableSeats",
           "Inscricao.id",
           "Inscricao.eventoId",
-          "Inscricao.participanteId",
           "Inscricao.status",
-          "Inscricao.registeredAt",
-          "Participante.id"
-        ],
-        "deniedFields": [
-          "Evento.id"
+          "Inscricao.createdAt",
+          "Participante.details.identification"
         ]
       }
     }

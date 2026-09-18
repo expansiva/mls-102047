@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:09:40.160Z",
+      "updatedAt": "2026-09-18T06:32:41.291Z",
       "artifactPaths": [
         "l4/comandaRestaurante/module.defs.ts"
       ],
@@ -16,27 +16,20 @@
           "kind": "internal",
           "origin": "named",
           "title": "Garçom",
-          "description": "Abre comandas para mesas, lança itens e cancela itens lançados por engano enquanto a comanda está aberta."
+          "description": "Abre comandas para mesas, lança itens com quantidade e observação e cancela lançamentos feitos por engano enquanto a comanda está aberta."
         },
         {
           "actorId": "caixa",
           "kind": "internal",
           "origin": "named",
           "title": "Caixa",
-          "description": "Fecha comandas, consulta o total, aplica descontos opcionais e registra a forma de pagamento."
+          "description": "Fecha comandas, consulta o total, aplica descontos opcionais, registra a forma de pagamento e libera a mesa."
         }
-      ],
-      "normalizations": [
-        {
-          "kind": "ptToPtBR",
-          "detail": "pt→pt-BR"
-        }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:10:12.366Z",
+      "updatedAt": "2026-09-18T06:33:08.145Z",
       "artifactPaths": [
         "l4/comandaRestaurante/journeys/abrirComanda.defs.ts",
         "l4/comandaRestaurante/journeys/lancarItemNaComanda.defs.ts",
@@ -50,21 +43,28 @@
         {
           "kind": "dropTransitionRef",
           "journeyId": "abrirComanda",
-          "stepId": "abrirComandaParaMesa",
+          "stepId": "criarComanda",
           "detail": "transitionRef abrirComanda dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
           "journeyId": "lancarItemNaComanda",
-          "stepId": "registrarItemLancado",
-          "detail": "transitionRef lancarItemComanda dropped; effect is create."
+          "stepId": "registrarItem",
+          "detail": "transitionRef lancarItem dropped; effect is create."
         }
+      ]
+    },
+    "workflows50": {
+      "status": "approved",
+      "updatedAt": "2026-09-18T06:33:08.317Z",
+      "artifactPaths": [
+        "l4/comandaRestaurante/workflows.defs.ts"
       ],
-      "autoReason": "fast"
+      "noProcessSignal": true
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:12:27.197Z",
+      "updatedAt": "2026-09-18T06:36:17.893Z",
       "artifactPaths": [
         "l4/comandaRestaurante/ontology/Mesa.defs.ts",
         "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts",
@@ -78,7 +78,7 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "Mesa",
-          "detail": "roleTag comandaRestaurante.Mesa; source /_102034_/l4/ontology/mdm.defs.ts"
+          "detail": "storage.table comandaRestaurante_mesa"
         },
         {
           "kind": "derivedFromPlatform",
@@ -101,19 +101,9 @@
           "detail": "record.fields.id, record.fields.version"
         },
         {
-          "kind": "tightened",
+          "kind": "derivedFromPlatform",
           "entityId": "Mesa",
-          "detail": "Mesa.details.identification.subtype.values"
-        },
-        {
-          "kind": "tightened",
-          "entityId": "Mesa",
-          "detail": "Mesa.details.location.locationType.values"
-        },
-        {
-          "kind": "namespaceEmpty",
-          "entityId": "Mesa",
-          "detail": "details.comandaRestaurante"
+          "detail": "record.fields.details.fields.available.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -132,67 +122,66 @@
         },
         {
           "kind": "derivedFromPlatform",
+          "entityId": "Comanda",
+          "detail": "record.fields.details.fields.total.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "ItemComanda",
           "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ItemComanda",
+          "detail": "record.fields.details.fields.subtotal.derived (derived[])"
         }
       ],
       "citedRules": [
+        "mesaDisponivelParaAbrirComanda",
         "rule-foreign-namespace-refused",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "itemCardapioAtivoParaLancamento",
         "comandaMesaDisponivel",
-        "comandaUmaAbertaPorMesa",
-        "totalConsideraItensAtivos",
-        "fechamentoExigePagamento",
+        "umaComandaAbertaPorMesa",
+        "formaPagamentoObrigatoriaNoFechamento",
         "descontoNaoExcedeTotal",
-        "mesaLiberadaNoFechamento",
-        "itemComandaSomenteEmComandaAberta",
-        "cancelamentoItemComandaSomenteEmComandaAberta",
-        "precoItemComandaVigente"
+        "fechamentoLiberaMesa",
+        "itemComandaRequiresOpenComanda",
+        "itemComandaCancellationRequiresOpenComanda"
       ],
       "citedCapabilities": [
         "read.byId",
-        "locate.byName",
-        "register.createOrAttach",
-        "edit.platformFields",
-        "inactivate",
-        "listLinks",
-        "statusHistory.read",
-        "audit",
-        "comandaRestaurante.locateAvailable",
-        "edit.moduleNamespace",
         "locate.byColumn",
         "count",
         "listByForeignKey",
         "create",
+        "update",
+        "uniqueKey",
+        "locate.byName",
+        "register.createOrAttach",
+        "edit.platformFields",
+        "edit.moduleNamespace",
+        "inactivate",
+        "listLinks",
+        "statusHistory.read",
+        "audit",
         "transition",
-        "transaction",
-        "read.mdmRecord",
         "sequence.next",
-        "comandaRestaurante.calcularTotal"
-      ],
-      "autoReason": "fast"
-    },
-    "workflows50": {
-      "status": "approved",
-      "updatedAt": "2026-09-17T04:12:27.553Z",
-      "artifactPaths": [
-        "l4/comandaRestaurante/workflows.defs.ts"
-      ],
-      "noProcessSignal": true,
-      "autoReason": "fast"
+        "transaction",
+        "read.mdmRecord"
+      ]
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:12:49.756Z",
+      "updatedAt": "2026-09-18T06:37:07.333Z",
       "artifactPaths": [
         "l4/comandaRestaurante/rules.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:13:11.178Z",
+      "updatedAt": "2026-09-18T06:37:07.520Z",
       "artifactPaths": [
         "l4/comandaRestaurante/access.defs.ts"
       ],
@@ -207,36 +196,33 @@
           "grantId": "caixaFechamento",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
-      ],
-      "autoReason": "fast"
+      ]
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:13:38.067Z",
+      "updatedAt": "2026-09-18T06:37:29.035Z",
       "artifactPaths": [
         "l4/comandaRestaurante/integration.defs.ts"
-      ],
-      "autoReason": "fast"
+      ]
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-17T04:13:38.265Z",
+      "updatedAt": "2026-09-18T06:37:29.224Z",
       "artifactPaths": [
         "l4/comandaRestaurante/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
         "l5/config.json",
         "l5/project.json"
-      ],
-      "autoReason": "fast"
+      ]
     }
   },
   "sourcePrompt": "módulo comandaRestaurante, português. o restaurante tem mesas e um cardápio com itens e preços. o garçom abre uma comanda para uma mesa, lança itens (com quantidade e observação), e pode cancelar um item lançado por engano enquanto a comanda estiver aberta. o caixa fecha a comanda: vê o total, aplica desconto opcional, registra a forma de pagamento e a mesa fica livre. perfis: garçom e caixa.",
   "invocation": {
-    "fast": true,
+    "fast": false,
     "module": "comandaRestaurante",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-17T04:13:38.265Z",
+  "updatedAt": "2026-09-18T06:37:29.224Z",
   "rebuildAll": {
     "deleted": [
       "l4/comandaRestaurante/access.defs.ts",
@@ -248,7 +234,6 @@
       "l4/comandaRestaurante/journeys/lancarItemNaComanda.defs.ts",
       "l4/comandaRestaurante/module.defs.ts",
       "l4/comandaRestaurante/ontology/Comanda.defs.ts",
-      "l4/comandaRestaurante/ontology/Garcom.defs.ts",
       "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts",
       "l4/comandaRestaurante/ontology/ItemComanda.defs.ts",
       "l4/comandaRestaurante/ontology/Mesa.defs.ts",
@@ -259,11 +244,9 @@
       "l4/comandaRestaurante/pipeline/journeys20-draft.json",
       "l4/comandaRestaurante/pipeline/module10-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-Comanda-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-Garcom-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-ItemCardapio-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-ItemComanda-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-Mesa-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-bindings-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-plan-draft.json",
       "l4/comandaRestaurante/pipeline/pipeline.json",
@@ -275,8 +258,9 @@
     ],
     "edited": [
       "l4/organization/registry.defs.ts",
+      "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-09-17T04:09:28.350Z"
+    "at": "2026-09-18T06:32:41.281Z"
   }
 }

@@ -7,24 +7,19 @@ export const financeiroJourneyIndex = {
   "moduleName": "financeiro",
   "journeys": [
     {
-      "journeyId": "registrarRecebimento",
+      "journeyId": "receberTitulo",
       "actorRef": "caixa",
-      "title": "Registrar recebimento de título"
+      "title": "Receber um título"
     },
     {
       "journeyId": "estornarRecebimentoNoMesmoDia",
       "actorRef": "caixa",
-      "title": "Estornar recebimento no mesmo dia"
+      "title": "Estornar um recebimento no mesmo dia"
     },
     {
-      "journeyId": "acompanharPainelRecebiveis",
+      "journeyId": "acompanharRecebiveis",
       "actorRef": "gerenteFinanceiro",
-      "title": "Acompanhar painel de recebíveis"
-    },
-    {
-      "journeyId": "consultarTitulosVencidos",
-      "actorRef": "gerenteFinanceiro",
-      "title": "Consultar títulos vencidos"
+      "title": "Acompanhar recebíveis e títulos vencidos"
     },
     {
       "journeyId": "emitirExtratoPorPagador",

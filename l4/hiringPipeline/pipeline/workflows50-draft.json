@@ -1,52 +1,64 @@
 {
-  "schemaVersion": "2026-09-12-ns5-workflows-v2",
+  "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "hiringPipeline",
   "processes": [
     {
-      "processId": "reviewInterviewForOffer",
-      "title": "Review interviewed candidate for offer",
-      "description": "Routes an interviewed application to the hiring manager for an offer decision.",
+      "processId": "applicationDecisionProcess",
+      "title": "Application decision process",
+      "description": "Coordinates hiring-manager decisions after an application reaches interview and routes declined applications to the recruiter for closure.",
       "trigger": {
         "kind": "event",
-        "event": "Application.advanceToInterview"
+        "event": "Application.moveToInterview"
       },
       "tasks": [
         {
-          "taskId": "issueOfferDecision",
+          "taskId": "decideOffer",
           "kind": "human",
           "actorRef": "hiringManager",
-          "journeyRef": "issueOffer",
+          "journeyRef": "decideOffer",
+          "next": [
+            "decideHiringOutcome",
+            "recordApplicationRejection"
+          ],
+          "description": "The hiring manager decides whether to make an offer, advancing successful applications or referring declined applications for rejection recording."
+        },
+        {
+          "taskId": "decideHiringOutcome",
+          "kind": "human",
+          "actorRef": "hiringManager",
+          "journeyRef": "decideHiringOutcome",
+          "next": [
+            "recordApplicationRejection"
+          ],
+          "description": "The hiring manager decides the outcome of an offered application and refers any declined application for rejection recording."
+        },
+        {
+          "taskId": "recordApplicationRejection",
+          "kind": "human",
+          "actorRef": "recruiter",
+          "journeyRef": "recordApplicationRejection",
           "next": [],
-          "description": "The hiring manager reviews the interviewed application and decides whether to issue an offer."
+          "description": "The recruiter records the rejection reason and closes the declined application."
         }
       ]
     },
     {
-      "processId": "confirmHireAndUpdatePosition",
-      "title": "Confirm hire and update position capacity",
-      "description": "Routes an offered application to the hiring manager and updates the associated position after a hire is recorded.",
+      "processId": "closeFilledPositionProcess",
+      "title": "Close filled job position",
+      "description": "Automatically closes a job position when a hire fills its required headcount.",
       "trigger": {
         "kind": "event",
-        "event": "Application.issueOffer"
+        "event": "Application.moveToHired"
       },
       "tasks": [
         {
-          "taskId": "confirmHire",
-          "kind": "human",
-          "actorRef": "hiringManager",
-          "journeyRef": "hireCandidate",
-          "next": [
-            "updatePositionCapacity"
-          ],
-          "description": "The hiring manager confirms whether the offered candidate is hired."
-        },
-        {
-          "taskId": "updatePositionCapacity",
+          "taskId": "closeFilledPosition",
           "kind": "mechanical",
           "entityRef": "JobPosition",
-          "effect": "update",
+          "effect": "transition",
+          "transitionRef": "closeFilledPosition",
           "next": [],
-          "description": "Update the position's filled headcount and close the position when its required headcount is filled."
+          "description": "The system closes the related job position when its filled headcount reaches the required headcount."
         }
       ]
     }
@@ -69,18 +81,19 @@
       "inProcess": false
     },
     {
-      "journeyId": "issueOffer",
+      "journeyId": "decideOffer",
       "inProcess": true,
-      "processId": "reviewInterviewForOffer"
+      "processId": "applicationDecisionProcess"
     },
     {
-      "journeyId": "hireCandidate",
+      "journeyId": "decideHiringOutcome",
       "inProcess": true,
-      "processId": "confirmHireAndUpdatePosition"
+      "processId": "applicationDecisionProcess"
     },
     {
-      "journeyId": "rejectApplication",
-      "inProcess": false
+      "journeyId": "recordApplicationRejection",
+      "inProcess": true,
+      "processId": "applicationDecisionProcess"
     }
   ]
 }

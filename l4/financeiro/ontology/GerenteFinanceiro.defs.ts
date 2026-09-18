@@ -3,28 +3,29 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const financeiroEntityGerenteFinanceiro = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "financeiro",
   "entityId": "GerenteFinanceiro",
   "title": "Gerente financeiro",
-  "description": "Pessoa da organização usada para delimitar o escopo pessoal do gerente financeiro quando aplicável.",
+  "description": "Pessoa da organização que exerce o papel de gerente financeiro e é a referência pessoal para o escopo de suas ações no módulo.",
   "displayField": "details.identification.name",
   "relationships": {},
   "capabilities": {
-    "read.byId": "Lê o cadastro mestre do gerente financeiro pelo identificador, hidratando seus dados no MDM, para telas administrativas do financeiro.",
-    "locate.byName": "Localiza gerentes financeiros pelo nome no índice de pessoas para a administração do módulo financeiro.",
-    "locate.byDocument": "Localiza uma pessoa pelo documento nacional para evitar duplicidade ao vinculá-la como gerente financeiro.",
-    "register.createOrAttach": "Cria ou vincula a pessoa já existente ao papel de gerente financeiro por documento e pela etiqueta de papel, para a administração interna do financeiro.",
-    "edit.platformFields": "Atualiza os dados de pessoa mantidos pela plataforma no cadastro do gerente financeiro, para usuários internos autorizados.",
-    "edit.moduleNamespace": "Atualiza exclusivamente o namespace financeiro do gerente financeiro no documento mestre, para a administração autorizada do módulo.",
-    "inactivate": "Inativa ou reativa o papel do gerente financeiro por meio da situação do cadastro mestre, para a administração interna.",
-    "listLinks": "Exibe os relacionamentos mestre vinculados ao gerente financeiro, com papel e vigência, para a administração do cadastro.",
-    "audit": "Consulta quem alterou o cadastro mestre do gerente financeiro e quando, por meio da auditoria da plataforma, para usuários administrativos autorizados."
+    "read.byId": "Lê o gerente financeiro pelo identificador mestre para apresentar a referência pessoal em telas do módulo; usado pelo módulo financeiro.",
+    "locate.byName": "Localiza pessoas pelo nome para selecionar ou conferir o gerente financeiro; usado por administradores internos autorizados.",
+    "locate.byDocument": "Localiza a pessoa pelo documento nacional antes de criar ou vincular o papel de gerente financeiro; usado por administradores internos autorizados.",
+    "register.createOrAttach": "Cria a pessoa quando não existir ou anexa o papel financeiro.GerenteFinanceiro à pessoa já identificada pelo documento; usado por administradores internos autorizados.",
+    "edit.platformFields": "Atualiza os dados de identificação da pessoa mantidos pela plataforma, preservando o papel de gerente financeiro; usado por administradores internos autorizados.",
+    "edit.moduleNamespace": "Atualiza exclusivamente o namespace financeiro do gerente financeiro, que permanece sem dados específicos neste módulo; usado pelo módulo financeiro.",
+    "inactivate": "Inativa ou reativa o registro mestre do gerente financeiro sem excluir seu histórico; usado por administradores internos autorizados.",
+    "audit": "Consulta quem alterou os dados mestres do gerente financeiro e quando; usado por administradores internos autorizados.",
+    "invite.login": "Concede convite de acesso à pessoa que atua como gerente financeiro para que possa autenticar-se na plataforma; usado por administradores internos autorizados."
   },
   "rules": [
     "rule-foreign-namespace-refused",
     "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
+    "rule-person-ssn-unique-for-us",
     "rule-person-privacy-consent-required-br-eu"
   ],
   "writer": "crud",
@@ -65,11 +66,11 @@ export const financeiroEntityGerenteFinanceiro = {
                   {
                     "value": "Person",
                     "title": "Pessoa",
-                    "description": "Pessoa física."
+                    "description": "Pessoa natural."
                   }
                 ],
                 "description": "Indica que este registro mestre é uma pessoa.",
-                "title": "Tipo de cadastro",
+                "title": "Subtipo",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -79,7 +80,7 @@ export const financeiroEntityGerenteFinanceiro = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nome pelo qual o gerente financeiro é identificado na organização.",
+                "description": "Nome pelo qual o gerente financeiro é identificado no módulo.",
                 "title": "Nome",
                 "min": 0,
                 "max": 0
@@ -93,26 +94,26 @@ export const financeiroEntityGerenteFinanceiro = {
                   {
                     "value": "Active",
                     "title": "Ativo",
-                    "description": "Registro disponível para uso."
+                    "description": "Registro mestre ativo."
                   },
                   {
                     "value": "Inactive",
                     "title": "Inativo",
-                    "description": "Registro fora de uso."
+                    "description": "Registro mestre inativo."
                   },
                   {
                     "value": "Merged",
                     "title": "Mesclado",
-                    "description": "Registro unido a outro registro mestre."
+                    "description": "Registro mestre incorporado a outro."
                   },
                   {
                     "value": "Blocked",
                     "title": "Bloqueado",
-                    "description": "Registro impedido de uso."
+                    "description": "Registro mestre bloqueado."
                   }
                 ],
-                "title": "Situação do cadastro",
-                "description": "Situação de atividade do registro mestre do gerente financeiro.",
+                "title": "Situação",
+                "description": "Situação do registro mestre da pessoa.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -122,28 +123,34 @@ export const financeiroEntityGerenteFinanceiro = {
                 "indexed": true,
                 "values": [
                   {
-                    "value": "CPF",
-                    "title": "CPF",
-                    "description": "Cadastro de Pessoas Físicas."
+                    "value": "SSN",
+                    "title": "SSN",
+                    "description": "Número de seguridade social dos Estados Unidos."
                   },
                   {
                     "value": "Passport",
                     "title": "Passaporte",
-                    "description": "Documento de viagem."
+                    "description": "Passaporte."
+                  },
+                  {
+                    "value": "DriversLicense",
+                    "title": "Carteira de motorista",
+                    "description": "Documento de habilitação."
                   },
                   {
                     "value": "NationalId",
                     "title": "Documento nacional",
-                    "description": "Documento de identificação nacional."
+                    "description": "Documento nacional de identificação."
                   },
                   {
-                    "value": "Other",
-                    "title": "Outro",
-                    "description": "Outro documento aceito pela plataforma."
+                    "value": "CPF",
+                    "title": "CPF",
+                    "description": "Cadastro de Pessoas Físicas."
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional usado para identificar e deduplicar a pessoa.",
+                "description": "Tipo do documento nacional usado para identificar e deduplicar o gerente financeiro.",
+                "required": true,
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -151,8 +158,9 @@ export const financeiroEntityGerenteFinanceiro = {
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento nacional da pessoa, usado na deduplicação quando informado.",
+                "description": "Número do documento usado para identificar e deduplicar o gerente financeiro.",
                 "title": "Número do documento",
+                "required": true,
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -164,7 +172,7 @@ export const financeiroEntityGerenteFinanceiro = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 0,
                 "default": "US",
-                "description": "Código ISO do país aplicável ao documento e às regras da pessoa.",
+                "description": "Código ISO do país que rege o documento e as regras aplicáveis ao gerente financeiro.",
                 "title": "País",
                 "min": 0,
                 "max": 0
@@ -174,32 +182,32 @@ export const financeiroEntityGerenteFinanceiro = {
                 "required": true,
                 "collection": true,
                 "derived": true,
-                "description": "Etiquetas derivadas pela plataforma, incluindo o papel financeiro.GerenteFinanceiro.",
+                "description": "Etiquetas derivadas, incluindo o papel financeiro.GerenteFinanceiro.",
                 "title": "Etiquetas",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação da pessoa, mantidos pela plataforma e usados para reconhecer o gerente financeiro."
+            "description": "Dados de identificação da pessoa usados para reconhecer e manter seu papel no módulo financeiro."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados básicos da pessoa mantidos pela plataforma."
+            "description": "Dados base compartilhados da pessoa; este papel não precisa declarar campos adicionais nesta camada."
           },
           "person": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados próprios de pessoa física mantidos pela plataforma."
+            "description": "Dados próprios de pessoa natural; este papel não precisa declarar campos adicionais nesta camada."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização, somente para leitura neste módulo."
+            "description": "Dados promovidos pela organização, lidos pelo módulo financeiro e definidos no registro da organização."
           },
           "financeiro": {
             "type": "object",

@@ -8,7 +8,7 @@
         "kind": "role",
         "family": "mdm",
         "title": "Veículo",
-        "description": "Veículo da frota, identificado pela placa e usado nos abastecimentos e nas manutenções.",
+        "description": "Veículo da frota, mantido como ativo veicular compartilhado da organização, com dados de operação específicos deste módulo.",
         "displayField": "details.identification.name",
         "writer": "crud",
         "subtype": "AssetVehicle",
@@ -20,7 +20,7 @@
         "kind": "role",
         "family": "mdm",
         "title": "Motorista",
-        "description": "Pessoa da transportadora que dirige veículos atribuídos e registra seus abastecimentos.",
+        "description": "Pessoa que conduz veículos atribuídos e registra os abastecimentos realizados.",
         "displayField": "details.identification.name",
         "writer": "crud",
         "subtype": "Person",
@@ -32,7 +32,7 @@
         "kind": "role",
         "family": "mdm",
         "title": "Oficina",
-        "description": "Empresa que executa serviços de manutenção nos veículos da frota.",
+        "description": "Empresa oficina responsável pela execução de serviços registrados nas ordens de manutenção.",
         "displayField": "details.identification.name",
         "writer": "crud",
         "subtype": "Company",
@@ -44,8 +44,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Atribuição de veículo",
-        "description": "Registro operacional que vincula um motorista aos veículos que pode dirigir.",
-        "displayField": "id",
+        "description": "Registro operacional que vincula um veículo da frota ao motorista autorizado a conduzi-lo.",
+        "displayField": "details.assignmentLabel",
         "writer": "crud",
         "class": "supporting",
         "storage": {
@@ -59,8 +59,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Abastecimento",
-        "description": "Registro de combustível abastecido por um motorista em um veículo, com leitura do painel.",
-        "displayField": "id",
+        "description": "Registro de abastecimento realizado por um motorista em um veículo atribuído.",
+        "displayField": "details.fuelingDate",
         "class": "event",
         "storage": {
           "target": "moduleDatabase",
@@ -73,8 +73,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Plano de manutenção preventiva",
-        "description": "Periodicidade preventiva de um veículo por quilometragem, meses ou ambas.",
-        "displayField": "id",
+        "description": "Definição da periodicidade preventiva de manutenção de um veículo por quilometragem, meses ou ambos.",
+        "displayField": "details.name",
         "class": "core",
         "storage": {
           "target": "moduleDatabase",
@@ -87,8 +87,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Ordem de manutenção",
-        "description": "Ordem aberta para manutenção preventiva vencida ou para correção de defeito de um veículo.",
-        "displayField": "id",
+        "description": "Ordem aberta para registrar e acompanhar uma manutenção preventiva vencida ou o reparo de um defeito do veículo.",
+        "displayField": "details.description",
         "class": "core",
         "storage": {
           "target": "moduleDatabase",
@@ -115,7 +115,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a dirigir o veículo.",
+        "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a conduzir o veículo.",
         "field": "VehicleAssignment.driverId"
       },
       {
@@ -125,7 +125,7 @@
         "type": "manyToMany",
         "required": false,
         "mode": "throughTable",
-        "description": "Os veículos visíveis ao motorista são derivados das atribuições de veículo registradas para ele.",
+        "description": "Os motoristas que podem consultar e conduzir um veículo são obtidos pelas suas atribuições de veículo.",
         "through": "VehicleAssignment",
         "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
         "derived": true
@@ -137,7 +137,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada abastecimento é registrado para um único veículo.",
+        "description": "Todo abastecimento é registrado para um único veículo atribuído.",
         "field": "Fueling.vehicleId"
       },
       {
@@ -147,7 +147,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada abastecimento registra o motorista que o realizou.",
+        "description": "Todo abastecimento identifica o motorista que o registrou.",
         "field": "Fueling.driverId"
       },
       {
@@ -157,7 +157,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada plano preventivo define a periodicidade de manutenção de um veículo.",
+        "description": "Cada plano preventivo é definido para um veículo da frota.",
         "field": "MaintenancePlan.vehicleId"
       },
       {
@@ -167,18 +167,8 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada ordem de manutenção trata um único veículo.",
+        "description": "Cada ordem de manutenção pertence a um único veículo.",
         "field": "MaintenanceOrder.vehicleId"
-      },
-      {
-        "relationshipId": "maintenanceOrderWorkshop",
-        "from": "MaintenanceOrder",
-        "to": "Workshop",
-        "type": "manyToOne",
-        "required": true,
-        "mode": "fk",
-        "description": "Cada ordem de manutenção informa a oficina responsável pela execução do serviço.",
-        "field": "MaintenanceOrder.workshopId"
       },
       {
         "relationshipId": "maintenanceOrderPlan",
@@ -187,8 +177,18 @@
         "type": "manyToOne",
         "required": false,
         "mode": "fk",
-        "description": "Uma ordem preventiva pode decorrer de um plano de manutenção vencido; ordens por defeito não precisam de plano.",
+        "description": "Uma ordem preventiva pode decorrer de um plano de manutenção; ordens por defeito não exigem plano.",
         "field": "MaintenanceOrder.maintenancePlanId"
+      },
+      {
+        "relationshipId": "maintenanceOrderWorkshop",
+        "from": "MaintenanceOrder",
+        "to": "Workshop",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Cada ordem de manutenção informa a oficina responsável pelo serviço.",
+        "field": "MaintenanceOrder.workshopId"
       }
     ],
     "normalizations": [
@@ -231,38 +231,37 @@
   },
   "entities": [
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "manutencaoFrota",
       "entityId": "Vehicle",
       "title": "Veículo",
-      "description": "Veículo da frota, identificado pela placa e usado nos abastecimentos e nas manutenções.",
+      "description": "Veículo da frota, mantido como ativo veicular compartilhado da organização, com dados de operação específicos deste módulo.",
       "displayField": "details.identification.name",
       "relationships": {
-        "vehicleAssignmentVehicle": {
+        "vehicleAssignments": {
           "relationshipId": "vehicleAssignmentVehicle",
           "to": "VehicleAssignment",
           "via": "VehicleAssignment.vehicleId",
           "cardinality": "1:N",
           "title": "Atribuições do veículo",
-          "description": "Atribuições que vinculam este veículo a motoristas da transportadora.",
+          "description": "Atribuições que vinculam este veículo a motoristas da frota.",
           "mode": "fk",
           "direction": "to",
-          "required": true,
-          "role": "veículo atribuído"
+          "required": "Nunca é obrigatório para a existência do veículo."
         },
-        "vehicleAssignedDrivers": {
+        "assignedDrivers": {
           "relationshipId": "vehicleAssignedDrivers",
           "to": "Driver",
           "via": "VehicleAssignment",
           "cardinality": "N:N",
           "title": "Motoristas atribuídos",
-          "description": "Motoristas visíveis para este veículo, derivados das atribuições de veículo registradas.",
+          "description": "Motoristas que podem conduzir e consultar este veículo, obtidos pelas atribuições de veículo.",
           "mode": "throughTable",
           "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
           "derived": true,
-          "role": "veículo dirigido"
+          "required": "Nunca é obrigatório para a existência do veículo."
         },
-        "fuelingVehicle": {
+        "fuelings": {
           "relationshipId": "fuelingVehicle",
           "to": "Fueling",
           "via": "Fueling.vehicleId",
@@ -271,10 +270,9 @@
           "description": "Abastecimentos registrados para este veículo.",
           "mode": "fk",
           "direction": "to",
-          "required": true,
-          "role": "veículo abastecido"
+          "required": "Nunca é obrigatório para a existência do veículo."
         },
-        "maintenancePlanVehicle": {
+        "maintenancePlans": {
           "relationshipId": "maintenancePlanVehicle",
           "to": "MaintenancePlan",
           "via": "MaintenancePlan.vehicleId",
@@ -283,10 +281,9 @@
           "description": "Planos de manutenção preventiva definidos para este veículo.",
           "mode": "fk",
           "direction": "to",
-          "required": true,
-          "role": "veículo planejado"
+          "required": "Nunca é obrigatório para a existência do veículo."
         },
-        "maintenanceOrderVehicle": {
+        "maintenanceOrders": {
           "relationshipId": "maintenanceOrderVehicle",
           "to": "MaintenanceOrder",
           "via": "MaintenanceOrder.vehicleId",
@@ -295,26 +292,25 @@
           "description": "Ordens de manutenção abertas para este veículo.",
           "mode": "fk",
           "direction": "to",
-          "required": true,
-          "role": "veículo em manutenção"
+          "required": "Nunca é obrigatório para a existência do veículo."
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um veículo pelo identificador mestre · usa leitura direta pelo mdmId · motorista e gestor usam ao abrir um veículo já selecionado.",
-        "locate.byName": "Localiza veículos pelo nome de reconhecimento · pesquisa o índice de nomes do subtipo AssetVehicle · motorista e gestor usam para encontrar um veículo.",
-        "locate.byTag": "Lista os veículos que têm o papel manutencaoFrota.Vehicle · consulta a tag do módulo no índice MDM · gestor usa para localizar veículos cadastrados na frota.",
-        "register.createOrAttach": "Cadastra ou associa um veículo existente ao papel de veículo da frota · cria quando ausente e grava a tag e o espaço manutencaoFrota · gestor usa ao incluir veículo na frota.",
-        "edit.platformFields": "Atualiza placa, modelo, ano e demais dados de plataforma permitidos do veículo · altera os campos do registro mestre e seu índice quando aplicável · gestor usa na manutenção cadastral.",
-        "edit.moduleNamespace": "Atualiza a quilometragem atual específica da frota · grava somente details.manutencaoFrota do veículo · sistema atualiza a partir de abastecimentos mais recentes e gestor pode manter o dado.",
-        "inactivate": "Retira um veículo do uso sem apagá-lo · altera a situação mestre para inativo, com possibilidade de reativação · gestor usa quando o veículo deixa a frota.",
-        "statusHistory.read": "Consulta o histórico de situações do veículo · lê as mudanças de status registradas pela plataforma · gestor usa para acompanhar ativações e inativações.",
-        "audit": "Consulta quem alterou os dados do veículo e quando · lê a trilha de auditoria do registro mestre · gestor usa para conferência administrativa."
+        "read.byId": "Lê um veículo pelo identificador mestre, por consulta direta ao MDM, para motorista e gestor visualizarem um veículo já selecionado.",
+        "locate.byName": "Localiza veículos pelo nome de identificação indexado, para motorista encontrar somente veículos atribuídos e gestor localizar veículos da frota.",
+        "locate.byTag": "Lista os registros com a etiqueta de papel manutencaoFrota.Vehicle no índice de tags do MDM, para o módulo compor a relação de veículos da frota.",
+        "register.createOrAttach": "Cria ou anexa o papel de veículo da frota a um registro mestre pelo fluxo create-or-attach do MDM, para o gestor cadastrar veículos.",
+        "edit.platformFields": "Atualiza placa, modelo, ano e demais dados veiculares da plataforma no documento mestre, para o gestor manter o cadastro do veículo.",
+        "edit.moduleNamespace": "Atualiza a quilometragem operacional no namespace manutencaoFrota do documento mestre, para o módulo manter a quilometragem atualizada após os registros de abastecimento.",
+        "inactivate": "Inativa ou reativa o registro mestre pela situação do MDM, para o gestor retirar temporariamente um veículo de uso sem apagar seu histórico.",
+        "statusHistory.read": "Exibe o histórico de mudanças de situação do registro mestre, pela consulta de histórico de status, para o gestor acompanhar a disponibilidade cadastral do veículo.",
+        "audit": "Consulta quem alterou os dados do veículo e quando no log de auditoria do MDM, para o gestor rastrear alterações cadastrais."
       },
       "rules": [
         "rule-foreign-namespace-refused",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "vehicleMileageUpdatedFromLatestFueling"
+        "preventiveMaintenanceMileageAlert"
       ],
       "writer": "crud",
       "kind": "role",
@@ -339,7 +335,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre do veículo da frota, com dados da plataforma e informações específicas da manutenção de frota.",
+            "description": "Documento mestre do veículo, com dados de identificação, dados veiculares da plataforma e informações operacionais deste módulo.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -354,10 +350,10 @@
                       {
                         "value": "AssetVehicle",
                         "title": "Veículo",
-                        "description": "Veículo da frota."
+                        "description": "Ativo veicular."
                       }
                     ],
-                    "description": "Subtipo mestre que identifica este registro como veículo.",
+                    "description": "Indica que este registro mestre é um veículo da frota.",
                     "title": "Subtipo",
                     "maxLength": 0,
                     "min": 0,
@@ -368,8 +364,8 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome de reconhecimento do veículo nas consultas da frota.",
-                    "title": "Nome",
+                    "description": "Nome pelo qual o veículo é localizado e reconhecido na frota.",
+                    "title": "Nome de identificação",
                     "min": 0,
                     "max": 0
                   },
@@ -382,26 +378,26 @@
                       {
                         "value": "Active",
                         "title": "Ativo",
-                        "description": "Veículo ativo no cadastro mestre."
+                        "description": "Registro disponível para uso."
                       },
                       {
                         "value": "Inactive",
                         "title": "Inativo",
-                        "description": "Veículo fora de uso no cadastro mestre."
+                        "description": "Registro fora de uso."
                       },
                       {
                         "value": "Merged",
                         "title": "Mesclado",
-                        "description": "Registro mesclado a outro veículo mestre."
+                        "description": "Registro incorporado a outro registro mestre."
                       },
                       {
                         "value": "Blocked",
                         "title": "Bloqueado",
-                        "description": "Registro bloqueado pela plataforma."
+                        "description": "Registro bloqueado pela organização."
                       }
                     ],
-                    "title": "Situação",
-                    "description": "Situação do registro mestre do veículo para uso na frota.",
+                    "title": "Situação do registro",
+                    "description": "Situação do veículo no cadastro mestre da organização.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -410,22 +406,22 @@
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "pattern": "^BR$",
+                    "pattern": "^[A-Z]{2}$",
                     "maxLength": 0,
                     "default": "US",
-                    "description": "País do cadastro e das regras aplicáveis à identificação do veículo.",
+                    "description": "Código do país aplicável ao registro mestre do veículo.",
                     "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação e situação do veículo no cadastro mestre."
+                "description": "Dados de identificação e situação do registro mestre do veículo."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados base compartilhados do registro mestre do veículo; não há campos desse ramo usados pela manutenção de frota."
+                "description": "Dados comuns do registro mestre, mantidos pela plataforma."
               },
               "assetVehicle": {
                 "type": "object",
@@ -434,9 +430,8 @@
                   "plate": {
                     "type": "string",
                     "title": "Placa",
-                    "description": "Placa brasileira que identifica o veículo da frota.",
+                    "description": "Placa de identificação do veículo da frota.",
                     "required": true,
-                    "pattern": "^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -444,7 +439,7 @@
                   "model": {
                     "type": "string",
                     "title": "Modelo",
-                    "description": "Modelo do veículo consultado por motoristas e gestores.",
+                    "description": "Modelo informado para identificação do veículo.",
                     "required": true,
                     "maxLength": 0,
                     "min": 0,
@@ -453,37 +448,43 @@
                   "year": {
                     "type": "integer",
                     "title": "Ano",
-                    "description": "Ano de fabricação ou modelo informado para o veículo.",
+                    "description": "Ano do veículo da frota.",
                     "required": true,
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Características de plataforma usadas para identificar o veículo da frota."
+                "description": "Características do ativo veicular usadas para identificar o veículo da frota."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização, somente para leitura pela manutenção de frota."
+                "description": "Dados promovidos pela organização para uso compartilhado entre módulos."
               },
               "manutencaoFrota": {
                 "type": "object",
                 "owner": "module",
                 "fields": {
-                  "currentMileage": {
-                    "type": "number",
+                  "currentMileageKm": {
+                    "type": "integer",
                     "required": true,
                     "of": "Address",
                     "title": "Quilometragem atual",
-                    "description": "Quilometragem mais recente conhecida do veículo, usada para consulta e para acompanhar o vencimento das preventivas.",
+                    "description": "Última quilometragem conhecida no painel do veículo, em quilômetros.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
+                  },
+                  "preventiveMaintenanceMileageOverdue": {
+                    "type": "boolean",
+                    "derived": true,
+                    "title": "Preventiva por quilometragem vencida",
+                    "description": "Há plano preventivo ativo por quilometragem e a quilometragem atual do veículo passou da quilometragem prevista para a próxima manutenção."
                   }
                 },
-                "description": "Informações específicas da manutenção de frota; somente este módulo pode alterá-las."
+                "description": "Informações operacionais do veículo mantidas exclusivamente pelo módulo de manutenção de frota."
               }
             }
           }
@@ -491,11 +492,11 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "manutencaoFrota",
       "entityId": "Driver",
       "title": "Motorista",
-      "description": "Pessoa da transportadora que dirige veículos atribuídos e registra seus abastecimentos.",
+      "description": "Pessoa que conduz veículos atribuídos e registra os abastecimentos realizados.",
       "displayField": "details.identification.name",
       "relationships": {
         "vehicleAssignments": {
@@ -503,11 +504,12 @@
           "to": "VehicleAssignment",
           "via": "VehicleAssignment.driverId",
           "cardinality": "1:N",
-          "title": "Atribuições de veículos",
-          "description": "Atribuições que vinculam este motorista aos veículos que está autorizado a dirigir.",
+          "title": "Atribuições de veículo",
+          "description": "Atribuições que autorizam este motorista a conduzir veículos.",
           "mode": "fk",
           "direction": "to",
-          "required": "Sempre que houver uma atribuição de veículo para este motorista."
+          "required": true,
+          "role": "motorista atribuído"
         },
         "assignedVehicles": {
           "relationshipId": "vehicleAssignedDrivers",
@@ -515,43 +517,42 @@
           "via": "VehicleAssignment",
           "cardinality": "N:N",
           "title": "Veículos atribuídos",
-          "description": "Veículos visíveis ao motorista, derivados das atribuições de veículo registradas para ele.",
+          "description": "Veículos que este motorista pode consultar e conduzir, obtidos pelas atribuições de veículo.",
           "mode": "throughTable",
           "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
           "derived": true,
           "direction": "to",
-          "required": "Quando existir uma atribuição ativa entre o motorista e o veículo."
+          "role": "motorista autorizado"
         },
         "fuelings": {
           "relationshipId": "fuelingDriver",
           "to": "Fueling",
           "via": "Fueling.driverId",
           "cardinality": "1:N",
-          "title": "Abastecimentos realizados",
+          "title": "Abastecimentos registrados",
           "description": "Abastecimentos registrados por este motorista.",
           "mode": "fk",
           "direction": "to",
-          "required": "Sempre que o motorista registrar um abastecimento."
+          "required": true,
+          "role": "motorista registrador"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um motorista pelo identificador MDM, por leitura direta do registro mestre, para telas de atribuição, abastecimento e gestão de frota.",
-        "locate.byName": "Localiza motoristas pelo nome no índice MDM para o gestor selecionar a pessoa em atribuições de veículos.",
-        "locate.byDocument": "Localiza um motorista pelo documento nacional para evitar duplicidade ao cadastrá-lo ou vinculá-lo ao módulo.",
-        "locate.byContact": "Localiza a pessoa motorista por canal de contato para confirmar um cadastro existente antes de criar ou vincular seu papel.",
-        "register.createOrAttach": "Cria a pessoa quando ela não existe ou anexa o papel de Motorista ao registro existente, pela deduplicação por documento ou contato, para o gestor de frota manter os motoristas.",
-        "edit.platformFields": "Atualiza os dados de identificação permitidos do motorista no registro mestre, reindexando a identificação quando necessário, para o gestor de frota manter o cadastro.",
-        "inactivate": "Inativa ou reativa o papel de motorista sem apagar seu registro mestre, pela alteração de status MDM, para o gestor retirar motoristas de uso.",
-        "link.contact": "Vincula um canal de contato ao motorista criando um ContactChannel e a relação HasContact, para o gestor manter formas de contato sem gravá-las no módulo.",
-        "listLinks": "Lista vínculos ativos e históricos do motorista pelo serviço de relacionamentos MDM, para consultar suas relações cadastrais.",
-        "tag": "Aplica etiquetas livres no namespace do módulo no índice de tags, para o gestor organizar motoristas sem criar campos próprios.",
-        "audit": "Consulta quem alterou os dados do motorista e quando no log de auditoria MDM, para o gestor rastrear alterações cadastrais.",
-        "invite.login": "Convida o motorista para acesso, criando a linha de login no índice de tags e acionando a identidade da plataforma, para que ele consulte veículos atribuídos e registre abastecimentos."
+        "read.byId": "Consulta um motorista pelo identificador mestre, carregando seu nome para atribuições e abastecimentos, para gestores e telas que já possuem o identificador.",
+        "locate.byName": "Localiza pessoas pelo nome para selecionar ou conferir um motorista durante o cadastro de atribuições, para o gestor de frota.",
+        "locate.byDocument": "Localiza uma pessoa pelo documento nacional para evitar duplicidade ao cadastrar ou associar um motorista, para o gestor de frota.",
+        "register.createOrAttach": "Cria a pessoa quando não existir ou anexa o papel de Motorista ao registro mestre encontrado por documento, para o gestor de frota.",
+        "edit.platformFields": "Atualiza os dados de identificação do motorista mantidos pela plataforma, para o gestor de frota.",
+        "inactivate": "Inativa ou reativa o registro mestre de um motorista que deixou de operar na frota, para o gestor de frota.",
+        "listLinks": "Exibe as atribuições, os veículos autorizados e os abastecimentos relacionados ao motorista, para o gestor de frota.",
+        "invite.login": "Convida o motorista para acessar o sistema com seu próprio login, para o gestor de frota.",
+        "audit": "Mostra quem alterou os dados do motorista e quando, por meio da auditoria da plataforma, para o gestor de frota."
       },
       "rules": [
         "rule-foreign-namespace-refused",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "rule-person-ssn-unique-for-us",
         "rule-person-privacy-consent-required-br-eu"
       ],
       "writer": "crud",
@@ -577,19 +578,70 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da pessoa no MDM, com os dados de identificação usados pela manutenção de frota e o espaço exclusivo do módulo.",
+            "description": "Documento mestre da pessoa que atua como motorista na manutenção de frota.",
             "fields": {
               "identification": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Pessoa",
+                        "description": "Pessoa física."
+                      }
+                    ],
+                    "description": "Indica que este registro mestre é uma pessoa que exerce o papel de motorista.",
+                    "title": "Tipo de cadastro",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome pelo qual o motorista é identificado nas atribuições de veículos e nos abastecimentos.",
+                    "description": "Nome pelo qual o motorista é identificado nas atribuições de veículo e nos abastecimentos.",
                     "title": "Nome",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo",
+                        "description": "Registro disponível para uso."
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo",
+                        "description": "Registro fora de uso."
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado",
+                        "description": "Registro incorporado a outro registro mestre."
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado",
+                        "description": "Registro bloqueado pela plataforma."
+                      }
+                    ],
+                    "title": "Situação",
+                    "description": "Situação de atividade do registro mestre do motorista.",
+                    "maxLength": 0,
                     "min": 0,
                     "max": 0
                   },
@@ -605,46 +657,46 @@
                       {
                         "value": "EIN",
                         "title": "EIN",
-                        "description": "Identificador fiscal de organização dos Estados Unidos."
+                        "description": "Identificador fiscal empresarial dos Estados Unidos."
                       },
                       {
                         "value": "Passport",
                         "title": "Passaporte",
-                        "description": "Documento de passaporte."
+                        "description": "Passaporte."
                       },
                       {
                         "value": "DriversLicense",
                         "title": "Carteira de motorista",
-                        "description": "Documento de habilitação para dirigir."
+                        "description": "Documento de habilitação."
                       },
                       {
                         "value": "NationalId",
                         "title": "Documento nacional",
-                        "description": "Documento nacional de identificação."
+                        "description": "Documento nacional de identidade."
                       },
                       {
                         "value": "CPF",
                         "title": "CPF",
-                        "description": "Cadastro de Pessoas Físicas do Brasil."
+                        "description": "Cadastro de Pessoas Físicas."
                       },
                       {
                         "value": "CNPJ",
                         "title": "CNPJ",
-                        "description": "Cadastro Nacional da Pessoa Jurídica do Brasil."
+                        "description": "Cadastro Nacional da Pessoa Jurídica."
                       },
                       {
                         "value": "VAT",
-                        "title": "Identificador fiscal",
-                        "description": "Identificador fiscal de outro país."
+                        "title": "VAT",
+                        "description": "Identificador de imposto sobre valor agregado."
                       },
                       {
                         "value": "Other",
                         "title": "Outro",
-                        "description": "Outro tipo de documento aceito pela plataforma."
+                        "description": "Outro documento reconhecido."
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional usado para localizar ou deduplicar o cadastro do motorista.",
+                    "description": "Tipo do documento nacional usado para identificar e deduplicar o motorista quando informado.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -652,7 +704,7 @@
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do documento nacional do motorista, usado na deduplicação do registro mestre.",
+                    "description": "Número do documento nacional informado para deduplicar o motorista.",
                     "title": "Número do documento",
                     "maxLength": 0,
                     "min": 0,
@@ -665,31 +717,31 @@
                     "pattern": "^[A-Z]{2}$",
                     "maxLength": 2,
                     "default": "US",
-                    "description": "Código ISO do país que define as regras aplicáveis ao cadastro do motorista.",
+                    "description": "Código ISO do país aplicável ao documento e às regras legais do motorista.",
                     "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação da pessoa que atua como motorista na transportadora."
+                "description": "Dados de identificação da pessoa mantidos pela plataforma e usados para reconhecer e manter o motorista."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados básicos compartilhados da pessoa no MDM; este módulo não mantém campos próprios nesta seção."
+                "description": "Dados básicos da plataforma que este papel não utiliza diretamente."
               },
               "person": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados pessoais da pessoa no MDM; nenhum campo adicional é necessário para o papel de motorista."
+                "description": "Dados próprios de pessoa mantidos pela plataforma que este papel não utiliza diretamente."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização para uso compartilhado entre módulos; este módulo apenas os lê."
+                "description": "Dados promovidos pela organização, apenas para leitura pelo módulo."
               },
               "manutencaoFrota": {
                 "type": "object",
@@ -703,11 +755,11 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "manutencaoFrota",
       "entityId": "Workshop",
       "title": "Oficina",
-      "description": "Empresa que executa serviços de manutenção nos veículos da frota.",
+      "description": "Empresa oficina responsável pela execução de serviços registrados nas ordens de manutenção.",
       "displayField": "details.identification.name",
       "relationships": {
         "maintenanceOrders": {
@@ -716,25 +768,31 @@
           "via": "MaintenanceOrder.workshopId",
           "cardinality": "1:N",
           "title": "Ordens de manutenção da oficina",
-          "description": "Ordens de manutenção que indicam esta oficina como responsável pela execução do serviço.",
+          "description": "Ordens de manutenção que informam esta oficina como responsável pelo serviço.",
           "mode": "fk",
           "direction": "to",
-          "required": "Ao registrar uma ordem de manutenção."
+          "required": "Sempre para cada ordem de manutenção.",
+          "role": "oficina responsável"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta uma oficina pelo identificador mestre · usa leitura indexada por mdmId e hidratação do documento · gestor de frota ao visualizar uma ordem de manutenção ou o cadastro da oficina.",
-        "locate.byName": "Localiza oficinas pelo nome informado · pesquisa o nome no índice de registros Company ativos · gestor de frota ao selecionar ou cadastrar a oficina da ordem.",
-        "locate.byDocument": "Localiza uma oficina pelo documento nacional · consulta o documento no índice para evitar duplicidade · gestor de frota ao cadastrar uma empresa já conhecida.",
-        "register.createOrAttach": "Cria a empresa quando ela não existe ou associa o papel de Oficina ao registro existente · localiza por documento e anexa a tag manutencaoFrota.Workshop com o namespace do módulo · gestor de frota ao cadastrar a oficina responsável por serviços.",
-        "edit.platformFields": "Atualiza os dados corporativos permitidos da oficina · grava os campos de identificação e da empresa no registro mestre · gestor de frota ao corrigir o cadastro da oficina.",
-        "inactivate": "Inativa ou reativa uma oficina sem apagar seu histórico · altera a situação do registro mestre entre ativa e inativa · gestor de frota quando a oficina deixa ou volta a atender a frota."
+        "read.byId": "Consulta uma oficina pelo identificador mestre para apresentar a empresa vinculada à ordem de manutenção; usado pelo gestor de frota.",
+        "locate.byName": "Localiza oficinas pelo nome para selecionar a responsável ao abrir uma ordem de manutenção; usado pelo gestor de frota.",
+        "locate.byDocument": "Localiza uma oficina pelo CNPJ antes do cadastro para evitar duplicidade; usado pelo gestor de frota.",
+        "register.createOrAttach": "Cria ou associa uma empresa oficina ao módulo por CNPJ quando disponível, atribuindo a função de Oficina; usado pelo gestor de frota.",
+        "edit.platformFields": "Atualiza os dados corporativos e de identificação da oficina mantidos pela plataforma; usado pelo gestor de frota.",
+        "inactivate": "Inativa ou reativa uma oficina sem apagar seu histórico nas ordens de manutenção; usado pelo gestor de frota.",
+        "listLinks": "Lista as ordens de manutenção que apontam para a oficina responsável; usado pelo gestor de frota.",
+        "attach.document": "Anexa documentos relacionados à empresa oficina no registro mestre; usado pelo gestor de frota.",
+        "comment": "Registra observações sobre a oficina no registro mestre; usado pelo gestor de frota.",
+        "audit": "Consulta quem alterou os dados da oficina e quando; usado pelo gestor de frota."
       },
       "rules": [
         "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-company-legal-name-required"
+        "rule-company-ein-unique-for-us",
+        "rule-company-legal-name-required",
+        "rule-document-shape-validated"
       ],
       "writer": "crud",
       "kind": "role",
@@ -759,7 +817,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da empresa que executa serviços de manutenção para a frota.",
+            "description": "Documento mestre da empresa oficina, com dados de identificação, dados corporativos e o espaço deste módulo.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -774,10 +832,10 @@
                       {
                         "value": "Company",
                         "title": "Empresa",
-                        "description": "Empresa cadastrada como oficina para execução de manutenção."
+                        "description": "Empresa cadastrada como oficina responsável por serviços de manutenção."
                       }
                     ],
-                    "description": "Indica que este registro mestre representa uma empresa usada como oficina de manutenção.",
+                    "description": "Subtipo mestre que identifica este registro como uma empresa.",
                     "title": "Subtipo",
                     "maxLength": 0,
                     "min": 0,
@@ -788,7 +846,7 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome pelo qual o gestor identifica e localiza a oficina responsável pelo serviço.",
+                    "description": "Nome pelo qual a oficina é reconhecida nas ordens de manutenção.",
                     "title": "Nome da oficina",
                     "min": 0,
                     "max": 0
@@ -802,7 +860,7 @@
                       {
                         "value": "Active",
                         "title": "Ativa",
-                        "description": "Oficina disponível para uso."
+                        "description": "Oficina disponível para ser informada em ordens de manutenção."
                       },
                       {
                         "value": "Inactive",
@@ -811,17 +869,17 @@
                       },
                       {
                         "value": "Merged",
-                        "title": "Unificada",
-                        "description": "Cadastro incorporado a outro registro mestre."
+                        "title": "Mesclada",
+                        "description": "Registro incorporado a outro registro mestre."
                       },
                       {
                         "value": "Blocked",
                         "title": "Bloqueada",
-                        "description": "Cadastro bloqueado pela organização."
+                        "description": "Registro bloqueado pela plataforma."
                       }
                     ],
-                    "title": "Situação do cadastro",
-                    "description": "Situação do registro mestre da oficina para uso em novas ordens de manutenção.",
+                    "title": "Situação",
+                    "description": "Situação de atividade do registro mestre da oficina.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -831,53 +889,13 @@
                     "indexed": true,
                     "values": [
                       {
-                        "value": "SSN",
-                        "title": "SSN",
-                        "description": "Documento nacional SSN."
-                      },
-                      {
-                        "value": "EIN",
-                        "title": "EIN",
-                        "description": "Identificador empresarial EIN."
-                      },
-                      {
-                        "value": "Passport",
-                        "title": "Passaporte",
-                        "description": "Documento de passaporte."
-                      },
-                      {
-                        "value": "DriversLicense",
-                        "title": "Carteira de motorista",
-                        "description": "Documento de habilitação."
-                      },
-                      {
-                        "value": "NationalId",
-                        "title": "Documento nacional",
-                        "description": "Documento nacional de identificação."
-                      },
-                      {
-                        "value": "CPF",
-                        "title": "CPF",
-                        "description": "Cadastro de pessoa física."
-                      },
-                      {
                         "value": "CNPJ",
                         "title": "CNPJ",
-                        "description": "Cadastro nacional de pessoa jurídica."
-                      },
-                      {
-                        "value": "VAT",
-                        "title": "VAT",
-                        "description": "Registro fiscal VAT."
-                      },
-                      {
-                        "value": "Other",
-                        "title": "Outro",
-                        "description": "Outro tipo de documento aceito pela plataforma."
+                        "description": "Cadastro Nacional da Pessoa Jurídica da oficina."
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional informado para identificar a empresa da oficina, quando disponível.",
+                    "description": "Tipo do documento nacional usado para localizar e evitar duplicidade da empresa oficina.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -885,8 +903,8 @@
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do documento da empresa, usado para localizar ou deduplicar a oficina quando informado.",
-                    "title": "Número do documento",
+                    "description": "Número do documento nacional da empresa oficina.",
+                    "title": "Documento",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -896,21 +914,21 @@
                     "required": true,
                     "indexed": true,
                     "pattern": "^[A-Z]{2}$",
-                    "maxLength": 0,
+                    "maxLength": 2,
                     "default": "US",
-                    "description": "Código ISO do país ao qual pertencem o documento e as regras legais da oficina.",
+                    "description": "Código ISO do país ao qual pertencem o documento e as regras da empresa oficina.",
                     "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação da empresa usados para reconhecer e localizar a oficina no cadastro mestre."
+                "description": "Dados de identificação da empresa oficina mantidos pela plataforma."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Campos básicos compartilhados do registro mestre; nenhum dado adicional é necessário para o papel de oficina neste módulo."
+                "description": "Dados base da empresa mantidos pela plataforma."
               },
               "company": {
                 "type": "object",
@@ -922,11 +940,11 @@
                     "values": [
                       {
                         "value": "LegalEntity",
-                        "title": "Entidade jurídica",
-                        "description": "Empresa externa que presta serviços de manutenção."
+                        "title": "Pessoa jurídica",
+                        "description": "Empresa legalmente constituída que presta serviços de oficina."
                       }
                     ],
-                    "description": "Classifica a oficina como entidade empresarial independente.",
+                    "description": "Classificação da empresa cadastrada como oficina.",
                     "title": "Natureza da empresa",
                     "maxLength": 0,
                     "min": 0,
@@ -935,28 +953,20 @@
                   "legalName": {
                     "type": "string",
                     "required": true,
-                    "description": "Nome oficial da empresa cadastrada como oficina.",
+                    "description": "Nome oficial registrado da empresa oficina.",
                     "title": "Razão social",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "tradeName": {
-                    "type": "string",
-                    "description": "Nome comercial pelo qual a oficina pode ser conhecida pelo gestor de frota.",
-                    "title": "Nome fantasia",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados corporativos da empresa que presta os serviços de manutenção."
+                "description": "Dados corporativos da empresa oficina mantidos pela plataforma."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização e somente lidos por este módulo."
+                "description": "Dados promovidos pela organização para uso comum entre módulos; este módulo apenas os lê."
               },
               "manutencaoFrota": {
                 "type": "object",
@@ -970,12 +980,12 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "manutencaoFrota",
       "entityId": "VehicleAssignment",
       "title": "Atribuição de veículo",
-      "description": "Registro operacional que vincula um motorista aos veículos que pode dirigir.",
-      "displayField": "id",
+      "description": "Registro operacional que vincula um veículo da frota ao motorista autorizado a conduzi-lo.",
+      "displayField": "details.assignmentLabel",
       "relationships": {
         "vehicle": {
           "relationshipId": "vehicleAssignmentVehicle",
@@ -985,7 +995,8 @@
           "title": "Veículo atribuído",
           "description": "Cada atribuição vincula obrigatoriamente um veículo da frota.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": "sempre",
+          "role": "veículo da frota"
         },
         "driver": {
           "relationshipId": "vehicleAssignmentDriver",
@@ -993,21 +1004,22 @@
           "via": "VehicleAssignment.driverId",
           "cardinality": "N:1",
           "title": "Motorista autorizado",
-          "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a dirigir o veículo.",
+          "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a conduzir o veículo.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": "sempre",
+          "role": "motorista autorizado"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta uma atribuição pelo identificador da linha para o motorista ou gestor que já a selecionou.",
-        "locate.byColumn": "Lista atribuições pelos veículos ou motoristas indexados, com paginação, para o gestor de frota.",
-        "count": "Conta as atribuições que correspondem aos filtros de veículo ou motorista para o gestor de frota.",
-        "listByForeignKey": "Lista os veículos atribuídos a um motorista ou os motoristas atribuídos a um veículo pela chave estrangeira, para aplicar o escopo do motorista e para o gestor.",
-        "create": "Cria a vinculação operacional entre veículo e motorista, informando as duas chaves estrangeiras, para o gestor de frota.",
-        "update": "Altera os dados da vinculação operacional pelo identificador para o gestor de frota.",
-        "delete": "Remove uma atribuição de veículo e motorista pelo identificador quando a autorização deixar de valer, para o gestor de frota.",
-        "uniqueKey": "Impede uma segunda atribuição idêntica do mesmo veículo ao mesmo motorista pelo índice único, para manter o cadastro do gestor consistente.",
-        "read.mdmRecord": "Lê os registros mestres de veículo e motorista apontados pelas chaves da atribuição para exibir seus dados ao motorista e ao gestor de frota."
+        "read.byId": "Lê uma atribuição pelo identificador da linha no repositório, para o gestor de frota e para o motorista dentro do seu escopo de veículos atribuídos.",
+        "locate.byColumn": "Lista atribuições filtradas pelos índices de veículo ou motorista, com paginação, para o gestor de frota e para as consultas do motorista limitadas às suas atribuições.",
+        "count": "Conta atribuições conforme os filtros de veículo ou motorista, para o gestor de frota acompanhar os vínculos cadastrados.",
+        "listByForeignKey": "Lista as atribuições que apontam para um veículo ou motorista pelos respectivos identificadores, para telas de veículos, motoristas e controle de acesso.",
+        "create": "Cria a vinculação operacional entre um veículo e um motorista autorizado, gravando a linha de atribuição, para o gestor de frota.",
+        "update": "Atualiza a identificação operacional de uma atribuição existente pelo identificador da linha, para o gestor de frota.",
+        "delete": "Remove uma atribuição operacional cadastrada pelo identificador da linha, para o gestor de frota quando o vínculo deixar de valer.",
+        "uniqueKey": "Recusa uma segunda atribuição com a mesma combinação de veículo e motorista pelo índice único, para manter um único vínculo operacional idêntico.",
+        "read.mdmRecord": "Lê os registros mestres do veículo e do motorista apontados pela atribuição, pelos seus identificadores MDM, para exibir os dados nas telas da frota."
       },
       "rules": [],
       "writer": "crud",
@@ -1036,12 +1048,12 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "to": [
               "Vehicle"
             ],
             "title": "Veículo",
-            "description": "Veículo da frota autorizado nesta atribuição.",
+            "description": "Veículo da frota vinculado a esta atribuição operacional.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -1050,12 +1062,12 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "to": [
               "Driver"
             ],
             "title": "Motorista",
-            "description": "Motorista autorizado a dirigir o veículo nesta atribuição.",
+            "description": "Motorista autorizado a conduzir o veículo nesta atribuição.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -1063,12 +1075,24 @@
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "title": "Detalhes da atribuição",
-            "description": "Namespace operacional da atribuição; não há dados adicionais solicitados.",
+            "description": "Informações operacionais da vinculação entre o veículo e o motorista.",
             "maxLength": 0,
             "min": 0,
-            "max": 0
+            "max": 0,
+            "fields": {
+              "assignmentLabel": {
+                "type": "string",
+                "required": true,
+                "of": "Address",
+                "title": "Identificação da atribuição",
+                "description": "Identificação operacional da atribuição para apresentação nas telas da frota.",
+                "maxLength": 120,
+                "min": 0,
+                "max": 0
+              }
+            }
           }
         }
       },
@@ -1080,47 +1104,47 @@
       ]
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "manutencaoFrota",
       "entityId": "Fueling",
       "title": "Abastecimento",
-      "description": "Registro de combustível abastecido por um motorista em um veículo, com leitura do painel.",
-      "displayField": "id",
+      "description": "Registro de abastecimento realizado por um motorista em um veículo atribuído.",
+      "displayField": "details.fuelingDate",
       "relationships": {
-        "vehicle": {
+        "veiculo": {
           "relationshipId": "fuelingVehicle",
           "to": "Vehicle",
           "via": "Fueling.vehicleId",
           "cardinality": "N:1",
           "title": "Veículo abastecido",
-          "description": "Cada abastecimento é registrado para um único veículo.",
+          "description": "Todo abastecimento é registrado para um único veículo atribuído.",
           "mode": "fk",
-          "required": "Sempre, para registrar o abastecimento."
+          "required": "Sempre"
         },
-        "driver": {
+        "motorista": {
           "relationshipId": "fuelingDriver",
           "to": "Driver",
           "via": "Fueling.driverId",
           "cardinality": "N:1",
           "title": "Motorista responsável",
-          "description": "Cada abastecimento registra o motorista que o realizou.",
+          "description": "Todo abastecimento identifica o motorista que o registrou.",
           "mode": "fk",
-          "required": "Sempre, para identificar quem realizou o registro."
+          "required": "Sempre"
         }
       },
       "capabilities": {
-        "read.byId": "Lê um abastecimento pelo identificador da linha para exibir seus dados ao motorista ou gestor de frota.",
-        "locate.byColumn": "Lista abastecimentos por veículo, motorista ou data, com ordenação e paginação, para consultas da frota.",
-        "count": "Conta os abastecimentos que correspondem aos filtros de veículo, motorista e data em uma lista da frota.",
-        "listByForeignKey": "Lista os abastecimentos vinculados a um veículo ou a um motorista para compor o histórico correspondente.",
-        "create": "Registra um abastecimento com veículo, motorista, data, litros, valor e leitura do painel para o motorista.",
-        "read.mdmRecord": "Lê os registros mestres do veículo e do motorista referenciados para apresentar seus dados nas consultas de abastecimento.",
-        "transaction": "Grava o abastecimento e atualiza a quilometragem atual do veículo na mesma operação quando a nova leitura for mais recente."
+        "read.byId": "Consulta um abastecimento pelo identificador da linha para exibir seus dados ao motorista ou ao gestor de frota.",
+        "locate.byColumn": "Lista abastecimentos por veículo ou motorista, usando as colunas indexadas e paginação, para consultas da frota.",
+        "count": "Conta os abastecimentos que correspondem aos filtros de veículo ou motorista para os totais das listas.",
+        "listByForeignKey": "Lista os abastecimentos vinculados a um veículo ou a um motorista para o histórico consultado por motoristas e gestores.",
+        "create": "Registra um novo abastecimento com data, litros, valor e quilometragem do painel para o veículo atribuído ao motorista.",
+        "update": "Corrige os dados de um abastecimento já registrado quando necessário, preservando o veículo e o motorista responsáveis.",
+        "transaction": "Grava o abastecimento e atualiza a quilometragem atual do veículo na mesma operação para manter a frota consistente.",
+        "read.mdmRecord": "Lê os registros mestres do veículo e do motorista apontados pelo abastecimento para mostrar seus dados nas consultas."
       },
       "rules": [
-        "fuelingDriverMustBeAssignedToVehicle",
-        "fuelingOdometerReadingCannotBeNegative",
-        "fuelingUpdatesVehicleMileageWhenMoreRecent"
+        "motoristaAbasteceVeiculoAtribuido",
+        "quilometragemAbastecimentoNaoMenorQueAtual"
       ],
       "kind": "entity",
       "class": "event",
@@ -1152,7 +1176,7 @@
               "Vehicle"
             ],
             "title": "Veículo",
-            "description": "Veículo abastecido, usado para listar os abastecimentos e conferir sua quilometragem.",
+            "description": "Veículo da frota abastecido.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -1171,35 +1195,34 @@
             "min": 0,
             "max": 0
           },
-          "fuelingDate": {
-            "type": "date",
-            "required": true,
-            "indexed": true,
-            "of": "Address",
-            "title": "Data do abastecimento",
-            "description": "Data em que o combustível foi abastecido, usada para ordenar e consultar os registros.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
-          },
           "details": {
             "type": "object",
             "required": true,
             "of": "Address",
             "title": "Dados do abastecimento",
-            "description": "Dados informados pelo motorista no registro do abastecimento.",
+            "description": "Informações registradas no abastecimento do veículo.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
+              "fuelingDate": {
+                "type": "date",
+                "required": true,
+                "of": "Address",
+                "title": "Data do abastecimento",
+                "description": "Data em que o abastecimento foi realizado.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
               "liters": {
                 "type": "number",
                 "required": true,
                 "of": "Address",
                 "title": "Litros abastecidos",
-                "description": "Quantidade de combustível abastecida em litros.",
+                "description": "Quantidade de combustível abastecida, em litros.",
                 "maxLength": 0,
-                "min": 0.01,
+                "min": 0,
                 "max": 0
               },
               "amount": {
@@ -1212,12 +1235,12 @@
                 "min": 0,
                 "max": 0
               },
-              "odometerReading": {
+              "odometerKm": {
                 "type": "integer",
                 "required": true,
                 "of": "Address",
                 "title": "Quilometragem no painel",
-                "description": "Leitura do odômetro do veículo no momento do abastecimento.",
+                "description": "Quilometragem indicada no painel do veículo no momento do abastecimento.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -1228,12 +1251,12 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "manutencaoFrota",
       "entityId": "MaintenancePlan",
       "title": "Plano de manutenção preventiva",
-      "description": "Periodicidade preventiva de um veículo por quilometragem, meses ou ambas.",
-      "displayField": "id",
+      "description": "Definição da periodicidade preventiva de manutenção de um veículo por quilometragem, meses ou ambos.",
+      "displayField": "details.name",
       "relationships": {
         "vehicle": {
           "relationshipId": "maintenancePlanVehicle",
@@ -1241,9 +1264,9 @@
           "via": "MaintenancePlan.vehicleId",
           "cardinality": "N:1",
           "title": "Veículo do plano",
-          "description": "Cada plano preventivo define a periodicidade de manutenção de um veículo.",
+          "description": "Veículo da frota para o qual a periodicidade preventiva foi definida.",
           "mode": "fk",
-          "required": "Sempre."
+          "required": "Sempre"
         },
         "maintenanceOrders": {
           "relationshipId": "maintenanceOrderPlan",
@@ -1251,27 +1274,25 @@
           "via": "MaintenanceOrder.maintenancePlanId",
           "cardinality": "1:N",
           "title": "Ordens de manutenção do plano",
-          "description": "Ordens preventivas podem ser abertas a partir deste plano quando ele vence; ordens por defeito não precisam estar vinculadas a um plano.",
+          "description": "Ordens de manutenção preventiva que foram abertas a partir deste plano.",
           "mode": "fk",
           "direction": "to",
-          "required": "Quando uma ordem de manutenção preventiva decorrer deste plano."
+          "required": "Nunca"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um plano preventivo pelo identificador da linha, usando findOne por id, para o gestor de frota.",
-        "locate.byColumn": "Lista planos preventivos por veículo, com ordenação e paginação sobre a coluna indexada vehicleId, para o gestor de frota.",
-        "count": "Conta os planos preventivos que correspondem ao filtro de veículo, usando a mesma condição de listagem, para o gestor de frota.",
-        "listByForeignKey": "Lista os planos preventivos vinculados a um ou mais veículos pela chave estrangeira vehicleId, para as telas do gestor de frota.",
-        "create": "Cria um plano preventivo com periodicidade por quilômetros, meses ou ambas, inserindo a linha para o gestor de frota.",
-        "update": "Altera as periodicidades e as referências previstas de um plano, aplicando atualização parcial da linha para o gestor de frota.",
-        "delete": "Remove um plano preventivo que não deve mais ser utilizado, excluindo fisicamente a linha para o gestor de frota.",
-        "read.mdmRecord": "Lê o registro mestre do veículo indicado por vehicleId para mostrar seus dados e a quilometragem atual ao gestor de frota.",
-        "manutencaoFrota.alertOverduePreventive": "Identifica planos cuja próxima quilometragem prevista foi ultrapassada pela quilometragem atual do veículo e gera o aviso para o gestor de frota."
+        "read.byId": "Lê um plano preventivo pelo identificador da linha · consulta o repositório pelo id · gestor de frota ao abrir os detalhes do plano.",
+        "locate.byColumn": "Lista planos preventivos pelo veículo, com ordenação e paginação · filtra pela coluna indexada do veículo · gestor de frota ao consultar os planos da frota.",
+        "count": "Conta os planos preventivos que correspondem ao veículo informado · aplica o mesmo filtro da listagem · gestor de frota no resumo da frota.",
+        "listByForeignKey": "Lista os planos preventivos vinculados a um veículo · consulta as linhas pela chave estrangeira do veículo · gestor de frota na tela do veículo.",
+        "create": "Cadastra um plano de manutenção preventiva para um veículo · grava o veículo e as periodicidades informadas · gestor de frota ao definir a preventiva.",
+        "update": "Atualiza a periodicidade ou as referências de um plano preventivo · altera parcialmente a linha do plano · gestor de frota ao revisar o planejamento.",
+        "read.mdmRecord": "Lê o registro mestre do veículo vinculado ao plano · hidrata o veículo pela chave estrangeira no MDM · gestor de frota ao conferir dados e quilometragem atual.",
+        "manutencaoFrota.alertarPreventivaVencida": "Sinaliza planos cuja preventiva está vencida · calcula a condição a partir dos intervalos do plano, de suas referências e da quilometragem atual do veículo · gestor de frota ao tratar alertas preventivos."
       },
       "rules": [
-        "maintenancePlanRequiresInterval",
-        "maintenancePlanPositiveInterval",
-        "maintenancePlanCalculatedSchedule"
+        "maintenanceIntervalRequired",
+        "preventiveMileageAlert"
       ],
       "kind": "entity",
       "class": "core",
@@ -1298,12 +1319,12 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
+            "of": "ContactSummary",
             "to": [
               "Vehicle"
             ],
             "title": "Veículo",
-            "description": "Veículo ao qual se aplica a periodicidade de manutenção preventiva.",
+            "description": "Veículo da frota ao qual este plano de manutenção preventiva se aplica.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -1311,48 +1332,78 @@
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
+            "of": "ContactSummary",
             "title": "Dados do plano preventivo",
-            "description": "Periodicidades e referências calculadas da manutenção preventiva do veículo.",
+            "description": "Periodicidade e referências usadas para acompanhar a próxima manutenção preventiva do veículo.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
-              "intervalKm": {
+              "name": {
+                "type": "string",
+                "required": true,
+                "of": "ContactSummary",
+                "title": "Nome do plano",
+                "description": "Identificação do plano preventivo para uso do gestor de frota.",
+                "maxLength": 120,
+                "min": 0,
+                "max": 0
+              },
+              "intervalKilometers": {
                 "type": "integer",
-                "of": "Address",
-                "title": "Periodicidade por quilometragem",
-                "description": "Quantidade de quilômetros entre manutenções preventivas, quando a preventiva é controlada por quilometragem.",
+                "of": "ContactSummary",
+                "title": "Intervalo em quilômetros",
+                "description": "Quantidade de quilômetros entre manutenções preventivas, quando o plano é controlado por quilometragem.",
                 "maxLength": 0,
                 "min": 1,
                 "max": 0
               },
               "intervalMonths": {
                 "type": "integer",
-                "of": "Address",
-                "title": "Periodicidade por meses",
-                "description": "Quantidade de meses entre manutenções preventivas, quando a preventiva é controlada por tempo.",
+                "of": "ContactSummary",
+                "title": "Intervalo em meses",
+                "description": "Quantidade de meses entre manutenções preventivas, quando o plano é controlado por tempo.",
                 "maxLength": 0,
                 "min": 1,
                 "max": 0
               },
-              "nextMaintenanceKm": {
+              "referenceMileage": {
                 "type": "integer",
-                "of": "Address",
-                "title": "Próxima quilometragem prevista",
-                "description": "Quilometragem calculada para a próxima manutenção preventiva; serve de referência para o alerta de vencimento.",
+                "required": true,
+                "of": "ContactSummary",
+                "title": "Quilometragem de referência",
+                "description": "Quilometragem do veículo que inicia a contagem do próximo ciclo preventivo.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
-              "nextMaintenanceDate": {
+              "referenceDate": {
                 "type": "date",
-                "of": "Address",
-                "title": "Próxima data prevista",
-                "description": "Data calculada para a próxima manutenção preventiva quando houver periodicidade por meses.",
+                "required": true,
+                "of": "ContactSummary",
+                "title": "Data de referência",
+                "description": "Data que inicia a contagem do próximo ciclo preventivo por tempo.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
+              },
+              "nextPreventiveMileage": {
+                "type": "integer",
+                "derived": true,
+                "title": "Próxima quilometragem preventiva",
+                "description": "Quilometragem prevista para a próxima manutenção, calculada a partir da quilometragem de referência e do intervalo em quilômetros quando o plano usa quilometragem."
+              },
+              "nextPreventiveDate": {
+                "type": "date",
+                "derived": true,
+                "title": "Próxima data preventiva",
+                "description": "Data prevista para a próxima manutenção, calculada a partir da data de referência e do intervalo em meses quando o plano usa tempo."
+              },
+              "preventiveOverdue": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Preventiva vencida",
+                "description": "O veículo atingiu ou ultrapassou a próxima quilometragem preventiva, ou alcançou a próxima data preventiva, conforme os intervalos definidos neste plano e a quilometragem atual do veículo."
               }
             }
           }
@@ -1360,12 +1411,12 @@
       }
     },
     {
-      "schemaVersion": "2026-09-15-ns5-ontology-v3",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "manutencaoFrota",
       "entityId": "MaintenanceOrder",
       "title": "Ordem de manutenção",
-      "description": "Ordem aberta para manutenção preventiva vencida ou para correção de defeito de um veículo.",
-      "displayField": "id",
+      "description": "Ordem aberta para registrar e acompanhar uma manutenção preventiva vencida ou o reparo de um defeito do veículo.",
+      "displayField": "details.description",
       "relationships": {
         "vehicle": {
           "relationshipId": "maintenanceOrderVehicle",
@@ -1373,9 +1424,19 @@
           "via": "MaintenanceOrder.vehicleId",
           "cardinality": "N:1",
           "title": "Veículo da ordem",
-          "description": "Cada ordem de manutenção trata um único veículo.",
+          "description": "Cada ordem de manutenção pertence a um único veículo da frota.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": "sempre"
+        },
+        "maintenancePlan": {
+          "relationshipId": "maintenanceOrderPlan",
+          "to": "MaintenancePlan",
+          "via": "MaintenanceOrder.maintenancePlanId",
+          "cardinality": "N:1",
+          "title": "Plano preventivo",
+          "description": "A ordem pode decorrer de um plano de manutenção preventiva.",
+          "mode": "fk",
+          "required": "quando o tipo de manutenção for preventiva"
         },
         "workshop": {
           "relationshipId": "maintenanceOrderWorkshop",
@@ -1385,28 +1446,23 @@
           "title": "Oficina responsável",
           "description": "Cada ordem informa a oficina responsável pela execução do serviço.",
           "mode": "fk",
-          "required": "Sempre"
-        },
-        "maintenancePlan": {
-          "relationshipId": "maintenanceOrderPlan",
-          "to": "MaintenancePlan",
-          "via": "MaintenanceOrder.maintenancePlanId",
-          "cardinality": "N:1",
-          "title": "Plano preventivo de origem",
-          "description": "Uma ordem preventiva pode decorrer de um plano de manutenção vencido.",
-          "mode": "fk",
-          "required": "Quando a ordem decorrer de manutenção preventiva vencida"
+          "required": "sempre"
         }
       },
       "capabilities": {
-        "read.byId": "Lê uma ordem de manutenção pelo identificador, para o gestor consultar uma ordem já selecionada.",
-        "locate.byColumn": "Lista ordens de manutenção pelos veículos, oficinas ou planos associados, com paginação, para o gestor localizar a ordem desejada.",
-        "listByForeignKey": "Lista as ordens vinculadas a um veículo, oficina ou plano de manutenção, para consulta operacional do gestor.",
-        "create": "Cria uma ordem de manutenção para um veículo, por defeito ou por plano preventivo vencido, usada pelo gestor de frota.",
-        "update": "Atualiza a descrição, o custo e a data de saída de uma ordem após a execução da manutenção, usada pelo gestor de frota.",
-        "read.mdmRecord": "Lê os registros mestres do veículo e da oficina referenciados pela ordem, para o gestor visualizar seus dados sem copiá-los para a ordem."
+        "read.byId": "Lê uma ordem de manutenção pelo identificador da linha para o gestor consultar os dados já selecionados.",
+        "locate.byColumn": "Lista ordens de manutenção por veículo, plano, oficina ou data de entrada, com paginação, para o gestor localizar e acompanhar serviços.",
+        "count": "Conta as ordens de manutenção conforme os filtros indexados para o gestor visualizar totais da consulta.",
+        "listByForeignKey": "Lista as ordens vinculadas a um veículo, plano preventivo ou oficina para compor as respectivas consultas.",
+        "create": "Cria uma ordem de manutenção vinculada ao veículo e à oficina para o gestor registrar uma preventiva vencida ou um defeito.",
+        "update": "Atualiza os dados da ordem, incluindo custo final e data de saída, para o gestor registrar a conclusão do serviço.",
+        "read.mdmRecord": "Lê os registros mestres do veículo e da oficina apontados pela ordem para o gestor ver seus dados sem copiá-los na transação."
       },
-      "rules": [],
+      "rules": [
+        "preventiveOrderRequiresPlan",
+        "repairOrderDoesNotRequirePlan",
+        "completionRequiresExitDateAndFinalCost"
+      ],
       "kind": "entity",
       "class": "core",
       "storage": {
@@ -1437,7 +1493,20 @@
               "Vehicle"
             ],
             "title": "Veículo",
-            "description": "Veículo que receberá a manutenção.",
+            "description": "Veículo da frota que receberá a manutenção registrada nesta ordem.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "maintenancePlanId": {
+            "type": "record",
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "MaintenancePlan"
+            ],
+            "title": "Plano de manutenção",
+            "description": "Plano preventivo que originou a ordem, quando a manutenção decorrer de uma preventiva.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -1451,20 +1520,18 @@
               "Workshop"
             ],
             "title": "Oficina",
-            "description": "Oficina responsável pela execução do serviço de manutenção.",
+            "description": "Oficina responsável pelo serviço descrito na ordem de manutenção.",
             "maxLength": 0,
             "min": 0,
             "max": 0
           },
-          "maintenancePlanId": {
-            "type": "record",
+          "entryDate": {
+            "type": "date",
+            "required": true,
             "indexed": true,
             "of": "Address",
-            "to": [
-              "MaintenancePlan"
-            ],
-            "title": "Plano de manutenção",
-            "description": "Plano preventivo vencido que motivou a ordem, quando aplicável.",
+            "title": "Data de entrada",
+            "description": "Data em que o veículo entrou na oficina para o serviço desta ordem.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -1473,37 +1540,58 @@
             "type": "object",
             "required": true,
             "of": "Address",
-            "title": "Dados da ordem de manutenção",
-            "description": "Informações operacionais registradas para a manutenção do veículo.",
+            "title": "Dados da ordem",
+            "description": "Informações da manutenção que não são usadas como chave de consulta da ordem.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
+              "maintenanceType": {
+                "type": "enum",
+                "required": true,
+                "of": "Address",
+                "values": [
+                  {
+                    "value": "preventive",
+                    "title": "Preventiva",
+                    "description": "Manutenção aberta em razão de um plano preventivo."
+                  },
+                  {
+                    "value": "repair",
+                    "title": "Reparo de defeito",
+                    "description": "Manutenção aberta para corrigir um defeito identificado no veículo."
+                  }
+                ],
+                "title": "Tipo de manutenção",
+                "description": "Indica se a ordem foi aberta para uma manutenção preventiva ou para reparar um defeito.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
               "description": {
                 "type": "text",
                 "required": true,
                 "of": "Address",
-                "title": "Descrição",
-                "description": "Descrição do defeito informado ou do serviço preventivo a executar.",
+                "title": "Descrição do serviço",
+                "description": "Descrição da manutenção preventiva necessária ou do defeito que será reparado.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
-              "cost": {
+              "estimatedCost": {
                 "type": "money",
                 "of": "Address",
-                "title": "Custo",
-                "description": "Custo da manutenção, informado ou ajustado quando disponível.",
+                "title": "Custo previsto",
+                "description": "Custo previsto para o serviço, quando essa estimativa estiver disponível ao abrir a ordem.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
-              "entryDate": {
-                "type": "date",
-                "required": true,
+              "finalCost": {
+                "type": "money",
                 "of": "Address",
-                "title": "Data de entrada",
-                "description": "Data em que o veículo entrou para manutenção.",
+                "title": "Custo final",
+                "description": "Custo efetivo informado quando o serviço de manutenção é concluído.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -1512,10 +1600,16 @@
                 "type": "date",
                 "of": "Address",
                 "title": "Data de saída",
-                "description": "Data em que a manutenção foi concluída e o veículo saiu da oficina.",
+                "description": "Data em que o veículo saiu da oficina após a conclusão do serviço.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
+              },
+              "completed": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Manutenção concluída",
+                "description": "A ordem está concluída quando a data de saída do veículo da oficina foi informada."
               }
             }
           }
@@ -1541,7 +1635,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a dirigir o veículo.",
+      "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a conduzir o veículo.",
       "field": "VehicleAssignment.driverId"
     },
     {
@@ -1551,7 +1645,7 @@
       "type": "manyToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Os veículos visíveis ao motorista são derivados das atribuições de veículo registradas para ele.",
+      "description": "Os motoristas que podem consultar e conduzir um veículo são obtidos pelas suas atribuições de veículo.",
       "through": "VehicleAssignment",
       "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
       "derived": true
@@ -1563,7 +1657,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada abastecimento é registrado para um único veículo.",
+      "description": "Todo abastecimento é registrado para um único veículo atribuído.",
       "field": "Fueling.vehicleId"
     },
     {
@@ -1573,7 +1667,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada abastecimento registra o motorista que o realizou.",
+      "description": "Todo abastecimento identifica o motorista que o registrou.",
       "field": "Fueling.driverId"
     },
     {
@@ -1583,7 +1677,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada plano preventivo define a periodicidade de manutenção de um veículo.",
+      "description": "Cada plano preventivo é definido para um veículo da frota.",
       "field": "MaintenancePlan.vehicleId"
     },
     {
@@ -1593,18 +1687,8 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada ordem de manutenção trata um único veículo.",
+      "description": "Cada ordem de manutenção pertence a um único veículo.",
       "field": "MaintenanceOrder.vehicleId"
-    },
-    {
-      "relationshipId": "maintenanceOrderWorkshop",
-      "from": "MaintenanceOrder",
-      "to": "Workshop",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada ordem de manutenção informa a oficina responsável pela execução do serviço.",
-      "field": "MaintenanceOrder.workshopId"
     },
     {
       "relationshipId": "maintenanceOrderPlan",
@@ -1613,8 +1697,18 @@
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Uma ordem preventiva pode decorrer de um plano de manutenção vencido; ordens por defeito não precisam de plano.",
+      "description": "Uma ordem preventiva pode decorrer de um plano de manutenção; ordens por defeito não exigem plano.",
       "field": "MaintenanceOrder.maintenancePlanId"
+    },
+    {
+      "relationshipId": "maintenanceOrderWorkshop",
+      "from": "MaintenanceOrder",
+      "to": "Workshop",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada ordem de manutenção informa a oficina responsável pelo serviço.",
+      "field": "MaintenanceOrder.workshopId"
     }
   ],
   "removedOrphans": [],
@@ -1668,17 +1762,7 @@
     {
       "kind": "tightened",
       "entityId": "Vehicle",
-      "detail": "Vehicle.details.identification.countryCode.pattern"
-    },
-    {
-      "kind": "tightened",
-      "entityId": "Vehicle",
       "detail": "Vehicle.details.assetVehicle.plate.required"
-    },
-    {
-      "kind": "tightened",
-      "entityId": "Vehicle",
-      "detail": "Vehicle.details.assetVehicle.plate.pattern"
     },
     {
       "kind": "tightened",
@@ -1692,8 +1776,18 @@
     },
     {
       "kind": "derivedFromPlatform",
+      "entityId": "Vehicle",
+      "detail": "record.fields.details.manutencaoFrota.fields.preventiveMaintenanceMileageOverdue.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
       "entityId": "Driver",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Driver",
+      "detail": "Driver.details.identification.subtype.values"
     },
     {
       "kind": "namespaceEmpty",
@@ -1709,6 +1803,11 @@
       "kind": "tightened",
       "entityId": "Workshop",
       "detail": "Workshop.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Workshop",
+      "detail": "Workshop.details.identification.docType.values"
     },
     {
       "kind": "tightened",
@@ -1737,8 +1836,28 @@
     },
     {
       "kind": "derivedFromPlatform",
+      "entityId": "MaintenancePlan",
+      "detail": "record.fields.details.fields.nextPreventiveMileage.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "MaintenancePlan",
+      "detail": "record.fields.details.fields.nextPreventiveDate.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "MaintenancePlan",
+      "detail": "record.fields.details.fields.preventiveOverdue.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
       "entityId": "MaintenanceOrder",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "MaintenanceOrder",
+      "detail": "record.fields.details.fields.completed.derived (derived[])"
     }
   ]
 }

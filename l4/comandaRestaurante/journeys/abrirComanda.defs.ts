@@ -8,36 +8,36 @@ export const abrirComandaJourney = {
   "business": {
     "actorRef": "garcom",
     "title": "Abrir comanda para uma mesa",
-    "goal": "Iniciar o atendimento de uma mesa disponível.",
+    "goal": "Iniciar o atendimento de uma mesa ocupada com uma comanda aberta.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarMesaDisponivel",
+        "stepId": "localizarMesa",
         "kind": "locate",
         "entity": "Mesa",
-        "title": "Localizar mesa disponível",
-        "description": "Localiza e seleciona uma mesa disponível para o novo atendimento."
+        "title": "Localizar mesa",
+        "description": "Localiza a mesa que receberá a comanda e confirma que ela está disponível."
       },
       {
-        "stepId": "abrirComandaParaMesa",
+        "stepId": "criarComanda",
         "kind": "act",
         "entity": "Comanda",
         "effect": "create",
         "title": "Abrir comanda",
-        "description": "Abre uma comanda vinculada à mesa selecionada; a mesa passa a estar ocupada."
+        "description": "Abre uma comanda vinculada à mesa selecionada, deixando-a disponível para o lançamento de itens."
       }
     ],
     "outcome": {
-      "statement": "Uma comanda aberta fica vinculada à mesa selecionada.",
+      "statement": "Uma comanda aberta fica associada à mesa para registrar o consumo.",
       "evidence": [
-        "A comanda possui identificação, mesa vinculada e situação aberta.",
-        "A mesa é apresentada como ocupada."
+        "A comanda aberta está identificada para a mesa selecionada.",
+        "A mesa passa a estar ocupada pela comanda."
       ]
     }
   },
-  "businessHash": "sha256:548a6fcc6bd524ddb8f3a06cc6cebe7d7a68224ff3207f06f1451d85b1051c24"
+  "businessHash": "sha256:11342c75532e708c14dfc42502689718e156c9e987285dd0c03ba28120a096ad"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AbrirComandaJourneyType = typeof abrirComandaJourney;

@@ -3,11 +3,11 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaEntityDriver = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "manutencaoFrota",
   "entityId": "Driver",
   "title": "Motorista",
-  "description": "Pessoa da transportadora que dirige veículos atribuídos e registra seus abastecimentos.",
+  "description": "Pessoa que conduz veículos atribuídos e registra os abastecimentos realizados.",
   "displayField": "details.identification.name",
   "relationships": {
     "vehicleAssignments": {
@@ -15,11 +15,12 @@ export const manutencaoFrotaEntityDriver = {
       "to": "VehicleAssignment",
       "via": "VehicleAssignment.driverId",
       "cardinality": "1:N",
-      "title": "Atribuições de veículos",
-      "description": "Atribuições que vinculam este motorista aos veículos que está autorizado a dirigir.",
+      "title": "Atribuições de veículo",
+      "description": "Atribuições que autorizam este motorista a conduzir veículos.",
       "mode": "fk",
       "direction": "to",
-      "required": "Sempre que houver uma atribuição de veículo para este motorista."
+      "required": true,
+      "role": "motorista atribuído"
     },
     "assignedVehicles": {
       "relationshipId": "vehicleAssignedDrivers",
@@ -27,43 +28,42 @@ export const manutencaoFrotaEntityDriver = {
       "via": "VehicleAssignment",
       "cardinality": "N:N",
       "title": "Veículos atribuídos",
-      "description": "Veículos visíveis ao motorista, derivados das atribuições de veículo registradas para ele.",
+      "description": "Veículos que este motorista pode consultar e conduzir, obtidos pelas atribuições de veículo.",
       "mode": "throughTable",
       "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
       "derived": true,
       "direction": "to",
-      "required": "Quando existir uma atribuição ativa entre o motorista e o veículo."
+      "role": "motorista autorizado"
     },
     "fuelings": {
       "relationshipId": "fuelingDriver",
       "to": "Fueling",
       "via": "Fueling.driverId",
       "cardinality": "1:N",
-      "title": "Abastecimentos realizados",
+      "title": "Abastecimentos registrados",
       "description": "Abastecimentos registrados por este motorista.",
       "mode": "fk",
       "direction": "to",
-      "required": "Sempre que o motorista registrar um abastecimento."
+      "required": true,
+      "role": "motorista registrador"
     }
   },
   "capabilities": {
-    "read.byId": "Consulta um motorista pelo identificador MDM, por leitura direta do registro mestre, para telas de atribuição, abastecimento e gestão de frota.",
-    "locate.byName": "Localiza motoristas pelo nome no índice MDM para o gestor selecionar a pessoa em atribuições de veículos.",
-    "locate.byDocument": "Localiza um motorista pelo documento nacional para evitar duplicidade ao cadastrá-lo ou vinculá-lo ao módulo.",
-    "locate.byContact": "Localiza a pessoa motorista por canal de contato para confirmar um cadastro existente antes de criar ou vincular seu papel.",
-    "register.createOrAttach": "Cria a pessoa quando ela não existe ou anexa o papel de Motorista ao registro existente, pela deduplicação por documento ou contato, para o gestor de frota manter os motoristas.",
-    "edit.platformFields": "Atualiza os dados de identificação permitidos do motorista no registro mestre, reindexando a identificação quando necessário, para o gestor de frota manter o cadastro.",
-    "inactivate": "Inativa ou reativa o papel de motorista sem apagar seu registro mestre, pela alteração de status MDM, para o gestor retirar motoristas de uso.",
-    "link.contact": "Vincula um canal de contato ao motorista criando um ContactChannel e a relação HasContact, para o gestor manter formas de contato sem gravá-las no módulo.",
-    "listLinks": "Lista vínculos ativos e históricos do motorista pelo serviço de relacionamentos MDM, para consultar suas relações cadastrais.",
-    "tag": "Aplica etiquetas livres no namespace do módulo no índice de tags, para o gestor organizar motoristas sem criar campos próprios.",
-    "audit": "Consulta quem alterou os dados do motorista e quando no log de auditoria MDM, para o gestor rastrear alterações cadastrais.",
-    "invite.login": "Convida o motorista para acesso, criando a linha de login no índice de tags e acionando a identidade da plataforma, para que ele consulte veículos atribuídos e registre abastecimentos."
+    "read.byId": "Consulta um motorista pelo identificador mestre, carregando seu nome para atribuições e abastecimentos, para gestores e telas que já possuem o identificador.",
+    "locate.byName": "Localiza pessoas pelo nome para selecionar ou conferir um motorista durante o cadastro de atribuições, para o gestor de frota.",
+    "locate.byDocument": "Localiza uma pessoa pelo documento nacional para evitar duplicidade ao cadastrar ou associar um motorista, para o gestor de frota.",
+    "register.createOrAttach": "Cria a pessoa quando não existir ou anexa o papel de Motorista ao registro mestre encontrado por documento, para o gestor de frota.",
+    "edit.platformFields": "Atualiza os dados de identificação do motorista mantidos pela plataforma, para o gestor de frota.",
+    "inactivate": "Inativa ou reativa o registro mestre de um motorista que deixou de operar na frota, para o gestor de frota.",
+    "listLinks": "Exibe as atribuições, os veículos autorizados e os abastecimentos relacionados ao motorista, para o gestor de frota.",
+    "invite.login": "Convida o motorista para acessar o sistema com seu próprio login, para o gestor de frota.",
+    "audit": "Mostra quem alterou os dados do motorista e quando, por meio da auditoria da plataforma, para o gestor de frota."
   },
   "rules": [
     "rule-foreign-namespace-refused",
     "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
+    "rule-person-ssn-unique-for-us",
     "rule-person-privacy-consent-required-br-eu"
   ],
   "writer": "crud",
@@ -89,19 +89,70 @@ export const manutencaoFrotaEntityDriver = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre da pessoa no MDM, com os dados de identificação usados pela manutenção de frota e o espaço exclusivo do módulo.",
+        "description": "Documento mestre da pessoa que atua como motorista na manutenção de frota.",
         "fields": {
           "identification": {
             "type": "object",
             "owner": "platform",
             "fields": {
+              "subtype": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Person",
+                    "title": "Pessoa",
+                    "description": "Pessoa física."
+                  }
+                ],
+                "description": "Indica que este registro mestre é uma pessoa que exerce o papel de motorista.",
+                "title": "Tipo de cadastro",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
               "name": {
                 "type": "string",
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nome pelo qual o motorista é identificado nas atribuições de veículos e nos abastecimentos.",
+                "description": "Nome pelo qual o motorista é identificado nas atribuições de veículo e nos abastecimentos.",
                 "title": "Nome",
+                "min": 0,
+                "max": 0
+              },
+              "status": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Active",
+                    "title": "Ativo",
+                    "description": "Registro disponível para uso."
+                  },
+                  {
+                    "value": "Inactive",
+                    "title": "Inativo",
+                    "description": "Registro fora de uso."
+                  },
+                  {
+                    "value": "Merged",
+                    "title": "Mesclado",
+                    "description": "Registro incorporado a outro registro mestre."
+                  },
+                  {
+                    "value": "Blocked",
+                    "title": "Bloqueado",
+                    "description": "Registro bloqueado pela plataforma."
+                  }
+                ],
+                "title": "Situação",
+                "description": "Situação de atividade do registro mestre do motorista.",
+                "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
@@ -117,46 +168,46 @@ export const manutencaoFrotaEntityDriver = {
                   {
                     "value": "EIN",
                     "title": "EIN",
-                    "description": "Identificador fiscal de organização dos Estados Unidos."
+                    "description": "Identificador fiscal empresarial dos Estados Unidos."
                   },
                   {
                     "value": "Passport",
                     "title": "Passaporte",
-                    "description": "Documento de passaporte."
+                    "description": "Passaporte."
                   },
                   {
                     "value": "DriversLicense",
                     "title": "Carteira de motorista",
-                    "description": "Documento de habilitação para dirigir."
+                    "description": "Documento de habilitação."
                   },
                   {
                     "value": "NationalId",
                     "title": "Documento nacional",
-                    "description": "Documento nacional de identificação."
+                    "description": "Documento nacional de identidade."
                   },
                   {
                     "value": "CPF",
                     "title": "CPF",
-                    "description": "Cadastro de Pessoas Físicas do Brasil."
+                    "description": "Cadastro de Pessoas Físicas."
                   },
                   {
                     "value": "CNPJ",
                     "title": "CNPJ",
-                    "description": "Cadastro Nacional da Pessoa Jurídica do Brasil."
+                    "description": "Cadastro Nacional da Pessoa Jurídica."
                   },
                   {
                     "value": "VAT",
-                    "title": "Identificador fiscal",
-                    "description": "Identificador fiscal de outro país."
+                    "title": "VAT",
+                    "description": "Identificador de imposto sobre valor agregado."
                   },
                   {
                     "value": "Other",
                     "title": "Outro",
-                    "description": "Outro tipo de documento aceito pela plataforma."
+                    "description": "Outro documento reconhecido."
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional usado para localizar ou deduplicar o cadastro do motorista.",
+                "description": "Tipo do documento nacional usado para identificar e deduplicar o motorista quando informado.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -164,7 +215,7 @@ export const manutencaoFrotaEntityDriver = {
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento nacional do motorista, usado na deduplicação do registro mestre.",
+                "description": "Número do documento nacional informado para deduplicar o motorista.",
                 "title": "Número do documento",
                 "maxLength": 0,
                 "min": 0,
@@ -177,31 +228,31 @@ export const manutencaoFrotaEntityDriver = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "Código ISO do país que define as regras aplicáveis ao cadastro do motorista.",
+                "description": "Código ISO do país aplicável ao documento e às regras legais do motorista.",
                 "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação da pessoa que atua como motorista na transportadora."
+            "description": "Dados de identificação da pessoa mantidos pela plataforma e usados para reconhecer e manter o motorista."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados básicos compartilhados da pessoa no MDM; este módulo não mantém campos próprios nesta seção."
+            "description": "Dados básicos da plataforma que este papel não utiliza diretamente."
           },
           "person": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados pessoais da pessoa no MDM; nenhum campo adicional é necessário para o papel de motorista."
+            "description": "Dados próprios de pessoa mantidos pela plataforma que este papel não utiliza diretamente."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização para uso compartilhado entre módulos; este módulo apenas os lê."
+            "description": "Dados promovidos pela organização, apenas para leitura pelo módulo."
           },
           "manutencaoFrota": {
             "type": "object",

@@ -7,44 +7,58 @@ export const startApplicationScreeningJourney = {
   "journeyId": "startApplicationScreening",
   "business": {
     "actorRef": "recruiter",
-    "title": "Start candidate screening",
-    "goal": "Record a candidate's application for an open job position and begin screening.",
+    "title": "Start screening an application",
+    "goal": "Associate a candidate with an open job position and begin screening.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "locateCandidate",
+        "stepId": "locateCandidateForApplication",
         "kind": "locate",
         "entity": "Candidate",
-        "title": "Find the candidate.",
-        "description": "Locate the registered candidate, or use the candidate already in context."
+        "title": "x",
+        "description": "Locate the candidate who is applying."
       },
       {
-        "stepId": "locateOpenPosition",
+        "stepId": "inspectCandidateForApplication",
+        "kind": "inspect",
+        "entity": "Candidate",
+        "title": "x",
+        "description": "Review the candidate information and available resume."
+      },
+      {
+        "stepId": "locateOpenJobPosition",
         "kind": "locate",
         "entity": "JobPosition",
-        "title": "Find the open position.",
+        "title": "x",
         "description": "Locate the open job position for the application."
+      },
+      {
+        "stepId": "inspectJobPositionRequirements",
+        "kind": "inspect",
+        "entity": "JobPosition",
+        "title": "x",
+        "description": "Review the job position and its remaining hiring need."
       },
       {
         "stepId": "createApplication",
         "kind": "act",
         "entity": "Application",
         "effect": "create",
-        "title": "Create the application.",
-        "description": "Record the candidate's application for the selected job position in screening."
+        "title": "x",
+        "description": "Record the candidate's application for the selected job position and start it in screening."
       }
     ],
     "outcome": {
-      "statement": "The candidate has an application in the screening stage for the job position.",
+      "statement": "The candidate has an application in the screening stage for the selected position.",
       "evidence": [
-        "An application links the candidate and job position.",
-        "The application shows the screening stage."
+        "An application links the candidate to the job position.",
+        "The application stage is screening."
       ]
     }
   },
-  "businessHash": "sha256:e3b29d46b4de044aaba2fae8ad2b8a046ebaef5cfaf6256c436f67652ee2cf4a"
+  "businessHash": "sha256:867c6c9c9e21cd4daffc0e72d15b87ad25a87336ebbc4954136bc29f5dd97e36"
 } as const satisfies Ns5JourneyArtifact;
 
 export type StartApplicationScreeningJourneyType = typeof startApplicationScreeningJourney;

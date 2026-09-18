@@ -3,186 +3,119 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteEntityMesa = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "comandaRestaurante",
   "entityId": "Mesa",
   "title": "Mesa",
-  "description": "Mesa física do restaurante utilizada para vincular e identificar o atendimento por comanda; sua disponibilidade é derivada das comandas abertas.",
+  "description": "Mesa operada pelo restaurante, disponível ou ocupada conforme as comandas abertas vinculadas a ela.",
   "displayField": "details.identification.name",
   "relationships": {
-    "comandaParaMesa": {
-      "relationshipId": "comandaParaMesa",
+    "comandas": {
+      "relationshipId": "comandaMesa",
       "to": "Comanda",
       "via": "Comanda.mesaId",
       "cardinality": "1:N",
       "title": "Comandas da mesa",
-      "description": "Comandas abertas e encerradas que foram vinculadas a esta mesa em atendimentos distintos.",
+      "description": "Comandas abertas ou já encerradas para esta mesa ao longo dos atendimentos.",
       "mode": "fk",
       "direction": "to",
-      "required": "Ao abrir uma comanda para a mesa."
+      "required": "Não é obrigatória; uma mesa pode não ter comandas vinculadas.",
+      "role": "mesa"
     }
   },
   "capabilities": {
-    "read.byId": "Lê uma mesa pelo identificador mestre, por consulta direta do registro, para o garçom carregar a mesa já selecionada.",
-    "locate.byName": "Localiza mesas pelo nome no índice de localizações, para o garçom selecionar a mesa do atendimento.",
-    "register.createOrAttach": "Cria ou vincula a mesa física ao papel do módulo após localizar o registro mestre, para o garçom iniciar atendimento em uma mesa cadastrada.",
-    "edit.platformFields": "Atualiza nome, código e demais dados de localização permitidos no registro mestre, pela atualização do documento, para a manutenção operacional das mesas.",
-    "inactivate": "Inativa ou reativa uma mesa pelo status mestre, impedindo ou permitindo seu uso em novos atendimentos, para a manutenção operacional.",
-    "listLinks": "Lista as comandas relacionadas à mesa pela relação comandaParaMesa, para consulta do histórico de atendimentos.",
-    "statusHistory.read": "Consulta as alterações de status do cadastro mestre da mesa no histórico da plataforma, para a manutenção operacional.",
-    "audit": "Consulta quem alterou o cadastro mestre da mesa e quando no registro de auditoria, para a conferência administrativa.",
-    "comandaRestaurante.locateAvailable": "Lista mesas ativas sem comanda aberta por consulta das comandas vinculadas, para o garçom selecionar uma mesa disponível antes de abrir o atendimento."
+    "read.byId": "Consulta uma mesa pelo identificador da linha no repositório de mesas para as telas que já possuem seu id, usada pelo garçom e pelo caixa.",
+    "locate.byColumn": "Localiza mesas pelo número indexado, com ordenação e paginação, para o garçom selecionar uma mesa antes de abrir a comanda.",
+    "count": "Conta as mesas que atendem aos critérios de número no repositório para a lista de mesas usada por usuários internos autorizados.",
+    "listByForeignKey": "Lista as comandas que apontam para esta mesa pela chave estrangeira de Comanda para conferir seus atendimentos, usada pelo caixa.",
+    "create": "Cadastra uma mesa com número único e nome de apresentação no repositório de mesas, usado por usuário interno autorizado a manter o salão.",
+    "update": "Altera o número ou o nome de apresentação de uma mesa no repositório de mesas, usado por usuário interno autorizado a manter o salão.",
+    "uniqueKey": "Recusa o cadastro de outra mesa com o mesmo número pelo índice único da tabela, aplicado pelo motor em toda gravação."
   },
   "rules": [
-    "rule-foreign-namespace-refused",
-    "rule-document-shape-validated",
-    "rule-identity-never-in-namespace"
+    "mesaDisponivelParaAbrirComanda"
   ],
-  "kind": "role",
-  "subtype": "Location",
-  "roleTag": "comandaRestaurante.Mesa",
-  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "writer": "crud",
+  "kind": "entity",
+  "class": "supporting",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "comandaRestaurante_mesa",
+    "kind": "relational"
+  },
   "record": {
     "fields": {
       "id": {
         "type": "uuid",
         "required": true,
-        "indexed": true,
         "derived": true,
-        "description": "mdmId; stable through promotion and merge."
+        "indexed": true,
+        "title": "Id"
       },
       "version": {
         "type": "integer",
         "required": true,
-        "derived": true,
-        "description": "Bumped by the engine on every write; optimistic concurrency."
+        "derived": true
+      },
+      "number": {
+        "type": "integer",
+        "required": true,
+        "unique": true,
+        "indexed": true,
+        "of": "Address",
+        "title": "Número da mesa",
+        "description": "Número que identifica a mesa no restaurante e permite localizá-la no atendimento.",
+        "maxLength": 0,
+        "min": 1,
+        "max": 0
       },
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre da mesa física usada nos atendimentos do restaurante.",
+        "of": "Address",
+        "title": "Detalhes da mesa",
+        "description": "Informações descritivas da mesa que não são usadas como filtro.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0,
         "fields": {
           "identification": {
             "type": "object",
-            "owner": "platform",
+            "required": true,
+            "of": "Address",
+            "title": "Identificação",
+            "description": "Identificação apresentada da mesa no restaurante.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
             "fields": {
-              "subtype": {
-                "type": "enum",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "values": [
-                  {
-                    "value": "Location",
-                    "title": "Localização física do restaurante.",
-                    "description": "Registro mestre de local físico."
-                  }
-                ],
-                "description": "Subtipo mestre Location que identifica este registro como local físico.",
-                "title": "Subtipo",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
               "name": {
                 "type": "string",
                 "required": true,
-                "indexed": true,
-                "maxLength": 0,
-                "description": "Nome pelo qual o garçom reconhece e seleciona a mesa para abrir uma comanda.",
+                "of": "Address",
                 "title": "Nome da mesa",
-                "min": 0,
-                "max": 0
-              },
-              "status": {
-                "type": "enum",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "values": [
-                  {
-                    "value": "Active",
-                    "title": "Ativa",
-                    "description": "Mesa disponível para uso no cadastro mestre."
-                  },
-                  {
-                    "value": "Inactive",
-                    "title": "Inativa",
-                    "description": "Mesa retirada de uso no cadastro mestre."
-                  },
-                  {
-                    "value": "Merged",
-                    "title": "Mesclada",
-                    "description": "Registro mestre mesclado a outro registro."
-                  },
-                  {
-                    "value": "Blocked",
-                    "title": "Bloqueada",
-                    "description": "Registro mestre bloqueado pela plataforma."
-                  }
-                ],
-                "title": "Status do cadastro",
-                "description": "Situação mestre da mesa; mesas inativas não devem ser usadas em novos atendimentos.",
-                "maxLength": 0,
+                "description": "Nome apresentado para a mesa nas telas de atendimento.",
+                "maxLength": 80,
                 "min": 0,
                 "max": 0
               }
-            },
-            "description": "Dados de identificação da mesa no cadastro mestre."
+            }
           },
-          "base": {
-            "type": "object",
-            "owner": "platform",
-            "fields": {},
-            "description": "Dados básicos da plataforma mantidos para a mesa quando aplicáveis."
-          },
-          "location": {
-            "type": "object",
-            "owner": "platform",
-            "fields": {
-              "locationType": {
-                "type": "enum",
-                "required": true,
-                "values": [
-                  {
-                    "value": "Other",
-                    "title": "Outro local físico",
-                    "description": "Classificação de plataforma para uma mesa de restaurante."
-                  }
-                ],
-                "title": "Tipo de localização",
-                "description": "Classificação de localização usada para representar a mesa física do restaurante.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
-              "locationCode": {
-                "type": "string",
-                "title": "Código da mesa",
-                "description": "Código de identificação operacional da mesa, como seu número no salão.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              }
-            },
-            "description": "Características de localização física da mesa no restaurante."
-          },
-          "general": {
-            "type": "object",
-            "owner": "organization",
-            "open": true,
-            "description": "Dados promovidos pela organização, somente para leitura pelo módulo."
-          },
-          "comandaRestaurante": {
-            "type": "object",
-            "owner": "module",
-            "fields": {},
-            "description": "Module namespace; the prompt asked for no data of this module about the record."
+          "available": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Disponível",
+            "description": "A mesa está disponível quando não possui comanda aberta vinculada."
           }
         }
       }
     }
-  }
+  },
+  "uniqueKeys": [
+    [
+      "number"
+    ]
+  ]
 } as const satisfies Ns5OntologyEntityV3;
 
 export type ComandaRestauranteEntityMesaType = typeof comandaRestauranteEntityMesa;

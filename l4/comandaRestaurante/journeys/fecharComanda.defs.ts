@@ -7,8 +7,8 @@ export const fecharComandaJourney = {
   "journeyId": "fecharComanda",
   "business": {
     "actorRef": "caixa",
-    "title": "Fechar comanda e registrar pagamento",
-    "goal": "Receber uma comanda aberta, aplicar desconto quando necessário e liberar a mesa.",
+    "title": "Fechar comanda e liberar mesa",
+    "goal": "Registrar o pagamento de uma comanda, aplicar eventual desconto e concluir o atendimento da mesa.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,34 +18,34 @@ export const fecharComandaJourney = {
         "kind": "locate",
         "entity": "Comanda",
         "title": "Localizar comanda aberta",
-        "description": "Usa a comanda em contexto ou localiza a comanda aberta que será encerrada."
+        "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa para fechamento."
       },
       {
-        "stepId": "consultarTotalDaComanda",
+        "stepId": "consultarTotal",
         "kind": "inspect",
         "entity": "Comanda",
         "title": "Consultar total",
-        "description": "Confere os itens válidos e o total a receber da comanda."
+        "description": "Confere o total calculado a partir dos itens válidos lançados na comanda."
       },
       {
-        "stepId": "fecharEregistrarPagamento",
+        "stepId": "concluirFechamento",
         "kind": "act",
         "entity": "Comanda",
         "effect": "transition",
         "transitionRef": "fecharComanda",
         "title": "Fechar comanda",
-        "description": "Aplica desconto opcional, registra a forma de pagamento e encerra a comanda; a mesa vinculada fica livre."
+        "description": "Aplica um desconto, quando houver, registra a forma de pagamento e fecha a comanda, liberando a mesa."
       }
     ],
     "outcome": {
-      "statement": "A comanda é encerrada com o pagamento registrado e a mesa é liberada.",
+      "statement": "A comanda é encerrada com o pagamento registrado e a mesa fica disponível.",
       "evidence": [
-        "A comanda apresenta situação fechada, desconto aplicado quando houver e forma de pagamento registrada.",
-        "A mesa vinculada é apresentada como disponível."
+        "A comanda fechada apresenta o total final, o desconto aplicado quando existente e a forma de pagamento.",
+        "A mesa vinculada à comanda está livre para novo atendimento."
       ]
     }
   },
-  "businessHash": "sha256:fa13c88de6d38f155b78106eccccd347b1a52e8f93440c9d5af87b8446deab58"
+  "businessHash": "sha256:523a96944308896534532d4f3f50e3a97e502b77bb03f9bc1ae37b83b6b91486"
 } as const satisfies Ns5JourneyArtifact;
 
 export type FecharComandaJourneyType = typeof fecharComandaJourney;

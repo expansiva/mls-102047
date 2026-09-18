@@ -3,9 +3,9 @@
 import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaOntologyIndex = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
-  "businessDomain": "Agenda clínica para cadastro de pacientes, agendamento e acompanhamento de consultas",
+  "businessDomain": "Agenda clínica",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "agendaClinica",
@@ -23,6 +23,11 @@ export const agendaClinicaOntologyIndex = {
       "subtype": "Person"
     },
     {
+      "entityId": "Recepcionista",
+      "kind": "role",
+      "subtype": "Person"
+    },
+    {
       "entityId": "ContatoPaciente",
       "kind": "role",
       "subtype": "ContactChannel"
@@ -30,39 +35,39 @@ export const agendaClinicaOntologyIndex = {
     {
       "entityId": "Consulta",
       "kind": "entity",
-      "class": "core"
+      "class": "event"
     }
   ],
   "relationships": [
     {
-      "relationshipId": "consultaPaciente",
+      "relationshipId": "patientContacts",
+      "from": "Paciente",
+      "to": "ContatoPaciente",
+      "type": "oneToMany",
+      "required": true,
+      "mode": "mdmRelationship",
+      "description": "O paciente possui canais de contato, incluindo telefone para confirmação da consulta.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "appointmentPatient",
       "from": "Consulta",
       "to": "Paciente",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é agendada para um paciente.",
-      "field": "Consulta.pacienteId"
+      "description": "Cada consulta é agendada para um único paciente.",
+      "field": "Consulta.patientId"
     },
     {
-      "relationshipId": "consultaProfissional",
+      "relationshipId": "appointmentProfessional",
       "from": "Consulta",
       "to": "Profissional",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é atribuída a um profissional responsável pelo atendimento.",
-      "field": "Consulta.profissionalId"
-    },
-    {
-      "relationshipId": "pacienteHasContact",
-      "from": "Paciente",
-      "to": "ContatoPaciente",
-      "type": "oneToMany",
-      "required": false,
-      "mode": "mdmRelationship",
-      "description": "O paciente possui canais de contato usados para comunicação e confirmação de consultas.",
-      "catalogType": "HasContact"
+      "description": "Cada consulta é realizada por um único profissional.",
+      "field": "Consulta.professionalId"
     }
   ]
 } as const satisfies Ns5OntologyIndexV3;

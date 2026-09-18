@@ -3,54 +3,53 @@
 import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const financeiroEntityTituloReceber = {
-  "schemaVersion": "2026-09-15-ns5-ontology-v3",
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "financeiro",
   "entityId": "TituloReceber",
   "title": "Título a receber",
   "description": "Cobrança originada em outro módulo, com pagador, valor, vencimento, origem e saldo a receber.",
-  "displayField": "id",
+  "displayField": "number",
   "relationships": {
     "pagador": {
-      "relationshipId": "tituloPagador",
+      "relationshipId": "tituloTemPagador",
       "to": "Pagador",
       "via": "TituloReceber.pagadorId",
       "cardinality": "N:1",
       "title": "Pagador do título",
-      "description": "Cada título a receber pertence a um único pagador; um pagador pode ter vários títulos.",
+      "description": "O título pertence ao pagador responsável por sua quitação.",
       "mode": "fk",
-      "required": "Sempre, para identificar quem deve o valor.",
+      "required": "sempre",
       "role": "pagador"
     },
     "recebimentos": {
-      "relationshipId": "recebimentoTitulo",
+      "relationshipId": "recebimentoDoTitulo",
       "to": "Recebimento",
-      "via": "Recebimento.tituloId",
+      "via": "Recebimento.tituloReceberId",
       "cardinality": "1:N",
       "title": "Recebimentos do título",
-      "description": "Relaciona as baixas totais ou parciais registradas para este título.",
+      "description": "Recebimentos lançados para quitar total ou parcialmente este título.",
       "mode": "fk",
       "direction": "to",
-      "required": "Quando houver baixa ou estorno registrado para o título.",
-      "role": "recebimentos"
+      "required": "quando houver recebimento lançado para o título",
+      "role": "título recebido"
     }
   },
   "capabilities": {
-    "read.byId": "Lê um título pelo identificador da linha · consulta o repositório por id · usado por caixa, gerente financeiro, pagador e integrações que já possuem o título selecionado.",
-    "locate.byColumn": "Lista títulos por pagador, vencimento, saldo em aberto ou origem · filtra e pagina pelas colunas indexadas · usado por caixa, gerente financeiro e pagador conforme seu escopo de dados.",
-    "count": "Conta os títulos que atendem aos critérios de consulta · executa a mesma filtragem da lista sem paginação · usado pelo gerente financeiro nos totais de listas e pelo portal do pagador.",
-    "listByForeignKey": "Lista os títulos vinculados a um pagador · consulta pela chave estrangeira pagadorId · usado pelo gerente financeiro para o extrato e pelo portal para os próprios títulos.",
-    "create": "Registra o título recebido de uma cobrança originada em outro módulo · insere a linha de entrada com pagador, valores, vencimento e referência de origem · usado pela integração interna de origem.",
-    "update": "Atualiza o saldo em aberto calculado do título · grava a alteração na mesma linha após um recebimento ou estorno · usado pelo processamento financeiro autorizado.",
-    "uniqueKey": "Impede a duplicação de uma cobrança recebida · aplica índice único sobre módulo e referência de origem · usado pelo motor em cada entrada inbound.",
-    "transaction": "Grava a baixa ou o estorno e o saldo correspondente de forma atômica · executa as escritas de título e recebimento em uma transação · usado pelo caixa, pelo portal do pagador e pela Stripe.",
-    "read.mdmRecord": "Lê os dados mestres do pagador sem copiá-los no título · hidrata o registro MDM apontado por pagadorId · usado pelo caixa, gerente financeiro e portal do pagador.",
-    "financeiro.listarTitulosVencidos": "Lista títulos vencidos que ainda têm saldo a receber · consulta vencimento anterior à data atual e saldo aberto positivo · usado pelo gerente financeiro.",
-    "financeiro.resumirRecebiveis": "Calcula o painel de recebíveis por período e origem · agrupa os títulos pelos critérios solicitados e soma seus saldos abertos · usado pelo gerente financeiro.",
-    "financeiro.emitirExtratoPorPagador": "Monta a posição financeira de um pagador · combina títulos e recebimentos vinculados ao pagador informado · usado pelo gerente financeiro."
+    "read.byId": "Consulta um título pelo identificador da linha para exibir seus dados, saldo e situação a quem já o selecionou.",
+    "locate.byColumn": "Localiza títulos por pagador, vencimento, módulo de origem ou registro de origem, com ordenação e paginação, para caixa, gerente financeiro e pagador dentro do seu escopo.",
+    "count": "Conta os títulos que correspondem aos filtros de pagador, período ou origem para os indicadores de consulta do gerente financeiro.",
+    "listByForeignKey": "Lista os títulos vinculados a um ou mais pagadores pela chave de pagador, para o portal e para a emissão de extrato.",
+    "create": "Registra, pela entrada do módulo de origem, um novo título a receber com pagador, valor e vencimento.",
+    "uniqueKey": "Impede duplicidade do número do título e da cobrança recebida do mesmo registro de origem.",
+    "transaction": "Grava de forma atômica o título recebido da origem e sua identificação sequencial quando a entrada exigir ambas as operações.",
+    "read.mdmRecord": "Lê o registro mestre do pagador apontado pelo título para mostrar seu nome no caixa, nas análises e no portal.",
+    "sequence.next": "Emite o próximo número sequencial do título a receber quando uma cobrança ingressa no financeiro.",
+    "financeiro.localizarTitulosEmAberto": "Localiza títulos com saldo em aberto, inclusive vencidos, calculando a situação pelos recebimentos vinculados para o caixa, gerente financeiro e pagador no respectivo escopo."
   },
   "rules": [
-    "origemCobrancaUnica",
-    "saldoTituloConsistente"
+    "tituloOrigemUnico",
+    "saldoTituloCalculado",
+    "valorRecebimentoNaoExcedeSaldo"
   ],
   "writer": "inbound",
   "kind": "entity",
@@ -74,6 +73,18 @@ export const financeiroEntityTituloReceber = {
         "required": true,
         "derived": true
       },
+      "number": {
+        "type": "string",
+        "required": true,
+        "unique": true,
+        "indexed": true,
+        "of": "Address",
+        "title": "Número do título",
+        "description": "Número sequencial usado para identificar e localizar o título a receber.",
+        "maxLength": 0,
+        "min": 0,
+        "max": 0
+      },
       "pagadorId": {
         "type": "record",
         "required": true,
@@ -83,53 +94,41 @@ export const financeiroEntityTituloReceber = {
           "Pagador"
         ],
         "title": "Pagador",
-        "description": "Pessoa responsável pelo pagamento deste título a receber.",
+        "description": "Pessoa responsável pelo pagamento do título.",
         "maxLength": 0,
         "min": 0,
         "max": 0
       },
-      "vencimento": {
+      "dueDate": {
         "type": "date",
         "required": true,
         "indexed": true,
         "of": "Address",
         "title": "Vencimento",
-        "description": "Data limite prevista para o pagamento do título.",
+        "description": "Data em que o valor do título vence, usada para localizar recebíveis por período e identificar vencidos.",
         "maxLength": 0,
         "min": 0,
         "max": 0
       },
-      "saldoAberto": {
-        "type": "money",
-        "required": true,
-        "indexed": true,
-        "of": "Address",
-        "title": "Saldo em aberto",
-        "description": "Valor ainda a receber, recalculado a partir dos recebimentos não estornados vinculados ao título.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
-      },
-      "origemModulo": {
+      "originModule": {
         "type": "string",
         "required": true,
         "indexed": true,
         "of": "Address",
         "title": "Módulo de origem",
-        "description": "Identificador do módulo que gerou a cobrança recebida.",
-        "pattern": "^[a-z][A-Za-z0-9]*$",
+        "description": "Módulo que gerou a cobrança encaminhada ao contas a receber.",
         "maxLength": 100,
         "min": 0,
         "max": 0
       },
-      "origemReferencia": {
-        "type": "string",
+      "originRecordId": {
+        "type": "uuid",
         "required": true,
         "indexed": true,
         "of": "Address",
-        "title": "Referência da origem",
-        "description": "Identificador da cobrança ou do documento que originou este título no módulo de origem.",
-        "maxLength": 200,
+        "title": "Registro de origem",
+        "description": "Identificador do registro no módulo de origem que gerou esta cobrança.",
+        "maxLength": 0,
         "min": 0,
         "max": 0
       },
@@ -137,21 +136,45 @@ export const financeiroEntityTituloReceber = {
         "type": "object",
         "required": true,
         "of": "Address",
-        "title": "Detalhes do título",
-        "description": "Dados financeiros próprios da cobrança que não são usados como critério de busca ou ordenação.",
+        "title": "Dados do título",
+        "description": "Dados financeiros próprios da cobrança recebida de outro módulo.",
         "maxLength": 0,
         "min": 0,
         "max": 0,
         "fields": {
-          "valorOriginal": {
+          "amount": {
             "type": "money",
             "required": true,
             "of": "Address",
             "title": "Valor original",
-            "description": "Valor total cobrado quando o título foi recebido do módulo de origem.",
+            "description": "Valor total cobrado na criação do título.",
             "maxLength": 0,
             "min": 0,
             "max": 0
+          },
+          "totalReceived": {
+            "type": "money",
+            "derived": true,
+            "title": "Total recebido",
+            "description": "Soma dos recebimentos não estornados lançados para este título."
+          },
+          "outstandingBalance": {
+            "type": "money",
+            "derived": true,
+            "title": "Saldo em aberto",
+            "description": "Valor original do título menos a soma dos recebimentos não estornados vinculados a ele."
+          },
+          "situation": {
+            "type": "string",
+            "derived": true,
+            "title": "Situação",
+            "description": "Em aberto quando não há recebimento, parcialmente recebido quando o saldo em aberto é menor que o valor original, ou quitado quando não há saldo em aberto."
+          },
+          "overdue": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Vencido",
+            "description": "Título com saldo em aberto e vencimento anterior à data de hoje."
           }
         }
       }
@@ -159,8 +182,11 @@ export const financeiroEntityTituloReceber = {
   },
   "uniqueKeys": [
     [
-      "origemModulo",
-      "origemReferencia"
+      "number"
+    ],
+    [
+      "originModule",
+      "originRecordId"
     ]
   ]
 } as const satisfies Ns5OntologyEntityV3;

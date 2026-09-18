@@ -8,29 +8,28 @@ export const openJobPositionJourney = {
   "business": {
     "actorRef": "recruiter",
     "title": "Open a job position",
-    "goal": "Create an open position with its hiring requirements.",
+    "goal": "Make an approved hiring need available for applications under its responsible hiring manager.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "enterPositionDetails",
+        "stepId": "createJobPosition",
         "kind": "act",
         "entity": "JobPosition",
         "effect": "create",
-        "title": "Enter the position title, department, description, and headcount.",
-        "description": "Create the job position with its title, department, description, and required headcount."
+        "title": "x",
+        "description": "Open a job position with its title, department, description, headcount, and responsible hiring manager."
       }
     ],
     "outcome": {
-      "statement": "An open job position is available for candidate applications.",
+      "statement": "The job position is open and can receive applications.",
       "evidence": [
-        "The job position shows its title, department, description, and headcount.",
-        "The job position is available in the hiring pipeline."
+        "An open job position shows its title, department, headcount, and responsible hiring manager."
       ]
     }
   },
-  "businessHash": "sha256:d4dabe707059f458dea26e050c4ee82d13c0ec124291bf02d94244ef7951cabc"
+  "businessHash": "sha256:7ac9c25de1f7cd87566ebeb5b5b0f0ddce28067ada2e671697289023b1accc97"
 } as const satisfies Ns5JourneyArtifact;
 
 export type OpenJobPositionJourneyType = typeof openJobPositionJourney;

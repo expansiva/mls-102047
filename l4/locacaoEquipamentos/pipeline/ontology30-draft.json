@@ -1,335 +1,753 @@
 {
   "plan": {
     "moduleName": "locacaoEquipamentos",
-    "businessDomain": "Locação de equipamentos para construção, incluindo contratos, devoluções e acompanhamento da situação dos equipamentos.",
+    "businessDomain": "Locação de equipamentos para construção",
     "entities": [
       {
         "entityId": "Cliente",
+        "kind": "role",
+        "family": "mdm",
         "title": "Cliente",
-        "description": "Pessoa cadastrada como cliente da locadora e vinculada aos seus contratos de locação.",
-        "kind": "mdm",
-        "party": "person",
-        "mdmSubtype": "Person",
-        "displayField": "name",
-        "storage": {
-          "target": "mdm",
-          "scope": "organization",
-          "idField": "id",
-          "mdmType": "locacaoEquipamentos.Cliente"
-        }
+        "description": "Pessoa cadastrada na organização que realiza contratos de locação de equipamentos.",
+        "displayField": "details.identification.name",
+        "subtype": "Person",
+        "roleTag": "locacaoEquipamentos.Cliente",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
       },
       {
         "entityId": "Equipamento",
+        "kind": "entity",
+        "family": "tdm",
         "title": "Equipamento",
-        "description": "Equipamento de construção disponibilizado para locação, com situação operacional acompanhada pela locadora.",
-        "kind": "mdm",
-        "party": "none",
-        "mdmSubtype": "AssetEquipment",
-        "displayField": "name",
-        "storage": {
-          "target": "mdm",
-          "scope": "organization",
-          "idField": "id",
-          "mdmType": "locacaoEquipamentos.Equipamento"
-        }
-      },
-      {
-        "entityId": "Atendente",
-        "title": "Atendente",
-        "description": "Profissional da locadora responsável pelos contratos que cria e pelas devoluções que registra.",
-        "kind": "mdm",
-        "party": "person",
-        "mdmSubtype": "Person",
-        "displayField": "name",
+        "description": "Equipamento de construção operado pela locadora, identificado por código, com diária e situação operacional acompanhada no módulo.",
+        "displayField": "code",
         "writer": "crud",
+        "class": "core",
         "storage": {
-          "target": "mdm",
-          "scope": "organization",
-          "idField": "id",
-          "mdmType": "locacaoEquipamentos.Atendente"
+          "target": "moduleDatabase",
+          "table": "locacaoEquipamentos_equipamento",
+          "kind": "relational"
         }
       },
       {
         "entityId": "ContratoLocacao",
+        "kind": "entity",
+        "family": "tdm",
         "title": "Contrato de locação",
-        "description": "Registro da locação de equipamentos para um cliente, com período previsto e encerramento por devolução.",
-        "kind": "core",
-        "party": "none",
-        "displayField": "contractNumber",
+        "description": "Contrato que registra a locação de equipamentos para um cliente, o período previsto e a devolução efetiva.",
+        "displayField": "id",
+        "class": "core",
         "storage": {
           "target": "moduleDatabase",
-          "scope": "module",
-          "idField": "id",
-          "mdmType": "locacaoEquipamentos.ContratoLocacao"
+          "table": "locacaoEquipamentos_contratolocacao",
+          "kind": "relational"
         }
       },
       {
-        "entityId": "RentalItem",
-        "title": "Item de locação",
-        "description": "Item de um contrato que identifica o equipamento reservado para o período de locação.",
-        "kind": "supporting",
-        "party": "none",
-        "displayField": "equipment",
-        "mutability": "appendOnly",
+        "entityId": "ItemContratoLocacao",
+        "kind": "entity",
+        "family": "tdm",
+        "title": "Item do contrato de locação",
+        "description": "Equipamento individual incluído em um contrato, com a diária aplicável à locação e os valores necessários para apurar multa por atraso.",
+        "displayField": "id",
+        "class": "supporting",
         "storage": {
           "target": "moduleDatabase",
-          "scope": "module",
-          "idField": "id",
-          "mdmType": "locacaoEquipamentos.RentalItem"
+          "table": "locacaoEquipamentos_itemcontratolocacao",
+          "kind": "relational"
         }
       }
     ],
     "relationships": [
       {
-        "relationshipId": "clientHasRentalContracts",
-        "fromEntity": "Cliente",
-        "toEntity": "ContratoLocacao",
-        "type": "oneToMany",
-        "required": true,
-        "description": "O cliente é titular dos contratos de locação realizados em seu nome.",
-        "persistence": {
-          "mode": "crossStoreReference"
-        }
-      },
-      {
-        "relationshipId": "attendantCreatesRentalContracts",
-        "fromEntity": "Atendente",
-        "toEntity": "ContratoLocacao",
-        "type": "oneToMany",
-        "required": true,
-        "description": "O atendente é responsável pelos contratos de locação que cria.",
-        "persistence": {
-          "mode": "crossStoreReference"
-        }
-      },
-      {
-        "relationshipId": "rentalContractIncludesItems",
-        "fromEntity": "ContratoLocacao",
-        "toEntity": "RentalItem",
-        "type": "oneToMany",
-        "required": true,
-        "description": "O contrato de locação contém um ou mais itens de locação.",
-        "persistence": {
-          "mode": "moduleReference"
-        }
-      },
-      {
-        "relationshipId": "rentalItemReservesEquipment",
-        "fromEntity": "RentalItem",
-        "toEntity": "Equipamento",
+        "relationshipId": "contratoLocacaoCliente",
+        "from": "ContratoLocacao",
+        "to": "Cliente",
         "type": "manyToOne",
         "required": true,
-        "description": "O item de locação reserva um equipamento específico para o contrato.",
-        "persistence": {
-          "mode": "crossStoreReference"
-        }
+        "mode": "fk",
+        "description": "Cada contrato de locação pertence a um cliente.",
+        "field": "ContratoLocacao.clienteId"
+      },
+      {
+        "relationshipId": "contratoLocacaoItens",
+        "from": "ContratoLocacao",
+        "to": "ItemContratoLocacao",
+        "type": "oneToMany",
+        "required": true,
+        "mode": "fk",
+        "description": "Cada contrato de locação possui um ou mais itens de equipamentos.",
+        "field": "ItemContratoLocacao.contratoLocacaoId"
+      },
+      {
+        "relationshipId": "itemContratoLocacaoEquipamento",
+        "from": "ItemContratoLocacao",
+        "to": "Equipamento",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Cada item do contrato identifica o equipamento locado.",
+        "field": "ItemContratoLocacao.equipamentoId"
+      },
+      {
+        "relationshipId": "contratoLocacaoEquipamentos",
+        "from": "ContratoLocacao",
+        "to": "Equipamento",
+        "type": "manyToMany",
+        "required": true,
+        "mode": "throughTable",
+        "description": "Os equipamentos de um contrato são obtidos pelos seus itens de locação.",
+        "through": "ItemContratoLocacao",
+        "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
+        "derived": true
       }
     ],
     "normalizations": [
       {
-        "kind": "writerDerived",
-        "entityId": "RentalItem",
-        "detail": "parent via ContratoLocacao.rentalContractIncludesItems",
-        "writerKind": "parent",
-        "via": {
-          "entityId": "ContratoLocacao",
-          "relationshipId": "rentalContractIncludesItems"
-        }
+        "kind": "derivedFromPlatform",
+        "entityId": "Cliente",
+        "detail": "roleTag locacaoEquipamentos.Cliente; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Equipamento",
+        "detail": "storage.table locacaoEquipamentos_equipamento"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "ContratoLocacao",
+        "detail": "storage.table locacaoEquipamentos_contratolocacao"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "ItemContratoLocacao",
+        "detail": "storage.table locacaoEquipamentos_itemcontratolocacao"
       }
     ]
   },
   "entities": [
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "locacaoEquipamentos",
       "entityId": "Cliente",
       "title": "Cliente",
-      "description": "Pessoa cadastrada como cliente da locadora e vinculada aos seus contratos de locação.",
-      "kind": "mdm",
-      "party": "person",
-      "mdmSubtype": "Person",
-      "displayField": "name",
-      "fields": [],
-      "lifecycleStates": [],
-      "transitions": [],
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "locacaoEquipamentos.Cliente"
+      "description": "Pessoa cadastrada na organização que realiza contratos de locação de equipamentos.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "contratosLocacao": {
+          "relationshipId": "contratoLocacaoCliente",
+          "to": "ContratoLocacao",
+          "via": "ContratoLocacao.clienteId",
+          "cardinality": "1:N",
+          "title": "Contratos de locação do cliente",
+          "description": "Contratos de locação vinculados a este cliente; cada contrato pertence obrigatoriamente a um cliente.",
+          "mode": "fk",
+          "direction": "to",
+          "required": "Nunca é obrigatório que o cliente já possua contratos de locação.",
+          "role": "cliente"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Lê o cadastro mestre de um cliente pelo identificador conhecido · usa leitura por mdmId no índice e no documento · atendente e gerente ao consultar dados de um contrato.",
+        "locate.byName": "Localiza clientes pelo nome informado · pesquisa o índice de pessoas por nome e situação · atendente antes de criar um contrato de locação.",
+        "locate.byDocument": "Localiza um cliente pelo documento nacional · consulta o índice por tipo e número de documento para evitar duplicidade · atendente ao cadastrar ou selecionar o cliente.",
+        "register.createOrAttach": "Cria a pessoa quando ainda não existe ou associa a pessoa existente ao papel de Cliente · deduplica pelo documento e anexa a tag locacaoEquipamentos.Cliente · atendente ao registrar cliente para uma locação.",
+        "edit.platformFields": "Atualiza os dados de identificação do cliente mantidos pela plataforma · grava os campos da camada mestre e atualiza seu índice quando necessário · atendente na manutenção do cadastro.",
+        "inactivate": "Inativa ou reativa o cadastro mestre do cliente sem excluí-lo · altera a situação ativa ou inativa do registro · gerente ao impedir ou restabelecer o uso do cliente em novas locações.",
+        "comment": "Registra uma observação sobre o cadastro do cliente · cria comentário vinculado ao registro mestre no módulo · atendente e gerente quando precisarem contextualizar o atendimento.",
+        "audit": "Consulta as alterações realizadas no cadastro do cliente · lê a trilha de auditoria do registro mestre · gerente ao acompanhar a manutenção cadastral."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
+        "rule-person-privacy-consent-required-br-eu"
+      ],
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "locacaoEquipamentos.Cliente",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "Documento mestre da pessoa que atua como cliente nas locações de equipamentos.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Pessoa",
+                        "description": "Pessoa física cadastrada como cliente."
+                      }
+                    ],
+                    "description": "Indica que este registro mestre é uma pessoa.",
+                    "title": "Tipo de cadastro",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 0,
+                    "description": "Nome pelo qual o cliente é identificado durante a locação.",
+                    "title": "Nome",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo",
+                        "description": "Cadastro disponível para uso."
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo",
+                        "description": "Cadastro fora de uso para novas locações."
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado",
+                        "description": "Cadastro unido a outro registro mestre."
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado",
+                        "description": "Cadastro bloqueado pela plataforma."
+                      }
+                    ],
+                    "title": "Situação do cadastro",
+                    "description": "Situação mestre que define se o cliente pode ser utilizado em novos contratos.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "docType": {
+                    "type": "enum",
+                    "indexed": true,
+                    "values": [
+                      {
+                        "value": "SSN",
+                        "title": "SSN",
+                        "description": "Documento social dos Estados Unidos."
+                      },
+                      {
+                        "value": "EIN",
+                        "title": "EIN",
+                        "description": "Identificador empresarial dos Estados Unidos."
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte",
+                        "description": "Passaporte."
+                      },
+                      {
+                        "value": "DriversLicense",
+                        "title": "Carteira de habilitação",
+                        "description": "Documento de habilitação."
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Identidade nacional",
+                        "description": "Documento de identidade nacional."
+                      },
+                      {
+                        "value": "CPF",
+                        "title": "CPF",
+                        "description": "Cadastro de Pessoa Física."
+                      },
+                      {
+                        "value": "CNPJ",
+                        "title": "CNPJ",
+                        "description": "Cadastro Nacional da Pessoa Jurídica."
+                      },
+                      {
+                        "value": "VAT",
+                        "title": "VAT",
+                        "description": "Identificador tributário."
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro",
+                        "description": "Outro documento aceito pela organização."
+                      }
+                    ],
+                    "title": "Tipo de documento",
+                    "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do cliente.",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "docId": {
+                    "type": "string",
+                    "indexed": true,
+                    "description": "Número do documento apresentado para identificar o cliente e localizar cadastro já existente.",
+                    "title": "Número do documento",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 0,
+                    "default": "US",
+                    "description": "Código do país ao qual se aplicam o documento e as regras do cliente.",
+                    "title": "País do cadastro",
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados de identificação do cadastro mestre usados para reconhecer e localizar o cliente."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {},
+                "description": "Dados comuns do cadastro mestre da pessoa; nenhum campo adicional é usado especificamente nesta locação."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consentimento de privacidade do cliente quando exigido pelas regras aplicáveis.",
+                    "title": "Consentimento de privacidade",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados próprios de pessoa física aplicáveis ao cliente."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Dados promovidos pela organização e compartilhados entre módulos; este módulo apenas os lê."
+              },
+              "locacaoEquipamentos": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
       }
     },
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "locacaoEquipamentos",
       "entityId": "Equipamento",
       "title": "Equipamento",
-      "description": "Equipamento de construção disponibilizado para locação, com situação operacional acompanhada pela locadora.",
-      "kind": "mdm",
-      "party": "none",
-      "mdmSubtype": "AssetEquipment",
-      "displayField": "name",
-      "fields": [
-        {
-          "fieldId": "rentalCode",
-          "title": "Código do equipamento",
-          "type": "string",
-          "required": true,
-          "unique": true,
-          "constraints": {
-            "maxLength": 100
-          },
-          "description": "Código interno usado pela locadora para identificar o equipamento."
+      "description": "Equipamento de construção operado pela locadora, identificado por código, com diária e situação operacional acompanhada no módulo.",
+      "displayField": "code",
+      "relationships": {
+        "itensContratoLocacao": {
+          "relationshipId": "itemContratoLocacaoEquipamento",
+          "to": "ItemContratoLocacao",
+          "via": "ItemContratoLocacao.equipamentoId",
+          "cardinality": "1:N",
+          "title": "Itens de contrato de locação",
+          "description": "Itens de contratos de locação que identificam este equipamento.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
         },
-        {
-          "fieldId": "dailyRate",
-          "title": "Valor da diária",
-          "type": "money",
-          "required": true,
-          "constraints": {
+        "contratosLocacao": {
+          "relationshipId": "contratoLocacaoEquipamentos",
+          "to": "ContratoLocacao",
+          "via": "ItemContratoLocacao",
+          "cardinality": "N:N",
+          "title": "Contratos de locação",
+          "description": "Contratos que incluem este equipamento por meio dos respectivos itens de locação.",
+          "mode": "throughTable",
+          "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
+          "derived": true,
+          "direction": "to",
+          "required": true
+        }
+      },
+      "capabilities": {
+        "read.byId": "Consulta um equipamento pelo identificador da linha no repositório, para telas que já possuem esse identificador.",
+        "locate.byColumn": "Lista equipamentos por código ou situação indexada, com ordenação e paginação, para o atendente localizar equipamentos e o gerente acompanhar sua situação.",
+        "count": "Conta os equipamentos que atendem ao filtro de situação, para os indicadores de disponibilidade do gerente.",
+        "create": "Cadastra um equipamento com código, descrição, valor da diária e situação inicial, para o gerente manter a frota de locação.",
+        "update": "Altera a descrição ou o valor da diária do equipamento no repositório, para o gerente manter seus dados comerciais.",
+        "transition": "Move a situação indexada entre disponível, locado e em manutenção, conforme a locação, devolução ou manutenção registrada por atendente ou gerente.",
+        "uniqueKey": "Garante por índice único que não existam dois equipamentos com o mesmo código na locadora.",
+        "locacaoEquipamentos.consultarDisponibilidadePeriodo": "Verifica nos itens de contratos se o equipamento está livre no período solicitado, para o atendente incluí-lo somente quando não houver locação com período sobreposto."
+      },
+      "rules": [
+        "periodosLocacaoSemSobreposicao",
+        "equipamentoEmManutencaoNaoPodeSerLocado"
+      ],
+      "writer": "crud",
+      "kind": "entity",
+      "class": "core",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "locacaoEquipamentos_equipamento",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "code": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Código",
+            "description": "Código único usado pela locadora para identificar e localizar o equipamento.",
+            "maxLength": 0,
             "min": 0,
-            "precision": 2
+            "max": 0
           },
-          "description": "Valor cobrado por dia de locação do equipamento."
+          "status": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "values": [
+              {
+                "value": "available",
+                "title": "Disponível",
+                "description": "Equipamento disponível para uma nova locação."
+              },
+              {
+                "value": "rented",
+                "title": "Locado",
+                "description": "Equipamento atualmente em locação."
+              },
+              {
+                "value": "maintenance",
+                "title": "Em manutenção",
+                "description": "Equipamento indisponível enquanto passa por manutenção."
+              }
+            ],
+            "title": "Situação",
+            "description": "Situação operacional atual do equipamento para acompanhamento da disponibilidade pela locadora.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "of": "Address",
+            "title": "Dados do equipamento",
+            "description": "Informações descritivas e comerciais do equipamento que não são usadas como índice de consulta.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
+            "fields": {
+              "description": {
+                "type": "text",
+                "required": true,
+                "of": "Address",
+                "title": "Descrição",
+                "description": "Descrição do equipamento de construção oferecido para locação.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "dailyRate": {
+                "type": "money",
+                "required": true,
+                "of": "Address",
+                "title": "Valor da diária",
+                "description": "Valor cobrado por dia de locação do equipamento.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              }
+            }
+          }
+        }
+      },
+      "uniqueKeys": [
+        [
+          "code"
+        ]
+      ],
+      "lifecycleStates": [
+        {
+          "state": "available",
+          "reachedBy": "actor"
         },
         {
-          "fieldId": "operationalSituation",
-          "title": "Situação operacional",
-          "type": "string",
-          "required": true,
-          "enum": [
-            {
-              "value": "available",
-              "title": "Disponível"
-            },
-            {
-              "value": "rented",
-              "title": "Locado"
-            },
-            {
-              "value": "maintenance",
-              "title": "Em manutenção"
-            }
-          ],
-          "description": "Situação operacional atual do equipamento para fins de locação."
+          "state": "rented",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "maintenance",
+          "reachedBy": "actor"
         }
       ],
-      "lifecycleStates": [],
-      "transitions": [],
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "locacaoEquipamentos.Equipamento"
-      }
+      "transitions": [
+        {
+          "transitionId": "registrarLocacao",
+          "from": [
+            "available"
+          ],
+          "to": "rented",
+          "by": [
+            "atendente"
+          ],
+          "description": "Registra que o equipamento foi entregue para locação.",
+          "ruleRefs": [
+            "periodosLocacaoSemSobreposicao",
+            "equipamentoEmManutencaoNaoPodeSerLocado"
+          ]
+        },
+        {
+          "transitionId": "registrarDevolucao",
+          "from": [
+            "rented"
+          ],
+          "to": "available",
+          "by": [
+            "atendente"
+          ],
+          "description": "Registra a devolução do equipamento e o torna disponível novamente."
+        },
+        {
+          "transitionId": "iniciarManutencao",
+          "from": [
+            "available"
+          ],
+          "to": "maintenance",
+          "by": [
+            "gerente"
+          ],
+          "description": "Coloca o equipamento em manutenção, impedindo novas locações."
+        },
+        {
+          "transitionId": "concluirManutencao",
+          "from": [
+            "maintenance"
+          ],
+          "to": "available",
+          "by": [
+            "gerente"
+          ],
+          "description": "Conclui a manutenção e libera o equipamento para locação."
+        }
+      ]
     },
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
-      "moduleName": "locacaoEquipamentos",
-      "entityId": "Atendente",
-      "title": "Atendente",
-      "description": "Profissional da locadora responsável pelos contratos que cria e pelas devoluções que registra.",
-      "kind": "mdm",
-      "party": "person",
-      "mdmSubtype": "Person",
-      "displayField": "name",
-      "fields": [],
-      "lifecycleStates": [],
-      "transitions": [],
-      "storage": {
-        "target": "mdm",
-        "scope": "organization",
-        "idField": "id",
-        "mdmType": "locacaoEquipamentos.Atendente"
-      },
-      "writer": "crud"
-    },
-    {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "locacaoEquipamentos",
       "entityId": "ContratoLocacao",
       "title": "Contrato de locação",
-      "description": "Registro da locação de equipamentos para um cliente, com período previsto e encerramento por devolução.",
-      "kind": "core",
-      "party": "none",
-      "displayField": "contractNumber",
-      "fields": [
-        {
-          "fieldId": "id",
-          "title": "Identificador",
-          "type": "uuid",
-          "required": true,
-          "description": "Identificador único do contrato de locação."
+      "description": "Contrato que registra a locação de equipamentos para um cliente, o período previsto e a devolução efetiva.",
+      "displayField": "id",
+      "relationships": {
+        "cliente": {
+          "relationshipId": "contratoLocacaoCliente",
+          "to": "Cliente",
+          "via": "ContratoLocacao.clienteId",
+          "cardinality": "N:1",
+          "title": "Cliente do contrato",
+          "description": "Cliente para quem este contrato de locação foi criado.",
+          "mode": "fk",
+          "required": "Sempre."
         },
-        {
-          "fieldId": "contractNumber",
-          "title": "Número do contrato",
-          "type": "string",
-          "required": true,
-          "unique": true,
-          "description": "Número sequencial que identifica o contrato de locação."
+        "itens": {
+          "relationshipId": "contratoLocacaoItens",
+          "to": "ItemContratoLocacao",
+          "via": "ItemContratoLocacao.contratoLocacaoId",
+          "cardinality": "1:N",
+          "title": "Itens do contrato",
+          "description": "Itens que registram os equipamentos incluídos neste contrato.",
+          "mode": "fk",
+          "required": "Sempre, com pelo menos um equipamento locado."
         },
-        {
-          "fieldId": "clienteId",
-          "title": "Cliente",
-          "type": "uuid",
-          "required": true,
-          "description": "Referência ao cliente titular do contrato de locação."
-        },
-        {
-          "fieldId": "atendenteId",
-          "title": "Atendente responsável",
-          "type": "uuid",
-          "required": true,
-          "description": "Referência ao atendente responsável pela criação do contrato."
-        },
-        {
-          "fieldId": "pickupDate",
-          "title": "Data de retirada",
-          "type": "date",
-          "required": true,
-          "description": "Data prevista para retirada dos equipamentos locados."
-        },
-        {
-          "fieldId": "expectedReturnDate",
-          "title": "Data prevista de devolução",
-          "type": "date",
-          "required": true,
-          "description": "Data prevista para devolução dos equipamentos."
-        },
-        {
-          "fieldId": "actualReturnDate",
-          "title": "Data real de devolução",
-          "type": "date",
-          "required": false,
-          "description": "Data em que os equipamentos foram efetivamente devolvidos."
-        },
-        {
-          "fieldId": "status",
-          "title": "Situação do contrato",
-          "type": "string",
-          "required": true,
-          "enum": [
-            {
-              "value": "open",
-              "title": "Em aberto"
-            },
-            {
-              "value": "completed",
-              "title": "Concluído"
-            }
-          ],
-          "description": "Situação atual do contrato de locação."
+        "equipamentos": {
+          "relationshipId": "contratoLocacaoEquipamentos",
+          "to": "Equipamento",
+          "via": "ItemContratoLocacao",
+          "cardinality": "N:N",
+          "title": "Equipamentos locados",
+          "description": "Equipamentos obtidos pelos itens deste contrato de locação.",
+          "mode": "throughTable",
+          "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
+          "derived": true,
+          "required": "Sempre, por meio dos itens do contrato."
         }
+      },
+      "capabilities": {
+        "read.byId": "Lê um contrato pelo identificador no repositório para o atendente consultar uma locação já selecionada.",
+        "locate.byColumn": "Lista contratos por cliente, situação e datas indexadas para o atendente localizar a locação em devolução e o gerente acompanhar locações.",
+        "count": "Conta contratos conforme os filtros de cliente, situação e período para exibir totais nas listas do atendente e do gerente.",
+        "listByForeignKey": "Lista os contratos vinculados a um cliente pela chave estrangeira para consultar o histórico de locações desse cliente.",
+        "create": "Cria o contrato com cliente, período e itens em uma operação de locação realizada pelo atendente.",
+        "transition": "Move o contrato de em aberto para encerrado ao registrar a devolução pelo atendente.",
+        "transaction": "Grava o contrato e seus itens de equipamentos de forma atômica para o atendente não deixar uma locação incompleta.",
+        "read.mdmRecord": "Lê o registro mestre apontado por clienteId para mostrar os dados do cliente ao atendente e ao gerente."
+      },
+      "rules": [
+        "contratoComPeloMenosUmEquipamento",
+        "equipamentoSemPeriodosSobrepostos",
+        "multaAtrasoLocacao"
       ],
-      "details": {
-        "lateDays": {
-          "type": "integer",
-          "description": "Quantidade de dias de atraso calculada a partir das datas prevista e real de devolução."
-        },
-        "lateFee": {
-          "type": "money",
-          "description": "Multa calculada pela soma das diárias dos itens multiplicada pelos dias de atraso e por 1,5."
+      "kind": "entity",
+      "class": "core",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "locacaoEquipamentos_contratolocacao",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "clienteId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "Cliente"
+            ],
+            "title": "Cliente",
+            "description": "Cliente para quem o contrato de locação foi registrado.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "status": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "values": [
+              {
+                "value": "open",
+                "title": "Em aberto",
+                "description": "Locação criada e ainda sem devolução registrada."
+              },
+              {
+                "value": "closed",
+                "title": "Encerrado",
+                "description": "Locação cuja devolução foi registrada."
+              }
+            ],
+            "title": "Situação do contrato",
+            "description": "Situação operacional do contrato de locação, usada para distinguir locações em aberto das encerradas.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "dataRetirada": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Data de retirada",
+            "description": "Data prevista para retirada dos equipamentos pelo cliente.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "dataPrevistaDevolucao": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "title": "Data prevista de devolução",
+            "description": "Data até a qual os equipamentos devem ser devolvidos, usada para verificar disponibilidade e atraso.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "dataRealDevolucao": {
+            "type": "date",
+            "indexed": true,
+            "of": "Address",
+            "title": "Data real de devolução",
+            "description": "Data em que a devolução dos equipamentos foi efetivamente registrada.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "of": "Address",
+            "title": "Detalhes do contrato",
+            "description": "Informações do contrato que não precisam de filtro, ordenação ou deduplicação.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
+            "fields": {
+              "multaPorAtraso": {
+                "type": "money",
+                "derived": true,
+                "title": "Multa por atraso",
+                "description": "Multa calculada quando a data real de devolução for posterior à data prevista, somando a diária de cada equipamento locado multiplicada pelos dias de atraso e por 1,5."
+              }
+            }
+          }
         }
       },
       "lifecycleStates": [
@@ -338,7 +756,7 @@
           "reachedBy": "actor"
         },
         {
-          "state": "completed",
+          "state": "closed",
           "reachedBy": "actor"
         }
       ],
@@ -348,196 +766,255 @@
           "from": [
             "open"
           ],
-          "to": "completed",
+          "to": "closed",
           "by": [
             "atendente"
           ],
-          "description": "Registra a data real de devolução e conclui o contrato de locação."
+          "description": "Registra a data real de devolução e encerra a locação dos equipamentos do contrato.",
+          "ruleRefs": [
+            "multaAtrasoLocacao"
+          ]
         }
-      ],
-      "storage": {
-        "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id"
-      }
+      ]
     },
     {
-      "schemaVersion": "2026-09-11-ns5-ontology-v2",
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "locacaoEquipamentos",
-      "entityId": "RentalItem",
-      "title": "Item de locação",
-      "description": "Item de um contrato que identifica o equipamento reservado para o período de locação.",
-      "kind": "supporting",
-      "party": "none",
-      "displayField": "equipment",
-      "fields": [
-        {
-          "fieldId": "id",
-          "title": "Identificador",
-          "type": "uuid",
-          "required": true,
-          "description": "Identificador único do item de locação."
-        },
-        {
-          "fieldId": "rentalContract",
+      "entityId": "ItemContratoLocacao",
+      "title": "Item do contrato de locação",
+      "description": "Equipamento individual incluído em um contrato, com a diária aplicável à locação e os valores necessários para apurar multa por atraso.",
+      "displayField": "id",
+      "relationships": {
+        "contratoLocacao": {
+          "relationshipId": "contratoLocacaoItens",
+          "to": "ContratoLocacao",
+          "via": "ItemContratoLocacao.contratoLocacaoId",
+          "cardinality": "N:1",
           "title": "Contrato de locação",
-          "type": "uuid",
-          "required": true,
-          "description": "Contrato de locação ao qual este item pertence."
+          "description": "Item pertencente a um contrato de locação.",
+          "mode": "fk",
+          "direction": "to",
+          "required": "sempre"
         },
-        {
-          "fieldId": "equipment",
-          "title": "Equipamento",
-          "type": "uuid",
-          "required": true,
-          "description": "Equipamento específico reservado neste item de locação."
-        },
-        {
-          "fieldId": "dailyRate",
-          "title": "Valor da diária contratada",
-          "type": "money",
-          "required": true,
-          "description": "Valor diário do equipamento registrado no momento da inclusão no contrato."
+        "equipamento": {
+          "relationshipId": "itemContratoLocacaoEquipamento",
+          "to": "Equipamento",
+          "via": "ItemContratoLocacao.equipamentoId",
+          "cardinality": "N:1",
+          "title": "Equipamento locado",
+          "description": "Equipamento individual reservado neste item do contrato.",
+          "mode": "fk",
+          "required": "sempre"
         }
+      },
+      "capabilities": {
+        "read.byId": "Consulta um item pelo identificador da linha para exibir o equipamento e sua diária aplicável no contrato, usada por atendentes e gerentes.",
+        "locate.byColumn": "Lista itens filtrados pelo contrato ou pelo equipamento indexados, com paginação, usada para consultar os equipamentos de um contrato e verificar locações de um equipamento.",
+        "count": "Conta os itens que correspondem aos filtros de contrato ou equipamento para compor listas e verificações da locação, usado por atendentes e gerentes.",
+        "listByForeignKey": "Lista os itens vinculados a um contrato ou a um equipamento pela chave estrangeira, usada nas telas de contrato e de disponibilidade.",
+        "create": "Inclui um equipamento e sua diária aplicável como item de um novo contrato, gravado junto à abertura pelo atendente.",
+        "update": "Atualiza a diária aplicável ou o equipamento de um item enquanto o contrato pode ser ajustado, usado pelo atendente.",
+        "delete": "Remove um item incluído indevidamente antes da confirmação do contrato, usado pelo atendente.",
+        "uniqueKey": "Impede que o mesmo equipamento seja incluído mais de uma vez no mesmo contrato pela chave composta de contrato e equipamento, aplicado pelo sistema.",
+        "transaction": "Grava de forma atômica o contrato e todos os seus itens de equipamentos, usada pelo atendente na abertura da locação."
+      },
+      "rules": [
+        "equipamentoSemSobreposicao",
+        "calcularMultaAtraso"
       ],
-      "uniqueKeys": [
-        [
-          "rentalContract",
-          "equipment"
-        ]
-      ],
-      "lifecycleStates": [],
-      "transitions": [],
+      "kind": "entity",
+      "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "scope": "module",
-        "idField": "id"
+        "table": "locacaoEquipamentos_itemcontratolocacao",
+        "kind": "relational"
       },
-      "mutability": "appendOnly"
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "contratoLocacaoId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "ContratoLocacao"
+            ],
+            "title": "Contrato de locação",
+            "description": "Contrato de locação ao qual este equipamento foi incluído.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "equipamentoId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "Address",
+            "to": [
+              "Equipamento"
+            ],
+            "title": "Equipamento",
+            "description": "Equipamento individual reservado e locado neste item do contrato.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "of": "Address",
+            "title": "Dados do item",
+            "description": "Dados comerciais aplicáveis ao equipamento neste contrato de locação.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0,
+            "fields": {
+              "valorDiariaAplicavel": {
+                "type": "money",
+                "required": true,
+                "of": "Address",
+                "title": "Valor da diária aplicável",
+                "description": "Valor da diária do equipamento acordado para este item no contrato.",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              },
+              "multaAtraso": {
+                "type": "money",
+                "derived": true,
+                "title": "Multa por atraso",
+                "description": "Multa deste equipamento quando a devolução real do contrato é posterior à data prevista, calculada pela diária aplicável multiplicada pelos dias de atraso e por 1,5."
+              }
+            }
+          }
+        }
+      },
+      "uniqueKeys": [
+        [
+          "contratoLocacaoId",
+          "equipamentoId"
+        ]
+      ]
     }
   ],
   "relationships": [
     {
-      "relationshipId": "clientHasRentalContracts",
-      "fromEntity": "Cliente",
-      "toEntity": "ContratoLocacao",
-      "type": "oneToMany",
-      "required": true,
-      "description": "O cliente é titular dos contratos de locação realizados em seu nome.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "ContratoLocacao",
-        "from": {
-          "entityId": "Cliente",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "ContratoLocacao",
-          "fieldIds": [
-            "clienteId"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "attendantCreatesRentalContracts",
-      "fromEntity": "Atendente",
-      "toEntity": "ContratoLocacao",
-      "type": "oneToMany",
-      "required": true,
-      "description": "O atendente é responsável pelos contratos de locação que cria.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "ContratoLocacao",
-        "from": {
-          "entityId": "Atendente",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "ContratoLocacao",
-          "fieldIds": [
-            "atendenteId"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "rentalContractIncludesItems",
-      "fromEntity": "ContratoLocacao",
-      "toEntity": "RentalItem",
-      "type": "oneToMany",
-      "required": true,
-      "description": "O contrato de locação contém um ou mais itens de locação.",
-      "persistence": {
-        "mode": "moduleReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "RentalItem",
-        "from": {
-          "entityId": "ContratoLocacao",
-          "fieldIds": [
-            "id"
-          ]
-        },
-        "to": {
-          "entityId": "RentalItem",
-          "fieldIds": [
-            "rentalContract"
-          ]
-        }
-      }
-    },
-    {
-      "relationshipId": "rentalItemReservesEquipment",
-      "fromEntity": "RentalItem",
-      "toEntity": "Equipamento",
+      "relationshipId": "contratoLocacaoCliente",
+      "from": "ContratoLocacao",
+      "to": "Cliente",
       "type": "manyToOne",
       "required": true,
-      "description": "O item de locação reserva um equipamento específico para o contrato.",
-      "persistence": {
-        "mode": "crossStoreReference"
-      },
-      "realization": {
-        "kind": "fieldReference",
-        "ownerEntity": "RentalItem",
-        "from": {
-          "entityId": "RentalItem",
-          "fieldIds": [
-            "equipment"
-          ]
-        },
-        "to": {
-          "entityId": "Equipamento",
-          "fieldIds": [
-            "id"
-          ]
-        }
-      }
+      "mode": "fk",
+      "description": "Cada contrato de locação pertence a um cliente.",
+      "field": "ContratoLocacao.clienteId"
+    },
+    {
+      "relationshipId": "contratoLocacaoItens",
+      "from": "ContratoLocacao",
+      "to": "ItemContratoLocacao",
+      "type": "oneToMany",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada contrato de locação possui um ou mais itens de equipamentos.",
+      "field": "ItemContratoLocacao.contratoLocacaoId"
+    },
+    {
+      "relationshipId": "itemContratoLocacaoEquipamento",
+      "from": "ItemContratoLocacao",
+      "to": "Equipamento",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada item do contrato identifica o equipamento locado.",
+      "field": "ItemContratoLocacao.equipamentoId"
+    },
+    {
+      "relationshipId": "contratoLocacaoEquipamentos",
+      "from": "ContratoLocacao",
+      "to": "Equipamento",
+      "type": "manyToMany",
+      "required": true,
+      "mode": "throughTable",
+      "description": "Os equipamentos de um contrato são obtidos pelos seus itens de locação.",
+      "through": "ItemContratoLocacao",
+      "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
+      "derived": true
     }
   ],
   "removedOrphans": [],
   "liftedAggregateEntities": [],
   "normalizations": [
     {
-      "kind": "writerDerived",
-      "entityId": "RentalItem",
-      "detail": "parent via ContratoLocacao.rentalContractIncludesItems",
-      "writerKind": "parent",
-      "via": {
-        "entityId": "ContratoLocacao",
-        "relationshipId": "rentalContractIncludesItems"
-      }
+      "kind": "derivedFromPlatform",
+      "entityId": "Cliente",
+      "detail": "roleTag locacaoEquipamentos.Cliente; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Equipamento",
+      "detail": "storage.table locacaoEquipamentos_equipamento"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ContratoLocacao",
+      "detail": "storage.table locacaoEquipamentos_contratolocacao"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemContratoLocacao",
+      "detail": "storage.table locacaoEquipamentos_itemcontratolocacao"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Cliente",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Cliente",
+      "detail": "Cliente.details.identification.subtype.values"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Cliente",
+      "detail": "details.locacaoEquipamentos"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Equipamento",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ContratoLocacao",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ContratoLocacao",
+      "detail": "record.fields.details.fields.multaPorAtraso.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemContratoLocacao",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemContratoLocacao",
+      "detail": "record.fields.details.fields.multaAtraso.derived (derived[])"
     }
   ]
 }

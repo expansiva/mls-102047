@@ -14,37 +14,30 @@ export const acompanharIndicadoresDeComprasJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarPedidosParaAcompanhamento",
+        "stepId": "consultarPedidosDeCompra",
         "kind": "locate",
-        "entity": "PedidoCompra",
-        "title": "x",
-        "description": "Acessa os pedidos de compra da organização para acompanhamento dos pedidos em aberto e atrasados."
+        "entity": "PurchaseOrder",
+        "title": "Consultar pedidos de compra",
+        "description": "Acessa os pedidos de compra da organização para acompanhamento."
       },
       {
-        "stepId": "consultarIndicadoresDePedidos",
+        "stepId": "inspecionarIndicadoresDePedidos",
         "kind": "inspect",
-        "entity": "PedidoCompra",
-        "title": "x",
-        "description": "Consulta os indicadores de pedidos em aberto e atrasados no painel de compras."
-      },
-      {
-        "stepId": "consultarTotalMensalPorFornecedor",
-        "kind": "inspect",
-        "entity": "Fornecedor",
-        "title": "x",
-        "description": "Consulta no painel o total comprado de cada fornecedor no mês."
+        "entity": "PurchaseOrder",
+        "title": "Inspecionar indicadores de pedidos",
+        "description": "Consulta os indicadores de pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês."
       }
     ],
     "outcome": {
-      "statement": "O gerente dispõe dos indicadores atuais para acompanhar a situação das compras e os valores comprados por fornecedor.",
+      "statement": "O gerente visualiza a situação dos pedidos e os totais mensais por fornecedor.",
       "evidence": [
-        "Quantidade ou lista de pedidos em aberto apresentada.",
-        "Quantidade ou lista de pedidos atrasados apresentada.",
-        "Total comprado no mês apresentado por fornecedor."
+        "Indicadores mostram a quantidade de pedidos em aberto.",
+        "Indicadores mostram os pedidos atrasados.",
+        "Indicadores mostram o total comprado por fornecedor no mês."
       ]
     }
   },
-  "businessHash": "sha256:08224fafae3e538973018092310a3f67b9bf04d16af95a1cc9864930cf75f975"
+  "businessHash": "sha256:91da38701e1e4dd1b473f295c84c90923fec4178aceb0867df08d59b819372b5"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AcompanharIndicadoresDeComprasJourneyType = typeof acompanharIndicadoresDeComprasJourney;
