@@ -8,43 +8,29 @@ export const criarContratoLocacaoJourney = {
   "business": {
     "actorRef": "atendente",
     "title": "Criar contrato de locação",
-    "goal": "Registrar a locação de um cliente para um ou mais equipamentos em um período disponível.",
+    "goal": "Registrar a locação de equipamentos para um cliente no período solicitado.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarCliente",
-        "kind": "locate",
-        "entity": "Cliente",
-        "title": "x",
-        "description": "Localiza o cliente que fará a locação."
-      },
-      {
-        "stepId": "localizarEquipamentos",
-        "kind": "locate",
-        "entity": "Equipamento",
-        "title": "x",
-        "description": "Localiza os equipamentos solicitados e consulta sua situação e disponibilidade para o período informado."
-      },
-      {
-        "stepId": "registrarContrato",
+        "stepId": "informarContrato",
         "kind": "act",
         "entity": "ContratoLocacao",
         "effect": "create",
         "title": "x",
-        "description": "Cria o contrato com o cliente, os equipamentos, a data de retirada e a data prevista de devolução; o sistema impede a inclusão de equipamento que tenha locação com período sobreposto."
+        "description": "Cria o contrato para o cliente, informando a data de retirada, a data prevista de devolução e um ou mais equipamentos. O sistema impede a locação de um equipamento em períodos sobrepostos."
       }
     ],
     "outcome": {
-      "statement": "O contrato de locação é registrado para os equipamentos disponíveis no período solicitado.",
+      "statement": "Um contrato de locação é registrado para os equipamentos disponíveis no período informado.",
       "evidence": [
-        "Contrato de locação criado com cliente, período e equipamentos vinculados.",
-        "Os equipamentos do contrato passam a constar como locados para o período registrado."
+        "O contrato possui identificação, cliente, equipamentos, data de retirada e data prevista de devolução.",
+        "Os equipamentos incluídos não possuem outra locação com período sobreposto."
       ]
     }
   },
-  "businessHash": "sha256:e848ef07c208a4623814ac4c74b4737f4bc1a5af85898ba2814be976a344c266"
+  "businessHash": "sha256:694634d5424c48494e1e11546442bc27423a21d6e3f392ac8cec36a88deeafc3"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CriarContratoLocacaoJourneyType = typeof criarContratoLocacaoJourney;

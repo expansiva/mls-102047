@@ -6,17 +6,20 @@ export const locacaoEquipamentosRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "locacaoEquipamentos",
   "rules": {
-    "periodosLocacaoSemSobreposicao": "Um mesmo equipamento não pode constar em contratos de locação cujos períodos, da data de retirada à data prevista de devolução, sejam sobrepostos.",
-    "equipamentoEmManutencaoNaoPodeSerLocado": "Equipamento em manutenção não pode ser incluído em uma locação.",
-    "multaAtrasoLocacao": "Quando a devolução real for posterior à data prevista, a multa do contrato deve ser a soma, para cada equipamento locado, da diária aplicável multiplicada pelos dias de atraso e por 1,5.",
-    "ruleForeignNamespaceRefused": "Dados pertencentes a outro módulo não podem ser registrados como dados próprios deste módulo.",
-    "ruleDocumentShapeValidated": "O documento de identificação do cliente deve atender à estrutura aplicável ao seu tipo e país.",
-    "ruleIdentityNeverInNamespace": "A identidade mestre do cliente não pode ser mantida nos dados específicos deste módulo.",
-    "rulePersonPrivacyConsentRequiredBrEu": "O cliente pessoa física deve possuir consentimento de privacidade quando exigido no Brasil ou na União Europeia.",
-    "contratoComPeloMenosUmEquipamento": "Todo contrato de locação deve incluir pelo menos um equipamento.",
-    "equipamentoSemPeriodosSobrepostos": "A inclusão de um equipamento em contrato somente é permitida quando não houver locação desse equipamento em período sobreposto.",
-    "equipamentoSemSobreposicao": "Um equipamento não pode ser reservado em mais de uma locação para datas coincidentes.",
-    "calcularMultaAtraso": "A multa por atraso de cada equipamento deve ser calculada pela diária aplicável multiplicada pelos dias de atraso e por 1,5."
+    "dataDevolucaoValida": "A data real de devolução deve ser igual ou posterior à data de retirada do contrato.",
+    "multaPorAtraso": "A multa por atraso do contrato deve corresponder à soma das diárias dos equipamentos locados multiplicada pelos dias de atraso e pelo fator 1,5.",
+    "ruleForeignNamespaceRefused": "Dados de outros módulos não podem ser gravados no namespace exclusivo de locação de equipamentos.",
+    "ruleDocumentShapeValidated": "O documento de identificação do cliente deve obedecer ao formato aplicável ao seu tipo e país.",
+    "ruleIdentityNeverInNamespace": "Os dados de identidade do cliente devem permanecer no registro mestre e não podem ser gravados no namespace do módulo.",
+    "rulePersonPrivacyConsentRequiredBrEu": "O consentimento de privacidade do cliente deve ser registrado quando exigido pela legislação aplicável no Brasil ou na União Europeia.",
+    "codigoEquipamentoUnico": "O código de cada equipamento deve ser único no catálogo da locadora.",
+    "situacaoOperacionalDoEquipamento": "A situação do equipamento deve ser em manutenção quando estiver marcado para manutenção, locado quando possuir contrato em andamento sem devolução efetiva e disponível nos demais casos.",
+    "equipamentoEmManutencaoIndisponivel": "Um equipamento em manutenção não pode ser incluído em uma nova locação.",
+    "locacaoDeEquipamentoSemSobreposicao": "Um mesmo equipamento não pode ser locado em contratos cujos períodos se sobreponham.",
+    "equipamentoSemSobreposicao": "Cada equipamento deve ter períodos de locação mutuamente não sobrepostos.",
+    "periodoLocacaoValido": "A data prevista de devolução deve ser igual ou posterior à data de retirada.",
+    "equipamentoPeriodoNoOverlap": "A inclusão de um equipamento em um contrato deve ser recusada quando o período contratado se sobrepuser ao período de outro contrato desse equipamento.",
+    "calcularMultaAtraso": "A multa por atraso de cada equipamento deve ser calculada pela sua diária multiplicada pelos dias de atraso e pelo fator 1,5 quando a devolução real for posterior à prevista."
   }
 } as const satisfies Ns5RulesArtifactV2;
 

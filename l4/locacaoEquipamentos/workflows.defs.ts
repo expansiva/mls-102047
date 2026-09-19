@@ -16,7 +16,7 @@ export const locacaoEquipamentosWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "acompanharSituacaoEquipamentos",
+      "journeyId": "consultarSituacaoEquipamentos",
       "inProcess": false
     }
   ]

@@ -14,12 +14,12 @@ export const locacaoEquipamentosJourneyIndex = {
     {
       "journeyId": "registrarDevolucao",
       "actorRef": "atendente",
-      "title": "Registrar devolução de equipamentos"
+      "title": "Registrar devolução de locação"
     },
     {
-      "journeyId": "acompanharSituacaoEquipamentos",
+      "journeyId": "consultarSituacaoEquipamentos",
       "actorRef": "gerente",
-      "title": "Acompanhar situação dos equipamentos"
+      "title": "Consultar situação dos equipamentos"
     }
   ],
   "systemDecisions": []

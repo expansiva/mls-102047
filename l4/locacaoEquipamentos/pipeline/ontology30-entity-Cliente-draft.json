@@ -4,31 +4,29 @@
     "moduleName": "locacaoEquipamentos",
     "entityId": "Cliente",
     "title": "Cliente",
-    "description": "Pessoa cadastrada na organização que realiza contratos de locação de equipamentos.",
+    "description": "Pessoa cliente para a qual a locação de equipamentos é contratada.",
     "displayField": "details.identification.name",
     "relationships": {
-      "contratosLocacao": {
+      "contratoLocacaoCliente": {
         "relationshipId": "contratoLocacaoCliente",
         "to": "ContratoLocacao",
         "via": "ContratoLocacao.clienteId",
         "cardinality": "1:N",
         "title": "Contratos de locação do cliente",
-        "description": "Contratos de locação vinculados a este cliente; cada contrato pertence obrigatoriamente a um cliente.",
+        "description": "Contratos de locação celebrados para este cliente.",
         "mode": "fk",
         "direction": "to",
-        "required": "Nunca é obrigatório que o cliente já possua contratos de locação.",
+        "required": true,
         "role": "cliente"
       }
     },
     "capabilities": {
-      "read.byId": "Lê o cadastro mestre de um cliente pelo identificador conhecido · usa leitura por mdmId no índice e no documento · atendente e gerente ao consultar dados de um contrato.",
-      "locate.byName": "Localiza clientes pelo nome informado · pesquisa o índice de pessoas por nome e situação · atendente antes de criar um contrato de locação.",
-      "locate.byDocument": "Localiza um cliente pelo documento nacional · consulta o índice por tipo e número de documento para evitar duplicidade · atendente ao cadastrar ou selecionar o cliente.",
-      "register.createOrAttach": "Cria a pessoa quando ainda não existe ou associa a pessoa existente ao papel de Cliente · deduplica pelo documento e anexa a tag locacaoEquipamentos.Cliente · atendente ao registrar cliente para uma locação.",
-      "edit.platformFields": "Atualiza os dados de identificação do cliente mantidos pela plataforma · grava os campos da camada mestre e atualiza seu índice quando necessário · atendente na manutenção do cadastro.",
-      "inactivate": "Inativa ou reativa o cadastro mestre do cliente sem excluí-lo · altera a situação ativa ou inativa do registro · gerente ao impedir ou restabelecer o uso do cliente em novas locações.",
-      "comment": "Registra uma observação sobre o cadastro do cliente · cria comentário vinculado ao registro mestre no módulo · atendente e gerente quando precisarem contextualizar o atendimento.",
-      "audit": "Consulta as alterações realizadas no cadastro do cliente · lê a trilha de auditoria do registro mestre · gerente ao acompanhar a manutenção cadastral."
+      "read.byId": "Lê o cadastro mestre de um cliente pelo identificador já conhecido, hidratando seu nome nos contratos, para atendentes e gerentes.",
+      "locate.byName": "Localiza clientes pelo nome digitado no índice de pessoas, para o atendente selecionar o cliente ao criar um contrato.",
+      "locate.byDocument": "Localiza o cliente pelo documento nacional antes do cadastro, para o atendente evitar duplicidade de pessoa.",
+      "register.createOrAttach": "Cria o registro mestre quando não existir ou anexa a função de cliente ao registro já localizado por documento, para o atendente contratar a locação para a pessoa correta.",
+      "edit.platformFields": "Atualiza os dados de identificação de plataforma do cliente e reindexa a identificação quando necessário, para o atendente manter o cadastro correto.",
+      "inactivate": "Inativa ou reativa o cadastro mestre sem apagá-lo, para o atendente impedir ou restabelecer seu uso em novas locações."
     },
     "rules": [
       "rule-foreign-namespace-refused",
@@ -58,7 +56,7 @@
         "details": {
           "type": "object",
           "required": true,
-          "description": "Documento mestre da pessoa que atua como cliente nas locações de equipamentos.",
+          "description": "Registro mestre da pessoa cliente, com dados de identificação da plataforma e o espaço exclusivo deste módulo.",
           "fields": {
             "identification": {
               "type": "object",
@@ -76,7 +74,7 @@
                       "description": "Pessoa física cadastrada como cliente."
                     }
                   ],
-                  "description": "Indica que este registro mestre é uma pessoa.",
+                  "description": "Indica que este registro mestre representa uma pessoa cliente.",
                   "title": "Tipo de cadastro",
                   "maxLength": 0,
                   "min": 0,
@@ -87,7 +85,7 @@
                   "required": true,
                   "indexed": true,
                   "maxLength": 0,
-                  "description": "Nome pelo qual o cliente é identificado durante a locação.",
+                  "description": "Nome pelo qual o cliente é identificado nos contratos de locação.",
                   "title": "Nome",
                   "min": 0,
                   "max": 0
@@ -106,12 +104,12 @@
                     {
                       "value": "Inactive",
                       "title": "Inativo",
-                      "description": "Cadastro fora de uso para novas locações."
+                      "description": "Cadastro fora de uso."
                     },
                     {
                       "value": "Merged",
-                      "title": "Mesclado",
-                      "description": "Cadastro unido a outro registro mestre."
+                      "title": "Unificado",
+                      "description": "Cadastro incorporado a outro registro mestre."
                     },
                     {
                       "value": "Blocked",
@@ -120,7 +118,7 @@
                     }
                   ],
                   "title": "Situação do cadastro",
-                  "description": "Situação mestre que define se o cliente pode ser utilizado em novos contratos.",
+                  "description": "Situação de atividade do registro mestre do cliente.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -132,32 +130,32 @@
                     {
                       "value": "SSN",
                       "title": "SSN",
-                      "description": "Documento social dos Estados Unidos."
+                      "description": "Número de seguridade social dos Estados Unidos."
                     },
                     {
                       "value": "EIN",
                       "title": "EIN",
-                      "description": "Identificador empresarial dos Estados Unidos."
+                      "description": "Identificador fiscal empresarial dos Estados Unidos."
                     },
                     {
                       "value": "Passport",
                       "title": "Passaporte",
-                      "description": "Passaporte."
+                      "description": "Documento de viagem internacional."
                     },
                     {
                       "value": "DriversLicense",
-                      "title": "Carteira de habilitação",
+                      "title": "Carteira de motorista",
                       "description": "Documento de habilitação."
                     },
                     {
                       "value": "NationalId",
-                      "title": "Identidade nacional",
-                      "description": "Documento de identidade nacional."
+                      "title": "Documento nacional",
+                      "description": "Documento nacional de identificação."
                     },
                     {
                       "value": "CPF",
                       "title": "CPF",
-                      "description": "Cadastro de Pessoa Física."
+                      "description": "Cadastro de Pessoas Físicas."
                     },
                     {
                       "value": "CNPJ",
@@ -166,17 +164,17 @@
                     },
                     {
                       "value": "VAT",
-                      "title": "VAT",
-                      "description": "Identificador tributário."
+                      "title": "Identificação fiscal",
+                      "description": "Número de identificação para imposto sobre valor agregado."
                     },
                     {
                       "value": "Other",
                       "title": "Outro",
-                      "description": "Outro documento aceito pela organização."
+                      "description": "Outro documento aceito pela plataforma."
                     }
                   ],
                   "title": "Tipo de documento",
-                  "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do cliente.",
+                  "description": "Tipo do documento nacional apresentado para identificar e deduplicar o cliente.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -184,7 +182,7 @@
                 "docId": {
                   "type": "string",
                   "indexed": true,
-                  "description": "Número do documento apresentado para identificar o cliente e localizar cadastro já existente.",
+                  "description": "Número do documento apresentado para identificar e deduplicar o cliente.",
                   "title": "Número do documento",
                   "maxLength": 0,
                   "min": 0,
@@ -197,19 +195,19 @@
                   "pattern": "^[A-Z]{2}$",
                   "maxLength": 0,
                   "default": "US",
-                  "description": "Código do país ao qual se aplicam o documento e as regras do cliente.",
-                  "title": "País do cadastro",
+                  "description": "Código do país aplicável ao documento e às regras legais do cliente.",
+                  "title": "País",
                   "min": 0,
                   "max": 0
                 }
               },
-              "description": "Dados de identificação do cadastro mestre usados para reconhecer e localizar o cliente."
+              "description": "Dados de identificação usados para localizar e reconhecer o cliente na locadora."
             },
             "base": {
               "type": "object",
               "owner": "platform",
               "fields": {},
-              "description": "Dados comuns do cadastro mestre da pessoa; nenhum campo adicional é usado especificamente nesta locação."
+              "description": "Dados básicos da plataforma que esta função de cliente não precisa declarar."
             },
             "person": {
               "type": "object",
@@ -218,20 +216,20 @@
                 "privacyConsent": {
                   "type": "object",
                   "of": "PrivacyConsent",
-                  "description": "Consentimento de privacidade do cliente quando exigido pelas regras aplicáveis.",
+                  "description": "Consentimento de privacidade do cliente, quando exigido pela legislação aplicável.",
                   "title": "Consentimento de privacidade",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
                 }
               },
-              "description": "Dados próprios de pessoa física aplicáveis ao cliente."
+              "description": "Dados pessoais de plataforma necessários para observar o consentimento aplicável ao cliente."
             },
             "general": {
               "type": "object",
               "owner": "organization",
               "open": true,
-              "description": "Dados promovidos pela organização e compartilhados entre módulos; este módulo apenas os lê."
+              "description": "Dados promovidos pela organização para uso entre módulos, somente para leitura neste módulo."
             },
             "locacaoEquipamentos": {
               "type": "object",

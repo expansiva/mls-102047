@@ -4,7 +4,7 @@
     "moduleName": "locacaoEquipamentos",
     "entityId": "ContratoLocacao",
     "title": "Contrato de locação",
-    "description": "Contrato que registra a locação de equipamentos para um cliente, o período previsto e a devolução efetiva.",
+    "description": "Contrato que registra a locação de um ou mais equipamentos para um cliente, com retirada, devolução prevista e retorno efetivo.",
     "displayField": "id",
     "relationships": {
       "cliente": {
@@ -13,47 +13,38 @@
         "via": "ContratoLocacao.clienteId",
         "cardinality": "N:1",
         "title": "Cliente do contrato",
-        "description": "Cliente para quem este contrato de locação foi criado.",
+        "description": "Cliente para o qual o contrato de locação foi celebrado.",
         "mode": "fk",
         "required": "Sempre."
       },
       "itens": {
-        "relationshipId": "contratoLocacaoItens",
+        "relationshipId": "itemContratoLocacaoContrato",
         "to": "ItemContratoLocacao",
         "via": "ItemContratoLocacao.contratoLocacaoId",
         "cardinality": "1:N",
         "title": "Itens do contrato",
-        "description": "Itens que registram os equipamentos incluídos neste contrato.",
+        "description": "Equipamentos incluídos neste contrato de locação.",
         "mode": "fk",
-        "required": "Sempre, com pelo menos um equipamento locado."
-      },
-      "equipamentos": {
-        "relationshipId": "contratoLocacaoEquipamentos",
-        "to": "Equipamento",
-        "via": "ItemContratoLocacao",
-        "cardinality": "N:N",
-        "title": "Equipamentos locados",
-        "description": "Equipamentos obtidos pelos itens deste contrato de locação.",
-        "mode": "throughTable",
-        "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
-        "derived": true,
-        "required": "Sempre, por meio dos itens do contrato."
+        "direction": "to",
+        "required": "Sempre."
       }
     },
     "capabilities": {
-      "read.byId": "Lê um contrato pelo identificador no repositório para o atendente consultar uma locação já selecionada.",
-      "locate.byColumn": "Lista contratos por cliente, situação e datas indexadas para o atendente localizar a locação em devolução e o gerente acompanhar locações.",
-      "count": "Conta contratos conforme os filtros de cliente, situação e período para exibir totais nas listas do atendente e do gerente.",
-      "listByForeignKey": "Lista os contratos vinculados a um cliente pela chave estrangeira para consultar o histórico de locações desse cliente.",
-      "create": "Cria o contrato com cliente, período e itens em uma operação de locação realizada pelo atendente.",
-      "transition": "Move o contrato de em aberto para encerrado ao registrar a devolução pelo atendente.",
-      "transaction": "Grava o contrato e seus itens de equipamentos de forma atômica para o atendente não deixar uma locação incompleta.",
-      "read.mdmRecord": "Lê o registro mestre apontado por clienteId para mostrar os dados do cliente ao atendente e ao gerente."
+      "read.byId": "Lê um contrato de locação pelo identificador para o atendente conferir seus dados antes de registrar o retorno.",
+      "locate.byColumn": "Lista contratos por cliente, situação e período de retirada ou devolução prevista para o atendente localizar contratos em aberto.",
+      "count": "Conta contratos conforme os filtros de cliente, situação e período para apresentar totais nas listas.",
+      "listByForeignKey": "Lista os contratos vinculados a um cliente para consultar seu histórico de locações.",
+      "create": "Cria o contrato de locação em aberto para o cliente, com retirada e devolução prevista, quando o atendente registra a locação.",
+      "update": "Atualiza os dados ainda permitidos de um contrato de locação em aberto quando o atendente precisa corrigir o registro.",
+      "transition": "Move o contrato de em aberto para devolvido ao registrar a data real de devolução, para uso do atendente.",
+      "transaction": "Grava o contrato e seus itens de equipamentos de forma atômica quando o atendente cria a locação.",
+      "read.mdmRecord": "Lê o registro mestre do cliente apontado pelo contrato para mostrar seus dados sem copiá-los para a locação."
     },
     "rules": [
-      "contratoComPeloMenosUmEquipamento",
-      "equipamentoSemPeriodosSobrepostos",
-      "multaAtrasoLocacao"
+      "equipamentoSemSobreposicao",
+      "periodoLocacaoValido",
+      "dataDevolucaoValida",
+      "multaPorAtraso"
     ],
     "kind": "entity",
     "class": "core",
@@ -85,7 +76,7 @@
             "Cliente"
           ],
           "title": "Cliente",
-          "description": "Cliente para quem o contrato de locação foi registrado.",
+          "description": "Cliente para o qual o contrato de locação foi celebrado.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -99,16 +90,16 @@
             {
               "value": "open",
               "title": "Em aberto",
-              "description": "Locação criada e ainda sem devolução registrada."
+              "description": "A locação está em andamento e aguarda a devolução dos equipamentos."
             },
             {
-              "value": "closed",
-              "title": "Encerrado",
-              "description": "Locação cuja devolução foi registrada."
+              "value": "returned",
+              "title": "Devolvido",
+              "description": "A devolução efetiva foi registrada e a locação foi encerrada."
             }
           ],
           "title": "Situação do contrato",
-          "description": "Situação operacional do contrato de locação, usada para distinguir locações em aberto das encerradas.",
+          "description": "Situação operacional do contrato de locação, usada para localizar contratos em aberto e retornos já registrados.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -119,7 +110,7 @@
           "indexed": true,
           "of": "Address",
           "title": "Data de retirada",
-          "description": "Data prevista para retirada dos equipamentos pelo cliente.",
+          "description": "Data em que os equipamentos são retirados pelo cliente; permite consultar locações por período.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -130,17 +121,7 @@
           "indexed": true,
           "of": "Address",
           "title": "Data prevista de devolução",
-          "description": "Data até a qual os equipamentos devem ser devolvidos, usada para verificar disponibilidade e atraso.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
-        },
-        "dataRealDevolucao": {
-          "type": "date",
-          "indexed": true,
-          "of": "Address",
-          "title": "Data real de devolução",
-          "description": "Data em que a devolução dos equipamentos foi efetivamente registrada.",
+          "description": "Data prevista para a devolução dos equipamentos; permite consultar contratos por período.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -149,17 +130,26 @@
           "type": "object",
           "required": true,
           "of": "Address",
-          "title": "Detalhes do contrato",
-          "description": "Informações do contrato que não precisam de filtro, ordenação ou deduplicação.",
+          "title": "Dados do contrato",
+          "description": "Dados do retorno que não são usados como critério de busca ou ordenação.",
           "maxLength": 0,
           "min": 0,
           "max": 0,
           "fields": {
-            "multaPorAtraso": {
+            "dataRealDevolucao": {
+              "type": "date",
+              "of": "Address",
+              "title": "Data real de devolução",
+              "description": "Data em que os equipamentos deste contrato foram efetivamente devolvidos; é informada ao registrar o retorno.",
+              "maxLength": 0,
+              "min": 0,
+              "max": 0
+            },
+            "multaAtraso": {
               "type": "money",
               "derived": true,
               "title": "Multa por atraso",
-              "description": "Multa calculada quando a data real de devolução for posterior à data prevista, somando a diária de cada equipamento locado multiplicada pelos dias de atraso e por 1,5."
+              "description": "Multa calculada quando a data real de devolução é posterior à data prevista, usando a diária de cada equipamento locado, os dias de atraso e o fator de 1,5."
             }
           }
         }
@@ -171,7 +161,7 @@
         "reachedBy": "actor"
       },
       {
-        "state": "closed",
+        "state": "returned",
         "reachedBy": "actor"
       }
     ],
@@ -181,13 +171,14 @@
         "from": [
           "open"
         ],
-        "to": "closed",
+        "to": "returned",
         "by": [
           "atendente"
         ],
-        "description": "Registra a data real de devolução e encerra a locação dos equipamentos do contrato.",
+        "description": "Registra a data real de devolução e encerra o contrato de locação.",
         "ruleRefs": [
-          "multaAtrasoLocacao"
+          "dataDevolucaoValida",
+          "multaPorAtraso"
         ]
       }
     ]
@@ -201,7 +192,7 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "ContratoLocacao",
-      "detail": "record.fields.details.fields.multaPorAtraso.derived (derived[])"
+      "detail": "record.fields.details.fields.multaAtraso.derived (derived[])"
     }
   ]
 }

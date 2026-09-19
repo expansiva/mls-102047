@@ -7,7 +7,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Cliente",
-      "description": "Pessoa cadastrada na organização que realiza contratos de locação de equipamentos.",
+      "description": "Pessoa cliente para a qual a locação de equipamentos é contratada.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "locacaoEquipamentos.Cliente",
@@ -19,7 +19,7 @@
       "family": "tdm",
       "title": "Equipamento",
       "description": "Equipamento de construção operado pela locadora, identificado por código, com diária e situação operacional acompanhada no módulo.",
-      "displayField": "code",
+      "displayField": "codigo",
       "writer": "crud",
       "class": "core",
       "storage": {
@@ -33,7 +33,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Contrato de locação",
-      "description": "Contrato que registra a locação de equipamentos para um cliente, o período previsto e a devolução efetiva.",
+      "description": "Contrato que registra a locação de um ou mais equipamentos para um cliente, com retirada, devolução prevista e retorno efetivo.",
       "displayField": "id",
       "class": "core",
       "storage": {
@@ -47,7 +47,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Item do contrato de locação",
-      "description": "Equipamento individual incluído em um contrato, com a diária aplicável à locação e os valores necessários para apurar multa por atraso.",
+      "description": "Item que vincula um equipamento ao contrato de locação e permite controlar sua indisponibilidade no período contratado e a multa aplicável.",
       "displayField": "id",
       "class": "supporting",
       "storage": {
@@ -65,17 +65,17 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada contrato de locação pertence a um cliente.",
+      "description": "Cada contrato de locação é celebrado para um cliente.",
       "field": "ContratoLocacao.clienteId"
     },
     {
-      "relationshipId": "contratoLocacaoItens",
-      "from": "ContratoLocacao",
-      "to": "ItemContratoLocacao",
-      "type": "oneToMany",
+      "relationshipId": "itemContratoLocacaoContrato",
+      "from": "ItemContratoLocacao",
+      "to": "ContratoLocacao",
+      "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada contrato de locação possui um ou mais itens de equipamentos.",
+      "description": "Cada item de locação pertence a um único contrato de locação.",
       "field": "ItemContratoLocacao.contratoLocacaoId"
     },
     {
@@ -85,20 +85,8 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item do contrato identifica o equipamento locado.",
+      "description": "Cada item do contrato reserva um equipamento específico para o período da locação.",
       "field": "ItemContratoLocacao.equipamentoId"
-    },
-    {
-      "relationshipId": "contratoLocacaoEquipamentos",
-      "from": "ContratoLocacao",
-      "to": "Equipamento",
-      "type": "manyToMany",
-      "required": true,
-      "mode": "throughTable",
-      "description": "Os equipamentos de um contrato são obtidos pelos seus itens de locação.",
-      "through": "ItemContratoLocacao",
-      "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
-      "derived": true
     }
   ],
   "normalizations": [

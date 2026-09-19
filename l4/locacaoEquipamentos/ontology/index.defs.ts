@@ -41,17 +41,17 @@ export const locacaoEquipamentosOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada contrato de locação pertence a um cliente.",
+      "description": "Cada contrato de locação é celebrado para um cliente.",
       "field": "ContratoLocacao.clienteId"
     },
     {
-      "relationshipId": "contratoLocacaoItens",
-      "from": "ContratoLocacao",
-      "to": "ItemContratoLocacao",
-      "type": "oneToMany",
+      "relationshipId": "itemContratoLocacaoContrato",
+      "from": "ItemContratoLocacao",
+      "to": "ContratoLocacao",
+      "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada contrato de locação possui um ou mais itens de equipamentos.",
+      "description": "Cada item de locação pertence a um único contrato de locação.",
       "field": "ItemContratoLocacao.contratoLocacaoId"
     },
     {
@@ -61,20 +61,8 @@ export const locacaoEquipamentosOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item do contrato identifica o equipamento locado.",
+      "description": "Cada item do contrato reserva um equipamento específico para o período da locação.",
       "field": "ItemContratoLocacao.equipamentoId"
-    },
-    {
-      "relationshipId": "contratoLocacaoEquipamentos",
-      "from": "ContratoLocacao",
-      "to": "Equipamento",
-      "type": "manyToMany",
-      "required": true,
-      "mode": "throughTable",
-      "description": "Os equipamentos de um contrato são obtidos pelos seus itens de locação.",
-      "through": "ItemContratoLocacao",
-      "path": "ContratoLocacao <- ItemContratoLocacao.contratoLocacaoId; ItemContratoLocacao.equipamentoId -> Equipamento",
-      "derived": true
     }
   ]
 } as const satisfies Ns5OntologyIndexV3;
