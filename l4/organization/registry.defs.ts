@@ -774,10 +774,15 @@ export const solutionRegistry = {
         {
           "entityId": "ContratoLocacao",
           "kind": "entity",
-          "class": "core"
+          "class": "event"
         },
         {
-          "entityId": "ItemContratoLocacao",
+          "entityId": "ItemLocacao",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "ManutencaoEquipamento",
           "kind": "entity",
           "class": "supporting"
         }
@@ -788,7 +793,7 @@ export const solutionRegistry = {
           "on": "ContratoLocacao.registrarDevolucao"
         }
       ],
-      "updatedAt": "2026-09-19T18:01:07.267Z"
+      "updatedAt": "2026-09-20T10:52:08.240Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;
