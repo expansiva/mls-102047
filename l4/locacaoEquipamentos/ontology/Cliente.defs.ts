@@ -7,29 +7,32 @@ export const locacaoEquipamentosEntityCliente = {
   "moduleName": "locacaoEquipamentos",
   "entityId": "Cliente",
   "title": "Cliente",
-  "description": "Pessoa cliente para a qual a locação de equipamentos é contratada.",
+  "description": "Pessoa cadastrada no MDM que celebra contratos de locação de equipamentos.",
   "displayField": "details.identification.name",
   "relationships": {
-    "contratoLocacaoCliente": {
-      "relationshipId": "contratoLocacaoCliente",
+    "contratosLocacao": {
+      "relationshipId": "clienteContratosLocacao",
       "to": "ContratoLocacao",
       "via": "ContratoLocacao.clienteId",
       "cardinality": "1:N",
       "title": "Contratos de locação do cliente",
-      "description": "Contratos de locação celebrados para este cliente.",
+      "description": "Contratos de locação celebrados pelo cliente; cada contrato pertence a um único cliente.",
       "mode": "fk",
-      "direction": "to",
-      "required": true,
+      "required": "ao criar um contrato de locação",
       "role": "cliente"
     }
   },
   "capabilities": {
-    "read.byId": "Lê o cadastro mestre de um cliente pelo identificador já conhecido, hidratando seu nome nos contratos, para atendentes e gerentes.",
-    "locate.byName": "Localiza clientes pelo nome digitado no índice de pessoas, para o atendente selecionar o cliente ao criar um contrato.",
-    "locate.byDocument": "Localiza o cliente pelo documento nacional antes do cadastro, para o atendente evitar duplicidade de pessoa.",
-    "register.createOrAttach": "Cria o registro mestre quando não existir ou anexa a função de cliente ao registro já localizado por documento, para o atendente contratar a locação para a pessoa correta.",
-    "edit.platformFields": "Atualiza os dados de identificação de plataforma do cliente e reindexa a identificação quando necessário, para o atendente manter o cadastro correto.",
-    "inactivate": "Inativa ou reativa o cadastro mestre sem apagá-lo, para o atendente impedir ou restabelecer seu uso em novas locações."
+    "read.byId": "Lê o cadastro mestre pelo identificador MDM para exibir o cliente do contrato · consulta direta por id no índice e documento MDM · atendente e gerente.",
+    "locate.byName": "Localiza clientes pelo nome informado ao abrir uma locação · busca por nome no índice de pessoas · atendente.",
+    "locate.byDocument": "Localiza um cliente pelo documento nacional para evitar cadastro duplicado · consulta por tipo e número de documento no MDM · atendente.",
+    "register.createOrAttach": "Cria a pessoa no MDM quando ausente ou anexa a função de Cliente quando já existe · deduplicação por documento e inclusão da tag locacaoEquipamentos.Cliente · atendente ao criar contrato.",
+    "edit.platformFields": "Atualiza os dados de identificação do cliente mantidos pela plataforma · atualização do documento mestre e do índice de identificação · atendente.",
+    "inactivate": "Inativa ou reativa o cliente sem apagar seu histórico de contratos · alteração do status MDM · gerente.",
+    "listLinks": "Exibe os contratos de locação vinculados ao cliente · leitura da relação clienteContratosLocacao pelo vínculo de chave estrangeira · atendente e gerente.",
+    "comment": "Registra observações sobre o cadastro do cliente · comentário ancorado no registro MDM do cliente · atendente e gerente.",
+    "audit": "Consulta quem alterou o cadastro mestre do cliente e quando · leitura da trilha de auditoria do MDM · gerente.",
+    "statusHistory.read": "Exibe as mudanças de situação do cadastro do cliente · leitura do histórico de status do MDM · gerente."
   },
   "rules": [
     "rule-foreign-namespace-refused",
@@ -59,7 +62,7 @@ export const locacaoEquipamentosEntityCliente = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Registro mestre da pessoa cliente, com dados de identificação da plataforma e o espaço exclusivo deste módulo.",
+        "description": "Documento mestre da pessoa cliente utilizado pela locadora.",
         "fields": {
           "identification": {
             "type": "object",
@@ -77,7 +80,7 @@ export const locacaoEquipamentosEntityCliente = {
                     "description": "Pessoa física cadastrada como cliente."
                   }
                 ],
-                "description": "Indica que este registro mestre representa uma pessoa cliente.",
+                "description": "Indica que este registro mestre representa uma pessoa.",
                 "title": "Tipo de cadastro",
                 "maxLength": 0,
                 "min": 0,
@@ -88,41 +91,8 @@ export const locacaoEquipamentosEntityCliente = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nome pelo qual o cliente é identificado nos contratos de locação.",
+                "description": "Nome pelo qual o cliente é identificado ao localizar e celebrar contratos de locação.",
                 "title": "Nome",
-                "min": 0,
-                "max": 0
-              },
-              "status": {
-                "type": "enum",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "values": [
-                  {
-                    "value": "Active",
-                    "title": "Ativo",
-                    "description": "Cadastro disponível para uso."
-                  },
-                  {
-                    "value": "Inactive",
-                    "title": "Inativo",
-                    "description": "Cadastro fora de uso."
-                  },
-                  {
-                    "value": "Merged",
-                    "title": "Unificado",
-                    "description": "Cadastro incorporado a outro registro mestre."
-                  },
-                  {
-                    "value": "Blocked",
-                    "title": "Bloqueado",
-                    "description": "Cadastro bloqueado pela plataforma."
-                  }
-                ],
-                "title": "Situação do cadastro",
-                "description": "Situação de atividade do registro mestre do cliente.",
-                "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
@@ -131,24 +101,9 @@ export const locacaoEquipamentosEntityCliente = {
                 "indexed": true,
                 "values": [
                   {
-                    "value": "SSN",
-                    "title": "SSN",
-                    "description": "Número de seguridade social dos Estados Unidos."
-                  },
-                  {
-                    "value": "EIN",
-                    "title": "EIN",
-                    "description": "Identificador fiscal empresarial dos Estados Unidos."
-                  },
-                  {
-                    "value": "Passport",
-                    "title": "Passaporte",
-                    "description": "Documento de viagem internacional."
-                  },
-                  {
-                    "value": "DriversLicense",
-                    "title": "Carteira de motorista",
-                    "description": "Documento de habilitação."
+                    "value": "CPF",
+                    "title": "CPF",
+                    "description": "Cadastro de Pessoa Física."
                   },
                   {
                     "value": "NationalId",
@@ -156,28 +111,18 @@ export const locacaoEquipamentosEntityCliente = {
                     "description": "Documento nacional de identificação."
                   },
                   {
-                    "value": "CPF",
-                    "title": "CPF",
-                    "description": "Cadastro de Pessoas Físicas."
-                  },
-                  {
-                    "value": "CNPJ",
-                    "title": "CNPJ",
-                    "description": "Cadastro Nacional da Pessoa Jurídica."
-                  },
-                  {
-                    "value": "VAT",
-                    "title": "Identificação fiscal",
-                    "description": "Número de identificação para imposto sobre valor agregado."
+                    "value": "Passport",
+                    "title": "Passaporte",
+                    "description": "Documento de viagem do cliente."
                   },
                   {
                     "value": "Other",
                     "title": "Outro",
-                    "description": "Outro documento aceito pela plataforma."
+                    "description": "Outro documento de identificação aceito."
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional apresentado para identificar e deduplicar o cliente.",
+                "description": "Tipo do documento nacional usado para identificar e evitar duplicidade de cliente.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -185,7 +130,7 @@ export const locacaoEquipamentosEntityCliente = {
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento apresentado para identificar e deduplicar o cliente.",
+                "description": "Número do documento nacional do cliente para identificação e deduplicação.",
                 "title": "Número do documento",
                 "maxLength": 0,
                 "min": 0,
@@ -196,21 +141,21 @@ export const locacaoEquipamentosEntityCliente = {
                 "required": true,
                 "indexed": true,
                 "pattern": "^[A-Z]{2}$",
-                "maxLength": 0,
+                "maxLength": 2,
                 "default": "US",
-                "description": "Código do país aplicável ao documento e às regras legais do cliente.",
+                "description": "Código ISO do país aplicável ao documento e às regras do cliente.",
                 "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação usados para localizar e reconhecer o cliente na locadora."
+            "description": "Dados de identificação do cliente mantidos pela plataforma MDM."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados básicos da plataforma que esta função de cliente não precisa declarar."
+            "description": "Dados básicos da plataforma MDM que não são necessários nesta locação."
           },
           "person": {
             "type": "object",
@@ -219,20 +164,20 @@ export const locacaoEquipamentosEntityCliente = {
               "privacyConsent": {
                 "type": "object",
                 "of": "PrivacyConsent",
-                "description": "Consentimento de privacidade do cliente, quando exigido pela legislação aplicável.",
+                "description": "Consentimento de privacidade do cliente, aplicado quando exigido pelas regras de proteção de dados.",
                 "title": "Consentimento de privacidade",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados pessoais de plataforma necessários para observar o consentimento aplicável ao cliente."
+            "description": "Dados pessoais da plataforma aplicáveis ao cliente."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização para uso entre módulos, somente para leitura neste módulo."
+            "description": "Dados promovidos pela organização, somente para leitura neste módulo."
           },
           "locacaoEquipamentos": {
             "type": "object",

@@ -13,7 +13,7 @@ export const locacaoEquipamentosIntegration = {
       "to": "financeiro",
       "event": "devolucaoRegistrada",
       "on": "ContratoLocacao.registrarDevolucao",
-      "description": "Publica a devolução registrada, incluindo a multa calculada quando houver atraso, para possibilitar o tratamento financeiro do contrato.",
+      "description": "Publica a devolução registrada, incluindo a multa calculada em caso de atraso, para o módulo financeiro gerar a cobrança correspondente.",
       "entityRefs": [
         "ContratoLocacao"
       ]

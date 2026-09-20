@@ -6,37 +6,44 @@
       "business": {
         "actorRef": "atendente",
         "title": "Criar contrato de locação",
-        "goal": "Registrar a locação de equipamentos para um cliente no período solicitado.",
+        "goal": "Registrar a locação de equipamentos para um cliente em um período definido.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "informarContrato",
+            "stepId": "localizarCliente",
+            "kind": "locate",
+            "entity": "Cliente",
+            "title": "x",
+            "description": "Localiza o cliente que fará a locação."
+          },
+          {
+            "stepId": "criarContrato",
             "kind": "act",
             "entity": "ContratoLocacao",
             "effect": "create",
             "title": "x",
-            "description": "Cria o contrato para o cliente, informando a data de retirada, a data prevista de devolução e um ou mais equipamentos. O sistema impede a locação de um equipamento em períodos sobrepostos."
+            "description": "Cria o contrato com os equipamentos, as datas de retirada e devolução prevista, verificando que cada equipamento não possui locação em período sobreposto."
           }
         ],
         "outcome": {
-          "statement": "Um contrato de locação é registrado para os equipamentos disponíveis no período informado.",
+          "statement": "O contrato de locação é registrado para o cliente com os equipamentos reservados no período informado.",
           "evidence": [
-            "O contrato possui identificação, cliente, equipamentos, data de retirada e data prevista de devolução.",
-            "Os equipamentos incluídos não possuem outra locação com período sobreposto."
+            "Contrato de locação identificado para o cliente.",
+            "Equipamentos e período de locação registrados no contrato."
           ]
         }
       },
-      "businessHash": "sha256:694634d5424c48494e1e11546442bc27423a21d6e3f392ac8cec36a88deeafc3"
+      "businessHash": "sha256:14fceaf696efd2484998a6d8e74c959dff6e78c380ee5b77f850f0977d99b48d"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
       "journeyId": "registrarDevolucao",
       "business": {
         "actorRef": "atendente",
-        "title": "Registrar devolução de locação",
-        "goal": "Registrar a data efetiva de devolução e apurar eventual multa por atraso.",
+        "title": "Registrar devolução de equipamentos",
+        "goal": "Registrar a data real de devolução e concluir a locação.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -46,34 +53,34 @@
             "kind": "locate",
             "entity": "ContratoLocacao",
             "title": "x",
-            "description": "Localiza o contrato de locação em aberto para o qual os equipamentos foram devolvidos."
+            "description": "Localiza o contrato de locação em aberto, usando o contrato já em contexto quando disponível."
           },
           {
-            "stepId": "conferirContrato",
+            "stepId": "inspecionarContrato",
             "kind": "inspect",
             "entity": "ContratoLocacao",
             "title": "x",
-            "description": "Confere os equipamentos locados, a data prevista de devolução e os dados do contrato antes de registrar o retorno."
+            "description": "Confere os equipamentos locados e a data prevista de devolução."
           },
           {
-            "stepId": "registrarRetorno",
+            "stepId": "registrarDevolucao",
             "kind": "act",
             "entity": "ContratoLocacao",
             "effect": "transition",
             "transitionRef": "registrarDevolucao",
             "title": "x",
-            "description": "Registra a data real de devolução. Quando houver atraso, o sistema calcula a multa com base na diária de cada equipamento, nos dias de atraso e no fator de 1,5."
+            "description": "Registra a data real de devolução, conclui a locação e permite o cálculo da multa quando houver atraso."
           }
         ],
         "outcome": {
-          "statement": "A devolução é registrada e a multa por atraso, quando aplicável, fica apurada no contrato.",
+          "statement": "A devolução é registrada e a multa por atraso, quando aplicável, fica calculada no contrato.",
           "evidence": [
-            "O contrato registra a data real de devolução.",
-            "O contrato apresenta a multa calculada quando a devolução ocorreu após a data prevista."
+            "Data real de devolução registrada no contrato.",
+            "Multa calculada quando a devolução ocorre após a data prevista."
           ]
         }
       },
-      "businessHash": "sha256:80148690075ac2a7a73e849c85e3e89f2f1d2260876febcf680faf45f77c729d"
+      "businessHash": "sha256:9a4f219495ee6e76edd98cfc455d1a7cebebb604d94db515c44f92ca41a207a3"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -83,7 +90,7 @@
         "title": "Consultar situação dos equipamentos",
         "goal": "Acompanhar quais equipamentos estão disponíveis, locados ou em manutenção.",
         "entry": {
-          "mode": "contextOrLookup"
+          "mode": "coldStart"
         },
         "steps": [
           {
@@ -91,24 +98,24 @@
             "kind": "locate",
             "entity": "Equipamento",
             "title": "x",
-            "description": "Localiza os equipamentos para acompanhamento da operação."
+            "description": "Localiza os equipamentos da locadora."
           },
           {
-            "stepId": "consultarSituacao",
+            "stepId": "inspecionarSituacao",
             "kind": "inspect",
             "entity": "Equipamento",
             "title": "x",
-            "description": "Consulta a situação de cada equipamento, identificando se está disponível, locado ou em manutenção."
+            "description": "Consulta a situação de cada equipamento, incluindo disponibilidade, locação ou manutenção."
           }
         ],
         "outcome": {
-          "statement": "O gerente visualiza a situação operacional dos equipamentos.",
+          "statement": "O gerente acompanha a situação atual dos equipamentos da locadora.",
           "evidence": [
-            "Cada equipamento consultado apresenta sua situação como disponível, locado ou em manutenção."
+            "Situação de disponibilidade, locação ou manutenção exibida para os equipamentos."
           ]
         }
       },
-      "businessHash": "sha256:2321a01cdf865d6b834b7013369a36b5f6aad5f3b6f615c0b2ff396eb6d86c00"
+      "businessHash": "sha256:f1c14d2846a3f38dd6d23318844f6e96c13e1f64792c0cf1b9ac0beca2b9c256"
     }
   ],
   "systemDecisions": [],
@@ -118,7 +125,7 @@
     {
       "kind": "dropTransitionRef",
       "journeyId": "criarContratoLocacao",
-      "stepId": "informarContrato",
+      "stepId": "criarContrato",
       "detail": "transitionRef x dropped; effect is create."
     }
   ]

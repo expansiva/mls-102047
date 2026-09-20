@@ -25,44 +25,59 @@ export const locacaoEquipamentosOntologyIndex = {
     {
       "entityId": "ContratoLocacao",
       "kind": "entity",
-      "class": "core"
+      "class": "event"
     },
     {
-      "entityId": "ItemContratoLocacao",
+      "entityId": "ItemLocacao",
+      "kind": "entity",
+      "class": "supporting"
+    },
+    {
+      "entityId": "ManutencaoEquipamento",
       "kind": "entity",
       "class": "supporting"
     }
   ],
   "relationships": [
     {
-      "relationshipId": "contratoLocacaoCliente",
-      "from": "ContratoLocacao",
-      "to": "Cliente",
-      "type": "manyToOne",
+      "relationshipId": "clienteContratosLocacao",
+      "from": "Cliente",
+      "to": "ContratoLocacao",
+      "type": "oneToMany",
       "required": true,
       "mode": "fk",
-      "description": "Cada contrato de locação é celebrado para um cliente.",
+      "description": "Um cliente pode possuir vários contratos de locação, e cada contrato pertence a um cliente.",
       "field": "ContratoLocacao.clienteId"
     },
     {
-      "relationshipId": "itemContratoLocacaoContrato",
-      "from": "ItemContratoLocacao",
-      "to": "ContratoLocacao",
-      "type": "manyToOne",
+      "relationshipId": "contratoItensLocacao",
+      "from": "ContratoLocacao",
+      "to": "ItemLocacao",
+      "type": "oneToMany",
       "required": true,
       "mode": "fk",
-      "description": "Cada item de locação pertence a um único contrato de locação.",
-      "field": "ItemContratoLocacao.contratoLocacaoId"
+      "description": "Um contrato de locação contém um ou mais itens de equipamentos locados.",
+      "field": "ItemLocacao.contratoLocacaoId"
     },
     {
-      "relationshipId": "itemContratoLocacaoEquipamento",
-      "from": "ItemContratoLocacao",
+      "relationshipId": "itemLocacaoEquipamento",
+      "from": "ItemLocacao",
       "to": "Equipamento",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item do contrato reserva um equipamento específico para o período da locação.",
-      "field": "ItemContratoLocacao.equipamentoId"
+      "description": "Cada item de locação referencia exatamente um equipamento, que pode constar em locações diferentes em períodos não sobrepostos.",
+      "field": "ItemLocacao.equipamentoId"
+    },
+    {
+      "relationshipId": "equipamentoManutencoes",
+      "from": "Equipamento",
+      "to": "ManutencaoEquipamento",
+      "type": "oneToMany",
+      "required": true,
+      "mode": "fk",
+      "description": "Um equipamento pode ter vários períodos de manutenção, cada um associado a um único equipamento.",
+      "field": "ManutencaoEquipamento.equipamentoId"
     }
   ]
 } as const satisfies Ns5OntologyIndexV3;

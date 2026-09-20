@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-19T17:57:39.560Z",
+      "updatedAt": "2026-09-20T10:46:33.209Z",
       "artifactPaths": [
         "l4/locacaoEquipamentos/module.defs.ts"
       ],
@@ -16,20 +16,20 @@
           "kind": "internal",
           "origin": "named",
           "title": "Atendente",
-          "description": "Cria contratos de locação para clientes, incluindo equipamentos e o período de retirada e devolução prevista, e registra a devolução efetiva."
+          "description": "Cria contratos de locação para clientes e registra a devolução dos equipamentos."
         },
         {
           "actorId": "gerente",
           "kind": "internal",
           "origin": "named",
           "title": "Gerente",
-          "description": "Acompanha a situação dos equipamentos, incluindo disponibilidade, locações em andamento e manutenção."
+          "description": "Acompanha a disponibilidade, a locação e a manutenção dos equipamentos."
         }
       ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-19T17:58:06.416Z",
+      "updatedAt": "2026-09-20T10:47:05.189Z",
       "artifactPaths": [
         "l4/locacaoEquipamentos/journeys/criarContratoLocacao.defs.ts",
         "l4/locacaoEquipamentos/journeys/registrarDevolucao.defs.ts",
@@ -42,31 +42,32 @@
         {
           "kind": "dropTransitionRef",
           "journeyId": "criarContratoLocacao",
-          "stepId": "informarContrato",
+          "stepId": "criarContrato",
           "detail": "transitionRef x dropped; effect is create."
         }
       ]
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-09-19T17:58:17.544Z",
+      "updatedAt": "2026-09-20T10:47:16.059Z",
       "artifactPaths": [
         "l4/locacaoEquipamentos/workflows.defs.ts"
       ]
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-19T18:00:27.939Z",
+      "updatedAt": "2026-09-20T10:50:30.938Z",
       "artifactPaths": [
         "l4/locacaoEquipamentos/ontology/Cliente.defs.ts",
         "l4/locacaoEquipamentos/ontology/Equipamento.defs.ts",
         "l4/locacaoEquipamentos/ontology/ContratoLocacao.defs.ts",
-        "l4/locacaoEquipamentos/ontology/ItemContratoLocacao.defs.ts",
+        "l4/locacaoEquipamentos/ontology/ItemLocacao.defs.ts",
+        "l4/locacaoEquipamentos/ontology/ManutencaoEquipamento.defs.ts",
         "l4/locacaoEquipamentos/ontology/index.defs.ts"
       ],
       "uncitedEntities": [
-        "Cliente",
-        "ItemContratoLocacao"
+        "ItemLocacao",
+        "ManutencaoEquipamento"
       ],
       "liftedAggregateEntities": [],
       "normalizations": [
@@ -87,8 +88,13 @@
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "ItemContratoLocacao",
-          "detail": "storage.table locacaoEquipamentos_itemcontratolocacao"
+          "entityId": "ItemLocacao",
+          "detail": "storage.table locacaoEquipamentos_itemlocacao"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ManutencaoEquipamento",
+          "detail": "storage.table locacaoEquipamentos_manutencaoequipamento"
         },
         {
           "kind": "derivedFromPlatform",
@@ -99,6 +105,11 @@
           "kind": "tightened",
           "entityId": "Cliente",
           "detail": "Cliente.details.identification.subtype.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Cliente",
+          "detail": "Cliente.details.identification.docType.values"
         },
         {
           "kind": "namespaceEmpty",
@@ -113,7 +124,7 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "Equipamento",
-          "detail": "record.fields.details.fields.situacaoAtual.derived (derived[])"
+          "detail": "record.fields.details.fields.situacaoOperacional.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -127,13 +138,18 @@
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "ItemContratoLocacao",
+          "entityId": "ItemLocacao",
           "detail": "record.fields.id, record.fields.version"
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "ItemContratoLocacao",
+          "entityId": "ItemLocacao",
           "detail": "record.fields.details.fields.multaAtraso.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ManutencaoEquipamento",
+          "detail": "record.fields.id, record.fields.version"
         }
       ],
       "citedRules": [
@@ -141,16 +157,17 @@
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
         "rule-person-privacy-consent-required-br-eu",
-        "codigoEquipamentoUnico",
-        "situacaoOperacionalDoEquipamento",
-        "equipamentoEmManutencaoIndisponivel",
-        "locacaoDeEquipamentoSemSobreposicao",
-        "equipamentoSemSobreposicao",
+        "periodosLocacaoNaoSobrepostos",
+        "situacaoOperacionalEquipamento",
+        "contratoComPeloMenosUmItem",
         "periodoLocacaoValido",
-        "dataDevolucaoValida",
+        "equipamentoSemSobreposicao",
+        "devolucaoAposRetirada",
         "multaPorAtraso",
-        "equipamentoPeriodoNoOverlap",
-        "calcularMultaAtraso"
+        "itemEquipamentoUnicoNoContrato",
+        "calcularMultaAtraso",
+        "maintenanceDatesValid",
+        "maintenanceDoesNotOverlapRental"
       ],
       "citedCapabilities": [
         "read.byId",
@@ -159,68 +176,77 @@
         "register.createOrAttach",
         "edit.platformFields",
         "inactivate",
+        "listLinks",
+        "comment",
+        "audit",
+        "statusHistory.read",
         "locate.byColumn",
-        "locate.byText",
         "count",
+        "locacaoEquipamentos.consultarSituacaoEquipamentos",
         "listByForeignKey",
         "create",
         "update",
-        "uniqueKey",
-        "locacaoEquipamentos.consultarSituacaoEquipamentos",
         "transition",
         "transaction",
-        "read.mdmRecord"
+        "read.mdmRecord",
+        "delete",
+        "uniqueKey"
       ]
     },
     "judge35": {
       "status": "approved",
-      "updatedAt": "2026-09-19T18:00:28.124Z",
+      "updatedAt": "2026-09-20T10:50:31.096Z",
       "artifactPaths": [
         "l4/locacaoEquipamentos/pipeline/judge35-draft.json"
       ],
       "noJudgeSignal": true
     },
+    "rules40": {
+      "status": "approved",
+      "updatedAt": "2026-09-20T10:50:58.603Z",
+      "artifactPaths": [
+        "l4/locacaoEquipamentos/rules.defs.ts"
+      ]
+    },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-19T18:00:50.608Z",
+      "updatedAt": "2026-09-20T10:51:41.349Z",
       "artifactPaths": [
         "l4/locacaoEquipamentos/access.defs.ts"
       ],
       "normalizations": [
         {
           "kind": "dropAnchorEntity",
-          "grantId": "atendenteContratosLocacao",
+          "grantId": "atendenteLocalizarCliente",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         },
         {
           "kind": "dropAnchorEntity",
-          "grantId": "atendenteDadosParaLocacao",
+          "grantId": "atendenteSelecionarEquipamentos",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         },
         {
           "kind": "dropAnchorEntity",
-          "grantId": "gerenteSituacaoEquipamentos",
+          "grantId": "atendenteGerirLocacoes",
+          "detail": "anchorEntity removed; organization is not own/assigned/related."
+        },
+        {
+          "kind": "dropAnchorEntity",
+          "grantId": "gerenteGerirInventario",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
       ]
     },
-    "rules40": {
-      "status": "approved",
-      "updatedAt": "2026-09-19T18:00:50.620Z",
-      "artifactPaths": [
-        "l4/locacaoEquipamentos/rules.defs.ts"
-      ]
-    },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-19T18:01:06.987Z",
+      "updatedAt": "2026-09-20T10:52:08.065Z",
       "artifactPaths": [
         "l4/locacaoEquipamentos/integration.defs.ts"
       ]
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-19T18:01:07.274Z",
+      "updatedAt": "2026-09-20T10:52:08.249Z",
       "artifactPaths": [
         "l4/locacaoEquipamentos/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -235,14 +261,12 @@
     "module": "locacaoEquipamentos",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-19T18:01:07.274Z",
+  "updatedAt": "2026-09-20T10:52:08.249Z",
   "rebuildAll": {
     "deleted": [
-      "l2/locacaoEquipamentos/pipeline/menu20-draft.json",
-      "l2/locacaoEquipamentos/pipeline/pipeline.json",
       "l4/locacaoEquipamentos/access.defs.ts",
       "l4/locacaoEquipamentos/integration.defs.ts",
-      "l4/locacaoEquipamentos/journeys/acompanharSituacaoEquipamentos.defs.ts",
+      "l4/locacaoEquipamentos/journeys/consultarSituacaoEquipamentos.defs.ts",
       "l4/locacaoEquipamentos/journeys/criarContratoLocacao.defs.ts",
       "l4/locacaoEquipamentos/journeys/index.defs.ts",
       "l4/locacaoEquipamentos/journeys/registrarDevolucao.defs.ts",
@@ -256,6 +280,7 @@
       "l4/locacaoEquipamentos/pipeline/finalize-report.json",
       "l4/locacaoEquipamentos/pipeline/integration70-draft.json",
       "l4/locacaoEquipamentos/pipeline/journeys20-draft.json",
+      "l4/locacaoEquipamentos/pipeline/judge35-draft.json",
       "l4/locacaoEquipamentos/pipeline/module10-draft.json",
       "l4/locacaoEquipamentos/pipeline/ontology30-draft.json",
       "l4/locacaoEquipamentos/pipeline/ontology30-entity-Cliente-draft.json",
@@ -267,17 +292,10 @@
       "l4/locacaoEquipamentos/pipeline/rules40-draft.json",
       "l4/locacaoEquipamentos/pipeline/run01_newsolution5.json",
       "l4/locacaoEquipamentos/pipeline/workflows50-draft.json",
-      "l4/locacaoEquipamentos/pool/l1/20260919093251_locacaoEquipamentos-20260919093251_1.json",
-      "l4/locacaoEquipamentos/pool/l2/20260919093251_locacaoEquipamentos-20260919093251_1.json",
-      "l4/locacaoEquipamentos/pool/l2/menu.json",
       "l4/locacaoEquipamentos/rules.defs.ts",
       "l4/locacaoEquipamentos/workflows.defs.ts"
     ],
-    "edited": [
-      "l4/organization/registry.defs.ts",
-      "l5/config.json",
-      "l5/project.json"
-    ],
-    "at": "2026-09-19T17:57:39.550Z"
+    "edited": [],
+    "at": "2026-09-20T10:46:33.199Z"
   }
 }

@@ -14,7 +14,7 @@ export const locacaoEquipamentosJourneyIndex = {
     {
       "journeyId": "registrarDevolucao",
       "actorRef": "atendente",
-      "title": "Registrar devolução de locação"
+      "title": "Registrar devolução de equipamentos"
     },
     {
       "journeyId": "consultarSituacaoEquipamentos",

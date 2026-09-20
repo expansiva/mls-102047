@@ -8,29 +8,36 @@ export const criarContratoLocacaoJourney = {
   "business": {
     "actorRef": "atendente",
     "title": "Criar contrato de locação",
-    "goal": "Registrar a locação de equipamentos para um cliente no período solicitado.",
+    "goal": "Registrar a locação de equipamentos para um cliente em um período definido.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "informarContrato",
+        "stepId": "localizarCliente",
+        "kind": "locate",
+        "entity": "Cliente",
+        "title": "x",
+        "description": "Localiza o cliente que fará a locação."
+      },
+      {
+        "stepId": "criarContrato",
         "kind": "act",
         "entity": "ContratoLocacao",
         "effect": "create",
         "title": "x",
-        "description": "Cria o contrato para o cliente, informando a data de retirada, a data prevista de devolução e um ou mais equipamentos. O sistema impede a locação de um equipamento em períodos sobrepostos."
+        "description": "Cria o contrato com os equipamentos, as datas de retirada e devolução prevista, verificando que cada equipamento não possui locação em período sobreposto."
       }
     ],
     "outcome": {
-      "statement": "Um contrato de locação é registrado para os equipamentos disponíveis no período informado.",
+      "statement": "O contrato de locação é registrado para o cliente com os equipamentos reservados no período informado.",
       "evidence": [
-        "O contrato possui identificação, cliente, equipamentos, data de retirada e data prevista de devolução.",
-        "Os equipamentos incluídos não possuem outra locação com período sobreposto."
+        "Contrato de locação identificado para o cliente.",
+        "Equipamentos e período de locação registrados no contrato."
       ]
     }
   },
-  "businessHash": "sha256:694634d5424c48494e1e11546442bc27423a21d6e3f392ac8cec36a88deeafc3"
+  "businessHash": "sha256:14fceaf696efd2484998a6d8e74c959dff6e78c380ee5b77f850f0977d99b48d"
 } as const satisfies Ns5JourneyArtifact;
 
 export type CriarContratoLocacaoJourneyType = typeof criarContratoLocacaoJourney;

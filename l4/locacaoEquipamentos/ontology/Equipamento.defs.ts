@@ -7,38 +7,40 @@ export const locacaoEquipamentosEntityEquipamento = {
   "moduleName": "locacaoEquipamentos",
   "entityId": "Equipamento",
   "title": "Equipamento",
-  "description": "Equipamento de construção operado pela locadora, identificado por código, com diária e situação operacional acompanhada no módulo.",
+  "description": "Equipamento da locadora identificado por código, com diária definida e situação operacional calculada a partir das locações e manutenções.",
   "displayField": "codigo",
   "relationships": {
-    "itensContratoLocacao": {
-      "relationshipId": "itemContratoLocacaoEquipamento",
-      "to": "ItemContratoLocacao",
-      "via": "ItemContratoLocacao.equipamentoId",
+    "itensLocacao": {
+      "relationshipId": "itemLocacaoEquipamento",
+      "to": "ItemLocacao",
+      "via": "ItemLocacao.equipamentoId",
       "cardinality": "1:N",
-      "title": "Itens de contratos de locação",
-      "description": "Itens de contratos que reservam este equipamento para um período de locação.",
+      "title": "Itens de locação",
+      "description": "Itens de locação que referenciam este equipamento em contratos da locadora.",
       "mode": "fk",
       "direction": "to",
-      "required": "Quando o equipamento estiver vinculado a uma locação.",
-      "role": "equipamento"
+      "required": "Sempre que um item de locação for registrado."
+    },
+    "manutencoes": {
+      "relationshipId": "equipamentoManutencoes",
+      "to": "ManutencaoEquipamento",
+      "via": "ManutencaoEquipamento.equipamentoId",
+      "cardinality": "1:N",
+      "title": "Manutenções",
+      "description": "Períodos de manutenção associados a este equipamento.",
+      "mode": "fk",
+      "required": "Sempre que uma manutenção for registrada."
     }
   },
   "capabilities": {
-    "read.byId": "Consulta um equipamento pelo identificador da linha · busca por id no repositório · atendente e gerente usam ao abrir seus dados.",
-    "locate.byColumn": "Lista equipamentos por código ou indicação de manutenção · filtra e pagina pelas colunas indexadas · atendente localiza equipamentos para contratos e gerente acompanha a operação.",
-    "locate.byText": "Encontra equipamentos por trecho do código · pesquisa textual sem distinção entre maiúsculas e minúsculas na coluna de código · atendente e gerente usam na busca rápida.",
-    "count": "Conta os equipamentos que atendem aos filtros · executa a mesma condição da listagem sem paginação · gerente usa para acompanhar o catálogo filtrado.",
-    "listByForeignKey": "Lista os itens de contrato que apontam para um equipamento · consulta ItemContratoLocacao pela chave estrangeira do equipamento · atendente e gerente consultam as locações vinculadas.",
-    "create": "Cadastra um equipamento para locação · insere a linha com código, manutenção e dados comerciais · gerente mantém o catálogo da locadora.",
-    "update": "Atualiza os dados comerciais ou a indicação de manutenção do equipamento · altera parcialmente a linha pelo id · gerente mantém o catálogo e controla a indisponibilidade por manutenção.",
-    "uniqueKey": "Impede repetição de código de equipamento · aplica índice único sobre a coluna codigo · o sistema protege o catálogo mantido pelo gerente.",
-    "locacaoEquipamentos.consultarSituacaoEquipamentos": "Apura a situação operacional de cada equipamento · combina a indicação de manutenção com os contratos de locação em andamento e suas devoluções · gerente acompanha equipamentos disponíveis, locados ou em manutenção."
+    "read.byId": "Consulta um equipamento pelo identificador da linha no repositório de equipamentos para as telas que já possuem seu id, usada pelo gerente.",
+    "locate.byColumn": "Localiza equipamentos pelo código indexado, com ordenação e paginação, para o gerente encontrar equipamentos da locadora.",
+    "count": "Conta os equipamentos que atendem aos filtros por colunas indexadas para exibir o total na consulta do gerente.",
+    "locacaoEquipamentos.consultarSituacaoEquipamentos": "Apura e apresenta a situação operacional calculada de cada equipamento a partir das locações e manutenções vigentes, para o gerente acompanhar os disponíveis, locados e em manutenção."
   },
   "rules": [
-    "codigoEquipamentoUnico",
-    "situacaoOperacionalDoEquipamento",
-    "equipamentoEmManutencaoIndisponivel",
-    "locacaoDeEquipamentoSemSobreposicao"
+    "periodosLocacaoNaoSobrepostos",
+    "situacaoOperacionalEquipamento"
   ],
   "writer": "crud",
   "kind": "entity",
@@ -67,30 +69,19 @@ export const locacaoEquipamentosEntityEquipamento = {
         "required": true,
         "unique": true,
         "indexed": true,
-        "of": "ContactSummary",
+        "of": "Address",
         "title": "Código",
-        "description": "Código interno que identifica o equipamento no catálogo da locadora.",
-        "maxLength": 50,
-        "min": 0,
-        "max": 0
-      },
-      "emManutencao": {
-        "type": "boolean",
-        "required": true,
-        "indexed": true,
-        "of": "ContactSummary",
-        "title": "Em manutenção",
-        "description": "Indica que o equipamento está indisponível para novas locações por estar em manutenção.",
-        "maxLength": 0,
+        "description": "Código único que identifica o equipamento na locadora e permite sua localização.",
+        "maxLength": 80,
         "min": 0,
         "max": 0
       },
       "details": {
         "type": "object",
         "required": true,
-        "of": "ContactSummary",
-        "title": "Dados do equipamento",
-        "description": "Dados descritivos e comerciais do equipamento que não exigem pesquisa ou ordenação.",
+        "of": "Address",
+        "title": "Detalhes",
+        "description": "Dados descritivos e comerciais do equipamento que não exigem índice próprio.",
         "maxLength": 0,
         "min": 0,
         "max": 0,
@@ -98,9 +89,9 @@ export const locacaoEquipamentosEntityEquipamento = {
           "descricao": {
             "type": "text",
             "required": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "title": "Descrição",
-            "description": "Descrição do equipamento de construção oferecido para locação.",
+            "description": "Descrição do equipamento de construção disponibilizado para locação.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -108,18 +99,18 @@ export const locacaoEquipamentosEntityEquipamento = {
           "valorDiaria": {
             "type": "money",
             "required": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "title": "Valor da diária",
-            "description": "Valor cobrado por dia de locação do equipamento.",
+            "description": "Valor cobrado por uma diária de locação deste equipamento.",
             "maxLength": 0,
-            "min": 0.01,
+            "min": 0,
             "max": 0
           },
-          "situacaoAtual": {
+          "situacaoOperacional": {
             "type": "enum",
             "derived": true,
-            "title": "Situação atual",
-            "description": "Situação operacional mostrada ao gerente: em manutenção quando o equipamento estiver marcado para manutenção; locado quando houver contrato de locação em andamento para ele sem devolução efetiva; disponível nos demais casos."
+            "title": "Situação operacional",
+            "description": "Situação calculada na data da consulta: em manutenção quando há manutenção em andamento; locado quando há item de locação em período vigente; disponível quando não há manutenção em andamento nem locação vigente."
           }
         }
       }

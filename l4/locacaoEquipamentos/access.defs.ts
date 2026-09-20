@@ -11,74 +11,97 @@ export const locacaoEquipamentosAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Atendente",
-      "description": "Cria contratos de locação para clientes, incluindo equipamentos e o período de retirada e devolução prevista, e registra a devolução efetiva."
+      "description": "Cria contratos de locação para clientes e registra a devolução dos equipamentos."
     },
     {
       "actorId": "gerente",
       "kind": "internal",
       "origin": "named",
       "title": "Gerente",
-      "description": "Acompanha a situação dos equipamentos, incluindo disponibilidade, locações em andamento e manutenção."
+      "description": "Acompanha a disponibilidade, a locação e a manutenção dos equipamentos."
     }
   ],
   "grants": [
     {
-      "grantId": "atendenteContratosLocacao",
+      "grantId": "atendenteLocalizarCliente",
       "actorRef": "atendente",
-      "title": "Gerenciar contratos de locação",
-      "description": "Permite criar contratos de locação, incluir os equipamentos locados e registrar a devolução efetiva dos contratos da locadora.",
+      "title": "Localizar clientes para locação",
+      "description": "Permite ao atendente identificar o cliente cadastrado ao preparar um contrato de locação.",
       "entityRefs": [
-        "ContratoLocacao",
-        "ItemContratoLocacao"
+        "Cliente"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os contratos e itens de locação de toda a organização necessários ao atendimento."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Permite visualizar todos os dados dos contratos de locação e de seus itens, inclusive retorno e multa calculada."
-      }
-    },
-    {
-      "grantId": "atendenteDadosParaLocacao",
-      "actorRef": "atendente",
-      "title": "Consultar clientes e equipamentos para locação",
-      "description": "Permite identificar o cliente e consultar os equipamentos e seus valores para registrar uma locação, incluindo o cadastro de equipamento necessário à operação.",
-      "entityRefs": [
-        "Cliente",
-        "Equipamento"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Abrange clientes e equipamentos de toda a organização necessários para formalizar locações."
+        "description": "Clientes cadastrados na organização."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Exibe a identificação do cliente e os dados operacionais, descritivos, comerciais e de situação do equipamento, sem expor os demais dados pessoais do cliente.",
+        "description": "Permite consultar a identificação do cliente necessária para sua localização; os demais dados do registro mestre permanecem restritos.",
         "allowedFields": [
+          "Cliente.id",
           "Cliente.details.identification",
-          "Equipamento.codigo",
-          "Equipamento.emManutencao",
-          "Equipamento.details"
+          "Cliente.details.locacaoEquipamentos"
         ]
       }
     },
     {
-      "grantId": "gerenteSituacaoEquipamentos",
-      "actorRef": "gerente",
-      "title": "Acompanhar equipamentos da locadora",
-      "description": "Permite consultar e administrar o cadastro e a situação operacional dos equipamentos da organização, incluindo disponibilidade, locação e manutenção.",
+      "grantId": "atendenteSelecionarEquipamentos",
+      "actorRef": "atendente",
+      "title": "Consultar equipamentos para locação",
+      "description": "Permite ao atendente consultar os equipamentos e suas condições comerciais e operacionais ao montar um contrato.",
       "entityRefs": [
         "Equipamento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange todos os equipamentos da organização."
+        "description": "Equipamentos pertencentes à organização."
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "Permite consultar o código, a descrição, a diária e a situação operacional de cada equipamento.",
+        "allowedFields": [
+          "Equipamento.id",
+          "Equipamento.codigo",
+          "Equipamento.details.descricao",
+          "Equipamento.details.valorDiaria",
+          "Equipamento.details.situacaoOperacional"
+        ]
+      }
+    },
+    {
+      "grantId": "atendenteGerirLocacoes",
+      "actorRef": "atendente",
+      "title": "Criar e concluir contratos de locação",
+      "description": "Permite ao atendente registrar contratos, seus equipamentos locados e a devolução efetiva, inclusive a multa calculada por atraso.",
+      "entityRefs": [
+        "ContratoLocacao",
+        "ItemLocacao"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Contratos e itens de locação da organização."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Exibe todos os dados cadastrais, comerciais e a situação operacional de cada equipamento."
+        "description": "Permite consultar integralmente os contratos de locação e seus itens para criação, conferência e devolução."
+      }
+    },
+    {
+      "grantId": "gerenteGerirInventario",
+      "actorRef": "gerente",
+      "title": "Gerir equipamentos e manutenções",
+      "description": "Permite ao gerente administrar o cadastro de equipamentos e seus períodos de manutenção, acompanhando a situação operacional.",
+      "entityRefs": [
+        "Equipamento",
+        "ManutencaoEquipamento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Equipamentos e manutenções de toda a organização."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Permite consultar integralmente os equipamentos e os registros de manutenção necessários para gerir a disponibilidade."
       }
     }
   ]

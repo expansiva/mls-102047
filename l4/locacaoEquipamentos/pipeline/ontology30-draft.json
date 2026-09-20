@@ -8,7 +8,7 @@
         "kind": "role",
         "family": "mdm",
         "title": "Cliente",
-        "description": "Pessoa cliente para a qual a locação de equipamentos é contratada.",
+        "description": "Pessoa cadastrada no MDM que celebra contratos de locação de equipamentos.",
         "displayField": "details.identification.name",
         "subtype": "Person",
         "roleTag": "locacaoEquipamentos.Cliente",
@@ -19,7 +19,7 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Equipamento",
-        "description": "Equipamento de construção operado pela locadora, identificado por código, com diária e situação operacional acompanhada no módulo.",
+        "description": "Equipamento da locadora identificado por código, com diária definida e situação operacional calculada a partir das locações e manutenções.",
         "displayField": "codigo",
         "writer": "crud",
         "class": "core",
@@ -34,9 +34,9 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Contrato de locação",
-        "description": "Contrato que registra a locação de um ou mais equipamentos para um cliente, com retirada, devolução prevista e retorno efetivo.",
+        "description": "Contrato que registra a locação de um cliente, seu período previsto e a devolução efetiva dos equipamentos.",
         "displayField": "id",
-        "class": "core",
+        "class": "event",
         "storage": {
           "target": "moduleDatabase",
           "table": "locacaoEquipamentos_contratolocacao",
@@ -44,50 +44,75 @@
         }
       },
       {
-        "entityId": "ItemContratoLocacao",
+        "entityId": "ItemLocacao",
         "kind": "entity",
         "family": "tdm",
-        "title": "Item do contrato de locação",
-        "description": "Item que vincula um equipamento ao contrato de locação e permite controlar sua indisponibilidade no período contratado e a multa aplicável.",
+        "title": "Item de locação",
+        "description": "Item de um contrato que vincula um equipamento à locação e preserva a diária usada no cálculo de multa.",
         "displayField": "id",
         "class": "supporting",
         "storage": {
           "target": "moduleDatabase",
-          "table": "locacaoEquipamentos_itemcontratolocacao",
+          "table": "locacaoEquipamentos_itemlocacao",
+          "kind": "relational"
+        }
+      },
+      {
+        "entityId": "ManutencaoEquipamento",
+        "kind": "entity",
+        "family": "tdm",
+        "title": "Manutenção de equipamento",
+        "description": "Período de indisponibilidade de um equipamento para manutenção, usado no cálculo de sua situação.",
+        "displayField": "id",
+        "writer": "crud",
+        "class": "supporting",
+        "storage": {
+          "target": "moduleDatabase",
+          "table": "locacaoEquipamentos_manutencaoequipamento",
           "kind": "relational"
         }
       }
     ],
     "relationships": [
       {
-        "relationshipId": "contratoLocacaoCliente",
-        "from": "ContratoLocacao",
-        "to": "Cliente",
-        "type": "manyToOne",
+        "relationshipId": "clienteContratosLocacao",
+        "from": "Cliente",
+        "to": "ContratoLocacao",
+        "type": "oneToMany",
         "required": true,
         "mode": "fk",
-        "description": "Cada contrato de locação é celebrado para um cliente.",
+        "description": "Um cliente pode possuir vários contratos de locação, e cada contrato pertence a um cliente.",
         "field": "ContratoLocacao.clienteId"
       },
       {
-        "relationshipId": "itemContratoLocacaoContrato",
-        "from": "ItemContratoLocacao",
-        "to": "ContratoLocacao",
-        "type": "manyToOne",
+        "relationshipId": "contratoItensLocacao",
+        "from": "ContratoLocacao",
+        "to": "ItemLocacao",
+        "type": "oneToMany",
         "required": true,
         "mode": "fk",
-        "description": "Cada item de locação pertence a um único contrato de locação.",
-        "field": "ItemContratoLocacao.contratoLocacaoId"
+        "description": "Um contrato de locação contém um ou mais itens de equipamentos locados.",
+        "field": "ItemLocacao.contratoLocacaoId"
       },
       {
-        "relationshipId": "itemContratoLocacaoEquipamento",
-        "from": "ItemContratoLocacao",
+        "relationshipId": "itemLocacaoEquipamento",
+        "from": "ItemLocacao",
         "to": "Equipamento",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada item do contrato reserva um equipamento específico para o período da locação.",
-        "field": "ItemContratoLocacao.equipamentoId"
+        "description": "Cada item de locação referencia exatamente um equipamento, que pode constar em locações diferentes em períodos não sobrepostos.",
+        "field": "ItemLocacao.equipamentoId"
+      },
+      {
+        "relationshipId": "equipamentoManutencoes",
+        "from": "Equipamento",
+        "to": "ManutencaoEquipamento",
+        "type": "oneToMany",
+        "required": true,
+        "mode": "fk",
+        "description": "Um equipamento pode ter vários períodos de manutenção, cada um associado a um único equipamento.",
+        "field": "ManutencaoEquipamento.equipamentoId"
       }
     ],
     "normalizations": [
@@ -108,8 +133,13 @@
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "ItemContratoLocacao",
-        "detail": "storage.table locacaoEquipamentos_itemcontratolocacao"
+        "entityId": "ItemLocacao",
+        "detail": "storage.table locacaoEquipamentos_itemlocacao"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "ManutencaoEquipamento",
+        "detail": "storage.table locacaoEquipamentos_manutencaoequipamento"
       }
     ]
   },
@@ -119,29 +149,32 @@
       "moduleName": "locacaoEquipamentos",
       "entityId": "Cliente",
       "title": "Cliente",
-      "description": "Pessoa cliente para a qual a locação de equipamentos é contratada.",
+      "description": "Pessoa cadastrada no MDM que celebra contratos de locação de equipamentos.",
       "displayField": "details.identification.name",
       "relationships": {
-        "contratoLocacaoCliente": {
-          "relationshipId": "contratoLocacaoCliente",
+        "contratosLocacao": {
+          "relationshipId": "clienteContratosLocacao",
           "to": "ContratoLocacao",
           "via": "ContratoLocacao.clienteId",
           "cardinality": "1:N",
           "title": "Contratos de locação do cliente",
-          "description": "Contratos de locação celebrados para este cliente.",
+          "description": "Contratos de locação celebrados pelo cliente; cada contrato pertence a um único cliente.",
           "mode": "fk",
-          "direction": "to",
-          "required": true,
+          "required": "ao criar um contrato de locação",
           "role": "cliente"
         }
       },
       "capabilities": {
-        "read.byId": "Lê o cadastro mestre de um cliente pelo identificador já conhecido, hidratando seu nome nos contratos, para atendentes e gerentes.",
-        "locate.byName": "Localiza clientes pelo nome digitado no índice de pessoas, para o atendente selecionar o cliente ao criar um contrato.",
-        "locate.byDocument": "Localiza o cliente pelo documento nacional antes do cadastro, para o atendente evitar duplicidade de pessoa.",
-        "register.createOrAttach": "Cria o registro mestre quando não existir ou anexa a função de cliente ao registro já localizado por documento, para o atendente contratar a locação para a pessoa correta.",
-        "edit.platformFields": "Atualiza os dados de identificação de plataforma do cliente e reindexa a identificação quando necessário, para o atendente manter o cadastro correto.",
-        "inactivate": "Inativa ou reativa o cadastro mestre sem apagá-lo, para o atendente impedir ou restabelecer seu uso em novas locações."
+        "read.byId": "Lê o cadastro mestre pelo identificador MDM para exibir o cliente do contrato · consulta direta por id no índice e documento MDM · atendente e gerente.",
+        "locate.byName": "Localiza clientes pelo nome informado ao abrir uma locação · busca por nome no índice de pessoas · atendente.",
+        "locate.byDocument": "Localiza um cliente pelo documento nacional para evitar cadastro duplicado · consulta por tipo e número de documento no MDM · atendente.",
+        "register.createOrAttach": "Cria a pessoa no MDM quando ausente ou anexa a função de Cliente quando já existe · deduplicação por documento e inclusão da tag locacaoEquipamentos.Cliente · atendente ao criar contrato.",
+        "edit.platformFields": "Atualiza os dados de identificação do cliente mantidos pela plataforma · atualização do documento mestre e do índice de identificação · atendente.",
+        "inactivate": "Inativa ou reativa o cliente sem apagar seu histórico de contratos · alteração do status MDM · gerente.",
+        "listLinks": "Exibe os contratos de locação vinculados ao cliente · leitura da relação clienteContratosLocacao pelo vínculo de chave estrangeira · atendente e gerente.",
+        "comment": "Registra observações sobre o cadastro do cliente · comentário ancorado no registro MDM do cliente · atendente e gerente.",
+        "audit": "Consulta quem alterou o cadastro mestre do cliente e quando · leitura da trilha de auditoria do MDM · gerente.",
+        "statusHistory.read": "Exibe as mudanças de situação do cadastro do cliente · leitura do histórico de status do MDM · gerente."
       },
       "rules": [
         "rule-foreign-namespace-refused",
@@ -171,7 +204,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Registro mestre da pessoa cliente, com dados de identificação da plataforma e o espaço exclusivo deste módulo.",
+            "description": "Documento mestre da pessoa cliente utilizado pela locadora.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -189,7 +222,7 @@
                         "description": "Pessoa física cadastrada como cliente."
                       }
                     ],
-                    "description": "Indica que este registro mestre representa uma pessoa cliente.",
+                    "description": "Indica que este registro mestre representa uma pessoa.",
                     "title": "Tipo de cadastro",
                     "maxLength": 0,
                     "min": 0,
@@ -200,41 +233,8 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome pelo qual o cliente é identificado nos contratos de locação.",
+                    "description": "Nome pelo qual o cliente é identificado ao localizar e celebrar contratos de locação.",
                     "title": "Nome",
-                    "min": 0,
-                    "max": 0
-                  },
-                  "status": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Active",
-                        "title": "Ativo",
-                        "description": "Cadastro disponível para uso."
-                      },
-                      {
-                        "value": "Inactive",
-                        "title": "Inativo",
-                        "description": "Cadastro fora de uso."
-                      },
-                      {
-                        "value": "Merged",
-                        "title": "Unificado",
-                        "description": "Cadastro incorporado a outro registro mestre."
-                      },
-                      {
-                        "value": "Blocked",
-                        "title": "Bloqueado",
-                        "description": "Cadastro bloqueado pela plataforma."
-                      }
-                    ],
-                    "title": "Situação do cadastro",
-                    "description": "Situação de atividade do registro mestre do cliente.",
-                    "maxLength": 0,
                     "min": 0,
                     "max": 0
                   },
@@ -243,24 +243,9 @@
                     "indexed": true,
                     "values": [
                       {
-                        "value": "SSN",
-                        "title": "SSN",
-                        "description": "Número de seguridade social dos Estados Unidos."
-                      },
-                      {
-                        "value": "EIN",
-                        "title": "EIN",
-                        "description": "Identificador fiscal empresarial dos Estados Unidos."
-                      },
-                      {
-                        "value": "Passport",
-                        "title": "Passaporte",
-                        "description": "Documento de viagem internacional."
-                      },
-                      {
-                        "value": "DriversLicense",
-                        "title": "Carteira de motorista",
-                        "description": "Documento de habilitação."
+                        "value": "CPF",
+                        "title": "CPF",
+                        "description": "Cadastro de Pessoa Física."
                       },
                       {
                         "value": "NationalId",
@@ -268,28 +253,18 @@
                         "description": "Documento nacional de identificação."
                       },
                       {
-                        "value": "CPF",
-                        "title": "CPF",
-                        "description": "Cadastro de Pessoas Físicas."
-                      },
-                      {
-                        "value": "CNPJ",
-                        "title": "CNPJ",
-                        "description": "Cadastro Nacional da Pessoa Jurídica."
-                      },
-                      {
-                        "value": "VAT",
-                        "title": "Identificação fiscal",
-                        "description": "Número de identificação para imposto sobre valor agregado."
+                        "value": "Passport",
+                        "title": "Passaporte",
+                        "description": "Documento de viagem do cliente."
                       },
                       {
                         "value": "Other",
                         "title": "Outro",
-                        "description": "Outro documento aceito pela plataforma."
+                        "description": "Outro documento de identificação aceito."
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional apresentado para identificar e deduplicar o cliente.",
+                    "description": "Tipo do documento nacional usado para identificar e evitar duplicidade de cliente.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -297,7 +272,7 @@
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do documento apresentado para identificar e deduplicar o cliente.",
+                    "description": "Número do documento nacional do cliente para identificação e deduplicação.",
                     "title": "Número do documento",
                     "maxLength": 0,
                     "min": 0,
@@ -308,21 +283,21 @@
                     "required": true,
                     "indexed": true,
                     "pattern": "^[A-Z]{2}$",
-                    "maxLength": 0,
+                    "maxLength": 2,
                     "default": "US",
-                    "description": "Código do país aplicável ao documento e às regras legais do cliente.",
+                    "description": "Código ISO do país aplicável ao documento e às regras do cliente.",
                     "title": "País",
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação usados para localizar e reconhecer o cliente na locadora."
+                "description": "Dados de identificação do cliente mantidos pela plataforma MDM."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados básicos da plataforma que esta função de cliente não precisa declarar."
+                "description": "Dados básicos da plataforma MDM que não são necessários nesta locação."
               },
               "person": {
                 "type": "object",
@@ -331,20 +306,20 @@
                   "privacyConsent": {
                     "type": "object",
                     "of": "PrivacyConsent",
-                    "description": "Consentimento de privacidade do cliente, quando exigido pela legislação aplicável.",
+                    "description": "Consentimento de privacidade do cliente, aplicado quando exigido pelas regras de proteção de dados.",
                     "title": "Consentimento de privacidade",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados pessoais de plataforma necessários para observar o consentimento aplicável ao cliente."
+                "description": "Dados pessoais da plataforma aplicáveis ao cliente."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização para uso entre módulos, somente para leitura neste módulo."
+                "description": "Dados promovidos pela organização, somente para leitura neste módulo."
               },
               "locacaoEquipamentos": {
                 "type": "object",
@@ -362,38 +337,40 @@
       "moduleName": "locacaoEquipamentos",
       "entityId": "Equipamento",
       "title": "Equipamento",
-      "description": "Equipamento de construção operado pela locadora, identificado por código, com diária e situação operacional acompanhada no módulo.",
+      "description": "Equipamento da locadora identificado por código, com diária definida e situação operacional calculada a partir das locações e manutenções.",
       "displayField": "codigo",
       "relationships": {
-        "itensContratoLocacao": {
-          "relationshipId": "itemContratoLocacaoEquipamento",
-          "to": "ItemContratoLocacao",
-          "via": "ItemContratoLocacao.equipamentoId",
+        "itensLocacao": {
+          "relationshipId": "itemLocacaoEquipamento",
+          "to": "ItemLocacao",
+          "via": "ItemLocacao.equipamentoId",
           "cardinality": "1:N",
-          "title": "Itens de contratos de locação",
-          "description": "Itens de contratos que reservam este equipamento para um período de locação.",
+          "title": "Itens de locação",
+          "description": "Itens de locação que referenciam este equipamento em contratos da locadora.",
           "mode": "fk",
           "direction": "to",
-          "required": "Quando o equipamento estiver vinculado a uma locação.",
-          "role": "equipamento"
+          "required": "Sempre que um item de locação for registrado."
+        },
+        "manutencoes": {
+          "relationshipId": "equipamentoManutencoes",
+          "to": "ManutencaoEquipamento",
+          "via": "ManutencaoEquipamento.equipamentoId",
+          "cardinality": "1:N",
+          "title": "Manutenções",
+          "description": "Períodos de manutenção associados a este equipamento.",
+          "mode": "fk",
+          "required": "Sempre que uma manutenção for registrada."
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um equipamento pelo identificador da linha · busca por id no repositório · atendente e gerente usam ao abrir seus dados.",
-        "locate.byColumn": "Lista equipamentos por código ou indicação de manutenção · filtra e pagina pelas colunas indexadas · atendente localiza equipamentos para contratos e gerente acompanha a operação.",
-        "locate.byText": "Encontra equipamentos por trecho do código · pesquisa textual sem distinção entre maiúsculas e minúsculas na coluna de código · atendente e gerente usam na busca rápida.",
-        "count": "Conta os equipamentos que atendem aos filtros · executa a mesma condição da listagem sem paginação · gerente usa para acompanhar o catálogo filtrado.",
-        "listByForeignKey": "Lista os itens de contrato que apontam para um equipamento · consulta ItemContratoLocacao pela chave estrangeira do equipamento · atendente e gerente consultam as locações vinculadas.",
-        "create": "Cadastra um equipamento para locação · insere a linha com código, manutenção e dados comerciais · gerente mantém o catálogo da locadora.",
-        "update": "Atualiza os dados comerciais ou a indicação de manutenção do equipamento · altera parcialmente a linha pelo id · gerente mantém o catálogo e controla a indisponibilidade por manutenção.",
-        "uniqueKey": "Impede repetição de código de equipamento · aplica índice único sobre a coluna codigo · o sistema protege o catálogo mantido pelo gerente.",
-        "locacaoEquipamentos.consultarSituacaoEquipamentos": "Apura a situação operacional de cada equipamento · combina a indicação de manutenção com os contratos de locação em andamento e suas devoluções · gerente acompanha equipamentos disponíveis, locados ou em manutenção."
+        "read.byId": "Consulta um equipamento pelo identificador da linha no repositório de equipamentos para as telas que já possuem seu id, usada pelo gerente.",
+        "locate.byColumn": "Localiza equipamentos pelo código indexado, com ordenação e paginação, para o gerente encontrar equipamentos da locadora.",
+        "count": "Conta os equipamentos que atendem aos filtros por colunas indexadas para exibir o total na consulta do gerente.",
+        "locacaoEquipamentos.consultarSituacaoEquipamentos": "Apura e apresenta a situação operacional calculada de cada equipamento a partir das locações e manutenções vigentes, para o gerente acompanhar os disponíveis, locados e em manutenção."
       },
       "rules": [
-        "codigoEquipamentoUnico",
-        "situacaoOperacionalDoEquipamento",
-        "equipamentoEmManutencaoIndisponivel",
-        "locacaoDeEquipamentoSemSobreposicao"
+        "periodosLocacaoNaoSobrepostos",
+        "situacaoOperacionalEquipamento"
       ],
       "writer": "crud",
       "kind": "entity",
@@ -422,30 +399,19 @@
             "required": true,
             "unique": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "of": "Address",
             "title": "Código",
-            "description": "Código interno que identifica o equipamento no catálogo da locadora.",
-            "maxLength": 50,
-            "min": 0,
-            "max": 0
-          },
-          "emManutencao": {
-            "type": "boolean",
-            "required": true,
-            "indexed": true,
-            "of": "ContactSummary",
-            "title": "Em manutenção",
-            "description": "Indica que o equipamento está indisponível para novas locações por estar em manutenção.",
-            "maxLength": 0,
+            "description": "Código único que identifica o equipamento na locadora e permite sua localização.",
+            "maxLength": 80,
             "min": 0,
             "max": 0
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
-            "title": "Dados do equipamento",
-            "description": "Dados descritivos e comerciais do equipamento que não exigem pesquisa ou ordenação.",
+            "of": "Address",
+            "title": "Detalhes",
+            "description": "Dados descritivos e comerciais do equipamento que não exigem índice próprio.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
@@ -453,9 +419,9 @@
               "descricao": {
                 "type": "text",
                 "required": true,
-                "of": "ContactSummary",
+                "of": "Address",
                 "title": "Descrição",
-                "description": "Descrição do equipamento de construção oferecido para locação.",
+                "description": "Descrição do equipamento de construção disponibilizado para locação.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -463,18 +429,18 @@
               "valorDiaria": {
                 "type": "money",
                 "required": true,
-                "of": "ContactSummary",
+                "of": "Address",
                 "title": "Valor da diária",
-                "description": "Valor cobrado por dia de locação do equipamento.",
+                "description": "Valor cobrado por uma diária de locação deste equipamento.",
                 "maxLength": 0,
-                "min": 0.01,
+                "min": 0,
                 "max": 0
               },
-              "situacaoAtual": {
+              "situacaoOperacional": {
                 "type": "enum",
                 "derived": true,
-                "title": "Situação atual",
-                "description": "Situação operacional mostrada ao gerente: em manutenção quando o equipamento estiver marcado para manutenção; locado quando houver contrato de locação em andamento para ele sem devolução efetiva; disponível nos demais casos."
+                "title": "Situação operacional",
+                "description": "Situação calculada na data da consulta: em manutenção quando há manutenção em andamento; locado quando há item de locação em período vigente; disponível quando não há manutenção em andamento nem locação vigente."
               }
             }
           }
@@ -491,50 +457,53 @@
       "moduleName": "locacaoEquipamentos",
       "entityId": "ContratoLocacao",
       "title": "Contrato de locação",
-      "description": "Contrato que registra a locação de um ou mais equipamentos para um cliente, com retirada, devolução prevista e retorno efetivo.",
+      "description": "Contrato que registra a locação de um cliente, seu período previsto e a devolução efetiva dos equipamentos.",
       "displayField": "id",
       "relationships": {
         "cliente": {
-          "relationshipId": "contratoLocacaoCliente",
+          "relationshipId": "clienteContratosLocacao",
           "to": "Cliente",
           "via": "ContratoLocacao.clienteId",
           "cardinality": "N:1",
           "title": "Cliente do contrato",
-          "description": "Cliente para o qual o contrato de locação foi celebrado.",
-          "mode": "fk",
-          "required": "Sempre."
-        },
-        "itens": {
-          "relationshipId": "itemContratoLocacaoContrato",
-          "to": "ItemContratoLocacao",
-          "via": "ItemContratoLocacao.contratoLocacaoId",
-          "cardinality": "1:N",
-          "title": "Itens do contrato",
-          "description": "Equipamentos incluídos neste contrato de locação.",
+          "description": "Cada contrato de locação pertence a um cliente, que pode possuir vários contratos.",
           "mode": "fk",
           "direction": "to",
-          "required": "Sempre."
+          "required": "Sempre",
+          "role": "locatário"
+        },
+        "itensLocacao": {
+          "relationshipId": "contratoItensLocacao",
+          "to": "ItemLocacao",
+          "via": "ItemLocacao.contratoLocacaoId",
+          "cardinality": "1:N",
+          "title": "Itens da locação",
+          "description": "O contrato contém um ou mais itens que identificam os equipamentos locados.",
+          "mode": "fk",
+          "required": "Sempre",
+          "role": "contrato"
         }
       },
       "capabilities": {
-        "read.byId": "Lê um contrato de locação pelo identificador para o atendente conferir seus dados antes de registrar o retorno.",
-        "locate.byColumn": "Lista contratos por cliente, situação e período de retirada ou devolução prevista para o atendente localizar contratos em aberto.",
-        "count": "Conta contratos conforme os filtros de cliente, situação e período para apresentar totais nas listas.",
-        "listByForeignKey": "Lista os contratos vinculados a um cliente para consultar seu histórico de locações.",
-        "create": "Cria o contrato de locação em aberto para o cliente, com retirada e devolução prevista, quando o atendente registra a locação.",
-        "update": "Atualiza os dados ainda permitidos de um contrato de locação em aberto quando o atendente precisa corrigir o registro.",
-        "transition": "Move o contrato de em aberto para devolvido ao registrar a data real de devolução, para uso do atendente.",
-        "transaction": "Grava o contrato e seus itens de equipamentos de forma atômica quando o atendente cria a locação.",
-        "read.mdmRecord": "Lê o registro mestre do cliente apontado pelo contrato para mostrar seus dados sem copiá-los para a locação."
+        "read.byId": "Lê um contrato pelo identificador da linha com consulta por id; usado pelo atendente ao inspecionar o contrato em contexto.",
+        "locate.byColumn": "Lista contratos por cliente, situação e datas indexadas, com ordenação e paginação; usado pelo atendente para localizar contratos em aberto e pelo gerente para acompanhar locações.",
+        "count": "Conta contratos que atendem aos filtros de cliente, situação e período; usado nas listas do atendente e do gerente.",
+        "listByForeignKey": "Lista os contratos vinculados a um cliente pela chave clienteId; usado ao consultar o histórico de locações do cliente.",
+        "create": "Cria o contrato com cliente, período e situação em aberto; usado pelo atendente ao registrar uma nova locação.",
+        "update": "Altera dados permitidos de um contrato ainda em aberto, como o período previsto, com validação de conflitos; usado pelo atendente antes da devolução.",
+        "transition": "Move o contrato de em aberto para devolvido ao registrar a data real de devolução; usado pelo atendente.",
+        "transaction": "Grava o contrato e seus itens de locação de forma atômica; usado pelo atendente na criação para não deixar um contrato sem equipamentos.",
+        "read.mdmRecord": "Lê o registro mestre apontado por clienteId para exibir os dados do cliente sem copiá-los no contrato; usado nas telas do atendente e do gerente."
       },
       "rules": [
-        "equipamentoSemSobreposicao",
+        "contratoComPeloMenosUmItem",
         "periodoLocacaoValido",
-        "dataDevolucaoValida",
+        "equipamentoSemSobreposicao",
+        "devolucaoAposRetirada",
         "multaPorAtraso"
       ],
       "kind": "entity",
-      "class": "core",
+      "class": "event",
       "storage": {
         "target": "moduleDatabase",
         "table": "locacaoEquipamentos_contratolocacao",
@@ -558,35 +527,12 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
+            "of": "ContactSummary",
             "to": [
               "Cliente"
             ],
             "title": "Cliente",
-            "description": "Cliente para o qual o contrato de locação foi celebrado.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
-          },
-          "status": {
-            "type": "enum",
-            "required": true,
-            "indexed": true,
-            "of": "Address",
-            "values": [
-              {
-                "value": "open",
-                "title": "Em aberto",
-                "description": "A locação está em andamento e aguarda a devolução dos equipamentos."
-              },
-              {
-                "value": "returned",
-                "title": "Devolvido",
-                "description": "A devolução efetiva foi registrada e a locação foi encerrada."
-              }
-            ],
-            "title": "Situação do contrato",
-            "description": "Situação operacional do contrato de locação, usada para localizar contratos em aberto e retornos já registrados.",
+            "description": "Cliente para quem o contrato de locação foi celebrado.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -595,9 +541,9 @@
             "type": "date",
             "required": true,
             "indexed": true,
-            "of": "Address",
+            "of": "ContactSummary",
             "title": "Data de retirada",
-            "description": "Data em que os equipamentos são retirados pelo cliente; permite consultar locações por período.",
+            "description": "Data prevista para a retirada dos equipamentos pelo cliente; é usada para verificar conflitos entre períodos de locação.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -606,9 +552,32 @@
             "type": "date",
             "required": true,
             "indexed": true,
-            "of": "Address",
+            "of": "ContactSummary",
             "title": "Data prevista de devolução",
-            "description": "Data prevista para a devolução dos equipamentos; permite consultar contratos por período.",
+            "description": "Data acordada para a devolução dos equipamentos; é usada para verificar conflitos de período e apurar atraso.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "status": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "of": "ContactSummary",
+            "values": [
+              {
+                "value": "open",
+                "title": "Em aberto",
+                "description": "A locação foi criada e aguarda a devolução dos equipamentos."
+              },
+              {
+                "value": "returned",
+                "title": "Devolvido",
+                "description": "A devolução foi registrada e a locação foi concluída."
+              }
+            ],
+            "title": "Situação do contrato",
+            "description": "Indica se a locação ainda está em aberto ou se os equipamentos já foram devolvidos.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -616,18 +585,18 @@
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
+            "of": "ContactSummary",
             "title": "Dados do contrato",
-            "description": "Dados do retorno que não são usados como critério de busca ou ordenação.",
+            "description": "Informações do contrato que não são usadas como critério de filtro, ordenação ou pesquisa.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
-              "dataRealDevolucao": {
+              "dataDevolucaoReal": {
                 "type": "date",
-                "of": "Address",
+                "of": "ContactSummary",
                 "title": "Data real de devolução",
-                "description": "Data em que os equipamentos deste contrato foram efetivamente devolvidos; é informada ao registrar o retorno.",
+                "description": "Data em que os equipamentos foram efetivamente devolvidos pelo cliente.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -636,7 +605,7 @@
                 "type": "money",
                 "derived": true,
                 "title": "Multa por atraso",
-                "description": "Multa calculada quando a data real de devolução é posterior à data prevista, usando a diária de cada equipamento locado, os dias de atraso e o fator de 1,5."
+                "description": "Valor da multa quando a data real de devolução é posterior à data prevista, calculado pela soma das diárias dos equipamentos locados multiplicada pela quantidade de dias de atraso e por 1,5; é zero quando não houver atraso."
               }
             }
           }
@@ -662,9 +631,9 @@
           "by": [
             "atendente"
           ],
-          "description": "Registra a data real de devolução e encerra o contrato de locação.",
+          "description": "Registra a data real de devolução e conclui a locação dos equipamentos do contrato.",
           "ruleRefs": [
-            "dataDevolucaoValida",
+            "devolucaoAposRetirada",
             "multaPorAtraso"
           ]
         }
@@ -673,49 +642,56 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "locacaoEquipamentos",
-      "entityId": "ItemContratoLocacao",
-      "title": "Item do contrato de locação",
-      "description": "Item que vincula um equipamento ao contrato de locação e permite controlar sua indisponibilidade no período contratado e a multa aplicável.",
+      "entityId": "ItemLocacao",
+      "title": "Item de locação",
+      "description": "Item de um contrato que vincula um equipamento à locação e preserva a diária usada no cálculo de multa.",
       "displayField": "id",
       "relationships": {
         "contratoLocacao": {
-          "relationshipId": "itemContratoLocacaoContrato",
+          "relationshipId": "contratoItensLocacao",
           "to": "ContratoLocacao",
-          "via": "ItemContratoLocacao.contratoLocacaoId",
+          "via": "ItemLocacao.contratoLocacaoId",
           "cardinality": "N:1",
-          "title": "Contrato de locação",
-          "description": "Cada item de locação pertence a um único contrato de locação.",
+          "title": "Pertence ao contrato de locação",
+          "description": "Este item pertence a exatamente um contrato de locação.",
           "mode": "fk",
-          "required": "sempre"
+          "direction": "to",
+          "required": "sempre",
+          "role": "item do contrato"
         },
         "equipamento": {
-          "relationshipId": "itemContratoLocacaoEquipamento",
+          "relationshipId": "itemLocacaoEquipamento",
           "to": "Equipamento",
-          "via": "ItemContratoLocacao.equipamentoId",
+          "via": "ItemLocacao.equipamentoId",
           "cardinality": "N:1",
-          "title": "Equipamento reservado",
-          "description": "Cada item do contrato reserva um equipamento específico para o período da locação.",
+          "title": "Referencia o equipamento locado",
+          "description": "Este item reserva exatamente um equipamento para o período definido no contrato.",
           "mode": "fk",
-          "required": "sempre"
+          "required": "sempre",
+          "role": "equipamento locado"
         }
       },
       "capabilities": {
-        "read.byId": "Lê um item pelo identificador da linha para exibir o equipamento reservado e sua multa calculada; usa a chave id; atendente e gerente usam na consulta do contrato.",
-        "locate.byColumn": "Lista itens filtrados pelos contratos ou equipamentos indexados, com ordenação e paginação; usa contratoLocacaoId e equipamentoId; atendente e gerente usam nas consultas operacionais.",
-        "listByForeignKey": "Lista os itens vinculados a um contrato ou a um equipamento; consulta pelas chaves estrangeiras indexadas; atendente visualiza os itens do contrato e gerente consulta as locações do equipamento.",
-        "create": "Inclui um equipamento como item de um contrato; grava contratoLocacaoId e equipamentoId em conjunto com a abertura do contrato; atendente usa para registrar a locação.",
-        "uniqueKey": "Impede que o mesmo equipamento seja incluído mais de uma vez no mesmo contrato; aplica a chave única de contrato e equipamento; o sistema usa na gravação do contrato.",
-        "transaction": "Grava os itens junto com o contrato de locação de forma atômica; executa a abertura em uma transação; atendente usa ao criar o contrato."
+        "read.byId": "Lê um item de locação pelo identificador da linha no repositório; atendente e gerente o usam ao abrir um contrato ou consultar uma locação.",
+        "locate.byColumn": "Lista itens de locação pelos contratos ou equipamentos indexados, com ordenação e paginação; atendente e gerente usam para consultar itens vinculados.",
+        "count": "Conta os itens que correspondem aos filtros de contrato ou equipamento; atendente e gerente usam para exibir totais em consultas.",
+        "listByForeignKey": "Lista os itens que apontam para um contrato ou equipamento pelas chaves estrangeiras; atendente e gerente usam para ver equipamentos de uma locação e o histórico de locações do equipamento.",
+        "create": "Cria o item que vincula um equipamento ao contrato e registra a diária contratada; atendente usa ao montar o contrato de locação.",
+        "update": "Altera os dados permitidos de um item de locação por atualização parcial; atendente usa enquanto ajusta o contrato conforme as regras aplicáveis.",
+        "delete": "Remove fisicamente um item de locação pelo identificador; atendente usa para retirar um equipamento de um contrato antes da efetivação, conforme as regras aplicáveis.",
+        "uniqueKey": "Recusa repetir o mesmo equipamento no mesmo contrato pela chave única de contrato e equipamento; o sistema aplica ao gravar itens criados pelo atendente.",
+        "transaction": "Grava os itens e as alterações do contrato como uma única transação; atendente usa ao criar ou ajustar uma locação com um ou mais equipamentos."
       },
       "rules": [
-        "equipamentoPeriodoNoOverlap",
+        "equipamentoSemSobreposicao",
+        "itemEquipamentoUnicoNoContrato",
         "calcularMultaAtraso"
       ],
       "kind": "entity",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "locacaoEquipamentos_itemcontratolocacao",
+        "table": "locacaoEquipamentos_itemlocacao",
         "kind": "relational"
       },
       "record": {
@@ -736,7 +712,7 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
+            "of": "ContactSummary",
             "to": [
               "ContratoLocacao"
             ],
@@ -750,12 +726,12 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
+            "of": "ContactSummary",
             "to": [
               "Equipamento"
             ],
             "title": "Equipamento",
-            "description": "Equipamento reservado por este item no período definido pelo contrato.",
+            "description": "Equipamento de construção reservado neste item de locação.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -763,18 +739,28 @@
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
-            "title": "Detalhes do item",
-            "description": "Dados próprios do item que não exigem filtro, ordenação ou unicidade.",
+            "of": "ContactSummary",
+            "title": "Dados do item de locação",
+            "description": "Dados próprios do equipamento dentro deste contrato de locação.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
+              "valorDiariaContratada": {
+                "type": "money",
+                "required": true,
+                "of": "ContactSummary",
+                "title": "Valor da diária contratada",
+                "description": "Valor diário do equipamento preservado no momento da inclusão no contrato e usado para calcular eventual multa por atraso.",
+                "maxLength": 0,
+                "min": 0.01,
+                "max": 0
+              },
               "multaAtraso": {
                 "type": "money",
                 "derived": true,
                 "title": "Multa por atraso",
-                "description": "Valor da multa deste equipamento quando a devolução real do contrato for posterior à devolução prevista, calculado pela diária do equipamento multiplicada pelos dias de atraso e por 1,5."
+                "description": "Valor calculado quando a devolução real do contrato ocorre após a data prevista, usando a diária contratada deste item, a quantidade de dias de atraso e o multiplicador de 1,5."
               }
             }
           }
@@ -786,38 +772,153 @@
           "equipamentoId"
         ]
       ]
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "locacaoEquipamentos",
+      "entityId": "ManutencaoEquipamento",
+      "title": "Manutenção de equipamento",
+      "description": "Período de indisponibilidade de um equipamento para manutenção, usado no cálculo de sua situação.",
+      "displayField": "id",
+      "relationships": {
+        "equipamento": {
+          "relationshipId": "equipamentoManutencoes",
+          "to": "Equipamento",
+          "via": "ManutencaoEquipamento.equipamentoId",
+          "cardinality": "N:1",
+          "title": "Equipamento em manutenção",
+          "description": "Cada período de manutenção pertence a um único equipamento.",
+          "mode": "fk",
+          "direction": "to",
+          "required": "Sempre, para registrar o período de indisponibilidade.",
+          "role": "período de manutenção do equipamento"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Lê um período de manutenção pelo identificador da linha, para o gerente consultar seus dados.",
+        "locate.byColumn": "Lista períodos de manutenção por equipamento e por datas indexadas, com ordenação e paginação, para o gerente acompanhar indisponibilidades.",
+        "count": "Conta os períodos de manutenção conforme os filtros aplicados, para o gerente visualizar o total da consulta.",
+        "listByForeignKey": "Lista os períodos de manutenção vinculados a um ou mais equipamentos, para exibir o histórico de indisponibilidades de cada equipamento.",
+        "create": "Registra um novo período de indisponibilidade para manutenção de um equipamento, usado pelo gerente para manter sua situação atualizada.",
+        "update": "Altera as datas de um período de manutenção já registrado, usado pelo gerente enquanto a manutenção é planejada ou reprogramada.",
+        "delete": "Remove um período de manutenção registrado indevidamente, usado pelo gerente antes de ele produzir uma indisponibilidade válida."
+      },
+      "rules": [
+        "maintenanceDatesValid",
+        "maintenanceDoesNotOverlapRental"
+      ],
+      "writer": "crud",
+      "kind": "entity",
+      "class": "supporting",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "locacaoEquipamentos_manutencaoequipamento",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "equipamentoId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "of": "ContactSummary",
+            "to": [
+              "Equipamento"
+            ],
+            "title": "Equipamento",
+            "description": "Equipamento que ficará indisponível durante este período de manutenção.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "dataInicio": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "of": "ContactSummary",
+            "title": "Data de início",
+            "description": "Data em que o equipamento passa a ficar indisponível para manutenção.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "dataFim": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "of": "ContactSummary",
+            "title": "Data de término",
+            "description": "Data em que termina o período de indisponibilidade do equipamento para manutenção.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "of": "ContactSummary",
+            "title": "Detalhes da manutenção",
+            "description": "Informações próprias do período de manutenção que não exigem filtro, ordenação ou busca.",
+            "maxLength": 0,
+            "min": 0,
+            "max": 0
+          }
+        }
+      }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "contratoLocacaoCliente",
-      "from": "ContratoLocacao",
-      "to": "Cliente",
-      "type": "manyToOne",
+      "relationshipId": "clienteContratosLocacao",
+      "from": "Cliente",
+      "to": "ContratoLocacao",
+      "type": "oneToMany",
       "required": true,
       "mode": "fk",
-      "description": "Cada contrato de locação é celebrado para um cliente.",
+      "description": "Um cliente pode possuir vários contratos de locação, e cada contrato pertence a um cliente.",
       "field": "ContratoLocacao.clienteId"
     },
     {
-      "relationshipId": "itemContratoLocacaoContrato",
-      "from": "ItemContratoLocacao",
-      "to": "ContratoLocacao",
-      "type": "manyToOne",
+      "relationshipId": "contratoItensLocacao",
+      "from": "ContratoLocacao",
+      "to": "ItemLocacao",
+      "type": "oneToMany",
       "required": true,
       "mode": "fk",
-      "description": "Cada item de locação pertence a um único contrato de locação.",
-      "field": "ItemContratoLocacao.contratoLocacaoId"
+      "description": "Um contrato de locação contém um ou mais itens de equipamentos locados.",
+      "field": "ItemLocacao.contratoLocacaoId"
     },
     {
-      "relationshipId": "itemContratoLocacaoEquipamento",
-      "from": "ItemContratoLocacao",
+      "relationshipId": "itemLocacaoEquipamento",
+      "from": "ItemLocacao",
       "to": "Equipamento",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item do contrato reserva um equipamento específico para o período da locação.",
-      "field": "ItemContratoLocacao.equipamentoId"
+      "description": "Cada item de locação referencia exatamente um equipamento, que pode constar em locações diferentes em períodos não sobrepostos.",
+      "field": "ItemLocacao.equipamentoId"
+    },
+    {
+      "relationshipId": "equipamentoManutencoes",
+      "from": "Equipamento",
+      "to": "ManutencaoEquipamento",
+      "type": "oneToMany",
+      "required": true,
+      "mode": "fk",
+      "description": "Um equipamento pode ter vários períodos de manutenção, cada um associado a um único equipamento.",
+      "field": "ManutencaoEquipamento.equipamentoId"
     }
   ],
   "removedOrphans": [],
@@ -840,8 +941,13 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "ItemContratoLocacao",
-      "detail": "storage.table locacaoEquipamentos_itemcontratolocacao"
+      "entityId": "ItemLocacao",
+      "detail": "storage.table locacaoEquipamentos_itemlocacao"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ManutencaoEquipamento",
+      "detail": "storage.table locacaoEquipamentos_manutencaoequipamento"
     },
     {
       "kind": "derivedFromPlatform",
@@ -852,6 +958,11 @@
       "kind": "tightened",
       "entityId": "Cliente",
       "detail": "Cliente.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Cliente",
+      "detail": "Cliente.details.identification.docType.values"
     },
     {
       "kind": "namespaceEmpty",
@@ -866,7 +977,7 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Equipamento",
-      "detail": "record.fields.details.fields.situacaoAtual.derived (derived[])"
+      "detail": "record.fields.details.fields.situacaoOperacional.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
@@ -880,13 +991,18 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "ItemContratoLocacao",
+      "entityId": "ItemLocacao",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "ItemContratoLocacao",
+      "entityId": "ItemLocacao",
       "detail": "record.fields.details.fields.multaAtraso.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ManutencaoEquipamento",
+      "detail": "record.fields.id, record.fields.version"
     }
   ]
 }

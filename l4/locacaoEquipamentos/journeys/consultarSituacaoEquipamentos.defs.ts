@@ -10,7 +10,7 @@ export const consultarSituacaoEquipamentosJourney = {
     "title": "Consultar situação dos equipamentos",
     "goal": "Acompanhar quais equipamentos estão disponíveis, locados ou em manutenção.",
     "entry": {
-      "mode": "contextOrLookup"
+      "mode": "coldStart"
     },
     "steps": [
       {
@@ -18,24 +18,24 @@ export const consultarSituacaoEquipamentosJourney = {
         "kind": "locate",
         "entity": "Equipamento",
         "title": "x",
-        "description": "Localiza os equipamentos para acompanhamento da operação."
+        "description": "Localiza os equipamentos da locadora."
       },
       {
-        "stepId": "consultarSituacao",
+        "stepId": "inspecionarSituacao",
         "kind": "inspect",
         "entity": "Equipamento",
         "title": "x",
-        "description": "Consulta a situação de cada equipamento, identificando se está disponível, locado ou em manutenção."
+        "description": "Consulta a situação de cada equipamento, incluindo disponibilidade, locação ou manutenção."
       }
     ],
     "outcome": {
-      "statement": "O gerente visualiza a situação operacional dos equipamentos.",
+      "statement": "O gerente acompanha a situação atual dos equipamentos da locadora.",
       "evidence": [
-        "Cada equipamento consultado apresenta sua situação como disponível, locado ou em manutenção."
+        "Situação de disponibilidade, locação ou manutenção exibida para os equipamentos."
       ]
     }
   },
-  "businessHash": "sha256:2321a01cdf865d6b834b7013369a36b5f6aad5f3b6f615c0b2ff396eb6d86c00"
+  "businessHash": "sha256:f1c14d2846a3f38dd6d23318844f6e96c13e1f64792c0cf1b9ac0beca2b9c256"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarSituacaoEquipamentosJourneyType = typeof consultarSituacaoEquipamentosJourney;
