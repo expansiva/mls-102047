@@ -1,4 +1,8 @@
 {
+  "schemaVersion": "2026-09-20-p2-menu-v2.2",
+  "moduleName": "inscricaoEvento",
+  "userLanguage": "pt-BR",
+  "device": "web",
   "tree": [
     {
       "id": "inicio_organizador",
@@ -21,7 +25,8 @@
           "kind": "inbox",
           "text": "Veja itens que aguardam sua atenção."
         }
-      ]
+      ],
+      "action": "change"
     },
     {
       "id": "eventos",
@@ -44,7 +49,8 @@
           "kind": "actions",
           "text": "Crie, edite e publique eventos."
         }
-      ]
+      ],
+      "action": "change"
     },
     {
       "id": "evento_selecionado",
@@ -78,9 +84,11 @@
               "kind": "timeline",
               "text": "Acompanhe cancelamentos e promoções automáticas da lista de espera."
             }
-          ]
+          ],
+          "action": "new"
         }
-      ]
+      ],
+      "action": "new"
     },
     {
       "id": "participante",
@@ -110,7 +118,8 @@
               "kind": "inbox",
               "text": "Veja itens que aguardam sua ação."
             }
-          ]
+          ],
+          "action": "change"
         },
         {
           "id": "eventos_publicos",
@@ -129,7 +138,8 @@
               "kind": "actions",
               "text": "Faça sua inscrição em um evento publicado."
             }
-          ]
+          ],
+          "action": "new"
         },
         {
           "id": "minhas_inscricoes",
@@ -152,64 +162,91 @@
               "kind": "timeline",
               "text": "Acompanhe cancelamentos e promoções automáticas da lista de espera que afetam suas inscrições."
             }
-          ]
+          ],
+          "action": "change"
         }
-      ]
+      ],
+      "action": "change"
     }
   ],
-  "authorities": [
-    {
-      "actorRef": "organizador",
-      "nodes": [
-        "inicio_organizador",
+  "authorities": {
+    "actor:organizador": [
+      "inicio_organizador",
+      "eventos",
+      "evento_selecionado"
+    ],
+    "actor:publico": [
+      "participante"
+    ]
+  },
+  "meta": {
+    "journeys": {
+      "cadastrarEpublicarEvento": [
+        "eventos"
+      ],
+      "inscreverSeEmEvento": [
+        "eventos_publicos"
+      ],
+      "cancelarInscricao": [
+        "minhas_inscricoes"
+      ],
+      "acompanharEexportarInscricoes": [
         "eventos",
-        "evento_selecionado"
+        "inscricoes_do_evento"
       ]
     },
-    {
-      "actorRef": "publico",
-      "nodes": [
-        "participante"
+    "processes": {
+      "promoverListaEsperaAposCancelamento": [
+        "inscricoes_do_evento",
+        "minhas_inscricoes"
       ]
-    }
-  ],
-  "meta": {
-    "journeys": [
+    },
+    "entities": {},
+    "removed": [
       {
-        "journeyId": "cadastrarEpublicarEvento",
-        "pages": [
-          "eventos"
-        ]
+        "id": "inscricoes",
+        "kind": "page",
+        "label": "Inscrições",
+        "organisms": [
+          {
+            "kind": "list",
+            "text": "Vejo os inscritos, os participantes e os e-mails de cada evento."
+          },
+          {
+            "kind": "detail",
+            "text": "Consulto os dados da inscrição e do participante."
+          },
+          {
+            "kind": "actions",
+            "text": "Baixo a lista de inscrições em CSV."
+          },
+          {
+            "kind": "timeline",
+            "text": "Vejo quando o sistema promoveu alguém da lista de espera depois de um cancelamento."
+          }
+        ],
+        "action": "remove"
       },
       {
-        "journeyId": "inscreverSeEmEvento",
-        "pages": [
-          "eventos_publicos"
-        ]
-      },
-      {
-        "journeyId": "cancelarInscricao",
-        "pages": [
-          "minhas_inscricoes"
-        ]
-      },
-      {
-        "journeyId": "acompanharEexportarInscricoes",
-        "pages": [
-          "eventos",
-          "inscricoes_do_evento"
-        ]
+        "id": "eventos_publicados",
+        "kind": "page",
+        "label": "Eventos",
+        "organisms": [
+          {
+            "kind": "list",
+            "text": "Localizo os eventos publicados."
+          },
+          {
+            "kind": "detail",
+            "text": "Consulto as informações do evento publicado."
+          },
+          {
+            "kind": "form",
+            "text": "Registro a minha inscrição no evento."
+          }
+        ],
+        "action": "remove"
       }
-    ],
-    "processes": [
-      {
-        "processId": "promoverListaEsperaAposCancelamento",
-        "pages": [
-          "inscricoes_do_evento",
-          "minhas_inscricoes"
-        ]
-      }
-    ],
-    "entities": []
+    ]
   }
 }

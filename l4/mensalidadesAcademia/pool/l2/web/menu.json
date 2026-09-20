@@ -1,4 +1,8 @@
 {
+  "schemaVersion": "2026-09-20-p2-menu-v2.2",
+  "moduleName": "mensalidadesAcademia",
+  "userLanguage": "pt-BR",
+  "device": "web",
   "tree": [
     {
       "id": "aluno",
@@ -40,9 +44,11 @@
               "kind": "actions",
               "text": "Cancele sua matrícula quando precisar encerrar o vínculo."
             }
-          ]
+          ],
+          "action": "change"
         }
-      ]
+      ],
+      "action": "change"
     },
     {
       "id": "inicio_recepcao",
@@ -65,7 +71,8 @@
           "kind": "inbox",
           "text": "Veja pendências que aguardam atendimento."
         }
-      ]
+      ],
+      "action": "change"
     },
     {
       "id": "matriculas",
@@ -88,7 +95,8 @@
           "kind": "actions",
           "text": "Registre uma nova matrícula para o aluno selecionado."
         }
-      ]
+      ],
+      "action": "change"
     },
     {
       "id": "mensalidades_pagamentos",
@@ -115,7 +123,8 @@
           "kind": "actions",
           "text": "Registre o pagamento informado para a mensalidade."
         }
-      ]
+      ],
+      "action": "new"
     },
     {
       "id": "planos",
@@ -138,7 +147,8 @@
           "kind": "actions",
           "text": "Crie, edite ou exclua planos."
         }
-      ]
+      ],
+      "action": "new"
     },
     {
       "id": "inicio_gerencia",
@@ -177,80 +187,125 @@
           "kind": "actions",
           "text": "Gere as mensalidades do mês para os alunos com matrícula ativa."
         }
-      ]
+      ],
+      "action": "change"
     }
   ],
-  "authorities": [
-    {
-      "actorRef": "recepcao",
-      "nodes": [
-        "inicio_recepcao",
-        "matriculas",
-        "mensalidades_pagamentos",
-        "planos"
-      ]
-    },
-    {
-      "actorRef": "gerencia",
-      "nodes": [
-        "inicio_gerencia",
-        "planos"
-      ]
-    },
-    {
-      "actorRef": "aluno",
-      "nodes": [
-        "aluno"
-      ]
-    }
-  ],
+  "authorities": {
+    "actor:recepcao": [
+      "inicio_recepcao",
+      "matriculas",
+      "mensalidades_pagamentos",
+      "planos"
+    ],
+    "actor:gerencia": [
+      "inicio_gerencia",
+      "planos"
+    ],
+    "actor:aluno": [
+      "aluno"
+    ]
+  },
   "meta": {
-    "journeys": [
+    "journeys": {
+      "matricularAluno": [
+        "matriculas"
+      ],
+      "gerarMensalidadesDoMes": [
+        "inicio_gerencia"
+      ],
+      "registrarPagamentoMensalidade": [
+        "mensalidades_pagamentos"
+      ],
+      "acompanharIndicadoresAcademia": [
+        "inicio_gerencia"
+      ],
+      "cancelarPropriaMatricula": [
+        "minha_matricula"
+      ]
+    },
+    "processes": {
+      "lembrarGeracaoMensalidades": [
+        "inicio_gerencia"
+      ]
+    },
+    "entities": {
+      "Plano": [
+        "planos"
+      ]
+    },
+    "removed": [
       {
-        "journeyId": "matricularAluno",
-        "pages": [
-          "matriculas"
-        ]
+        "id": "mensalidades_recepcao",
+        "kind": "page",
+        "label": "Mensalidades",
+        "organisms": [
+          {
+            "kind": "list",
+            "text": "Localizo a mensalidade, com situação, total pago e saldo devedor."
+          },
+          {
+            "kind": "detail",
+            "text": "Inspeciono a mensalidade e os valores já pagos."
+          },
+          {
+            "kind": "form",
+            "text": "Registro o pagamento informado pelo aluno."
+          },
+          {
+            "kind": "timeline",
+            "text": "Vejo os pagamentos e o que o sistema atualizou nesta mensalidade."
+          }
+        ],
+        "action": "remove"
       },
       {
-        "journeyId": "gerarMensalidadesDoMes",
-        "pages": [
-          "inicio_gerencia"
-        ]
+        "id": "mensalidades_gerencia",
+        "kind": "page",
+        "label": "Mensalidades",
+        "organisms": [
+          {
+            "kind": "list",
+            "text": "Vejo as mensalidades, com situação, total pago e saldo devedor."
+          },
+          {
+            "kind": "detail",
+            "text": "Vejo os dados da mensalidade."
+          },
+          {
+            "kind": "timeline",
+            "text": "Vejo as mensalidades que o sistema gerou."
+          },
+          {
+            "kind": "actions",
+            "text": "Gero as mensalidades do mês para os alunos com matrícula ativa."
+          }
+        ],
+        "action": "remove"
       },
       {
-        "journeyId": "registrarPagamentoMensalidade",
-        "pages": [
-          "mensalidades_pagamentos"
-        ]
-      },
-      {
-        "journeyId": "acompanharIndicadoresAcademia",
-        "pages": [
-          "inicio_gerencia"
-        ]
-      },
-      {
-        "journeyId": "cancelarPropriaMatricula",
-        "pages": [
-          "minha_matricula"
-        ]
-      }
-    ],
-    "processes": [
-      {
-        "processId": "lembrarGeracaoMensalidades",
-        "pages": [
-          "inicio_gerencia"
-        ]
-      }
-    ],
-    "entities": [
-      {
-        "entityId": "Plano",
-        "pages": [
-          "planos"
-        ]
+        "id": "inicio_aluno",
+        "kind": "page",
+        "label": "Início",
+        "organisms": [
+          {
+            "kind": "summary",
+            "text": "Vejo o resumo da minha situação na academia."
+          },
+          {
+            "kind": "highlights",
+            "text": "Vejo o que mais importa na minha matrícula agora."
+          },
+          {
+            "kind": "alerts",
+            "text": "Vejo avisos e prazos da minha matrícula."
+          },
+          {
+            "kind": "inbox",
+            "text": "Vejo o que está esperando uma ação minha."
+          }
+        ],
+        "action": "remove"
       }
     ]
   }

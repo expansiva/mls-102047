@@ -1,4 +1,8 @@
 {
+  "schemaVersion": "2026-09-20-p2-menu-v2.2",
+  "moduleName": "locacaoEquipamentos",
+  "userLanguage": "pt-BR",
+  "device": "web",
   "tree": [
     {
       "id": "inicio_atendente",
@@ -21,7 +25,8 @@
           "kind": "inbox",
           "text": "Veja contratos e devoluções que aguardam sua ação."
         }
-      ]
+      ],
+      "action": "change"
     },
     {
       "id": "clientes",
@@ -40,7 +45,8 @@
           "kind": "actions",
           "text": "Selecionar um cliente para a locação."
         }
-      ]
+      ],
+      "action": "new"
     },
     {
       "id": "locacoes",
@@ -67,7 +73,8 @@
           "kind": "actions",
           "text": "Criar contrato de locação e registrar devolução."
         }
-      ]
+      ],
+      "action": "new"
     },
     {
       "id": "equipamentos_atendente",
@@ -86,7 +93,8 @@
           "kind": "actions",
           "text": "Selecionar equipamento para o contrato de locação."
         }
-      ]
+      ],
+      "action": "new"
     },
     {
       "id": "inicio_gerente",
@@ -109,7 +117,8 @@
           "kind": "inbox",
           "text": "Veja atividades de inventário e manutenção sob sua responsabilidade."
         }
-      ]
+      ],
+      "action": "change"
     },
     {
       "id": "equipamentos_gerente",
@@ -136,63 +145,93 @@
           "kind": "actions",
           "text": "Criar, editar e excluir equipamentos; criar, editar e excluir manutenções de equipamentos."
         }
-      ]
+      ],
+      "action": "new"
     }
   ],
-  "authorities": [
-    {
-      "actorRef": "atendente",
-      "nodes": [
-        "inicio_atendente",
+  "authorities": {
+    "actor:atendente": [
+      "inicio_atendente",
+      "clientes",
+      "locacoes",
+      "equipamentos_atendente"
+    ],
+    "actor:gerente": [
+      "inicio_gerente",
+      "equipamentos_gerente"
+    ]
+  },
+  "meta": {
+    "journeys": {
+      "criarContratoLocacao": [
         "clientes",
-        "locacoes",
-        "equipamentos_atendente"
-      ]
-    },
-    {
-      "actorRef": "gerente",
-      "nodes": [
-        "inicio_gerente",
+        "equipamentos_atendente",
+        "locacoes"
+      ],
+      "registrarDevolucao": [
+        "locacoes"
+      ],
+      "consultarSituacaoEquipamentos": [
         "equipamentos_gerente"
       ]
-    }
-  ],
-  "meta": {
-    "journeys": [
+    },
+    "processes": {},
+    "entities": {
+      "Equipamento": [
+        "equipamentos_gerente"
+      ],
+      "ManutencaoEquipamento": [
+        "equipamentos_gerente"
+      ]
+    },
+    "removed": [
       {
-        "journeyId": "criarContratoLocacao",
-        "pages": [
-          "clientes",
-          "equipamentos_atendente",
-          "locacoes"
-        ]
+        "id": "contratos",
+        "kind": "page",
+        "label": "Contratos de locação",
+        "organisms": [
+          {
+            "kind": "list",
+            "text": "Vejo a lista de contratos e localizo o contrato do cliente."
+          },
+          {
+            "kind": "detail",
+            "text": "Vejo o contrato completo, os itens locados, as datas combinadas, a multa por atraso e a situação operacional de cada equipamento."
+          },
+          {
+            "kind": "form",
+            "text": "Preencho a locação: localizo o cliente, seleciono os equipamentos pela situação operacional e defino o período."
+          },
+          {
+            "kind": "timeline",
+            "text": "Vejo o que o sistema fez sozinho neste contrato, como atualizar a multa por atraso."
+          },
+          {
+            "kind": "actions",
+            "text": "Crio o contrato de locação e registro a data real de devolução para concluir a locação."
+          }
+        ],
+        "action": "remove"
       },
       {
-        "journeyId": "registrarDevolucao",
-        "pages": [
-          "locacoes"
-        ]
-      },
-      {
-        "journeyId": "consultarSituacaoEquipamentos",
-        "pages": [
-          "equipamentos_gerente"
-        ]
-      }
-    ],
-    "processes": [],
-    "entities": [
-      {
-        "entityId": "Equipamento",
-        "pages": [
-          "equipamentos_gerente"
-        ]
-      },
-      {
-        "entityId": "ManutencaoEquipamento",
-        "pages": [
-          "equipamentos_gerente"
-        ]
+        "id": "equipamentos",
+        "kind": "page",
+        "label": "Equipamentos",
+        "organisms": [
+          {
+            "kind": "list",
+            "text": "Localizo os equipamentos e vejo quem está disponível, locado ou em manutenção."
+          },
+          {
+            "kind": "detail",
+            "text": "Inspeciono a situação operacional do equipamento, os dados do inventário e se há manutenção."
+          },
+          {
+            "kind": "timeline",
+            "text": "Vejo o que o sistema registrou sozinho na vida deste equipamento."
+          }
+        ],
+        "action": "remove"
       }
     ]
   }
