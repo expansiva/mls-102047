@@ -4,43 +4,54 @@
     "moduleName": "compras",
     "entityId": "Product",
     "title": "Produto",
-    "description": "Produto do cadastro mestre que pode ser fornecido, pedido e recebido nas compras.",
+    "description": "Produto mestre localizado para compor o catálogo de fornecedores, os pedidos de compra e os recebimentos.",
     "displayField": "details.identification.name",
     "relationships": {
-      "suppliers": {
-        "relationshipId": "supplierSuppliesProduct",
-        "to": "Supplier",
-        "via": "SuppliesProduct",
-        "cardinality": "N:N",
-        "title": "Fornecedores do produto",
-        "description": "Fornecedores que podem fornecer este produto para a organização.",
-        "direction": "to"
-      },
-      "supplierOfferings": {
-        "relationshipId": "supplierOfferingProduct",
-        "to": "SupplierOffering",
-        "via": "SupplierOffering.productId",
+      "supplierProducts": {
+        "relationshipId": "supplierProductProduct",
+        "to": "SupplierProduct",
+        "via": "SupplierProduct.productId",
         "cardinality": "1:N",
-        "title": "Condições de fornecimento",
-        "description": "Condições de fornecimento que definem preços combinados deste produto por fornecedor.",
+        "title": "Fornecimentos do produto",
+        "description": "Registros de fornecedores que oferecem este produto com preço combinado.",
         "mode": "fk",
         "direction": "to",
-        "required": "Sempre que uma condição de fornecimento for cadastrada."
+        "required": "Quando existir um produto cadastrado no catálogo de um fornecedor.",
+        "role": "produto"
+      },
+      "supplierCatalogSuppliers": {
+        "relationshipId": "supplierCatalogProducts",
+        "to": "Supplier",
+        "via": "SupplierProduct",
+        "cardinality": "N:N",
+        "title": "Fornecedores do produto",
+        "description": "Fornecedores que incluem este produto em seu catálogo comercial por meio dos registros de preço combinado.",
+        "mode": "throughTable",
+        "path": "SupplierProduct.supplierId -> SupplierProduct.productId",
+        "derived": true,
+        "direction": "to",
+        "required": "Quando o produto estiver relacionado ao catálogo comercial de um fornecedor.",
+        "role": "produto fornecido"
       }
     },
     "capabilities": {
-      "read.byId": "Lê o produto mestre pelo identificador · consulta o registro mestre pelo mdmId · usado pelo comprador e pelo almoxarife ao exibir produtos vinculados a condições, pedidos e recebimentos.",
-      "locate.byName": "Localiza produtos pelo nome · pesquisa o índice de produtos ativos pelo texto informado · usada pelo comprador ao adicionar um produto às condições de fornecimento.",
-      "register.createOrAttach": "Cria ou vincula o papel de produto nas compras · localiza o cadastro mestre existente e anexa a tag compras.Product, criando-o somente se estiver ausente · executado pelo mecanismo ao registrar uma condição de fornecimento.",
-      "link": "Vincula um fornecedor a este produto · cria o relacionamento mestre SuppliesProduct com histórico de vigência · usado pelo comprador ao disponibilizar o produto para compra daquele fornecedor.",
-      "unlink": "Encerra o vínculo de fornecimento do produto · inativa o relacionamento mestre SuppliesProduct preservando seu histórico · usado pelo comprador quando o fornecedor deixa de fornecer o produto.",
-      "listLinks": "Lista fornecedores e condições relacionados ao produto · consulta os relacionamentos ativos e seu histórico de vigência · usada pelo comprador para conferir as fontes de fornecimento do produto."
+      "read.byId": "Lê o produto mestre pelo identificador já conhecido, carregando seus dados para catálogo, pedido e recebimento, para comprador, gerente de compras e almoxarife.",
+      "locate.byName": "Localiza produtos pelo nome no índice de produtos ativos para que o comprador os selecione no catálogo de fornecedores.",
+      "register.createOrAttach": "Cria ou vincula o produto mestre à função de produto de compras por identificação existente, para manutenção interna autorizada do cadastro.",
+      "edit.platformFields": "Atualiza os dados de catálogo do produto, como nome, SKU, unidade de medida e controle de estoque, para quem mantém o cadastro mestre.",
+      "edit.moduleNamespace": "Atualiza somente o espaço do módulo compras do produto mestre, que permanece sem dados exclusivos neste módulo, para serviços autorizados do módulo.",
+      "inactivate": "Inativa ou reativa o produto mestre para impedir ou permitir seu uso nas compras, para quem mantém o cadastro mestre.",
+      "listLinks": "Lista os fornecedores e registros de catálogo relacionados ao produto, com suas referências e vigências, para o comprador consultar as fontes de fornecimento.",
+      "statusHistory.read": "Exibe o histórico de alterações de situação do produto mestre para responsáveis pela manutenção do cadastro.",
+      "audit": "Consulta quem alterou os dados do produto mestre e quando, para auditoria administrativa."
     },
     "rules": [
       "rule-foreign-namespace-refused",
       "rule-document-shape-validated",
-      "rule-identity-never-in-namespace"
+      "rule-identity-never-in-namespace",
+      "rule-delete-blocked-by-relationships"
     ],
+    "writer": "crud",
     "kind": "role",
     "subtype": "Product",
     "roleTag": "compras.Product",
@@ -63,7 +74,7 @@
         "details": {
           "type": "object",
           "required": true,
-          "description": "Documento mestre do produto lido pelo módulo de compras, incluindo somente os dados necessários para fornecimento, pedido e recebimento.",
+          "description": "Dados do produto mestre utilizados pelo módulo de compras.",
           "fields": {
             "identification": {
               "type": "object",
@@ -78,10 +89,10 @@
                     {
                       "value": "Product",
                       "title": "Produto",
-                      "description": "Item de catálogo ou estoque que pode ser comprado e recebido."
+                      "description": "Item de catálogo ou estoque."
                     }
                   ],
-                  "description": "Subtipo mestre do registro, mantido como Produto.",
+                  "description": "Subtipo do registro mestre, mantido pela plataforma como Produto.",
                   "title": "Subtipo",
                   "maxLength": 0,
                   "min": 0,
@@ -92,8 +103,8 @@
                   "required": true,
                   "indexed": true,
                   "maxLength": 0,
-                  "description": "Nome pelo qual o comprador localiza o produto para incluí-lo nas condições de fornecimento e nos pedidos de compra.",
-                  "title": "Nome do produto",
+                  "description": "Nome pelo qual o comprador localiza e reconhece o produto para incluí-lo no catálogo do fornecedor.",
+                  "title": "Nome",
                   "min": 0,
                   "max": 0
                 },
@@ -106,38 +117,50 @@
                     {
                       "value": "Active",
                       "title": "Ativo",
-                      "description": "Produto disponível no cadastro mestre."
+                      "description": "Produto disponível para uso."
                     },
                     {
                       "value": "Inactive",
                       "title": "Inativo",
-                      "description": "Produto inativado no cadastro mestre."
+                      "description": "Produto fora de uso."
                     },
                     {
                       "value": "Merged",
                       "title": "Mesclado",
-                      "description": "Produto incorporado a outro registro mestre."
+                      "description": "Produto consolidado em outro registro mestre."
                     },
                     {
                       "value": "Blocked",
                       "title": "Bloqueado",
-                      "description": "Produto bloqueado no cadastro mestre."
+                      "description": "Produto bloqueado pela plataforma."
                     }
                   ],
-                  "title": "Situação do cadastro mestre",
-                  "description": "Situação mestre que indica se o produto pode continuar sendo utilizado nas compras.",
+                  "title": "Situação",
+                  "description": "Situação do registro mestre que determina se o produto está ativo para uso.",
                   "maxLength": 0,
+                  "min": 0,
+                  "max": 0
+                },
+                "countryCode": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "pattern": "^[A-Z]{2}$",
+                  "maxLength": 0,
+                  "default": "US",
+                  "description": "Código do país aplicável ao cadastro mestre do produto.",
+                  "title": "País",
                   "min": 0,
                   "max": 0
                 }
               },
-              "description": "Dados de identificação do cadastro mestre usados para localizar e verificar a situação do produto nas compras."
+              "description": "Dados de identificação do produto mestre usados para localizá-lo e reconhecê-lo nas compras."
             },
             "base": {
               "type": "object",
               "owner": "platform",
               "fields": {},
-              "description": "Dados comuns do cadastro mestre do produto que este módulo não precisa declarar."
+              "description": "Dados comuns do registro mestre do produto."
             },
             "product": {
               "type": "object",
@@ -145,7 +168,7 @@
               "fields": {
                 "sku": {
                   "type": "string",
-                  "description": "Código interno do produto usado pelo almoxarifado para reconhecer o item recebido.",
+                  "description": "Código interno do produto, usado para reconhecê-lo no catálogo e no estoque.",
                   "title": "SKU",
                   "maxLength": 0,
                   "min": 0,
@@ -153,7 +176,7 @@
                 },
                 "unitOfMeasure": {
                   "type": "string",
-                  "description": "Unidade em que a quantidade do produto é pedida e recebida, como unidade, caixa, quilograma ou litro.",
+                  "description": "Unidade em que o produto é comprado e recebido, como unidade, caixa, quilograma ou litro.",
                   "title": "Unidade de medida",
                   "maxLength": 0,
                   "min": 0,
@@ -161,20 +184,20 @@
                 },
                 "isInventoried": {
                   "type": "boolean",
-                  "description": "Indica se o recebimento deste produto deve gerar entrada no estoque.",
+                  "description": "Indica se o produto recebido deve ter entrada controlada em estoque.",
                   "title": "Controla estoque",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
                 }
               },
-              "description": "Características do catálogo mestre necessárias para identificar o item e registrar seu recebimento no estoque."
+              "description": "Características de catálogo e estoque do produto mestre relevantes às compras."
             },
             "general": {
               "type": "object",
               "owner": "organization",
               "open": true,
-              "description": "Dados promovidos pela organização, lidos pelo módulo de compras e declarados no registro organizacional."
+              "description": "Dados promovidos pela organização para uso compartilhado entre módulos."
             },
             "compras": {
               "type": "object",

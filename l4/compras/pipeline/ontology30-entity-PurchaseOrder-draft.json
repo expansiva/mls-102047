@@ -4,7 +4,7 @@
     "moduleName": "compras",
     "entityId": "PurchaseOrder",
     "title": "Pedido de compra",
-    "description": "Pedido de compra aberto para um fornecedor, com itens, quantidades, preços e decisão de aprovação quando necessária.",
+    "description": "Pedido de compra destinado a um fornecedor, com itens incorporados, quantidades, preços e fluxo de envio ou aprovação.",
     "displayField": "orderNumber",
     "relationships": {
       "supplier": {
@@ -13,9 +13,21 @@
         "via": "PurchaseOrder.supplierId",
         "cardinality": "N:1",
         "title": "Fornecedor do pedido",
-        "description": "Fornecedor para o qual o pedido de compra foi aberto.",
+        "description": "Fornecedor único ao qual o pedido de compra é destinado.",
         "mode": "fk",
-        "required": "sempre"
+        "required": "sempre",
+        "role": "fornecedor do pedido"
+      },
+      "buyer": {
+        "relationshipId": "purchaseOrderBuyer",
+        "to": "Buyer",
+        "via": "PurchaseOrder.buyerId",
+        "cardinality": "N:1",
+        "title": "Comprador responsável",
+        "description": "Comprador responsável por abrir e encaminhar o pedido de compra.",
+        "mode": "fk",
+        "required": "sempre",
+        "role": "comprador responsável"
       },
       "goodsReceipts": {
         "relationshipId": "goodsReceiptPurchaseOrder",
@@ -23,34 +35,38 @@
         "via": "GoodsReceipt.purchaseOrderId",
         "cardinality": "1:N",
         "title": "Recebimentos do pedido",
-        "description": "Recebimentos totais ou parciais registrados para os itens deste pedido.",
+        "description": "Recebimentos totais ou parciais registrados para os itens deste pedido enviado.",
         "mode": "fk",
         "direction": "to",
-        "required": "quando houver itens recebidos"
+        "required": "quando houver entrega registrada",
+        "role": "pedido recebido"
       }
     },
     "capabilities": {
-      "read.byId": "Lê um pedido de compra pelo identificador da linha · consulta por id no repositório de pedidos · telas que já possuem o identificador do pedido.",
-      "locate.byColumn": "Lista pedidos por fornecedor, situação, data do pedido ou previsão de entrega · filtra e pagina as colunas indexadas · comprador, gerente de compras e almoxarife.",
-      "locate.byText": "Localiza pedidos pelo número informado · busca textual na coluna de número do pedido · comprador, gerente de compras e almoxarife.",
-      "count": "Conta pedidos que atendem aos critérios de acompanhamento · usa o mesmo filtro das listas sem paginação · gerente de compras.",
-      "listByForeignKey": "Lista os pedidos abertos para um fornecedor · consulta pela chave estrangeira do fornecedor · comprador e gerente de compras.",
-      "create": "Abre um pedido de compra em elaboração com seus itens · insere a linha do pedido e seu documento de detalhes · comprador.",
-      "update": "Altera os itens e as datas de um pedido ainda em elaboração · atualiza a linha identificada pelo id · comprador.",
-      "transition": "Envia, aprova ou rejeita o pedido alterando sua situação indexada · aplica a transição autorizada pelas regras do módulo · comprador e gerente de compras.",
-      "uniqueKey": "Impede a repetição do número de pedido · aplica índice único na coluna orderNumber · motor da plataforma ao gravar.",
-      "sequence.next": "Emite o próximo número sequencial do pedido de compra · usa a sequência do módulo e da entidade · comprador ao abrir o pedido.",
-      "read.mdmRecord": "Lê o cadastro mestre do fornecedor e dos produtos referenciados pelo pedido · hidrata os identificadores MDM dos registros relacionados · comprador, gerente de compras e almoxarife."
+      "read.byId": "Lê um pedido pelo identificador da linha no repositório de pedidos, para comprador, gerente de compras ou almoxarife que já possui o identificador.",
+      "locate.byColumn": "Lista pedidos por fornecedor, comprador, situação, data prevista ou data de envio usando as colunas indexadas, para as listas operacionais e os indicadores.",
+      "locate.byText": "Localiza pedidos pelo trecho digitado no número do pedido por busca textual, para comprador, gerente de compras ou almoxarife.",
+      "count": "Conta pedidos que atendem aos filtros de fornecedor, situação e período, para totais exibidos nas listas e no acompanhamento gerencial.",
+      "listByForeignKey": "Lista pedidos vinculados a um fornecedor ou comprador por suas chaves estrangeiras, para consultar o histórico operacional desses registros.",
+      "create": "Cria um pedido em elaboração com fornecedor, comprador e ao menos um item, para o comprador iniciar uma compra.",
+      "update": "Atualiza fornecedor, data prevista e itens de um pedido ainda em elaboração, para o comprador corrigir a compra antes do encaminhamento.",
+      "transition": "Move o pedido entre elaboração, aprovação, envio ou rejeição com as regras de valor limite, para comprador e gerente de compras nos respectivos fluxos.",
+      "uniqueKey": "Recusa a repetição do número sequencial do pedido por índice único, para preservar a identificação de cada pedido de compra.",
+      "transaction": "Grava atomicamente a abertura do pedido e a emissão de seu número sequencial, para o comprador não obter um pedido incompleto.",
+      "read.mdmRecord": "Lê os registros mestres do fornecedor e do comprador apontados pelas chaves do pedido, para exibir seus dados sem duplicá-los na compra.",
+      "sequence.next": "Emite o próximo número de pedido da sequência do módulo para a abertura de um pedido pelo comprador.",
+      "compras.viewPurchaseIndicators": "Exibe pedidos em aberto, pedidos atrasados e o total comprado por fornecedor no mês a partir dos indicadores de compras, para o gerente de compras."
     },
     "rules": [
-      "purchaseOrderMustHaveItems",
-      "purchaseOrderItemProductOfferedBySupplier",
-      "purchaseOrderItemQuantityPositive",
-      "purchaseOrderItemPriceNonnegative",
-      "purchaseOrderEditableOnlyDraft",
-      "purchaseOrderApprovalRequiredAboveLimit",
-      "purchaseOrderReceiptRequiresApprovalWhenRequired",
-      "goodsReceiptQuantityWithinOrderedQuantity"
+      "purchaseOrderItemsRequired",
+      "purchaseOrderPositiveQuantities",
+      "purchaseOrderPriceMatchesAgreement",
+      "purchaseOrderExpectedDeliveryBeforeSend",
+      "purchaseOrderRequiresApproval",
+      "purchaseOrderMayBeSent",
+      "purchaseOrderApprovalDecision",
+      "goodsReceiptOnlyForSentPurchaseOrder",
+      "goodsReceiptDoesNotExceedOpenQuantity"
     ],
     "kind": "entity",
     "class": "core",
@@ -73,28 +89,43 @@
           "required": true,
           "derived": true
         },
-        "supplierId": {
-          "type": "record",
-          "required": true,
-          "indexed": true,
-          "of": "ContactSummary",
-          "to": [
-            "Supplier"
-          ],
-          "title": "Fornecedor",
-          "description": "Fornecedor para o qual o pedido de compra foi aberto.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
-        },
         "orderNumber": {
           "type": "string",
           "required": true,
           "unique": true,
           "indexed": true,
-          "of": "ContactSummary",
+          "of": "Address",
           "title": "Número do pedido",
-          "description": "Número sequencial pelo qual o pedido de compra é identificado e consultado.",
+          "description": "Número sequencial que identifica o pedido de compra para consulta e comunicação.",
+          "pattern": "^PC-[0-9]+$",
+          "maxLength": 32,
+          "min": 0,
+          "max": 0
+        },
+        "supplierId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "of": "Address",
+          "to": [
+            "Supplier"
+          ],
+          "title": "Fornecedor",
+          "description": "Fornecedor para o qual o pedido de compra é destinado.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "buyerId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "of": "Address",
+          "to": [
+            "Buyer"
+          ],
+          "title": "Comprador responsável",
+          "description": "Comprador que abriu e mantém o pedido de compra.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -103,7 +134,7 @@
           "type": "enum",
           "required": true,
           "indexed": true,
-          "of": "ContactSummary",
+          "of": "Address",
           "values": [
             {
               "value": "draft",
@@ -111,34 +142,28 @@
               "description": "Pedido ainda em preparação pelo comprador."
             },
             {
-              "value": "sent",
-              "title": "Enviado",
-              "description": "Pedido enviado, aguardando recebimento ou decisão de aprovação quando exigida."
+              "value": "pendingApproval",
+              "title": "Aguardando aprovação",
+              "description": "Pedido acima do limite encaminhado para decisão gerencial."
             },
             {
               "value": "approved",
               "title": "Aprovado",
-              "description": "Pedido de valor acima do limite aprovado pelo gerente de compras."
+              "description": "Pedido aprovado pelo gerente e liberado para envio ao fornecedor."
+            },
+            {
+              "value": "sent",
+              "title": "Enviado",
+              "description": "Pedido enviado ao fornecedor e disponível para registro de recebimentos."
             },
             {
               "value": "rejected",
               "title": "Rejeitado",
-              "description": "Pedido recusado pelo gerente de compras e impedido de seguir para recebimento."
+              "description": "Pedido rejeitado pelo gerente de compras."
             }
           ],
           "title": "Situação do pedido",
-          "description": "Etapa operacional do pedido de compra, alterada pelo envio ou pela decisão do gerente.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
-        },
-        "orderDate": {
-          "type": "date",
-          "required": true,
-          "indexed": true,
-          "of": "ContactSummary",
-          "title": "Data do pedido",
-          "description": "Data em que o pedido de compra foi aberto.",
+          "description": "Etapa operacional do pedido de compra, desde a elaboração até o envio ou a rejeição.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -146,9 +171,19 @@
         "expectedDeliveryDate": {
           "type": "date",
           "indexed": true,
-          "of": "ContactSummary",
-          "title": "Previsão de entrega",
-          "description": "Data prevista para a chegada dos produtos, usada para acompanhar atrasos.",
+          "of": "Address",
+          "title": "Data prevista de entrega",
+          "description": "Data prevista para a chegada dos produtos do pedido, usada para identificar atrasos.",
+          "maxLength": 0,
+          "min": 0,
+          "max": 0
+        },
+        "sentAt": {
+          "type": "timestamp",
+          "indexed": true,
+          "of": "Address",
+          "title": "Data e hora de envio",
+          "description": "Momento em que o pedido foi enviado ao fornecedor, usado nos indicadores mensais de compras.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -156,9 +191,9 @@
         "details": {
           "type": "object",
           "required": true,
-          "of": "ContactSummary",
-          "title": "Detalhes do pedido",
-          "description": "Itens e valores acordados para a compra.",
+          "of": "Address",
+          "title": "Dados do pedido de compra",
+          "description": "Itens e informações próprias do pedido que não exigem consulta indexada.",
           "maxLength": 0,
           "min": 0,
           "max": 0,
@@ -167,22 +202,22 @@
               "type": "object",
               "required": true,
               "collection": true,
-              "of": "ContactSummary",
+              "of": "Address",
               "title": "Itens do pedido",
-              "description": "Produtos solicitados, com as quantidades e os preços acordados neste pedido.",
+              "description": "Produtos solicitados ao fornecedor, com quantidade e preço combinado registrados no pedido.",
               "maxLength": 0,
-              "min": 0,
+              "min": 1,
               "max": 0,
               "fields": {
-                "productId": {
+                "supplierProductId": {
                   "type": "record",
                   "required": true,
-                  "of": "ContactSummary",
+                  "of": "Address",
                   "to": [
-                    "Product"
+                    "SupplierProduct"
                   ],
-                  "title": "Produto",
-                  "description": "Produto solicitado no item do pedido.",
+                  "title": "Produto fornecido",
+                  "description": "Cadastro do produto e do preço combinado para o fornecedor selecionado.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -190,9 +225,9 @@
                 "quantity": {
                   "type": "number",
                   "required": true,
-                  "of": "ContactSummary",
-                  "title": "Quantidade solicitada",
-                  "description": "Quantidade do produto solicitada neste item.",
+                  "of": "Address",
+                  "title": "Quantidade pedida",
+                  "description": "Quantidade do produto solicitada neste item do pedido.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -200,44 +235,44 @@
                 "unitPrice": {
                   "type": "money",
                   "required": true,
-                  "of": "ContactSummary",
+                  "of": "Address",
                   "title": "Preço unitário combinado",
-                  "description": "Preço unitário acordado com o fornecedor para este item do pedido.",
+                  "description": "Preço unitário acordado com o fornecedor e aplicado a este item no momento da abertura do pedido.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
                 }
               }
             },
-            "orderTotal": {
+            "totalAmount": {
               "type": "money",
               "derived": true,
               "title": "Valor total do pedido",
-              "description": "Soma dos preços unitários multiplicados pelas quantidades de todos os itens deste pedido."
+              "description": "Soma das quantidades pedidas multiplicadas pelos respectivos preços unitários combinados de todos os itens do pedido."
             },
-            "requiresApproval": {
+            "approvalRequired": {
               "type": "boolean",
               "derived": true,
               "title": "Exige aprovação",
-              "description": "O valor total do pedido excede o limite de aprovação definido para compras."
+              "description": "Indica que o valor total do pedido é superior ao valor limite de aprovação gerencial definido pela organização."
             },
-            "receiptSituation": {
-              "type": "string",
-              "derived": true,
-              "title": "Situação do recebimento",
-              "description": "Indica se nenhum item, parte dos itens ou todos os itens do pedido já foram recebidos, comparando as quantidades recebidas com as quantidades solicitadas."
-            },
-            "isOpen": {
+            "hasPendingReceipt": {
               "type": "boolean",
               "derived": true,
-              "title": "Pedido em aberto",
-              "description": "Pedido enviado ou aprovado que não foi rejeitado e ainda não teve todos os seus itens recebidos."
+              "title": "Possui saldo pendente de recebimento",
+              "description": "Indica que o pedido enviado possui ao menos um item cuja quantidade recebida nos recebimentos registrados é menor que a quantidade pedida."
+            },
+            "isFullyReceived": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Está totalmente recebido",
+              "description": "Indica que, para todos os itens do pedido, a soma das quantidades registradas nos recebimentos alcança a quantidade pedida."
             },
             "isOverdue": {
               "type": "boolean",
               "derived": true,
-              "title": "Pedido atrasado",
-              "description": "Pedido em aberto cuja previsão de entrega é anterior à data de hoje e que ainda não teve todos os seus itens recebidos."
+              "title": "Está atrasado",
+              "description": "Indica que o pedido foi enviado, ainda possui saldo pendente de recebimento e sua data prevista de entrega é anterior à data atual."
             }
           }
         }
@@ -254,11 +289,15 @@
         "reachedBy": "actor"
       },
       {
-        "state": "sent",
+        "state": "pendingApproval",
         "reachedBy": "actor"
       },
       {
         "state": "approved",
+        "reachedBy": "actor"
+      },
+      {
+        "state": "sent",
         "reachedBy": "actor"
       },
       {
@@ -268,48 +307,70 @@
     ],
     "transitions": [
       {
-        "transitionId": "sendPurchaseOrder",
+        "transitionId": "submitPurchaseOrder",
         "from": [
           "draft"
+        ],
+        "to": "pendingApproval",
+        "by": [
+          "comprador"
+        ],
+        "description": "Submete ao gerente o pedido cujo valor total excede o limite de aprovação.",
+        "ruleRefs": [
+          "purchaseOrderItemsRequired",
+          "purchaseOrderPositiveQuantities",
+          "purchaseOrderPriceMatchesAgreement",
+          "purchaseOrderExpectedDeliveryBeforeSend",
+          "purchaseOrderRequiresApproval"
+        ]
+      },
+      {
+        "transitionId": "sendPurchaseOrder",
+        "from": [
+          "draft",
+          "approved"
         ],
         "to": "sent",
         "by": [
           "comprador"
         ],
-        "description": "Envia o pedido ao fornecedor; pedidos acima do limite ficam sujeitos à aprovação antes do recebimento.",
+        "description": "Envia ao fornecedor um pedido dentro do limite de aprovação ou previamente aprovado pelo gerente.",
         "ruleRefs": [
-          "purchaseOrderMustHaveItems",
-          "purchaseOrderItemProductOfferedBySupplier",
-          "purchaseOrderItemQuantityPositive",
-          "purchaseOrderItemPriceNonnegative"
+          "purchaseOrderItemsRequired",
+          "purchaseOrderPositiveQuantities",
+          "purchaseOrderPriceMatchesAgreement",
+          "purchaseOrderExpectedDeliveryBeforeSend",
+          "purchaseOrderMayBeSent"
         ]
       },
       {
         "transitionId": "decidePurchaseOrder",
         "from": [
-          "sent"
+          "pendingApproval"
         ],
         "to": "approved",
         "by": [
           "gerenteCompras"
         ],
-        "description": "Aprova um pedido enviado cujo valor exige decisão do gerente de compras.",
+        "description": "Aprova o pedido submetido e o libera para envio ao fornecedor.",
         "ruleRefs": [
-          "purchaseOrderApprovalRequiredAboveLimit"
+          "purchaseOrderRequiresApproval",
+          "purchaseOrderApprovalDecision"
         ]
       },
       {
         "transitionId": "rejectPurchaseOrder",
         "from": [
-          "sent"
+          "pendingApproval"
         ],
         "to": "rejected",
         "by": [
           "gerenteCompras"
         ],
-        "description": "Rejeita um pedido enviado cujo valor exige decisão do gerente de compras.",
+        "description": "Rejeita o pedido submetido, impedindo seu envio ao fornecedor.",
         "ruleRefs": [
-          "purchaseOrderApprovalRequiredAboveLimit"
+          "purchaseOrderRequiresApproval",
+          "purchaseOrderApprovalDecision"
         ]
       }
     ]
@@ -323,22 +384,22 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.orderTotal.derived (derived[])"
+      "detail": "record.fields.details.fields.totalAmount.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.requiresApproval.derived (derived[])"
+      "detail": "record.fields.details.fields.approvalRequired.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.receiptSituation.derived (derived[])"
+      "detail": "record.fields.details.fields.hasPendingReceipt.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.isOpen.derived (derived[])"
+      "detail": "record.fields.details.fields.isFullyReceived.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",

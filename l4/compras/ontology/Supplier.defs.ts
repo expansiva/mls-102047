@@ -7,7 +7,7 @@ export const comprasEntitySupplier = {
   "moduleName": "compras",
   "entityId": "Supplier",
   "title": "Fornecedor",
-  "description": "Empresa fornecedora cadastrada ou vinculada para disponibilizar produtos e condições de compra.",
+  "description": "Empresa fornecedora cadastrada ou vinculada ao cadastro mestre, identificada pelo CNPJ e utilizada nos pedidos de compra.",
   "displayField": "details.identification.name",
   "relationships": {
     "supplierContacts": {
@@ -15,27 +15,35 @@ export const comprasEntitySupplier = {
       "to": "SupplierContact",
       "via": "HasContact",
       "cardinality": "1:N",
-      "title": "Canais de contato do fornecedor",
-      "description": "Canais de contato vinculados ao fornecedor para sua comunicação comercial."
+      "title": "Contatos do fornecedor",
+      "description": "Canais de contato mestre vinculados ao fornecedor para a comunicação comercial.",
+      "required": "ao cadastrar ou vincular o fornecedor",
+      "role": "HasContact"
     },
-    "suppliedProducts": {
-      "relationshipId": "supplierSuppliesProduct",
-      "to": "Product",
-      "via": "SuppliesProduct",
-      "cardinality": "N:N",
-      "title": "Produtos fornecidos",
-      "description": "Produtos que o fornecedor disponibiliza para compra."
-    },
-    "supplierOfferings": {
-      "relationshipId": "supplierOfferingSupplier",
-      "to": "SupplierOffering",
-      "via": "SupplierOffering.supplierId",
+    "supplierProducts": {
+      "relationshipId": "supplierProductSupplier",
+      "to": "SupplierProduct",
+      "via": "SupplierProduct.supplierId",
       "cardinality": "1:N",
-      "title": "Condições de fornecimento",
-      "description": "Condições de preço combinado dos produtos pertencentes ao fornecedor.",
+      "title": "Produtos fornecidos",
+      "description": "Registros do catálogo comercial que definem os produtos e os preços combinados deste fornecedor.",
       "mode": "fk",
       "direction": "to",
-      "required": true
+      "required": "quando houver produto cadastrado no catálogo do fornecedor",
+      "role": "fornecedor"
+    },
+    "catalogProducts": {
+      "relationshipId": "supplierCatalogProducts",
+      "to": "Product",
+      "via": "SupplierProduct",
+      "cardinality": "N:N",
+      "title": "Catálogo de produtos",
+      "description": "Produtos fornecidos pela empresa, obtidos por meio dos registros de produto do fornecedor e seus preços combinados.",
+      "mode": "throughTable",
+      "path": "SupplierProduct.supplierId -> SupplierProduct.productId",
+      "derived": true,
+      "required": "quando o fornecedor possuir catálogo comercial",
+      "role": "fornecedor"
     },
     "purchaseOrders": {
       "relationshipId": "purchaseOrderSupplier",
@@ -43,26 +51,24 @@ export const comprasEntitySupplier = {
       "via": "PurchaseOrder.supplierId",
       "cardinality": "1:N",
       "title": "Pedidos de compra",
-      "description": "Pedidos de compra abertos para este fornecedor.",
+      "description": "Pedidos de compra destinados a este fornecedor.",
       "mode": "fk",
       "direction": "to",
-      "required": true
+      "required": "quando houver pedido de compra destinado ao fornecedor",
+      "role": "fornecedor"
     }
   },
   "capabilities": {
-    "read.byId": "Lê o fornecedor pelo identificador mestre para exibi-lo nos pedidos e nas condições de fornecimento; usado pelo comprador e pelo gerente de compras.",
-    "locate.byName": "Localiza fornecedores pelo nome para selecionar a empresa ao cadastrar condições e abrir pedidos; usado pelo comprador.",
-    "locate.byDocument": "Localiza o fornecedor pelo CNPJ para evitar duplicidade antes de cadastrá-lo ou vinculá-lo; usado pelo comprador.",
-    "locate.byContact": "Localiza o fornecedor a partir de um canal de contato vinculado; usado pelo comprador na comunicação comercial.",
-    "register.createOrAttach": "Cria a empresa fornecedora quando não existe ou vincula o cadastro mestre existente pelo CNPJ, aplicando o papel de fornecedor; usado pelo comprador.",
-    "edit.platformFields": "Atualiza os dados cadastrais da empresa fornecedora, como razão social e nome fantasia, no cadastro mestre; usado pelo comprador.",
-    "edit.moduleNamespace": "Atualiza somente o espaço do módulo de compras do fornecedor, que permanece sem dados exclusivos nesta definição; usado pelo módulo de compras.",
-    "inactivate": "Inativa ou reativa um fornecedor sem apagar seu histórico de pedidos e condições; usado pelo comprador.",
-    "link": "Vincula o fornecedor a produtos que fornece e a seus canais de contato por relacionamentos versionados; usado pelo comprador.",
-    "unlink": "Encerra o vínculo de um produto ou canal de contato com o fornecedor, preservando o histórico do relacionamento; usado pelo comprador.",
-    "link.contact": "Cria e vincula um canal de contato comercial ao fornecedor por HasContact; usado pelo comprador.",
-    "listLinks": "Lista produtos fornecidos, contatos e demais vínculos do fornecedor com sua vigência; usado pelo comprador.",
-    "audit": "Consulta quem alterou os dados e vínculos do fornecedor e quando; usado pelo gerente de compras para acompanhamento."
+    "read.byId": "Lê o fornecedor pelo identificador mestre para exibi-lo nos pedidos e no catálogo comercial; usado por comprador e gerente de compras.",
+    "locate.byName": "Localiza empresas fornecedoras pelo nome para selecionar um fornecedor já cadastrado; usado pelo comprador.",
+    "locate.byDocument": "Localiza o fornecedor pelo CNPJ para reutilizar o cadastro mestre e evitar duplicidade; usado pelo comprador.",
+    "locate.byContact": "Localiza o fornecedor por um canal de contato mestre quando necessário para comunicação comercial; usado pelo comprador.",
+    "register.createOrAttach": "Cria a empresa quando o CNPJ não existe ou anexa o papel de fornecedor quando ela já existe, gravando os dados permitidos do módulo; usado pelo comprador.",
+    "edit.platformFields": "Atualiza os dados mestre permitidos, como razão social e CNPJ, no cadastro do fornecedor; usado pelo comprador.",
+    "inactivate": "Inativa o fornecedor no cadastro mestre sem apagar seu histórico de compras; usado pelo comprador.",
+    "link.contact": "Vincula um canal de contato mestre ao fornecedor por HasContact para comunicação comercial; usado pelo comprador.",
+    "listLinks": "Lista contatos, produtos do catálogo e pedidos relacionados ao fornecedor; usado pelo comprador e gerente de compras.",
+    "audit": "Consulta as alterações auditadas do cadastro mestre do fornecedor; usado pelo gerente de compras."
   },
   "rules": [
     "rule-foreign-namespace-refused",
@@ -92,7 +98,7 @@ export const comprasEntitySupplier = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre da empresa fornecedora, com dados cadastrais da plataforma e informações específicas do módulo de compras.",
+        "description": "Documento mestre da empresa fornecedora utilizado pelo módulo de compras.",
         "fields": {
           "identification": {
             "type": "object",
@@ -107,10 +113,10 @@ export const comprasEntitySupplier = {
                   {
                     "value": "Company",
                     "title": "Empresa",
-                    "description": "Empresa cadastrada no cadastro mestre."
+                    "description": "Empresa no cadastro mestre."
                   }
                 ],
-                "description": "Identifica este registro mestre como uma empresa.",
+                "description": "Subtipo mestre que identifica este registro como empresa.",
                 "title": "Subtipo",
                 "maxLength": 0,
                 "min": 0,
@@ -140,21 +146,21 @@ export const comprasEntitySupplier = {
                   {
                     "value": "Inactive",
                     "title": "Inativo",
-                    "description": "Fornecedor fora de uso."
+                    "description": "Fornecedor inativado e indisponível para novos usos."
                   },
                   {
                     "value": "Merged",
-                    "title": "Unificado",
-                    "description": "Registro unificado a outro cadastro mestre."
+                    "title": "Mesclado",
+                    "description": "Registro incorporado a outro cadastro mestre."
                   },
                   {
                     "value": "Blocked",
                     "title": "Bloqueado",
-                    "description": "Registro bloqueado pela plataforma."
+                    "description": "Registro bloqueado pela organização."
                   }
                 ],
                 "title": "Situação",
-                "description": "Situação do registro mestre do fornecedor para uso nas compras.",
+                "description": "Situação mestre do fornecedor para uso no módulo de compras.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -170,7 +176,7 @@ export const comprasEntitySupplier = {
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional usado para identificar o fornecedor.",
+                "description": "Tipo de documento nacional usado para identificar o fornecedor brasileiro.",
                 "required": true,
                 "maxLength": 0,
                 "min": 0,
@@ -179,7 +185,7 @@ export const comprasEntitySupplier = {
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do CNPJ da empresa fornecedora.",
+                "description": "Número do CNPJ que identifica e evita duplicidade do fornecedor.",
                 "title": "CNPJ",
                 "required": true,
                 "pattern": "^\\d{14}$",
@@ -194,13 +200,24 @@ export const comprasEntitySupplier = {
                 "pattern": "^BR$",
                 "maxLength": 0,
                 "default": "US",
-                "description": "País do cadastro e das regras documentais do fornecedor.",
+                "description": "Código do Brasil, país cujas regras documentais se aplicam ao CNPJ.",
                 "title": "País",
+                "min": 0,
+                "max": 0
+              },
+              "tags": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "derived": true,
+                "description": "Marcadores derivados, incluindo o papel de fornecedor do módulo de compras.",
+                "title": "Marcadores",
+                "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação e situação da empresa fornecedora no cadastro mestre."
+            "description": "Dados de identificação mestre da empresa fornecedora."
           },
           "base": {
             "type": "object",
@@ -212,7 +229,7 @@ export const comprasEntitySupplier = {
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Resumo derivado dos canais de contato vinculados ao fornecedor para comunicação comercial.",
+                "description": "Resumo derivado dos canais de contato mestre vinculados ao fornecedor.",
                 "title": "Contatos",
                 "maxLength": 0,
                 "min": 0,
@@ -222,14 +239,14 @@ export const comprasEntitySupplier = {
                 "type": "object",
                 "required": true,
                 "derived": true,
-                "description": "Referências derivadas aos relacionamentos do fornecedor, incluindo produtos fornecidos e canais de contato.",
+                "description": "Referências compactas derivadas dos relacionamentos ativos do fornecedor.",
                 "title": "Referências de relacionamentos",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados comuns do cadastro mestre usados para identificar e contatar o fornecedor."
+            "description": "Dados básicos mestre utilizados para comunicar-se e relacionar-se com o fornecedor."
           },
           "company": {
             "type": "object",
@@ -242,7 +259,7 @@ export const comprasEntitySupplier = {
                   {
                     "value": "LegalEntity",
                     "title": "Pessoa jurídica",
-                    "description": "Empresa legalmente constituída."
+                    "description": "Empresa juridicamente constituída."
                   }
                 ],
                 "description": "Classifica o fornecedor como uma entidade jurídica.",
@@ -254,28 +271,20 @@ export const comprasEntitySupplier = {
               "legalName": {
                 "type": "string",
                 "required": true,
-                "description": "Razão social oficial da empresa fornecedora.",
+                "description": "Nome empresarial oficial do fornecedor informado no cadastro e usado nas compras.",
                 "title": "Razão social",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
-              "tradeName": {
-                "type": "string",
-                "description": "Nome fantasia pelo qual o fornecedor também pode ser conhecido.",
-                "title": "Nome fantasia",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados corporativos da empresa que atua como fornecedora."
+            "description": "Dados legais mestre da empresa fornecedora."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização, apenas para leitura pelo módulo de compras."
+            "description": "Dados promovidos pela organização, somente para leitura pelo módulo de compras."
           },
           "compras": {
             "type": "object",

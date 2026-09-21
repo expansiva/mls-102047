@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 export const comprasOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "compras",
-  "businessDomain": "Compras",
+  "businessDomain": "Compras e recebimento de mercadorias",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "compras",
@@ -23,17 +23,17 @@ export const comprasOntologyIndex = {
       "subtype": "ContactChannel"
     },
     {
-      "entityId": "Product",
-      "kind": "role",
-      "subtype": "Product"
-    },
-    {
       "entityId": "Buyer",
       "kind": "role",
       "subtype": "Person"
     },
     {
-      "entityId": "SupplierOffering",
+      "entityId": "Product",
+      "kind": "role",
+      "subtype": "Product"
+    },
+    {
+      "entityId": "SupplierProduct",
       "kind": "entity",
       "class": "supporting"
     },
@@ -48,7 +48,7 @@ export const comprasOntologyIndex = {
       "class": "event"
     },
     {
-      "entityId": "PurchaseOrderDashboard",
+      "entityId": "PurchaseIndicators",
       "kind": "entity",
       "class": "supporting"
     }
@@ -59,50 +59,42 @@ export const comprasOntologyIndex = {
       "from": "Supplier",
       "to": "SupplierContact",
       "type": "oneToMany",
-      "required": false,
+      "required": true,
       "mode": "mdmRelationship",
-      "description": "Um fornecedor pode ter canais de contato vinculados para sua comunicação comercial.",
+      "description": "Um fornecedor possui um ou mais canais de contato mestre para a comunicação comercial.",
       "catalogType": "HasContact"
     },
     {
-      "relationshipId": "supplierSuppliesProduct",
-      "from": "Supplier",
-      "to": "Product",
-      "type": "manyToMany",
-      "required": false,
-      "mode": "mdmRelationship",
-      "description": "Um fornecedor pode fornecer diversos produtos, e um produto pode ser fornecido por diversos fornecedores.",
-      "catalogType": "SuppliesProduct"
-    },
-    {
-      "relationshipId": "supplierOfferingSupplier",
-      "from": "SupplierOffering",
+      "relationshipId": "supplierProductSupplier",
+      "from": "SupplierProduct",
       "to": "Supplier",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento pertence a um fornecedor.",
-      "field": "SupplierOffering.supplierId"
+      "description": "Cada registro de produto do fornecedor pertence a um único fornecedor.",
+      "field": "SupplierProduct.supplierId"
     },
     {
-      "relationshipId": "supplierOfferingProduct",
-      "from": "SupplierOffering",
+      "relationshipId": "supplierProductProduct",
+      "from": "SupplierProduct",
       "to": "Product",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento define o preço combinado para um produto.",
-      "field": "SupplierOffering.productId"
+      "description": "Cada registro de produto do fornecedor referencia um único produto mestre.",
+      "field": "SupplierProduct.productId"
     },
     {
-      "relationshipId": "supplierOfferingBuyer",
-      "from": "SupplierOffering",
-      "to": "Buyer",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada condição de fornecimento é cadastrada por um comprador para permitir o escopo pessoal do cadastro.",
-      "field": "SupplierOffering.buyerId"
+      "relationshipId": "supplierCatalogProducts",
+      "from": "Supplier",
+      "to": "Product",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "O catálogo comercial do fornecedor relaciona fornecedores e produtos pelos registros de preço combinado.",
+      "through": "SupplierProduct",
+      "path": "SupplierProduct.supplierId -> SupplierProduct.productId",
+      "derived": true
     },
     {
       "relationshipId": "purchaseOrderSupplier",
@@ -111,8 +103,18 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada pedido de compra é aberto para um fornecedor.",
+      "description": "Cada pedido de compra é destinado a um único fornecedor.",
       "field": "PurchaseOrder.supplierId"
+    },
+    {
+      "relationshipId": "purchaseOrderBuyer",
+      "from": "PurchaseOrder",
+      "to": "Buyer",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada pedido de compra é aberto por um comprador responsável.",
+      "field": "PurchaseOrder.buyerId"
     },
     {
       "relationshipId": "goodsReceiptPurchaseOrder",
@@ -121,7 +123,7 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento registra a entrega total ou parcial de um pedido de compra.",
+      "description": "Cada recebimento registra uma entrega vinculada a um único pedido de compra enviado.",
       "field": "GoodsReceipt.purchaseOrderId"
     }
   ]
