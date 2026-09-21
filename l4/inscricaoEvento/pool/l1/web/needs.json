@@ -1,0 +1,168 @@
+{
+  "schemaVersion": "2026-09-21-p2-needs-v1",
+  "moduleName": "inscricaoEvento",
+  "device": "web",
+  "menuSchema": "2026-09-20-p2-menu-v2.2",
+  "pages": [
+    {
+      "pageId": "inicio_organizador",
+      "actors": [
+        "organizador"
+      ],
+      "reads": [
+        {
+          "entity": "Evento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.vagasDisponiveis",
+            "details.vagasOcupadas"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        },
+        {
+          "entity": "Inscricao",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "organism:alerts"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "eventos",
+      "actors": [
+        "organizador"
+      ],
+      "reads": [
+        {
+          "entity": "Evento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.vagasDisponiveis",
+            "details.vagasOcupadas"
+          ],
+          "from": [
+            "journey:acompanharEexportarInscricoes/consultarInscritosEocupacao",
+            "journey:acompanharEexportarInscricoes/localizarEvento",
+            "journey:cadastrarEpublicarEvento/criarEvento",
+            "journey:cadastrarEpublicarEvento/publicarEvento"
+          ]
+        },
+        {
+          "entity": "Inscricao",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:acompanharEexportarInscricoes/baixarListaCsv",
+            "process:promoverListaEsperaAposCancelamento"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Evento",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:cadastrarEpublicarEvento/criarEvento"
+          ]
+        },
+        {
+          "entity": "Evento",
+          "operation": "transition",
+          "transitionRef": "publicarEvento",
+          "from": [
+            "journey:cadastrarEpublicarEvento/publicarEvento"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "inicio_publico",
+      "actors": [
+        "publico"
+      ],
+      "reads": [
+        {
+          "entity": "Inscricao",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "organism:alerts"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "eventos_publicados",
+      "actors": [
+        "publico"
+      ],
+      "reads": [
+        {
+          "entity": "Inscricao",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "journey:inscreverSeEmEvento/registrarInscricao"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Inscricao",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:inscreverSeEmEvento/registrarInscricao"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "minhas_inscricoes",
+      "actors": [
+        "publico"
+      ],
+      "reads": [
+        {
+          "entity": "Inscricao",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "journey:cancelarInscricao/cancelarInscricao",
+            "journey:cancelarInscricao/consultarInscricao",
+            "journey:cancelarInscricao/localizarInscricao",
+            "process:promoverListaEsperaAposCancelamento"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Inscricao",
+          "operation": "transition",
+          "transitionRef": "cancelarInscricao",
+          "from": [
+            "journey:cancelarInscricao/cancelarInscricao"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "sourceMenu": "pool/l2/web/menu.json",
+    "generatedAt": "2026-09-21T17:51:39.128Z"
+  }
+}

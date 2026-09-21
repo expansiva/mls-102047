@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "2026-09-20-p2-menu-v2.2",
+  "moduleName": "hiringPipeline",
+  "userLanguage": "en",
+  "device": "web",
+  "tree": [
+    {
+      "id": "recruiter_home",
+      "kind": "page",
+      "label": "Home",
+      "organisms": [
+        {
+          "kind": "summary",
+          "text": "How many open positions, registered candidates, and applications I have in screening and interview."
+        },
+        {
+          "kind": "highlights",
+          "text": "Positions nearly filled and applications that still need screening."
+        },
+        {
+          "kind": "alerts",
+          "text": "Hiring deadlines and recurring duties."
+        },
+        {
+          "kind": "inbox",
+          "text": "Declined applications waiting for me to record a rejection and close them."
+        }
+      ],
+      "action": "new"
+    },
+    {
+      "id": "job_positions",
+      "kind": "page",
+      "label": "Job positions",
+      "organisms": [
+        {
+          "kind": "list",
+          "text": "Open and closed job positions."
+        },
+        {
+          "kind": "detail",
+          "text": "Title, requirements, hiring manager, filled headcount, and remaining headcount."
+        },
+        {
+          "kind": "form",
+          "text": "Open a job position and assign its hiring manager."
+        },
+        {
+          "kind": "actions",
+          "text": "Open this job position."
+        },
+        {
+          "kind": "timeline",
+          "text": "When the system closed a position because filled headcount reached the required headcount."
+        }
+      ],
+      "action": "new"
+    },
+    {
+      "id": "candidates",
+      "kind": "page",
+      "label": "Candidates",
+      "organisms": [
+        {
+          "kind": "list",
+          "text": "Find a candidate by name."
+        },
+        {
+          "kind": "detail",
+          "text": "The candidate's name, contacts, and qualifications."
+        },
+        {
+          "kind": "form",
+          "text": "Register a candidate so I can use them on applications."
+        },
+        {
+          "kind": "actions",
+          "text": "Save the candidate in the registry."
+        }
+      ],
+      "action": "new"
+    },
+    {
+      "id": "applications",
+      "kind": "page",
+      "label": "Applications",
+      "organisms": [
+        {
+          "kind": "list",
+          "text": "Applications by candidate, position, and stage."
+        },
+        {
+          "kind": "detail",
+          "text": "The application, its candidate and position, and the current stage."
+        },
+        {
+          "kind": "form",
+          "text": "Start screening by linking a candidate to an open position."
+        },
+        {
+          "kind": "actions",
+          "text": "Move a screened application to interview, or record a rejection reason and close it."
+        }
+      ],
+      "action": "new"
+    },
+    {
+      "id": "hiring_workspace",
+      "kind": "hub",
+      "label": "My hiring",
+      "context": "HiringManager",
+      "text": "Opens with you already selected as hiring manager. From here you decide offers and hiring outcomes for your positions.",
+      "children": [
+        {
+          "id": "hiring_manager_home",
+          "kind": "page",
+          "label": "Home",
+          "organisms": [
+            {
+              "kind": "summary",
+              "text": "Remaining headcount on my positions and how many applications wait for a decision."
+            },
+            {
+              "kind": "highlights",
+              "text": "Positions that filled and offers still outstanding."
+            },
+            {
+              "kind": "alerts",
+              "text": "Deadlines on offer and hiring decisions."
+            },
+            {
+              "kind": "inbox",
+              "text": "Interviewed applications waiting for an offer decision, and offered applications waiting for a hiring outcome."
+            }
+          ],
+          "action": "new"
+        },
+        {
+          "id": "managed_applications",
+          "kind": "page",
+          "label": "Applications",
+          "organisms": [
+            {
+              "kind": "list",
+              "text": "Interviewed and offered applications on my positions."
+            },
+            {
+              "kind": "detail",
+              "text": "The application, the candidate, and remaining headcount on the position."
+            },
+            {
+              "kind": "actions",
+              "text": "Make an offer, hire the candidate, or send a declined application back so rejection can be recorded."
+            }
+          ],
+          "action": "new"
+        },
+        {
+          "id": "managed_positions",
+          "kind": "page",
+          "label": "Job positions",
+          "organisms": [
+            {
+              "kind": "list",
+              "text": "Job positions I am responsible for."
+            },
+            {
+              "kind": "detail",
+              "text": "Filled headcount and remaining headcount."
+            },
+            {
+              "kind": "timeline",
+              "text": "When the system closed a position because filled headcount reached the required headcount."
+            }
+          ],
+          "action": "new"
+        }
+      ],
+      "action": "new"
+    }
+  ],
+  "authorities": {
+    "actor:recruiter": [
+      "recruiter_home",
+      "job_positions",
+      "candidates",
+      "applications"
+    ],
+    "actor:hiringManager": [
+      "hiring_workspace"
+    ]
+  },
+  "meta": {
+    "journeys": {
+      "openJobPosition": [
+        "job_positions"
+      ],
+      "registerCandidate": [
+        "candidates"
+      ],
+      "startApplicationScreening": [
+        "candidates",
+        "job_positions",
+        "applications"
+      ],
+      "advanceApplicationToInterview": [
+        "applications",
+        "candidates"
+      ],
+      "decideOffer": [
+        "managed_applications"
+      ],
+      "decideHiringOutcome": [
+        "managed_applications",
+        "managed_positions"
+      ],
+      "recordApplicationRejection": [
+        "applications",
+        "job_positions"
+      ]
+    },
+    "processes": {
+      "applicationDecisionProcess": [
+        "recruiter_home",
+        "applications",
+        "hiring_manager_home",
+        "managed_applications"
+      ],
+      "closeFilledPositionProcess": [
+        "job_positions",
+        "managed_positions",
+        "managed_applications",
+        "hiring_manager_home",
+        "recruiter_home"
+      ]
+    },
+    "removed": []
+  }
+}

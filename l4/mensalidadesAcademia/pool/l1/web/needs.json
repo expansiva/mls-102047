@@ -5,27 +5,47 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
-      "pageId": "atendimento_recepcao",
+      "pageId": "inicio",
       "actors": [
         "recepcao"
       ],
       "reads": [
         {
-          "entity": "Aluno",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:matricularAluno/localizarAluno"
-          ]
-        },
-        {
-          "entity": "Matricula",
+          "entity": "Mensalidade",
           "family": "tdm",
           "scope": "organization",
-          "derived": [],
+          "derived": [
+            "details.saldoDevedor",
+            "details.situacao",
+            "details.totalPago"
+          ],
           "from": [
-            "journey:matricularAluno/criarMatricula"
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "inicio_gerencia",
+      "actors": [
+        "gerencia"
+      ],
+      "reads": [
+        {
+          "entity": "IndicadoresAcademia",
+          "family": "ddm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeAlunosAtivos",
+            "details.quantidadeAlunosBloqueados",
+            "details.quantidadeAlunosInadimplentes",
+            "details.totalAReceber",
+            "details.totalRecebido",
+            "period"
+          ],
+          "from": [
+            "organism:summary"
           ]
         },
         {
@@ -38,47 +58,11 @@
             "details.totalPago"
           ],
           "from": [
-            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
-            "journey:registrarPagamentoMensalidade/localizarMensalidade"
-          ]
-        },
-        {
-          "entity": "Pagamento",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:registrarPagamentoMensalidade/registrarPagamento"
-          ]
-        },
-        {
-          "entity": "Plano",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:matricularAluno/localizarPlano"
+            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores"
           ]
         }
       ],
-      "writes": [
-        {
-          "entity": "Matricula",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:matricularAluno/criarMatricula"
-          ]
-        },
-        {
-          "entity": "Pagamento",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:registrarPagamentoMensalidade/registrarPagamento"
-          ]
-        }
-      ]
+      "writes": []
     },
     {
       "pageId": "planos",
@@ -116,27 +100,56 @@
       ]
     },
     {
-      "pageId": "controle_financeiro",
+      "pageId": "matriculas",
       "actors": [
-        "gerencia"
+        "recepcao"
       ],
       "reads": [
         {
-          "entity": "IndicadoresAcademia",
-          "family": "ddm",
+          "entity": "Aluno",
+          "family": "mdm",
           "scope": "organization",
-          "derived": [
-            "details.quantidadeAlunosAtivos",
-            "details.quantidadeAlunosBloqueados",
-            "details.quantidadeAlunosInadimplentes",
-            "details.totalAReceber",
-            "details.totalRecebido",
-            "period"
-          ],
+          "derived": [],
           "from": [
-            "organism:highlights"
+            "journey:matricularAluno/localizarAluno"
           ]
         },
+        {
+          "entity": "Matricula",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:matricularAluno/criarMatricula"
+          ]
+        },
+        {
+          "entity": "Plano",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:matricularAluno/localizarPlano"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Matricula",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:matricularAluno/criarMatricula"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "mensalidades",
+      "actors": [
+        "recepcao"
+      ],
+      "reads": [
         {
           "entity": "Mensalidade",
           "family": "tdm",
@@ -147,7 +160,47 @@
             "details.totalPago"
           ],
           "from": [
-            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores",
+            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
+            "journey:registrarPagamentoMensalidade/localizarMensalidade"
+          ]
+        },
+        {
+          "entity": "Pagamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:registrarPagamentoMensalidade/registrarPagamento"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Pagamento",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:registrarPagamentoMensalidade/registrarPagamento"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "mensalidades_gerencia",
+      "actors": [
+        "gerencia"
+      ],
+      "reads": [
+        {
+          "entity": "Mensalidade",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.saldoDevedor",
+            "details.situacao",
+            "details.totalPago"
+          ],
+          "from": [
             "journey:gerarMensalidadesDoMes/criarMensalidades"
           ]
         }
@@ -195,6 +248,6 @@
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-09-20T20:32:05.572Z"
+    "generatedAt": "2026-09-21T17:57:10.504Z"
   }
 }

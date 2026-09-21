@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "2026-09-21-p2-needs-v1",
+  "moduleName": "ordenServicio",
+  "device": "web",
+  "menuSchema": "2026-09-20-p2-menu-v2.2",
+  "pages": [
+    {
+      "pageId": "inicio_recepcionista",
+      "actors": [
+        "recepcionista"
+      ],
+      "reads": [
+        {
+          "entity": "OrdenServicio",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.availableForPickup"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "ordenes_recepcionista",
+      "actors": [
+        "recepcionista"
+      ],
+      "reads": [
+        {
+          "entity": "OrdenServicio",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.availableForPickup"
+          ],
+          "from": [
+            "journey:abrirOrdenServicio/registrarRecepcion",
+            "journey:entregarAparatoYfinalizar/finalizarEntrega",
+            "journey:entregarAparatoYfinalizar/localizarOrdenLista",
+            "journey:entregarAparatoYfinalizar/verificarOrdenParaEntrega"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "OrdenServicio",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:abrirOrdenServicio/registrarRecepcion"
+          ]
+        },
+        {
+          "entity": "OrdenServicio",
+          "operation": "transition",
+          "transitionRef": "entregarYfinalizar",
+          "from": [
+            "journey:entregarAparatoYfinalizar/finalizarEntrega"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "inicio_tecnico",
+      "actors": [
+        "tecnico"
+      ],
+      "reads": [
+        {
+          "entity": "OrdenServicio",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.availableForPickup"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "ordenes_tecnico",
+      "actors": [
+        "tecnico"
+      ],
+      "reads": [
+        {
+          "entity": "OrdenServicio",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.availableForPickup"
+          ],
+          "from": [
+            "journey:prepararPresupuesto/emitirPresupuesto",
+            "journey:prepararPresupuesto/localizarOrdenPendiente",
+            "journey:prepararPresupuesto/registrarAnalisis",
+            "journey:repararYmarcarLista/localizarOrdenAprobada",
+            "journey:repararYmarcarLista/registrarReparacionTerminada",
+            "journey:repararYmarcarLista/revisarDiagnosticoAprobado"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "OrdenServicio",
+          "operation": "transition",
+          "transitionRef": "emitirPresupuesto",
+          "from": [
+            "journey:prepararPresupuesto/emitirPresupuesto"
+          ]
+        },
+        {
+          "entity": "OrdenServicio",
+          "operation": "transition",
+          "transitionRef": "marcarLista",
+          "from": [
+            "journey:repararYmarcarLista/registrarReparacionTerminada"
+          ]
+        },
+        {
+          "entity": "OrdenServicio",
+          "operation": "update",
+          "transitionRef": "",
+          "from": [
+            "journey:prepararPresupuesto/registrarAnalisis"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "inicio_cliente",
+      "actors": [
+        "cliente"
+      ],
+      "reads": [
+        {
+          "entity": "OrdenServicio",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.availableForPickup"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "ordenes_cliente",
+      "actors": [
+        "cliente"
+      ],
+      "reads": [
+        {
+          "entity": "OrdenServicio",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.availableForPickup"
+          ],
+          "from": [
+            "journey:aprobarPresupuesto/confirmarAprobacion",
+            "journey:aprobarPresupuesto/revisarPresupuestoRecibido",
+            "journey:consultarMisOrdenes/consultarDetalleDeOrden",
+            "journey:consultarMisOrdenes/localizarMisOrdenes",
+            "journey:rechazarPresupuesto/confirmarRechazo",
+            "journey:rechazarPresupuesto/revisarPresupuestoParaRechazo"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "OrdenServicio",
+          "operation": "transition",
+          "transitionRef": "aprobarPresupuesto",
+          "from": [
+            "journey:aprobarPresupuesto/confirmarAprobacion"
+          ]
+        },
+        {
+          "entity": "OrdenServicio",
+          "operation": "transition",
+          "transitionRef": "rechazarPresupuesto",
+          "from": [
+            "journey:rechazarPresupuesto/confirmarRechazo"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "sourceMenu": "pool/l2/web/menu.json",
+    "generatedAt": "2026-09-21T18:00:37.015Z"
+  }
+}

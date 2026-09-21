@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "2026-09-21-p2-needs-v1",
+  "moduleName": "locacaoEquipamentos",
+  "device": "web",
+  "menuSchema": "2026-09-20-p2-menu-v2.2",
+  "pages": [
+    {
+      "pageId": "inicio_atendente",
+      "actors": [
+        "atendente"
+      ],
+      "reads": [
+        {
+          "entity": "ContratoLocacao",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.multaAtraso"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        },
+        {
+          "entity": "Equipamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.situacaoOperacional"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        },
+        {
+          "entity": "ItemLocacao",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.multaAtraso"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "contratos",
+      "actors": [
+        "atendente"
+      ],
+      "reads": [
+        {
+          "entity": "Cliente",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:criarContratoLocacao/localizarCliente"
+          ]
+        },
+        {
+          "entity": "ContratoLocacao",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.multaAtraso"
+          ],
+          "from": [
+            "journey:criarContratoLocacao/criarContrato",
+            "journey:registrarDevolucao/inspecionarContrato",
+            "journey:registrarDevolucao/localizarContrato",
+            "journey:registrarDevolucao/registrarDevolucao"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "ContratoLocacao",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:criarContratoLocacao/criarContrato"
+          ]
+        },
+        {
+          "entity": "ContratoLocacao",
+          "operation": "transition",
+          "transitionRef": "registrarDevolucao",
+          "from": [
+            "journey:registrarDevolucao/registrarDevolucao"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "inicio_gerente",
+      "actors": [
+        "gerente"
+      ],
+      "reads": [
+        {
+          "entity": "Equipamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.situacaoOperacional"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "equipamentos",
+      "actors": [
+        "gerente"
+      ],
+      "reads": [
+        {
+          "entity": "Equipamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.situacaoOperacional"
+          ],
+          "from": [
+            "journey:consultarSituacaoEquipamentos/inspecionarSituacao",
+            "journey:consultarSituacaoEquipamentos/localizarEquipamentos"
+          ]
+        }
+      ],
+      "writes": []
+    }
+  ],
+  "meta": {
+    "sourceMenu": "pool/l2/web/menu.json",
+    "generatedAt": "2026-09-21T18:05:02.084Z"
+  }
+}
