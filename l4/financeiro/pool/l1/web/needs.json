@@ -1,0 +1,382 @@
+{
+  "schemaVersion": "2026-09-21-p2-needs-v1",
+  "moduleName": "financeiro",
+  "device": "web",
+  "menuSchema": "2026-09-20-p2-menu-v2.2",
+  "pages": [
+    {
+      "pageId": "inicio_caixa",
+      "actors": [
+        "caixa"
+      ],
+      "reads": [
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "titulos_caixa",
+      "actors": [
+        "caixa"
+      ],
+      "reads": [
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:receberTitulo/registrarRecebimento"
+          ]
+        },
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "journey:receberTitulo/consultarTituloParaRecebimento",
+            "journey:receberTitulo/localizarTituloEmAberto"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Recebimento",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:receberTitulo/registrarRecebimento"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "recebimentos_caixa",
+      "actors": [
+        "caixa"
+      ],
+      "reads": [
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:estornarRecebimentoNoMesmoDia/conferirRecebimentoDoDia",
+            "journey:estornarRecebimentoNoMesmoDia/estornarRecebimento",
+            "journey:estornarRecebimentoNoMesmoDia/localizarRecebimentoDoDia"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Recebimento",
+          "operation": "transition",
+          "transitionRef": "estornarRecebimento",
+          "from": [
+            "journey:estornarRecebimentoNoMesmoDia/estornarRecebimento"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "inicio_gerente",
+      "actors": [
+        "gerenteFinanceiro"
+      ],
+      "reads": [
+        {
+          "entity": "PainelRecebiveis",
+          "family": "ddm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeTitulosEmAberto",
+            "details.quantidadeTitulosVencidos",
+            "details.valorEmAberto",
+            "details.valorRecebido",
+            "details.valorVencido",
+            "groupKey",
+            "period"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        },
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "journey:acompanharRecebiveis/inspecionarRecebiveis",
+            "journey:acompanharRecebiveis/localizarTitulosParaAnalise"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "recebiveis",
+      "actors": [
+        "gerenteFinanceiro"
+      ],
+      "reads": [
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "journey:acompanharRecebiveis/inspecionarRecebiveis",
+            "journey:acompanharRecebiveis/localizarTitulosParaAnalise"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "pagadores",
+      "actors": [
+        "gerenteFinanceiro"
+      ],
+      "reads": [
+        {
+          "entity": "ExtratoPagador",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.saldoEmAberto",
+            "details.totalRecebido",
+            "details.totalTitulos"
+          ],
+          "from": [
+            "journey:emitirExtratoPorPagador/gerarExtratoDoPagador"
+          ]
+        },
+        {
+          "entity": "Pagador",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:emitirExtratoPorPagador/localizarPagador"
+          ]
+        },
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "journey:emitirExtratoPorPagador/consultarMovimentacoesDoPagador"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "ExtratoPagador",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:emitirExtratoPorPagador/gerarExtratoDoPagador"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "extratos_pagador",
+      "actors": [
+        "gerenteFinanceiro"
+      ],
+      "reads": [
+        {
+          "entity": "ExtratoPagador",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.saldoEmAberto",
+            "details.totalRecebido",
+            "details.totalTitulos"
+          ],
+          "from": [
+            "journey:emitirExtratoPorPagador/gerarExtratoDoPagador"
+          ]
+        },
+        {
+          "entity": "Pagador",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:emitirExtratoPorPagador/localizarPagador"
+          ]
+        },
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "journey:emitirExtratoPorPagador/consultarMovimentacoesDoPagador"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "ExtratoPagador",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:emitirExtratoPorPagador/gerarExtratoDoPagador"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "inicio_pagador",
+      "actors": [
+        "pagador"
+      ],
+      "reads": [
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "meus_titulos",
+      "actors": [
+        "pagador"
+      ],
+      "reads": [
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "journey:consultarMeusTitulosErecebimentos/consultarMeusRecebimentos",
+            "journey:consultarMeusTitulosErecebimentos/localizarMeusRecebimentos",
+            "journey:pagarTituloComCartao/pagarTituloComCartao"
+          ]
+        },
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "journey:consultarMeusTitulosErecebimentos/consultarMeusTitulos",
+            "journey:consultarMeusTitulosErecebimentos/localizarMeusTitulos",
+            "journey:pagarTituloComCartao/conferirMeuTituloParaPagamento",
+            "journey:pagarTituloComCartao/localizarMeuTituloEmAberto"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Recebimento",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:pagarTituloComCartao/pagarTituloComCartao"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "meus_recebimentos",
+      "actors": [
+        "pagador"
+      ],
+      "reads": [
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "journey:consultarMeusTitulosErecebimentos/consultarMeusRecebimentos",
+            "journey:consultarMeusTitulosErecebimentos/localizarMeusRecebimentos"
+          ]
+        },
+        {
+          "entity": "TituloReceber",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.outstandingBalance",
+            "details.overdue",
+            "details.situation",
+            "details.totalReceived"
+          ],
+          "from": [
+            "journey:consultarMeusTitulosErecebimentos/consultarMeusTitulos",
+            "journey:consultarMeusTitulosErecebimentos/localizarMeusTitulos"
+          ]
+        }
+      ],
+      "writes": []
+    }
+  ],
+  "meta": {
+    "sourceMenu": "pool/l2/web/menu.json",
+    "generatedAt": "2026-09-21T17:45:26.219Z"
+  }
+}

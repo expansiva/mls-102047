@@ -5,7 +5,7 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
-      "pageId": "inicio_comprador",
+      "pageId": "visao_geral_comprador",
       "actors": [
         "comprador"
       ],
@@ -29,7 +29,94 @@
       "writes": []
     },
     {
-      "pageId": "fornecedores_e_condicoes",
+      "pageId": "fornecedores_condicoes",
+      "actors": [
+        "comprador"
+      ],
+      "reads": [
+        {
+          "entity": "Product",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:cadastrarFornecedor/localizarProduto"
+          ]
+        },
+        {
+          "entity": "PurchaseOrder",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.isOpen",
+            "details.isOverdue",
+            "details.orderTotal",
+            "details.receiptSituation",
+            "details.requiresApproval"
+          ],
+          "from": [
+            "journey:abrirEenviarPedidoCompra/abrirPedidoCompra",
+            "journey:abrirEenviarPedidoCompra/enviarPedidoCompra"
+          ]
+        },
+        {
+          "entity": "Supplier",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:abrirEenviarPedidoCompra/localizarFornecedor",
+            "journey:cadastrarFornecedor/cadastrarFornecedor"
+          ]
+        },
+        {
+          "entity": "SupplierOffering",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "journey:abrirEenviarPedidoCompra/consultarCondicoesFornecimento",
+            "journey:cadastrarFornecedor/registrarCondicaoFornecimento"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "PurchaseOrder",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:abrirEenviarPedidoCompra/abrirPedidoCompra"
+          ]
+        },
+        {
+          "entity": "PurchaseOrder",
+          "operation": "transition",
+          "transitionRef": "sendPurchaseOrder",
+          "from": [
+            "journey:abrirEenviarPedidoCompra/enviarPedidoCompra"
+          ]
+        },
+        {
+          "entity": "Supplier",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:cadastrarFornecedor/cadastrarFornecedor"
+          ]
+        },
+        {
+          "entity": "SupplierOffering",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:cadastrarFornecedor/registrarCondicaoFornecimento"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "produtos",
       "actors": [
         "comprador"
       ],
@@ -82,7 +169,7 @@
       ]
     },
     {
-      "pageId": "pedidos_de_compra",
+      "pageId": "pedidos_compra",
       "actors": [
         "comprador"
       ],
@@ -142,59 +229,7 @@
       ]
     },
     {
-      "pageId": "gestao_pedidos_compras",
-      "actors": [
-        "gerenteCompras"
-      ],
-      "reads": [
-        {
-          "entity": "PurchaseOrder",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [
-            "details.isOpen",
-            "details.isOverdue",
-            "details.orderTotal",
-            "details.receiptSituation",
-            "details.requiresApproval"
-          ],
-          "from": [
-            "journey:acompanharIndicadoresDeCompras/consultarPedidosDeCompra",
-            "journey:acompanharIndicadoresDeCompras/inspecionarIndicadoresDePedidos",
-            "journey:decidirPedidoAcimaDoLimite/inspecionarPedidoCompra",
-            "journey:decidirPedidoAcimaDoLimite/localizarPedidoPendente",
-            "journey:decidirPedidoAcimaDoLimite/registrarDecisaoDoPedido"
-          ]
-        },
-        {
-          "entity": "PurchaseOrderDashboard",
-          "family": "ddm",
-          "scope": "organization",
-          "derived": [
-            "details.openPurchaseOrdersCount",
-            "details.overduePurchaseOrdersCount",
-            "details.totalPurchasedAmount",
-            "groupKey",
-            "period"
-          ],
-          "from": [
-            "organism:summary"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "PurchaseOrder",
-          "operation": "transition",
-          "transitionRef": "decidePurchaseOrder",
-          "from": [
-            "journey:decidirPedidoAcimaDoLimite/registrarDecisaoDoPedido"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "recebimentos",
+      "pageId": "recebimentos_de_pedidos",
       "actors": [
         "almoxarife"
       ],
@@ -237,10 +272,87 @@
           ]
         }
       ]
+    },
+    {
+      "pageId": "painel_pedidos_compra",
+      "actors": [
+        "gerenteCompras"
+      ],
+      "reads": [
+        {
+          "entity": "PurchaseOrder",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.isOpen",
+            "details.isOverdue",
+            "details.orderTotal",
+            "details.receiptSituation",
+            "details.requiresApproval"
+          ],
+          "from": [
+            "journey:acompanharIndicadoresDeCompras/consultarPedidosDeCompra",
+            "journey:acompanharIndicadoresDeCompras/inspecionarIndicadoresDePedidos"
+          ]
+        },
+        {
+          "entity": "PurchaseOrderDashboard",
+          "family": "ddm",
+          "scope": "organization",
+          "derived": [
+            "details.openPurchaseOrdersCount",
+            "details.overduePurchaseOrdersCount",
+            "details.totalPurchasedAmount",
+            "groupKey",
+            "period"
+          ],
+          "from": [
+            "organism:summary"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "pedidos_para_aprovacao",
+      "actors": [
+        "gerenteCompras"
+      ],
+      "reads": [
+        {
+          "entity": "PurchaseOrder",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.isOpen",
+            "details.isOverdue",
+            "details.orderTotal",
+            "details.receiptSituation",
+            "details.requiresApproval"
+          ],
+          "from": [
+            "journey:acompanharIndicadoresDeCompras/consultarPedidosDeCompra",
+            "journey:acompanharIndicadoresDeCompras/inspecionarIndicadoresDePedidos",
+            "journey:decidirPedidoAcimaDoLimite/inspecionarPedidoCompra",
+            "journey:decidirPedidoAcimaDoLimite/localizarPedidoPendente",
+            "journey:decidirPedidoAcimaDoLimite/registrarDecisaoDoPedido"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "PurchaseOrder",
+          "operation": "transition",
+          "transitionRef": "decidePurchaseOrder",
+          "from": [
+            "journey:decidirPedidoAcimaDoLimite/registrarDecisaoDoPedido"
+          ]
+        }
+      ]
     }
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-09-21T01:43:31.411Z"
+    "generatedAt": "2026-09-21T17:39:29.104Z"
   }
 }
