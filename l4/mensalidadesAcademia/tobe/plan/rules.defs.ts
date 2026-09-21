@@ -15,7 +15,7 @@ export const mensalidadesAcademiaRules = {
     "matriculaAtivaUnicaPorAluno": "Um aluno pode possuir somente uma matrícula ativa por vez.",
     "mensalidadeUnicaPorMatriculaEcompetencia": "Uma matrícula pode possuir somente uma mensalidade para cada mês de competência.",
     "mensalidadeGeradaParaMatriculaAtiva": "A mensalidade mensal somente pode ser gerada para matrícula ativa, com o valor do plano e vencimento no dia de vencimento do plano correspondente à competência.",
-    "situacaoMensalidadeDerivada": "A mensalidade é paga quando o total de pagamentos alcança o valor da cobrança, vencida quando possui saldo devedor após o vencimento e em aberto nos demais casos.",
+    "situacaoMensalidadeDerivada": "A mensalidade é paga quando o total de pagamentos alcança o valor da cobrança, vencida quando possui saldo devedor a partir do dia seguinte ao vencimento e em aberto nos demais casos.",
     "paymentAmountPositive": "O valor de cada pagamento deve ser positivo.",
     "paymentUpdatesMonthlyFee": "Todo pagamento registrado deve compor o total pago e atualizar o saldo devedor da mensalidade correspondente.",
     "paymentRegularizesStudentWhenApplicable": "O registro de pagamento deve regularizar a situação do aluno quando ele deixar de atender ao critério de bloqueio por mensalidades vencidas.",

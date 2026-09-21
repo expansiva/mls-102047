@@ -5,76 +5,27 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
-      "pageId": "minha_matricula",
-      "actors": [
-        "aluno"
-      ],
-      "reads": [
-        {
-          "entity": "Matricula",
-          "family": "tdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "journey:cancelarPropriaMatricula/cancelarMatricula",
-            "journey:cancelarPropriaMatricula/inspecionarPropriaMatricula",
-            "journey:cancelarPropriaMatricula/localizarPropriaMatricula"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Matricula",
-          "operation": "transition",
-          "transitionRef": "cancelarMatricula",
-          "from": [
-            "journey:cancelarPropriaMatricula/cancelarMatricula"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "inicio_recepcao",
+      "pageId": "atendimento_recepcao",
       "actors": [
         "recepcao"
       ],
       "reads": [
         {
-          "entity": "Mensalidade",
+          "entity": "Aluno",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:matricularAluno/localizarAluno"
+          ]
+        },
+        {
+          "entity": "Matricula",
           "family": "tdm",
           "scope": "organization",
-          "derived": [
-            "details.saldoDevedor",
-            "details.situacao",
-            "details.totalPago"
-          ],
+          "derived": [],
           "from": [
-            "organism:summary"
-          ]
-        }
-      ],
-      "writes": []
-    },
-    {
-      "pageId": "inicio_gerencia",
-      "actors": [
-        "gerencia"
-      ],
-      "reads": [
-        {
-          "entity": "IndicadoresAcademia",
-          "family": "ddm",
-          "scope": "organization",
-          "derived": [
-            "details.quantidadeAlunosAtivos",
-            "details.quantidadeAlunosBloqueados",
-            "details.quantidadeAlunosInadimplentes",
-            "details.totalAReceber",
-            "details.totalRecebido",
-            "period"
-          ],
-          "from": [
-            "organism:summary"
+            "journey:matricularAluno/criarMatricula"
           ]
         },
         {
@@ -87,18 +38,44 @@
             "details.totalPago"
           ],
           "from": [
-            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores",
-            "journey:gerarMensalidadesDoMes/criarMensalidades"
+            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
+            "journey:registrarPagamentoMensalidade/localizarMensalidade"
+          ]
+        },
+        {
+          "entity": "Pagamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:registrarPagamentoMensalidade/registrarPagamento"
+          ]
+        },
+        {
+          "entity": "Plano",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "journey:matricularAluno/localizarPlano"
           ]
         }
       ],
       "writes": [
         {
-          "entity": "Mensalidade",
+          "entity": "Matricula",
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:gerarMensalidadesDoMes/criarMensalidades"
+            "journey:matricularAluno/criarMatricula"
+          ]
+        },
+        {
+          "entity": "Pagamento",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:registrarPagamentoMensalidade/registrarPagamento"
           ]
         }
       ]
@@ -139,98 +116,28 @@
       ]
     },
     {
-      "pageId": "matriculas",
-      "actors": [
-        "recepcao"
-      ],
-      "reads": [
-        {
-          "entity": "Aluno",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:matricularAluno/localizarAluno"
-          ]
-        },
-        {
-          "entity": "Matricula",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:matricularAluno/criarMatricula"
-          ]
-        },
-        {
-          "entity": "Plano",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:matricularAluno/localizarPlano"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Matricula",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:matricularAluno/criarMatricula"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "mensalidades_recepcao",
-      "actors": [
-        "recepcao"
-      ],
-      "reads": [
-        {
-          "entity": "Mensalidade",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [
-            "details.saldoDevedor",
-            "details.situacao",
-            "details.totalPago"
-          ],
-          "from": [
-            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
-            "journey:registrarPagamentoMensalidade/localizarMensalidade"
-          ]
-        },
-        {
-          "entity": "Pagamento",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:registrarPagamentoMensalidade/registrarPagamento"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Pagamento",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:registrarPagamentoMensalidade/registrarPagamento"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "mensalidades_gerencia",
+      "pageId": "controle_financeiro",
       "actors": [
         "gerencia"
       ],
       "reads": [
         {
+          "entity": "IndicadoresAcademia",
+          "family": "ddm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeAlunosAtivos",
+            "details.quantidadeAlunosBloqueados",
+            "details.quantidadeAlunosInadimplentes",
+            "details.totalAReceber",
+            "details.totalRecebido",
+            "period"
+          ],
+          "from": [
+            "organism:highlights"
+          ]
+        },
+        {
           "entity": "Mensalidade",
           "family": "tdm",
           "scope": "organization",
@@ -240,6 +147,7 @@
             "details.totalPago"
           ],
           "from": [
+            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores",
             "journey:gerarMensalidadesDoMes/criarMensalidades"
           ]
         }
@@ -251,6 +159,35 @@
           "transitionRef": "",
           "from": [
             "journey:gerarMensalidadesDoMes/criarMensalidades"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "minha_matricula",
+      "actors": [
+        "aluno"
+      ],
+      "reads": [
+        {
+          "entity": "Matricula",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "journey:cancelarPropriaMatricula/cancelarMatricula",
+            "journey:cancelarPropriaMatricula/inspecionarPropriaMatricula",
+            "journey:cancelarPropriaMatricula/localizarPropriaMatricula"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Matricula",
+          "operation": "transition",
+          "transitionRef": "cancelarMatricula",
+          "from": [
+            "journey:cancelarPropriaMatricula/cancelarMatricula"
           ]
         }
       ]
@@ -258,6 +195,6 @@
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-09-21T05:11:19.639Z"
+    "generatedAt": "2026-09-21T05:46:40.036Z"
   }
 }
