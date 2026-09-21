@@ -5,6 +5,35 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
+      "pageId": "minha_matricula",
+      "actors": [
+        "aluno"
+      ],
+      "reads": [
+        {
+          "entity": "Matricula",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "journey:cancelarPropriaMatricula/cancelarMatricula",
+            "journey:cancelarPropriaMatricula/inspecionarPropriaMatricula",
+            "journey:cancelarPropriaMatricula/localizarPropriaMatricula"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Matricula",
+          "operation": "transition",
+          "transitionRef": "cancelarMatricula",
+          "from": [
+            "journey:cancelarPropriaMatricula/cancelarMatricula"
+          ]
+        }
+      ]
+    },
+    {
       "pageId": "inicio_recepcao",
       "actors": [
         "recepcao"
@@ -58,11 +87,21 @@
             "details.totalPago"
           ],
           "from": [
-            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores"
+            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores",
+            "journey:gerarMensalidadesDoMes/criarMensalidades"
           ]
         }
       ],
-      "writes": []
+      "writes": [
+        {
+          "entity": "Mensalidade",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:gerarMensalidadesDoMes/criarMensalidades"
+          ]
+        }
+      ]
     },
     {
       "pageId": "planos",
@@ -215,47 +254,10 @@
           ]
         }
       ]
-    },
-    {
-      "pageId": "inicio_aluno",
-      "actors": [
-        "aluno"
-      ],
-      "reads": [],
-      "writes": []
-    },
-    {
-      "pageId": "minha_matricula",
-      "actors": [
-        "aluno"
-      ],
-      "reads": [
-        {
-          "entity": "Matricula",
-          "family": "tdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "journey:cancelarPropriaMatricula/cancelarMatricula",
-            "journey:cancelarPropriaMatricula/inspecionarPropriaMatricula",
-            "journey:cancelarPropriaMatricula/localizarPropriaMatricula"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Matricula",
-          "operation": "transition",
-          "transitionRef": "cancelarMatricula",
-          "from": [
-            "journey:cancelarPropriaMatricula/cancelarMatricula"
-          ]
-        }
-      ]
     }
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-09-21T02:51:26.325Z"
+    "generatedAt": "2026-09-21T05:11:19.639Z"
   }
 }
