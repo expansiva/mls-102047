@@ -7,32 +7,22 @@ export const comprasJourneyIndex = {
   "moduleName": "compras",
   "journeys": [
     {
-      "journeyId": "cadastrarFornecedorEcatalogo",
+      "journeyId": "cadastrarFornecedor",
       "actorRef": "comprador",
-      "title": "Cadastrar fornecedor e produtos fornecidos"
+      "title": "Cadastrar fornecedor e condições de fornecimento"
     },
     {
-      "journeyId": "atualizarPrecoCombinado",
+      "journeyId": "abrirEenviarPedidoCompra",
       "actorRef": "comprador",
-      "title": "Atualizar preço combinado de fornecedor"
+      "title": "Abrir e enviar pedido de compra"
     },
     {
-      "journeyId": "enviarPedidoDentroDoLimite",
-      "actorRef": "comprador",
-      "title": "Criar e enviar pedido de compra dentro do limite"
-    },
-    {
-      "journeyId": "submeterPedidoParaAprovacao",
-      "actorRef": "comprador",
-      "title": "Submeter pedido de compra acima do limite"
-    },
-    {
-      "journeyId": "decidirPedidoSubmetido",
+      "journeyId": "decidirPedidoAcimaDoLimite",
       "actorRef": "gerenteCompras",
-      "title": "Decidir pedido de compra submetido"
+      "title": "Decidir pedido de compra acima do limite"
     },
     {
-      "journeyId": "registrarRecebimentoDePedido",
+      "journeyId": "registrarRecebimentoPedido",
       "actorRef": "almoxarife",
       "title": "Registrar recebimento total ou parcial"
     },

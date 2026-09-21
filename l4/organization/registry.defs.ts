@@ -140,6 +140,99 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-18T06:37:29.224Z"
     },
     {
+      "moduleName": "compras",
+      "actors": [
+        {
+          "actorId": "comprador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerenteCompras",
+          "kind": "internal"
+        },
+        {
+          "actorId": "almoxarife",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Company",
+          "roleTag": "compras.Supplier",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "compras.SupplierContact",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "Product",
+          "roleTag": "compras.Product",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "compras.Buyer",
+          "namespace": "compras"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Supplier",
+          "kind": "role",
+          "mdmSubtype": "Company",
+          "class": "mdm"
+        },
+        {
+          "entityId": "SupplierContact",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Product",
+          "kind": "role",
+          "mdmSubtype": "Product",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Buyer",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "SupplierOffering",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "PurchaseOrder",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "GoodsReceipt",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PurchaseOrderDashboard",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "recebimentoRegistrado",
+          "on": "GoodsReceipt.create"
+        }
+      ],
+      "updatedAt": "2026-09-18T08:58:16.019Z"
+    },
+    {
       "moduleName": "controleEstoque",
       "actors": [
         {

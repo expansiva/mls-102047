@@ -8,36 +8,36 @@ export const acompanharIndicadoresDeComprasJourney = {
   "business": {
     "actorRef": "gerenteCompras",
     "title": "Acompanhar indicadores de compras",
-    "goal": "Visualizar pedidos em aberto, pedidos atrasados e o total comprado por fornecedor no mês.",
+    "goal": "Monitorar pedidos em aberto, atrasados e o total comprado por fornecedor no mês.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarPedidosParaIndicadores",
+        "stepId": "consultarPedidosDeCompra",
         "kind": "locate",
         "entity": "PurchaseOrder",
-        "title": "Localizar pedidos para indicadores",
-        "description": "Acessa os pedidos de compra da organização para compor os indicadores."
+        "title": "Consultar pedidos de compra",
+        "description": "Acessa os pedidos de compra da organização para acompanhamento."
       },
       {
         "stepId": "inspecionarIndicadoresDePedidos",
         "kind": "inspect",
         "entity": "PurchaseOrder",
-        "title": "Consultar indicadores de pedidos",
-        "description": "Consulta o painel com pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês."
+        "title": "Inspecionar indicadores de pedidos",
+        "description": "Consulta os indicadores de pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês."
       }
     ],
     "outcome": {
-      "statement": "O gerente tem uma visão atual dos pedidos pendentes, atrasados e dos valores comprados por fornecedor no mês.",
+      "statement": "O gerente visualiza a situação dos pedidos e os totais mensais por fornecedor.",
       "evidence": [
-        "Indicador de pedidos em aberto exibido.",
-        "Indicador de pedidos atrasados exibido.",
-        "Total comprado por fornecedor no mês exibido."
+        "Indicadores mostram a quantidade de pedidos em aberto.",
+        "Indicadores mostram os pedidos atrasados.",
+        "Indicadores mostram o total comprado por fornecedor no mês."
       ]
     }
   },
-  "businessHash": "sha256:7b765c7fbd8ef8c79ec1de7c2e06f8286c059fcc0ead9728936e39879060af77"
+  "businessHash": "sha256:91da38701e1e4dd1b473f295c84c90923fec4178aceb0867df08d59b819372b5"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AcompanharIndicadoresDeComprasJourneyType = typeof acompanharIndicadoresDeComprasJourney;

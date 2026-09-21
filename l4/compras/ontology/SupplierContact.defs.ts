@@ -7,39 +7,37 @@ export const comprasEntitySupplierContact = {
   "moduleName": "compras",
   "entityId": "SupplierContact",
   "title": "Contato do fornecedor",
-  "description": "Canal de contato mestre vinculado ao fornecedor para a comunicação comercial.",
-  "displayField": "details.contactChannel.value",
+  "description": "Canal de contato vinculado ao fornecedor para comunicação comercial.",
+  "displayField": "details.identification.name",
   "relationships": {
     "supplier": {
       "relationshipId": "supplierHasContact",
       "to": "Supplier",
       "via": "HasContact",
       "cardinality": "N:1",
-      "title": "Fornecedor do contato",
-      "description": "Fornecedor ao qual este canal de contato mestre está vinculado para comunicação comercial.",
+      "title": "Fornecedor",
+      "description": "Fornecedor ao qual este canal de contato está vinculado para comunicação comercial.",
       "direction": "to",
-      "required": "sempre",
-      "role": "canal de contato comercial"
+      "role": "HasContact"
     }
   },
   "capabilities": {
-    "read.byId": "Lê o canal de contato mestre pelo identificador para exibir os dados de comunicação do fornecedor às telas de compras.",
-    "locate.byName": "Localiza canais de contato pelo nome para o comprador encontrar um contato já cadastrado.",
-    "locate.byContact": "Localiza um canal pelo telefone, e-mail ou identificador de comunicação para evitar duplicidade e apoiar o contato comercial.",
-    "register.createOrAttach": "Cria ou vincula o canal de contato mestre ao papel de contato de fornecedor ao cadastrá-lo para um fornecedor.",
-    "edit.platformFields": "Atualiza o nome e os dados de plataforma do canal de contato usado na comunicação comercial do fornecedor.",
-    "inactivate": "Inativa um canal de contato que não deve mais ser usado na comunicação com o fornecedor.",
-    "link": "Vincula este canal de contato mestre ao fornecedor por meio do relacionamento HasContact.",
-    "unlink": "Encerra o vínculo deste canal com o fornecedor, preservando o histórico do relacionamento.",
-    "listLinks": "Lista os fornecedores vinculados a este canal e a vigência dos vínculos para consulta comercial.",
-    "comment": "Registra observações sobre o uso do canal de contato na comunicação com o fornecedor.",
-    "audit": "Consulta quem alterou o canal de contato e quando para rastreabilidade administrativa."
+    "read.byId": "Lê o canal de contato pelo identificador do MDM para exibi-lo ao consultar um fornecedor, usado por comprador e gerente de compras.",
+    "locate.byName": "Localiza canais de contato pelo nome reconhecível no cadastro mestre para o comprador encontrar um contato comercial.",
+    "locate.byContact": "Localiza o canal pelo telefone, e-mail ou outro valor de contato para identificar o fornecedor relacionado, usado pelo comprador.",
+    "register.createOrAttach": "Cria ou vincula ao módulo o canal de contato já existente no MDM durante o cadastro do fornecedor, usado pelo comprador.",
+    "edit.platformFields": "Atualiza nome, valor, tipo e verificação do canal de contato no cadastro mestre, usado pelo comprador.",
+    "inactivate": "Inativa ou reativa um canal que não deve mais ser usado na comunicação comercial, usado pelo comprador.",
+    "link": "Vincula este canal de contato ao fornecedor por meio do relacionamento HasContact, usado pelo comprador.",
+    "unlink": "Encerra o vínculo deste canal com o fornecedor preservando o histórico do relacionamento, usado pelo comprador.",
+    "listLinks": "Lista o fornecedor vinculado e a vigência do vínculo deste canal de contato, usado pelo comprador.",
+    "audit": "Consulta quem alterou o canal de contato e quando, usado pelo gerente de compras para acompanhamento."
   },
   "rules": [
     "rule-foreign-namespace-refused",
+    "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
-    "rule-contact-value-unique-per-type",
-    "rule-delete-blocked-by-relationships"
+    "rule-contact-value-unique-per-type"
   ],
   "kind": "role",
   "subtype": "ContactChannel",
@@ -63,7 +61,7 @@ export const comprasEntitySupplierContact = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre do canal de contato usado na comunicação comercial com fornecedores.",
+        "description": "Documento do cadastro mestre do canal de contato usado na comunicação comercial com fornecedores.",
         "fields": {
           "identification": {
             "type": "object",
@@ -78,10 +76,10 @@ export const comprasEntitySupplierContact = {
                   {
                     "value": "ContactChannel",
                     "title": "Canal de contato",
-                    "description": "Canal de contato mestre."
+                    "description": "Canal de contato cadastrado no MDM."
                   }
                 ],
-                "description": "Subtipo de registro mestre, mantido como canal de contato.",
+                "description": "Subtipo do cadastro mestre, mantido como canal de contato.",
                 "title": "Subtipo",
                 "maxLength": 0,
                 "min": 0,
@@ -92,8 +90,8 @@ export const comprasEntitySupplierContact = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nome pelo qual o canal de contato é reconhecido na comunicação comercial do fornecedor.",
-                "title": "Nome do contato",
+                "description": "Nome pelo qual o comprador reconhece o canal de contato do fornecedor.",
+                "title": "Nome",
                 "min": 0,
                 "max": 0
               },
@@ -106,26 +104,26 @@ export const comprasEntitySupplierContact = {
                   {
                     "value": "Active",
                     "title": "Ativo",
-                    "description": "Canal de contato disponível para uso."
+                    "description": "Canal disponível para uso."
                   },
                   {
                     "value": "Inactive",
                     "title": "Inativo",
-                    "description": "Canal de contato fora de uso."
+                    "description": "Canal fora de uso."
                   },
                   {
                     "value": "Merged",
                     "title": "Mesclado",
-                    "description": "Canal de contato mesclado a outro registro mestre."
+                    "description": "Canal incorporado a outro cadastro."
                   },
                   {
                     "value": "Blocked",
                     "title": "Bloqueado",
-                    "description": "Canal de contato bloqueado pela organização."
+                    "description": "Canal impedido de uso."
                   }
                 ],
                 "title": "Situação",
-                "description": "Situação operacional do registro mestre do canal de contato.",
+                "description": "Situação do canal de contato no cadastro mestre.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -135,21 +133,21 @@ export const comprasEntitySupplierContact = {
                 "required": true,
                 "indexed": true,
                 "pattern": "^[A-Z]{2}$",
-                "maxLength": 0,
+                "maxLength": 2,
                 "default": "US",
-                "description": "Código do país aplicável ao canal de contato do fornecedor.",
+                "description": "País ao qual se aplicam as regras do canal de contato.",
                 "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação do canal de contato mestre neste módulo."
+            "description": "Dados de identificação e situação do canal de contato no cadastro mestre."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados base compartilhados do registro mestre; nenhum dado adicional é usado para este papel."
+            "description": "Dados comuns do cadastro mestre do canal de contato."
           },
           "contactChannel": {
             "type": "object",
@@ -162,41 +160,41 @@ export const comprasEntitySupplierContact = {
                   {
                     "value": "Phone",
                     "title": "Telefone",
-                    "description": "Telefone comercial."
+                    "description": "Número de telefone."
                   },
                   {
                     "value": "Email",
                     "title": "E-mail",
-                    "description": "E-mail comercial."
+                    "description": "Endereço de e-mail."
                   },
                   {
                     "value": "WhatsApp",
                     "title": "WhatsApp",
-                    "description": "Canal comercial do WhatsApp."
+                    "description": "Contato por WhatsApp."
                   },
                   {
                     "value": "Instagram",
                     "title": "Instagram",
-                    "description": "Perfil comercial no Instagram."
+                    "description": "Perfil do Instagram."
                   },
                   {
                     "value": "LinkedIn",
                     "title": "LinkedIn",
-                    "description": "Perfil comercial no LinkedIn."
+                    "description": "Perfil do LinkedIn."
                   },
                   {
                     "value": "X",
                     "title": "X",
-                    "description": "Perfil comercial no X."
+                    "description": "Perfil na rede X."
                   },
                   {
                     "value": "Other",
                     "title": "Outro",
-                    "description": "Outro canal de comunicação comercial."
+                    "description": "Outro meio de contato."
                   }
                 ],
                 "title": "Tipo de contato",
-                "description": "Tipo do canal de comunicação comercial do fornecedor.",
+                "description": "Tipo do canal usado para comunicação comercial com o fornecedor.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -228,13 +226,13 @@ export const comprasEntitySupplierContact = {
                 "max": 0
               }
             },
-            "description": "Dados do canal usado para a comunicação comercial com o fornecedor."
+            "description": "Meio de contato comercial que pode ser vinculado a um fornecedor."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização, disponíveis para leitura e declarados no registro organizacional."
+            "description": "Dados promovidos pela organização, somente para leitura pelo módulo de compras."
           },
           "compras": {
             "type": "object",

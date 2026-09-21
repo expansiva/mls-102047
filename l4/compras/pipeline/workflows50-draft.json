@@ -3,60 +3,52 @@
   "moduleName": "compras",
   "processes": [
     {
-      "processId": "submeterEDecidirPedidoDeCompra",
-      "title": "Submeter e decidir pedido de compra",
-      "description": "Orquestra o encaminhamento de pedidos acima do limite pelo comprador e a decisão do gerente de compras.",
+      "processId": "aprovarPedidoAcimaDoLimite",
+      "title": "Aprovação de pedido de compra acima do limite",
+      "description": "Orquestra o encaminhamento de pedidos de compra acima do limite para a decisão do gerente de compras.",
       "trigger": {
         "kind": "manual",
         "actorRef": "comprador"
       },
       "tasks": [
         {
-          "taskId": "submeterPedido",
+          "taskId": "enviarEEncaminharPedido",
           "kind": "human",
           "actorRef": "comprador",
-          "journeyRef": "submeterPedidoParaAprovacao",
+          "journeyRef": "abrirEenviarPedidoCompra",
           "next": [
-            "decidirPedido"
+            "decidirPedidoEncaminhado"
           ],
-          "description": "O comprador abre o pedido acima do limite, submete-o para aprovação e o encaminha ao gerente de compras."
+          "description": "O comprador envia o pedido de compra e encaminha ao gerente de compras aqueles cujo valor exige aprovação."
         },
         {
-          "taskId": "decidirPedido",
+          "taskId": "decidirPedidoEncaminhado",
           "kind": "human",
           "actorRef": "gerenteCompras",
-          "journeyRef": "decidirPedidoSubmetido",
+          "journeyRef": "decidirPedidoAcimaDoLimite",
           "next": [],
-          "description": "O gerente de compras analisa o pedido submetido e registra sua aprovação ou rejeição."
+          "description": "O gerente de compras avalia o pedido encaminhado e registra sua aprovação ou rejeição."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "cadastrarFornecedorEcatalogo",
+      "journeyId": "cadastrarFornecedor",
       "inProcess": false
     },
     {
-      "journeyId": "atualizarPrecoCombinado",
-      "inProcess": false
-    },
-    {
-      "journeyId": "enviarPedidoDentroDoLimite",
-      "inProcess": false
-    },
-    {
-      "journeyId": "submeterPedidoParaAprovacao",
+      "journeyId": "abrirEenviarPedidoCompra",
       "inProcess": true,
-      "processId": "submeterEDecidirPedidoDeCompra"
+      "processId": "aprovarPedidoAcimaDoLimite"
     },
     {
-      "journeyId": "decidirPedidoSubmetido",
+      "journeyId": "decidirPedidoAcimaDoLimite",
       "inProcess": true,
-      "processId": "submeterEDecidirPedidoDeCompra"
+      "processId": "aprovarPedidoAcimaDoLimite"
     },
     {
-      "journeyId": "registrarRecebimentoDePedido",
+      "journeyId": "registrarRecebimentoPedido",
       "inProcess": false
     },
     {
