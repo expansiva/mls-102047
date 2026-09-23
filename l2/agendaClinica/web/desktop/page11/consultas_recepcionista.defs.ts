@@ -2,54 +2,113 @@ export const descriptions = [
   {
     "organismId": "organism.list.1",
     "kind": "list",
-    "description": "Apresenta as consultas da clínica para que a recepcionista localize consultas e verifique os horários registrados, inclusive ao informar os critérios disponíveis de consulta: identificação, paciente, profissional, data e horário e situação. Permite ajustar esses critérios e a página da consulta e executar a busca. Enquanto a busca estiver em andamento, comunica o carregamento; se não houver resultados, informa que nenhuma consulta foi encontrada; se falhar, apresenta o erro da consulta e permite tentar novamente. Os controles de busca e os resultados devem ser utilizáveis por teclado, com rótulos acessíveis e anúncio das mudanças de carregamento, vazio e erro.",
+    "description": "Permite à recepcionista consultar as consultas da clínica e os horários registrados, usando os critérios disponíveis de identificação, paciente, profissional, data e situação para localizar registros. A consulta informa horários ocupados do profissional e apoia a identificação de disponibilidade antes do agendamento. Durante a busca, comunica carregamento; se não houver resultados, informa que nenhuma consulta foi encontrada; se ocorrer falha, apresenta o erro de forma acessível. Os critérios, resultados e mudança de página devem ter rótulos compreensíveis e operar por teclado e tecnologias assistivas.",
     "contentRef": "base",
     "capabilityRefs": [
+      "listConsulta",
       "setListConsultaId",
       "setListConsultaPatientId",
       "setListConsultaProfessionalId",
       "setListConsultaScheduledAt",
       "setListConsultaStatus",
-      "setListConsultaPage",
-      "listConsulta"
+      "setListConsultaPage"
     ],
-    "moleculeRecommendations": []
+    "moleculeRecommendations": [
+      {
+        "groupId": "groupViewTable",
+        "candidates": [
+          "groupviewtable--ml-advanced-data-table",
+          "groupviewtable--ml-data-table"
+        ],
+        "reason": "A capacidade consulta uma coleção de consultas com critérios e página opcional."
+      },
+      {
+        "groupId": "groupEnterDatetime",
+        "candidates": [
+          "groupenterdatetime--ml-datetime-picker",
+          "groupenterdatetime--ml-enter-datetime-masked-input"
+        ],
+        "reason": "Há um critério editável de data e horário da consulta."
+      }
+    ]
   },
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Exibe os dados da consulta localizada para conferência antes de uma ação contextual: paciente, profissional, data, horário e situação disponíveis no resultado da consulta. A recepcionista pode percorrer e selecionar uma consulta para conferir suas informações e preparar a confirmação por telefone ou o registro de falta. Durante o carregamento, informa que os dados estão sendo consultados; quando não houver consulta correspondente, apresenta o estado vazio; em erro, comunica a falha e oferece nova tentativa. A seleção e a leitura dos dados devem funcionar por teclado e expor nome e estado acessíveis.",
+    "description": "Apresenta os dados da consulta localizada para conferência, incluindo paciente, profissional, data e horário. A recepcionista pode informar a identificação da consulta e executar a consulta do registro. Durante o carregamento, anuncia que os dados estão sendo buscados; se nenhum registro corresponder, informa a ausência de consulta; se houver falha, comunica o erro de modo acessível. Os dados devem permanecer identificados, legíveis e navegáveis por teclado e leitores de tela.",
     "contentRef": "base",
     "capabilityRefs": [
-      "listConsulta",
-      "setConfirmarConsultaId",
-      "setRegistrarFaltaId"
+      "setListConsultaId",
+      "listConsulta"
     ],
-    "moleculeRecommendations": []
+    "moleculeRecommendations": [
+      {
+        "groupId": "groupViewCard",
+        "candidates": [
+          "groupviewcard--ml-view-card-horizontal"
+        ],
+        "reason": "A consulta de um registro fornece informações essenciais para conferência."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-contextual-feedback"
+        ],
+        "reason": "A consulta possui estados de carregamento, ausência de resultado e erro que exigem retorno acessível."
+      }
+    ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Permite marcar uma consulta selecionando paciente e profissional, informando data e horário e a situação exigida para o novo registro. Disponibiliza a consulta de pacientes e profissionais para apoiar as escolhas e a consulta de horários já registrados do profissional na data pretendida, de modo que o agendamento só seja concluído se o horário estiver disponível. Valida os campos obrigatórios antes do envio. Durante o envio, informa o processamento e evita reenvio; ao concluir, comunica o resultado e atualiza a lista de consultas; se houver erro, mostra a falha associada ao agendamento e preserva os dados para correção e nova tentativa. Rótulos, obrigatoriedade, erros e resultado devem ser acessíveis a teclado e leitores de tela.",
+    "description": "Permite marcar uma consulta selecionando paciente e profissional e informando data, horário e situação. A recepcionista pode consultar pacientes e profissionais para realizar as seleções. O agendamento só é concluído se não houver outra consulta do mesmo profissional no mesmo horário. Campos obrigatórios, rótulos e erros devem ser anunciados e operáveis por teclado. Durante o envio, comunica processamento e evita novo envio; após sucesso, informa a criação da consulta; em caso de erro, preserva os dados informados e comunica o problema para correção e nova tentativa.",
     "contentRef": "createConsulta",
     "capabilityRefs": [
+      "listPaciente",
+      "listProfissional",
       "setCreateConsultaPatientId",
       "setCreateConsultaProfessionalId",
       "setCreateConsultaScheduledAt",
       "setCreateConsultaStatus",
-      "listPaciente",
-      "listProfissional",
-      "setListConsultaProfessionalId",
-      "setListConsultaScheduledAt",
-      "listConsulta",
       "createConsulta"
     ],
-    "moleculeRecommendations": []
+    "moleculeRecommendations": [
+      {
+        "groupId": "groupSelectOne",
+        "candidates": [
+          "groupselectone--ml-combobox",
+          "groupselectone--ml-select-one-autocomplete"
+        ],
+        "reason": "Paciente e profissional são escolhas únicas obtidas por consultas disponíveis."
+      },
+      {
+        "groupId": "groupEnterDatetime",
+        "candidates": [
+          "groupenterdatetime--ml-datetime-picker"
+        ],
+        "reason": "O agendamento exige informar data e horário."
+      },
+      {
+        "groupId": "groupTriggerAction",
+        "candidates": [
+          "grouptriggeraction--ml-button-standard"
+        ],
+        "reason": "O comando cria a consulta com os valores obrigatórios informados."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-contextual-feedback",
+          "groupnotifyuser--ml-toast-notification"
+        ],
+        "reason": "O envio possui estados de sucesso e erro que precisam ser comunicados."
+      }
+    ]
   },
   {
     "organismId": "organism.actions.1",
     "kind": "actions",
-    "description": "Oferece ações contextuais para a consulta selecionada: registrar que ela foi confirmada por telefone ou registrar a falta do paciente. As ações exigem uma consulta selecionada e devem deixar claro qual atualização será executada antes da confirmação. Enquanto cada ação estiver sendo processada, comunica o andamento e evita repetição; ao concluir, informa o resultado e atualiza as consultas; em falha, apresenta o erro correspondente e permite nova tentativa. Ambas as ações devem estar disponíveis por teclado, ter nome acessível e anunciar resultados e erros.",
+    "description": "Permite atuar sobre uma consulta selecionada para registrar a confirmação feita por telefone ou a falta do paciente. Cada ação exige que a consulta esteja identificada e deve deixar claro qual atualização será aplicada. Durante a execução, comunica processamento e impede repetição acidental. Após êxito, informa a atualização e a consulta é atualizada na listagem; em erro, apresenta uma mensagem acessível e permite nova tentativa. As ações devem ter nomes claros, foco visível e operação por teclado.",
     "contentRef": "base",
     "capabilityRefs": [
       "setConfirmarConsultaId",
@@ -57,7 +116,24 @@ export const descriptions = [
       "setRegistrarFaltaId",
       "registrarFalta"
     ],
-    "moleculeRecommendations": []
+    "moleculeRecommendations": [
+      {
+        "groupId": "groupTriggerAction",
+        "candidates": [
+          "grouptriggeraction--ml-button-standard",
+          "grouptriggeraction--ml-kebab-action-trigger"
+        ],
+        "reason": "Há comandos contextuais para confirmar a consulta ou registrar falta, ambos com estado de execução."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-toast-notification",
+          "groupnotifyuser--ml-alert-modal"
+        ],
+        "reason": "Os comandos expõem estados de sucesso e erro que precisam de retorno ao usuário."
+      }
+    ]
   }
 ] as const;
 
@@ -76,7 +152,19 @@ export const pipeline = [
     "categoryRef": "calendarScheduling",
     "skills": [
       "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
-      "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md"
+      "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md",
+      "_102040_/l2/molecules/groupviewtable/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts",
+      "_102040_/l2/molecules/groupenterdatetime/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupEnterDateTime/usage.ts",
+      "_102040_/l2/molecules/groupviewcard/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts",
+      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
+      "_102040_/l2/molecules/groupselectone/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupSelectOne/usage.ts",
+      "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts"
     ]
   }
 ] as const;

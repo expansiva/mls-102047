@@ -2,18 +2,40 @@ export const descriptions = [
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Prioriza a leitura do cadastro de recepcionista em espaço reduzido, mostrando as informações disponíveis dos registros de Profissional e Recepcionista. Comunica por texto acessível o carregamento, a ausência de dados e falhas de consulta. A consulta e a leitura por tecnologias assistivas permanecem disponíveis.",
+    "description": "Prioriza a leitura do cadastro próprio de recepcionista retornado pelas consultas de Profissional e Recepcionista, mantendo os dados essenciais facilmente percorríveis em espaço reduzido. Ao consultar, informa carregamento; se não houver dados, apresenta estado vazio; se ocorrer falha, comunica o erro de forma clara. A leitura por tecnologia assistiva e a navegação por toque devem manter acesso às mesmas informações e mensagens.",
     "contentRef": "base",
     "capabilityRefs": [
       "listProfissional",
       "listRecepcionista"
     ],
-    "moleculeRecommendations": []
+    "moleculeRecommendations": [
+      {
+        "groupId": "groupViewData",
+        "candidates": [
+          "groupviewdata--ml-vertical-record-list"
+        ],
+        "reason": "As consultas retornam coleções de registros de Profissional e Recepcionista que precisam ser apresentadas para consulta em tela estreita."
+      },
+      {
+        "groupId": "groupShowProgress",
+        "candidates": [
+          "groupshowprogress--ml-indeterminate-spinner"
+        ],
+        "reason": "As consultas possuem estado de carregamento com duração não informada."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-notify-banner"
+        ],
+        "reason": "As consultas possuem estado de erro que deve ser comunicado de modo acessível."
+      }
+    ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Permite preencher e atualizar por toque os dados de atuação na clínica para Profissional e Recepcionista, priorizando os campos obrigatórios de nome, país e ocupação e mantendo disponíveis documento, consentimento de privacidade e os demais dados previstos. Rótulos, obrigatoriedade, erros de validação e mensagens de envio devem ser acessíveis. Comunica processamento, sucesso com atualização da consulta e erros para correção e nova tentativa, sem remover as capacidades de criação e atualização.",
+    "description": "Permite, por toque e com leitura priorizada, criar ou atualizar os dados de atuação na clínica dos registros de Profissional e Recepcionista. Mantém a entrada dos dados declarados de identificação, incluindo nome, tipo e número de documento e código do país, a ocupação e o consentimento de privacidade do Profissional, e os dados disponíveis de base, pessoa, gerais e de agenda clínica do Recepcionista. Os requisitos obrigatórios e erros são anunciados de forma acessível, o envio mostra processamento, sucesso ou falha, e a pessoa pode corrigir os dados e tentar novamente sem perder as capacidades de criação ou atualização.",
     "contentRef": "base",
     "capabilityRefs": [
       "createProfissional",
@@ -21,7 +43,43 @@ export const descriptions = [
       "updateProfissional",
       "updateRecepcionista"
     ],
-    "moleculeRecommendations": []
+    "moleculeRecommendations": [
+      {
+        "groupId": "groupEnterText",
+        "candidates": [
+          "groupentertext--ml-enter-text"
+        ],
+        "reason": "Há entrada de texto para nome, documento, código do país, ocupação e demais dados editáveis declarados."
+      },
+      {
+        "groupId": "groupEnterBoolean",
+        "candidates": [
+          "groupenterboolean--ml-checkbox-preference"
+        ],
+        "reason": "O consentimento de privacidade do Profissional é uma decisão booleana."
+      },
+      {
+        "groupId": "groupTriggerAction",
+        "candidates": [
+          "grouptriggeraction--ml-button-standard"
+        ],
+        "reason": "As operações de criação e atualização exigem um comando explícito de envio por toque."
+      },
+      {
+        "groupId": "groupShowProgress",
+        "candidates": [
+          "groupshowprogress--ml-linear-progress"
+        ],
+        "reason": "As operações de criação e atualização possuem estado de processamento."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-contextual-feedback"
+        ],
+        "reason": "As operações de criação e atualização possuem resultados e erros que devem orientar o preenchimento e o envio."
+      }
+    ]
   }
 ] as const;
 
@@ -40,7 +98,19 @@ export const pipeline = [
     "categoryRef": "entityRecordManagement",
     "skills": [
       "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
-      "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md"
+      "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md",
+      "_102040_/l2/molecules/groupviewdata/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
+      "_102040_/l2/molecules/groupshowprogress/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts",
+      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
+      "_102040_/l2/molecules/groupentertext/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
+      "_102040_/l2/molecules/groupenterboolean/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupEnterBoolean/usage.ts",
+      "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts"
     ]
   }
 ] as const;

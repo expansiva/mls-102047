@@ -2,42 +2,70 @@ export const descriptions = [
   {
     "organismId": "organism.list.1",
     "kind": "list",
-    "description": "Permite à recepcionista localizar, por toque e leitura priorizada, o médico ou terapeuta para o agendamento usando os dados de identificação disponíveis na consulta de profissionais. Os resultados retornados permanecem acessíveis em espaço reduzido, e os dados de consulta podem ser ajustados e reenviados. Durante o carregamento, comunica que a busca está em andamento; sem resultados, informa que nenhum profissional foi encontrado; em falha, apresenta o erro e mantém a opção de tentar novamente. Campos e comandos têm rótulos acessíveis, indicação de obrigatoriedade quando aplicável e anúncios de status para tecnologias assistivas.",
+    "description": "Objetivo: permitir que a recepcionista localize, por toque, o médico ou terapeuta para marcar a consulta. Informações: em espaço reduzido, o nome do profissional é priorizado, seguido do status de identificação. Ações: informar nome e status como critérios, consultar profissionais, tocar para selecionar o identificador do profissional e mudar a página da consulta quando necessário; essas capacidades são mantidas no celular. Durante o carregamento, anuncia que a busca está em andamento e não trata a lista como concluída. Sem resultados, informa que nenhum profissional corresponde aos critérios. Em caso de erro, comunica a falha e permite revisar os critérios e consultar novamente. Os alvos de toque são claros; leitores de tela recebem nome, status, carregamento, resultado, vazio e erro.",
     "contentRef": "listProfissional",
     "capabilityRefs": [
       "listProfissional",
-      "setListProfissionalId",
-      "setListProfissionalDetails",
-      "setListProfissionalDetailsIdentification",
-      "setListProfissionalDetailsIdentificationSubtype",
       "setListProfissionalDetailsIdentificationName",
       "setListProfissionalDetailsIdentificationStatus",
-      "setListProfissionalDetailsIdentificationDocType",
-      "setListProfissionalDetailsIdentificationDocId",
-      "setListProfissionalDetailsIdentificationCountryCode",
-      "setListProfissionalPage"
+      "setListProfissionalPage",
+      "setListProfissionalId"
     ],
-    "moleculeRecommendations": []
+    "moleculeRecommendations": [
+      {
+        "groupId": "groupSearchContent",
+        "candidates": [
+          "groupsearchcontent--ml-search-bar"
+        ],
+        "reason": "O nome de identificação continua sendo o critério textual principal para localizar profissionais."
+      },
+      {
+        "groupId": "groupSelectOne",
+        "candidates": [
+          "groupselectone--ml-segmented-control"
+        ],
+        "reason": "O status de identificação é uma escolha única que pode ser acessada de forma compacta por toque."
+      },
+      {
+        "groupId": "groupViewData",
+        "candidates": [
+          "groupviewdata--ml-vertical-record-list"
+        ],
+        "reason": "A coleção retornada por listProfissional pode priorizar nome e status em uma leitura vertical adequada à tela estreita."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-contextual-feedback"
+        ],
+        "reason": "Carregamento, vazio e erro de listProfissional precisam permanecer perceptíveis no fluxo de leitura móvel."
+      }
+    ]
   },
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Prioriza a conferência, em tela menor, do nome e dos dados de identificação do profissional retornado, ajudando a confirmar quem realizará a consulta. Mantém a consulta de profissionais e seus dados de entrada disponíveis por toque. Comunica carregamento, ausência de profissional e erro de consulta de forma clara, com nova tentativa possível. A identificação e os controles possuem rótulos acessíveis e mensagens de status anunciadas a tecnologias assistivas.",
+    "description": "Objetivo: permitir que a recepcionista confira o nome do profissional escolhido no celular antes de seguir com o agendamento. Informações: prioriza o nome e apresenta o status de identificação retornado por listProfissional. Ação: leitura para confirmar a identidade do profissional, preservando a consulta que fornece esse contexto. Durante o carregamento, informa que os dados ainda não estão prontos. Se não houver profissional retornado ou selecionado, deixa claro que não há nome para conferir. Em caso de erro, comunica a falha de forma perceptível. O conteúdo tem ordem de leitura simples, texto acessível e anúncio quando o profissional em contexto é atualizado.",
     "contentRef": "listProfissional",
     "capabilityRefs": [
-      "listProfissional",
-      "setListProfissionalId",
-      "setListProfissionalDetails",
-      "setListProfissionalDetailsIdentification",
-      "setListProfissionalDetailsIdentificationSubtype",
-      "setListProfissionalDetailsIdentificationName",
-      "setListProfissionalDetailsIdentificationStatus",
-      "setListProfissionalDetailsIdentificationDocType",
-      "setListProfissionalDetailsIdentificationDocId",
-      "setListProfissionalDetailsIdentificationCountryCode",
-      "setListProfissionalPage"
+      "listProfissional"
     ],
-    "moleculeRecommendations": []
+    "moleculeRecommendations": [
+      {
+        "groupId": "groupViewCard",
+        "candidates": [
+          "groupviewcard--ml-profile-card"
+        ],
+        "reason": "A visualização resumida de perfil destaca o nome do profissional para conferência a partir de listProfissional."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-contextual-feedback"
+        ],
+        "reason": "Os estados de carregamento, vazio e erro da consulta devem ser informados durante a conferência móvel."
+      }
+    ]
   }
 ] as const;
 
@@ -56,7 +84,17 @@ export const pipeline = [
     "categoryRef": "calendarScheduling",
     "skills": [
       "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
-      "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md"
+      "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md",
+      "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
+      "_102040_/l2/molecules/groupselectone/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupSelectOne/usage.ts",
+      "_102040_/l2/molecules/groupviewdata/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
+      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
+      "_102040_/l2/molecules/groupviewcard/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts"
     ]
   }
 ] as const;
