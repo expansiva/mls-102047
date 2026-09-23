@@ -2,7 +2,7 @@ export const descriptions = [
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Apresenta ao profissional os dados disponíveis do seu cadastro profissional. Enquanto a consulta estiver em carregamento, informa o andamento; se não houver dados, comunica o estado vazio; se falhar, apresenta o erro da consulta de forma compreensível. O conteúdo deve poder ser lido por tecnologias assistivas, incluindo identificação clara do estado e dos dados exibidos.",
+    "description": "Apresenta ao profissional os dados disponíveis do seu próprio cadastro. Enquanto a consulta estiver em carregamento, comunica que os dados estão sendo obtidos; quando não houver dados, informa a ausência de cadastro; e, se a consulta falhar, apresenta a falha de forma compreensível. As informações devem ser legíveis por tecnologias assistivas, com estados anunciados e conteúdo identificado.",
     "contentRef": "base",
     "capabilityRefs": [
       "listProfissional"
@@ -13,30 +13,30 @@ export const descriptions = [
         "candidates": [
           "groupviewdata--ml-vertical-record-list"
         ],
-        "reason": "A consulta retorna uma coleção de registros profissionais e a lista empilhada permite leitura dos dados retornados."
+        "reason": "A consulta retorna uma coleção e pode apresentar os dados disponíveis de modo escaneável."
+      },
+      {
+        "groupId": "groupShowProgress",
+        "candidates": [
+          "groupshowprogress--ml-indeterminate-spinner"
+        ],
+        "reason": "A consulta possui estado de carregamento sem duração conhecida."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-notify-banner"
+        ],
+        "reason": "A consulta possui estado de erro e ausência de dados que precisam ser comunicados."
       }
     ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Permite criar ou atualizar os dados de atuação clínica do profissional. Coleta os campos disponíveis de identificação, nome, tipo e número de documento, código do país, dados base, dados pessoais, ocupação, consentimento de privacidade, dados gerais e dados da agenda clínica. Nome, código do país, ocupação e detalhes são obrigatórios quando aplicáveis ao comando. A pessoa usuária pode alterar os valores e enviar a criação ou atualização; durante o envio, o estado de processamento é comunicado, e sucessos ou erros são informados de modo acessível. Após criar ou atualizar, a consulta de profissionais é atualizada.",
-    "contentRef": "base",
+    "description": "Permite atualizar os dados de atuação clínica do profissional no cadastro selecionado. Mantém campos editáveis para detalhes, identificação, nome, tipo e número de documento, código do país, dados base, dados de pessoa, ocupação, consentimento de privacidade, dados gerais e dados de agenda clínica; nome, código do país, ocupação e detalhes são obrigatórios. A identificação do registro é somente leitura. A pessoa revisa os dados e confirma a atualização; durante o envio, o comando informa processamento e evita novo envio. Em caso de sucesso ou erro, o resultado é comunicado de forma acessível, incluindo mensagens associadas aos campos quando aplicável.",
+    "contentRef": "updateProfissional",
     "capabilityRefs": [
-      "setCreateProfissionalDetails",
-      "setCreateProfissionalDetailsIdentification",
-      "setCreateProfissionalDetailsIdentificationName",
-      "setCreateProfissionalDetailsIdentificationDocType",
-      "setCreateProfissionalDetailsIdentificationDocId",
-      "setCreateProfissionalDetailsIdentificationCountryCode",
-      "setCreateProfissionalDetailsBase",
-      "setCreateProfissionalDetailsPerson",
-      "setCreateProfissionalDetailsPersonOccupation",
-      "setCreateProfissionalDetailsPersonPrivacyConsent",
-      "setCreateProfissionalDetailsGeneral",
-      "setCreateProfissionalDetailsAgendaClinica",
-      "createProfissional",
-      "setUpdateProfissionalId",
       "setUpdateProfissionalDetails",
       "setUpdateProfissionalDetailsIdentification",
       "setUpdateProfissionalDetailsIdentificationName",
@@ -49,8 +49,7 @@ export const descriptions = [
       "setUpdateProfissionalDetailsPersonPrivacyConsent",
       "setUpdateProfissionalDetailsGeneral",
       "setUpdateProfissionalDetailsAgendaClinica",
-      "updateProfissional",
-      "listProfissional"
+      "updateProfissional"
     ],
     "moleculeRecommendations": [
       {
@@ -58,7 +57,7 @@ export const descriptions = [
         "candidates": [
           "groupentertext--ml-enter-text"
         ],
-        "reason": "Há entradas textuais editáveis para identificação, documentos e demais dados do profissional."
+        "reason": "Há entrada textual editável, incluindo nome e identificadores documentais."
       },
       {
         "groupId": "groupEnterBoolean",
@@ -72,7 +71,7 @@ export const descriptions = [
         "candidates": [
           "grouptriggeraction--ml-button-standard"
         ],
-        "reason": "Os comandos de criar e atualizar precisam de uma ação explícita de envio."
+        "reason": "A atualização é um comando confirmado pelo profissional."
       },
       {
         "groupId": "groupNotifyUser",
@@ -80,14 +79,14 @@ export const descriptions = [
           "groupnotifyuser--ml-contextual-feedback",
           "groupnotifyuser--ml-toast-notification"
         ],
-        "reason": "Os comandos possuem estados de sucesso e erro que devem ser comunicados."
+        "reason": "O formulário precisa comunicar validação, falha e confirmação do comando."
       },
       {
         "groupId": "groupShowProgress",
         "candidates": [
-          "groupshowprogress--ml-indeterminate-spinner"
+          "groupshowprogress--ml-linear-progress"
         ],
-        "reason": "As operações de criação e atualização expõem estados de carregamento sem duração conhecida."
+        "reason": "O comando de atualização possui estado de carregamento."
       }
     ]
   }
@@ -100,7 +99,8 @@ export const pipeline = [
     "defPath": "l2/agendaClinica/web/desktop/page11/dados_profissional.defs.ts",
     "outputPath": "l2/agendaClinica/web/desktop/page11/dados_profissional.ts",
     "dependsFiles": [
-      "l2/agendaClinica/web/shared/dados_profissional.ts"
+      "l2/agendaClinica/web/shared/dados_profissional.ts",
+      "l2/designSystem.ts"
     ],
     "dependsOn": [
       "dados_profissional__l2_shared"
@@ -111,16 +111,16 @@ export const pipeline = [
       "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md",
       "_102040_/l2/molecules/groupviewdata/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
+      "_102040_/l2/molecules/groupshowprogress/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts",
+      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
       "_102040_/l2/molecules/groupentertext/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
       "_102040_/l2/molecules/groupenterboolean/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupEnterBoolean/usage.ts",
       "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts",
-      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
-      "_102040_/l2/molecules/groupshowprogress/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts"
+      "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts"
     ]
   }
 ] as const;

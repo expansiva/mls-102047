@@ -1,5 +1,5 @@
 export const definition = {
-  "schemaVersion": "2026-09-21-agent-defs-l2-shared-v1",
+  "schemaVersion": "2026-09-23-agent-defs-l2-shared-v2",
   "moduleName": "agendaClinica",
   "pageId": "pacientes",
   "pageName": "Pacientes",
@@ -61,8 +61,8 @@ export const definition = {
       "defaultValue": "base",
       "valueSet": [
         "base",
-        "listPaciente",
-        "listProfissional",
+        "localizarPaciente",
+        "localizarProfissional",
         "createConsulta",
         "createPaciente"
       ]
@@ -749,8 +749,7 @@ export const definition = {
       "statusStateKey": "ui.pacientes.createConsulta.status",
       "errorStateKey": "ui.pacientes.createConsulta.error",
       "refreshActionIds": [
-        "listConsulta",
-        "listPaciente"
+        "listConsulta"
       ]
     },
     {
@@ -1283,13 +1282,13 @@ export const definition = {
       "preconditions": []
     },
     {
-      "value": "listPaciente",
+      "value": "localizarPaciente",
       "kind": "detail",
       "actionId": "listPaciente",
       "preconditions": []
     },
     {
-      "value": "listProfissional",
+      "value": "localizarProfissional",
       "kind": "detail",
       "actionId": "listProfissional",
       "preconditions": []
@@ -1401,13 +1400,19 @@ export const definition = {
   ]
 } as const;
 
-export const pipeline = {
-  "id": "pacientes__l2_shared",
-  "type": "l2_shared",
-  "defPath": "l2/agendaClinica/web/shared/pacientes.defs.ts",
-  "outputPath": "l2/agendaClinica/web/shared/pacientes.ts",
-  "dependsFiles": [
-    "l2/agendaClinica/web/contracts/pacientes.defs.ts"
-  ],
-  "dependsOn": []
-} as const;
+export const pipeline = [
+  {
+    "id": "pacientes__l2_shared",
+    "type": "l2_shared",
+    "defPath": "l2/agendaClinica/web/shared/pacientes.defs.ts",
+    "outputPath": "l2/agendaClinica/web/shared/pacientes.ts",
+    "dependsFiles": [
+      "l2/agendaClinica/web/contracts/pacientes.defs.ts",
+      "_102029_.d.ts"
+    ],
+    "dependsOn": [],
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2SharedTs.ts"
+    ]
+  }
+] as const;

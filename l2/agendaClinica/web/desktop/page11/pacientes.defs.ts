@@ -2,58 +2,75 @@ export const descriptions = [
   {
     "organismId": "organism.list.1",
     "kind": "list",
-    "description": "Permite à recepcionista localizar pacientes já associados à clínica e consultar os resultados retornados. A busca usa os dados de paciente disponíveis, incluindo identificação e nome, para apoiar a prevenção de cadastros duplicados. Enquanto a consulta estiver em andamento, informa o carregamento; se não houver resultados, comunica que nenhum paciente foi encontrado; se falhar, apresenta o erro e oferece nova tentativa. A coleção e seus controles de consulta devem ter rótulos acessíveis e resultados compreensíveis por tecnologias assistivas.",
-    "contentRef": "listPaciente",
+    "description": "Permite à recepcionista localizar pacientes já associados à clínica, evitando duplicidade e apoiando o agendamento. A consulta pode usar nome e dados de identificação disponíveis, apresenta os registros encontrados e permite alterar a página da consulta. Informa carregamento, ausência de resultados e falha na consulta, oferecendo nova tentativa de modo acessível; campos, resultados e mudanças de estado têm rótulos compreensíveis e uso por teclado e leitor de tela.",
+    "contentRef": "localizarPaciente",
     "capabilityRefs": [
       "listPaciente",
       "setListPacienteDetailsIdentificationName",
+      "setListPacienteDetailsIdentificationDocType",
+      "setListPacienteDetailsIdentificationDocId",
+      "setListPacienteDetailsIdentificationCountryCode",
       "setListPacientePage"
     ],
     "moleculeRecommendations": [
-      {
-        "groupId": "groupViewTable",
-        "candidates": [
-          "groupviewtable--ml-data-table"
-        ],
-        "reason": "A consulta retorna uma coleção de pacientes que precisa ser lida e percorrida."
-      },
       {
         "groupId": "groupSearchContent",
         "candidates": [
           "groupsearchcontent--ml-search-filters"
         ],
-        "reason": "A localização de paciente pode usar o nome informado na consulta para refinar os resultados."
+        "reason": "A consulta de pacientes pode ser refinada pelos dados de identificação disponíveis."
+      },
+      {
+        "groupId": "groupViewData",
+        "candidates": [
+          "groupviewdata--ml-vertical-record-list"
+        ],
+        "reason": "listPaciente retorna uma coleção de registros de pacientes para consulta e escolha."
       }
     ]
   },
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Apresenta os dados disponíveis do paciente localizado para que a recepcionista confira nome e identificação antes de continuar o atendimento. Indica carregamento durante a consulta, ausência de dados quando não houver paciente retornado e erro com opção de tentar consultar novamente. As informações devem ter rótulos claros e uma leitura acessível da identificação e dos demais dados retornados.",
-    "contentRef": "listPaciente",
+    "description": "Exibe os pacientes retornados pela localização para que a recepcionista confira nome e dados cadastrais antes de prosseguir. Durante a consulta, comunica carregamento; quando não há correspondência, orienta a refinar a busca; e, em caso de falha, informa o erro e permite tentar novamente. Os dados e os controles de busca são anunciados de forma clara para tecnologias assistivas e permanecem utilizáveis por teclado.",
+    "contentRef": "localizarPaciente",
     "capabilityRefs": [
-      "listPaciente"
+      "listPaciente",
+      "setListPacienteDetailsIdentificationName",
+      "setListPacienteDetailsIdentificationDocType",
+      "setListPacienteDetailsIdentificationDocId",
+      "setListPacienteDetailsIdentificationCountryCode"
     ],
     "moleculeRecommendations": [
       {
-        "groupId": "groupViewCard",
+        "groupId": "groupViewData",
         "candidates": [
-          "groupviewcard--ml-profile-card"
+          "groupviewdata--ml-vertical-record-list"
         ],
-        "reason": "Os dados de um paciente podem ser apresentados como um resumo individual, com nome e identificação em destaque."
+        "reason": "listPaciente fornece registros localizados para a conferência dos dados cadastrais."
+      },
+      {
+        "groupId": "groupSearchContent",
+        "candidates": [
+          "groupsearchcontent--ml-search-bar"
+        ],
+        "reason": "Os dados de identificação podem ser usados para refinar a localização do paciente."
       }
     ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Coleta os dados cadastrais necessários para criar ou associar um paciente à clínica: nome e código do país são obrigatórios; tipo e número do documento, apelidos e observações podem ser informados quando aplicáveis. Os campos devem expor rótulos, obrigatoriedade e instruções de forma acessível. Durante o envio, preserva os valores e informa que o cadastro está sendo processado; em caso de erro, comunica a falha associada ao envio para correção e nova submissão.",
+    "description": "Coleta os dados para registrar ou associar um novo paciente à clínica. Nome e código do país são obrigatórios; tipo e número de documento, apelidos e observações podem ser preenchidos quando aplicável. Indica obrigatoriedade e problemas de preenchimento em texto associado aos respectivos campos. Durante o envio, preserva o conteúdo informado e comunica processamento, êxito ou falha para que a recepcionista possa corrigir os dados e reenviar, com suporte a teclado e leitor de tela.",
     "contentRef": "createPaciente",
     "capabilityRefs": [
+      "setCreatePacienteDetails",
+      "setCreatePacienteDetailsIdentification",
       "setCreatePacienteDetailsIdentificationName",
-      "setCreatePacienteDetailsIdentificationCountryCode",
       "setCreatePacienteDetailsIdentificationDocType",
       "setCreatePacienteDetailsIdentificationDocId",
+      "setCreatePacienteDetailsIdentificationCountryCode",
+      "setCreatePacienteDetailsBase",
       "setCreatePacienteDetailsBaseAliases",
       "setCreatePacienteDetailsBaseNotes",
       "createPaciente"
@@ -66,28 +83,35 @@ export const descriptions = [
           "groupentertext--ml-tag-input",
           "groupentertext--ml-multiline-text"
         ],
-        "reason": "O cadastro recebe nome, dados textuais de identificação, apelidos e observações."
+        "reason": "O cadastro recebe nome, dados documentais, apelidos e observações textuais."
       },
       {
         "groupId": "groupTriggerAction",
         "candidates": [
           "grouptriggeraction--ml-button-standard"
         ],
-        "reason": "O cadastro precisa de uma ação explícita para executar createPaciente."
+        "reason": "createPaciente é o comando explícito para registrar ou associar o paciente."
+      },
+      {
+        "groupId": "groupShowProgress",
+        "candidates": [
+          "groupshowprogress--ml-linear-progress"
+        ],
+        "reason": "O comando de cadastro possui estado de carregamento durante o envio."
       },
       {
         "groupId": "groupNotifyUser",
         "candidates": [
           "groupnotifyuser--ml-contextual-feedback"
         ],
-        "reason": "O envio possui estados de erro que devem ser comunicados junto ao cadastro."
+        "reason": "O comando expõe resultado e erro que requerem retorno acessível."
       }
     ]
   },
   {
     "organismId": "organism.actions.1",
     "kind": "actions",
-    "description": "Disponibiliza a ação para registrar o paciente informado e confirmar que ele poderá receber consultas. A ação só deve ser executada com os dados obrigatórios preenchidos; informa o processamento, o resultado concluído ou o erro retornado, permitindo nova tentativa. O comando deve ter nome acessível, estado desabilitado ou de carregamento quando apropriado e feedback anunciado de forma acessível.",
+    "description": "Disponibiliza a conclusão do registro do paciente após o preenchimento cadastral, tornando-o disponível para receber consultas. A ação informa quando está sendo processada, confirma a conclusão e comunica erros sem impedir a correção dos dados e uma nova tentativa. O comando e seus estados possuem nome e mensagens acessíveis para tecnologias assistivas.",
     "contentRef": "createPaciente",
     "capabilityRefs": [
       "createPaciente"
@@ -98,22 +122,22 @@ export const descriptions = [
         "candidates": [
           "grouptriggeraction--ml-button-standard"
         ],
-        "reason": "Há um comando de criação de paciente a ser disparado pela recepcionista."
-      },
-      {
-        "groupId": "groupNotifyUser",
-        "candidates": [
-          "groupnotifyuser--ml-toast-notification",
-          "groupnotifyuser--ml-contextual-feedback"
-        ],
-        "reason": "O comando possui estados de sucesso e erro que requerem retorno à usuária."
+        "reason": "createPaciente é o comando que efetiva o registro ou a associação do paciente."
       },
       {
         "groupId": "groupShowProgress",
         "candidates": [
           "groupshowprogress--ml-indeterminate-spinner"
         ],
-        "reason": "O estado de envio do comando tem duração não especificada."
+        "reason": "createPaciente possui estado de carregamento, sem duração declarada."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-toast-notification",
+          "groupnotifyuser--ml-alert-modal"
+        ],
+        "reason": "createPaciente fornece resultado e erro para confirmação ou tratamento pela recepcionista."
       }
     ]
   }
@@ -126,7 +150,8 @@ export const pipeline = [
     "defPath": "l2/agendaClinica/web/desktop/page11/pacientes.defs.ts",
     "outputPath": "l2/agendaClinica/web/desktop/page11/pacientes.ts",
     "dependsFiles": [
-      "l2/agendaClinica/web/shared/pacientes.ts"
+      "l2/agendaClinica/web/shared/pacientes.ts",
+      "l2/designSystem.ts"
     ],
     "dependsOn": [
       "pacientes__l2_shared"
@@ -135,20 +160,18 @@ export const pipeline = [
     "skills": [
       "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
       "_102020_/l2/agentDefsL2/skills/pageCategories/masterDataManagement.md",
-      "_102040_/l2/molecules/groupviewtable/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts",
       "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
-      "_102040_/l2/molecules/groupviewcard/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts",
+      "_102040_/l2/molecules/groupviewdata/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
       "_102040_/l2/molecules/groupentertext/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
       "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts",
-      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
       "_102040_/l2/molecules/groupshowprogress/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts"
+      "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts",
+      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts"
     ]
   }
 ] as const;

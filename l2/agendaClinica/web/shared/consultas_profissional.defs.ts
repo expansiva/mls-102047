@@ -1,5 +1,5 @@
 export const definition = {
-  "schemaVersion": "2026-09-21-agent-defs-l2-shared-v1",
+  "schemaVersion": "2026-09-23-agent-defs-l2-shared-v2",
   "moduleName": "agendaClinica",
   "pageId": "consultas_profissional",
   "pageName": "Agenda do dia",
@@ -416,13 +416,19 @@ export const definition = {
   ]
 } as const;
 
-export const pipeline = {
-  "id": "consultas_profissional__l2_shared",
-  "type": "l2_shared",
-  "defPath": "l2/agendaClinica/web/shared/consultas_profissional.defs.ts",
-  "outputPath": "l2/agendaClinica/web/shared/consultas_profissional.ts",
-  "dependsFiles": [
-    "l2/agendaClinica/web/contracts/consultas_profissional.defs.ts"
-  ],
-  "dependsOn": []
-} as const;
+export const pipeline = [
+  {
+    "id": "consultas_profissional__l2_shared",
+    "type": "l2_shared",
+    "defPath": "l2/agendaClinica/web/shared/consultas_profissional.defs.ts",
+    "outputPath": "l2/agendaClinica/web/shared/consultas_profissional.ts",
+    "dependsFiles": [
+      "l2/agendaClinica/web/contracts/consultas_profissional.defs.ts",
+      "_102029_.d.ts"
+    ],
+    "dependsOn": [],
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2SharedTs.ts"
+    ]
+  }
+] as const;
