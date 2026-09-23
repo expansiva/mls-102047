@@ -1,6 +1,64 @@
 export const descriptions = [
-  "No celular, Pacientes prioriza a identificação do paciente e o avanço seguro da recepcionista entre busca, cadastro e agendamento, sem retirar nenhuma tarefa. Ela pesquisa pacientes usando identificador, detalhes de identificação, subtipo, nome, situação, tipo e número de documento, código do país e página, e lê os resultados devolvidos para reconhecer quem já está cadastrado. Pode abrir o contexto de novo paciente e informar detalhes, identificação, nome e código do país obrigatórios, além de tipo e número de documento, dados-base, aliases obrigatórios e observações quando cabíveis, para registrar ou associar o paciente à clínica. Toques acionam buscas, escolhas e registro; controles têm área de toque adequada, nomes acessíveis, ordem de foco coerente e obrigatoriedade e erros compreensíveis para leitor de tela. O processamento, a ausência de pacientes e falhas de busca ou cadastro são comunicados sem ocultar os dados já inseridos, permitindo corrigir e tentar de novo.",
-  "Para marcar a consulta no espaço reduzido, a recepcionista primeiro encontra o paciente e o profissional. A pesquisa de profissionais conserva identificador, detalhes de identificação, subtipo, nome, situação, documento, código do país e página, e seus resultados permitem a seleção informada. Ela consulta as consultas existentes com identificador, paciente, profissional, data e hora agendada, situação e página para avaliar a disponibilidade do profissional. Em seguida, preenche paciente, profissional, data e hora e situação obrigatórios e confirma a criação da consulta, que só é concluída se o horário estiver disponível. O resultado confirma o agendamento; processamento e erro de criação são anunciados de forma acessível, e os valores continuam disponíveis para revisão e novo envio. Os contextos de localizar paciente, localizar profissional, criar paciente e criar consulta permanecem distinguíveis por leitura e por interação por toque."
+  {
+    "organismId": "organism.list.1",
+    "kind": "list",
+    "description": "Permite à recepcionista localizar pacientes já cadastrados para confirmar se podem ser usados no atendimento e evitar duplicidade. Prioriza a leitura dos critérios e dos resultados disponíveis em espaço reduzido, mantendo a consulta e a mudança de página por toque e teclado. Comunica carregamento, ausência de resultados e falha na consulta, com alternativa para tentar novamente e mensagens acessíveis a tecnologias assistivas.",
+    "contentRef": "localizarPaciente",
+    "capabilityRefs": [
+      "listPaciente",
+      "setListPacienteId",
+      "setListPacienteDetailsIdentificationName",
+      "setListPacienteDetailsIdentificationDocType",
+      "setListPacienteDetailsIdentificationDocId",
+      "setListPacienteDetailsIdentificationCountryCode",
+      "setListPacientePage"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.detail.1",
+    "kind": "detail",
+    "description": "Permite conferir os dados de identificação disponíveis do paciente localizado, priorizando nome e dados retornados para leitura em tela menor. Mantém a consulta e a alteração de critérios por toque e teclado; informa carregamento, ausência de paciente correspondente e falha, com possibilidade de nova consulta. As informações e mensagens permanecem acessíveis para leitores de tela.",
+    "contentRef": "localizarPaciente",
+    "capabilityRefs": [
+      "listPaciente",
+      "setListPacienteId",
+      "setListPacienteDetailsIdentificationName",
+      "setListPacienteDetailsIdentificationDocType",
+      "setListPacienteDetailsIdentificationDocId",
+      "setListPacienteDetailsIdentificationCountryCode"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.form.1",
+    "kind": "form",
+    "description": "Coleta os dados do novo paciente para associá-lo à clínica, com prioridade para os obrigatórios: dados cadastrais, nome e código do país. Mantém disponíveis os campos opcionais de documento, aliases e observações, com interação por toque e teclado. Indica obrigatoriedade e erros de validação, preserva valores durante o envio e informa processamento, sucesso ou falha de modo acessível.",
+    "contentRef": "createPaciente",
+    "capabilityRefs": [
+      "setCreatePacienteDetails",
+      "setCreatePacienteDetailsIdentification",
+      "setCreatePacienteDetailsIdentificationName",
+      "setCreatePacienteDetailsIdentificationDocType",
+      "setCreatePacienteDetailsIdentificationDocId",
+      "setCreatePacienteDetailsIdentificationCountryCode",
+      "setCreatePacienteDetailsBase",
+      "setCreatePacienteDetailsBaseAliases",
+      "setCreatePacienteDetailsBaseNotes",
+      "createPaciente"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.actions.1",
+    "kind": "actions",
+    "description": "Oferece a ação de registrar o paciente após o preenchimento dos dados, tornando-o disponível para receber consultas. Em tela menor, mantém o comando claramente identificável e acionável por toque e teclado. Informa envio em andamento, confirma a criação do cadastro e comunica falhas para correção e nova tentativa, com anúncio acessível do estado.",
+    "contentRef": "createPaciente",
+    "capabilityRefs": [
+      "createPaciente"
+    ],
+    "moleculeRecommendations": []
+  }
 ] as const;
 
 export const pipeline = [
@@ -15,6 +73,10 @@ export const pipeline = [
     "dependsOn": [
       "pacientes__l2_shared"
     ],
-    "skills": []
+    "categoryRef": "masterDataManagement",
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/masterDataManagement.md"
+    ]
   }
 ] as const;

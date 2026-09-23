@@ -1,5 +1,28 @@
 export const descriptions = [
-  "A recepcionista consulta e mantém o próprio cadastro de atuação na clínica, reunindo os dados vinculados a Profissional e a Recepcionista. A página apresenta os dados recuperados de ambos os cadastros e permite informar ou corrigir identificação — nome, código do país e, quando aplicável, tipo e número de documento — além de ocupação e consentimento de privacidade do perfil profissional; também permite preencher os dados disponíveis de base, pessoa, gerais e agenda clínica do perfil de recepcionista. Quando já houver registros, a confirmação atualiza os respectivos cadastros; quando não houver registro correspondente, permite criá-lo. A página comunica carregamento durante a consulta ou o salvamento, ausência de dados quando a consulta não retornar cadastro e erro de consulta ou de gravação com a mensagem disponível e uma forma de tentar consultar novamente. Após criar ou atualizar, o conteúdo consultado é renovado para refletir o resultado. Campos obrigatórios são identificados, valores inválidos recebem orientação associada ao campo, o status das operações é anunciado por tecnologias assistivas e todos os controles, inclusive confirmar e tentar novamente, podem ser alcançados e operados por teclado com rótulos compreensíveis."
+  {
+    "organismId": "organism.detail.1",
+    "kind": "detail",
+    "description": "Apresenta o cadastro de recepcionista para consulta, incluindo as informações retornadas dos registros de Profissional e Recepcionista. Enquanto a consulta estiver em carregamento, comunica o progresso; se não houver dados, informa que não há cadastro disponível; e, se ocorrer falha, apresenta o erro de consulta de forma acessível. As informações devem poder ser lidas por tecnologias assistivas.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "listProfissional",
+      "listRecepcionista"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.form.1",
+    "kind": "form",
+    "description": "Permite informar e atualizar os dados de atuação na clínica para os registros de Profissional e Recepcionista, incluindo nome, país, documento quando aplicável, ocupação, consentimento de privacidade e os dados disponíveis de base, pessoa, gerais e agenda clínica. Identifica campos obrigatórios, associa rótulos e mensagens de validação aos campos e permite enviar a criação ou atualização correspondente. Durante o envio, comunica o processamento; após sucesso, atualiza a consulta relacionada; e, em caso de erro, expõe uma mensagem acessível para correção e nova tentativa.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "createProfissional",
+      "createRecepcionista",
+      "updateProfissional",
+      "updateRecepcionista"
+    ],
+    "moleculeRecommendations": []
+  }
 ] as const;
 
 export const pipeline = [
@@ -14,6 +37,10 @@ export const pipeline = [
     "dependsOn": [
       "dados_recepcionista__l2_shared"
     ],
-    "skills": []
+    "categoryRef": "entityRecordManagement",
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md"
+    ]
   }
 ] as const;

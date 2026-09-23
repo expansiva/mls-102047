@@ -61,8 +61,8 @@ export const definition = {
       "defaultValue": "base",
       "valueSet": [
         "base",
-        "localizarPaciente",
-        "localizarProfissional",
+        "listPaciente",
+        "listProfissional",
         "createConsulta",
         "createPaciente"
       ]
@@ -1283,13 +1283,13 @@ export const definition = {
       "preconditions": []
     },
     {
-      "value": "localizarPaciente",
+      "value": "listPaciente",
       "kind": "detail",
       "actionId": "listPaciente",
       "preconditions": []
     },
     {
-      "value": "localizarProfissional",
+      "value": "listProfissional",
       "kind": "detail",
       "actionId": "listProfissional",
       "preconditions": []

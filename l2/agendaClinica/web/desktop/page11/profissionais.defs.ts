@@ -1,9 +1,44 @@
 export const descriptions = [
-  "The receptionist’s objective is to locate an active physician or therapist, confirm that professional’s name, locate the patient who will receive the appointment, inspect appointments already occupying that professional at the intended moment, and register a new appointment only when the same professional has no other appointment at the same time.",
-  "Information available includes professionals and patients identified by name, status, subtype, document type, document identifier, and country code, together with appointments that show identifier, patient, professional, scheduled moment, and appointment status. Longer professional, patient, and appointment collections can be requested a page at a time.",
-  "The receptionist enters professional identification criteria and requests the professional collection, then confirms the chosen name. The receptionist enters patient identification criteria and requests the patient collection. The receptionist enters appointment criteria including identifier, patient, professional, scheduled moment, status, and optional page, then requests occupied appointments. The receptionist then supplies the patient, professional, scheduled moment, and appointment status and registers the appointment; a successful registration refreshes the occupied-appointment collection.",
-  "While the page or a professional, patient, or appointment collection is loading, or while registration is in progress, the receptionist is informed that work is still running and must not treat the view as complete. When a collection returns no matches, an empty outcome is stated so criteria can be revised. When listing or registration fails, including when the professional already has an appointment at that time, the error is stated and the receptionist may retry with the values already entered. Idle and success outcomes stay equally clear so it is obvious when it is safe to continue.",
-  "Keyboard access reaches every criterion, every collection request, paging, and registration. Each value has an accessible name. Changes among idle, loading, empty, success, and error are announced to assistive technology without trapping focus, so a screen-reader user can confirm the professional, inspect occupancy, and complete the same booking."
+  {
+    "organismId": "organism.list.1",
+    "kind": "list",
+    "description": "Permite à recepcionista localizar o médico ou terapeuta para o agendamento, consultando os profissionais conforme os dados de identificação informados. Exibe os resultados retornados pela consulta de profissionais e permite ajustar os dados de consulta disponíveis antes de realizá-la novamente. Durante o carregamento, comunica que a busca está em andamento; quando não houver resultados, informa que nenhum profissional foi encontrado; em falha, apresenta o erro da consulta e mantém a possibilidade de tentar novamente. Os campos e comandos devem ter nomes acessíveis, instruções para preenchimento obrigatório quando aplicável e retorno de status anunciado a tecnologias assistivas.",
+    "contentRef": "listProfissional",
+    "capabilityRefs": [
+      "listProfissional",
+      "setListProfissionalId",
+      "setListProfissionalDetails",
+      "setListProfissionalDetailsIdentification",
+      "setListProfissionalDetailsIdentificationSubtype",
+      "setListProfissionalDetailsIdentificationName",
+      "setListProfissionalDetailsIdentificationStatus",
+      "setListProfissionalDetailsIdentificationDocType",
+      "setListProfissionalDetailsIdentificationDocId",
+      "setListProfissionalDetailsIdentificationCountryCode",
+      "setListProfissionalPage"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.detail.1",
+    "kind": "detail",
+    "description": "Permite conferir o nome e os dados de identificação do profissional retornado pela consulta, para confirmar a pessoa que realizará a consulta. Reflete o carregamento da consulta de profissionais, informa de forma clara quando não houver profissional a apresentar e comunica erros com alternativa de nova consulta. A identificação exibida e os controles de consulta devem possuir rótulos acessíveis e mensagens de status perceptíveis por tecnologias assistivas.",
+    "contentRef": "listProfissional",
+    "capabilityRefs": [
+      "listProfissional",
+      "setListProfissionalId",
+      "setListProfissionalDetails",
+      "setListProfissionalDetailsIdentification",
+      "setListProfissionalDetailsIdentificationSubtype",
+      "setListProfissionalDetailsIdentificationName",
+      "setListProfissionalDetailsIdentificationStatus",
+      "setListProfissionalDetailsIdentificationDocType",
+      "setListProfissionalDetailsIdentificationDocId",
+      "setListProfissionalDetailsIdentificationCountryCode",
+      "setListProfissionalPage"
+    ],
+    "moleculeRecommendations": []
+  }
 ] as const;
 
 export const pipeline = [
@@ -18,6 +53,10 @@ export const pipeline = [
     "dependsOn": [
       "profissionais__l2_shared"
     ],
-    "skills": []
+    "categoryRef": "calendarScheduling",
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md"
+    ]
   }
 ] as const;

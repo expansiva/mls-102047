@@ -1,7 +1,26 @@
 export const descriptions = [
-  "No celular, o profissional prioriza a leitura e a manutenção do próprio cadastro. A experiência torna legíveis os dados já disponíveis e oferece a edição completa dos dados de atuação clínica: identificação, nome, tipo e número de documento, código do país, dados base e pessoais, ocupação, consentimento de privacidade, informações gerais e informações da agenda clínica. O preenchimento deixa explícito que nome, código do país e ocupação são obrigatórios, sem ocultar os dados opcionais nem a capacidade de editá-los.",
-  "Com espaço reduzido, a pessoa consegue avançar pela leitura e pelo preenchimento sem perder as tarefas de consultar o cadastro, criar um cadastro ausente ou atualizar um cadastro existente. Enquanto dados ou envio estão em processamento, há retorno claro de andamento e prevenção de envios duplicados. A ausência de cadastro é explicada e conduz ao preenchimento para criação. Falhas de consulta, criação ou atualização mostram o erro aplicável, mantêm os valores informados e disponibilizam nova tentativa; uma conclusão bem-sucedida atualiza a consulta dos profissionais.",
-  "Os alvos de toque têm identificação inequívoca e espaço suficiente para acionamento. Rótulos, obrigatoriedade, valores de consentimento e erros são comunicados também a leitores de tela. A navegação por teclado externo conserva foco visível e sequência lógica, e atualizações de carregamento, vazio, sucesso e falha são anunciadas sem depender apenas de cor ou movimento."
+  {
+    "organismId": "organism.detail.1",
+    "kind": "detail",
+    "description": "Permite ao profissional consultar, com prioridade de leitura em espaço reduzido, os dados do seu cadastro de profissional retornados pela consulta. Enquanto a consulta estiver carregando, comunica o carregamento; quando não houver dados, informa a ausência de cadastro; e, em caso de erro, apresenta uma mensagem de falha associada à consulta. As informações, estados e mensagens precisam permanecer acessíveis por toque e por tecnologias assistivas.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "listProfissional"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.form.1",
+    "kind": "form",
+    "description": "Permite ao profissional preencher e revisar por toque os dados de atuação clínica em uma ordem de leitura adequada ao espaço reduzido: identificação, nome, tipo e número de documento, código do país, dados base, dados pessoais, ocupação, consentimento de privacidade, dados gerais e dados da agenda clínica, conforme aplicável. Nome, código do país, ocupação e os dados obrigatórios do registro precisam de validação e indicação acessível de campos obrigatórios ou inválidos. A pessoa pode criar o cadastro quando ainda não existir ou atualizar o registro selecionado; durante o envio, o progresso é comunicado, e falhas de criação ou atualização são apresentadas de forma compreensível e associada à ação. Após êxito, a consulta do cadastro é atualizada.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "createProfissional",
+      "updateProfissional",
+      "listProfissional"
+    ],
+    "moleculeRecommendations": []
+  }
 ] as const;
 
 export const pipeline = [
@@ -16,6 +35,10 @@ export const pipeline = [
     "dependsOn": [
       "dados_profissional__l2_shared"
     ],
-    "skills": []
+    "categoryRef": "entityRecordManagement",
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md"
+    ]
   }
 ] as const;

@@ -1,5 +1,28 @@
 export const descriptions = [
-  "No celular, a recepcionista prioriza a leitura do seu cadastro e a atualização dos mesmos dados de atuação na clínica, sem perder nenhuma capacidade disponível no desktop. Os dados de Profissional e Recepcionista são apresentados de modo legível no espaço reduzido, permitindo revisar e editar nome, código do país, tipo e número de documento quando informados, ocupação, consentimento de privacidade e os dados disponíveis de base, pessoa, gerais e agenda clínica. Conforme exista ou não um cadastro para cada vínculo, a confirmação atualiza o registro existente ou cria o registro correspondente. A experiência preserva o que a pessoa já digitou enquanto informa carregamento de consulta ou envio; se não houver dados, explica a ausência de cadastro, e se ocorrer falha, apresenta o erro disponível e permite uma nova consulta. Depois de uma criação ou atualização, os dados são consultados novamente para mostrar o estado atual. A ordem de leitura deixa propósito, dados e confirmação claros em telas estreitas; alvos de toque são utilizáveis, campos obrigatórios e erros são anunciados e associados aos respectivos campos, e todos os controles mantêm nomes acessíveis para leitor de tela e navegação por teclado quando houver."
+  {
+    "organismId": "organism.detail.1",
+    "kind": "detail",
+    "description": "Prioriza a leitura do cadastro de recepcionista em espaço reduzido, mostrando as informações disponíveis dos registros de Profissional e Recepcionista. Comunica por texto acessível o carregamento, a ausência de dados e falhas de consulta. A consulta e a leitura por tecnologias assistivas permanecem disponíveis.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "listProfissional",
+      "listRecepcionista"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.form.1",
+    "kind": "form",
+    "description": "Permite preencher e atualizar por toque os dados de atuação na clínica para Profissional e Recepcionista, priorizando os campos obrigatórios de nome, país e ocupação e mantendo disponíveis documento, consentimento de privacidade e os demais dados previstos. Rótulos, obrigatoriedade, erros de validação e mensagens de envio devem ser acessíveis. Comunica processamento, sucesso com atualização da consulta e erros para correção e nova tentativa, sem remover as capacidades de criação e atualização.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "createProfissional",
+      "createRecepcionista",
+      "updateProfissional",
+      "updateRecepcionista"
+    ],
+    "moleculeRecommendations": []
+  }
 ] as const;
 
 export const pipeline = [
@@ -14,6 +37,10 @@ export const pipeline = [
     "dependsOn": [
       "dados_recepcionista__l2_shared"
     ],
-    "skills": []
+    "categoryRef": "entityRecordManagement",
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md"
+    ]
   }
 ] as const;

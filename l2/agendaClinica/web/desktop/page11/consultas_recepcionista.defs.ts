@@ -1,9 +1,64 @@
 export const descriptions = [
-  "A recepcionista consulta as consultas da clínica para agendar um paciente com um profissional em data e horário disponíveis e, para uma consulta localizada, registrar a confirmação por telefone ou a falta do paciente.",
-  "A consulta informa paciente, profissional, data e horário agendados e situação. A busca de consultas aceita identidade da consulta, paciente, profissional, data e horário, situação e página de resultados. Para localizar pacientes e profissionais durante o agendamento, estão disponíveis os respectivos dados de identificação, incluindo identificação, subtipo, nome, situação, tipo e número de documento e código do país, além da página de resultados.",
-  "A recepcionista pode alterar os critérios e consultar as consultas, abrir e conferir a consulta selecionada, e avançar pelos resultados. Ao agendar, localiza e seleciona paciente e profissional, confere os horários já ocupados do profissional na data pretendida e preenche paciente, profissional, data e horário e situação para registrar a consulta. O agendamento só é concluído quando não existe outra consulta do mesmo profissional naquele horário. Para uma consulta selecionada, pode registrar a confirmação telefônica ou a falta; após cada registro, a relação de consultas é atualizada.",
-  "Durante o carregamento, o andamento da consulta de dados ou do registro é comunicado e a mesma operação não deve ser repetida. Sem consultas para os critérios, é informado que não há resultados. Falhas de consulta ou de registro são apresentadas de forma compreensível, inclusive quando o horário não está disponível, permitindo revisar os critérios ou dados e tentar novamente. O sucesso comunica o registro realizado e reflete a consulta criada ou atualizada.",
-  "A interação é utilizável por teclado e ponteiro. Rótulos e instruções deixam claros os dados de paciente, profissional, data e horário, os campos obrigatórios do agendamento e que confirmação e falta exigem uma consulta selecionada. Tecnologias assistivas recebem atualizações de carregamento, vazio, erro e sucesso, com foco seguindo a sequência de consulta, seleção e ação."
+  {
+    "organismId": "organism.list.1",
+    "kind": "list",
+    "description": "Apresenta as consultas da clínica para que a recepcionista localize consultas e verifique os horários registrados, inclusive ao informar os critérios disponíveis de consulta: identificação, paciente, profissional, data e horário e situação. Permite ajustar esses critérios e a página da consulta e executar a busca. Enquanto a busca estiver em andamento, comunica o carregamento; se não houver resultados, informa que nenhuma consulta foi encontrada; se falhar, apresenta o erro da consulta e permite tentar novamente. Os controles de busca e os resultados devem ser utilizáveis por teclado, com rótulos acessíveis e anúncio das mudanças de carregamento, vazio e erro.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "setListConsultaId",
+      "setListConsultaPatientId",
+      "setListConsultaProfessionalId",
+      "setListConsultaScheduledAt",
+      "setListConsultaStatus",
+      "setListConsultaPage",
+      "listConsulta"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.detail.1",
+    "kind": "detail",
+    "description": "Exibe os dados da consulta localizada para conferência antes de uma ação contextual: paciente, profissional, data, horário e situação disponíveis no resultado da consulta. A recepcionista pode percorrer e selecionar uma consulta para conferir suas informações e preparar a confirmação por telefone ou o registro de falta. Durante o carregamento, informa que os dados estão sendo consultados; quando não houver consulta correspondente, apresenta o estado vazio; em erro, comunica a falha e oferece nova tentativa. A seleção e a leitura dos dados devem funcionar por teclado e expor nome e estado acessíveis.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "listConsulta",
+      "setConfirmarConsultaId",
+      "setRegistrarFaltaId"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.form.1",
+    "kind": "form",
+    "description": "Permite marcar uma consulta selecionando paciente e profissional, informando data e horário e a situação exigida para o novo registro. Disponibiliza a consulta de pacientes e profissionais para apoiar as escolhas e a consulta de horários já registrados do profissional na data pretendida, de modo que o agendamento só seja concluído se o horário estiver disponível. Valida os campos obrigatórios antes do envio. Durante o envio, informa o processamento e evita reenvio; ao concluir, comunica o resultado e atualiza a lista de consultas; se houver erro, mostra a falha associada ao agendamento e preserva os dados para correção e nova tentativa. Rótulos, obrigatoriedade, erros e resultado devem ser acessíveis a teclado e leitores de tela.",
+    "contentRef": "createConsulta",
+    "capabilityRefs": [
+      "setCreateConsultaPatientId",
+      "setCreateConsultaProfessionalId",
+      "setCreateConsultaScheduledAt",
+      "setCreateConsultaStatus",
+      "listPaciente",
+      "listProfissional",
+      "setListConsultaProfessionalId",
+      "setListConsultaScheduledAt",
+      "listConsulta",
+      "createConsulta"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.actions.1",
+    "kind": "actions",
+    "description": "Oferece ações contextuais para a consulta selecionada: registrar que ela foi confirmada por telefone ou registrar a falta do paciente. As ações exigem uma consulta selecionada e devem deixar claro qual atualização será executada antes da confirmação. Enquanto cada ação estiver sendo processada, comunica o andamento e evita repetição; ao concluir, informa o resultado e atualiza as consultas; em falha, apresenta o erro correspondente e permite nova tentativa. Ambas as ações devem estar disponíveis por teclado, ter nome acessível e anunciar resultados e erros.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "setConfirmarConsultaId",
+      "confirmarConsulta",
+      "setRegistrarFaltaId",
+      "registrarFalta"
+    ],
+    "moleculeRecommendations": []
+  }
 ] as const;
 
 export const pipeline = [
@@ -18,6 +73,10 @@ export const pipeline = [
     "dependsOn": [
       "consultas_recepcionista__l2_shared"
     ],
-    "skills": []
+    "categoryRef": "calendarScheduling",
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md"
+    ]
   }
 ] as const;

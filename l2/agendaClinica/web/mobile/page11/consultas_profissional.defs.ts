@@ -1,8 +1,47 @@
 export const descriptions = [
-  "On a handheld device the professional still has a single objective: see only their consultations of the day and record attendance with a note. Constrained space sets reading priority to the next scheduled time, then the patient, then the situation, so they can act on the imminent visit first without losing access to the rest of their own day.",
-  "Touch locates the day with the same consultation identity, patient, professional, scheduled time, situation, and paging criteria, then inspects a consultation and starts registering attendance. They still select the consultation, type the required attendance details, optionally add an attendance note, and confirm the attended change. No capability is removed; they complete the same locate, inspect, and register work through sequential reading and taps instead of scanning many encounters at once.",
-  "After a tap, loading of the day is obvious so they do not confuse a slow retrieve with an empty agenda. An empty day is a brief statement that they have no consultations of their own. List errors and attendance-save errors stay readable in the small space and can be retried. Success of registering attendance is confirmed before they go back to reviewing the day.",
-  "Thumb-reachable controls and a screen reader expose locating, inspecting, and registering attendance. Live updates speak loading, empty, error, and success. When they start or finish recording attendance, focus remains on the consultation they chose so a gesture does not leave them lost."
+  {
+    "organismId": "organism.list.1",
+    "kind": "list",
+    "description": "Prioriza a leitura das próprias consultas do dia em espaço reduzido, mostrando os dados retornados da consulta, incluindo horário e situação disponível, e permitindo tocar ou usar teclado para escolher uma consulta. Durante o carregamento da agenda, comunica o estado; se não houver consultas, informa a ausência de resultados; se a consulta falhar, apresenta o erro associado e permite tentar novamente de forma acessível. Os itens devem ter alvos de toque claros, nomes compreensíveis e suporte a tecnologias assistivas.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "listConsulta"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.detail.1",
+    "kind": "detail",
+    "description": "Exibe os dados da consulta escolhida com prioridade para paciente, horário e situação, para que o profissional os confira antes de registrar o atendimento. Usa os dados da agenda consultada; enquanto eles carregam, comunica o carregamento; sem consultas, não oferece detalhe selecionável; em caso de erro, informa o problema de forma acessível. A troca de consulta e a leitura do detalhe devem funcionar por toque, teclado e tecnologias assistivas.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "listConsulta"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.form.1",
+    "kind": "form",
+    "description": "Em espaço reduzido, permite preencher os detalhes obrigatórios do atendimento e, se necessário, a anotação opcional do profissional para a consulta selecionada; o identificador vem da seleção e não pode ser alterado. Indica obrigatoriedade e valida os dados antes do envio. Durante o registro, comunica o processamento e evita reenvio; se houver erro, apresenta-o sem descartar o preenchimento; após sucesso, confirma o resultado e a agenda é atualizada. Campos, validações e mensagens devem funcionar por toque, teclado e tecnologias assistivas.",
+    "contentRef": "registrarAtendimento",
+    "capabilityRefs": [
+      "setRegistrarAtendimentoId",
+      "setRegistrarAtendimentoDetails",
+      "setRegistrarAtendimentoDetailsAttendanceNote",
+      "registrarAtendimento"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.actions.1",
+    "kind": "actions",
+    "description": "Disponibiliza o comando para marcar como atendida a consulta própria selecionada, após o preenchimento dos detalhes obrigatórios. Mantém o comando indisponível sem consulta selecionada ou sem os detalhes necessários. Ao tocar ou acionar pelo teclado, comunica o andamento, impede envios duplicados, informa eventuais erros e permite nova tentativa; quando concluído, confirma o atendimento e atualiza a agenda. O comando deve ter rótulo claro, alvo de toque adequado e anúncios acessíveis de estado.",
+    "contentRef": "registrarAtendimento",
+    "capabilityRefs": [
+      "registrarAtendimento"
+    ],
+    "moleculeRecommendations": []
+  }
 ] as const;
 
 export const pipeline = [
@@ -17,6 +56,10 @@ export const pipeline = [
     "dependsOn": [
       "consultas_profissional__l2_shared"
     ],
-    "skills": []
+    "categoryRef": "calendarScheduling",
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md"
+    ]
   }
 ] as const;

@@ -1,0 +1,1849 @@
+{
+  "schemaVersion": "2026-09-22-d1-controllers-v1",
+  "project": 102047,
+  "moduleName": "agendaClinica",
+  "llmCalls": 0,
+  "ok": false,
+  "measuredRoutes": 26,
+  "measuredPages": 6,
+  "enumerations": [
+    {
+      "entityId": "Consulta",
+      "path": "status",
+      "values": [
+        "scheduled",
+        "confirmed",
+        "noShow",
+        "attended"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "ContatoPaciente",
+      "path": "details.contactChannel.contactType",
+      "values": [
+        "Phone"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Paciente",
+      "path": "details.identification.docType",
+      "values": [
+        "SSN",
+        "EIN",
+        "Passport",
+        "DriversLicense",
+        "NationalId",
+        "CPF",
+        "CNPJ",
+        "VAT",
+        "Other"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Paciente",
+      "path": "details.identification.status",
+      "values": [
+        "Active",
+        "Inactive",
+        "Merged",
+        "Blocked"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Paciente",
+      "path": "details.identification.subtype",
+      "values": [
+        "Person"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Profissional",
+      "path": "details.identification.docType",
+      "values": [
+        "SSN",
+        "EIN",
+        "Passport",
+        "DriversLicense",
+        "NationalId",
+        "CPF",
+        "CNPJ",
+        "VAT",
+        "Other"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Profissional",
+      "path": "details.identification.status",
+      "values": [
+        "Active",
+        "Inactive",
+        "Merged",
+        "Blocked"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Profissional",
+      "path": "details.identification.subtype",
+      "values": [
+        "Person"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Recepcionista",
+      "path": "details.identification.docType",
+      "values": [
+        "CPF",
+        "Passport",
+        "NationalId",
+        "Other"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Recepcionista",
+      "path": "details.identification.status",
+      "values": [
+        "Active",
+        "Inactive",
+        "Merged",
+        "Blocked"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Recepcionista",
+      "path": "details.identification.subtype",
+      "values": [
+        "Person"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Controller projection has no values slot. Enum values stay on the domain draft."
+    }
+  ],
+  "controllers": [
+    {
+      "pageId": "consultas_profissional",
+      "defPath": "l1/agendaClinica/layer_1_external/adapters/http/controllers/consultas_profissional.defs.ts",
+      "handlers": [
+        {
+          "route": "agendaClinica.consultas_profissional.cmdRegistrarAtendimento",
+          "pageId": "consultas_profissional",
+          "kind": "command",
+          "usecaseId": "registrarAtendimento",
+          "functionName": "registrarAtendimento",
+          "contractPath": "l2/agendaClinica/web/contracts/consultas_profissional.defs.ts",
+          "inputSymbol": "RegistrarAtendimentoInput",
+          "outputSymbol": "RegistrarAtendimentoOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "profissionalAgendaDiaria"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "profissionalAgendaDiaria",
+              "actorRef": "profissional",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fullRecord",
+              "allowedFields": [],
+              "anchorEntity": "Paciente",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "ACCESS_ANCHOR",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.consultas_profissional.qryListConsulta",
+          "pageId": "consultas_profissional",
+          "kind": "query",
+          "usecaseId": "listConsulta",
+          "functionName": "listConsulta",
+          "contractPath": "l2/agendaClinica/web/contracts/consultas_profissional.defs.ts",
+          "inputSymbol": "ListConsultaInput",
+          "outputSymbol": "ListConsultaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "profissionalAgendaDiaria"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "profissionalAgendaDiaria",
+              "actorRef": "profissional",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fullRecord",
+              "allowedFields": [],
+              "anchorEntity": "Paciente",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "ACCESS_ANCHOR",
+              "emittedBy": "support70"
+            }
+          ]
+        }
+      ],
+      "staleRoutes": [],
+      "definition": null
+    },
+    {
+      "pageId": "consultas_recepcionista",
+      "defPath": "l1/agendaClinica/layer_1_external/adapters/http/controllers/consultas_recepcionista.defs.ts",
+      "handlers": [
+        {
+          "route": "agendaClinica.consultas_recepcionista.cmdConfirmarConsulta",
+          "pageId": "consultas_recepcionista",
+          "kind": "command",
+          "usecaseId": "confirmarConsulta",
+          "functionName": "confirmarConsulta",
+          "contractPath": "l2/agendaClinica/web/contracts/consultas_recepcionista.defs.ts",
+          "inputSymbol": "ConfirmarConsultaInput",
+          "outputSymbol": "ConfirmarConsultaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaAgendaConsultas"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaAgendaConsultas",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Consulta.id",
+                "Consulta.version",
+                "Consulta.patientId",
+                "Consulta.professionalId",
+                "Consulta.scheduledAt",
+                "Consulta.status"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.consultas_recepcionista.cmdCreateConsulta",
+          "pageId": "consultas_recepcionista",
+          "kind": "command",
+          "usecaseId": "createConsulta",
+          "functionName": "createConsulta",
+          "contractPath": "l2/agendaClinica/web/contracts/consultas_recepcionista.defs.ts",
+          "inputSymbol": "CreateConsultaInput",
+          "outputSymbol": "CreateConsultaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaAgendaConsultas"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaAgendaConsultas",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Consulta.id",
+                "Consulta.version",
+                "Consulta.patientId",
+                "Consulta.professionalId",
+                "Consulta.scheduledAt",
+                "Consulta.status"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.consultas_recepcionista.cmdRegistrarFalta",
+          "pageId": "consultas_recepcionista",
+          "kind": "command",
+          "usecaseId": "registrarFalta",
+          "functionName": "registrarFalta",
+          "contractPath": "l2/agendaClinica/web/contracts/consultas_recepcionista.defs.ts",
+          "inputSymbol": "RegistrarFaltaInput",
+          "outputSymbol": "RegistrarFaltaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaAgendaConsultas"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaAgendaConsultas",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Consulta.id",
+                "Consulta.version",
+                "Consulta.patientId",
+                "Consulta.professionalId",
+                "Consulta.scheduledAt",
+                "Consulta.status"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.consultas_recepcionista.qryListConsulta",
+          "pageId": "consultas_recepcionista",
+          "kind": "query",
+          "usecaseId": "listConsulta",
+          "functionName": "listConsulta",
+          "contractPath": "l2/agendaClinica/web/contracts/consultas_recepcionista.defs.ts",
+          "inputSymbol": "ListConsultaInput",
+          "outputSymbol": "ListConsultaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaAgendaConsultas"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaAgendaConsultas",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Consulta.id",
+                "Consulta.version",
+                "Consulta.patientId",
+                "Consulta.professionalId",
+                "Consulta.scheduledAt",
+                "Consulta.status"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.consultas_recepcionista.qryListPaciente",
+          "pageId": "consultas_recepcionista",
+          "kind": "query",
+          "usecaseId": "listPaciente",
+          "functionName": "listPaciente",
+          "contractPath": "l2/agendaClinica/web/contracts/consultas_recepcionista.defs.ts",
+          "inputSymbol": "ListPacienteInput",
+          "outputSymbol": "ListPacienteOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaCadastroPacientes"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaCadastroPacientes",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Paciente",
+                "ContatoPaciente"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Paciente.id",
+                "Paciente.version",
+                "Paciente.details.identification",
+                "Paciente.details.base",
+                "ContatoPaciente.id",
+                "ContatoPaciente.version",
+                "ContatoPaciente.details.identification",
+                "ContatoPaciente.details.contactChannel"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "patientContacts",
+                  "from": "Paciente",
+                  "to": "ContatoPaciente",
+                  "field": ""
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.consultas_recepcionista.qryListProfissional",
+          "pageId": "consultas_recepcionista",
+          "kind": "query",
+          "usecaseId": "listProfissional",
+          "functionName": "listProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/consultas_recepcionista.defs.ts",
+          "inputSymbol": "ListProfissionalInput",
+          "outputSymbol": "ListProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaLocalizarProfissionais"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaLocalizarProfissionais",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Profissional.id",
+                "Profissional.version",
+                "Profissional.details.identification",
+                "Profissional.details.person"
+              ],
+              "anchorEntity": "",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        }
+      ],
+      "staleRoutes": [],
+      "definition": null
+    },
+    {
+      "pageId": "dados_profissional",
+      "defPath": "l1/agendaClinica/layer_1_external/adapters/http/controllers/dados_profissional.defs.ts",
+      "handlers": [
+        {
+          "route": "agendaClinica.dados_profissional.cmdCreateProfissional",
+          "pageId": "dados_profissional",
+          "kind": "command",
+          "usecaseId": "createProfissional",
+          "functionName": "createProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_profissional.defs.ts",
+          "inputSymbol": "CreateProfissionalInput",
+          "outputSymbol": "CreateProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "profissionalProprioCadastro"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "profissionalProprioCadastro",
+              "actorRef": "profissional",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fullRecord",
+              "allowedFields": [],
+              "anchorEntity": "Profissional",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.dados_profissional.cmdUpdateProfissional",
+          "pageId": "dados_profissional",
+          "kind": "command",
+          "usecaseId": "updateProfissional",
+          "functionName": "updateProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_profissional.defs.ts",
+          "inputSymbol": "UpdateProfissionalInput",
+          "outputSymbol": "UpdateProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "profissionalProprioCadastro"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "profissionalProprioCadastro",
+              "actorRef": "profissional",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fullRecord",
+              "allowedFields": [],
+              "anchorEntity": "Profissional",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.dados_profissional.qryListProfissional",
+          "pageId": "dados_profissional",
+          "kind": "query",
+          "usecaseId": "listProfissional",
+          "functionName": "listProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_profissional.defs.ts",
+          "inputSymbol": "ListProfissionalInput",
+          "outputSymbol": "ListProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "profissionalProprioCadastro"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "profissionalProprioCadastro",
+              "actorRef": "profissional",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fullRecord",
+              "allowedFields": [],
+              "anchorEntity": "Profissional",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        }
+      ],
+      "staleRoutes": [],
+      "definition": null
+    },
+    {
+      "pageId": "dados_recepcionista",
+      "defPath": "l1/agendaClinica/layer_1_external/adapters/http/controllers/dados_recepcionista.defs.ts",
+      "handlers": [
+        {
+          "route": "agendaClinica.dados_recepcionista.cmdCreateProfissional",
+          "pageId": "dados_recepcionista",
+          "kind": "command",
+          "usecaseId": "createProfissional",
+          "functionName": "createProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_recepcionista.defs.ts",
+          "inputSymbol": "CreateProfissionalInput",
+          "outputSymbol": "CreateProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaLocalizarProfissionais"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaLocalizarProfissionais",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Profissional.id",
+                "Profissional.version",
+                "Profissional.details.identification",
+                "Profissional.details.person"
+              ],
+              "anchorEntity": "",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.dados_recepcionista.cmdCreateRecepcionista",
+          "pageId": "dados_recepcionista",
+          "kind": "command",
+          "usecaseId": "createRecepcionista",
+          "functionName": "createRecepcionista",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_recepcionista.defs.ts",
+          "inputSymbol": "CreateRecepcionistaInput",
+          "outputSymbol": "CreateRecepcionistaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaProprioCadastro"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaProprioCadastro",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Recepcionista"
+              ],
+              "disclosure": "fullRecord",
+              "allowedFields": [],
+              "anchorEntity": "Recepcionista",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.dados_recepcionista.cmdUpdateProfissional",
+          "pageId": "dados_recepcionista",
+          "kind": "command",
+          "usecaseId": "updateProfissional",
+          "functionName": "updateProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_recepcionista.defs.ts",
+          "inputSymbol": "UpdateProfissionalInput",
+          "outputSymbol": "UpdateProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaLocalizarProfissionais"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaLocalizarProfissionais",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Profissional.id",
+                "Profissional.version",
+                "Profissional.details.identification",
+                "Profissional.details.person"
+              ],
+              "anchorEntity": "",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.dados_recepcionista.cmdUpdateRecepcionista",
+          "pageId": "dados_recepcionista",
+          "kind": "command",
+          "usecaseId": "updateRecepcionista",
+          "functionName": "updateRecepcionista",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_recepcionista.defs.ts",
+          "inputSymbol": "UpdateRecepcionistaInput",
+          "outputSymbol": "UpdateRecepcionistaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaProprioCadastro"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaProprioCadastro",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Recepcionista"
+              ],
+              "disclosure": "fullRecord",
+              "allowedFields": [],
+              "anchorEntity": "Recepcionista",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.dados_recepcionista.qryListProfissional",
+          "pageId": "dados_recepcionista",
+          "kind": "query",
+          "usecaseId": "listProfissional",
+          "functionName": "listProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_recepcionista.defs.ts",
+          "inputSymbol": "ListProfissionalInput",
+          "outputSymbol": "ListProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaLocalizarProfissionais"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaLocalizarProfissionais",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Profissional.id",
+                "Profissional.version",
+                "Profissional.details.identification",
+                "Profissional.details.person"
+              ],
+              "anchorEntity": "",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.dados_recepcionista.qryListRecepcionista",
+          "pageId": "dados_recepcionista",
+          "kind": "query",
+          "usecaseId": "listRecepcionista",
+          "functionName": "listRecepcionista",
+          "contractPath": "l2/agendaClinica/web/contracts/dados_recepcionista.defs.ts",
+          "inputSymbol": "ListRecepcionistaInput",
+          "outputSymbol": "ListRecepcionistaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaProprioCadastro"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaProprioCadastro",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Recepcionista"
+              ],
+              "disclosure": "fullRecord",
+              "allowedFields": [],
+              "anchorEntity": "Recepcionista",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        }
+      ],
+      "staleRoutes": [],
+      "definition": null
+    },
+    {
+      "pageId": "pacientes",
+      "defPath": "l1/agendaClinica/layer_1_external/adapters/http/controllers/pacientes.defs.ts",
+      "handlers": [
+        {
+          "route": "agendaClinica.pacientes.cmdCreateConsulta",
+          "pageId": "pacientes",
+          "kind": "command",
+          "usecaseId": "createConsulta",
+          "functionName": "createConsulta",
+          "contractPath": "l2/agendaClinica/web/contracts/pacientes.defs.ts",
+          "inputSymbol": "CreateConsultaInput",
+          "outputSymbol": "CreateConsultaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaAgendaConsultas"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaAgendaConsultas",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Consulta.id",
+                "Consulta.version",
+                "Consulta.patientId",
+                "Consulta.professionalId",
+                "Consulta.scheduledAt",
+                "Consulta.status"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.pacientes.cmdCreatePaciente",
+          "pageId": "pacientes",
+          "kind": "command",
+          "usecaseId": "createPaciente",
+          "functionName": "createPaciente",
+          "contractPath": "l2/agendaClinica/web/contracts/pacientes.defs.ts",
+          "inputSymbol": "CreatePacienteInput",
+          "outputSymbol": "CreatePacienteOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaCadastroPacientes"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaCadastroPacientes",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Paciente",
+                "ContatoPaciente"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Paciente.id",
+                "Paciente.version",
+                "Paciente.details.identification",
+                "Paciente.details.base",
+                "ContatoPaciente.id",
+                "ContatoPaciente.version",
+                "ContatoPaciente.details.identification",
+                "ContatoPaciente.details.contactChannel"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "patientContacts",
+                  "from": "Paciente",
+                  "to": "ContatoPaciente",
+                  "field": ""
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.pacientes.qryListConsulta",
+          "pageId": "pacientes",
+          "kind": "query",
+          "usecaseId": "listConsulta",
+          "functionName": "listConsulta",
+          "contractPath": "l2/agendaClinica/web/contracts/pacientes.defs.ts",
+          "inputSymbol": "ListConsultaInput",
+          "outputSymbol": "ListConsultaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaAgendaConsultas"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaAgendaConsultas",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Consulta.id",
+                "Consulta.version",
+                "Consulta.patientId",
+                "Consulta.professionalId",
+                "Consulta.scheduledAt",
+                "Consulta.status"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.pacientes.qryListPaciente",
+          "pageId": "pacientes",
+          "kind": "query",
+          "usecaseId": "listPaciente",
+          "functionName": "listPaciente",
+          "contractPath": "l2/agendaClinica/web/contracts/pacientes.defs.ts",
+          "inputSymbol": "ListPacienteInput",
+          "outputSymbol": "ListPacienteOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaCadastroPacientes"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaCadastroPacientes",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Paciente",
+                "ContatoPaciente"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Paciente.id",
+                "Paciente.version",
+                "Paciente.details.identification",
+                "Paciente.details.base",
+                "ContatoPaciente.id",
+                "ContatoPaciente.version",
+                "ContatoPaciente.details.identification",
+                "ContatoPaciente.details.contactChannel"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "patientContacts",
+                  "from": "Paciente",
+                  "to": "ContatoPaciente",
+                  "field": ""
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.pacientes.qryListProfissional",
+          "pageId": "pacientes",
+          "kind": "query",
+          "usecaseId": "listProfissional",
+          "functionName": "listProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/pacientes.defs.ts",
+          "inputSymbol": "ListProfissionalInput",
+          "outputSymbol": "ListProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaLocalizarProfissionais"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaLocalizarProfissionais",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Profissional.id",
+                "Profissional.version",
+                "Profissional.details.identification",
+                "Profissional.details.person"
+              ],
+              "anchorEntity": "",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        }
+      ],
+      "staleRoutes": [],
+      "definition": null
+    },
+    {
+      "pageId": "profissionais",
+      "defPath": "l1/agendaClinica/layer_1_external/adapters/http/controllers/profissionais.defs.ts",
+      "handlers": [
+        {
+          "route": "agendaClinica.profissionais.cmdCreateConsulta",
+          "pageId": "profissionais",
+          "kind": "command",
+          "usecaseId": "createConsulta",
+          "functionName": "createConsulta",
+          "contractPath": "l2/agendaClinica/web/contracts/profissionais.defs.ts",
+          "inputSymbol": "CreateConsultaInput",
+          "outputSymbol": "CreateConsultaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaAgendaConsultas"
+          ],
+          "projection": {
+            "shape": "object",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaAgendaConsultas",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Consulta.id",
+                "Consulta.version",
+                "Consulta.patientId",
+                "Consulta.professionalId",
+                "Consulta.scheduledAt",
+                "Consulta.status"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.profissionais.qryListConsulta",
+          "pageId": "profissionais",
+          "kind": "query",
+          "usecaseId": "listConsulta",
+          "functionName": "listConsulta",
+          "contractPath": "l2/agendaClinica/web/contracts/profissionais.defs.ts",
+          "inputSymbol": "ListConsultaInput",
+          "outputSymbol": "ListConsultaOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaAgendaConsultas"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "patientId",
+              "professionalId",
+              "scheduledAt",
+              "status"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaAgendaConsultas",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Consulta"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Consulta.id",
+                "Consulta.version",
+                "Consulta.patientId",
+                "Consulta.professionalId",
+                "Consulta.scheduledAt",
+                "Consulta.status"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "appointmentPatient",
+                  "from": "Consulta",
+                  "to": "Paciente",
+                  "field": "Consulta.patientId"
+                },
+                {
+                  "relationshipId": "appointmentProfessional",
+                  "from": "Consulta",
+                  "to": "Profissional",
+                  "field": "Consulta.professionalId"
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.profissionais.qryListPaciente",
+          "pageId": "profissionais",
+          "kind": "query",
+          "usecaseId": "listPaciente",
+          "functionName": "listPaciente",
+          "contractPath": "l2/agendaClinica/web/contracts/profissionais.defs.ts",
+          "inputSymbol": "ListPacienteInput",
+          "outputSymbol": "ListPacienteOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaCadastroPacientes"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaCadastroPacientes",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Paciente",
+                "ContatoPaciente"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Paciente.id",
+                "Paciente.version",
+                "Paciente.details.identification",
+                "Paciente.details.base",
+                "ContatoPaciente.id",
+                "ContatoPaciente.version",
+                "ContatoPaciente.details.identification",
+                "ContatoPaciente.details.contactChannel"
+              ],
+              "anchorEntity": "",
+              "relationships": [
+                {
+                  "relationshipId": "patientContacts",
+                  "from": "Paciente",
+                  "to": "ContatoPaciente",
+                  "field": ""
+                }
+              ],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        },
+        {
+          "route": "agendaClinica.profissionais.qryListProfissional",
+          "pageId": "profissionais",
+          "kind": "query",
+          "usecaseId": "listProfissional",
+          "functionName": "listProfissional",
+          "contractPath": "l2/agendaClinica/web/contracts/profissionais.defs.ts",
+          "inputSymbol": "ListProfissionalInput",
+          "outputSymbol": "ListProfissionalOutput",
+          "status": "toCreate",
+          "preserved": false,
+          "grantIds": [
+            "recepcionistaLocalizarProfissionais"
+          ],
+          "projection": {
+            "shape": "array",
+            "fields": [
+              "id",
+              "version",
+              "details"
+            ],
+            "envelope": "passthrough"
+          },
+          "session": "verified",
+          "steps": [
+            "transport",
+            "session",
+            "authorize",
+            "call",
+            "project",
+            "bff"
+          ],
+          "scopePlan": [
+            {
+              "grantId": "recepcionistaLocalizarProfissionais",
+              "actorRef": "recepcionista",
+              "entityRefs": [
+                "Profissional"
+              ],
+              "disclosure": "fieldsOnly",
+              "allowedFields": [
+                "Profissional.id",
+                "Profissional.version",
+                "Profissional.details.identification",
+                "Profissional.details.person"
+              ],
+              "anchorEntity": "",
+              "relationships": [],
+              "pending": "",
+              "emittedBy": "support70"
+            }
+          ]
+        }
+      ],
+      "staleRoutes": [],
+      "definition": null
+    }
+  ],
+  "problems": [
+    {
+      "severity": "review",
+      "code": "ACCESS_ANCHOR",
+      "path": "agendaClinica.consultas_profissional.cmdRegistrarAtendimento",
+      "message": "Grant profissionalAgendaDiaria anchors on Paciente. Relationship appointmentProfessional binds another required target."
+    },
+    {
+      "severity": "review",
+      "code": "ACCESS_ANCHOR",
+      "path": "agendaClinica.consultas_profissional.qryListConsulta",
+      "message": "Grant profissionalAgendaDiaria anchors on Paciente. Relationship appointmentProfessional binds another required target."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.consultas_recepcionista.qryListPaciente",
+      "message": "Route agendaClinica.consultas_recepcionista.qryListPaciente projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.consultas_recepcionista.qryListProfissional",
+      "message": "Route agendaClinica.consultas_recepcionista.qryListProfissional projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.dados_recepcionista.cmdCreateProfissional",
+      "message": "Route agendaClinica.dados_recepcionista.cmdCreateProfissional projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.dados_recepcionista.cmdUpdateProfissional",
+      "message": "Route agendaClinica.dados_recepcionista.cmdUpdateProfissional projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.dados_recepcionista.qryListProfissional",
+      "message": "Route agendaClinica.dados_recepcionista.qryListProfissional projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.pacientes.cmdCreatePaciente",
+      "message": "Route agendaClinica.pacientes.cmdCreatePaciente projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.pacientes.qryListPaciente",
+      "message": "Route agendaClinica.pacientes.qryListPaciente projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.pacientes.qryListProfissional",
+      "message": "Route agendaClinica.pacientes.qryListProfissional projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.profissionais.qryListPaciente",
+      "message": "Route agendaClinica.profissionais.qryListPaciente projects details, which this page's grants do not disclose."
+    },
+    {
+      "severity": "error",
+      "code": "DISCLOSURE",
+      "path": "agendaClinica.profissionais.qryListProfissional",
+      "message": "Route agendaClinica.profissionais.qryListProfissional projects details, which this page's grants do not disclose."
+    }
+  ],
+  "normalizations": [
+    {
+      "code": "ENUMERATIONS_NOT_CONSUMED",
+      "path": "domain30.enumerations",
+      "detail": "11 enum values stay on the domain draft. controllers60 does not copy them."
+    }
+  ],
+  "emit": [],
+  "removals": []
+}

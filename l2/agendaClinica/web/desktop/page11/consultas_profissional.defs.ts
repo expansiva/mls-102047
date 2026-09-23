@@ -1,8 +1,47 @@
 export const descriptions = [
-  "The professional opens Agenda do dia to review only the consultations of the day that belong to them and, when a visit is finished, to record that attendance. They read each consultation’s patient, scheduled time, and situation so they can confirm the right encounter. Other professionals’ agendas are out of scope; the information stays limited to their own day.",
-  "They locate their own daily consultations, refining by consultation identity, patient, professional, scheduled time, situation, and paging, and they request that list whenever those criteria change. They inspect a consultation to confirm patient and time. To register attendance they select that consultation, enter the required attendance details, may add an attendance note, and confirm so the consultation becomes attended and the note is stored. After success they continue reviewing the rest of their day with the same locate and inspect work.",
-  "While the page or the consultation list is loading, they wait and are told the day is still being retrieved so they do not treat silence as an empty agenda. If nothing matches, they learn they have no consultations of their own for the day. If listing fails, they receive an error and can try locating again. Registering attendance has its own waiting, success, and error outcomes so they know whether the attended situation and note were saved. They remain on the daily agenda until they begin registering attendance, then stay with that recording work until it succeeds, fails, or they stop.",
-  "Keyboard and pointer both reach every task: locating the day, inspecting a consultation, entering attendance details and an optional note, and confirming. Focus follows that task order and returns to the consultation they were working on after attendance is saved or fails. Loading, empty, error, and success are announced in text to assistive technology, and the shift between browsing the day and recording attendance is named so a screen reader user always knows which work they are in."
+  {
+    "organismId": "organism.list.1",
+    "kind": "list",
+    "description": "Apresenta as consultas do dia vinculadas ao profissional autenticado para localizar a própria agenda. Exibe os dados retornados da consulta, incluindo o horário e a situação disponível, e permite escolher uma consulta para conferência. Enquanto a consulta da agenda é carregada, comunica o carregamento; quando não houver consultas do dia, informa a ausência de resultados; se a consulta falhar, apresenta o erro associado e mantém uma forma acessível de tentar novamente. A lista e a seleção devem ser utilizáveis por teclado e expor nomes e estados compreensíveis a tecnologias assistivas.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "listConsulta"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.detail.1",
+    "kind": "detail",
+    "description": "Mostra os dados da consulta escolhida para o profissional conferir o paciente e o horário antes de registrar o atendimento. Usa os dados da agenda já consultada e deixa clara a situação da consulta. Enquanto os dados da agenda estiverem carregando, informa esse estado; na ausência de consultas, não apresenta detalhe selecionável; se ocorrer erro na consulta, comunica o problema de modo acessível. A mudança de consulta e a leitura dos dados devem funcionar por teclado e ter rótulos compreensíveis para tecnologias assistivas.",
+    "contentRef": "base",
+    "capabilityRefs": [
+      "listConsulta"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.form.1",
+    "kind": "form",
+    "description": "Permite registrar o atendimento da consulta própria selecionada. Solicita os detalhes obrigatórios do atendimento e oferece a anotação do profissional como informação opcional; o identificador da consulta vem da seleção e não é editável. Impede o envio enquanto o detalhe obrigatório não estiver informado ou não houver consulta selecionada. Durante o registro, comunica o processamento e evita reenvio; em caso de erro, apresenta a mensagem associada preservando o que foi digitado; após sucesso, comunica a conclusão e a agenda é atualizada. Todos os campos, obrigatoriedade, erros e instruções devem estar disponíveis a teclado e tecnologias assistivas.",
+    "contentRef": "registrarAtendimento",
+    "capabilityRefs": [
+      "setRegistrarAtendimentoId",
+      "setRegistrarAtendimentoDetails",
+      "setRegistrarAtendimentoDetailsAttendanceNote",
+      "registrarAtendimento"
+    ],
+    "moleculeRecommendations": []
+  },
+  {
+    "organismId": "organism.actions.1",
+    "kind": "actions",
+    "description": "Oferece a ação de marcar como atendida a consulta própria selecionada, usando os dados preenchidos no registro. A ação só fica disponível quando houver uma consulta selecionada e os detalhes obrigatórios estiverem informados. Durante o envio, comunica que o atendimento está sendo registrado e previne acionamentos repetidos; no erro, informa a falha de modo acessível e permite nova tentativa; no sucesso, confirma o registro e atualiza a agenda diária. O comando deve ter nome claro, receber foco por teclado e anunciar mudanças de estado para tecnologias assistivas.",
+    "contentRef": "registrarAtendimento",
+    "capabilityRefs": [
+      "registrarAtendimento"
+    ],
+    "moleculeRecommendations": []
+  }
 ] as const;
 
 export const pipeline = [
@@ -17,6 +56,10 @@ export const pipeline = [
     "dependsOn": [
       "consultas_profissional__l2_shared"
     ],
-    "skills": []
+    "categoryRef": "calendarScheduling",
+    "skills": [
+      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md"
+    ]
   }
 ] as const;
