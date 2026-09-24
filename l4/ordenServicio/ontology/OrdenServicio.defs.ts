@@ -311,7 +311,8 @@ export const ordenServicioEntityOrdenServicio = {
       "description": "El técnico emite el presupuesto con el diagnóstico, las piezas necesarias y el valor propuesto para decisión del cliente.",
       "ruleRefs": [
         "emitBudgetRequiresAnalysis"
-      ]
+      ],
+      "payload": []
     },
     {
       "transitionId": "aprobarPresupuesto",
@@ -325,7 +326,8 @@ export const ordenServicioEntityOrdenServicio = {
       "description": "El cliente de la orden aprueba el presupuesto desde el portal y autoriza la reparación.",
       "ruleRefs": [
         "customerCanDecideOwnBudget"
-      ]
+      ],
+      "payload": []
     },
     {
       "transitionId": "rechazarPresupuesto",
@@ -339,7 +341,8 @@ export const ordenServicioEntityOrdenServicio = {
       "description": "El cliente de la orden rechaza el presupuesto desde el portal; la orden se cierra y el aparato queda disponible para retiro.",
       "ruleRefs": [
         "customerCanDecideOwnBudget"
-      ]
+      ],
+      "payload": []
     },
     {
       "transitionId": "marcarLista",
@@ -354,6 +357,9 @@ export const ordenServicioEntityOrdenServicio = {
       "ruleRefs": [
         "repairRequiresApprovedBudget",
         "repairCompletionRequiresWorkRecorded"
+      ],
+      "payload": [
+        "details.repairPerformed"
       ]
     },
     {
@@ -368,7 +374,8 @@ export const ordenServicioEntityOrdenServicio = {
       "description": "El recepcionista entrega al cliente el aparato reparado y finaliza la orden.",
       "ruleRefs": [
         "deliveryRequiresReadyOrder"
-      ]
+      ],
+      "payload": []
     }
   ]
 } as const satisfies Ns5OntologyEntityV3;

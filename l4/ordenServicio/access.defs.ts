@@ -51,6 +51,7 @@ export const ordenServicioAccess = {
           "Cliente.details.base",
           "Aparato.details.identification",
           "Aparato.details.assetEquipment",
+          "OrdenServicio.id",
           "OrdenServicio.serviceOrderNumber",
           "OrdenServicio.customerId",
           "OrdenServicio.deviceId",
@@ -111,6 +112,7 @@ export const ordenServicioAccess = {
         "mode": "fieldsOnly",
         "description": "Muestra el número, estado, diagnóstico, valor del presupuesto y disponibilidad para retiro de las órdenes propias, sin revelar costos internos de piezas ni anotaciones del técnico.",
         "allowedFields": [
+          "OrdenServicio.id",
           "OrdenServicio.serviceOrderNumber",
           "OrdenServicio.status",
           "OrdenServicio.details.diagnosis",
