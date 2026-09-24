@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "2026-09-21-agent-defs-l2-contracts-v1",
+  "project": 102047,
+  "module": "hiringPipeline",
+  "pageId": "job_positions",
+  "mode": "create",
+  "status": "gated",
+  "snapshotHash": "sha256:90be9a217b02f336efdf16feb2d6d140b529094c51b68ba74a84e5dee80fc468",
+  "artifactPath": "l2/hiringPipeline/web/contracts/job_positions.defs.ts",
+  "sourceHash": "sha256:329806d70de7bc77398ab4d4bdbc29c916901784899f4b1f38a7593f83df1090",
+  "routes": [
+    "hiringPipeline.job_positions.cmdCreateApplication",
+    "hiringPipeline.job_positions.cmdCreateJobPosition",
+    "hiringPipeline.job_positions.cmdRejectApplication",
+    "hiringPipeline.job_positions.qryListApplication",
+    "hiringPipeline.job_positions.qryListCandidate",
+    "hiringPipeline.job_positions.qryListJobPosition"
+  ],
+  "normalizations": [
+    {
+      "code": "transition-payload-qualified",
+      "pageId": "job_positions",
+      "route": "hiringPipeline.job_positions.cmdRejectApplication",
+      "detail": "details.rejectionReason -> Application.details.rejectionReason"
+    }
+  ],
+  "source": "export const createApplicationRoute = \"hiringPipeline.job_positions.cmdCreateApplication\" as const;\n\nexport interface CreateApplicationInput {\n  \"candidateId\": string;\n  \"jobPositionId\": string;\n  \"status\": \"screening\" | \"interview\" | \"offer\" | \"hired\" | \"rejected\";\n  \"details\": {\n    \"rejectionReason\"?: string;\n  };\n}\n\nexport interface CreateApplicationOutput {\n  \"id\": string;\n  \"version\": number;\n  \"candidateId\": string;\n  \"jobPositionId\": string;\n  \"status\": \"screening\" | \"interview\" | \"offer\" | \"hired\" | \"rejected\";\n  \"details\": {\n    \"rejectionReason\"?: string;\n  };\n}\n\nexport const createJobPositionRoute = \"hiringPipeline.job_positions.cmdCreateJobPosition\" as const;\n\nexport interface CreateJobPositionInput {\n  \"title\": string;\n  \"hiringManagerId\": string;\n  \"status\": \"open\" | \"closed\";\n  \"details\": {\n    \"department\": string;\n    \"description\": string;\n    \"headcount\": number;\n  };\n}\n\nexport interface CreateJobPositionOutput {\n  \"id\": string;\n  \"version\": number;\n  \"title\": string;\n  \"hiringManagerId\": string;\n  \"status\": \"open\" | \"closed\";\n  \"details\": {\n    \"department\": string;\n    \"description\": string;\n    \"headcount\": number;\n    \"filledHeadcount\"?: number;\n    \"remainingHeadcount\"?: number;\n  };\n}\n\nexport const rejectApplicationRoute = \"hiringPipeline.job_positions.cmdRejectApplication\" as const;\n\nexport interface RejectApplicationInput {\n  \"id\": string;\n  \"details\": {\n    \"rejectionReason\"?: string;\n  };\n}\n\nexport interface RejectApplicationOutput {\n  \"id\": string;\n  \"version\": number;\n  \"candidateId\": string;\n  \"jobPositionId\": string;\n  \"status\": \"screening\" | \"interview\" | \"offer\" | \"hired\" | \"rejected\";\n  \"details\": {\n    \"rejectionReason\"?: string;\n  };\n}\n\nexport const listApplicationRoute = \"hiringPipeline.job_positions.qryListApplication\" as const;\n\nexport interface ListApplicationInput {\n  \"id\": string;\n  \"candidateId\": string;\n  \"jobPositionId\": string;\n  \"status\": \"screening\" | \"interview\" | \"offer\" | \"hired\" | \"rejected\";\n  \"page\"?: number;\n}\n\nexport interface ListApplicationItem {\n  \"id\": string;\n  \"version\": number;\n  \"candidateId\": string;\n  \"jobPositionId\": string;\n  \"status\": \"screening\" | \"interview\" | \"offer\" | \"hired\" | \"rejected\";\n  \"details\": {\n    \"rejectionReason\"?: string;\n  };\n}\n\nexport type ListApplicationOutput = ListApplicationItem[];\n\nexport const listCandidateRoute = \"hiringPipeline.job_positions.qryListCandidate\" as const;\n\nexport interface ListCandidateInput {\n  \"id\": string;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Person\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n      \"docType\"?: \"SSN\" | \"EIN\" | \"Passport\" | \"DriversLicense\" | \"NationalId\" | \"CPF\" | \"CNPJ\" | \"VAT\" | \"Other\";\n      \"docId\"?: string;\n      \"countryCode\": string;\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListCandidateItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Person\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n      \"docType\"?: \"SSN\" | \"EIN\" | \"Passport\" | \"DriversLicense\" | \"NationalId\" | \"CPF\" | \"CNPJ\" | \"VAT\" | \"Other\";\n      \"docId\"?: string;\n      \"countryCode\": string;\n    };\n    \"base\"?: {\n      \"contacts\": Array<object>;\n    };\n    \"person\"?: object;\n    \"general\"?: object;\n    \"hiringPipeline\"?: {\n      \"source\": string;\n    };\n  };\n}\n\nexport type ListCandidateOutput = ListCandidateItem[];\n\nexport const listJobPositionRoute = \"hiringPipeline.job_positions.qryListJobPosition\" as const;\n\nexport interface ListJobPositionInput {\n  \"id\": string;\n  \"title\": string;\n  \"hiringManagerId\": string;\n  \"status\": \"open\" | \"closed\";\n  \"page\"?: number;\n}\n\nexport interface ListJobPositionItem {\n  \"id\": string;\n  \"version\": number;\n  \"title\": string;\n  \"hiringManagerId\": string;\n  \"status\": \"open\" | \"closed\";\n  \"details\": {\n    \"department\": string;\n    \"description\": string;\n    \"headcount\": number;\n    \"filledHeadcount\"?: number;\n    \"remainingHeadcount\"?: number;\n  };\n}\n\nexport type ListJobPositionOutput = ListJobPositionItem[];\n"
+}

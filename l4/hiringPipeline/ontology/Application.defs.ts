@@ -201,6 +201,7 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "recruiter"
       ],
+      "payload": [],
       "description": "Advance a screened application to interview.",
       "ruleRefs": [
         "applicationStageOrder"
@@ -215,6 +216,7 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "hiringManager"
       ],
+      "payload": [],
       "description": "Approve an offer for an interviewed candidate in a position managed by the hiring manager.",
       "ruleRefs": [
         "applicationStageOrder",
@@ -230,6 +232,7 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "hiringManager"
       ],
+      "payload": [],
       "description": "Hire an offered candidate while the job position still has hiring capacity.",
       "ruleRefs": [
         "applicationStageOrder",
@@ -248,6 +251,9 @@ export const hiringPipelineEntityApplication = {
       "to": "rejected",
       "by": [
         "recruiter"
+      ],
+      "payload": [
+        "details.rejectionReason"
       ],
       "description": "Reject an application and record the reason it will not proceed.",
       "ruleRefs": [
