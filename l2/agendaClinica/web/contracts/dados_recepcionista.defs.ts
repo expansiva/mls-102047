@@ -74,6 +74,7 @@ export const updateProfissionalRoute = "agendaClinica.dados_recepcionista.cmdUpd
 
 export interface UpdateProfissionalInput {
   "id": string;
+  "version": number;
   "details": {
     "identification"?: {
       "name": string;
@@ -111,6 +112,7 @@ export const updateRecepcionistaRoute = "agendaClinica.dados_recepcionista.cmdUp
 
 export interface UpdateRecepcionistaInput {
   "id": string;
+  "version": number;
   "details": {
     "identification"?: {
       "name": string;

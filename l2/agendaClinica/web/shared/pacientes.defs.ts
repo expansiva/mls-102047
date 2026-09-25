@@ -1,5 +1,5 @@
 export const definition = {
-  "schemaVersion": "2026-09-23-agent-defs-l2-shared-v2",
+  "schemaVersion": "2026-09-24-agent-defs-l2-shared-v3",
   "moduleName": "agendaClinica",
   "pageId": "pacientes",
   "pageName": "Pacientes",
@@ -61,8 +61,8 @@ export const definition = {
       "defaultValue": "base",
       "valueSet": [
         "base",
-        "localizarPaciente",
-        "localizarProfissional",
+        "listPaciente",
+        "listProfissional",
         "createConsulta",
         "createPaciente"
       ]
@@ -1282,13 +1282,13 @@ export const definition = {
       "preconditions": []
     },
     {
-      "value": "localizarPaciente",
+      "value": "listPaciente",
       "kind": "detail",
       "actionId": "listPaciente",
       "preconditions": []
     },
     {
-      "value": "localizarProfissional",
+      "value": "listProfissional",
       "kind": "detail",
       "actionId": "listProfissional",
       "preconditions": []
@@ -1297,13 +1297,23 @@ export const definition = {
       "value": "createConsulta",
       "kind": "command",
       "actionId": "createConsulta",
-      "preconditions": []
+      "preconditions": [
+        "ui.pacientes.createConsulta.input.patientId",
+        "ui.pacientes.createConsulta.input.professionalId",
+        "ui.pacientes.createConsulta.input.scheduledAt",
+        "ui.pacientes.createConsulta.input.status"
+      ]
     },
     {
       "value": "createPaciente",
       "kind": "command",
       "actionId": "createPaciente",
-      "preconditions": []
+      "preconditions": [
+        "ui.pacientes.createPaciente.input.details",
+        "ui.pacientes.createPaciente.input.details_identification_name",
+        "ui.pacientes.createPaciente.input.details_identification_countryCode",
+        "ui.pacientes.createPaciente.input.details_base_aliases"
+      ]
     }
   ],
   "initialLoads": [],

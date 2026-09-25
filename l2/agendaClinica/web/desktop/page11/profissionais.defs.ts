@@ -2,38 +2,38 @@ export const descriptions = [
   {
     "organismId": "organism.list.1",
     "kind": "list",
-    "description": "Permite à recepcionista localizar o médico ou terapeuta para o agendamento, consultando os profissionais conforme os critérios informados, inclusive nome de identificação e status. Exibe os resultados retornados para que a pessoa confirme o profissional a usar na consulta e pode solicitar outra página de resultados. Enquanto a consulta estiver em andamento, comunica carregamento; se não houver resultados, informa a ausência de profissionais correspondentes; se falhar, apresenta o erro da consulta e permite nova tentativa. Os campos devem ter rótulos claros e instruções associadas, com operação por teclado e anúncio acessível das mudanças nos resultados.",
+    "description": "Permite à recepcionista localizar médicos ou terapeutas ativos para o agendamento, consultando profissionais pelos dados de identificação, incluindo nome e status, e percorrendo resultados quando o critério de página for informado. Durante a consulta, comunica o carregamento; se não houver profissionais retornados, apresenta um estado vazio; e, se a consulta falhar, informa o erro e conserva os critérios para uma nova consulta. Os critérios, resultados e mudança de página devem ter rótulos acessíveis, estados anunciados e uso completo por teclado.",
     "contentRef": "listProfissional",
     "capabilityRefs": [
       "setListProfissionalDetailsIdentificationName",
       "setListProfissionalDetailsIdentificationStatus",
-      "listProfissional",
-      "setListProfissionalPage"
+      "setListProfissionalPage",
+      "listProfissional"
     ],
     "moleculeRecommendations": [
       {
-        "groupId": "groupEnterText",
+        "groupId": "groupSearchContent",
         "candidates": [
-          "groupentertext--ml-enter-text"
+          "groupsearchcontent--ml-search-filters"
         ],
-        "reason": "Há um estado editável para informar o nome de identificação do profissional antes da consulta."
+        "reason": "A alteração do critério de nome e a consulta de profissionais sustentam a busca na coleção retornada."
       },
       {
         "groupId": "groupViewData",
         "candidates": [
           "groupviewdata--ml-vertical-record-list"
         ],
-        "reason": "A consulta listProfissional retorna uma coleção de profissionais para leitura e escolha."
+        "reason": "A consulta retorna uma coleção de profissionais para leitura e escolha."
       }
     ]
   },
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Apresenta os dados retornados do profissional selecionado, com prioridade para a conferência do nome antes do agendamento. Permite informar o nome de identificação e consultar profissionais para atualizar essa conferência. Indica carregamento durante a busca, ausência de resultado quando nenhum profissional corresponder e o erro retornado se a consulta falhar, mantendo a possibilidade de nova tentativa. O nome e os controles recebem rótulos acessíveis, foco visível e uso por teclado.",
+    "description": "Permite conferir o nome e os demais dados de identificação do profissional consultado pelo identificador antes de prosseguir com o agendamento. Informa carregamento enquanto a consulta é realizada, comunica quando nenhum profissional for retornado e apresenta o erro em caso de falha, mantendo disponível a troca do identificador para nova consulta. O identificador, os dados retornados e as mensagens de estado devem ter nomes acessíveis e poder ser percorridos e acionados por teclado.",
     "contentRef": "listProfissional",
     "capabilityRefs": [
-      "setListProfissionalDetailsIdentificationName",
+      "setListProfissionalId",
       "listProfissional"
     ],
     "moleculeRecommendations": [
@@ -42,14 +42,14 @@ export const descriptions = [
         "candidates": [
           "groupentertext--ml-enter-text"
         ],
-        "reason": "O nome de identificação é um estado editável usado pela consulta de profissionais."
+        "reason": "O identificador do profissional é um valor informado para executar a consulta."
       },
       {
         "groupId": "groupViewCard",
         "candidates": [
           "groupviewcard--ml-profile-card"
         ],
-        "reason": "Os dados de um profissional retornado podem ser apresentados como informação de perfil para conferir o nome."
+        "reason": "Os dados retornados de um profissional podem ser apresentados para conferência como perfil."
       }
     ]
   }
@@ -72,10 +72,12 @@ export const pipeline = [
     "skills": [
       "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
       "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md",
-      "_102040_/l2/molecules/groupentertext/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
+      "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
       "_102040_/l2/molecules/groupviewdata/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
+      "_102040_/l2/molecules/groupentertext/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
       "_102040_/l2/molecules/groupviewcard/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts"
     ]

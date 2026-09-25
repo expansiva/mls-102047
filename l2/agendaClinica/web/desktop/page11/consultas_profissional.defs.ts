@@ -2,7 +2,7 @@ export const descriptions = [
   {
     "organismId": "organism.list.1",
     "kind": "list",
-    "description": "Apresenta as consultas do dia vinculadas ao profissional autenticado, com informações disponíveis de horário e situação para localizar uma consulta. Comunica carregamento durante a consulta, ausência de consultas quando o resultado estiver vazio e falha quando a consulta não puder ser obtida. Os itens devem ter nome e estado compreensíveis por tecnologias assistivas e permitir abrir a consulta pelo teclado.",
+    "description": "Apresenta as consultas do dia vinculadas ao profissional autenticado para que ele localize sua própria agenda. Mostra carregamento enquanto a consulta é obtida, informa quando não houver consultas e comunica falhas ao carregar, com alternativa acessível para tentar novamente. Os resultados devem ser navegáveis por teclado e expor horário, paciente e situação de cada consulta de forma compreensível.",
     "contentRef": "base",
     "capabilityRefs": [
       "listConsulta"
@@ -13,14 +13,21 @@ export const descriptions = [
         "candidates": [
           "groupviewdata--ml-vertical-record-list"
         ],
-        "reason": "A consulta retorna uma coleção de consultas do dia que precisa ser examinada de forma escaneável."
+        "reason": "A capacidade de consulta retorna uma coleção de consultas que precisa ser percorrida e identificada rapidamente."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-notify-banner"
+        ],
+        "reason": "A consulta possui estados de erro que devem ser comunicados com clareza e com possibilidade de nova tentativa."
       }
     ]
   },
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Exibe os dados disponíveis da consulta selecionada para que o profissional confira paciente, horário e situação antes de registrar o atendimento. Enquanto os dados da agenda carregam, informa o progresso; se não houver consulta disponível, comunica isso claramente; se ocorrer erro na consulta, apresenta uma mensagem compreensível. O conteúdo deve manter rótulos acessíveis e leitura sequencial clara por teclado e leitor de tela.",
+    "description": "Permite consultar os dados disponíveis da consulta própria selecionada, incluindo paciente e horário, antes do registro do atendimento. Enquanto os dados da agenda estiverem sendo carregados, informa esse estado; se não houver consulta selecionada ou dados disponíveis, explica a situação; se ocorrer falha na consulta, comunica o erro de modo acessível. As informações devem ter rótulos claros e permanecer legíveis por tecnologias assistivas.",
     "contentRef": "base",
     "capabilityRefs": [
       "listConsulta"
@@ -31,33 +38,42 @@ export const descriptions = [
         "candidates": [
           "groupviewcard--ml-view-card-horizontal"
         ],
-        "reason": "Os dados de uma consulta podem ser apresentados como uma unidade independente com metadados e ação contextual."
+        "reason": "A capacidade de consulta fornece os dados de uma consulta individual que precisam ser inspecionados com contexto e boa leitura."
       }
     ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Permite preencher os detalhes obrigatórios do atendimento e, opcionalmente, a anotação sobre o que aconteceu na consulta selecionada. Identifica campos obrigatórios, associa rótulos e mensagens de validação aos respectivos campos e preserva o que foi digitado em caso de falha. Enquanto o registro é enviado, informa o andamento; após sucesso ou erro, comunica o resultado de forma acessível.",
+    "description": "Coleta os dados obrigatórios para registrar o atendimento da consulta selecionada e permite incluir a anotação do atendimento quando necessária. Identifica campos obrigatórios, associa rótulos e mensagens de validação aos respectivos campos e preserva o que foi informado se o envio falhar. Durante o registro, informa processamento; em caso de erro, apresenta retorno acessível para correção e nova tentativa.",
     "contentRef": "registrarAtendimento",
     "capabilityRefs": [
       "setRegistrarAtendimentoDetails",
-      "setRegistrarAtendimentoDetailsAttendanceNote"
+      "setRegistrarAtendimentoDetailsAttendanceNote",
+      "registrarAtendimento"
     ],
     "moleculeRecommendations": [
       {
         "groupId": "groupEnterText",
         "candidates": [
+          "groupentertext--ml-enter-text",
           "groupentertext--ml-multiline-text"
         ],
-        "reason": "Detalhes e anotação de atendimento são entradas textuais que podem exigir descrição livre."
+        "reason": "Há entrada editável para os dados do atendimento e para uma anotação opcional, que pode exigir texto mais extenso."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-contextual-feedback"
+        ],
+        "reason": "O comando possui estados de erro e requer feedback associado ao preenchimento e ao envio."
       }
     ]
   },
   {
     "organismId": "organism.actions.1",
     "kind": "actions",
-    "description": "Disponibiliza o comando para marcar a consulta selecionada como atendida depois que os detalhes obrigatórios estiverem preenchidos. A ação deve indicar claramente quando está indisponível, em envio, concluída ou com erro; ao concluir, a agenda é atualizada. O comando precisa ter rótulo acessível, ser acionável por teclado e anunciar seu resultado para tecnologias assistivas.",
+    "description": "Disponibiliza a ação para marcar a consulta selecionada como atendida após o preenchimento dos dados obrigatórios. A ação deve indicar claramente quando estiver indisponível por falta da consulta selecionada ou de dados necessários, anunciar o processamento e confirmar ou comunicar a falha do registro. Deve poder ser acionada por teclado e ter nome acessível que expresse o resultado da ação.",
     "contentRef": "registrarAtendimento",
     "capabilityRefs": [
       "registrarAtendimento"
@@ -68,14 +84,15 @@ export const descriptions = [
         "candidates": [
           "grouptriggeraction--ml-button-standard"
         ],
-        "reason": "O registro de atendimento é um comando explícito de confirmação."
+        "reason": "O comando registra o atendimento e precisa de um disparador com rótulo visível e estado de processamento."
       },
       {
         "groupId": "groupNotifyUser",
         "candidates": [
-          "groupnotifyuser--ml-contextual-feedback"
+          "groupnotifyuser--ml-toast-notification",
+          "groupnotifyuser--ml-alert-modal"
         ],
-        "reason": "O status de sucesso ou erro do comando precisa de retorno contextual e acessível."
+        "reason": "O comando tem resultados de sucesso e erro que precisam ser comunicados ao profissional."
       }
     ]
   }
@@ -100,14 +117,14 @@ export const pipeline = [
       "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md",
       "_102040_/l2/molecules/groupviewdata/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
+      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
       "_102040_/l2/molecules/groupviewcard/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts",
       "_102040_/l2/molecules/groupentertext/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
       "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts",
-      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts"
+      "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts"
     ]
   }
 ] as const;

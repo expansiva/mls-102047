@@ -44,6 +44,7 @@ export const updateProfissionalRoute = "agendaClinica.dados_profissional.cmdUpda
 
 export interface UpdateProfissionalInput {
   "id": string;
+  "version": number;
   "details": {
     "identification"?: {
       "name": string;

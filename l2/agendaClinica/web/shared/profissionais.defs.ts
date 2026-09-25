@@ -1,5 +1,5 @@
 export const definition = {
-  "schemaVersion": "2026-09-23-agent-defs-l2-shared-v2",
+  "schemaVersion": "2026-09-24-agent-defs-l2-shared-v3",
   "moduleName": "agendaClinica",
   "pageId": "profissionais",
   "pageName": "Profissionais",
@@ -1000,10 +1000,7 @@ export const definition = {
       "value": "base",
       "kind": "base",
       "actionId": "listConsulta",
-      "preconditions": [
-        "ui.profissionais.listConsulta.input.professionalId",
-        "ui.profissionais.listConsulta.input.scheduledAt"
-      ]
+      "preconditions": []
     },
     {
       "value": "listPaciente",

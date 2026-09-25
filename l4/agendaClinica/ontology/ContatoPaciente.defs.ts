@@ -56,6 +56,7 @@ export const agendaClinicaEntityContatoPaciente = {
         "type": "integer",
         "required": true,
         "derived": true,
+        "writePrecondition": true,
         "description": "Bumped by the engine on every write; optimistic concurrency."
       },
       "details": {

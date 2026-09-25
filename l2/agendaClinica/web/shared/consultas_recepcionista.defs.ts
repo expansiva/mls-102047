@@ -1,5 +1,5 @@
 export const definition = {
-  "schemaVersion": "2026-09-23-agent-defs-l2-shared-v2",
+  "schemaVersion": "2026-09-24-agent-defs-l2-shared-v3",
   "moduleName": "agendaClinica",
   "pageId": "consultas_recepcionista",
   "pageName": "Consultas",
@@ -633,18 +633,6 @@ export const definition = {
   ],
   "actions": [
     {
-      "actionId": "setConfirmarConsultaId",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.consultas_recepcionista.confirmarConsulta.input.id"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.consultas_recepcionista.confirmarConsulta.input.id"
-    },
-    {
       "actionId": "confirmarConsulta",
       "kind": "command",
       "commandRef": "confirmarConsulta",
@@ -732,18 +720,6 @@ export const definition = {
       "refreshActionIds": [
         "listConsulta"
       ]
-    },
-    {
-      "actionId": "setRegistrarFaltaId",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.consultas_recepcionista.registrarFalta.input.id"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.consultas_recepcionista.registrarFalta.input.id"
     },
     {
       "actionId": "registrarFalta",
@@ -1170,7 +1146,12 @@ export const definition = {
       "value": "createConsulta",
       "kind": "command",
       "actionId": "createConsulta",
-      "preconditions": []
+      "preconditions": [
+        "ui.consultas_recepcionista.createConsulta.input.patientId",
+        "ui.consultas_recepcionista.createConsulta.input.professionalId",
+        "ui.consultas_recepcionista.createConsulta.input.scheduledAt",
+        "ui.consultas_recepcionista.createConsulta.input.status"
+      ]
     },
     {
       "value": "registrarFalta",

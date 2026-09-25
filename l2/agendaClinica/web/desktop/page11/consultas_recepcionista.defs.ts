@@ -2,7 +2,7 @@ export const descriptions = [
   {
     "organismId": "organism.list.1",
     "kind": "list",
-    "description": "Apresenta as consultas da clínica e permite consultar a relação conforme os critérios informados, incluindo paciente, profissional, data e horário e situação. Informa carregamento durante a consulta, ausência de resultados quando não houver consultas correspondentes e falha quando a consulta não puder ser concluída. A paginação pode solicitar outra página. Os resultados e controles devem ter rótulos compreensíveis, foco visível e leitura acessível de seus dados e estados.",
+    "description": "Apresenta as consultas da clínica para a recepcionista localizar compromissos e conferir os horários ocupados, com os dados disponíveis de paciente, profissional, data, horário e situação. Permite informar os critérios disponíveis de identificação, paciente, profissional, data, situação e página para consultar os resultados. Durante o carregamento, informa o andamento; se não houver resultados, comunica que não há consultas para os critérios informados; em caso de falha, apresenta o erro da consulta. Os critérios e a seleção de consulta devem ter rótulos compreensíveis e operação por teclado.",
     "contentRef": "base",
     "capabilityRefs": [
       "listConsulta",
@@ -17,21 +17,26 @@ export const descriptions = [
       {
         "groupId": "groupViewTable",
         "candidates": [
-          "groupviewtable--ml-advanced-data-table",
           "groupviewtable--ml-data-table"
         ],
-        "reason": "A consulta retorna uma coleção de consultas que pode ser apresentada para leitura estruturada."
+        "reason": "A consulta retorna uma coleção estruturada de consultas com critérios e página."
+      },
+      {
+        "groupId": "groupViewData",
+        "candidates": [
+          "groupviewdata--ml-calendar-view"
+        ],
+        "reason": "As consultas possuem data e hora de agendamento e podem ser consultadas em contexto de agenda."
       }
     ]
   },
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Permite conferir os dados de uma consulta localizada, incluindo paciente, profissional, data e horário, antes de qualquer ação contextual. Se a consulta ainda estiver sendo buscada, informa carregamento; se não houver registro correspondente, comunica a ausência; e, em caso de falha, apresenta o erro da consulta. Os dados devem ser anunciados com identificações claras e permanecer legíveis por teclado e leitor de tela.",
+    "description": "Permite conferir a consulta selecionada antes de uma atualização, mostrando os dados disponíveis de paciente, profissional, data, horário e situação. A seleção mantém o contexto da consulta para confirmação por telefone ou registro de falta. Enquanto a consulta é carregada, informa o andamento; quando não houver consulta selecionada, orienta a selecionar uma; se a consulta não puder ser obtida, comunica o erro. A consulta escolhida e suas informações devem ter identificação acessível por teclado e leitor de tela.",
     "contentRef": "base",
     "capabilityRefs": [
-      "listConsulta",
-      "setListConsultaId"
+      "listConsulta"
     ],
     "moleculeRecommendations": [
       {
@@ -39,18 +44,19 @@ export const descriptions = [
         "candidates": [
           "groupviewcard--ml-view-card-horizontal"
         ],
-        "reason": "Os dados de uma consulta podem ser apresentados como uma unidade independente de leitura com seus metadados."
+        "reason": "A consulta selecionada reúne metadados relevantes em uma unidade de leitura."
       }
     ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Permite marcar uma consulta selecionando paciente e profissional, informando data e hora e a situação exigida para o registro. A busca de pacientes e profissionais deve informar carregamento, ausência de opções e falha; o envio informa processamento, sucesso ou erro, inclusive quando o horário não estiver disponível. Campos obrigatórios devem ser identificados, erros associados aos respectivos campos e o envio acessível por teclado.",
+    "description": "Coleta paciente, profissional, data e hora e situação obrigatórios para marcar uma consulta. Permite localizar pacientes e profissionais para escolher seus identificadores e consultar as consultas existentes ao avaliar o horário pretendido. Valida os campos obrigatórios antes de enviar; durante o envio, informa o andamento e, após sucesso ou erro, comunica o resultado, incluindo a indisponibilidade de horário quando ocorrer, mantendo os dados para correção e nova tentativa. Rótulos, instruções, obrigatoriedade e mensagens de erro devem estar associados aos campos e ser utilizáveis por teclado.",
     "contentRef": "createConsulta",
     "capabilityRefs": [
       "listPaciente",
       "listProfissional",
+      "listConsulta",
       "setCreateConsultaPatientId",
       "setCreateConsultaProfessionalId",
       "setCreateConsultaScheduledAt",
@@ -64,43 +70,39 @@ export const descriptions = [
           "groupselectone--ml-combobox",
           "groupselectone--ml-select-one-autocomplete"
         ],
-        "reason": "Paciente e profissional são escolhas únicas obtidas pelas consultas disponíveis."
+        "reason": "Paciente e profissional são escolhas únicas obtidas pelas consultas de localização."
       },
       {
         "groupId": "groupEnterDatetime",
         "candidates": [
           "groupenterdatetime--ml-datetime-picker"
         ],
-        "reason": "O agendamento requer informar data e hora."
+        "reason": "O agendamento exige data e hora."
       },
       {
         "groupId": "groupTriggerAction",
         "candidates": [
           "grouptriggeraction--ml-button-standard"
         ],
-        "reason": "O registro da consulta é um comando de envio."
+        "reason": "O envio executa o comando de criar consulta."
       },
       {
         "groupId": "groupNotifyUser",
         "candidates": [
-          "groupnotifyuser--ml-contextual-feedback",
-          "groupnotifyuser--ml-toast-notification"
+          "groupnotifyuser--ml-contextual-feedback"
         ],
-        "reason": "O formulário precisa comunicar validação, sucesso e falha do agendamento."
+        "reason": "A criação expõe estados de andamento, sucesso e erro."
       }
     ]
   },
   {
     "organismId": "organism.actions.1",
     "kind": "actions",
-    "description": "Disponibiliza as ações para confirmar por telefone uma consulta selecionada ou registrar a falta do paciente na consulta selecionada. Cada ação exige uma consulta identificada e informa processamento, conclusão ou erro; após sucesso, a relação de consultas é atualizada. Os comandos devem expor rótulos explícitos, estado desabilitado enquanto processam e mensagens de resultado acessíveis.",
+    "description": "Disponibiliza, para a consulta selecionada, os comandos de registrar a confirmação telefônica ou marcar falta do paciente. Cada comando exige uma consulta selecionada; durante a execução, deixa clara a ação em andamento e evita reenvio. Após sucesso, informa a atualização e a listagem de consultas é atualizada; em caso de falha, comunica o erro e permite nova tentativa. As ações devem ter nomes claros, indicar o contexto da consulta selecionada e ter acesso por teclado.",
     "contentRef": "base",
     "capabilityRefs": [
-      "setConfirmarConsultaId",
       "confirmarConsulta",
-      "setRegistrarFaltaId",
-      "registrarFalta",
-      "listConsulta"
+      "registrarFalta"
     ],
     "moleculeRecommendations": [
       {
@@ -109,15 +111,14 @@ export const descriptions = [
           "grouptriggeraction--ml-button-standard",
           "grouptriggeraction--ml-button-group"
         ],
-        "reason": "Confirmar e registrar falta são comandos contextuais sobre a consulta selecionada."
+        "reason": "Há dois comandos contextuais para atualizar a situação da consulta selecionada."
       },
       {
         "groupId": "groupNotifyUser",
         "candidates": [
-          "groupnotifyuser--ml-toast-notification",
-          "groupnotifyuser--ml-alert-modal"
+          "groupnotifyuser--ml-contextual-feedback"
         ],
-        "reason": "As transições precisam comunicar sucesso e falhas que exijam atenção."
+        "reason": "Os comandos expõem estados de execução e erro."
       }
     ]
   }
@@ -142,6 +143,8 @@ export const pipeline = [
       "_102020_/l2/agentDefsL2/skills/pageCategories/calendarScheduling.md",
       "_102040_/l2/molecules/groupviewtable/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts",
+      "_102040_/l2/molecules/groupviewdata/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
       "_102040_/l2/molecules/groupviewcard/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts",
       "_102040_/l2/molecules/groupselectone/index.defs.ts",

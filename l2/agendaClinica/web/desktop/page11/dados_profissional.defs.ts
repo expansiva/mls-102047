@@ -2,7 +2,7 @@ export const descriptions = [
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Apresenta ao profissional os dados disponíveis do seu próprio cadastro. Enquanto a consulta estiver em carregamento, comunica que os dados estão sendo obtidos; quando não houver dados, informa a ausência de cadastro; e, se a consulta falhar, apresenta a falha de forma compreensível. As informações devem ser legíveis por tecnologias assistivas, com estados anunciados e conteúdo identificado.",
+    "description": "Apresenta o cadastro do próprio profissional para consulta, usando os dados retornados pela busca. Enquanto a consulta estiver em andamento, comunica carregamento; se não houver cadastro retornado, informa o estado vazio; se a consulta falhar, comunica o erro de forma compreensível e permite tentar consultar novamente. As informações devem ser legíveis por leitores de tela, com rótulos e estados anunciados adequadamente.",
     "contentRef": "base",
     "capabilityRefs": [
       "listProfissional"
@@ -13,30 +13,36 @@ export const descriptions = [
         "candidates": [
           "groupviewdata--ml-vertical-record-list"
         ],
-        "reason": "A consulta retorna uma coleção e pode apresentar os dados disponíveis de modo escaneável."
-      },
-      {
-        "groupId": "groupShowProgress",
-        "candidates": [
-          "groupshowprogress--ml-indeterminate-spinner"
-        ],
-        "reason": "A consulta possui estado de carregamento sem duração conhecida."
+        "reason": "A consulta retorna uma coleção de registros do profissional e o candidato permite leitura escaneável dos dados retornados."
       },
       {
         "groupId": "groupNotifyUser",
         "candidates": [
           "groupnotifyuser--ml-notify-banner"
         ],
-        "reason": "A consulta possui estado de erro e ausência de dados que precisam ser comunicados."
+        "reason": "A consulta possui estados de erro e vazio que precisam de comunicação perceptível."
       }
     ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Permite atualizar os dados de atuação clínica do profissional no cadastro selecionado. Mantém campos editáveis para detalhes, identificação, nome, tipo e número de documento, código do país, dados base, dados de pessoa, ocupação, consentimento de privacidade, dados gerais e dados de agenda clínica; nome, código do país, ocupação e detalhes são obrigatórios. A identificação do registro é somente leitura. A pessoa revisa os dados e confirma a atualização; durante o envio, o comando informa processamento e evita novo envio. Em caso de sucesso ou erro, o resultado é comunicado de forma acessível, incluindo mensagens associadas aos campos quando aplicável.",
-    "contentRef": "updateProfissional",
+    "description": "Permite informar ou alterar os dados de atuação clínica do profissional, incluindo identificação, nome, documento, código do país, ocupação, consentimento de privacidade e demais detalhes disponíveis. Os campos obrigatórios de nome, código do país e ocupação devem indicar obrigatoriedade, validação e erros de modo acessível. Cada alteração atualiza o estado correspondente; o envio cria o cadastro ou atualiza o registro existente. Durante o envio, evita reenvio e informa carregamento, sucesso ou falha. A atualização só pode prosseguir quando a identificação e a versão do registro selecionado estiverem disponíveis; se a versão não puder ser obtida, o envio é bloqueado sem descartar as edições.",
+    "contentRef": "base",
     "capabilityRefs": [
+      "setCreateProfissionalDetails",
+      "setCreateProfissionalDetailsIdentification",
+      "setCreateProfissionalDetailsIdentificationName",
+      "setCreateProfissionalDetailsIdentificationDocType",
+      "setCreateProfissionalDetailsIdentificationDocId",
+      "setCreateProfissionalDetailsIdentificationCountryCode",
+      "setCreateProfissionalDetailsBase",
+      "setCreateProfissionalDetailsPerson",
+      "setCreateProfissionalDetailsPersonOccupation",
+      "setCreateProfissionalDetailsPersonPrivacyConsent",
+      "setCreateProfissionalDetailsGeneral",
+      "setCreateProfissionalDetailsAgendaClinica",
+      "createProfissional",
       "setUpdateProfissionalDetails",
       "setUpdateProfissionalDetailsIdentification",
       "setUpdateProfissionalDetailsIdentificationName",
@@ -57,21 +63,21 @@ export const descriptions = [
         "candidates": [
           "groupentertext--ml-enter-text"
         ],
-        "reason": "Há entrada textual editável, incluindo nome e identificadores documentais."
+        "reason": "Há entrada editável de nome, identificação documental, código do país, ocupação e demais detalhes textuais."
       },
       {
         "groupId": "groupEnterBoolean",
         "candidates": [
           "groupenterboolean--ml-checkbox-preference"
         ],
-        "reason": "O consentimento de privacidade é uma decisão booleana editável."
+        "reason": "O formulário registra o consentimento de privacidade."
       },
       {
         "groupId": "groupTriggerAction",
         "candidates": [
           "grouptriggeraction--ml-button-standard"
         ],
-        "reason": "A atualização é um comando confirmado pelo profissional."
+        "reason": "Criar e atualizar são comandos explícitos de envio."
       },
       {
         "groupId": "groupNotifyUser",
@@ -79,14 +85,7 @@ export const descriptions = [
           "groupnotifyuser--ml-contextual-feedback",
           "groupnotifyuser--ml-toast-notification"
         ],
-        "reason": "O formulário precisa comunicar validação, falha e confirmação do comando."
-      },
-      {
-        "groupId": "groupShowProgress",
-        "candidates": [
-          "groupshowprogress--ml-linear-progress"
-        ],
-        "reason": "O comando de atualização possui estado de carregamento."
+        "reason": "O formulário precisa comunicar validação, erro e resultado das operações de criar e atualizar."
       }
     ]
   }
@@ -105,14 +104,12 @@ export const pipeline = [
     "dependsOn": [
       "dados_profissional__l2_shared"
     ],
-    "categoryRef": "entityRecordManagement",
+    "categoryRef": "masterDataManagement",
     "skills": [
       "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
-      "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/masterDataManagement.md",
       "_102040_/l2/molecules/groupviewdata/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
-      "_102040_/l2/molecules/groupshowprogress/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts",
       "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
       "_102040_/l2/molecules/groupentertext/index.defs.ts",

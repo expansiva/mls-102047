@@ -1,5 +1,5 @@
 export const definition = {
-  "schemaVersion": "2026-09-23-agent-defs-l2-shared-v2",
+  "schemaVersion": "2026-09-24-agent-defs-l2-shared-v3",
   "moduleName": "agendaClinica",
   "pageId": "dados_recepcionista",
   "pageName": "Meus dados",
@@ -368,6 +368,18 @@ export const definition = {
       "required": true
     },
     {
+      "stateKey": "ui.dados_recepcionista.updateProfissional.input.version",
+      "name": "version",
+      "kind": "input",
+      "defaultValue": null,
+      "actionRef": "updateProfissional",
+      "contractRef": "UpdateProfissionalInput.Profissional.version",
+      "source": "selectedEntity",
+      "presentation": "hidden",
+      "editable": false,
+      "required": true
+    },
+    {
       "stateKey": "ui.dados_recepcionista.updateProfissional.input.details",
       "name": "details",
       "kind": "input",
@@ -513,6 +525,18 @@ export const definition = {
       "contractRef": "UpdateRecepcionistaInput.Recepcionista.id",
       "source": "selectedEntity",
       "presentation": "selection",
+      "editable": false,
+      "required": true
+    },
+    {
+      "stateKey": "ui.dados_recepcionista.updateRecepcionista.input.version",
+      "name": "version",
+      "kind": "input",
+      "defaultValue": null,
+      "actionRef": "updateRecepcionista",
+      "contractRef": "UpdateRecepcionistaInput.Recepcionista.version",
+      "source": "selectedEntity",
+      "presentation": "hidden",
       "editable": false,
       "required": true
     },
@@ -1249,18 +1273,6 @@ export const definition = {
       ]
     },
     {
-      "actionId": "setUpdateProfissionalId",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.dados_recepcionista.updateProfissional.input.id"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.dados_recepcionista.updateProfissional.input.id"
-    },
-    {
       "actionId": "setUpdateProfissionalDetails",
       "kind": "stateSetter",
       "inputStateKeys": [],
@@ -1377,6 +1389,7 @@ export const definition = {
       "outputTypeRef": "UpdateProfissionalOutput",
       "inputStateKeys": [
         "ui.dados_recepcionista.updateProfissional.input.id",
+        "ui.dados_recepcionista.updateProfissional.input.version",
         "ui.dados_recepcionista.updateProfissional.input.details",
         "ui.dados_recepcionista.updateProfissional.input.details_identification",
         "ui.dados_recepcionista.updateProfissional.input.details_identification_name",
@@ -1395,18 +1408,6 @@ export const definition = {
       "refreshActionIds": [
         "listProfissional"
       ]
-    },
-    {
-      "actionId": "setUpdateRecepcionistaId",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.dados_recepcionista.updateRecepcionista.input.id"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.dados_recepcionista.updateRecepcionista.input.id"
     },
     {
       "actionId": "setUpdateRecepcionistaDetails",
@@ -1537,6 +1538,7 @@ export const definition = {
       "outputTypeRef": "UpdateRecepcionistaOutput",
       "inputStateKeys": [
         "ui.dados_recepcionista.updateRecepcionista.input.id",
+        "ui.dados_recepcionista.updateRecepcionista.input.version",
         "ui.dados_recepcionista.updateRecepcionista.input.details",
         "ui.dados_recepcionista.updateRecepcionista.input.details_identification",
         "ui.dados_recepcionista.updateRecepcionista.input.details_identification_name",
@@ -1907,6 +1909,7 @@ export const definition = {
       "outputTypeRef": "UpdateProfissionalOutput",
       "inputStateKeys": [
         "ui.dados_recepcionista.updateProfissional.input.id",
+        "ui.dados_recepcionista.updateProfissional.input.version",
         "ui.dados_recepcionista.updateProfissional.input.details",
         "ui.dados_recepcionista.updateProfissional.input.details_identification",
         "ui.dados_recepcionista.updateProfissional.input.details_identification_name",
@@ -1917,7 +1920,20 @@ export const definition = {
         "ui.dados_recepcionista.updateProfissional.input.details_person_occupation",
         "ui.dados_recepcionista.updateProfissional.input.details_person_privacyConsent"
       ],
-      "resultStateKey": "ui.dados_recepcionista.updateProfissional.result"
+      "resultStateKey": "ui.dados_recepcionista.updateProfissional.result",
+      "snapshotPreconditions": [
+        {
+          "inputStateKey": "ui.dados_recepcionista.updateProfissional.input.version",
+          "selectedIdentityStateKey": "ui.dados_recepcionista.updateProfissional.input.id",
+          "sourceActionId": "listProfissional",
+          "resultStateKey": "ui.dados_recepcionista.listProfissional.result",
+          "identityPath": "id",
+          "valuePath": "version",
+          "valueScalar": "number",
+          "capture": "onSelection",
+          "missing": "blockCommandPreserveEdit"
+        }
+      ]
     },
     {
       "actionId": "updateRecepcionista",
@@ -1927,6 +1943,7 @@ export const definition = {
       "outputTypeRef": "UpdateRecepcionistaOutput",
       "inputStateKeys": [
         "ui.dados_recepcionista.updateRecepcionista.input.id",
+        "ui.dados_recepcionista.updateRecepcionista.input.version",
         "ui.dados_recepcionista.updateRecepcionista.input.details",
         "ui.dados_recepcionista.updateRecepcionista.input.details_identification",
         "ui.dados_recepcionista.updateRecepcionista.input.details_identification_name",
@@ -1938,7 +1955,20 @@ export const definition = {
         "ui.dados_recepcionista.updateRecepcionista.input.details_general",
         "ui.dados_recepcionista.updateRecepcionista.input.details_agendaClinica"
       ],
-      "resultStateKey": "ui.dados_recepcionista.updateRecepcionista.result"
+      "resultStateKey": "ui.dados_recepcionista.updateRecepcionista.result",
+      "snapshotPreconditions": [
+        {
+          "inputStateKey": "ui.dados_recepcionista.updateRecepcionista.input.version",
+          "selectedIdentityStateKey": "ui.dados_recepcionista.updateRecepcionista.input.id",
+          "sourceActionId": "listRecepcionista",
+          "resultStateKey": "ui.dados_recepcionista.listRecepcionista.result",
+          "identityPath": "id",
+          "valuePath": "version",
+          "valueScalar": "number",
+          "capture": "onSelection",
+          "missing": "blockCommandPreserveEdit"
+        }
+      ]
     },
     {
       "actionId": "listProfissional",

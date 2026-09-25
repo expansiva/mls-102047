@@ -2,7 +2,7 @@ export const descriptions = [
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Permite à recepcionista consultar os dados disponíveis de seu cadastro de Profissional e Recepcionista, priorizando a leitura das informações em tela estreita. Durante a consulta, comunica o carregamento; quando não houver dados retornados, informa o estado vazio; e, em caso de falha, apresenta um erro compreensível. As informações, estados e erros devem ser anunciados de forma acessível, sem depender somente de sinais visuais.",
+    "description": "Prioriza a leitura dos dados do cadastro próprio de recepcionista e do registro profissional relacionado em espaço reduzido. Durante o carregamento, informa o progresso; sem resultados, comunica a ausência de cadastro; e, em caso de falha, apresenta o erro. As informações devem ter rótulos acessíveis e permanecer compreensíveis por leitores de tela.",
     "contentRef": "base",
     "capabilityRefs": [
       "listProfissional",
@@ -14,14 +14,28 @@ export const descriptions = [
         "candidates": [
           "groupviewdata--ml-vertical-record-list"
         ],
-        "reason": "Os resultados das consultas podem ser apresentados como registros de leitura escaneável em tela estreita."
+        "reason": "A apresentação em lista vertical favorece a leitura dos dados retornados em telas estreitas."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-notify-banner"
+        ],
+        "reason": "Comunica os estados da consulta sem depender somente de sinais visuais."
+      },
+      {
+        "groupId": "groupShowProgress",
+        "candidates": [
+          "groupshowprogress--ml-indeterminate-spinner"
+        ],
+        "reason": "Indica o carregamento da consulta de duração desconhecida."
       }
     ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Permite atualizar, por toque, os dados de atuação na clínica nos registros de Profissional e Recepcionista. Abrange os dados de identificação disponíveis, ocupação, consentimento de privacidade e os agrupamentos de dados previstos para recepcionista. Prioriza os campos obrigatórios na leitura, preserva os valores informados quando houver erro e comunica carregamento, sucesso ou falha nas operações de criação e atualização. Todos os campos e comandos permanecem disponíveis com rótulos claros, validações compreensíveis e uso acessível também por teclado.",
+    "description": "Permite preencher e atualizar, por toque, os detalhes de atuação na clínica do registro profissional e do cadastro de recepcionista. Dá prioridade aos campos obrigatórios de nome, código do país e, para Profissional, ocupação; também oferece os demais detalhes declarados, incluindo consentimento de privacidade. Mantém as edições caso falte a versão exigida para atualizar e bloqueia o envio nessa condição. As ações de criar ou atualizar informam carregamento, sucesso e erro, atualizando as consultas relacionadas. Rótulos, obrigatoriedade, erros e comandos devem permanecer acessíveis em leitores de tela.",
     "contentRef": "base",
     "capabilityRefs": [
       "setCreateProfissionalDetailsIdentificationName",
@@ -63,21 +77,35 @@ export const descriptions = [
         "candidates": [
           "groupentertext--ml-enter-text"
         ],
-        "reason": "Os dados editáveis de identificação, ocupação e demais informações textuais podem ser preenchidos com interação adequada a telas móveis."
+        "reason": "Os detalhes editáveis incluem valores textuais e a entrada simples favorece o preenchimento em dispositivos móveis."
       },
       {
         "groupId": "groupEnterBoolean",
         "candidates": [
           "groupenterboolean--ml-checkbox-preference"
         ],
-        "reason": "O consentimento de privacidade é um valor booleano editável."
+        "reason": "O consentimento de privacidade é uma escolha booleana."
       },
       {
         "groupId": "groupTriggerAction",
         "candidates": [
           "grouptriggeraction--ml-button-standard"
         ],
-        "reason": "Os comandos de criar e atualizar exigem uma ação explícita de envio por toque."
+        "reason": "Criação e atualização requerem comandos claros e acionáveis por toque."
+      },
+      {
+        "groupId": "groupNotifyUser",
+        "candidates": [
+          "groupnotifyuser--ml-contextual-feedback"
+        ],
+        "reason": "Erros, obrigatoriedade, bloqueio por versão e resultados precisam de retorno próximo à interação."
+      },
+      {
+        "groupId": "groupShowProgress",
+        "candidates": [
+          "groupshowprogress--ml-circular-progress"
+        ],
+        "reason": "Os comandos possuem estado de carregamento e o indicador compacto preserva espaço de leitura."
       }
     ]
   }
@@ -102,6 +130,10 @@ export const pipeline = [
       "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md",
       "_102040_/l2/molecules/groupviewdata/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
+      "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
+      "_102040_/l2/molecules/groupshowprogress/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts",
       "_102040_/l2/molecules/groupentertext/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
       "_102040_/l2/molecules/groupenterboolean/index.defs.ts",

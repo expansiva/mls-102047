@@ -2,7 +2,7 @@ export const descriptions = [
   {
     "organismId": "organism.detail.1",
     "kind": "detail",
-    "description": "Prioriza a leitura dos dados disponíveis do próprio cadastro em espaço reduzido, preservando a consulta ao registro. Ao carregar, anuncia que os dados estão sendo obtidos; na ausência de dados, informa que não há cadastro disponível; e, em caso de falha, comunica o erro de modo compreensível. O conteúdo e seus estados devem permanecer acessíveis por leitor de tela.",
+    "description": "Prioriza a leitura do cadastro do próprio profissional em uma sequência fácil de percorrer por toque e leitor de tela, preservando a consulta dos dados retornados. Comunica carregamento, ausência de cadastro e falha da consulta de forma clara, com opção de tentar consultar novamente quando houver erro.",
     "contentRef": "base",
     "capabilityRefs": [
       "listProfissional"
@@ -13,30 +13,36 @@ export const descriptions = [
         "candidates": [
           "groupviewdata--ml-vertical-record-list"
         ],
-        "reason": "A apresentação empilhada favorece a leitura de dados consultados em telas estreitas."
-      },
-      {
-        "groupId": "groupShowProgress",
-        "candidates": [
-          "groupshowprogress--ml-indeterminate-spinner"
-        ],
-        "reason": "A consulta possui estado de carregamento sem duração conhecida."
+        "reason": "O formato de lista vertical favorece a leitura de registros retornados em espaço reduzido."
       },
       {
         "groupId": "groupNotifyUser",
         "candidates": [
           "groupnotifyuser--ml-notify-banner"
         ],
-        "reason": "A consulta possui estado de erro e ausência de dados que precisam ser comunicados."
+        "reason": "Mantém visíveis os estados de erro e vazio da consulta em uma tela estreita."
       }
     ]
   },
   {
     "organismId": "organism.form.1",
     "kind": "form",
-    "description": "Permite ao profissional atualizar, por toque, os dados de atuação clínica do cadastro selecionado, mantendo todos os campos editáveis de detalhes, identificação, nome, tipo e número de documento, código do país, dados base, dados de pessoa, ocupação, consentimento de privacidade, dados gerais e dados de agenda clínica. Nome, código do país, ocupação e detalhes continuam obrigatórios, enquanto a identificação do registro permanece somente leitura. A leitura deve priorizar rótulos e obrigatoriedade, com foco acessível, alvos de toque claros e mensagens de validação associadas aos campos. Ao confirmar, informa o processamento, impede reenvio e comunica sucesso ou erro de forma acessível.",
-    "contentRef": "updateProfissional",
+    "description": "Permite preencher e revisar por toque os mesmos dados de atuação clínica: identificação, nome, documento, código do país, ocupação, consentimento de privacidade e demais detalhes. Mantém indicação acessível dos campos obrigatórios, dos erros e do foco, e prioriza a leitura de cada informação antes do envio. As edições atualizam seus estados; o envio cria ou atualiza o cadastro, informa processamento, sucesso ou erro e evita reenvio. Para atualizar, exige identificação e versão disponíveis, bloqueando o comando sem perder o que foi editado se a versão não estiver disponível.",
+    "contentRef": "base",
     "capabilityRefs": [
+      "setCreateProfissionalDetails",
+      "setCreateProfissionalDetailsIdentification",
+      "setCreateProfissionalDetailsIdentificationName",
+      "setCreateProfissionalDetailsIdentificationDocType",
+      "setCreateProfissionalDetailsIdentificationDocId",
+      "setCreateProfissionalDetailsIdentificationCountryCode",
+      "setCreateProfissionalDetailsBase",
+      "setCreateProfissionalDetailsPerson",
+      "setCreateProfissionalDetailsPersonOccupation",
+      "setCreateProfissionalDetailsPersonPrivacyConsent",
+      "setCreateProfissionalDetailsGeneral",
+      "setCreateProfissionalDetailsAgendaClinica",
+      "createProfissional",
       "setUpdateProfissionalDetails",
       "setUpdateProfissionalDetailsIdentification",
       "setUpdateProfissionalDetailsIdentificationName",
@@ -57,21 +63,21 @@ export const descriptions = [
         "candidates": [
           "groupentertext--ml-enter-text"
         ],
-        "reason": "Há entrada textual editável, incluindo nome e identificadores documentais."
+        "reason": "Oferece entrada direta por toque para os dados textuais editáveis do cadastro."
       },
       {
         "groupId": "groupEnterBoolean",
         "candidates": [
           "groupenterboolean--ml-checkbox-preference"
         ],
-        "reason": "O consentimento de privacidade é uma decisão booleana editável."
+        "reason": "Permite registrar o consentimento de privacidade de forma reconhecível e acessível."
       },
       {
         "groupId": "groupTriggerAction",
         "candidates": [
           "grouptriggeraction--ml-button-standard"
         ],
-        "reason": "A atualização é um comando confirmado pelo profissional."
+        "reason": "Os comandos de criar e atualizar precisam de acionamento explícito com estado de carregamento."
       },
       {
         "groupId": "groupNotifyUser",
@@ -79,14 +85,7 @@ export const descriptions = [
           "groupnotifyuser--ml-contextual-feedback",
           "groupnotifyuser--ml-toast-notification"
         ],
-        "reason": "O formulário precisa comunicar validação, falha e confirmação do comando."
-      },
-      {
-        "groupId": "groupShowProgress",
-        "candidates": [
-          "groupshowprogress--ml-linear-progress"
-        ],
-        "reason": "O comando de atualização possui estado de carregamento."
+        "reason": "Dá retorno acessível para validação, falha e sucesso do envio."
       }
     ]
   }
@@ -105,14 +104,12 @@ export const pipeline = [
     "dependsOn": [
       "dados_profissional__l2_shared"
     ],
-    "categoryRef": "entityRecordManagement",
+    "categoryRef": "masterDataManagement",
     "skills": [
       "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
-      "_102020_/l2/agentDefsL2/skills/pageCategories/entityRecordManagement.md",
+      "_102020_/l2/agentDefsL2/skills/pageCategories/masterDataManagement.md",
       "_102040_/l2/molecules/groupviewdata/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
-      "_102040_/l2/molecules/groupshowprogress/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts",
       "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts",
       "_102040_/l2/molecules/groupentertext/index.defs.ts",

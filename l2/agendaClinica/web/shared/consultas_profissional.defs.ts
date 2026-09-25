@@ -1,5 +1,5 @@
 export const definition = {
-  "schemaVersion": "2026-09-23-agent-defs-l2-shared-v2",
+  "schemaVersion": "2026-09-24-agent-defs-l2-shared-v3",
   "moduleName": "agendaClinica",
   "pageId": "consultas_profissional",
   "pageName": "Agenda do dia",
@@ -214,18 +214,6 @@ export const definition = {
     }
   ],
   "actions": [
-    {
-      "actionId": "setRegistrarAtendimentoId",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.consultas_profissional.registrarAtendimento.input.id"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.consultas_profissional.registrarAtendimento.input.id"
-    },
     {
       "actionId": "setRegistrarAtendimentoDetails",
       "kind": "stateSetter",
