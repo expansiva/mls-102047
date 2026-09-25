@@ -16,7 +16,7 @@ export const agendaClinicaWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "confirmarConsulta",
+      "journeyId": "confirmarConsultaPorTelefone",
       "inProcess": false
     },
     {

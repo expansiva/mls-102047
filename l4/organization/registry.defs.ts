@@ -7,88 +7,6 @@ export const solutionRegistry = {
   "level1SchemaVersion": "2026-09-15-mdm-ontology-v2",
   "modules": [
     {
-      "moduleName": "agendaClinica",
-      "actors": [
-        {
-          "actorId": "recepcionista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "profissional",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "agendaClinica.Paciente",
-          "namespace": "agendaClinica"
-        },
-        {
-          "subtype": "Person",
-          "roleTag": "agendaClinica.Profissional",
-          "namespace": "agendaClinica"
-        },
-        {
-          "subtype": "Person",
-          "roleTag": "agendaClinica.Recepcionista",
-          "namespace": "agendaClinica"
-        },
-        {
-          "subtype": "ContactChannel",
-          "roleTag": "agendaClinica.ContatoPaciente",
-          "namespace": "agendaClinica"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Paciente",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Profissional",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Recepcionista",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "ContatoPaciente",
-          "kind": "role",
-          "mdmSubtype": "ContactChannel",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Consulta",
-          "kind": "entity",
-          "class": "event"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "consultaConfirmada",
-          "on": "Consulta.confirmarConsulta"
-        },
-        {
-          "eventId": "faltaPacienteRegistrada",
-          "on": "Consulta.registrarFalta"
-        },
-        {
-          "eventId": "atendimentoRegistrado",
-          "on": "Consulta.registrarAtendimento"
-        }
-      ],
-      "updatedAt": "2026-09-18T07:12:10.397Z"
-    },
-    {
       "moduleName": "comandaRestaurante",
       "actors": [
         {
@@ -794,6 +712,84 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-09-20T10:52:08.240Z"
+    },
+    {
+      "moduleName": "agendaClinica",
+      "actors": [
+        {
+          "actorId": "recepcionista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "profissional",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "agendaClinica.Paciente",
+          "namespace": "agendaClinica"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "agendaClinica.Profissional",
+          "namespace": "agendaClinica"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "agendaClinica.Recepcionista",
+          "namespace": "agendaClinica"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "agendaClinica.ContatoPaciente",
+          "namespace": "agendaClinica"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Paciente",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Profissional",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Recepcionista",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "ContatoPaciente",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Consulta",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "registrarFalta",
+          "on": "Consulta.registrarFalta"
+        },
+        {
+          "eventId": "registrarAtendimento",
+          "on": "Consulta.registrarAtendimento"
+        }
+      ],
+      "updatedAt": "2026-09-25T11:24:15.402Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

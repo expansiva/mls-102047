@@ -8,31 +8,24 @@ export const agendarConsultaJourney = {
   "business": {
     "actorRef": "recepcionista",
     "title": "Agendar consulta",
-    "goal": "Marcar uma consulta para um paciente com um profissional em data e horário disponíveis.",
+    "goal": "Marcar uma consulta de um paciente com um profissional em data e horário disponíveis.",
     "entry": {
-      "mode": "coldStart"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarPacienteParaAgendamento",
+        "stepId": "localizarPaciente",
         "kind": "locate",
         "entity": "Paciente",
         "title": "x",
-        "description": "Localiza o paciente que receberá a consulta."
+        "description": "Localiza o paciente que receberá o atendimento."
       },
       {
         "stepId": "localizarProfissional",
         "kind": "locate",
         "entity": "Profissional",
         "title": "x",
-        "description": "Localiza o médico ou terapeuta que realizará a consulta."
-      },
-      {
-        "stepId": "consultarDisponibilidade",
-        "kind": "inspect",
-        "entity": "Consulta",
-        "title": "x",
-        "description": "Consulta os horários já ocupados do profissional na data pretendida."
+        "description": "Localiza o profissional que realizará a consulta."
       },
       {
         "stepId": "criarConsulta",
@@ -40,18 +33,18 @@ export const agendarConsultaJourney = {
         "entity": "Consulta",
         "effect": "create",
         "title": "x",
-        "description": "Registra a consulta para o paciente e o profissional selecionados, com data e hora. O agendamento somente é concluído se não houver outra consulta do mesmo profissional no mesmo horário."
+        "description": "Agenda a consulta para o paciente e o profissional selecionados, informando data e horário; o horário do profissional precisa estar disponível."
       }
     ],
     "outcome": {
-      "statement": "A consulta fica marcada em um horário disponível do profissional.",
+      "statement": "A consulta fica agendada para o paciente, profissional, data e horário definidos.",
       "evidence": [
-        "Consulta criada com paciente, profissional, data e hora.",
-        "Não há outra consulta do profissional no mesmo horário."
+        "Consulta criada com paciente, profissional, data e horário.",
+        "Horário passa a constar na agenda do profissional."
       ]
     }
   },
-  "businessHash": "sha256:92c7882e6189d1b4c7692c0e14545635cf3bd5f909a1437cbbf2b35545383c77"
+  "businessHash": "sha256:4acb7113f492c8dfb7dc1ac5c3298cb918796926c713056f807c402573811920"
 } as const satisfies Ns5JourneyArtifact;
 
 export type AgendarConsultaJourneyType = typeof agendarConsultaJourney;

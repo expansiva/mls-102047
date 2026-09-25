@@ -1,13 +1,13 @@
 {
   "moduleName": "agendaClinica",
-  "businessDomain": "Agenda clínica",
+  "businessDomain": "Agenda clínica para cadastro de pacientes, agendamento, confirmação e registro de atendimentos.",
   "entities": [
     {
       "entityId": "Paciente",
       "kind": "role",
       "family": "mdm",
       "title": "Paciente",
-      "description": "Pessoa cadastrada ou associada à clínica para receber consultas.",
+      "description": "Pessoa atendida pela clínica e vinculada ao cadastro mestre da organização.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "agendaClinica.Paciente",
@@ -18,7 +18,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Profissional",
-      "description": "Médico ou terapeuta da clínica que realiza consultas e acessa a própria agenda.",
+      "description": "Médico ou terapeuta da clínica para quem as consultas são agendadas e que registra os próprios atendimentos.",
       "displayField": "details.identification.name",
       "writer": "crud",
       "subtype": "Person",
@@ -30,7 +30,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Recepcionista",
-      "description": "Pessoa da clínica que cadastra pacientes e administra os agendamentos.",
+      "description": "Pessoa da clínica que atua no cadastro de pacientes, agendamento, confirmação telefônica e registro de faltas.",
       "displayField": "details.identification.name",
       "writer": "crud",
       "subtype": "Person",
@@ -42,7 +42,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Contato do paciente",
-      "description": "Canal de contato do paciente, usado para a confirmação telefônica da consulta.",
+      "description": "Canal de contato mestre vinculado ao paciente, utilizado para a confirmação telefônica de consultas.",
       "displayField": "details.identification.name",
       "subtype": "ContactChannel",
       "roleTag": "agendaClinica.ContatoPaciente",
@@ -53,7 +53,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Consulta",
-      "description": "Agendamento clínico de um paciente com um profissional em data e horário determinados, acompanhado até o atendimento ou a falta.",
+      "description": "Agendamento de atendimento de um paciente com um profissional em data e horário definidos, incluindo confirmação, falta ou atendimento realizado.",
       "displayField": "scheduledAt",
       "class": "event",
       "storage": {
@@ -65,34 +65,34 @@
   ],
   "relationships": [
     {
-      "relationshipId": "patientContacts",
-      "from": "Paciente",
-      "to": "ContatoPaciente",
-      "type": "oneToMany",
-      "required": true,
-      "mode": "mdmRelationship",
-      "description": "O paciente possui canais de contato, incluindo telefone para confirmação da consulta.",
-      "catalogType": "HasContact"
-    },
-    {
-      "relationshipId": "appointmentPatient",
+      "relationshipId": "consultaPaciente",
       "from": "Consulta",
       "to": "Paciente",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é agendada para um único paciente.",
-      "field": "Consulta.patientId"
+      "description": "Cada consulta é agendada para um paciente.",
+      "field": "Consulta.pacienteId"
     },
     {
-      "relationshipId": "appointmentProfessional",
+      "relationshipId": "consultaProfissional",
       "from": "Consulta",
       "to": "Profissional",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é realizada por um único profissional.",
-      "field": "Consulta.professionalId"
+      "description": "Cada consulta é agendada para um profissional.",
+      "field": "Consulta.profissionalId"
+    },
+    {
+      "relationshipId": "pacienteHasContact",
+      "from": "Paciente",
+      "to": "ContatoPaciente",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "O paciente pode ter canais de contato mestre, inclusive telefone, para confirmação de consultas.",
+      "catalogType": "HasContact"
     }
   ],
   "normalizations": [

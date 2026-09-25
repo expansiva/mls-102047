@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:03:40.922Z",
+      "updatedAt": "2026-09-25T11:17:49.911Z",
       "artifactPaths": [
         "l4/agendaClinica/module.defs.ts"
       ],
@@ -31,15 +31,16 @@
           "kind": "ptToPtBR",
           "detail": "pt→pt-BR"
         }
-      ]
+      ],
+      "autoReason": "fast"
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:06:15.294Z",
+      "updatedAt": "2026-09-25T11:18:43.474Z",
       "artifactPaths": [
         "l4/agendaClinica/journeys/cadastrarPaciente.defs.ts",
         "l4/agendaClinica/journeys/agendarConsulta.defs.ts",
-        "l4/agendaClinica/journeys/confirmarConsulta.defs.ts",
+        "l4/agendaClinica/journeys/confirmarConsultaPorTelefone.defs.ts",
         "l4/agendaClinica/journeys/registrarFalta.defs.ts",
         "l4/agendaClinica/journeys/consultarAgendaDiaria.defs.ts",
         "l4/agendaClinica/journeys/registrarAtendimento.defs.ts",
@@ -59,19 +60,27 @@
           "journeyId": "agendarConsulta",
           "stepId": "criarConsulta",
           "detail": "transitionRef x dropped; effect is create."
+        },
+        {
+          "kind": "dropTransitionRef",
+          "journeyId": "confirmarConsultaPorTelefone",
+          "stepId": "registrarConfirmacaoTelefonica",
+          "detail": "transitionRef x dropped; effect is update."
         }
-      ]
+      ],
+      "autoReason": "fast"
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:06:26.229Z",
+      "updatedAt": "2026-09-25T11:18:54.345Z",
       "artifactPaths": [
         "l4/agendaClinica/workflows.defs.ts"
-      ]
+      ],
+      "autoReason": "fast"
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:09:15.721Z",
+      "updatedAt": "2026-09-25T11:22:15.160Z",
       "artifactPaths": [
         "l4/agendaClinica/ontology/Paciente.defs.ts",
         "l4/agendaClinica/ontology/Profissional.defs.ts",
@@ -122,6 +131,11 @@
           "detail": "Paciente.details.identification.subtype.values"
         },
         {
+          "kind": "tightened",
+          "entityId": "Paciente",
+          "detail": "Paciente.details.identification.docType.values"
+        },
+        {
           "kind": "namespaceEmpty",
           "entityId": "Paciente",
           "detail": "details.agendaClinica"
@@ -139,7 +153,7 @@
         {
           "kind": "tightened",
           "entityId": "Profissional",
-          "detail": "Profissional.details.person.occupation.required"
+          "detail": "Profissional.details.identification.docType.values"
         },
         {
           "kind": "namespaceEmpty",
@@ -157,11 +171,6 @@
           "detail": "Recepcionista.details.identification.subtype.values"
         },
         {
-          "kind": "tightened",
-          "entityId": "Recepcionista",
-          "detail": "Recepcionista.details.identification.docType.values"
-        },
-        {
           "kind": "namespaceEmpty",
           "entityId": "Recepcionista",
           "detail": "details.agendaClinica"
@@ -170,6 +179,16 @@
           "kind": "derivedFromPlatform",
           "entityId": "ContatoPaciente",
           "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "ContatoPaciente",
+          "detail": "ContatoPaciente.details.identification.subtype.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "ContatoPaciente",
+          "detail": "ContatoPaciente.details.identification.countryCode.pattern"
         },
         {
           "kind": "tightened",
@@ -189,16 +208,15 @@
       ],
       "citedRules": [
         "rule-foreign-namespace-refused",
-        "rule-delete-blocked-by-relationships",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-person-ssn-unique-for-us",
         "rule-person-privacy-consent-required-br-eu",
         "rule-contact-value-unique-per-type",
-        "uniqueProfessionalSchedule",
-        "consultationTransitionFlow",
-        "attendanceNoteRequired",
-        "professionalOwnAppointment"
+        "consultaHorarioProfissionalUnico",
+        "consultaSomenteAgendadaPodeRegistrarFalta",
+        "consultaSomenteAgendadaPodeRegistrarAtendimento",
+        "anotacaoObrigatoriaNoAtendimento",
+        "profissionalAtendeSomentePropriaConsulta"
       ],
       "citedCapabilities": [
         "read.byId",
@@ -210,86 +228,211 @@
         "inactivate",
         "link.contact",
         "listLinks",
+        "comment",
         "audit",
-        "locate.byTag",
-        "invite.login",
-        "statusHistory.read",
         "edit.moduleNamespace",
+        "statusHistory.read",
+        "invite.login",
         "link",
         "unlink",
         "locate.byColumn",
         "count",
         "listByForeignKey",
         "create",
+        "update",
         "transition",
         "uniqueKey",
         "read.mdmRecord"
-      ]
+      ],
+      "autoReason": "fast"
+    },
+    "judge35": {
+      "status": "approved",
+      "updatedAt": "2026-09-25T11:22:15.322Z",
+      "artifactPaths": [
+        "l4/agendaClinica/pipeline/judge35-draft.json"
+      ],
+      "noJudgeSignal": true,
+      "autoReason": "fast"
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:09:43.366Z",
+      "updatedAt": "2026-09-25T11:22:26.624Z",
       "artifactPaths": [
         "l4/agendaClinica/rules.defs.ts"
-      ]
+      ],
+      "autoReason": "fast"
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:11:32.498Z",
+      "updatedAt": "2026-09-25T11:23:48.191Z",
       "artifactPaths": [
         "l4/agendaClinica/access.defs.ts"
       ],
       "normalizations": [
         {
           "kind": "dropAnchorEntity",
-          "grantId": "recepcionistaCadastroPacientes",
-          "detail": "anchorEntity removed; organization is not own/assigned/related."
-        },
-        {
-          "kind": "dropAnchorEntity",
-          "grantId": "recepcionistaAgendaConsultas",
-          "detail": "anchorEntity removed; organization is not own/assigned/related."
-        },
-        {
-          "kind": "dropAnchorEntity",
-          "grantId": "recepcionistaLocalizarProfissionais",
+          "grantId": "recepcionistaGestaoAgenda",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
-      ]
+      ],
+      "autoReason": "fast"
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:12:10.213Z",
+      "updatedAt": "2026-09-25T11:24:15.208Z",
       "artifactPaths": [
         "l4/agendaClinica/integration.defs.ts"
-      ]
+      ],
+      "autoReason": "fast"
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:12:10.397Z",
+      "updatedAt": "2026-09-25T11:24:15.413Z",
       "artifactPaths": [
         "l4/agendaClinica/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
         "l5/config.json",
         "l5/project.json"
-      ]
+      ],
+      "autoReason": "fast"
     }
   },
   "sourcePrompt": "criar o módulo agendaClinica em português. a clínica tem profissionais (médicos e terapeutas) e pacientes. a recepcionista cadastra pacientes, marca consultas para um profissional em data e hora, confirma por telefone, e registra falta quando o paciente não vem. o profissional vê só a própria agenda do dia e marca a consulta como atendida com uma anotação. não pode haver duas consultas do mesmo profissional no mesmo horário. dois perfis: recepcionista e profissional.",
   "invocation": {
-    "fast": false,
+    "fast": true,
     "module": "agendaClinica",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-21T22:53:07.250Z",
+  "updatedAt": "2026-09-25T11:24:15.413Z",
   "rebuildAll": {
     "deleted": [
+      "l1/agendaClinica/layer_1_external/adapters/http/controllers/README.md",
+      "l1/agendaClinica/layer_1_external/adapters/http/controllers/consultas_profissional.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/http/controllers/consultas_recepcionista.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/http/controllers/dados_profissional.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/http/controllers/dados_recepcionista.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/http/controllers/pacientes.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/http/controllers/profissionais.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/integration/outbound.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/persistence/README.md",
+      "l1/agendaClinica/layer_1_external/adapters/persistence/consulta.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/persistence/consultaRepositoryAdapter.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/persistence/registerRepositories.defs.ts",
+      "l1/agendaClinica/layer_1_external/adapters/persistence/seeds.defs.ts",
+      "l1/agendaClinica/layer_1_external/auth/authorityMap.defs.ts",
+      "l1/agendaClinica/layer_2_application/ports/consultaRepository.defs.ts",
+      "l1/agendaClinica/layer_2_application/scope/accessScope.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/confirmarConsulta.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/createConsulta.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/createPaciente.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/createProfissional.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/createRecepcionista.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/listConsulta.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/listPaciente.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/listProfissional.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/listRecepcionista.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/registrarAtendimento.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/registrarFalta.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/updateProfissional.defs.ts",
+      "l1/agendaClinica/layer_2_application/usecases/updateRecepcionista.defs.ts",
+      "l1/agendaClinica/layer_3_domain/entities/consulta.defs.ts",
+      "l1/agendaClinica/layer_3_domain/entities/contatoPaciente.defs.ts",
+      "l1/agendaClinica/layer_3_domain/entities/paciente.defs.ts",
+      "l1/agendaClinica/layer_3_domain/entities/profissional.defs.ts",
+      "l1/agendaClinica/layer_3_domain/entities/recepcionista.defs.ts",
+      "l1/agendaClinica/pipeline/agentDefsL1/drafts/controllers60.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/drafts/domain30.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/drafts/persistence40.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/drafts/support70.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/drafts/usecases50-work.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/drafts/usecases50.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/input.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/pipeline.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/report.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/controllers60controllers60.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/domain30domain30.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/persistence40persistence40.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/support70support70.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-confirmarConsulta.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-createConsulta.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-createPaciente.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-createProfissional.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-createRecepcionista.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-listConsulta.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-listPaciente.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-listProfissional.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-listRecepcionista.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-registrarAtendimento.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-registrarFalta.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-updateProfissional.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50-updateRecepcionista.json",
+      "l1/agendaClinica/pipeline/agentDefsL1/traces/usecases50usecases50.json",
+      "l1/agendaClinica/pipeline/pipeline.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/drafts/consultas_profissional.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/drafts/consultas_recepcionista.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/drafts/dados_profissional.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/drafts/dados_recepcionista.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/drafts/pacientes.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/drafts/profissionais.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/results/consultas_profissional.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/results/consultas_recepcionista.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/results/dados_profissional.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/results/dados_recepcionista.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/results/pacientes.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/contracts30/results/profissionais.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/finalize60/ownership.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/finalize60/report.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/input.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/inputReport.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/pages.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/pages50/results/consultas_profissional.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/pages50/results/consultas_recepcionista.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/pages50/results/dados_profissional.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/pages50/results/dados_recepcionista.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/pages50/results/pacientes.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/pages50/results/profissionais.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/pipeline.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/shared.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/shared40/results/consultas_profissional.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/shared40/results/consultas_recepcionista.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/shared40/results/dados_profissional.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/shared40/results/dados_recepcionista.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/shared40/results/pacientes.json",
+      "l2/agendaClinica/pipeline/agentDefsL2/shared40/results/profissionais.json",
+      "l2/agendaClinica/pipeline/menu20-draft.json",
+      "l2/agendaClinica/pipeline/pipeline.json",
+      "l2/agendaClinica/web/contracts/consultas_profissional.defs.ts",
+      "l2/agendaClinica/web/contracts/consultas_recepcionista.defs.ts",
+      "l2/agendaClinica/web/contracts/dados_profissional.defs.ts",
+      "l2/agendaClinica/web/contracts/dados_recepcionista.defs.ts",
+      "l2/agendaClinica/web/contracts/pacientes.defs.ts",
+      "l2/agendaClinica/web/contracts/profissionais.defs.ts",
+      "l2/agendaClinica/web/desktop/page11/consultas_profissional.defs.ts",
+      "l2/agendaClinica/web/desktop/page11/consultas_recepcionista.defs.ts",
+      "l2/agendaClinica/web/desktop/page11/dados_profissional.defs.ts",
+      "l2/agendaClinica/web/desktop/page11/dados_recepcionista.defs.ts",
+      "l2/agendaClinica/web/desktop/page11/pacientes.defs.ts",
+      "l2/agendaClinica/web/desktop/page11/profissionais.defs.ts",
+      "l2/agendaClinica/web/mobile/page11/consultas_profissional.defs.ts",
+      "l2/agendaClinica/web/mobile/page11/consultas_recepcionista.defs.ts",
+      "l2/agendaClinica/web/mobile/page11/dados_profissional.defs.ts",
+      "l2/agendaClinica/web/mobile/page11/dados_recepcionista.defs.ts",
+      "l2/agendaClinica/web/mobile/page11/pacientes.defs.ts",
+      "l2/agendaClinica/web/mobile/page11/profissionais.defs.ts",
+      "l2/agendaClinica/web/shared/consultas_profissional.defs.ts",
+      "l2/agendaClinica/web/shared/consultas_recepcionista.defs.ts",
+      "l2/agendaClinica/web/shared/dados_profissional.defs.ts",
+      "l2/agendaClinica/web/shared/dados_recepcionista.defs.ts",
+      "l2/agendaClinica/web/shared/pacientes.defs.ts",
+      "l2/agendaClinica/web/shared/profissionais.defs.ts",
       "l4/agendaClinica/access.defs.ts",
       "l4/agendaClinica/integration.defs.ts",
       "l4/agendaClinica/journeys/agendarConsulta.defs.ts",
       "l4/agendaClinica/journeys/cadastrarPaciente.defs.ts",
       "l4/agendaClinica/journeys/confirmarConsulta.defs.ts",
-      "l4/agendaClinica/journeys/consultarAgendaDoDia.defs.ts",
+      "l4/agendaClinica/journeys/consultarAgendaDiaria.defs.ts",
       "l4/agendaClinica/journeys/index.defs.ts",
       "l4/agendaClinica/journeys/registrarAtendimento.defs.ts",
       "l4/agendaClinica/journeys/registrarFalta.defs.ts",
@@ -298,319 +441,46 @@
       "l4/agendaClinica/ontology/ContatoPaciente.defs.ts",
       "l4/agendaClinica/ontology/Paciente.defs.ts",
       "l4/agendaClinica/ontology/Profissional.defs.ts",
+      "l4/agendaClinica/ontology/Recepcionista.defs.ts",
       "l4/agendaClinica/ontology/index.defs.ts",
       "l4/agendaClinica/pipeline/access60-draft.json",
       "l4/agendaClinica/pipeline/finalize-report.json",
       "l4/agendaClinica/pipeline/integration70-draft.json",
       "l4/agendaClinica/pipeline/journeys20-draft.json",
       "l4/agendaClinica/pipeline/module10-draft.json",
-      "l4/agendaClinica/pipeline/ontology30-Consulta-draft.json",
-      "l4/agendaClinica/pipeline/ontology30-ContatoPaciente-draft.json",
-      "l4/agendaClinica/pipeline/ontology30-Paciente-draft.json",
-      "l4/agendaClinica/pipeline/ontology30-Profissional-draft.json",
       "l4/agendaClinica/pipeline/ontology30-draft.json",
+      "l4/agendaClinica/pipeline/ontology30-entity-Consulta-draft.json",
+      "l4/agendaClinica/pipeline/ontology30-entity-ContatoPaciente-draft.json",
+      "l4/agendaClinica/pipeline/ontology30-entity-Paciente-draft.json",
+      "l4/agendaClinica/pipeline/ontology30-entity-Profissional-draft.json",
+      "l4/agendaClinica/pipeline/ontology30-entity-Recepcionista-draft.json",
       "l4/agendaClinica/pipeline/ontology30-plan-draft.json",
       "l4/agendaClinica/pipeline/pipeline.json",
       "l4/agendaClinica/pipeline/rules40-draft.json",
       "l4/agendaClinica/pipeline/run01_newsolution5.json",
       "l4/agendaClinica/pipeline/workflows50-draft.json",
+      "l4/agendaClinica/pool/l1/20260921224728_agendaClinica-20260921224728_1.json",
+      "l4/agendaClinica/pool/l1/20260921225305_agendaClinica-20260921224728_1.json",
+      "l4/agendaClinica/pool/l1/web/l4diff.json",
+      "l4/agendaClinica/pool/l1/web/needs.json",
+      "l4/agendaClinica/pool/l2/20260921224728_agendaClinica-20260921224728_1.json",
+      "l4/agendaClinica/pool/l2/20260921225306_agendaClinica-20260921224728_1.json",
+      "l4/agendaClinica/pool/l2/web/backend.json",
+      "l4/agendaClinica/pool/l2/web/effort.json",
+      "l4/agendaClinica/pool/l2/web/l4diff.json",
+      "l4/agendaClinica/pool/l2/web/menu.json",
+      "l4/agendaClinica/pool/l4/20260921225307_agendaClinica-20260921224728_1.json",
+      "l4/agendaClinica/pool/l4/20260923125306_agendaClinica-20260921224728_1.json",
       "l4/agendaClinica/rules.defs.ts",
-      "l4/agendaClinica/workflows.defs.ts"
+      "l4/agendaClinica/workflows.defs.ts",
+      "l4/agendaClinica/workspace-model.defs.ts",
+      "l4/agendaClinica/workspaces/overview.defs.ts"
     ],
     "edited": [
       "l4/organization/registry.defs.ts",
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-09-18T07:03:40.912Z"
-  },
-  "pool": [
-    {
-      "at": "2026-09-19T09:17:50.063Z",
-      "file": "l4/agendaClinica/pool/l2/20260919091750_agendaClinica-20260919091750_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "agendaClinica-20260919091750",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-19T09:17:50.063Z",
-      "file": "l4/agendaClinica/pool/l1/20260919091750_agendaClinica-20260919091750_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "agendaClinica-20260919091750",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:28:12.585Z",
-      "file": "l4/agendaClinica/pool/l1/20260919091750_agendaClinica-20260919091750_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "agendaClinica-20260919091750",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T17:28:12.585Z",
-      "file": "l4/agendaClinica/pool/l2/20260919091750_agendaClinica-20260919091750_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "agendaClinica-20260919091750",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T17:28:12.934Z",
-      "file": "l4/agendaClinica/pool/l2/20260921172812_agendaClinica-20260921172812_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:28:12.934Z",
-      "file": "l4/agendaClinica/pool/l1/20260921172812_agendaClinica-20260921172812_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:33:58.455Z",
-      "file": "l4/agendaClinica/pool/l1/20260921173358_agendaClinica-20260921172812_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:33:59.015Z",
-      "file": "l4/agendaClinica/pool/l2/20260921173358_agendaClinica-20260921172812_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T21:40:47.613Z",
-      "file": "l4/agendaClinica/pool/l1/20260921172812_agendaClinica-20260921172812_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T21:40:47.613Z",
-      "file": "l4/agendaClinica/pool/l1/20260921173358_agendaClinica-20260921172812_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T21:40:47.613Z",
-      "file": "l4/agendaClinica/pool/l2/20260921172812_agendaClinica-20260921172812_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T21:40:47.613Z",
-      "file": "l4/agendaClinica/pool/l2/20260921173358_agendaClinica-20260921172812_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T21:40:47.613Z",
-      "file": "l4/agendaClinica/pool/l4/20260921173359_agendaClinica-20260921172812_1.json",
-      "from": "l2",
-      "to": "l4",
-      "thread": "agendaClinica-20260921172812",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T21:40:48.041Z",
-      "file": "l4/agendaClinica/pool/l2/20260921214048_agendaClinica-20260921214048_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T21:40:48.041Z",
-      "file": "l4/agendaClinica/pool/l1/20260921214048_agendaClinica-20260921214048_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T21:44:53.100Z",
-      "file": "l4/agendaClinica/pool/l1/20260921214452_agendaClinica-20260921214048_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T21:44:53.651Z",
-      "file": "l4/agendaClinica/pool/l2/20260921214453_agendaClinica-20260921214048_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T22:47:28.166Z",
-      "file": "l4/agendaClinica/pool/l1/20260921214048_agendaClinica-20260921214048_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T22:47:28.166Z",
-      "file": "l4/agendaClinica/pool/l1/20260921214452_agendaClinica-20260921214048_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T22:47:28.166Z",
-      "file": "l4/agendaClinica/pool/l2/20260921214048_agendaClinica-20260921214048_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T22:47:28.166Z",
-      "file": "l4/agendaClinica/pool/l2/20260921214453_agendaClinica-20260921214048_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T22:47:28.166Z",
-      "file": "l4/agendaClinica/pool/l4/20260921214453_agendaClinica-20260921214048_1.json",
-      "from": "l2",
-      "to": "l4",
-      "thread": "agendaClinica-20260921214048",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T22:47:28.619Z",
-      "file": "l4/agendaClinica/pool/l2/20260921224728_agendaClinica-20260921224728_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "agendaClinica-20260921224728",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T22:47:28.619Z",
-      "file": "l4/agendaClinica/pool/l1/20260921224728_agendaClinica-20260921224728_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "agendaClinica-20260921224728",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T22:53:05.953Z",
-      "file": "l4/agendaClinica/pool/l1/20260921225305_agendaClinica-20260921224728_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "agendaClinica-20260921224728",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T22:53:06.622Z",
-      "file": "l4/agendaClinica/pool/l2/20260921225306_agendaClinica-20260921224728_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "agendaClinica-20260921224728",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    }
-  ],
-  "poolWiped": [
-    "l4/agendaClinica/pool/l1/20260921214048_agendaClinica-20260921214048_1.json",
-    "l4/agendaClinica/pool/l1/20260921214452_agendaClinica-20260921214048_1.json",
-    "l4/agendaClinica/pool/l1/web/l4diff.json",
-    "l4/agendaClinica/pool/l1/web/needs.json",
-    "l4/agendaClinica/pool/l2/20260921214048_agendaClinica-20260921214048_1.json",
-    "l4/agendaClinica/pool/l2/20260921214453_agendaClinica-20260921214048_1.json",
-    "l4/agendaClinica/pool/l2/web/l4diff.json",
-    "l4/agendaClinica/pool/l2/web/menu.json",
-    "l4/agendaClinica/pool/l2/web/backend.json",
-    "l4/agendaClinica/pool/l2/web/effort.json",
-    "l4/agendaClinica/pool/l4/20260921214453_agendaClinica-20260921214048_1.json"
-  ],
-  "plOrchestration": [
-    {
-      "round": 1,
-      "l2": "done",
-      "l1": "done",
-      "effort": "done"
-    },
-    {
-      "round": 2,
-      "l2": "skipped",
-      "l1": "skipped",
-      "effort": "skipped"
-    }
-  ]
+    "at": "2026-09-25T11:17:49.904Z"
+  }
 }

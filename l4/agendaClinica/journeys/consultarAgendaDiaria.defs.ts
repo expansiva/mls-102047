@@ -8,34 +8,34 @@ export const consultarAgendaDiariaJourney = {
   "business": {
     "actorRef": "profissional",
     "title": "Consultar agenda diária",
-    "goal": "Visualizar apenas as próprias consultas do dia.",
+    "goal": "Ver as próprias consultas do dia.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarMinhasConsultasDoDia",
+        "stepId": "localizarConsultasDoDia",
         "kind": "locate",
         "entity": "Consulta",
         "title": "x",
-        "description": "Localiza as consultas do dia vinculadas ao próprio profissional."
+        "description": "Localiza as consultas do dia atribuídas ao próprio profissional."
       },
       {
         "stepId": "inspecionarAgendaDiaria",
         "kind": "inspect",
         "entity": "Consulta",
         "title": "x",
-        "description": "Consulta os horários e os dados necessários das próprias consultas do dia."
+        "description": "Consulta os dados das próprias consultas agendadas para o dia."
       }
     ],
     "outcome": {
-      "statement": "O profissional visualiza sua agenda diária sem acesso às agendas dos demais profissionais.",
+      "statement": "O profissional visualiza sua agenda diária.",
       "evidence": [
-        "Lista de consultas do dia vinculadas ao profissional autenticado."
+        "Lista das consultas do dia atribuídas ao profissional."
       ]
     }
   },
-  "businessHash": "sha256:bc8e664418886361b0408161bcf6aa7e1ac00567d16857b3f86e448fac84ebf0"
+  "businessHash": "sha256:b2e7e9e057958fdba74e485548382294dcfd94153b56e3b311a58177458852e1"
 } as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarAgendaDiariaJourneyType = typeof consultarAgendaDiariaJourney;

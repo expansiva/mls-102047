@@ -14,38 +14,38 @@ export const registrarAtendimentoJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarMinhaConsulta",
+        "stepId": "localizarConsultaPropria",
         "kind": "locate",
         "entity": "Consulta",
         "title": "x",
-        "description": "Localiza uma consulta vinculada ao próprio profissional."
+        "description": "Localiza uma consulta atribuída ao próprio profissional."
       },
       {
-        "stepId": "inspecionarMinhaConsulta",
+        "stepId": "inspecionarConsultaPropria",
         "kind": "inspect",
         "entity": "Consulta",
         "title": "x",
-        "description": "Confere os dados da própria consulta antes de concluir o atendimento."
+        "description": "Confere os dados da consulta antes de registrar o atendimento."
       },
       {
-        "stepId": "registrarAtendimentoRealizado",
+        "stepId": "registrarConsultaAtendida",
         "kind": "act",
         "entity": "Consulta",
         "effect": "transition",
         "transitionRef": "registrarAtendimento",
         "title": "x",
-        "description": "Marca a consulta como atendida e registra a anotação do profissional sobre o atendimento."
+        "description": "Marca a consulta como atendida e registra a anotação do atendimento."
       }
     ],
     "outcome": {
-      "statement": "A consulta fica registrada como atendida com a anotação do profissional.",
+      "statement": "A consulta fica marcada como atendida com a anotação registrada.",
       "evidence": [
-        "Situação da consulta registrada como atendida.",
+        "Situação da consulta indicada como atendida.",
         "Anotação do atendimento disponível na consulta."
       ]
     }
   },
-  "businessHash": "sha256:ed3afb283a60e389c01776d5c9f233e59e9467dd340e45b58264aa738dd0fe5e"
+  "businessHash": "sha256:061e5a0843885cf0879a4ed9e55e1569542b953462c7489873d78f4ab5023830"
 } as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarAtendimentoJourneyType = typeof registrarAtendimentoJourney;

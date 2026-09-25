@@ -17,7 +17,7 @@ export const agendaClinicaJourneyIndex = {
       "title": "Agendar consulta"
     },
     {
-      "journeyId": "confirmarConsulta",
+      "journeyId": "confirmarConsultaPorTelefone",
       "actorRef": "recepcionista",
       "title": "Confirmar consulta por telefone"
     },

@@ -4,19 +4,19 @@
     "moduleName": "agendaClinica",
     "entityId": "Recepcionista",
     "title": "Recepcionista",
-    "description": "Pessoa da clínica que cadastra pacientes e administra os agendamentos.",
+    "description": "Pessoa da clínica que atua no cadastro de pacientes, agendamento, confirmação telefônica e registro de faltas.",
     "displayField": "details.identification.name",
     "relationships": {},
     "capabilities": {
-      "read.byId": "Lê a recepcionista pelo identificador mestre, por consulta direta no índice e no documento, para telas internas que já possuem seu registro.",
-      "locate.byName": "Localiza recepcionistas pelo nome, pesquisando o índice de pessoas, para quem administra os cadastros da clínica.",
-      "locate.byDocument": "Localiza uma recepcionista pelo documento nacional, para evitar duplicidade durante seu cadastro interno.",
-      "register.createOrAttach": "Cria ou vincula a pessoa existente ao papel de recepcionista, conferindo documento e aplicando a tag do módulo, para o responsável interno pelo cadastro.",
-      "edit.platformFields": "Atualiza nome, documento e demais dados mantidos pela plataforma, reindexando a identificação quando necessário, para quem mantém o cadastro da recepcionista.",
-      "edit.moduleNamespace": "Atualiza somente o espaço agendaClinica da recepcionista, protegido da escrita de outros módulos, para a administração do módulo.",
-      "inactivate": "Inativa ou reativa a recepcionista sem apagar seu registro mestre, alterando a situação da plataforma, para quem mantém os cadastros internos.",
-      "audit": "Exibe quem alterou os dados da recepcionista e quando, pela auditoria do registro mestre, para a administração da clínica.",
-      "invite.login": "Concede convite de acesso à recepcionista, criando o identificador de login no índice da organização, para quem administra os acessos internos."
+      "read.byId": "Consulta uma recepcionista pelo identificador mestre, por leitura direta no índice e no documento, para telas da clínica que já possuem seu registro.",
+      "locate.byName": "Localiza recepcionistas pelo nome no índice de pessoas, para a clínica encontrar ou conferir o cadastro antes de usá-lo.",
+      "locate.byDocument": "Localiza uma recepcionista pelo documento nacional, consultando o índice para evitar que a clínica duplique a mesma pessoa.",
+      "register.createOrAttach": "Cria a pessoa quando ela não existe ou anexa o papel de Recepcionista quando já existe, por deduplicação documental e gravação da marca de papel, para a organização cadastrar a equipe de recepção.",
+      "edit.platformFields": "Atualiza os dados de identificação da recepcionista nos campos mantidos pela plataforma, reindexando a identificação quando necessário, para a clínica manter o cadastro correto.",
+      "inactivate": "Inativa ou reativa o registro mestre da recepcionista pela situação da plataforma, para a clínica retirar uma recepcionista que não atua mais sem apagar seu histórico.",
+      "statusHistory.read": "Exibe o histórico de mudanças de situação do registro mestre, consultando o histórico da plataforma, para a clínica acompanhar inativações e reativações.",
+      "audit": "Exibe quem alterou os dados da recepcionista e quando, pela auditoria imutável da plataforma, para a clínica realizar conferências administrativas.",
+      "invite.login": "Habilita o acesso da recepcionista por convite, criando o índice de login vinculado ao mesmo registro mestre, para que ela entre no módulo com o perfil de recepcionista."
     },
     "rules": [
       "rule-foreign-namespace-refused",
@@ -42,12 +42,13 @@
           "type": "integer",
           "required": true,
           "derived": true,
+          "writePrecondition": true,
           "description": "Bumped by the engine on every write; optimistic concurrency."
         },
         "details": {
           "type": "object",
           "required": true,
-          "description": "Documento mestre da pessoa, com dados da plataforma e o espaço exclusivo do módulo agenda clínica.",
+          "description": "Registro mestre da pessoa que exerce o papel de recepcionista na clínica.",
           "fields": {
             "identification": {
               "type": "object",
@@ -62,11 +63,11 @@
                     {
                       "value": "Person",
                       "title": "Pessoa",
-                      "description": "Pessoa física."
+                      "description": "Pessoa física que atua como recepcionista."
                     }
                   ],
-                  "description": "Indica que este registro mestre representa uma pessoa.",
-                  "title": "Tipo de registro",
+                  "description": "Subtipo do registro mestre, definido pela plataforma como pessoa.",
+                  "title": "Subtipo",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -89,27 +90,27 @@
                   "values": [
                     {
                       "value": "Active",
-                      "title": "Ativo",
-                      "description": "Registro disponível para uso."
+                      "title": "Ativa",
+                      "description": "Recepcionista disponível no cadastro mestre."
                     },
                     {
                       "value": "Inactive",
-                      "title": "Inativo",
-                      "description": "Registro fora de uso."
+                      "title": "Inativa",
+                      "description": "Recepcionista inativada no cadastro mestre."
                     },
                     {
                       "value": "Merged",
-                      "title": "Mesclado",
-                      "description": "Registro incorporado a outro registro mestre."
+                      "title": "Unificada",
+                      "description": "Registro unificado a outro registro mestre."
                     },
                     {
                       "value": "Blocked",
-                      "title": "Bloqueado",
-                      "description": "Registro bloqueado pela organização."
+                      "title": "Bloqueada",
+                      "description": "Registro bloqueado pela plataforma."
                     }
                   ],
-                  "title": "Situação do cadastro",
-                  "description": "Situação ativa, inativa, mesclada ou bloqueada do registro mestre da recepcionista.",
+                  "title": "Situação",
+                  "description": "Situação do registro mestre da recepcionista, controlada pela plataforma.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -119,28 +120,53 @@
                   "indexed": true,
                   "values": [
                     {
+                      "value": "SSN",
+                      "title": "SSN",
+                      "description": "Número de seguridade social."
+                    },
+                    {
+                      "value": "EIN",
+                      "title": "EIN",
+                      "description": "Número de identificação empresarial."
+                    },
+                    {
+                      "value": "Passport",
+                      "title": "Passaporte",
+                      "description": "Documento de passaporte."
+                    },
+                    {
+                      "value": "DriversLicense",
+                      "title": "Carteira de motorista",
+                      "description": "Documento de habilitação."
+                    },
+                    {
+                      "value": "NationalId",
+                      "title": "Documento nacional",
+                      "description": "Documento nacional de identidade."
+                    },
+                    {
                       "value": "CPF",
                       "title": "CPF",
                       "description": "Cadastro de Pessoas Físicas."
                     },
                     {
-                      "value": "Passport",
-                      "title": "Passaporte",
-                      "description": "Documento de viagem."
+                      "value": "CNPJ",
+                      "title": "CNPJ",
+                      "description": "Cadastro Nacional da Pessoa Jurídica."
                     },
                     {
-                      "value": "NationalId",
-                      "title": "Documento nacional",
-                      "description": "Documento nacional de identificação."
+                      "value": "VAT",
+                      "title": "VAT",
+                      "description": "Identificação tributária."
                     },
                     {
                       "value": "Other",
                       "title": "Outro",
-                      "description": "Outro documento de identificação."
+                      "description": "Outro documento aceito pela plataforma."
                     }
                   ],
                   "title": "Tipo de documento",
-                  "description": "Tipo do documento nacional usado para identificar a recepcionista.",
+                  "description": "Tipo do documento nacional usado para identificar e evitar duplicidade da recepcionista.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -148,7 +174,7 @@
                 "docId": {
                   "type": "string",
                   "indexed": true,
-                  "description": "Número do documento nacional da recepcionista.",
+                  "description": "Número do documento nacional da recepcionista, usado na deduplicação do registro mestre.",
                   "title": "Número do documento",
                   "maxLength": 0,
                   "min": 0,
@@ -159,33 +185,33 @@
                   "required": true,
                   "indexed": true,
                   "pattern": "^[A-Z]{2}$",
-                  "maxLength": 2,
+                  "maxLength": 0,
                   "default": "US",
-                  "description": "Código ISO do país ao qual se aplicam o documento e as regras da recepcionista.",
-                  "title": "País",
+                  "description": "Código ISO do país ao qual pertencem o documento e as regras aplicáveis à recepcionista.",
+                  "title": "País do documento",
                   "min": 0,
                   "max": 0
                 }
               },
-              "description": "Dados de identificação da pessoa usados pela clínica para reconhecer e manter a recepcionista."
+              "description": "Dados de identificação da pessoa, mantidos pela plataforma e usados para reconhecer a recepcionista."
             },
             "base": {
               "type": "object",
               "owner": "platform",
               "fields": {},
-              "description": "Dados básicos da plataforma para esta pessoa; não há dado adicional deste grupo usado pela agenda clínica."
+              "description": "Ramo de dados básicos da plataforma; nenhum dado básico adicional é usado especificamente para o papel de recepcionista."
             },
             "person": {
               "type": "object",
               "owner": "platform",
               "fields": {},
-              "description": "Dados pessoais da plataforma; a agenda clínica não usa campos adicionais deste grupo para a recepcionista."
+              "description": "Ramo de dados pessoais da plataforma; nenhum dado pessoal adicional é usado especificamente para o papel de recepcionista."
             },
             "general": {
               "type": "object",
               "owner": "organization",
               "open": true,
-              "description": "Dados promovidos pela organização, somente para leitura pela agenda clínica."
+              "description": "Dados promovidos e mantidos pela organização, apenas disponíveis para leitura neste módulo."
             },
             "agendaClinica": {
               "type": "object",
@@ -208,11 +234,6 @@
       "kind": "tightened",
       "entityId": "Recepcionista",
       "detail": "Recepcionista.details.identification.subtype.values"
-    },
-    {
-      "kind": "tightened",
-      "entityId": "Recepcionista",
-      "detail": "Recepcionista.details.identification.docType.values"
     },
     {
       "kind": "namespaceEmpty",

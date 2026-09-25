@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 export const agendaClinicaOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
-  "businessDomain": "Agenda clínica",
+  "businessDomain": "Agenda clínica para cadastro de pacientes, agendamento, confirmação e registro de atendimentos.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "agendaClinica",
@@ -40,34 +40,34 @@ export const agendaClinicaOntologyIndex = {
   ],
   "relationships": [
     {
-      "relationshipId": "patientContacts",
-      "from": "Paciente",
-      "to": "ContatoPaciente",
-      "type": "oneToMany",
-      "required": true,
-      "mode": "mdmRelationship",
-      "description": "O paciente possui canais de contato, incluindo telefone para confirmação da consulta.",
-      "catalogType": "HasContact"
-    },
-    {
-      "relationshipId": "appointmentPatient",
+      "relationshipId": "consultaPaciente",
       "from": "Consulta",
       "to": "Paciente",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é agendada para um único paciente.",
-      "field": "Consulta.patientId"
+      "description": "Cada consulta é agendada para um paciente.",
+      "field": "Consulta.pacienteId"
     },
     {
-      "relationshipId": "appointmentProfessional",
+      "relationshipId": "consultaProfissional",
       "from": "Consulta",
       "to": "Profissional",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é realizada por um único profissional.",
-      "field": "Consulta.professionalId"
+      "description": "Cada consulta é agendada para um profissional.",
+      "field": "Consulta.profissionalId"
+    },
+    {
+      "relationshipId": "pacienteHasContact",
+      "from": "Paciente",
+      "to": "ContatoPaciente",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "O paciente pode ter canais de contato mestre, inclusive telefone, para confirmação de consultas.",
+      "catalogType": "HasContact"
     }
   ]
 } as const satisfies Ns5OntologyIndexV3;
