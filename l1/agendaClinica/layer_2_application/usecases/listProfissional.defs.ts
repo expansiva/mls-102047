@@ -92,16 +92,16 @@ export const definition = {
       {
         "kind": "mdm",
         "namespace": "agendaClinica",
-        "call": "listByType",
+        "call": "findByDocument",
         "entity": "Profissional",
-        "capability": "locate.byName"
+        "capability": "locate.byDocument"
       },
       {
         "kind": "mdm",
         "namespace": "agendaClinica",
-        "call": "findByDocument",
+        "call": "listByType",
         "entity": "Profissional",
-        "capability": "locate.byDocument"
+        "capability": "locate.byName"
       },
       {
         "kind": "mdm",

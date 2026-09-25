@@ -37,7 +37,25 @@ export const definition = {
         ],
         "scopeMode": "own",
         "session": "verified",
-        "path": [],
+        "path": [
+          {
+            "entityId": "Consulta",
+            "steps": [
+              {
+                "relationshipId": "consultaProfissional",
+                "from": "Consulta",
+                "to": "Profissional",
+                "field": "Consulta.profissionalId"
+              }
+            ],
+            "pending": ""
+          },
+          {
+            "entityId": "Profissional",
+            "steps": [],
+            "pending": ""
+          }
+        ],
         "pending": ""
       },
       {
@@ -54,7 +72,13 @@ export const definition = {
         ],
         "scopeMode": "related",
         "session": "verified",
-        "path": [],
+        "path": [
+          {
+            "entityId": "Paciente",
+            "steps": [],
+            "pending": ""
+          }
+        ],
         "pending": ""
       },
       {
@@ -105,7 +129,33 @@ export const definition = {
         ],
         "scopeMode": "organization",
         "session": "verified",
-        "path": [],
+        "path": [
+          {
+            "entityId": "Paciente",
+            "steps": [],
+            "pending": ""
+          },
+          {
+            "entityId": "Profissional",
+            "steps": [],
+            "pending": ""
+          },
+          {
+            "entityId": "Recepcionista",
+            "steps": [],
+            "pending": ""
+          },
+          {
+            "entityId": "ContatoPaciente",
+            "steps": [],
+            "pending": ""
+          },
+          {
+            "entityId": "Consulta",
+            "steps": [],
+            "pending": ""
+          }
+        ],
         "pending": ""
       }
     ]

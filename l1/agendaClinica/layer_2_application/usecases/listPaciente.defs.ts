@@ -107,16 +107,16 @@ export const definition = {
       {
         "kind": "mdm",
         "namespace": "agendaClinica",
-        "call": "listByType",
+        "call": "findByDocument",
         "entity": "Paciente",
-        "capability": "locate.byName"
+        "capability": "locate.byDocument"
       },
       {
         "kind": "mdm",
         "namespace": "agendaClinica",
-        "call": "findByDocument",
+        "call": "listByType",
         "entity": "Paciente",
-        "capability": "locate.byDocument"
+        "capability": "locate.byName"
       },
       {
         "kind": "mdm",

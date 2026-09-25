@@ -112,11 +112,6 @@ export const definition = {
         "source": "ctx"
       },
       {
-        "kind": "port",
-        "call": "transition",
-        "port": "ConsultaRepository"
-      },
-      {
         "kind": "rule",
         "ruleId": "consultaSomenteAgendadaPodeRegistrarFalta"
       },
@@ -124,6 +119,11 @@ export const definition = {
         "kind": "transition",
         "transitionId": "registrarFalta",
         "payload": []
+      },
+      {
+        "kind": "port",
+        "call": "transition",
+        "port": "ConsultaRepository"
       },
       {
         "kind": "effect",
