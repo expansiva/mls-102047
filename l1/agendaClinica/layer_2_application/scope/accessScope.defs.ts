@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "accessScope",
   "artifactId": "accessScope",
   "moduleName": "agendaClinica",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [],
   "data": {
     "scopeId": "accessScope",

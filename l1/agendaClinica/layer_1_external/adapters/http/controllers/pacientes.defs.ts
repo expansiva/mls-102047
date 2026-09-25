@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "httpController",
   "artifactId": "pacientes",
   "moduleName": "agendaClinica",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [
     "_102047_/l1/agendaClinica/layer_2_application/scope/accessScope.defs.ts",
     "_102047_/l1/agendaClinica/layer_2_application/usecases/createPaciente.defs.ts",
