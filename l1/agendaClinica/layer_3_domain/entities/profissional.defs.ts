@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "domainEntity",
   "artifactId": "Profissional",
   "moduleName": "agendaClinica",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [],
   "data": {
     "entityId": "Profissional",

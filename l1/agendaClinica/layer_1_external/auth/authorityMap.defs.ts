@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "authorityMap",
   "artifactId": "authorityMap",
   "moduleName": "agendaClinica",
-  "status": "pending",
+  "status": "blocked",
   "dependencies": [
     "_102047_/l1/agendaClinica/layer_2_application/scope/accessScope.defs.ts"
   ],

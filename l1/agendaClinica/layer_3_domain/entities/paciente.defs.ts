@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "domainEntity",
   "artifactId": "Paciente",
   "moduleName": "agendaClinica",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [],
   "data": {
     "entityId": "Paciente",

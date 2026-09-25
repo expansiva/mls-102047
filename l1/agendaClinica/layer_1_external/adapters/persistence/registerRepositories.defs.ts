@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "repositoryRegistration",
   "artifactId": "registerRepositories",
   "moduleName": "agendaClinica",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [
     "_102047_/l1/agendaClinica/layer_1_external/adapters/persistence/consultaRepositoryAdapter.defs.ts"
   ],
