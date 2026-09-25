@@ -11,14 +11,16 @@ export const agendaClinicaAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Recepcionista",
-      "description": "Cadastra pacientes, agenda consultas, confirma consultas por telefone e registra faltas."
+      "description": "Cadastra pacientes, agenda consultas, confirma consultas por telefone e registra faltas.",
+      "personEntity": "Recepcionista"
     },
     {
       "actorId": "profissional",
       "kind": "internal",
       "origin": "named",
       "title": "Profissional",
-      "description": "Consulta a própria agenda diária e registra o atendimento com uma anotação."
+      "description": "Consulta a própria agenda diária e registra o atendimento com uma anotação.",
+      "personEntity": "Profissional"
     }
   ],
   "grants": [
@@ -145,7 +147,7 @@ export const agendaClinicaAccess = {
       "dataScope": {
         "mode": "own",
         "description": "Abrange somente consultas vinculadas à pessoa autenticada, limitada à agenda do dia.",
-        "anchorEntity": "Paciente"
+        "anchorEntity": "Profissional"
       },
       "disclosure": {
         "mode": "fullRecord",
@@ -163,7 +165,7 @@ export const agendaClinicaAccess = {
       "dataScope": {
         "mode": "own",
         "description": "Abrange somente os pacientes vinculados à pessoa autenticada na agenda diária.",
-        "anchorEntity": "Paciente"
+        "anchorEntity": "Profissional"
       },
       "disclosure": {
         "mode": "fieldsOnly",

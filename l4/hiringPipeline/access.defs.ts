@@ -11,14 +11,16 @@ export const hiringPipelineAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Recruiter",
-      "description": "Opens job positions, registers candidates, manages applications through screening and interview, and records rejections."
+      "description": "Opens job positions, registers candidates, manages applications through screening and interview, and records rejections.",
+      "personEntity": ""
     },
     {
       "actorId": "hiringManager",
       "kind": "internal",
       "origin": "named",
       "title": "Hiring Manager",
-      "description": "Decides offers and hiring outcomes for applications to the positions they manage."
+      "description": "Decides offers and hiring outcomes for applications to the positions they manage.",
+      "personEntity": "HiringManager"
     }
   ],
   "grants": [
@@ -118,7 +120,7 @@ export const hiringPipelineAccess = {
       "dataScope": {
         "mode": "own",
         "description": "Only candidates reached through applications for job positions whose responsible hiring manager is the session person.",
-        "anchorEntity": "Candidate"
+        "anchorEntity": "HiringManager"
       },
       "disclosure": {
         "mode": "fieldsOnly",
