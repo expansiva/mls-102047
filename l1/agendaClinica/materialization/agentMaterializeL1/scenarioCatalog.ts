@@ -2,7 +2,7 @@
 
 // Declarative backend scenarios. A server loads this module as data.
 export const scenarioCatalog = {
-  "schemaVersion": "2026-09-25-m1-scenario-catalog-v1",
+  "schemaVersion": "2026-09-26-m1-scenario-catalog-v1.1",
   "moduleName": "agendaClinica",
   "store": "memory",
   "scenarios": [
@@ -33,6 +33,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         }
@@ -65,6 +66,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         }
@@ -97,6 +99,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         }
@@ -129,6 +132,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         }
@@ -161,6 +165,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         }
@@ -193,6 +198,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         }
@@ -228,6 +234,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -252,6 +263,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -273,6 +289,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -296,6 +313,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:profissional"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -319,6 +343,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:profissional"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         }
@@ -354,6 +385,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -378,6 +414,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -402,6 +443,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -426,6 +472,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -450,6 +501,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -474,6 +530,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -495,6 +556,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -518,6 +580,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:recepcionista"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -541,6 +610,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:recepcionista"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -564,6 +640,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:recepcionista"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -587,6 +670,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:recepcionista"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -610,6 +700,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:recepcionista"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -633,6 +730,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:recepcionista"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         }
@@ -665,6 +769,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -688,6 +793,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "createConsulta.reachesStub",
             "stage": "structure",
@@ -726,6 +832,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -749,6 +856,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "createPaciente.reachesStub",
             "stage": "structure",
@@ -787,6 +895,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -810,6 +919,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "listConsulta.reachesStub",
             "stage": "structure",
@@ -848,6 +958,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -871,6 +982,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "listPaciente.reachesStub",
             "stage": "structure",
@@ -909,6 +1021,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -932,6 +1045,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "listProfissional.reachesStub",
             "stage": "structure",
@@ -973,6 +1087,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -997,6 +1116,11 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -1018,6 +1142,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -1041,6 +1166,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:recepcionista"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         },
@@ -1064,6 +1196,13 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": [
+              "agendaClinica:recepcionista"
+            ]
+          },
           "mandatory": true,
           "synthetic": []
         }
@@ -1096,6 +1235,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -1119,6 +1259,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "registrarAtendimento.missingRecord",
             "stage": "structure",
@@ -1149,6 +1290,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "registrarAtendimento.reachesStub",
             "stage": "structure",
@@ -1187,6 +1329,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -1210,6 +1353,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "registrarFalta.missingRecord",
             "stage": "structure",
@@ -1240,6 +1384,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "registrarFalta.reachesStub",
             "stage": "structure",
@@ -1278,6 +1423,7 @@ export const scenarioCatalog = {
             "isolatedActorField": null
           },
           "expectedFailure": null,
+          "runner": "module",
           "mandatory": true,
           "synthetic": []
         },
@@ -1301,6 +1447,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "updateConsulta.missingRecord",
             "stage": "structure",
@@ -1331,6 +1478,7 @@ export const scenarioCatalog = {
             "forbiddenFields": [],
             "isolatedActorField": null
           },
+          "runner": "module",
           "expectedFailure": {
             "caseId": "updateConsulta.reachesStub",
             "stage": "structure",
