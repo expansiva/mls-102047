@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "usecase",
   "artifactId": "registrarAtendimento",
   "moduleName": "agendaClinica",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [
     "_102047_/l1/agendaClinica/layer_2_application/ports/consultaRepository.defs.ts",
     "_102047_/l1/agendaClinica/layer_3_domain/entities/consulta.defs.ts",
