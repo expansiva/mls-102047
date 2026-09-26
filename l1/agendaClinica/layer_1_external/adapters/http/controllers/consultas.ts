@@ -13,7 +13,8 @@ import type { UpdateConsultaInput } from '/_102047_/l2/agendaClinica/web/contrac
 import type { ListConsultaInput } from '/_102047_/l2/agendaClinica/web/contracts/consultas.defs.js';
 import type { ListPacienteInput } from '/_102047_/l2/agendaClinica/web/contracts/consultas.defs.js';
 import type { ListProfissionalInput } from '/_102047_/l2/agendaClinica/web/contracts/consultas.defs.js';
-import { pendingConsultaRepository } from '/_102047_/l1/agendaClinica/layer_2_application/ports/consultaRepository.js';
+import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
+import type { ConsultaRepository } from '/_102047_/l1/agendaClinica/layer_2_application/ports/consultaRepository.js';
 
 export const routes: ControllerRoute[] = [
   { key: 'agendaClinica.consultas.cmdCreateConsulta', handler: handleCmdCreateConsulta },
@@ -29,7 +30,7 @@ async function handleCmdCreateConsulta(input: IRequestEnvelope): Promise<BffResp
   if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['pacienteId', 'profissionalId', 'scheduledAt', 'status', 'details']);
   if (invalid) throw invalid;
-  const data = await createConsulta(scopeParams(input.request.params, input.ctx, ['recepcionistaGestaoAgenda']) as unknown as CreateConsultaInput, input.ctx, { consultaRepository: pendingConsultaRepository });
+  const data = await createConsulta(scopeParams(input.request.params, input.ctx, ['recepcionistaGestaoAgenda']) as unknown as CreateConsultaInput, input.ctx, { consultaRepository: resolveRepository<ConsultaRepository>(input.ctx, 'ConsultaRepository') });
   return { ok: true, data: projectOutput(data, ['id', 'version', 'pacienteId', 'profissionalId', 'scheduledAt', 'status', 'details']), error: null };
 }
 
@@ -38,7 +39,7 @@ async function handleCmdRegistrarFalta(input: IRequestEnvelope): Promise<BffResp
   if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id']);
   if (invalid) throw invalid;
-  const data = await registrarFalta(scopeParams(input.request.params, input.ctx, ['recepcionistaGestaoAgenda']) as unknown as RegistrarFaltaInput, input.ctx, { consultaRepository: pendingConsultaRepository });
+  const data = await registrarFalta(scopeParams(input.request.params, input.ctx, ['recepcionistaGestaoAgenda']) as unknown as RegistrarFaltaInput, input.ctx, { consultaRepository: resolveRepository<ConsultaRepository>(input.ctx, 'ConsultaRepository') });
   return { ok: true, data: projectOutput(data, ['id', 'version', 'pacienteId', 'profissionalId', 'scheduledAt', 'status', 'details']), error: null };
 }
 
@@ -47,7 +48,7 @@ async function handleCmdUpdateConsulta(input: IRequestEnvelope): Promise<BffResp
   if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id', 'pacienteId', 'profissionalId', 'scheduledAt', 'status', 'details']);
   if (invalid) throw invalid;
-  const data = await updateConsulta(scopeParams(input.request.params, input.ctx, ['recepcionistaGestaoAgenda']) as unknown as UpdateConsultaInput, input.ctx, { consultaRepository: pendingConsultaRepository });
+  const data = await updateConsulta(scopeParams(input.request.params, input.ctx, ['recepcionistaGestaoAgenda']) as unknown as UpdateConsultaInput, input.ctx, { consultaRepository: resolveRepository<ConsultaRepository>(input.ctx, 'ConsultaRepository') });
   return { ok: true, data: projectOutput(data, ['id', 'version', 'pacienteId', 'profissionalId', 'scheduledAt', 'status', 'details']), error: null };
 }
 
@@ -56,7 +57,7 @@ async function handleQryListConsulta(input: IRequestEnvelope): Promise<BffRespon
   if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id', 'pacienteId', 'profissionalId', 'scheduledAt', 'status']);
   if (invalid) throw invalid;
-  const data = await listConsulta(scopeParams(input.request.params, input.ctx, ['recepcionistaGestaoAgenda']) as unknown as ListConsultaInput, input.ctx, { consultaRepository: pendingConsultaRepository });
+  const data = await listConsulta(scopeParams(input.request.params, input.ctx, ['recepcionistaGestaoAgenda']) as unknown as ListConsultaInput, input.ctx, { consultaRepository: resolveRepository<ConsultaRepository>(input.ctx, 'ConsultaRepository') });
   return { ok: true, data: projectOutput(data, ['id', 'version', 'pacienteId', 'profissionalId', 'scheduledAt', 'status', 'details']), error: null };
 }
 
