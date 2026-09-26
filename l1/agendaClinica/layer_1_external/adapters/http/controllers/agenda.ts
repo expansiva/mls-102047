@@ -5,7 +5,8 @@ import { registrarAtendimento } from '/_102047_/l1/agendaClinica/layer_2_applica
 import { listConsulta } from '/_102047_/l1/agendaClinica/layer_2_application/usecases/listConsulta.js';
 import type { RegistrarAtendimentoInput } from '/_102047_/l2/agendaClinica/web/contracts/agenda.defs.js';
 import type { ListConsultaInput } from '/_102047_/l2/agendaClinica/web/contracts/agenda.defs.js';
-import { pendingConsultaRepository } from '/_102047_/l1/agendaClinica/layer_2_application/ports/consultaRepository.js';
+import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
+import type { ConsultaRepository } from '/_102047_/l1/agendaClinica/layer_2_application/ports/consultaRepository.js';
 
 export const routes: ControllerRoute[] = [
   { key: 'agendaClinica.agenda.cmdRegistrarAtendimento', handler: handleCmdRegistrarAtendimento },
@@ -17,7 +18,7 @@ async function handleCmdRegistrarAtendimento(input: IRequestEnvelope): Promise<B
   if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id', 'details']);
   if (invalid) throw invalid;
-  const data = await registrarAtendimento(scopeParams(input.request.params, input.ctx, ['profissionalAgendaPropria']) as unknown as RegistrarAtendimentoInput, input.ctx, { consultaRepository: pendingConsultaRepository });
+  const data = await registrarAtendimento(scopeParams(input.request.params, input.ctx, ['profissionalAgendaPropria']) as unknown as RegistrarAtendimentoInput, input.ctx, { consultaRepository: resolveRepository<ConsultaRepository>(input.ctx, 'ConsultaRepository') });
   return { ok: true, data: projectOutput(data, ['id', 'version', 'pacienteId', 'profissionalId', 'scheduledAt', 'status', 'details']), error: null };
 }
 
@@ -26,7 +27,7 @@ async function handleQryListConsulta(input: IRequestEnvelope): Promise<BffRespon
   if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id', 'pacienteId', 'profissionalId', 'scheduledAt', 'status']);
   if (invalid) throw invalid;
-  const data = await listConsulta(scopeParams(input.request.params, input.ctx, ['profissionalAgendaPropria']) as unknown as ListConsultaInput, input.ctx, { consultaRepository: pendingConsultaRepository });
+  const data = await listConsulta(scopeParams(input.request.params, input.ctx, ['profissionalAgendaPropria']) as unknown as ListConsultaInput, input.ctx, { consultaRepository: resolveRepository<ConsultaRepository>(input.ctx, 'ConsultaRepository') });
   return { ok: true, data: projectOutput(data, ['id', 'version', 'pacienteId', 'profissionalId', 'scheduledAt', 'status', 'details']), error: null };
 }
 
