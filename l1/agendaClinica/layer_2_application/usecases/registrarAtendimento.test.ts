@@ -28,6 +28,19 @@ void test('registrarAtendimento keeps the catalog assertion', () => {
   }
 
   {
+    const item = scenario.cases.find(entry => entry.caseId === 'registrarAtendimento.missingRecord');
+    if (!item) throw new Error('missing case registrarAtendimento.missingRecord');
+    assert.equal(item.gate, 'business');
+    assert.equal(item.expect.ok, false);
+    assert.equal(item.expect.status, 404);
+    assert.equal(item.expect.errorCode, "NOT_FOUND");
+    assert.equal(item.expect.ruleId, null);
+    assert.deepEqual(item.expect.forbiddenFields, []);
+    assert.equal(item.expect.isolatedActorField, null);
+    assert.equal(item.routine, "");
+  }
+
+  {
     const item = scenario.cases.find(entry => entry.caseId === 'registrarAtendimento.reachesStub');
     if (!item) throw new Error('missing case registrarAtendimento.reachesStub');
     assert.equal(item.gate, 'business');
