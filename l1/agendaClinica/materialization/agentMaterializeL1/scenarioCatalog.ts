@@ -1100,13 +1100,43 @@ export const scenarioCatalog = {
           "synthetic": []
         },
         {
+          "caseId": "registrarAtendimento.missingRecord",
+          "gate": "business",
+          "source": "_102047_/l1/agendaClinica/layer_2_application/usecases/registrarAtendimento.defs.ts#operation",
+          "expectation": "An id that is not stored is NOT_FOUND. This is not the positive case.",
+          "preconditions": [
+            "memory store",
+            "no database"
+          ],
+          "actorId": "",
+          "routine": "",
+          "mutating": false,
+          "expect": {
+            "ok": false,
+            "status": 404,
+            "errorCode": "NOT_FOUND",
+            "ruleId": null,
+            "forbiddenFields": [],
+            "isolatedActorField": null
+          },
+          "expectedFailure": {
+            "caseId": "registrarAtendimento.missingRecord",
+            "stage": "structure",
+            "errorCode": "USECASE_NOT_IMPLEMENTED",
+            "status": 501
+          },
+          "mandatory": true,
+          "synthetic": []
+        },
+        {
           "caseId": "registrarAtendimento.reachesStub",
           "gate": "business",
           "source": "_102047_/l1/agendaClinica/layer_2_application/usecases/registrarAtendimento.defs.ts#operation",
           "expectation": "A valid call reaches the structure stub. Import, auth and database errors are not this red.",
           "preconditions": [
             "memory store",
-            "no database"
+            "no database",
+            "existing record"
           ],
           "actorId": "",
           "routine": "",
@@ -1161,13 +1191,43 @@ export const scenarioCatalog = {
           "synthetic": []
         },
         {
+          "caseId": "registrarFalta.missingRecord",
+          "gate": "business",
+          "source": "_102047_/l1/agendaClinica/layer_2_application/usecases/registrarFalta.defs.ts#operation",
+          "expectation": "An id that is not stored is NOT_FOUND. This is not the positive case.",
+          "preconditions": [
+            "memory store",
+            "no database"
+          ],
+          "actorId": "",
+          "routine": "",
+          "mutating": false,
+          "expect": {
+            "ok": false,
+            "status": 404,
+            "errorCode": "NOT_FOUND",
+            "ruleId": null,
+            "forbiddenFields": [],
+            "isolatedActorField": null
+          },
+          "expectedFailure": {
+            "caseId": "registrarFalta.missingRecord",
+            "stage": "structure",
+            "errorCode": "USECASE_NOT_IMPLEMENTED",
+            "status": 501
+          },
+          "mandatory": true,
+          "synthetic": []
+        },
+        {
           "caseId": "registrarFalta.reachesStub",
           "gate": "business",
           "source": "_102047_/l1/agendaClinica/layer_2_application/usecases/registrarFalta.defs.ts#operation",
           "expectation": "A valid call reaches the structure stub. Import, auth and database errors are not this red.",
           "preconditions": [
             "memory store",
-            "no database"
+            "no database",
+            "existing record"
           ],
           "actorId": "",
           "routine": "",
@@ -1222,13 +1282,43 @@ export const scenarioCatalog = {
           "synthetic": []
         },
         {
+          "caseId": "updateConsulta.missingRecord",
+          "gate": "business",
+          "source": "_102047_/l1/agendaClinica/layer_2_application/usecases/updateConsulta.defs.ts#operation",
+          "expectation": "An id that is not stored is NOT_FOUND. This is not the positive case.",
+          "preconditions": [
+            "memory store",
+            "no database"
+          ],
+          "actorId": "",
+          "routine": "",
+          "mutating": false,
+          "expect": {
+            "ok": false,
+            "status": 404,
+            "errorCode": "NOT_FOUND",
+            "ruleId": null,
+            "forbiddenFields": [],
+            "isolatedActorField": null
+          },
+          "expectedFailure": {
+            "caseId": "updateConsulta.missingRecord",
+            "stage": "structure",
+            "errorCode": "USECASE_NOT_IMPLEMENTED",
+            "status": 501
+          },
+          "mandatory": true,
+          "synthetic": []
+        },
+        {
           "caseId": "updateConsulta.reachesStub",
           "gate": "business",
           "source": "_102047_/l1/agendaClinica/layer_2_application/usecases/updateConsulta.defs.ts#operation",
           "expectation": "A valid call reaches the structure stub. Import, auth and database errors are not this red.",
           "preconditions": [
             "memory store",
-            "no database"
+            "no database",
+            "existing record"
           ],
           "actorId": "",
           "routine": "",
