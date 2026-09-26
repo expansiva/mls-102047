@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "usecase",
   "artifactId": "createPaciente",
   "moduleName": "agendaClinica",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [
     "_102034_/l4/ontology/mdm.defs.ts",
     "_102047_/l1/agendaClinica/layer_3_domain/entities/paciente.defs.ts",
