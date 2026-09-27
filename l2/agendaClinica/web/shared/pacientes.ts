@@ -4,93 +4,250 @@ import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import { execBff, type BffClientOptions } from '/_102029_/l2/bffClient.js';
 import { getState, setState, subscribe, unsubscribe } from '/_102029_/l2/collabState.js';
 import { runBlockingUiAction } from '/_102029_/l2/interactionRuntime.js';
-import {
-createPacienteRoute,
-listPacienteRoute,
-type CreatePacienteInput,
-type CreatePacienteOutput,
-type ListPacienteInput,
-type ListPacienteOutput,
+import { createPacienteRoute, listPacienteRoute } from '../contracts/pacientes.defs.js';
+import type {
+CreatePacienteInput,
+CreatePacienteOutput,
+ListPacienteInput,
+ListPacienteOutput,
 } from '../contracts/pacientes.defs.js';
+interface ErrorState {
+code: string;
+message: string;
+details?: unknown;
+}
 type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
+type Scenary = 'base' | 'createPaciente';
 type ActionStatus = 'idle' | 'loading' | 'success' | 'error';
-type Scenario = 'base' | 'createPaciente';
-type DocumentType = 'CPF' | 'NationalId' | 'Passport' | 'Other';
-type ErrorEnvelope = { code: string; message: string; details?: unknown };
+type DocType = 'CPF' | 'NationalId' | 'Passport' | 'Other';
+const subscribedStateKeys = [
+'ui.pacientes.pageStatus',
+'ui.pacientes.scenary',
+'ui.pacientes.createPaciente.input.details.identification.name',
+'ui.pacientes.createPaciente.input.details.identification.docType',
+'ui.pacientes.createPaciente.input.details.identification.docId',
+'ui.pacientes.createPaciente.input.details.identification.countryCode',
+'ui.pacientes.createPaciente.status',
+'ui.pacientes.createPaciente.error',
+'ui.pacientes.createPaciente.result',
+'ui.pacientes.listPaciente.input.id',
+'ui.pacientes.listPaciente.input.details.identification.subtype',
+'ui.pacientes.listPaciente.input.details.identification.name',
+'ui.pacientes.listPaciente.input.details.identification.docType',
+'ui.pacientes.listPaciente.input.details.identification.docId',
+'ui.pacientes.listPaciente.input.details.identification.countryCode',
+'ui.pacientes.listPaciente.input.page',
+'ui.pacientes.listPaciente.status',
+'ui.pacientes.listPaciente.error',
+'ui.pacientes.listPaciente.result',
+] as const;
+const stateMembers: Readonly<Record<string, string>> = {
+'ui.pacientes.pageStatus': 'pageStatus',
+'ui.pacientes.scenary': 'scenary',
+'ui.pacientes.createPaciente.input.details.identification.name': 'stateCreatePacienteDetailsIdentificationName',
+'ui.pacientes.createPaciente.input.details.identification.docType': 'stateCreatePacienteDetailsIdentificationDocType',
+'ui.pacientes.createPaciente.input.details.identification.docId': 'stateCreatePacienteDetailsIdentificationDocId',
+'ui.pacientes.createPaciente.input.details.identification.countryCode': 'stateCreatePacienteDetailsIdentificationCountryCode',
+'ui.pacientes.createPaciente.status': 'stateCreatePacienteStatus',
+'ui.pacientes.createPaciente.error': 'stateCreatePacienteError',
+'ui.pacientes.createPaciente.result': 'stateCreatePacienteResult',
+'ui.pacientes.listPaciente.input.id': 'stateListPacienteId',
+'ui.pacientes.listPaciente.input.details.identification.subtype': 'stateListPacienteDetailsIdentificationSubtype',
+'ui.pacientes.listPaciente.input.details.identification.name': 'stateListPacienteDetailsIdentificationName',
+'ui.pacientes.listPaciente.input.details.identification.docType': 'stateListPacienteDetailsIdentificationDocType',
+'ui.pacientes.listPaciente.input.details.identification.docId': 'stateListPacienteDetailsIdentificationDocId',
+'ui.pacientes.listPaciente.input.details.identification.countryCode': 'stateListPacienteDetailsIdentificationCountryCode',
+'ui.pacientes.listPaciente.input.page': 'stateListPacientePage',
+'ui.pacientes.listPaciente.status': 'stateListPacienteStatus',
+'ui.pacientes.listPaciente.error': 'stateListPacienteError',
+'ui.pacientes.listPaciente.result': 'stateListPacienteResult',
+};
+const actionMetadata = {
+createPaciente: {
+actorRef: 'recepcionista',
+grantRefs: ['recepcionistaGestaoAgenda'],
+authorities: ['recepcionista'],
+ruleRefs: ['rule-foreign-namespace-refused', 'rule-document-shape-validated', 'rule-identity-never-in-namespace', 'rule-person-privacy-consent-required-br-eu'],
+sourceHashes: ['l4/agendaClinica/ontology/Paciente.defs.ts#sha256:4f63b16a12262913c0f54fdec0bed255de36d8db3e11cf2708c5dcbe6748b2bd', 'l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b', 'l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c25d611ace61ecffdafe'],
+},
+listPaciente: {
+actorRef: 'recepcionista',
+grantRefs: ['recepcionistaGestaoAgenda'],
+authorities: ['recepcionista'],
+ruleRefs: [],
+sourceHashes: ['l4/agendaClinica/ontology/Paciente.defs.ts#sha256:4f63b16a12262913c0f54fdec0bed255de36d8db3e11cf2708c5dcbe6748b2bd', 'l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b', 'l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c25d611ace61ecffdafe'],
+},
+} as const;
 export class PacientesShared extends StateLitElement {
 public pageStatus: PageStatus = 'idle';
-public scenary: Scenario = 'base';
+public scenary: Scenary = 'base';
 public stateCreatePacienteDetailsIdentificationName: string | null = null;
-public stateCreatePacienteDetailsIdentificationDocType: DocumentType | null = null;
+public stateCreatePacienteDetailsIdentificationDocType: DocType | null = null;
 public stateCreatePacienteDetailsIdentificationDocId: string | null = null;
 public stateCreatePacienteDetailsIdentificationCountryCode: string | null = null;
 public stateCreatePacienteStatus: ActionStatus = 'idle';
-public stateCreatePacienteError: ErrorEnvelope | null = null;
+public stateCreatePacienteError: ErrorState | null = null;
 public stateCreatePacienteResult: CreatePacienteOutput | null = null;
 public stateListPacienteId: string | null = null;
 public stateListPacienteDetailsIdentificationSubtype: 'Person' | null = null;
 public stateListPacienteDetailsIdentificationName: string | null = null;
-public stateListPacienteDetailsIdentificationDocType: DocumentType | null = null;
+public stateListPacienteDetailsIdentificationDocType: DocType | null = null;
 public stateListPacienteDetailsIdentificationDocId: string | null = null;
 public stateListPacienteDetailsIdentificationCountryCode: string | null = null;
 public stateListPacientePage: number | null = null;
 public stateListPacienteStatus: ActionStatus = 'idle';
-public stateListPacienteError: ErrorEnvelope | null = null;
+public stateListPacienteError: ErrorState | null = null;
 public stateListPacienteResult: ListPacienteOutput = [];
-private readonly subscribedStateKeys: string[] = [
-'ui.pacientes.pageStatus','ui.pacientes.scenary','ui.pacientes.createPaciente.input.details.identification.name','ui.pacientes.createPaciente.input.details.identification.docType','ui.pacientes.createPaciente.input.details.identification.docId','ui.pacientes.createPaciente.input.details.identification.countryCode','ui.pacientes.createPaciente.status','ui.pacientes.createPaciente.error','ui.pacientes.createPaciente.result','ui.pacientes.listPaciente.input.id','ui.pacientes.listPaciente.input.details.identification.subtype','ui.pacientes.listPaciente.input.details.identification.name','ui.pacientes.listPaciente.input.details.identification.docType','ui.pacientes.listPaciente.input.details.identification.docId','ui.pacientes.listPaciente.input.details.identification.countryCode','ui.pacientes.listPaciente.input.page','ui.pacientes.listPaciente.status','ui.pacientes.listPaciente.error','ui.pacientes.listPaciente.result',
-];
-private readonly stateMembers: Record<string, string> = {
-'ui.pacientes.pageStatus':'pageStatus','ui.pacientes.scenary':'scenary','ui.pacientes.createPaciente.input.details.identification.name':'stateCreatePacienteDetailsIdentificationName','ui.pacientes.createPaciente.input.details.identification.docType':'stateCreatePacienteDetailsIdentificationDocType','ui.pacientes.createPaciente.input.details.identification.docId':'stateCreatePacienteDetailsIdentificationDocId','ui.pacientes.createPaciente.input.details.identification.countryCode':'stateCreatePacienteDetailsIdentificationCountryCode','ui.pacientes.createPaciente.status':'stateCreatePacienteStatus','ui.pacientes.createPaciente.error':'stateCreatePacienteError','ui.pacientes.createPaciente.result':'stateCreatePacienteResult','ui.pacientes.listPaciente.input.id':'stateListPacienteId','ui.pacientes.listPaciente.input.details.identification.subtype':'stateListPacienteDetailsIdentificationSubtype','ui.pacientes.listPaciente.input.details.identification.name':'stateListPacienteDetailsIdentificationName','ui.pacientes.listPaciente.input.details.identification.docType':'stateListPacienteDetailsIdentificationDocType','ui.pacientes.listPaciente.input.details.identification.docId':'stateListPacienteDetailsIdentificationDocId','ui.pacientes.listPaciente.input.details.identification.countryCode':'stateListPacienteDetailsIdentificationCountryCode','ui.pacientes.listPaciente.input.page':'stateListPacientePage','ui.pacientes.listPaciente.status':'stateListPacienteStatus','ui.pacientes.listPaciente.error':'stateListPacienteError','ui.pacientes.listPaciente.result':'stateListPacienteResult',
+public connectedCallback(): void {
+super.connectedCallback();
+for (const key of subscribedStateKeys) {
+subscribe(key, this);
+const value: unknown = getState(key);
+this.applyStateValue(key, value);
+}
+void this.runListPaciente();
+}
+public disconnectedCallback(): void {
+unsubscribe([...subscribedStateKeys], this);
+super.disconnectedCallback();
+}
+public handleIcaStateChange(key: string, value: any): void {
+if (value === undefined) return;
+this.applyStateValue(key, value);
+this.requestUpdate();
+}
+private applyStateValue(key: string, value: unknown): void {
+const memberName = stateMembers[key];
+if (!memberName || value === undefined) return;
+(this as unknown as Record<string, unknown>)[memberName] = value;
+}
+private feedback(error: unknown, fallback: string): ErrorState {
+if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+const candidate = error as { code?: unknown; message: string; details?: unknown };
+return {
+code: typeof candidate.code === 'string' ? candidate.code : 'REQUEST_ERROR',
+message: candidate.message,
+details: candidate.details,
 };
-public connectedCallback(): void { super.connectedCallback(); for (const key of this.subscribedStateKeys) { const member = this.stateMembers[key]; const current = getState(key); if (current !== undefined) (this as unknown as Record<string, unknown>)[member] = current; this.stateKeys.set(`${member};${key}`, true); subscribe([`${member};${key}`], this); } void this.runListPaciente(); }
-public disconnectedCallback(): void { for (const key of this.subscribedStateKeys) { const member = this.stateMembers[key]; unsubscribe([`${member};${key}`], this); } super.disconnectedCallback(); }
-public handleIcaStateChange(key: string, value: unknown): void { const member = this.stateMembers[key]; if (!member) return; (this as unknown as Record<string, unknown>)[member] = value; this.requestUpdate(member); }
-private publish<T>(key: string, member: string, value: T): void { (this as unknown as Record<string, unknown>)[member] = value; setState(key, value); }
-private error(code: string, message: string, details?: unknown): ErrorEnvelope { return { code, message, ...(details === undefined ? {} : { details }) }; }
-public setScenario(value: Scenario): void { if (value !== 'base' && value !== 'createPaciente') { this.publish('ui.pacientes.listPaciente.error', 'stateListPacienteError', this.error('INVALID_SCENARIO', 'The requested scenario is not available.')); return; } this.publish('ui.pacientes.scenary', 'scenary', value); }
-public setCreatePacienteDetailsIdentificationName(value: string | null): void { this.publish('ui.pacientes.createPaciente.input.details.identification.name', 'stateCreatePacienteDetailsIdentificationName', value); }
-public setCreatePacienteDetailsIdentificationDocType(value: DocumentType | null): void { this.publish('ui.pacientes.createPaciente.input.details.identification.docType', 'stateCreatePacienteDetailsIdentificationDocType', value); }
-public setCreatePacienteDetailsIdentificationDocId(value: string | null): void { this.publish('ui.pacientes.createPaciente.input.details.identification.docId', 'stateCreatePacienteDetailsIdentificationDocId', value); }
-public setCreatePacienteDetailsIdentificationCountryCode(value: string | null): void { this.publish('ui.pacientes.createPaciente.input.details.identification.countryCode', 'stateCreatePacienteDetailsIdentificationCountryCode', value); }
-public setListPacienteId(value: string | null): void { this.publish('ui.pacientes.listPaciente.input.id', 'stateListPacienteId', value); }
-public setListPacienteDetailsIdentificationSubtype(value: 'Person' | null): void { this.publish('ui.pacientes.listPaciente.input.details.identification.subtype', 'stateListPacienteDetailsIdentificationSubtype', value); }
-public setListPacienteDetailsIdentificationName(value: string | null): void { this.publish('ui.pacientes.listPaciente.input.details.identification.name', 'stateListPacienteDetailsIdentificationName', value); }
-public setListPacienteDetailsIdentificationDocType(value: DocumentType | null): void { this.publish('ui.pacientes.listPaciente.input.details.identification.docType', 'stateListPacienteDetailsIdentificationDocType', value); }
-public setListPacienteDetailsIdentificationDocId(value: string | null): void { this.publish('ui.pacientes.listPaciente.input.details.identification.docId', 'stateListPacienteDetailsIdentificationDocId', value); }
-public setListPacienteDetailsIdentificationCountryCode(value: string | null): void { this.publish('ui.pacientes.listPaciente.input.details.identification.countryCode', 'stateListPacienteDetailsIdentificationCountryCode', value); }
-private optionalString(value: string | null): string | undefined { return value !== null && value.trim() !== '' ? value : undefined; }
+}
+return { code: 'REQUEST_ERROR', message: fallback };
+}
+private setFeedback(key: string, feedback: ErrorState | null): void {
+setState(key, feedback);
+this.applyStateValue(key, feedback);
+}
+public setScenario(value: Scenary): void {
+if (value !== 'base' && value !== 'createPaciente') return;
+this.scenary = value;
+setState('ui.pacientes.scenary', value);
+}
+public setCreatePacienteDetailsIdentificationName(value: string | null): void {
+this.stateCreatePacienteDetailsIdentificationName = value;
+setState('ui.pacientes.createPaciente.input.details.identification.name', value);
+}
+public setCreatePacienteDetailsIdentificationDocType(value: DocType | null): void {
+this.stateCreatePacienteDetailsIdentificationDocType = value;
+setState('ui.pacientes.createPaciente.input.details.identification.docType', value);
+}
+public setCreatePacienteDetailsIdentificationDocId(value: string | null): void {
+this.stateCreatePacienteDetailsIdentificationDocId = value;
+setState('ui.pacientes.createPaciente.input.details.identification.docId', value);
+}
+public setCreatePacienteDetailsIdentificationCountryCode(value: string | null): void {
+this.stateCreatePacienteDetailsIdentificationCountryCode = value;
+setState('ui.pacientes.createPaciente.input.details.identification.countryCode', value);
+}
+public setListPacienteId(value: string | null): void { this.stateListPacienteId = value; setState('ui.pacientes.listPaciente.input.id', value); }
+public setListPacienteDetailsIdentificationSubtype(value: 'Person' | null): void { this.stateListPacienteDetailsIdentificationSubtype = value; setState('ui.pacientes.listPaciente.input.details.identification.subtype', value); }
+public setListPacienteDetailsIdentificationName(value: string | null): void { this.stateListPacienteDetailsIdentificationName = value; setState('ui.pacientes.listPaciente.input.details.identification.name', value); }
+public setListPacienteDetailsIdentificationDocType(value: DocType | null): void { this.stateListPacienteDetailsIdentificationDocType = value; setState('ui.pacientes.listPaciente.input.details.identification.docType', value); }
+public setListPacienteDetailsIdentificationDocId(value: string | null): void { this.stateListPacienteDetailsIdentificationDocId = value; setState('ui.pacientes.listPaciente.input.details.identification.docId', value); }
+public setListPacienteDetailsIdentificationCountryCode(value: string | null): void { this.stateListPacienteDetailsIdentificationCountryCode = value; setState('ui.pacientes.listPaciente.input.details.identification.countryCode', value); }
 public async runCreatePaciente(): Promise<void> {
 if (this.stateCreatePacienteStatus === 'loading') return;
-const name = this.optionalString(this.stateCreatePacienteDetailsIdentificationName);
-const countryCode = this.optionalString(this.stateCreatePacienteDetailsIdentificationCountryCode);
-if (!name || !countryCode) { const failure = this.error('REQUIRED_INPUT', 'Name and country code are required to create the patient.'); this.publish('ui.pacientes.createPaciente.error', 'stateCreatePacienteError', failure); this.publish('ui.pacientes.createPaciente.status', 'stateCreatePacienteStatus', 'error'); return; }
-const identification: CreatePacienteInput['details']['identification'] = { name, countryCode };
-const docType = this.stateCreatePacienteDetailsIdentificationDocType;
-const docId = this.optionalString(this.stateCreatePacienteDetailsIdentificationDocId);
-if (docType !== null) identification.docType = docType;
-if (docId !== undefined) identification.docId = docId;
-const input: CreatePacienteInput = { details: { identification } };
-this.publish('ui.pacientes.createPaciente.status', 'stateCreatePacienteStatus', 'loading');
-this.publish('ui.pacientes.createPaciente.error', 'stateCreatePacienteError', null);
-try {
-const response = await runBlockingUiAction((signal: AbortSignal) => { const options: BffClientOptions = { mode: 'blocking', signal }; return execBff<CreatePacienteOutput>(createPacienteRoute, input, options); });
-if (!response || !response.ok || response.data === null) {
-const failure = response?.error ? this.error(response.error.code, response.error.message, response.error.details) : this.error('BAD_RESPONSE', 'The patient could not be created.');
-this.publish('ui.pacientes.createPaciente.error', 'stateCreatePacienteError', failure);
-this.publish('ui.pacientes.createPaciente.status', 'stateCreatePacienteStatus', 'error'); return;
+const name = this.stateCreatePacienteDetailsIdentificationName;
+const countryCode = this.stateCreatePacienteDetailsIdentificationCountryCode;
+if (!name || name.trim() === '' || !countryCode || countryCode.trim() === '') {
+const error = this.feedback(null, 'Informe o nome e o país do paciente.');
+this.stateCreatePacienteStatus = 'error';
+this.setFeedback('ui.pacientes.createPaciente.error', error);
+setState('ui.pacientes.createPaciente.status', 'error');
+return;
 }
-this.publish('ui.pacientes.createPaciente.result', 'stateCreatePacienteResult', response.data);
-this.publish('ui.pacientes.createPaciente.status', 'stateCreatePacienteStatus', 'success');
+const params: CreatePacienteInput = { details: { identification: { name, countryCode } } };
+if (this.stateCreatePacienteDetailsIdentificationDocType !== null) params.details.identification.docType = this.stateCreatePacienteDetailsIdentificationDocType;
+if (this.stateCreatePacienteDetailsIdentificationDocId !== null && this.stateCreatePacienteDetailsIdentificationDocId !== '') params.details.identification.docId = this.stateCreatePacienteDetailsIdentificationDocId;
+this.stateCreatePacienteStatus = 'loading';
+this.stateCreatePacienteError = null;
+setState('ui.pacientes.createPaciente.status', 'loading');
+setState('ui.pacientes.createPaciente.error', null);
+try {
+const response = await runBlockingUiAction((signal: AbortSignal) => execBff<CreatePacienteOutput>(createPacienteRoute, params, { mode: 'blocking', signal } as BffClientOptions), { mode: 'blocking' });
+if (response?.ok && response.data !== null) {
+this.stateCreatePacienteResult = response.data;
+this.stateCreatePacienteStatus = 'success';
+setState('ui.pacientes.createPaciente.result', response.data);
+setState('ui.pacientes.createPaciente.status', 'success');
 await this.runListPaciente();
-} catch (caught: unknown) { const failure = caught instanceof Error ? this.error('RUNTIME_ERROR', caught.message) : this.error('RUNTIME_ERROR', String(caught)); this.publish('ui.pacientes.createPaciente.error', 'stateCreatePacienteError', failure); this.publish('ui.pacientes.createPaciente.status', 'stateCreatePacienteStatus', 'error'); }
+} else {
+const responseError = response?.error;
+const error = responseError && typeof responseError === 'object' && 'message' in responseError && typeof responseError.message === 'string'
+? this.feedback(responseError, responseError.message)
+: this.feedback(responseError, 'Não foi possível cadastrar o paciente.');
+this.stateCreatePacienteStatus = 'error';
+this.setFeedback('ui.pacientes.createPaciente.error', error);
+setState('ui.pacientes.createPaciente.status', 'error');
+}
+} catch (error: unknown) {
+const feedback = this.feedback(error, 'Não foi possível cadastrar o paciente.');
+this.stateCreatePacienteStatus = 'error';
+this.setFeedback('ui.pacientes.createPaciente.error', feedback);
+setState('ui.pacientes.createPaciente.status', 'error');
+}
 }
 public async runListPaciente(): Promise<void> {
-this.publish('ui.pacientes.pageStatus', 'pageStatus', 'loading'); this.publish('ui.pacientes.listPaciente.status', 'stateListPacienteStatus', 'loading'); this.publish('ui.pacientes.listPaciente.error', 'stateListPacienteError', null);
-const input: ListPacienteInput = {}; const identification: NonNullable<NonNullable<ListPacienteInput['details']>['identification']> = {}; let hasIdentification = false;
-const id = this.optionalString(this.stateListPacienteId); const subtype = this.stateListPacienteDetailsIdentificationSubtype; const name = this.optionalString(this.stateListPacienteDetailsIdentificationName); const docType = this.stateListPacienteDetailsIdentificationDocType; const docId = this.optionalString(this.stateListPacienteDetailsIdentificationDocId); const countryCode = this.optionalString(this.stateListPacienteDetailsIdentificationCountryCode);
-if (id !== undefined) input.id = id; if (subtype !== null) { identification.subtype = subtype; hasIdentification = true; } if (name !== undefined) { identification.name = name; hasIdentification = true; } if (docType !== null) { identification.docType = docType; hasIdentification = true; } if (docId !== undefined) { identification.docId = docId; hasIdentification = true; } if (countryCode !== undefined) { identification.countryCode = countryCode; hasIdentification = true; } if (hasIdentification) input.details = { identification }; if (this.stateListPacientePage !== null) input.page = this.stateListPacientePage;
-try { const response = await execBff<ListPacienteOutput>(listPacienteRoute, input, { mode: 'silent' }); if (!response.ok || response.data === null) { const failure = response.error ?? this.error('BAD_RESPONSE', 'Patients could not be loaded.'); this.publish('ui.pacientes.listPaciente.error', 'stateListPacienteError', failure); this.publish('ui.pacientes.listPaciente.status', 'stateListPacienteStatus', 'error'); this.publish('ui.pacientes.pageStatus', 'pageStatus', 'error'); return; } this.publish('ui.pacientes.listPaciente.result', 'stateListPacienteResult', response.data); this.publish('ui.pacientes.listPaciente.status', 'stateListPacienteStatus', 'success'); this.publish('ui.pacientes.pageStatus', 'pageStatus', response.data.length === 0 ? 'empty' : 'success'); } catch (caught: unknown) { const failure = caught instanceof Error ? this.error('RUNTIME_ERROR', caught.message) : this.error('RUNTIME_ERROR', String(caught)); this.publish('ui.pacientes.listPaciente.error', 'stateListPacienteError', failure); this.publish('ui.pacientes.listPaciente.status', 'stateListPacienteStatus', 'error'); this.publish('ui.pacientes.pageStatus', 'pageStatus', 'error'); }
+const params: ListPacienteInput = {};
+if (this.stateListPacienteId !== null && this.stateListPacienteId !== '') params.id = this.stateListPacienteId;
+const identification: NonNullable<NonNullable<ListPacienteInput['details']>['identification']> = {};
+let hasIdentification = false;
+if (this.stateListPacienteDetailsIdentificationSubtype !== null) { identification.subtype = this.stateListPacienteDetailsIdentificationSubtype; hasIdentification = true; }
+if (this.stateListPacienteDetailsIdentificationName !== null && this.stateListPacienteDetailsIdentificationName !== '') { identification.name = this.stateListPacienteDetailsIdentificationName; hasIdentification = true; }
+if (this.stateListPacienteDetailsIdentificationDocType !== null) { identification.docType = this.stateListPacienteDetailsIdentificationDocType; hasIdentification = true; }
+if (this.stateListPacienteDetailsIdentificationDocId !== null && this.stateListPacienteDetailsIdentificationDocId !== '') { identification.docId = this.stateListPacienteDetailsIdentificationDocId; hasIdentification = true; }
+if (this.stateListPacienteDetailsIdentificationCountryCode !== null && this.stateListPacienteDetailsIdentificationCountryCode !== '') { identification.countryCode = this.stateListPacienteDetailsIdentificationCountryCode; hasIdentification = true; }
+if (hasIdentification) params.details = { identification };
+if (this.stateListPacientePage !== null) params.page = this.stateListPacientePage;
+this.pageStatus = 'loading';
+this.stateListPacienteStatus = 'loading';
+this.stateListPacienteError = null;
+setState('ui.pacientes.pageStatus', 'loading');
+setState('ui.pacientes.listPaciente.status', 'loading');
+setState('ui.pacientes.listPaciente.error', null);
+try {
+const response = await execBff<ListPacienteOutput>(listPacienteRoute, params, { mode: 'silent' });
+if (response.ok && response.data !== null) {
+this.stateListPacienteResult = response.data;
+this.pageStatus = response.data.length === 0 ? 'empty' : 'success';
+this.stateListPacienteStatus = 'success';
+setState('ui.pacientes.listPaciente.result', response.data);
+setState('ui.pacientes.pageStatus', this.pageStatus);
+setState('ui.pacientes.listPaciente.status', 'success');
+} else {
+const error = this.feedback(response.error, 'Não foi possível localizar os pacientes.');
+this.pageStatus = 'error';
+this.stateListPacienteStatus = 'error';
+this.setFeedback('ui.pacientes.listPaciente.error', error);
+setState('ui.pacientes.pageStatus', 'error');
+setState('ui.pacientes.listPaciente.status', 'error');
+}
+} catch (error: unknown) {
+const feedback = this.feedback(error, 'Não foi possível localizar os pacientes.');
+this.pageStatus = 'error';
+this.stateListPacienteStatus = 'error';
+this.setFeedback('ui.pacientes.listPaciente.error', feedback);
+setState('ui.pacientes.pageStatus', 'error');
+setState('ui.pacientes.listPaciente.status', 'error');
+}
 }
 public enterBaseScenario(): void { this.setScenario('base'); }
 public enterCreatePacienteScenario(): void { this.setScenario('createPaciente'); }
