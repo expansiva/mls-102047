@@ -109,7 +109,7 @@
     },
     {
       "path": "l4/agendaClinica/pool/l2/web/backend.json",
-      "sha256": "sha256:fd9d6bf5948c4510bd29865cd5ae327f4375fc9316b2824827fc81c4c8c0a1dc",
+      "sha256": "sha256:2e8a2e06054695e395820150f9db473781adf2d0c51074c75f3685117f70850e",
       "bytes": 6315,
       "schemaVersion": "2026-09-21-p1-backend-v1.1"
     },
@@ -404,6 +404,86 @@
             "noTable": "ok"
           }
         ],
+        "operationBindings": [
+          {
+            "pageId": "agenda",
+            "route": "agendaClinica.agenda.cmdRegistrarAtendimento",
+            "entityId": "Consulta",
+            "operation": "transition",
+            "actorRef": "profissional",
+            "grantRefs": [
+              "profissionalAgendaPropria"
+            ],
+            "authorities": [
+              "profissional"
+            ],
+            "inputFields": [
+              {
+                "path": "Consulta.details.attendanceNote",
+                "origin": "actor",
+                "required": true
+              }
+            ],
+            "transition": {
+              "transitionId": "registrarAtendimento",
+              "from": [
+                "scheduled"
+              ],
+              "to": "attended",
+              "by": [
+                "profissional"
+              ],
+              "payload": [
+                "details.attendanceNote"
+              ]
+            },
+            "ruleRefs": [
+              {
+                "ruleId": "consultaSomenteAgendadaPodeRegistrarAtendimento",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.consultaSomenteAgendadaPodeRegistrarAtendimento",
+                "description": "O atendimento só pode ser registrado para uma consulta com situação agendada."
+              },
+              {
+                "ruleId": "anotacaoObrigatoriaNoAtendimento",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.anotacaoObrigatoriaNoAtendimento",
+                "description": "O registro de atendimento deve incluir uma anotação do atendimento."
+              },
+              {
+                "ruleId": "profissionalAtendeSomentePropriaConsulta",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.profissionalAtendeSomentePropriaConsulta",
+                "description": "O profissional só pode registrar o atendimento de uma consulta atribuída a ele."
+              }
+            ],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          },
+          {
+            "pageId": "agenda",
+            "route": "agendaClinica.agenda.qryListConsulta",
+            "entityId": "Consulta",
+            "operation": "list",
+            "actorRef": "profissional",
+            "grantRefs": [
+              "profissionalAgendaPropria"
+            ],
+            "authorities": [
+              "profissional"
+            ],
+            "inputFields": [],
+            "ruleRefs": [],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          }
+        ],
         "destinations": [
           {
             "kind": "contract",
@@ -672,6 +752,250 @@
             "noTable": "mdm"
           }
         ],
+        "operationBindings": [
+          {
+            "pageId": "consultas",
+            "route": "agendaClinica.consultas.cmdCreateConsulta",
+            "entityId": "Consulta",
+            "operation": "create",
+            "actorRef": "recepcionista",
+            "grantRefs": [
+              "recepcionistaGestaoAgenda"
+            ],
+            "authorities": [
+              "recepcionista"
+            ],
+            "inputFields": [
+              {
+                "path": "Consulta.pacienteId",
+                "origin": "actor",
+                "required": true
+              },
+              {
+                "path": "Consulta.profissionalId",
+                "origin": "actor",
+                "required": true
+              },
+              {
+                "path": "Consulta.scheduledAt",
+                "origin": "actor",
+                "required": true
+              },
+              {
+                "path": "Consulta.details.telephoneConfirmation.confirmedAt",
+                "origin": "actor",
+                "required": true
+              }
+            ],
+            "ruleRefs": [
+              {
+                "ruleId": "consultaHorarioProfissionalUnico",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.consultaHorarioProfissionalUnico",
+                "description": "Não pode haver duas consultas para o mesmo profissional na mesma data e horário."
+              },
+              {
+                "ruleId": "consultaSomenteAgendadaPodeRegistrarFalta",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.consultaSomenteAgendadaPodeRegistrarFalta",
+                "description": "A falta do paciente só pode ser registrada para uma consulta com situação agendada."
+              },
+              {
+                "ruleId": "consultaSomenteAgendadaPodeRegistrarAtendimento",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.consultaSomenteAgendadaPodeRegistrarAtendimento",
+                "description": "O atendimento só pode ser registrado para uma consulta com situação agendada."
+              },
+              {
+                "ruleId": "anotacaoObrigatoriaNoAtendimento",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.anotacaoObrigatoriaNoAtendimento",
+                "description": "O registro de atendimento deve incluir uma anotação do atendimento."
+              },
+              {
+                "ruleId": "profissionalAtendeSomentePropriaConsulta",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.profissionalAtendeSomentePropriaConsulta",
+                "description": "O profissional só pode registrar o atendimento de uma consulta atribuída a ele."
+              }
+            ],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          },
+          {
+            "pageId": "consultas",
+            "route": "agendaClinica.consultas.cmdRegistrarFalta",
+            "entityId": "Consulta",
+            "operation": "transition",
+            "actorRef": "recepcionista",
+            "grantRefs": [
+              "recepcionistaGestaoAgenda"
+            ],
+            "authorities": [
+              "recepcionista"
+            ],
+            "inputFields": [],
+            "transition": {
+              "transitionId": "registrarFalta",
+              "from": [
+                "scheduled"
+              ],
+              "to": "noShow",
+              "by": [
+                "recepcionista"
+              ],
+              "payload": []
+            },
+            "ruleRefs": [
+              {
+                "ruleId": "consultaSomenteAgendadaPodeRegistrarFalta",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.consultaSomenteAgendadaPodeRegistrarFalta",
+                "description": "A falta do paciente só pode ser registrada para uma consulta com situação agendada."
+              }
+            ],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          },
+          {
+            "pageId": "consultas",
+            "route": "agendaClinica.consultas.cmdUpdateConsulta",
+            "entityId": "Consulta",
+            "operation": "update",
+            "actorRef": "recepcionista",
+            "grantRefs": [
+              "recepcionistaGestaoAgenda"
+            ],
+            "authorities": [
+              "recepcionista"
+            ],
+            "inputFields": [
+              {
+                "path": "Consulta.pacienteId",
+                "origin": "actor",
+                "required": true
+              },
+              {
+                "path": "Consulta.profissionalId",
+                "origin": "actor",
+                "required": true
+              },
+              {
+                "path": "Consulta.scheduledAt",
+                "origin": "actor",
+                "required": true
+              },
+              {
+                "path": "Consulta.details.telephoneConfirmation.confirmedAt",
+                "origin": "actor",
+                "required": true
+              }
+            ],
+            "ruleRefs": [
+              {
+                "ruleId": "consultaHorarioProfissionalUnico",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.consultaHorarioProfissionalUnico",
+                "description": "Não pode haver duas consultas para o mesmo profissional na mesma data e horário."
+              },
+              {
+                "ruleId": "consultaSomenteAgendadaPodeRegistrarFalta",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.consultaSomenteAgendadaPodeRegistrarFalta",
+                "description": "A falta do paciente só pode ser registrada para uma consulta com situação agendada."
+              },
+              {
+                "ruleId": "consultaSomenteAgendadaPodeRegistrarAtendimento",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.consultaSomenteAgendadaPodeRegistrarAtendimento",
+                "description": "O atendimento só pode ser registrado para uma consulta com situação agendada."
+              },
+              {
+                "ruleId": "anotacaoObrigatoriaNoAtendimento",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.anotacaoObrigatoriaNoAtendimento",
+                "description": "O registro de atendimento deve incluir uma anotação do atendimento."
+              },
+              {
+                "ruleId": "profissionalAtendeSomentePropriaConsulta",
+                "file": "l4/agendaClinica/rules.defs.ts",
+                "symbol": "rules.profissionalAtendeSomentePropriaConsulta",
+                "description": "O profissional só pode registrar o atendimento de uma consulta atribuída a ele."
+              }
+            ],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          },
+          {
+            "pageId": "consultas",
+            "route": "agendaClinica.consultas.qryListConsulta",
+            "entityId": "Consulta",
+            "operation": "list",
+            "actorRef": "recepcionista",
+            "grantRefs": [
+              "recepcionistaGestaoAgenda"
+            ],
+            "authorities": [
+              "recepcionista"
+            ],
+            "inputFields": [],
+            "ruleRefs": [],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          },
+          {
+            "pageId": "consultas",
+            "route": "agendaClinica.consultas.qryListPaciente",
+            "entityId": "Paciente",
+            "operation": "list",
+            "actorRef": "recepcionista",
+            "grantRefs": [
+              "recepcionistaGestaoAgenda"
+            ],
+            "authorities": [
+              "recepcionista"
+            ],
+            "inputFields": [],
+            "ruleRefs": [],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Paciente.defs.ts#sha256:4f63b16a12262913c0f54fdec0bed255de36d8db3e11cf2708c5dcbe6748b2bd",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          },
+          {
+            "pageId": "consultas",
+            "route": "agendaClinica.consultas.qryListProfissional",
+            "entityId": "Profissional",
+            "operation": "list",
+            "actorRef": "recepcionista",
+            "grantRefs": [
+              "recepcionistaGestaoAgenda"
+            ],
+            "authorities": [
+              "recepcionista"
+            ],
+            "inputFields": [],
+            "ruleRefs": [],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Profissional.defs.ts#sha256:38b591caa01dec68d410202198270cb41fcee4314477fac8c5b1bc07b46d5f32",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          }
+        ],
         "destinations": [
           {
             "kind": "contract",
@@ -791,6 +1115,94 @@
             "noTable": "mdm"
           }
         ],
+        "operationBindings": [
+          {
+            "pageId": "pacientes",
+            "route": "agendaClinica.pacientes.cmdCreatePaciente",
+            "entityId": "Paciente",
+            "operation": "create",
+            "actorRef": "recepcionista",
+            "grantRefs": [
+              "recepcionistaGestaoAgenda"
+            ],
+            "authorities": [
+              "recepcionista"
+            ],
+            "inputFields": [
+              {
+                "path": "Paciente.details.identification.name",
+                "origin": "actor",
+                "required": true
+              },
+              {
+                "path": "Paciente.details.identification.docType",
+                "origin": "actor",
+                "required": false
+              },
+              {
+                "path": "Paciente.details.identification.docId",
+                "origin": "actor",
+                "required": false
+              },
+              {
+                "path": "Paciente.details.identification.countryCode",
+                "origin": "actor",
+                "required": true
+              }
+            ],
+            "ruleRefs": [
+              {
+                "ruleId": "rule-foreign-namespace-refused",
+                "file": "l4/agendaClinica/ontology/Paciente.defs.ts",
+                "symbol": "rules[rule-foreign-namespace-refused]",
+                "description": ""
+              },
+              {
+                "ruleId": "rule-document-shape-validated",
+                "file": "l4/agendaClinica/ontology/Paciente.defs.ts",
+                "symbol": "rules[rule-document-shape-validated]",
+                "description": ""
+              },
+              {
+                "ruleId": "rule-identity-never-in-namespace",
+                "file": "l4/agendaClinica/ontology/Paciente.defs.ts",
+                "symbol": "rules[rule-identity-never-in-namespace]",
+                "description": ""
+              },
+              {
+                "ruleId": "rule-person-privacy-consent-required-br-eu",
+                "file": "l4/agendaClinica/ontology/Paciente.defs.ts",
+                "symbol": "rules[rule-person-privacy-consent-required-br-eu]",
+                "description": ""
+              }
+            ],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Paciente.defs.ts#sha256:4f63b16a12262913c0f54fdec0bed255de36d8db3e11cf2708c5dcbe6748b2bd",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          },
+          {
+            "pageId": "pacientes",
+            "route": "agendaClinica.pacientes.qryListPaciente",
+            "entityId": "Paciente",
+            "operation": "list",
+            "actorRef": "recepcionista",
+            "grantRefs": [
+              "recepcionistaGestaoAgenda"
+            ],
+            "authorities": [
+              "recepcionista"
+            ],
+            "inputFields": [],
+            "ruleRefs": [],
+            "sourceHashes": [
+              "l4/agendaClinica/ontology/Paciente.defs.ts#sha256:4f63b16a12262913c0f54fdec0bed255de36d8db3e11cf2708c5dcbe6748b2bd",
+              "l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b",
+              "l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe"
+            ]
+          }
+        ],
         "destinations": [
           {
             "kind": "contract",
@@ -851,5 +1263,5 @@
       "message": "Sources have content hashes and structural consistency checks, but no shared release identity exists across all planners."
     }
   ],
-  "snapshotHash": "sha256:a2684b8d7eb945ae17c52f2ea1afa5808dd5d3b2fd2ec5ad57b65aa79e1e140b"
+  "snapshotHash": "sha256:5d4372e3fc25a76476702e81ff7b94fb1ddcab29342c8624e7fae51dba17d44e"
 }
