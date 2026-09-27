@@ -10,202 +10,192 @@ RegistrarAtendimentoInput,
 RegistrarAtendimentoOutput,
 ListConsultaInput,
 ListConsultaOutput,
-ListConsultaItem,
 } from '../contracts/agenda.defs.js';
+type ErrorState = {
+code: string;
+message: string;
+details?: unknown;
+};
 type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
 type Scenario = 'base' | 'registrarAtendimento';
 type ActionStatus = 'idle' | 'loading' | 'success' | 'error';
 type ConsultaStatus = 'scheduled' | 'noShow' | 'attended';
-type ErrorEnvelope = { code: string; message: string; details?: unknown };
-type OperationBinding = {
-actorRef: string;
-grantRefs: readonly string[];
-authorities: readonly string[];
-transition?: unknown;
-ruleRefs: readonly unknown[];
-sourceHashes: readonly string[];
-};
-const operationBindings: Readonly<Record<string, OperationBinding>> = {
+type AgendaError = NonNullable<ErrorState>;
+const STATE_KEYS = [
+'ui.agenda.pageStatus',
+'ui.agenda.scenary',
+'ui.agenda.registrarAtendimento.input.id',
+'ui.agenda.registrarAtendimento.input.details.attendanceNote',
+'ui.agenda.registrarAtendimento.status',
+'ui.agenda.registrarAtendimento.error',
+'ui.agenda.registrarAtendimento.result',
+'ui.agenda.listConsulta.input.id',
+'ui.agenda.listConsulta.input.pacienteId',
+'ui.agenda.listConsulta.input.profissionalId',
+'ui.agenda.listConsulta.input.scheduledAt',
+'ui.agenda.listConsulta.input.status',
+'ui.agenda.listConsulta.input.page',
+'ui.agenda.listConsulta.status',
+'ui.agenda.listConsulta.error',
+'ui.agenda.listConsulta.result',
+] as const;
+const operationBindings = {
+registrarAtendimento: {
+actorRef: 'profissional',
+grantRefs: ['profissionalAgendaPropria'],
+authorities: ['profissional'],
+transition: { transitionId: 'registrarAtendimento', from: ['scheduled'], to: 'attended', by: ['profissional'], payload: ['details.attendanceNote'] },
+ruleRefs: [
+{ ruleId: 'consultaSomenteAgendadaPodeRegistrarAtendimento', file: 'l4/agendaClinica/rules.defs.ts', symbol: 'rules.consultaSomenteAgendadaPodeRegistrarAtendimento', description: 'O atendimento só pode ser registrado para uma consulta com situação agendada.' },
+{ ruleId: 'anotacaoObrigatoriaNoAtendimento', file: 'l4/agendaClinica/rules.defs.ts', symbol: 'rules.anotacaoObrigatoriaNoAtendimento', description: 'O registro de atendimento deve incluir uma anotação do atendimento.' },
+{ ruleId: 'profissionalAtendeSomentePropriaConsulta', file: 'l4/agendaClinica/rules.defs.ts', symbol: 'rules.profissionalAtendeSomentePropriaConsulta', description: 'O profissional só pode registrar o atendimento de uma consulta atribuída a ele.' },
+],
+sourceHashes: ['l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552', 'l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b', 'l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe'],
+},
 listConsulta: {
 actorRef: 'profissional',
 grantRefs: ['profissionalAgendaPropria'],
 authorities: ['profissional'],
 ruleRefs: [],
-sourceHashes: [
-'l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552',
-'l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b',
-'l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe',
-],
+sourceHashes: ['l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552', 'l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b', 'l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe'],
 },
-registrarAtendimento: {
-actorRef: 'profissional',
-grantRefs: ['profissionalAgendaPropria'],
-authorities: ['profissional'],
-transition: {
-transitionId: 'registrarAtendimento',
-from: ['scheduled'],
-to: 'attended',
-by: ['profissional'],
-payload: ['details.attendanceNote'],
-},
-ruleRefs: [
-{ ruleId: 'consultaSomenteAgendadaPodeRegistrarAtendimento', file: 'l4/agendaClinica/rules.defs.ts', symbol: 'rules.consultaSomenteAgendadaPodeRegistrarAtendimento' },
-{ ruleId: 'anotacaoObrigatoriaNoAtendimento', file: 'l4/agendaClinica/rules.defs.ts', symbol: 'rules.anotacaoObrigatoriaNoAtendimento' },
-{ ruleId: 'profissionalAtendeSomentePropriaConsulta', file: 'l4/agendaClinica/rules.defs.ts', symbol: 'rules.profissionalAtendeSomentePropriaConsulta' },
-],
-sourceHashes: [
-'l4/agendaClinica/ontology/Consulta.defs.ts#sha256:d288780083aeb12e484740db46702ac341de938194d3380533c93b28200c9552',
-'l4/agendaClinica/access.defs.ts#sha256:22288ce4e7d7522f28879cad28e2582697aebe9124a685a7fc172db1a6e4e65b',
-'l4/agendaClinica/rules.defs.ts#sha256:b5516ac3568e374c7215a3424c381be7ba7485cde1c3d25d611ace61ecffdafe',
-],
-},
-};
+} as const;
 export class AgendaShared extends StateLitElement {
 public pageStatus: PageStatus = 'idle';
 public scenary: Scenario = 'base';
 public stateRegistrarAtendimentoId: string | null = null;
 public stateRegistrarAtendimentoDetailsAttendanceNote: string | null = null;
 public stateRegistrarAtendimentoStatus: ActionStatus = 'idle';
-public stateRegistrarAtendimentoError: ErrorEnvelope | null = null;
+public stateRegistrarAtendimentoError: ErrorState | null = null;
 public stateRegistrarAtendimentoResult: RegistrarAtendimentoOutput | null = null;
 public stateListConsultaId: string | null = null;
 public stateListConsultaPacienteId: string | null = null;
 public stateListConsultaProfissionalId: string | null = null;
 public stateListConsultaScheduledAt: string | null = null;
-public stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e0000610000670000650006e00006400006100002e00006c00006900007300007400004300006f00006e0000730000750006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073: ConsultaStatus | null = null;
+public stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073: ConsultaStatus | null = null;
 public stateListConsultaPage: number | null = null;
-public stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e0000610000670000650006e00006400006100002e00006c00006900007300007400004300006f00006e0000730000750006c00007400006100002e000073000074000061000074000075000073: ActionStatus = 'idle';
-public stateListConsultaError: ErrorEnvelope | null = null;
+public stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e000073000074000061000074000075000073: ActionStatus = 'idle';
+public stateListConsultaError: ErrorState | null = null;
 public stateListConsultaResult: ListConsultaOutput = [];
-private readonly subscribedStateKeys = [
-'ui.agenda.pageStatus', 'ui.agenda.scenary', 'ui.agenda.registrarAtendimento.input.id',
-'ui.agenda.registrarAtendimento.input.details.attendanceNote', 'ui.agenda.registrarAtendimento.status',
-'ui.agenda.registrarAtendimento.error', 'ui.agenda.registrarAtendimento.result', 'ui.agenda.listConsulta.input.id',
-'ui.agenda.listConsulta.input.pacienteId', 'ui.agenda.listConsulta.input.profissionalId', 'ui.agenda.listConsulta.input.scheduledAt',
-'ui.agenda.listConsulta.input.status', 'ui.agenda.listConsulta.input.page', 'ui.agenda.listConsulta.status',
-'ui.agenda.listConsulta.error', 'ui.agenda.listConsulta.result',
-] as const;
-private readonly statePropertyByKey: Readonly<Record<string, string>> = {
-'ui.agenda.pageStatus': 'pageStatus', 'ui.agenda.scenary': 'scenary',
-'ui.agenda.registrarAtendimento.input.id': 'stateRegistrarAtendimentoId',
-'ui.agenda.registrarAtendimento.input.details.attendanceNote': 'stateRegistrarAtendimentoDetailsAttendanceNote',
-'ui.agenda.registrarAtendimento.status': 'stateRegistrarAtendimentoStatus', 'ui.agenda.registrarAtendimento.error': 'stateRegistrarAtendimentoError',
-'ui.agenda.registrarAtendimento.result': 'stateRegistrarAtendimentoResult', 'ui.agenda.listConsulta.input.id': 'stateListConsultaId',
-'ui.agenda.listConsulta.input.pacienteId': 'stateListConsultaPacienteId', 'ui.agenda.listConsulta.input.profissionalId': 'stateListConsultaProfissionalId',
-'ui.agenda.listConsulta.input.scheduledAt': 'stateListConsultaScheduledAt', 'ui.agenda.listConsulta.input.status': 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e0000610000670000650006e00006400006100002e00006c00006900007300007400004300006f00006e0000730000750006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073',
-'ui.agenda.listConsulta.input.page': 'stateListConsultaPage', 'ui.agenda.listConsulta.status': 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e0000610000670000650006e00006400006100002e00006c00006900007300007400004300006f00006e0000730000750006c00007400006100002e000073000074000061000074000075000073',
-'ui.agenda.listConsulta.error': 'stateListConsultaError', 'ui.agenda.listConsulta.result': 'stateListConsultaResult',
-};
-public constructor() {
-super();
-this.subscribedStateKeys.forEach((key: string) => this.stateKeys.set(`${this.statePropertyByKey[key]};${key}`, false));
-}
+private readonly stateKeyToMember: ReadonlyMap<string, keyof AgendaShared> = new Map([
+['ui.agenda.pageStatus', 'pageStatus'], ['ui.agenda.scenary', 'scenary'],
+['ui.agenda.registrarAtendimento.input.id', 'stateRegistrarAtendimentoId'], ['ui.agenda.registrarAtendimento.input.details.attendanceNote', 'stateRegistrarAtendimentoDetailsAttendanceNote'],
+['ui.agenda.registrarAtendimento.status', 'stateRegistrarAtendimentoStatus'], ['ui.agenda.registrarAtendimento.error', 'stateRegistrarAtendimentoError'], ['ui.agenda.registrarAtendimento.result', 'stateRegistrarAtendimentoResult'],
+['ui.agenda.listConsulta.input.id', 'stateListConsultaId'], ['ui.agenda.listConsulta.input.pacienteId', 'stateListConsultaPacienteId'], ['ui.agenda.listConsulta.input.profissionalId', 'stateListConsultaProfissionalId'], ['ui.agenda.listConsulta.input.scheduledAt', 'stateListConsultaScheduledAt'],
+['ui.agenda.listConsulta.input.status', 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073'],
+['ui.agenda.listConsulta.input.page', 'stateListConsultaPage'], ['ui.agenda.listConsulta.status', 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e000073000074000061000074000075000073'],
+['ui.agenda.listConsulta.error', 'stateListConsultaError'], ['ui.agenda.listConsulta.result', 'stateListConsultaResult'],
+]);
 public connectedCallback(): void {
 super.connectedCallback();
-this.subscribedStateKeys.forEach((key: string) => {
-const value = getState(key);
-if (value !== undefined) this.applyState(key, value);
-});
+for (const key of STATE_KEYS) {
+const member = this.stateKeyToMember.get(key);
+if (member) {
+const value: unknown = getState(key);
+if (value !== undefined) (this as unknown as Record<string, unknown>)[member] = value;
+}
+subscribe([key], this);
+}
 void this.runListConsulta();
 }
 public disconnectedCallback(): void {
-this.subscribedStateKeys.forEach((key: string) => unsubscribe([key], this));
+for (const key of STATE_KEYS) unsubscribe([key], this);
 super.disconnectedCallback();
 }
-public handleIcaStateChange(key: string, value: unknown): void {
-if (this.statePropertyByKey[key]) {
-this.applyState(key, value);
+public handleIcaStateChange(key: string, value: any): void {
+if (value === undefined) return;
+const member = this.stateKeyToMember.get(key);
+if (member) {
+(this as unknown as Record<string, unknown>)[member] = value;
 this.requestUpdate();
 }
 }
-private applyState(key: string, value: unknown): void {
-const property = this.statePropertyByKey[key] as keyof AgendaShared;
-(this[property] as unknown) = value;
-}
-private publish(key: string, value: unknown): void {
+private publish<T>(key: string, member: keyof AgendaShared, value: T): void {
+(this as unknown as Record<string, unknown>)[member] = value;
 setState(key, value);
-this.applyState(key, value);
 }
-private errorFrom(error: unknown): ErrorEnvelope {
-if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
-const candidate = error as { code: unknown; message: unknown; details?: unknown };
-if (typeof candidate.code === 'string' && typeof candidate.message === 'string') return { code: candidate.code, message: candidate.message, details: candidate.details };
+private errorFrom(error: unknown, fallback: string): AgendaError {
+if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+const candidate = error as { code?: unknown; message: string; details?: unknown };
+return { code: typeof candidate.code === 'string' ? candidate.code : 'UNEXPECTED_ERROR', message: candidate.message, details: candidate.details };
 }
-return { code: 'UNEXPECTED_ERROR', message: error instanceof Error ? error.message : String(error) };
+return { code: 'UNEXPECTED_ERROR', message: fallback };
 }
-private queryParams(): ListConsultaInput {
+public setScenario(value: Scenario): void {
+if (value === 'registrarAtendimento' && this.stateRegistrarAtendimentoId === null) {
+console.error('Não é possível entrar no cenário de atendimento sem selecionar uma consulta.');
+return;
+}
+this.publish('ui.agenda.scenary', 'scenary', value);
+}
+public selectRegistrarAtendimentoId(id: string | null): void {
+if (id === null) {
+this.publish('ui.agenda.registrarAtendimento.input.id', 'stateRegistrarAtendimentoId', null);
+return;
+}
+const row = this.stateListConsultaResult.find((item) => item.id === id);
+if (!row) { console.error('Selecione uma consulta presente na agenda.'); return; }
+this.publish('ui.agenda.registrarAtendimento.input.id', 'stateRegistrarAtendimentoId', row.id);
+}
+public setRegistrarAtendimentoDetailsAttendanceNote(value: string | null): void { this.publish('ui.agenda.registrarAtendimento.input.details.attendanceNote', 'stateRegistrarAtendimentoDetailsAttendanceNote', value); }
+public setListConsultaId(value: string | null): void { this.publish('ui.agenda.listConsulta.input.id', 'stateListConsultaId', value); }
+public setListConsultaPacienteId(value: string | null): void { this.publish('ui.agenda.listConsulta.input.pacienteId', 'stateListConsultaPacienteId', value); }
+public setListConsultaProfissionalId(value: string | null): void { this.publish('ui.agenda.listConsulta.input.profissionalId', 'stateListConsultaProfissionalId', value); }
+public setListConsultaScheduledAt(value: string | null): void { this.publish('ui.agenda.listConsulta.input.scheduledAt', 'stateListConsultaScheduledAt', value); }
+public setListConsultaStatus(value: ConsultaStatus | null): void { this.publish('ui.agenda.listConsulta.input.status', 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073', value); }
+public enterBaseScenario(): void { this.setScenario('base'); }
+public enterRegistrarAtendimentoScenario(): void { if (this.stateRegistrarAtendimentoId !== null) this.setScenario('registrarAtendimento'); else console.error('Selecione uma consulta antes de registrar o atendimento.'); }
+public async runListConsulta(): Promise<void> {
+this.publish('ui.agenda.listConsulta.status', 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e000073000074000061000074000075000073', 'loading');
 const params: ListConsultaInput = {};
 if (this.stateListConsultaId) params.id = this.stateListConsultaId;
 if (this.stateListConsultaPacienteId) params.pacienteId = this.stateListConsultaPacienteId;
 if (this.stateListConsultaProfissionalId) params.profissionalId = this.stateListConsultaProfissionalId;
 if (this.stateListConsultaScheduledAt) params.scheduledAt = this.stateListConsultaScheduledAt;
-if (this.stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e0000610000670000650006e00006400006100002e00006c00006900007300007400004300006f00006e0000730000750006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073) params.status = this.stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e0000610000670000650006e00006400006100002e00006c00006900007300007400004300006f00006e0000730000750006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073;
+if (this.stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073) params.status = this.stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073;
 if (this.stateListConsultaPage !== null) params.page = this.stateListConsultaPage;
-return params;
-}
-public setScenario(value: Scenario): void {
-if (value === 'registrarAtendimento' && !this.stateRegistrarAtendimentoId) {
-this.publish('ui.agenda.registrarAtendimento.error', { code: 'PRECONDITION_REQUIRED', message: 'Selecione uma consulta antes de registrar o atendimento.' });
-return;
-}
-this.publish('ui.agenda.scenary', value);
-}
-public selectRegistrarAtendimentoId(value: string | null): void {
-if (value === null) {
-this.publish('ui.agenda.registrarAtendimento.input.id', null);
-return;
-}
-const row = this.stateListConsultaResult.find((item: ListConsultaItem) => item.id === value);
-if (!row) {
-this.publish('ui.agenda.registrarAtendimento.error', { code: 'INVALID_SELECTION', message: 'Selecione uma consulta válida da agenda.' });
-return;
-}
-this.publish('ui.agenda.registrarAtendimento.input.id', row.id);
-}
-public setRegistrarAtendimentoDetailsAttendanceNote(value: string | null): void { this.publish('ui.agenda.registrarAtendimento.input.details.attendanceNote', value); }
-public setListConsultaId(value: string | null): void { this.publish('ui.agenda.listConsulta.input.id', value); }
-public setListConsultaPacienteId(value: string | null): void { this.publish('ui.agenda.listConsulta.input.pacienteId', value); }
-public setListConsultaProfissionalId(value: string | null): void { this.publish('ui.agenda.listConsulta.input.profissionalId', value); }
-public setListConsultaScheduledAt(value: string | null): void { this.publish('ui.agenda.listConsulta.input.scheduledAt', value); }
-public setListConsultaStatus(value: ConsultaStatus | null): void { this.publish('ui.agenda.listConsulta.input.status', value); }
-public async runListConsulta(): Promise<void> {
-this.publish('ui.agenda.listConsulta.status', 'loading');
-this.publish('ui.agenda.listConsulta.error', null);
 try {
-const response = await execBff<ListConsultaOutput>(listConsultaRoute, this.queryParams(), { mode: 'silent' });
-if (response.ok && response.data !== null) {
-this.publish('ui.agenda.listConsulta.result', response.data);
-this.publish('ui.agenda.pageStatus', response.data.length === 0 ? 'empty' : 'success');
-this.publish('ui.agenda.listConsulta.status', 'success');
+const response = await execBff<ListConsultaOutput>(listConsultaRoute, params, { mode: 'silent' } satisfies BffClientOptions);
+if (response.ok && response.data) {
+this.publish('ui.agenda.listConsulta.result', 'stateListConsultaResult', response.data);
+this.publish('ui.agenda.listConsulta.status', 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e000073000074000061000074000075000073', response.data.length === 0 ? 'empty' : 'success');
 } else {
-const error = this.errorFrom(response.error);
-this.publish('ui.agenda.listConsulta.error', error); this.publish('ui.agenda.listConsulta.status', 'error'); this.publish('ui.agenda.pageStatus', 'error');
+const feedback = this.errorFrom(response.error, 'Não foi possível carregar a agenda.');
+this.publish('ui.agenda.listConsulta.error', 'stateListConsultaError', feedback);
+this.publish('ui.agenda.listConsulta.status', 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e000073000074000061000074000075000073', 'error');
 }
-} catch (error: unknown) {
-const normalized = this.errorFrom(error); this.publish('ui.agenda.listConsulta.error', normalized); this.publish('ui.agenda.listConsulta.status', 'error'); this.publish('ui.agenda.pageStatus', 'error');
+} catch (error) {
+this.publish('ui.agenda.listConsulta.error', 'stateListConsultaError', this.errorFrom(error, 'Não foi possível carregar a agenda.'));
+this.publish('ui.agenda.listConsulta.status', 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e000073000074000061000074000075000073', 'error');
 }
 }
 public async runRegistrarAtendimento(): Promise<void> {
 if (this.stateRegistrarAtendimentoStatus === 'loading') return;
-if (!this.stateRegistrarAtendimentoId) { this.publish('ui.agenda.registrarAtendimento.error', { code: 'REQUIRED_INPUT', message: 'Selecione uma consulta antes de registrar o atendimento.' }); return; }
-if (!this.stateRegistrarAtendimentoDetailsAttendanceNote?.trim()) { this.publish('ui.agenda.registrarAtendimento.error', { code: 'REQUIRED_INPUT', message: 'Informe a anotação do atendimento.' }); return; }
-this.publish('ui.agenda.registrarAtendimento.status', 'loading'); this.publish('ui.agenda.registrarAtendimento.error', null);
+if (!this.stateRegistrarAtendimentoId) { this.publish('ui.agenda.registrarAtendimento.error', 'stateRegistrarAtendimentoError', this.errorFrom(null, 'Selecione uma consulta para registrar o atendimento.')); return; }
+if (!this.stateRegistrarAtendimentoDetailsAttendanceNote) { this.publish('ui.agenda.registrarAtendimento.error', 'stateRegistrarAtendimentoError', this.errorFrom(null, 'Informe a anotação do atendimento.')); return; }
+this.publish('ui.agenda.registrarAtendimento.status', 'stateRegistrarAtendimentoStatus', 'loading');
+this.publish('ui.agenda.registrarAtendimento.error', 'stateRegistrarAtendimentoError', null);
 const params: RegistrarAtendimentoInput = { id: this.stateRegistrarAtendimentoId, details: { attendanceNote: this.stateRegistrarAtendimentoDetailsAttendanceNote } };
 try {
-const result = await runBlockingUiAction((signal: AbortSignal) => execBff<RegistrarAtendimentoOutput>(registrarAtendimentoRoute, params, { mode: 'blocking', signal } as BffClientOptions), { mode: 'blocking' });
-if (result?.ok && result.data !== null) {
-this.publish('ui.agenda.registrarAtendimento.result', result.data); this.publish('ui.agenda.registrarAtendimento.status', 'success'); await this.runListConsulta();
+const response = await runBlockingUiAction((signal: AbortSignal) => execBff<RegistrarAtendimentoOutput>(registrarAtendimentoRoute, params, { mode: 'blocking', signal }), { busyLabel: 'Registrando atendimento...' });
+if (response?.ok && response.data) {
+this.publish('ui.agenda.registrarAtendimento.result', 'stateRegistrarAtendimentoResult', response.data);
+this.publish('ui.agenda.registrarAtendimento.status', 'stateRegistrarAtendimentoStatus', 'success');
+await this.runListConsulta();
 } else {
-const error = this.errorFrom(result?.error);
-const message = result?.error && typeof result.error.message === 'string' ? result.error.message : error.message;
-this.publish('ui.agenda.registrarAtendimento.error', { ...error, message }); this.publish('ui.agenda.registrarAtendimento.status', 'error');
+const rawError: unknown = response?.error;
+const feedback = rawError && typeof rawError === 'object' && 'message' in rawError && typeof rawError.message === 'string'
+? this.errorFrom(rawError, rawError.message)
+: this.errorFrom(rawError, 'Não foi possível registrar o atendimento.');
+this.publish('ui.agenda.registrarAtendimento.error', 'stateRegistrarAtendimentoError', feedback);
+this.publish('ui.agenda.registrarAtendimento.status', 'stateRegistrarAtendimentoStatus', 'error');
 }
-} catch (error: unknown) {
-this.publish('ui.agenda.registrarAtendimento.error', this.errorFrom(error)); this.publish('ui.agenda.registrarAtendimento.status', 'error');
+} catch (error) {
+const feedback = this.errorFrom(error, 'Não foi possível registrar o atendimento.');
+this.publish('ui.agenda.registrarAtendimento.error', 'stateRegistrarAtendimentoError', feedback);
+this.publish('ui.agenda.registrarAtendimento.status', 'stateRegistrarAtendimentoStatus', 'error');
 }
 }
-public enterBaseScenario(): void { this.setScenario('base'); }
-public enterRegistrarAtendimentoScenario(): void { this.setScenario('registrarAtendimento'); }
 
   /** setter for state ui.agenda.scenary */
   setUiScenary(value: string): void {
@@ -252,4 +242,3 @@ public enterRegistrarAtendimentoScenario(): void { this.setScenario('registrarAt
   }
 
 }
-void operationBindings;

@@ -11,214 +11,164 @@ import '/_102040_/l2/molecules/groupentertext/ml-multiline-text.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
 /// **collab_i18n_start**
 const pageMessage_pt = {
-agenda: 'Agenda',
-consultasDoDia: 'Consultas do dia',
-agendaPropria: 'Agenda própria do profissional',
-hoje: 'Hoje',
-carregandoAgenda: 'Carregando a agenda...',
-semConsultas: 'Não há consultas na agenda.',
-consultaSelecionada: 'Consulta selecionada',
-horario: 'Horário',
-paciente: 'Paciente',
-situacao: 'Situação',
-agendada: 'Agendada',
-faltaRegistrada: 'Falta registrada',
-atendida: 'Atendida',
-pacienteNaoIdentificado: 'Paciente não identificado',
-registrarAtendimento: 'Registrar atendimento',
-registroDeAtendimento: 'Registro de atendimento',
-consulteERegistre: 'Consulte suas consultas e registre os atendimentos.',
-fechar: 'Fechar',
-anotacaoDoAtendimento: 'Anotação do atendimento *',
-anotacaoObrigatoria: 'A anotação é obrigatória.',
-registrando: 'Registrando...',
-atendimentoRegistrado: 'Atendimento registrado com sucesso.',
+agendaTitle: 'Agenda clínica',
+agendaDescription: 'Consulte suas consultas e registre o atendimento.',
 };
 type PageMessageType = typeof pageMessage_pt;
 const pageMessages: Record<string, PageMessageType> = { pt: pageMessage_pt };
 /// **collab_i18n_end**
+const LIST_STATUS_MEMBER = 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e00006900006e00007000007500007400002e000073000074000061000074000075000073' as const;
+const QUERY_STATUS_MEMBER = 'stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e00006100006700006500006e00006400006100002e00006c00006900007300007400004300006f00006e00007300007500006c00007400006100002e000073000074000061000074000075000073' as const;
+type AgendaElement = AgendaShared & {
+[LIST_STATUS_MEMBER]: 'idle' | 'loading' | 'success' | 'empty' | 'error';
+[QUERY_STATUS_MEMBER]: 'idle' | 'loading' | 'success' | 'error';
+};
 @customElement('agenda-clinica--web--desktop--page11--agenda-102047')
-export class AgendaPage11 extends AgendaShared {
-private selectedConsulta: ListConsultaItem | null = null;
-private get msg(): PageMessageType {
-const language = (document.documentElement.lang || 'pt').toLowerCase();
-return pageMessages[language] ?? pageMessages[language.slice(0, 2)] ?? pageMessage_pt;
+class AgendaDesktopPage11 extends AgendaShared {
+protected get msg(): PageMessageType {
+return pageMessages[(document.documentElement.lang || 'pt').toLowerCase()] ?? pageMessages.pt;
+}
+private selectedConsulta(): ListConsultaItem | undefined {
+const id = this.stateRegistrarAtendimentoId;
+return id === null ? undefined : this.stateListConsultaResult.find((item: ListConsultaItem) => item.id === id);
+}
+private patientName(item: ListConsultaItem): string {
+return item.consultaPaciente?.details?.identification?.name ?? 'Paciente não identificado';
 }
 private formatDate(value: string): string {
 const date = new Date(value);
-if (Number.isNaN(date.getTime())) return value;
-return new Intl.DateTimeFormat('pt-BR', {
-weekday: 'short',
-day: '2-digit',
-month: '2-digit',
-year: 'numeric',
-}).format(date);
-}
-private formatTime(value: string): string {
-const date = new Date(value);
-if (Number.isNaN(date.getTime())) return value;
-return new Intl.DateTimeFormat('pt-BR', {
-hour: '2-digit',
-minute: '2-digit',
-}).format(date);
-}
-private patientName(item: ListConsultaItem): string {
-return item.consultaPaciente?.details?.identification?.name ?? this.msg.pacienteNaoIdentificado;
+return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(date);
 }
 private statusLabel(status: ListConsultaItem['status']): string {
-if (status === 'scheduled') return this.msg.agendada;
-if (status === 'noShow') return this.msg.faltaRegistrada;
-return this.msg.atendida;
+if (status === 'scheduled') return 'Agendada';
+if (status === 'attended') return 'Atendida';
+return 'Falta registrada';
 }
 private selectConsulta(item: ListConsultaItem): void {
-this.selectedConsulta = item;
 this.selectRegistrarAtendimentoId(item.id);
-this.requestUpdate();
 }
-private openAttendance(item: ListConsultaItem): void {
-if (item.status !== 'scheduled') return;
-this.selectConsulta(item);
-this.enterRegistrarAtendimentoScenario();
-}
-private closeAttendance(): void {
-this.enterBaseScenario();
+private handleListClick(event: Event): void {
+const detail = (event as CustomEvent<{ index?: number }>).detail;
+const index = detail?.index;
+if (typeof index !== 'number') return;
+const item = this.stateListConsultaResult[index];
+if (item) this.selectConsulta(item);
 }
 private handleNoteInput(event: Event): void {
-const custom = event as CustomEvent<{ value?: unknown }>;
-const value = typeof custom.detail?.value === 'string' ? custom.detail.value : '';
-this.setRegistrarAtendimentoDetailsAttendanceNote(value);
+const detail = (event as CustomEvent<{ value?: unknown }>).detail;
+this.setRegistrarAtendimentoDetailsAttendanceNote(typeof detail?.value === 'string' ? detail.value : '');
 }
-private renderStatusFeedback(): TemplateResult | typeof nothing {
-const error = this.stateListConsultaError;
-if (this.pageStatus === 'error' && error) {
-return html`<groupnotifyuser--ml-contextual-feedback type="error" visible>
+private renderFeedback(): TemplateResult | typeof nothing {
+const error = this.stateRegistrarAtendimentoError;
+if (error === null) return nothing;
+return html`
+<groupnotifyuser--ml-contextual-feedback type="error" visible="true" dismissible="false" role="alert">
 <Message>${error.message}</Message>
-</groupnotifyuser--ml-contextual-feedback>`;
-}
-if (this.pageStatus === 'loading') {
-return html`<p class="agenda-feedback" role="status" aria-live="polite">${this.msg.carregandoAgenda}</p>`;
-}
-if (this.pageStatus === 'empty') {
-return html`<p class="agenda-feedback" role="status">${this.msg.semConsultas}</p>`;
-}
-return nothing;
+</groupnotifyuser--ml-contextual-feedback>
+<p class="agenda-mutation-feedback" role="alert" aria-live="assertive">${error.message}</p>
+`;
 }
 private renderCalendar(): TemplateResult {
-const items = this.stateListConsultaResult;
+const listStatus = (this as AgendaElement)[LIST_STATUS_MEMBER];
+const loading = listStatus === 'loading';
+const rows = this.stateListConsultaResult;
 return html`
-<section class="agenda-surface" aria-labelledby="agenda-calendar-title">
-<div class="agenda-surface-heading">
-<div>
-<h2 id="agenda-calendar-title">${this.msg.consultasDoDia}</h2>
-<p class="agenda-muted">${this.msg.agendaPropria}</p>
-</div>
-<p class="agenda-today">${this.msg.hoje}</p>
-</div>
-${this.renderStatusFeedback()}
-<groupviewdata--ml-calendar-view
-.loading=${this.stateListConsultaStatusX00007300007400006100007400006500003a00007500006900002e0000610000670000650006e00006400006100002e00006c00006900007300007400004300006f00006e0000730000750006c00007400006100002e000073000074000061000074000075000073 === 'loading'}
-@row-click=${(event: Event) => {
-const custom = event as CustomEvent<{ index?: unknown }>;
-const index = typeof custom.detail?.index === 'number' ? custom.detail.index : -1;
-const item = items[index];
-if (item) this.selectConsulta(item);
-}}>
+<section class="agenda-calendar" aria-labelledby="agenda-calendar-title">
+<h2 id="agenda-calendar-title">Consultas do dia</h2>
+<p class="agenda-caption">Agenda própria do profissional</p>
+<groupviewdata--ml-calendar-view .loading=${loading} hoverable="true" @row-click=${(event: Event) => this.handleListClick(event)}>
 <Columns>
-<Column field="scheduledAt" header=${this.msg.horario}></Column>
-<Column field="patient" header=${this.msg.paciente}></Column>
-<Column field="status" header=${this.msg.situacao}></Column>
+<Column field="scheduledAt" header="Horário"></Column>
+<Column field="patient" header="Paciente"></Column>
+<Column field="status" header="Situação"></Column>
 </Columns>
 <Rows>
-${items.map((item: ListConsultaItem) => html`
-<Row>
-<Cell>${this.formatTime(item.scheduledAt)}</Cell>
+${rows.map((item: ListConsultaItem) => html`
+<Row ?selected=${item.id === this.stateRegistrarAtendimentoId}>
+<Cell>
+<button class="agenda-slot" type="button" @click=${() => this.selectConsulta(item)}>
+${this.formatDate(item.scheduledAt)}
+</button>
+</Cell>
 <Cell>${this.patientName(item)}</Cell>
-<Cell>${this.statusLabel(item.status)}</Cell>
+<Cell><span class="agenda-status">${this.statusLabel(item.status)}</span></Cell>
 </Row>
 `)}
 </Rows>
-<Empty><span>${this.msg.semConsultas}</span></Empty>
-<Loading><span>${this.msg.carregandoAgenda}</span></Loading>
+<Loading><p role="status" aria-live="polite">Carregando a agenda...</p></Loading>
+<Empty><p role="status">Não há consultas na agenda do dia.</p></Empty>
 </groupviewdata--ml-calendar-view>
-${this.selectedConsulta ? this.renderSelectedSummary(this.selectedConsulta) : nothing}
+${listStatus === 'error' && this.stateListConsultaError !== null ? html`
+<p class="agenda-error" role="alert">${this.stateListConsultaError.message}</p>
+` : nothing}
 </section>
 `;
 }
-private renderSelectedSummary(item: ListConsultaItem): TemplateResult {
+private renderDetail(): TemplateResult {
+const item = this.selectedConsulta();
+if (!item) return html`<p role="status">Selecione uma consulta para conferir os dados.</p>`;
 return html`
-<aside class="agenda-detail" aria-labelledby="consulta-detail-title">
-<h2 id="consulta-detail-title">${this.msg.consultaSelecionada}</h2>
+<article class="agenda-detail" data-organism-id="organism.detail.1" aria-labelledby="consulta-detail-title">
+<h2 id="consulta-detail-title">Dados da consulta</h2>
 <dl>
-<div><dt>${this.msg.horario}</dt><dd>${this.formatDate(item.scheduledAt)} às ${this.formatTime(item.scheduledAt)}</dd></div>
-<div><dt>${this.msg.paciente}</dt><dd>${this.patientName(item)}</dd></div>
-<div><dt>${this.msg.situacao}</dt><dd>${this.statusLabel(item.status)}</dd></div>
+<div><dt>Horário</dt><dd>${this.formatDate(item.scheduledAt)}</dd></div>
+<div><dt>Paciente</dt><dd>${this.patientName(item)}</dd></div>
+<div><dt>Situação</dt><dd>${this.statusLabel(item.status)}</dd></div>
 </dl>
 ${item.status === 'scheduled' ? html`
-<grouptriggeraction--ml-button-standard @action=${() => this.openAttendance(item)}>
-<Label>${this.msg.registrarAtendimento}</Label>
+<grouptriggeraction--ml-button-standard data-variant="primary" @action=${() => this.enterRegistrarAtendimentoScenario()}>
+<Label>Registrar atendimento</Label>
 </grouptriggeraction--ml-button-standard>
 ` : nothing}
-</aside>
+</article>
 `;
 }
-private renderAttendanceForm(): TemplateResult {
-const item = this.selectedConsulta;
+private renderForm(): TemplateResult {
+const item = this.selectedConsulta();
+const status = this.stateRegistrarAtendimentoStatus;
 const note = this.stateRegistrarAtendimentoDetailsAttendanceNote ?? '';
-const error = this.stateRegistrarAtendimentoError;
-const loading = this.stateRegistrarAtendimentoStatus === 'loading';
+const canSubmit = item?.status === 'scheduled' && note.trim().length > 0 && status !== 'loading';
 return html`
-<section class="attendance-panel" aria-labelledby="attendance-title">
-<div class="attendance-heading">
-<div>
-<h2 id="attendance-title">${this.msg.registroDeAtendimento}</h2>
-${item ? html`<p>${this.patientName(item)} · ${this.formatTime(item.scheduledAt)}</p>` : nothing}
-</div>
-<button class="agenda-close" type="button" @click=${this.closeAttendance}>${this.msg.fechar}</button>
-</div>
-${error ? html`<groupnotifyuser--ml-contextual-feedback type="error" visible>
-<Message>${error.message}</Message>
-</groupnotifyuser--ml-contextual-feedback>` : nothing}
-${this.stateRegistrarAtendimentoStatus === 'success' ? html`<p class="agenda-success" role="status" aria-live="polite">${this.msg.atendimentoRegistrado}</p>` : nothing}
-<groupentertext--ml-multiline-text
-.value=${note}
-rows="5"
-required
-?loading=${loading}
-@input=${this.handleNoteInput}>
-<Label>${this.msg.anotacaoDoAtendimento}</Label>
-<Helper>${this.msg.anotacaoObrigatoria}</Helper>
+<form class="agenda-form" data-organism-id="organism.form.1" aria-labelledby="attendance-form-title" @submit=${(event: Event) => { event.preventDefault(); if (canSubmit) void this.runRegistrarAtendimento(); }}>
+<h2 id="attendance-form-title">Registrar atendimento</h2>
+${item ? html`<p>Consulta de ${this.patientName(item)} em ${this.formatDate(item.scheduledAt)}.</p>` : html`<p>Selecione uma consulta agendada.</p>`}
+${item?.status === 'scheduled' ? html`
+<groupentertext--ml-multiline-text .value=${note} rows="4" required="true" name="attendanceNote" @input=${(event: Event) => this.handleNoteInput(event)}>
+<Label>Anotação do atendimento *</Label>
+<Helper>Este campo é obrigatório.</Helper>
 </groupentertext--ml-multiline-text>
-<grouptriggeraction--ml-button-standard
-type="submit"
-.loading=${loading}
-?disabled=${loading || note.trim().length === 0}>
-<Label>${loading ? this.msg.registrando : this.msg.registrarAtendimento}</Label>
+${this.renderFeedback()}
+${status === 'success' ? html`<p role="status" aria-live="polite" class="agenda-mutation-feedback">Atendimento registrado com sucesso.</p>` : nothing}
+<grouptriggeraction--ml-button-standard data-variant="primary" .disabled=${!canSubmit} .loading=${status === 'loading'} type="submit">
+<Label>Concluir atendimento</Label>
 </grouptriggeraction--ml-button-standard>
-</section>
+` : html`<p role="status">O atendimento só pode ser registrado para uma consulta agendada.</p>`}
+<grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => this.enterBaseScenario()}>
+<Label>Voltar para a agenda</Label>
+</grouptriggeraction--ml-button-standard>
+</form>
 `;
 }
-protected override render(): TemplateResult {
+protected render(): TemplateResult {
 return html`
 <main class="agenda-page" aria-labelledby="agenda-title">
 <header class="agenda-header">
-<div>
-<h1 id="agenda-title">${this.msg.agenda}</h1>
-<p>${this.msg.consulteERegistre}</p>
-</div>
-<span class="agenda-date">${this.stateListConsultaResult.length > 0 ? this.formatDate(this.stateListConsultaResult[0].scheduledAt) : this.msg.hoje}</span>
+<h1 id="agenda-title">${this.msg.agendaTitle}</h1>
+<p>${this.msg.agendaDescription}</p>
 </header>
-<molecules--ml-scenary-102020 mode="scenary" .value=${this.scenary} @change=${(event: Event) => this.handleUiScenaryChange(event)}>
-<Scene value="base" title=${this.msg.agenda}>
-${this.renderCalendar()}
+<molecules--ml-scenary-102020 .value=${this.scenary} mode="scenary" back-label="Voltar" @change=${(event: Event) => this.handleUiScenaryChange(event)}>
+<Scene value="base" title="Agenda" contentRef="content.list">
+<div class="agenda-layout">
+<div data-organism-id="organism.list.1">${this.renderCalendar()}</div>
+<div>${this.renderDetail()}</div>
+</div>
 </Scene>
-<Scene value="registrarAtendimento" title=${this.msg.registroDeAtendimento}>
-${this.renderCalendar()}
-<form @submit=${(event: Event) => { event.preventDefault(); void this.runRegistrarAtendimento(); }}>
-${this.renderAttendanceForm()}
-</form>
+<Scene value="registrarAtendimento" title="Registro do atendimento" contentRef="content.form">
+${this.renderForm()}
 </Scene>
 </molecules--ml-scenary-102020>
 </main>
 `;
 }
 }
+export { AgendaDesktopPage11 };
