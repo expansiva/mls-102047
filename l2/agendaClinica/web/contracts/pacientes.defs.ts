@@ -1,16 +1,15 @@
+/// <mls fileReference="_102047_/l2/agendaClinica/web/contracts/pacientes.defs.ts" enhancement="_blank"/>
+
 export const createPacienteRoute = "agendaClinica.pacientes.cmdCreatePaciente" as const;
 
 export interface CreatePacienteInput {
   "details": {
-    "identification"?: {
+    "identification": {
       "name": string;
       "docType"?: "CPF" | "NationalId" | "Passport" | "Other";
       "docId"?: string;
       "countryCode": string;
     };
-    "base"?: object;
-    "general"?: object;
-    "agendaClinica"?: object;
   };
 }
 
@@ -34,14 +33,14 @@ export interface CreatePacienteOutput {
 export const listPacienteRoute = "agendaClinica.pacientes.qryListPaciente" as const;
 
 export interface ListPacienteInput {
-  "id": string;
-  "details": {
+  "id"?: string;
+  "details"?: {
     "identification"?: {
-      "subtype": "Person";
-      "name": string;
+      "subtype"?: "Person";
+      "name"?: string;
       "docType"?: "CPF" | "NationalId" | "Passport" | "Other";
       "docId"?: string;
-      "countryCode": string;
+      "countryCode"?: string;
     };
   };
   "page"?: number;

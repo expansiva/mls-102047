@@ -1,12 +1,13 @@
+/// <mls fileReference="_102047_/l2/agendaClinica/web/contracts/consultas.defs.ts" enhancement="_blank"/>
+
 export const createConsultaRoute = "agendaClinica.consultas.cmdCreateConsulta" as const;
 
 export interface CreateConsultaInput {
   "pacienteId": string;
   "profissionalId": string;
   "scheduledAt": string;
-  "status": "scheduled" | "noShow" | "attended";
   "details": {
-    "telephoneConfirmation"?: {
+    "telephoneConfirmation": {
       "confirmedAt": string;
     };
   };
@@ -22,6 +23,22 @@ export interface CreateConsultaOutput {
   "details": {
     "telephoneConfirmation"?: {
       "confirmedAt": string;
+    };
+  };
+  "consultaPaciente"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
+  };
+  "consultaProfissional"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
     };
   };
 }
@@ -44,6 +61,22 @@ export interface RegistrarFaltaOutput {
       "confirmedAt": string;
     };
   };
+  "consultaPaciente"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
+  };
+  "consultaProfissional"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
+  };
 }
 
 export const updateConsultaRoute = "agendaClinica.consultas.cmdUpdateConsulta" as const;
@@ -53,9 +86,8 @@ export interface UpdateConsultaInput {
   "pacienteId": string;
   "profissionalId": string;
   "scheduledAt": string;
-  "status": "scheduled" | "noShow" | "attended";
   "details": {
-    "telephoneConfirmation"?: {
+    "telephoneConfirmation": {
       "confirmedAt": string;
     };
   };
@@ -73,16 +105,32 @@ export interface UpdateConsultaOutput {
       "confirmedAt": string;
     };
   };
+  "consultaPaciente"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
+  };
+  "consultaProfissional"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
+  };
 }
 
 export const listConsultaRoute = "agendaClinica.consultas.qryListConsulta" as const;
 
 export interface ListConsultaInput {
-  "id": string;
-  "pacienteId": string;
-  "profissionalId": string;
-  "scheduledAt": string;
-  "status": "scheduled" | "noShow" | "attended";
+  "id"?: string;
+  "pacienteId"?: string;
+  "profissionalId"?: string;
+  "scheduledAt"?: string;
+  "status"?: "scheduled" | "noShow" | "attended";
   "page"?: number;
 }
 
@@ -98,6 +146,22 @@ export interface ListConsultaItem {
       "confirmedAt": string;
     };
   };
+  "consultaPaciente"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
+  };
+  "consultaProfissional"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
+  };
 }
 
 export type ListConsultaOutput = ListConsultaItem[];
@@ -105,14 +169,14 @@ export type ListConsultaOutput = ListConsultaItem[];
 export const listPacienteRoute = "agendaClinica.consultas.qryListPaciente" as const;
 
 export interface ListPacienteInput {
-  "id": string;
-  "details": {
+  "id"?: string;
+  "details"?: {
     "identification"?: {
-      "subtype": "Person";
-      "name": string;
+      "subtype"?: "Person";
+      "name"?: string;
       "docType"?: "CPF" | "NationalId" | "Passport" | "Other";
       "docId"?: string;
-      "countryCode": string;
+      "countryCode"?: string;
     };
   };
   "page"?: number;
@@ -140,15 +204,15 @@ export type ListPacienteOutput = ListPacienteItem[];
 export const listProfissionalRoute = "agendaClinica.consultas.qryListProfissional" as const;
 
 export interface ListProfissionalInput {
-  "id": string;
-  "details": {
+  "id"?: string;
+  "details"?: {
     "identification"?: {
-      "subtype": "Person";
-      "name": string;
-      "status": "Active" | "Inactive" | "Merged" | "Blocked";
+      "subtype"?: "Person";
+      "name"?: string;
+      "status"?: "Active" | "Inactive" | "Merged" | "Blocked";
       "docType"?: "CPF" | "Passport" | "NationalId" | "Other";
       "docId"?: string;
-      "countryCode": string;
+      "countryCode"?: string;
     };
   };
   "page"?: number;
