@@ -4,8 +4,8 @@
   "module": "controleEstoque",
   "pageId": "produtos",
   "status": "approved",
-  "snapshotHash": "sha256:83f9cf72153a2ce33f60a360c0bb111b1b1b9dca5de92a6809f818d9996ee05f",
-  "sharedHash": "sha256:23986180fd52021b92bfdf0d14707caceb4528df2606915f034208c0b2c0120a",
+  "snapshotHash": "sha256:7683c4a6bb31614607945bd1d0cdcd00963fedca2b9bdb0abaea33711f1a9a14",
+  "sharedHash": "sha256:b1c065d140f4e8da59bfa88d9edde76e21efb8f056e9a0ea61d5d3feb21b999a",
   "contextHash": "sha256:4d983481a475a701b7cdffe1ef4bb6d56a9937d96eacc96b9a03610aa8e908c9",
   "catalogHash": "sha256:285e42e596b7bde092824c38a446f23d7bd4ac40fc551a0e0d58be6d08f135dc",
   "skillHashes": {
@@ -13,7 +13,7 @@
     "_102020_/l2/agentDefsL2/skills/pageCategories/inventoryControl.md": "sha256:c7c546b14df520e4c4b9808883803fa4fdfdacd02731ffe83bd8f8aed4ff3c90"
   },
   "categoryRef": "inventoryControl",
-  "categoryReason": "A página concentra o acompanhamento de saldos de produtos, quantidades mínimas, avisos de saldo baixo e operações autorizadas de cadastro e movimentação de estoque.",
+  "categoryReason": "A página apoia o controle de estoque ao reunir consulta de saldos, quantidades mínimas, avisos de saldo baixo e os comandos permitidos de cadastrar produto e registrar movimentação.",
   "categoryEvidenceRefs": [
     "listProduto",
     "listMovimentacaoEstoque",
@@ -29,8 +29,8 @@
     "organism.actions.1"
   ],
   "moleculeReasons": {
-    "desktop": "As recomendações usam visualizações de dados para saldos e avisos, uma tabela para a consulta estruturada e entradas compatíveis com o cadastro autorizado.",
-    "mobile": "No espaço estreito, as recomendações privilegiam registros empilhados e campos de entrada tocáveis, preservando a consulta, o cadastro e todos os estados de feedback."
+    "desktop": "As recomendações apoiam a consulta de produtos e saldos, a localização por nome, a entrada dos dados permitidos para cadastro e o disparo explícito do comando, usando apenas capacidades compartilhadas aprovadas.",
+    "mobile": "No mobile, as mesmas capacidades são mantidas com prioridade de leitura vertical, busca direta, campos adequados ao toque e acionamento explícito do cadastro, evitando a compressão de dados estruturados."
   },
   "moleculeReceipt": {
     "schemaVersion": "2026-09-23-agent-defs-l2-molecule-receipt-v2",
@@ -39,11 +39,12 @@
     "selectedBy": "dependency",
     "outcome": "catalog-selection",
     "code": "D2_MOLECULE_SELECTION",
-    "reason": "Selected 6 catalog group(s).",
+    "reason": "Selected 7 catalog group(s).",
     "groupCount": 31,
     "candidateCount": 198,
     "selectedGroupIds": [
       "groupViewData",
+      "groupSearchContent",
       "groupViewTable",
       "groupViewCard",
       "groupEnterText",
@@ -287,6 +288,12 @@
       },
       {
         "role": "usage-contract",
+        "reference": "/_102020_/l2/aura/molecules/skills/groupSearchContent/usage",
+        "via": "stor",
+        "sha256": "sha256:1caf53d5f4027944d7904bdc8bc6e59ad33930072d1f3158b129d575cfbcdd85"
+      },
+      {
+        "role": "usage-contract",
         "reference": "/_102020_/l2/aura/molecules/skills/groupTriggerAction/usage",
         "via": "stor",
         "sha256": "sha256:1d4607aa57f6f738a1518456d2ee8db44c5c7d0f612cd5e76f09c89dfcb126ed"
@@ -310,7 +317,7 @@
         "sha256": "sha256:230955ba3517ab88fa6eb2ec4bcb1db7eeceaa260928f7c9020ea41788b2b23c"
       }
     ],
-    "contextHash": "sha256:cd48499e593c26ce3dbaf6301d93a8747c7235fb17e212b541ded957968b7d7d"
+    "contextHash": "sha256:972426b100d84cab256e5c77c510d9ce21c0d915a92b8a7122680fb4073e5a6e"
   },
   "templateSelection": {
     "categoryRef": "inventoryControl",
@@ -496,9 +503,9 @@
           {
             "groupId": "groupViewData",
             "candidates": [
-              "groupviewdata--ml-vertical-record-list"
+              "groupviewdata--ml-card-grid"
             ],
-            "reason": "A consulta de vários produtos com saldo atual é compatível com uma visualização de registros escaneável.",
+            "reason": "Os saldos são informações de múltiplos produtos e podem ser consultados como registros individuais.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
@@ -674,7 +681,7 @@
             "candidates": [
               "groupviewdata--ml-card-grid"
             ],
-            "reason": "Os itens com aviso são registros independentes que precisam receber atenção equivalente.",
+            "reason": "Os produtos que requerem atenção podem ser destacados individualmente com os dados que justificam o aviso.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
@@ -846,11 +853,24 @@
         },
         "moleculeRecommendations": [
           {
+            "groupId": "groupSearchContent",
+            "candidates": [
+              "groupsearchcontent--ml-search-filters"
+            ],
+            "reason": "O nome do produto é um critério disponível para localizar cadastros.",
+            "indexReference": "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
+            "indexVia": "stor",
+            "indexSha256": "sha256:4458436e93cf3d9d2ee59d0b9d1e27cbfd4b8c93c5c46f7f877f9eedef966867",
+            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
+            "usageContractVia": "stor",
+            "usageContractSha256": "sha256:1caf53d5f4027944d7904bdc8bc6e59ad33930072d1f3158b129d575cfbcdd85"
+          },
+          {
             "groupId": "groupViewTable",
             "candidates": [
               "groupviewtable--ml-data-table"
             ],
-            "reason": "A lista reúne campos estruturados de vários produtos para consulta operacional.",
+            "reason": "A coleção possui campos de identificação e controle de estoque adequados à consulta estruturada.",
             "indexReference": "_102040_/l2/molecules/groupviewtable/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:c63469f28e5e81594f34672f8959fba283b99c9869c60e3def070091642e70c9",
@@ -1026,7 +1046,7 @@
             "candidates": [
               "groupviewcard--ml-view-card-horizontal"
             ],
-            "reason": "O detalhe concentra metadados do produto e seus indicadores de estoque em uma unidade de leitura.",
+            "reason": "Os dados do produto formam uma unidade de consulta com metadados e condição de estoque.",
             "indexReference": "_102040_/l2/molecules/groupviewcard/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:cdfd46bdd1403f4c5e591a95c20760cdcdea27a08a35e3ac65f3445195efdbc0",
@@ -1202,7 +1222,7 @@
             "candidates": [
               "groupentertext--ml-enter-text"
             ],
-            "reason": "Nome e unidade de medida são entradas textuais de uma linha.",
+            "reason": "Nome do produto e unidade de medida são valores textuais de uma linha.",
             "indexReference": "_102040_/l2/molecules/groupentertext/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:224a115414c9a393b96ffece5577e00e65975f049f6d11e6fadcce6a1e73cd48",
@@ -1215,26 +1235,13 @@
             "candidates": [
               "groupenternumber--ml-number-input"
             ],
-            "reason": "A quantidade mínima é uma entrada numérica.",
+            "reason": "A quantidade mínima é um valor numérico informado pelo estoquista.",
             "indexReference": "_102040_/l2/molecules/groupenternumber/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:94a52c28ec828918c77800447f098381bc32de7e922344d8f4ec68924211cc62",
             "usageContractReference": "_102020_/l2/aura/molecules/skills/groupEnterNumber/usage.ts",
             "usageContractVia": "stor",
             "usageContractSha256": "sha256:46387e26474ca57c3c351992faf4cc924b14df799cf437115e8c593ff2a23de6"
-          },
-          {
-            "groupId": "groupTriggerAction",
-            "candidates": [
-              "grouptriggeraction--ml-button-standard"
-            ],
-            "reason": "O envio executa o comando autorizado de cadastro.",
-            "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:1d4607aa57f6f738a1518456d2ee8db44c5c7d0f612cd5e76f09c89dfcb126ed"
           }
         ]
       },
@@ -1404,7 +1411,7 @@
             "candidates": [
               "grouptriggeraction--ml-button-standard"
             ],
-            "reason": "Há um comando autorizado de cadastro que precisa de acionamento explícito e feedback de processamento.",
+            "reason": "O cadastro é um comando explícito de envio do produto informado.",
             "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
@@ -1582,7 +1589,7 @@
             "candidates": [
               "groupviewdata--ml-vertical-record-list"
             ],
-            "reason": "A leitura sequencial de registros é adequada ao espaço estreito e mantém o saldo de cada produto acessível.",
+            "reason": "A leitura de vários produtos em tela estreita é favorecida por registros empilhados e escaneáveis.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
@@ -1758,7 +1765,7 @@
             "candidates": [
               "groupviewdata--ml-vertical-record-list"
             ],
-            "reason": "Os avisos podem ser lidos como registros empilhados, com prioridade para o saldo e o limite mínimo.",
+            "reason": "Os avisos podem ser percorridos como registros prioritários em uma sequência fluida.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
@@ -1930,11 +1937,24 @@
         },
         "moleculeRecommendations": [
           {
+            "groupId": "groupSearchContent",
+            "candidates": [
+              "groupsearchcontent--ml-search-bar"
+            ],
+            "reason": "O nome do produto é um critério disponível para localizar registros.",
+            "indexReference": "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
+            "indexVia": "stor",
+            "indexSha256": "sha256:4458436e93cf3d9d2ee59d0b9d1e27cbfd4b8c93c5c46f7f877f9eedef966867",
+            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
+            "usageContractVia": "stor",
+            "usageContractSha256": "sha256:1caf53d5f4027944d7904bdc8bc6e59ad33930072d1f3158b129d575cfbcdd85"
+          },
+          {
             "groupId": "groupViewData",
             "candidates": [
               "groupviewdata--ml-vertical-record-list"
             ],
-            "reason": "Uma lista vertical de registros evita reduzir campos estruturados em uma tela estreita.",
+            "reason": "Os resultados permanecem legíveis em sequência em larguras móveis.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
@@ -2110,7 +2130,7 @@
             "candidates": [
               "groupviewcard--ml-view-card-horizontal"
             ],
-            "reason": "O registro detalhado pode agrupar os dados essenciais do produto em uma unidade de leitura tocável.",
+            "reason": "O produto é uma unidade de consulta com metadados e estado de estoque que pode ser lida sem perder contexto.",
             "indexReference": "_102040_/l2/molecules/groupviewcard/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:cdfd46bdd1403f4c5e591a95c20760cdcdea27a08a35e3ac65f3445195efdbc0",
@@ -2286,7 +2306,7 @@
             "candidates": [
               "groupentertext--ml-enter-text"
             ],
-            "reason": "Nome e unidade de medida são valores textuais curtos adequados à entrada por toque.",
+            "reason": "Nome do produto e unidade de medida são entradas textuais diretas.",
             "indexReference": "_102040_/l2/molecules/groupentertext/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:224a115414c9a393b96ffece5577e00e65975f049f6d11e6fadcce6a1e73cd48",
@@ -2299,26 +2319,13 @@
             "candidates": [
               "groupenternumber--ml-number-stepper"
             ],
-            "reason": "A quantidade mínima é numérica e pode ser ajustada com controles de toque.",
+            "reason": "A quantidade mínima é numérica e se beneficia de ajuste acessível ao toque.",
             "indexReference": "_102040_/l2/molecules/groupenternumber/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:94a52c28ec828918c77800447f098381bc32de7e922344d8f4ec68924211cc62",
             "usageContractReference": "_102020_/l2/aura/molecules/skills/groupEnterNumber/usage.ts",
             "usageContractVia": "stor",
             "usageContractSha256": "sha256:46387e26474ca57c3c351992faf4cc924b14df799cf437115e8c593ff2a23de6"
-          },
-          {
-            "groupId": "groupTriggerAction",
-            "candidates": [
-              "grouptriggeraction--ml-button-standard"
-            ],
-            "reason": "O cadastro requer um acionamento explícito com estado de processamento.",
-            "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:1d4607aa57f6f738a1518456d2ee8db44c5c7d0f612cd5e76f09c89dfcb126ed"
           }
         ]
       },
@@ -2488,7 +2495,7 @@
             "candidates": [
               "grouptriggeraction--ml-button-standard"
             ],
-            "reason": "O comando de cadastro autorizado precisa de uma ação primária clara e acessível ao toque.",
+            "reason": "O comando de cadastro requer um acionamento primário explícito, legível e adequado ao toque.",
             "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
@@ -2501,8 +2508,8 @@
     ]
   },
   "sourceHashes": {
-    "desktop": "sha256:0464a2c2d2e48afe088cd36a9cf42676cc299405b85e97db9f63ffe5fd37bcc3",
-    "mobile": "sha256:a9bb15d95c13f127f92afda0062594e619478422469f3a2ec2f71461c6c29ec9"
+    "desktop": "sha256:c7edbf3c5c0390a58063d2239ba9b8cf11fadf27e6ab6fd6b187187bdf3ae07b",
+    "mobile": "sha256:3d0517701be59f8ed2fb585e103dbf505cc0e0db6b77393e5490a0c8ee35f651"
   },
   "artifactPaths": {
     "desktop": "l2/controleEstoque/web/desktop/page11/produtos.defs.ts",
@@ -2512,5 +2519,5 @@
     "desktop": "produtos__desktop__page11",
     "mobile": "produtos__mobile__page11"
   },
-  "attempts": 1
+  "attempts": 2
 }

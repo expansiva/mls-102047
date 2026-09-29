@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l2/controleEstoque/web/desktop/page11/produtos.defs.ts" enhancement="_blank"/>
 
-export const definition = "Page: Produtos (produtos).\n\nPurpose: O estoquista consulta produtos, seus saldos atuais, quantidades mínimas e avisos de saldo baixo, cadastra produtos para acompanhamento do estoque e pode registrar movimentações autorizadas para atualizar os saldos.\n\nActors: estoquista.\n\nExperience: category guidance; No explicit style preference; used the category guidance. Selected category guidance for page11.\n\nSelected source: _102020_/l4/collabux/templates/categoryList.json sha256:9b1275fc3db9069c67dad58c10768614c9146217a8794365813166a218725beb.\n\nAuthority references: actor:estoquista.\n\nThe approved shared definition, DTOs, grants, rules and design-system dependencies are authoritative. Do not add operations, data, state, permissions, totals or saves absent from those sources.\n\nOperation create on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules movimentacaoEstoqueImutavel (l4/controleEstoque/rules.defs.ts#rules.movimentacaoEstoqueImutavel), quantidadeMovimentadaPositiva (l4/controleEstoque/rules.defs.ts#rules.quantidadeMovimentadaPositiva), registroMovimentacaoAtualizaSaldo (l4/controleEstoque/rules.defs.ts#rules.registroMovimentacaoAtualizaSaldo).\n\nOperation create on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules rule-foreign-namespace-refused (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-foreign-namespace-refused]), rule-document-shape-validated (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-document-shape-validated]), rule-identity-never-in-namespace (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-identity-never-in-namespace]), quantidadeMinimaValida (l4/controleEstoque/rules.defs.ts#rules.quantidadeMinimaValida), saldoAtualProduto (l4/controleEstoque/rules.defs.ts#rules.saldoAtualProduto), avisoSaldoMinimoProduto (l4/controleEstoque/rules.defs.ts#rules.avisoSaldoMinimoProduto).\n\nOperation list on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nOperation list on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nPresentation: desktop.\n\nEach organism below belongs to its existing shared content scenario. When that scenario is inactive, keep its content mounted but hidden, inert and outside keyboard focus. Do not invent content scenarios or controls.\n\nOrganism organism.summary.1 (summary) in content content.summary; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual. Apresenta o saldo atual de cada produto para acompanhamento do estoque, identificando o produto pelo nome e sua unidade de medida. Durante o carregamento, comunica que os dados estão sendo obtidos; se não houver produtos, informa o estado vazio; e, em falha, apresenta mensagem de erro compreensível e acessível.\n\nOrganism organism.highlights.1 (highlights) in content content.highlights; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Destaca os produtos sinalizados com saldo abaixo da quantidade mínima, mostrando nome, saldo atual, quantidade mínima e o indicador de aviso. O estado de carregamento não deve sugerir resultados antecipados, o estado vazio confirma que não há produtos sinalizados e erros são anunciados de forma acessível.\n\nOrganism organism.list.1 (list) in content content.list; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.identification.status, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Permite localizar os produtos cadastrados, exibindo nome, unidade de medida, situação do cadastro, saldo atual, quantidade mínima e o aviso de saldo baixo quando aplicável. A leitura mantém rótulos claros para tecnologias assistivas e apresenta estados distintos de carregamento, lista vazia e erro da consulta.\n\nOrganism organism.detail.1 (detail) in content content.detail; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.identification.status, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Exibe o produto selecionado com nome, unidade de medida, situação do cadastro, saldo atual, quantidade mínima e indicação de saldo abaixo do mínimo. O conteúdo deve ter título identificável e leitura acessível; enquanto consulta, informa carregamento, e comunica ausência ou falha sem ocultar o contexto da seleção.\n\nOrganism organism.form.1 (form) in content content.form; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.quantidadeMinima. Coleta nome do produto, unidade de medida e quantidade mínima para criar um produto acompanhado no estoque. Cada campo editável tem rótulo e indicação de necessidade apropriada; a quantidade mínima deve aceitar apenas valor maior ou igual a zero. Durante o envio, evita reenvio; em sucesso, confirma que o produto passou a constar na consulta; e em erro, comunica o problema de forma acessível.\n\nOrganism organism.actions.1 (actions) in content content.actions; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name. Disponibiliza a ação de cadastrar o produto após o preenchimento das informações necessárias. A ação informa progresso durante o processamento, confirma o resultado quando concluída e expõe falhas de maneira acessível; após sucesso, a consulta de produtos é atualizada para refletir o cadastro." as const;
+export const definition = "Page: Produtos (produtos).\n\nPurpose: O estoquista consulta os produtos, seus saldos atuais, quantidades mínimas e avisos de saldo baixo; cadastra produtos com a quantidade mínima e registra entradas ou saídas para atualizar o saldo do produto selecionado.\n\nActors: estoquista.\n\nExperience: category guidance; No explicit style preference; used the category guidance. Selected category guidance for page11.\n\nSelected source: _102020_/l4/collabux/templates/categoryList.json sha256:9b1275fc3db9069c67dad58c10768614c9146217a8794365813166a218725beb.\n\nAuthority references: actor:estoquista.\n\nThe approved shared definition, DTOs, grants, rules and design-system dependencies are authoritative. Do not add operations, data, state, permissions, totals or saves absent from those sources.\n\nOperation create on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules movimentacaoEstoqueImutavel (l4/controleEstoque/rules.defs.ts#rules.movimentacaoEstoqueImutavel), quantidadeMovimentadaPositiva (l4/controleEstoque/rules.defs.ts#rules.quantidadeMovimentadaPositiva), registroMovimentacaoAtualizaSaldo (l4/controleEstoque/rules.defs.ts#rules.registroMovimentacaoAtualizaSaldo).\n\nOperation create on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules rule-foreign-namespace-refused (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-foreign-namespace-refused]), rule-document-shape-validated (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-document-shape-validated]), rule-identity-never-in-namespace (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-identity-never-in-namespace]), quantidadeMinimaValida (l4/controleEstoque/rules.defs.ts#rules.quantidadeMinimaValida), saldoAtualProduto (l4/controleEstoque/rules.defs.ts#rules.saldoAtualProduto), avisoSaldoMinimoProduto (l4/controleEstoque/rules.defs.ts#rules.avisoSaldoMinimoProduto).\n\nOperation list on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nOperation list on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nPresentation: desktop.\n\nEach organism below belongs to its existing shared content scenario. When that scenario is inactive, keep its content mounted but hidden, inert and outside keyboard focus. Do not invent content scenarios or controls.\n\nOrganism organism.summary.1 (summary) in content content.summary; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual. Apresenta o saldo atual dos produtos para acompanhamento do estoque, identificando cada produto pelo nome e pela unidade de medida. Durante o carregamento, comunica o andamento; sem produtos, informa a ausência de registros; e, em caso de falha, expõe uma mensagem de erro acessível.\n\nOrganism organism.highlights.1 (highlights) in content content.highlights; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Evidencia os produtos cujo saldo atual está abaixo da quantidade mínima, com nome, saldo, mínimo configurado e indicação de saldo baixo. Comunica carregamento, ausência de produtos sinalizados e erro de consulta de maneira anunciável por tecnologias assistivas.\n\nOrganism organism.list.1 (list) in content content.list; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.identification.status, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Permite localizar e consultar os produtos cadastrados pelo nome e pelos filtros disponíveis de tipo de cadastro e situação. Apresenta nome, situação, unidade de medida, saldo atual, quantidade mínima e aviso de saldo baixo; informa carregamento, ausência de resultados e erro, com pesquisa e consulta acessíveis por teclado.\n\nOrganism organism.detail.1 (detail) in content content.detail; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.identification.status, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Mostra o produto consultado com nome, situação, unidade de medida, saldo atual, quantidade mínima e aviso de saldo baixo, para confirmar sua condição de estoque. Durante a consulta, comunica o carregamento; se o produto não for retornado, informa indisponibilidade; e, se houver falha, apresenta erro acessível.\n\nOrganism organism.form.1 (form) in content content.form; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.quantidadeMinima. Coleta nome do produto, unidade de medida e quantidade mínima para cadastrar o produto no controle de estoque. Acompanha a lista atualizada de produtos pelo nome, unidade de medida e mínimo configurado após o cadastro. Identifica os campos necessários, orienta que a quantidade mínima deve ser maior ou igual a zero e comunica validações, envio em andamento e falha de forma acessível.\n\nOrganism organism.actions.1 (actions) in content content.actions; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.quantidadeMinima. Disponibiliza o comando para cadastrar o produto após o preenchimento das informações exigidas e reflete na consulta atualizada o nome, a unidade de medida e a quantidade mínima cadastrados. O acionamento possui rótulo acessível, evita reenvio durante o processamento e comunica sucesso ou erro do comando." as const;
 
 export const pipeline = [
   {
@@ -30,6 +30,8 @@ export const pipeline = [
       "_102020_/l4/collabux/templates/categoryList.json",
       "_102040_/l2/molecules/groupviewdata/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
+      "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
+      "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
       "_102040_/l2/molecules/groupviewtable/index.defs.ts",
       "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts",
       "_102040_/l2/molecules/groupviewcard/index.defs.ts",
@@ -224,9 +226,9 @@ export const pipeline = [
           {
             "groupId": "groupViewData",
             "candidates": [
-              "groupviewdata--ml-vertical-record-list"
+              "groupviewdata--ml-card-grid"
             ],
-            "reason": "A consulta de vários produtos com saldo atual é compatível com uma visualização de registros escaneável.",
+            "reason": "Os saldos são informações de múltiplos produtos e podem ser consultados como registros individuais.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
@@ -402,7 +404,7 @@ export const pipeline = [
             "candidates": [
               "groupviewdata--ml-card-grid"
             ],
-            "reason": "Os itens com aviso são registros independentes que precisam receber atenção equivalente.",
+            "reason": "Os produtos que requerem atenção podem ser destacados individualmente com os dados que justificam o aviso.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
@@ -574,11 +576,24 @@ export const pipeline = [
         },
         "moleculeRecommendations": [
           {
+            "groupId": "groupSearchContent",
+            "candidates": [
+              "groupsearchcontent--ml-search-filters"
+            ],
+            "reason": "O nome do produto é um critério disponível para localizar cadastros.",
+            "indexReference": "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
+            "indexVia": "stor",
+            "indexSha256": "sha256:4458436e93cf3d9d2ee59d0b9d1e27cbfd4b8c93c5c46f7f877f9eedef966867",
+            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
+            "usageContractVia": "stor",
+            "usageContractSha256": "sha256:1caf53d5f4027944d7904bdc8bc6e59ad33930072d1f3158b129d575cfbcdd85"
+          },
+          {
             "groupId": "groupViewTable",
             "candidates": [
               "groupviewtable--ml-data-table"
             ],
-            "reason": "A lista reúne campos estruturados de vários produtos para consulta operacional.",
+            "reason": "A coleção possui campos de identificação e controle de estoque adequados à consulta estruturada.",
             "indexReference": "_102040_/l2/molecules/groupviewtable/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:c63469f28e5e81594f34672f8959fba283b99c9869c60e3def070091642e70c9",
@@ -754,7 +769,7 @@ export const pipeline = [
             "candidates": [
               "groupviewcard--ml-view-card-horizontal"
             ],
-            "reason": "O detalhe concentra metadados do produto e seus indicadores de estoque em uma unidade de leitura.",
+            "reason": "Os dados do produto formam uma unidade de consulta com metadados e condição de estoque.",
             "indexReference": "_102040_/l2/molecules/groupviewcard/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:cdfd46bdd1403f4c5e591a95c20760cdcdea27a08a35e3ac65f3445195efdbc0",
@@ -930,7 +945,7 @@ export const pipeline = [
             "candidates": [
               "groupentertext--ml-enter-text"
             ],
-            "reason": "Nome e unidade de medida são entradas textuais de uma linha.",
+            "reason": "Nome do produto e unidade de medida são valores textuais de uma linha.",
             "indexReference": "_102040_/l2/molecules/groupentertext/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:224a115414c9a393b96ffece5577e00e65975f049f6d11e6fadcce6a1e73cd48",
@@ -943,26 +958,13 @@ export const pipeline = [
             "candidates": [
               "groupenternumber--ml-number-input"
             ],
-            "reason": "A quantidade mínima é uma entrada numérica.",
+            "reason": "A quantidade mínima é um valor numérico informado pelo estoquista.",
             "indexReference": "_102040_/l2/molecules/groupenternumber/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:94a52c28ec828918c77800447f098381bc32de7e922344d8f4ec68924211cc62",
             "usageContractReference": "_102020_/l2/aura/molecules/skills/groupEnterNumber/usage.ts",
             "usageContractVia": "stor",
             "usageContractSha256": "sha256:46387e26474ca57c3c351992faf4cc924b14df799cf437115e8c593ff2a23de6"
-          },
-          {
-            "groupId": "groupTriggerAction",
-            "candidates": [
-              "grouptriggeraction--ml-button-standard"
-            ],
-            "reason": "O envio executa o comando autorizado de cadastro.",
-            "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:1d4607aa57f6f738a1518456d2ee8db44c5c7d0f612cd5e76f09c89dfcb126ed"
           }
         ]
       },
@@ -1132,7 +1134,7 @@ export const pipeline = [
             "candidates": [
               "grouptriggeraction--ml-button-standard"
             ],
-            "reason": "Há um comando autorizado de cadastro que precisa de acionamento explícito e feedback de processamento.",
+            "reason": "O cadastro é um comando explícito de envio do produto informado.",
             "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",

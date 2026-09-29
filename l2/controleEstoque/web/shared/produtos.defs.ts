@@ -629,9 +629,9 @@ export const definition = {
           }
         ],
         "sourceHashes": [
-          "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:2cff350aae09d440467e18b93b28610d222124198a6cd39c88173d4af357435d",
-          "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-          "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+          "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
+          "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+          "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
         ]
       },
       "operationBindings": [
@@ -664,9 +664,9 @@ export const definition = {
             }
           ],
           "sourceHashes": [
-            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:2cff350aae09d440467e18b93b28610d222124198a6cd39c88173d4af357435d",
-            "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-            "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
+            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
           ]
         }
       ]
@@ -778,9 +778,9 @@ export const definition = {
           }
         ],
         "sourceHashes": [
-          "l4/controleEstoque/ontology/Produto.defs.ts#sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348",
-          "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-          "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+          "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
+          "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+          "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
         ]
       },
       "operationBindings": [
@@ -831,9 +831,9 @@ export const definition = {
             }
           ],
           "sourceHashes": [
-            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348",
-            "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-            "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
+            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
           ]
         }
       ]
@@ -912,9 +912,9 @@ export const definition = {
         ],
         "ruleRefs": [],
         "sourceHashes": [
-          "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:2cff350aae09d440467e18b93b28610d222124198a6cd39c88173d4af357435d",
-          "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-          "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+          "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
+          "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+          "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
         ]
       },
       "operationBindings": [
@@ -928,9 +928,9 @@ export const definition = {
           ],
           "ruleRefs": [],
           "sourceHashes": [
-            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:2cff350aae09d440467e18b93b28610d222124198a6cd39c88173d4af357435d",
-            "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-            "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
+            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
           ]
         }
       ]
@@ -1018,9 +1018,9 @@ export const definition = {
         ],
         "ruleRefs": [],
         "sourceHashes": [
-          "l4/controleEstoque/ontology/Produto.defs.ts#sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348",
-          "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-          "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+          "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
+          "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+          "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
         ]
       },
       "operationBindings": [
@@ -1034,9 +1034,9 @@ export const definition = {
           ],
           "ruleRefs": [],
           "sourceHashes": [
-            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348",
-            "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-            "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
+            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
           ]
         }
       ]
@@ -1060,9 +1060,9 @@ export const definition = {
           ],
           "ruleRefs": [],
           "sourceHashes": [
-            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348",
-            "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-            "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
+            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
           ]
         }
       ]
@@ -1086,9 +1086,9 @@ export const definition = {
           ],
           "ruleRefs": [],
           "sourceHashes": [
-            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348",
-            "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-            "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
+            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
           ]
         }
       ]
@@ -1097,7 +1097,12 @@ export const definition = {
       "value": "createMovimentacaoEstoque",
       "kind": "command",
       "actionId": "createMovimentacaoEstoque",
-      "preconditions": [],
+      "preconditions": [
+        "ui.produtos.createMovimentacaoEstoque.input.produtoId",
+        "ui.produtos.createMovimentacaoEstoque.input.movimentadoEm",
+        "ui.produtos.createMovimentacaoEstoque.input.details.tipo",
+        "ui.produtos.createMovimentacaoEstoque.input.details.quantidade"
+      ],
       "methodName": "enterCreateMovimentacaoEstoqueScenario",
       "operationBindings": [
         {
@@ -1129,9 +1134,9 @@ export const definition = {
             }
           ],
           "sourceHashes": [
-            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:2cff350aae09d440467e18b93b28610d222124198a6cd39c88173d4af357435d",
-            "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-            "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
+            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
           ]
         }
       ]
@@ -1140,7 +1145,11 @@ export const definition = {
       "value": "createProduto",
       "kind": "command",
       "actionId": "createProduto",
-      "preconditions": [],
+      "preconditions": [
+        "ui.produtos.createProduto.input.details.identification.name",
+        "ui.produtos.createProduto.input.details.product.unitOfMeasure",
+        "ui.produtos.createProduto.input.details.controleEstoque.quantidadeMinima"
+      ],
       "methodName": "enterCreateProdutoScenario",
       "operationBindings": [
         {
@@ -1190,9 +1199,9 @@ export const definition = {
             }
           ],
           "sourceHashes": [
-            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348",
-            "l4/controleEstoque/access.defs.ts#sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d",
-            "l4/controleEstoque/rules.defs.ts#sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
+            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
+            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
           ]
         }
       ]
@@ -1200,12 +1209,12 @@ export const definition = {
   ],
   "initialLoads": [
     {
-      "actionId": "listProduto",
-      "stateKey": "ui.produtos.listProduto.result"
-    },
-    {
       "actionId": "listMovimentacaoEstoque",
       "stateKey": "ui.produtos.listMovimentacaoEstoque.result"
+    },
+    {
+      "actionId": "listProduto",
+      "stateKey": "ui.produtos.listProduto.result"
     }
   ],
   "dataBindings": [

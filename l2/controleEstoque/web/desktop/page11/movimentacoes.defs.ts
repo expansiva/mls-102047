@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l2/controleEstoque/web/desktop/page11/movimentacoes.defs.ts" enhancement="_blank"/>
 
-export const definition = "Page: Movimentações (movimentacoes).\n\nPurpose: Permitir que o estoquista consulte as movimentações de estoque e registre uma entrada ou saída de unidades para um produto, atualizando o saldo correspondente.\n\nActors: estoquista.\n\nExperience: category guidance; No explicit style preference; used the category guidance. Selected category guidance for page11.\n\nSelected source: _102020_/l4/collabux/templates/categoryList.json sha256:9b1275fc3db9069c67dad58c10768614c9146217a8794365813166a218725beb.\n\nAuthority references: actor:estoquista.\n\nThe approved shared definition, DTOs, grants, rules and design-system dependencies are authoritative. Do not add operations, data, state, permissions, totals or saves absent from those sources.\n\nOperation create on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules movimentacaoEstoqueImutavel (l4/controleEstoque/rules.defs.ts#rules.movimentacaoEstoqueImutavel), quantidadeMovimentadaPositiva (l4/controleEstoque/rules.defs.ts#rules.quantidadeMovimentadaPositiva), registroMovimentacaoAtualizaSaldo (l4/controleEstoque/rules.defs.ts#rules.registroMovimentacaoAtualizaSaldo).\n\nOperation list on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nOperation list on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nPresentation: desktop.\n\nEach organism below belongs to its existing shared content scenario. When that scenario is inactive, keep its content mounted but hidden, inert and outside keyboard focus. Do not invent content scenarios or controls.\n\nOrganism organism.list.1 (list) in content content.list; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListMovimentacaoEstoqueOutput.movimentacaoEstoqueProduto.details.identification.name, ListMovimentacaoEstoqueOutput.movimentadoEm, ListMovimentacaoEstoqueOutput.details.tipo, ListMovimentacaoEstoqueOutput.details.quantidade. Apresenta o histórico de movimentações já registradas, identificando o produto, a data e hora, o tipo e a quantidade. Enquanto a consulta carrega, informa o andamento; sem registros, explica a ausência de movimentações; em falha, comunica o erro de forma acessível. A leitura do histórico é estruturada para navegação por teclado e compreensão por tecnologias assistivas.\n\nOrganism organism.form.1 (form) in content content.form; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.id, ListProdutoOutput.details.identification.name, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Permite selecionar um produto disponível e conferir seu saldo atual e quantidade mínima antes de preencher a data e hora, o tipo de movimentação — entrada ou saída — e uma quantidade inteira positiva. Os campos obrigatórios são identificados e as mensagens de validação, carregamento e falha permanecem associadas aos respectivos controles e disponíveis para leitores de tela.\n\nOrganism organism.actions.1 (actions) in content content.actions; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListMovimentacaoEstoqueOutput.id, ListProdutoOutput.details.controleEstoque.saldoAtual. Oferece a ação para registrar a movimentação somente após o preenchimento dos dados obrigatórios. Durante o envio, impede repetições e informa o processamento; após sucesso, confirma o registro e atualiza o histórico, incluindo sua identificação, e o saldo atual do produto; em erro, apresenta uma mensagem acessível para que o estoquista possa corrigir os dados e tentar novamente. A movimentação registrada não pode ser alterada." as const;
+export const definition = "Page: Movimentações (movimentacoes).\n\nPurpose: O estoquista consulta o histórico de movimentações e os saldos dos produtos, seleciona um produto e registra uma entrada ou saída com data e hora, tipo e quantidade positiva para atualizar o saldo.\n\nActors: estoquista.\n\nExperience: category guidance; No explicit style preference; used the category guidance. Selected category guidance for page11.\n\nSelected source: _102020_/l4/collabux/templates/categoryList.json sha256:9b1275fc3db9069c67dad58c10768614c9146217a8794365813166a218725beb.\n\nAuthority references: actor:estoquista.\n\nThe approved shared definition, DTOs, grants, rules and design-system dependencies are authoritative. Do not add operations, data, state, permissions, totals or saves absent from those sources.\n\nOperation create on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules movimentacaoEstoqueImutavel (l4/controleEstoque/rules.defs.ts#rules.movimentacaoEstoqueImutavel), quantidadeMovimentadaPositiva (l4/controleEstoque/rules.defs.ts#rules.quantidadeMovimentadaPositiva), registroMovimentacaoAtualizaSaldo (l4/controleEstoque/rules.defs.ts#rules.registroMovimentacaoAtualizaSaldo).\n\nOperation list on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nOperation list on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nPresentation: desktop.\n\nEach organism below belongs to its existing shared content scenario. When that scenario is inactive, keep its content mounted but hidden, inert and outside keyboard focus. Do not invent content scenarios or controls.\n\nOrganism organism.list.1 (list) in content content.list; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListMovimentacaoEstoqueOutput.movimentadoEm, ListMovimentacaoEstoqueOutput.details.tipo, ListMovimentacaoEstoqueOutput.details.quantidade, ListMovimentacaoEstoqueOutput.movimentacaoEstoqueProduto.details.identification.name, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Apresenta o histórico de movimentações para acompanhamento, com produto relacionado, data e hora, tipo e quantidade de cada entrada ou saída. Também permite localizar e selecionar um produto disponível para consultar seu saldo atual, quantidade mínima e indicação de saldo abaixo do mínimo. Durante o carregamento, comunica que os registros estão sendo buscados; quando não houver registros, informa o estado vazio; e, em falha, apresenta o erro da consulta de modo perceptível e acessível.\n\nOrganism organism.form.1 (form) in content content.form; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Reúne o registro de uma movimentação para o produto selecionado, exibindo seu nome, saldo atual, quantidade mínima e eventual indicação de saldo abaixo do mínimo como contexto de decisão. O estoquista informa data e hora, escolhe entrada ou saída e preenche a quantidade positiva. Campos obrigatórios têm rótulos e instruções associadas, opções de tipo são compreensíveis por teclado e leitor de tela, e mensagens de validação ou falha do registro são anunciadas sem ocultar os dados informados.\n\nOrganism organism.actions.1 (actions) in content content.actions; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.controleEstoque.saldoAtual. Disponibiliza o comando para registrar a movimentação depois que produto, data e hora, tipo e quantidade obrigatórios estiverem informados. A ação indica processamento, confirma sucesso ou comunica falha de forma acessível; após o registro, atualiza as consultas de movimentações e produtos para que o saldo atual consultado reflita a movimentação. Não oferece alteração da movimentação já registrada." as const;
 
 export const pipeline = [
   {
@@ -222,13 +222,26 @@ export const pipeline = [
             "candidates": [
               "groupviewtable--ml-data-table"
             ],
-            "reason": "A consulta retorna uma coleção de movimentações com campos estruturados para leitura comparativa.",
+            "reason": "O histórico possui registros com campos estruturados que precisam ser consultados de forma comparável.",
             "indexReference": "_102040_/l2/molecules/groupviewtable/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:c63469f28e5e81594f34672f8959fba283b99c9869c60e3def070091642e70c9",
             "usageContractReference": "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts",
             "usageContractVia": "stor",
             "usageContractSha256": "sha256:230955ba3517ab88fa6eb2ec4bcb1db7eeceaa260928f7c9020ea41788b2b23c"
+          },
+          {
+            "groupId": "groupSelectOne",
+            "candidates": [
+              "groupselectone--ml-combobox"
+            ],
+            "reason": "A seleção de um único produto usa a consulta de produtos disponíveis.",
+            "indexReference": "_102040_/l2/molecules/groupselectone/index.defs.ts",
+            "indexVia": "stor",
+            "indexSha256": "sha256:20b935861b3c60bddb4b2d6890d5189988430900c74338e5b58f2f2243273a5e",
+            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupSelectOne/usage.ts",
+            "usageContractVia": "stor",
+            "usageContractSha256": "sha256:71f1e28821255daecedd4f2ccd77031042841a18ee52c6bd2aa4327a81654783"
           }
         ]
       },
@@ -393,9 +406,9 @@ export const pipeline = [
             "groupId": "groupSelectOne",
             "candidates": [
               "groupselectone--ml-combobox",
-              "groupselectone--ml-radio-group"
+              "groupselectone--ml-select"
             ],
-            "reason": "Há seleção única de produto e escolha entre os tipos de movimentação.",
+            "reason": "O produto é selecionado de uma lista e o tipo da movimentação exige uma única opção.",
             "indexReference": "_102040_/l2/molecules/groupselectone/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:20b935861b3c60bddb4b2d6890d5189988430900c74338e5b58f2f2243273a5e",
@@ -408,7 +421,7 @@ export const pipeline = [
             "candidates": [
               "groupenterdatetime--ml-datetime-picker"
             ],
-            "reason": "A movimentação exige data e hora.",
+            "reason": "O registro exige a informação editável de data e hora da movimentação.",
             "indexReference": "_102040_/l2/molecules/groupenterdatetime/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:2ba95b71fec77f2f7ee120e37d41d2a11a6672423a7a0a924112d5cf90a717dd",
@@ -421,7 +434,7 @@ export const pipeline = [
             "candidates": [
               "groupenternumber--ml-number-input"
             ],
-            "reason": "A quantidade é um número inteiro positivo informado pelo estoquista.",
+            "reason": "A quantidade é uma entrada numérica positiva.",
             "indexReference": "_102040_/l2/molecules/groupenternumber/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:94a52c28ec828918c77800447f098381bc32de7e922344d8f4ec68924211cc62",
@@ -593,7 +606,7 @@ export const pipeline = [
             "candidates": [
               "grouptriggeraction--ml-button-standard"
             ],
-            "reason": "O organismo executa o comando de registro da movimentação.",
+            "reason": "O registro é um comando primário único que deve indicar indisponibilidade ou processamento.",
             "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
@@ -607,7 +620,7 @@ export const pipeline = [
               "groupnotifyuser--ml-toast-notification",
               "groupnotifyuser--ml-contextual-feedback"
             ],
-            "reason": "O comando possui estados de sucesso, carregamento e erro que precisam ser comunicados.",
+            "reason": "O comando possui estados de sucesso e erro que exigem retorno claro ao estoquista.",
             "indexReference": "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:85dae4dc3ad57039dfeb5f9a091bfcbbb0263b74709cdca72f002a6168d382f7",
