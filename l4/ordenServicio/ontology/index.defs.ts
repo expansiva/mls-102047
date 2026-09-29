@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
 
 export const ordenServicioOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
@@ -50,7 +50,7 @@ export const ordenServicioOntologyIndex = {
       "field": "OrdenServicio.deviceId"
     }
   ]
-} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
+} as const satisfies Ns5OntologyIndexV3;
 
 export type OrdenServicioOntologyIndexType = typeof ordenServicioOntologyIndex;
 

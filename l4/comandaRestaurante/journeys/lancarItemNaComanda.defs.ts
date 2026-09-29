@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/journeys/lancarItemNaComanda.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
 
 export const lancarItemNaComandaJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -45,7 +45,7 @@ export const lancarItemNaComandaJourney = {
     }
   },
   "businessHash": "sha256:29368bcb11f4ba43a834e8eb6362681b2526df4dcc4a40252116970dd46c3169"
-} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
+} as const satisfies Ns5JourneyArtifact;
 
 export type LancarItemNaComandaJourneyType = typeof lancarItemNaComandaJourney;
 

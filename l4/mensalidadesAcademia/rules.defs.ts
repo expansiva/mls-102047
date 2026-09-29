@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/mensalidadesAcademia/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
 
 export const mensalidadesAcademiaRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -27,7 +27,7 @@ export const mensalidadesAcademiaRules = {
     "quantidadeAlunosBloqueadosCalculada": "A quantidade de alunos bloqueados do período corresponde ao número de alunos com duas ou mais mensalidades vencidas no período.",
     "quantidadeAlunosInadimplentesCalculada": "A quantidade de alunos inadimplentes do período corresponde ao número de alunos com ao menos uma mensalidade vencida no período."
   }
-} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
+} as const satisfies Ns5RulesArtifactV2;
 
 export type MensalidadesAcademiaRulesType = typeof mensalidadesAcademiaRules;
 

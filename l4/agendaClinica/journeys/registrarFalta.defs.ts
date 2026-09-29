@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/agendaClinica/journeys/registrarFalta.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
 
 export const registrarFaltaJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -38,7 +38,7 @@ export const registrarFaltaJourney = {
     }
   },
   "businessHash": "sha256:edcf233777fa29d26c5fbbf873bdca7c99fc7f92a0a074a7040495f718df06c4"
-} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
+} as const satisfies Ns5JourneyArtifact;
 
 export type RegistrarFaltaJourneyType = typeof registrarFaltaJourney;
 

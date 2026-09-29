@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/financeiro/journeys/pagarTituloComCartao.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
 
 export const pagarTituloComCartaoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -45,7 +45,7 @@ export const pagarTituloComCartaoJourney = {
     }
   },
   "businessHash": "sha256:19138d25825cde4f2ff9481551e3b46b5567f9d4f11adc0b027c91c1efcf05cd"
-} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
+} as const satisfies Ns5JourneyArtifact;
 
 export type PagarTituloComCartaoJourneyType = typeof pagarTituloComCartaoJourney;
 
