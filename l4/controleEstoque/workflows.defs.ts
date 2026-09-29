@@ -16,7 +16,7 @@ export const controleEstoqueWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "acompanharSaldoProdutos",
+      "journeyId": "acompanharSaldos",
       "inProcess": false
     },
     {

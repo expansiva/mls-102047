@@ -25,13 +25,13 @@ export const controleEstoqueOntologyIndex = {
   ],
   "relationships": [
     {
-      "relationshipId": "produtoMovimentacoesEstoque",
-      "from": "Produto",
-      "to": "MovimentacaoEstoque",
-      "type": "oneToMany",
+      "relationshipId": "movimentacaoEstoqueProduto",
+      "from": "MovimentacaoEstoque",
+      "to": "Produto",
+      "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Um produto possui movimentações de estoque registradas, e cada movimentação refere-se obrigatoriamente a um produto.",
+      "description": "Cada movimentação de estoque registra uma entrada ou saída para um único produto.",
       "field": "MovimentacaoEstoque.produtoId"
     }
   ]

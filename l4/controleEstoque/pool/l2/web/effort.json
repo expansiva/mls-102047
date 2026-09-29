@@ -1,16 +1,16 @@
 {
-  "schemaVersion": "2026-09-21-p2-effort-v1.1",
+  "schemaVersion": "2026-09-21-p2-effort-v1.2",
   "moduleName": "controleEstoque",
   "device": "web",
   "totals": {
     "screens": {
-      "toCreate": 3,
+      "toCreate": 2,
       "toUpdate": 0,
       "toRemove": 0,
       "done": 0
     },
     "endpoints": {
-      "toCreate": 9,
+      "toCreate": 7,
       "toUpdate": 0,
       "toRemove": 0,
       "done": 0
@@ -30,18 +30,6 @@
   },
   "screens": [
     {
-      "pageId": "controle_estoque_inicio",
-      "label": "Visão geral do estoque",
-      "actors": [
-        "estoquista"
-      ],
-      "status": "toCreate",
-      "endpoints": [
-        "controleEstoque.controle_estoque_inicio.qryListMovimentacaoEstoque",
-        "controleEstoque.controle_estoque_inicio.qryListProduto"
-      ]
-    },
-    {
       "pageId": "produtos",
       "label": "Produtos",
       "actors": [
@@ -56,51 +44,37 @@
       ]
     },
     {
-      "pageId": "movimentacoes_estoque",
-      "label": "Movimentações de estoque",
+      "pageId": "movimentacoes",
+      "label": "Movimentações",
       "actors": [
         "estoquista"
       ],
       "status": "toCreate",
       "endpoints": [
-        "controleEstoque.movimentacoes_estoque.cmdCreateMovimentacaoEstoque",
-        "controleEstoque.movimentacoes_estoque.qryListMovimentacaoEstoque",
-        "controleEstoque.movimentacoes_estoque.qryListProduto"
+        "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+        "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+        "controleEstoque.movimentacoes.qryListProduto"
       ]
     }
   ],
   "endpoints": [
     {
-      "route": "controleEstoque.controle_estoque_inicio.qryListMovimentacaoEstoque",
-      "page": "controle_estoque_inicio",
-      "kind": "qry",
-      "usecaseRef": "listMovimentacaoEstoque",
-      "status": "toCreate"
-    },
-    {
-      "route": "controleEstoque.controle_estoque_inicio.qryListProduto",
-      "page": "controle_estoque_inicio",
-      "kind": "qry",
-      "usecaseRef": "listProduto",
-      "status": "toCreate"
-    },
-    {
-      "route": "controleEstoque.movimentacoes_estoque.cmdCreateMovimentacaoEstoque",
-      "page": "movimentacoes_estoque",
+      "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+      "page": "movimentacoes",
       "kind": "cmd",
       "usecaseRef": "createMovimentacaoEstoque",
       "status": "toCreate"
     },
     {
-      "route": "controleEstoque.movimentacoes_estoque.qryListMovimentacaoEstoque",
-      "page": "movimentacoes_estoque",
+      "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+      "page": "movimentacoes",
       "kind": "qry",
       "usecaseRef": "listMovimentacaoEstoque",
       "status": "toCreate"
     },
     {
-      "route": "controleEstoque.movimentacoes_estoque.qryListProduto",
-      "page": "movimentacoes_estoque",
+      "route": "controleEstoque.movimentacoes.qryListProduto",
+      "page": "movimentacoes",
       "kind": "qry",
       "usecaseRef": "listProduto",
       "status": "toCreate"
@@ -172,10 +146,92 @@
     }
   ],
   "removed": [],
+  "testSupport": [
+    {
+      "id": "data:MovimentacaoEstoque",
+      "actorRefs": [
+        "estoquista"
+      ],
+      "entityRefs": [
+        "MovimentacaoEstoque",
+        "Produto"
+      ],
+      "sourceRefs": [
+        "grant:gerenciarEstoque",
+        "journey:acompanharSaldos/consultarSaldos",
+        "journey:acompanharSaldos/localizarProdutos",
+        "journey:cadastrarProduto/informarProduto",
+        "journey:registrarMovimentacaoEstoque/consultarSaldo",
+        "journey:registrarMovimentacaoEstoque/localizarProduto",
+        "journey:registrarMovimentacaoEstoque/registrarMovimentacao",
+        "journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado",
+        "relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto",
+        "relationship:Produto/movimentacaoEstoqueProduto"
+      ],
+      "status": "toCreate",
+      "owner": "L1",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "FIXTURE_EXECUTOR_UNREFERENCED: no L1 fixture executor creates and removes movimentacaoEstoque rows by execution id"
+    },
+    {
+      "id": "identity:estoquista",
+      "actorRefs": [
+        "estoquista"
+      ],
+      "entityRefs": [],
+      "sourceRefs": [
+        "access:actors/estoquista",
+        "grant:gerenciarEstoque",
+        "journey:acompanharSaldos/consultarSaldos",
+        "journey:acompanharSaldos/localizarProdutos",
+        "journey:cadastrarProduto/informarProduto",
+        "journey:registrarMovimentacaoEstoque/consultarSaldo",
+        "journey:registrarMovimentacaoEstoque/localizarProduto",
+        "journey:registrarMovimentacaoEstoque/registrarMovimentacao",
+        "journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado",
+        "relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto",
+        "relationship:Produto/movimentacaoEstoqueProduto"
+      ],
+      "status": "toCreate",
+      "owner": "runtime",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "PERSON_ENTITY_UNDECLARED: actor estoquista declares no personEntity; the test identity cannot be bound"
+    },
+    {
+      "id": "mdm:Produto",
+      "actorRefs": [
+        "estoquista"
+      ],
+      "entityRefs": [
+        "Produto"
+      ],
+      "sourceRefs": [
+        "grant:gerenciarEstoque",
+        "journey:acompanharSaldos/consultarSaldos",
+        "journey:acompanharSaldos/localizarProdutos",
+        "journey:cadastrarProduto/informarProduto",
+        "journey:registrarMovimentacaoEstoque/consultarSaldo",
+        "journey:registrarMovimentacaoEstoque/localizarProduto",
+        "journey:registrarMovimentacaoEstoque/registrarMovimentacao",
+        "journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado",
+        "ontology:MovimentacaoEstoque/relationships",
+        "relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto",
+        "relationship:Produto/movimentacaoEstoqueProduto"
+      ],
+      "status": "toCreate",
+      "owner": "runtime",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "RUNTIME_MDM_FIXTURE_UNREFERENCED: no verified runtime capability provisions and removes Produto records by execution id"
+    }
+  ],
   "unattributed": [],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
     "sourceBackend": "pool/l2/web/backend.json",
-    "generatedAt": "2026-09-21T17:40:16.653Z"
+    "sourceVersion": "2026-09-21-p1-backend-v1.2",
+    "generatedAt": "2026-09-28T17:39:16.762Z"
   }
 }

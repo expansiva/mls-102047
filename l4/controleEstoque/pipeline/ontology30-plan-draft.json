@@ -7,7 +7,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Produto",
-      "description": "Produto do cadastro mestre disponibilizado para controle de estoque, com saldo mínimo configurado no namespace do módulo e saldo atual e aviso de reposição calculados pelas movimentações.",
+      "description": "Produto acompanhado pelo estoque, com quantidade mínima definida para sinalizar saldo abaixo do mínimo.",
       "displayField": "details.identification.name",
       "subtype": "Product",
       "roleTag": "controleEstoque.Produto",
@@ -18,8 +18,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Movimentação de estoque",
-      "description": "Registro imutável de entrada ou saída de unidades de um produto para composição do saldo disponível.",
-      "displayField": "occurredAt",
+      "description": "Registro imutável de entrada ou saída de unidades de um produto, usado para calcular seu saldo atual.",
+      "displayField": "id",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
@@ -30,13 +30,13 @@
   ],
   "relationships": [
     {
-      "relationshipId": "produtoMovimentacoesEstoque",
-      "from": "Produto",
-      "to": "MovimentacaoEstoque",
-      "type": "oneToMany",
+      "relationshipId": "movimentacaoEstoqueProduto",
+      "from": "MovimentacaoEstoque",
+      "to": "Produto",
+      "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Um produto possui movimentações de estoque registradas, e cada movimentação refere-se obrigatoriamente a um produto.",
+      "description": "Cada movimentação de estoque registra uma entrada ou saída para um único produto.",
       "field": "MovimentacaoEstoque.produtoId"
     }
   ],

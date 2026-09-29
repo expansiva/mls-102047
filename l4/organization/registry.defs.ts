@@ -151,43 +151,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-18T08:58:16.019Z"
     },
     {
-      "moduleName": "controleEstoque",
-      "actors": [
-        {
-          "actorId": "estoquista",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Product",
-          "roleTag": "controleEstoque.Produto",
-          "namespace": "controleEstoque"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Produto",
-          "kind": "role",
-          "mdmSubtype": "Product",
-          "class": "mdm"
-        },
-        {
-          "entityId": "MovimentacaoEstoque",
-          "kind": "entity",
-          "class": "event"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "saldoAbaixoDoMinimo",
-          "on": "MovimentacaoEstoque.create"
-        }
-      ],
-      "updatedAt": "2026-09-18T07:17:29.018Z"
-    },
-    {
       "moduleName": "financeiro",
       "actors": [
         {
@@ -790,6 +753,38 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-09-25T11:24:15.402Z"
+    },
+    {
+      "moduleName": "controleEstoque",
+      "actors": [
+        {
+          "actorId": "estoquista",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Product",
+          "roleTag": "controleEstoque.Produto",
+          "namespace": "controleEstoque"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Produto",
+          "kind": "role",
+          "mdmSubtype": "Product",
+          "class": "mdm"
+        },
+        {
+          "entityId": "MovimentacaoEstoque",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [],
+      "updatedAt": "2026-09-28T17:36:36.016Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

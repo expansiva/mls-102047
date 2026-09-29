@@ -1,0 +1,1803 @@
+{
+  "schemaVersion": "2026-09-21-d1-usecases-v1",
+  "repairs": 0,
+  "request": {
+    "project": 102047,
+    "moduleName": "controleEstoque",
+    "usecases": [
+      {
+        "usecaseId": "createMovimentacaoEstoque",
+        "entity": "MovimentacaoEstoque",
+        "operation": "create",
+        "routes": [
+          "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+          "controleEstoque.produtos.cmdCreateMovimentacaoEstoque"
+        ],
+        "defPath": "l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts"
+      },
+      {
+        "usecaseId": "createProduto",
+        "entity": "Produto",
+        "operation": "create",
+        "routes": [
+          "controleEstoque.produtos.cmdCreateProduto"
+        ],
+        "defPath": "l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts"
+      },
+      {
+        "usecaseId": "listMovimentacaoEstoque",
+        "entity": "MovimentacaoEstoque",
+        "operation": "list",
+        "routes": [
+          "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+          "controleEstoque.produtos.qryListMovimentacaoEstoque"
+        ],
+        "defPath": "l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts"
+      },
+      {
+        "usecaseId": "listProduto",
+        "entity": "Produto",
+        "operation": "list",
+        "routes": [
+          "controleEstoque.movimentacoes.qryListProduto",
+          "controleEstoque.produtos.qryListProduto"
+        ],
+        "defPath": "l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+      }
+    ],
+    "routes": [
+      {
+        "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+        "page": "movimentacoes",
+        "kind": "cmd",
+        "usecaseRef": "createMovimentacaoEstoque"
+      },
+      {
+        "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+        "page": "movimentacoes",
+        "kind": "qry",
+        "usecaseRef": "listMovimentacaoEstoque"
+      },
+      {
+        "route": "controleEstoque.movimentacoes.qryListProduto",
+        "page": "movimentacoes",
+        "kind": "qry",
+        "usecaseRef": "listProduto"
+      },
+      {
+        "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+        "page": "produtos",
+        "kind": "cmd",
+        "usecaseRef": "createMovimentacaoEstoque"
+      },
+      {
+        "route": "controleEstoque.produtos.cmdCreateProduto",
+        "page": "produtos",
+        "kind": "cmd",
+        "usecaseRef": "createProduto"
+      },
+      {
+        "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+        "page": "produtos",
+        "kind": "qry",
+        "usecaseRef": "listMovimentacaoEstoque"
+      },
+      {
+        "route": "controleEstoque.produtos.qryListProduto",
+        "page": "produtos",
+        "kind": "qry",
+        "usecaseRef": "listProduto"
+      }
+    ],
+    "ports": [
+      {
+        "portId": "MovimentacaoEstoqueRepository",
+        "entityId": "MovimentacaoEstoque",
+        "defPath": "l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
+        "methods": [
+          "create",
+          "list"
+        ],
+        "signatures": [
+          {
+            "name": "create",
+            "params": [
+              "MovimentacaoEstoque"
+            ],
+            "returns": "MovimentacaoEstoque"
+          },
+          {
+            "name": "list",
+            "params": [
+              "MovimentacaoEstoqueFilter"
+            ],
+            "returns": "MovimentacaoEstoque[]"
+          }
+        ]
+      }
+    ],
+    "entities": [
+      {
+        "entityId": "MovimentacaoEstoque",
+        "storageTarget": "moduleDatabase",
+        "defPath": "l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
+        "namespace": "",
+        "fields": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "derived": true
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "derived": true
+          },
+          {
+            "name": "produtoId",
+            "type": "record",
+            "derived": false
+          },
+          {
+            "name": "movimentadoEm",
+            "type": "timestamp",
+            "derived": false
+          },
+          {
+            "name": "details",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.tipo",
+            "type": "enum",
+            "derived": false
+          },
+          {
+            "name": "details.quantidade",
+            "type": "integer",
+            "derived": false
+          }
+        ],
+        "transitions": [],
+        "rules": [
+          {
+            "ruleId": "movimentacaoEstoqueImutavel",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts"
+          },
+          {
+            "ruleId": "quantidadeMovimentadaPositiva",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts"
+          },
+          {
+            "ruleId": "registroMovimentacaoAtualizaSaldo",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts"
+          }
+        ],
+        "uniqueKeys": [],
+        "enumerations": [
+          {
+            "path": "details.tipo",
+            "values": [
+              "entrada",
+              "saida"
+            ]
+          }
+        ],
+        "capabilities": [
+          "controleEstoque.registrarMovimentacao",
+          "count",
+          "create",
+          "listByForeignKey",
+          "locate.byColumn",
+          "read.byId",
+          "read.mdmRecord",
+          "transaction"
+        ],
+        "platformFields": []
+      },
+      {
+        "entityId": "Produto",
+        "storageTarget": "mdm",
+        "defPath": "l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
+        "namespace": "controleEstoque",
+        "fields": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "derived": true
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "derived": true
+          },
+          {
+            "name": "details",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.identification",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.identification.subtype",
+            "type": "enum",
+            "derived": true
+          },
+          {
+            "name": "details.identification.name",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.identification.status",
+            "type": "enum",
+            "derived": true
+          },
+          {
+            "name": "details.base",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.product",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.product.unitOfMeasure",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.general",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.controleEstoque",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.controleEstoque.quantidadeMinima",
+            "type": "number",
+            "derived": false
+          },
+          {
+            "name": "details.controleEstoque.saldoAtual",
+            "type": "number",
+            "derived": true
+          },
+          {
+            "name": "details.controleEstoque.saldoAbaixoDoMinimo",
+            "type": "boolean",
+            "derived": true
+          }
+        ],
+        "transitions": [],
+        "rules": [
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-document-shape-validated",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "quantidadeMinimaValida",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts"
+          },
+          {
+            "ruleId": "saldoAtualProduto",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts"
+          },
+          {
+            "ruleId": "avisoSaldoMinimoProduto",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts"
+          }
+        ],
+        "uniqueKeys": [],
+        "enumerations": [
+          {
+            "path": "details.identification.subtype",
+            "values": [
+              "Product"
+            ]
+          },
+          {
+            "path": "details.identification.status",
+            "values": [
+              "Active",
+              "Inactive",
+              "Merged",
+              "Blocked"
+            ]
+          }
+        ],
+        "capabilities": [
+          "audit",
+          "edit.moduleNamespace",
+          "edit.platformFields",
+          "inactivate",
+          "locate.byName",
+          "read.byId",
+          "register.createOrAttach",
+          "statusHistory.read"
+        ],
+        "platformFields": [
+          "details.identification.name",
+          "details.product.unitOfMeasure"
+        ]
+      }
+    ],
+    "moduleRules": [
+      "avisoSaldoMinimoProduto",
+      "movimentacaoEstoqueImutavel",
+      "quantidadeMinimaValida",
+      "quantidadeMovimentadaPositiva",
+      "registroMovimentacaoAtualizaSaldo",
+      "saldoAtualProduto"
+    ],
+    "outbound": [],
+    "contracts": [
+      {
+        "pageId": "movimentacoes",
+        "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport const createMovimentacaoEstoqueRoute = \"controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque\" as const;\n\nexport interface CreateMovimentacaoEstoqueInput {\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n}\n\nexport interface CreateMovimentacaoEstoqueOutput {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport const listMovimentacaoEstoqueRoute = \"controleEstoque.movimentacoes.qryListMovimentacaoEstoque\" as const;\n\nexport interface ListMovimentacaoEstoqueInput {\n  \"id\"?: string;\n  \"produtoId\"?: string;\n  \"movimentadoEm\"?: string;\n  \"page\"?: number;\n}\n\nexport interface ListMovimentacaoEstoqueItem {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];\n\nexport const listProdutoRoute = \"controleEstoque.movimentacoes.qryListProduto\" as const;\n\nexport interface ListProdutoInput {\n  \"id\"?: string;\n  \"details\"?: {\n    \"identification\"?: {\n      \"subtype\"?: \"Product\";\n      \"name\"?: string;\n      \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListProdutoItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport type ListProdutoOutput = ListProdutoItem[];\n"
+      },
+      {
+        "pageId": "produtos",
+        "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport const createMovimentacaoEstoqueRoute = \"controleEstoque.produtos.cmdCreateMovimentacaoEstoque\" as const;\n\nexport interface CreateMovimentacaoEstoqueInput {\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n}\n\nexport interface CreateMovimentacaoEstoqueOutput {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport const createProdutoRoute = \"controleEstoque.produtos.cmdCreateProduto\" as const;\n\nexport interface CreateProdutoInput {\n  \"details\": {\n    \"identification\"?: {\n      \"name\": string;\n    };\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n    };\n  };\n}\n\nexport interface CreateProdutoOutput {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport const listMovimentacaoEstoqueRoute = \"controleEstoque.produtos.qryListMovimentacaoEstoque\" as const;\n\nexport interface ListMovimentacaoEstoqueInput {\n  \"id\"?: string;\n  \"produtoId\"?: string;\n  \"movimentadoEm\"?: string;\n  \"page\"?: number;\n}\n\nexport interface ListMovimentacaoEstoqueItem {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];\n\nexport const listProdutoRoute = \"controleEstoque.produtos.qryListProduto\" as const;\n\nexport interface ListProdutoInput {\n  \"id\"?: string;\n  \"details\"?: {\n    \"identification\"?: {\n      \"subtype\"?: \"Product\";\n      \"name\"?: string;\n      \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListProdutoItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport type ListProdutoOutput = ListProdutoItem[];\n"
+      }
+    ],
+    "contexts": [
+      {
+        "usecaseId": "createMovimentacaoEstoque",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [
+          {
+            "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+            "page": "movimentacoes",
+            "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "inputSymbol": "CreateMovimentacaoEstoqueInput",
+            "outputSymbol": "CreateMovimentacaoEstoqueOutput",
+            "inputFields": [
+              {
+                "path": "produtoId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentadoEm",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.tipo",
+                "type": "\"entrada\" | \"saida\"",
+                "optional": false
+              },
+              {
+                "path": "details.quantidade",
+                "type": "number",
+                "optional": false
+              }
+            ],
+            "outputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "version",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "produtoId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentadoEm",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.tipo",
+                "type": "\"entrada\" | \"saida\"",
+                "optional": false
+              },
+              {
+                "path": "details.quantidade",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "movimentacaoEstoqueProduto",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details.identification.name",
+                "type": "string",
+                "optional": false
+              }
+            ],
+            "unbound": "",
+            "access": [
+              {
+                "grantId": "gerenciarEstoque",
+                "actorRef": "estoquista",
+                "scope": "organization",
+                "anchorEntity": "",
+                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
+                "disclosure": "fullRecord",
+                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
+                "allowedFields": []
+              }
+            ]
+          },
+          {
+            "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+            "page": "produtos",
+            "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "inputSymbol": "CreateMovimentacaoEstoqueInput",
+            "outputSymbol": "CreateMovimentacaoEstoqueOutput",
+            "inputFields": [
+              {
+                "path": "produtoId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentadoEm",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.tipo",
+                "type": "\"entrada\" | \"saida\"",
+                "optional": false
+              },
+              {
+                "path": "details.quantidade",
+                "type": "number",
+                "optional": false
+              }
+            ],
+            "outputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "version",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "produtoId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentadoEm",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.tipo",
+                "type": "\"entrada\" | \"saida\"",
+                "optional": false
+              },
+              {
+                "path": "details.quantidade",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "movimentacaoEstoqueProduto",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details.identification.name",
+                "type": "string",
+                "optional": false
+              }
+            ],
+            "unbound": "",
+            "access": [
+              {
+                "grantId": "gerenciarEstoque",
+                "actorRef": "estoquista",
+                "scope": "organization",
+                "anchorEntity": "",
+                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
+                "disclosure": "fullRecord",
+                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
+                "allowedFields": []
+              }
+            ]
+          }
+        ],
+        "rules": [],
+        "rulePlan": [
+          {
+            "ruleId": "movimentacaoEstoqueImutavel",
+            "origin": "l4/controleEstoque/rules.defs.ts#movimentacaoEstoqueImutavel",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "RULE_UNBOUND"
+          },
+          {
+            "ruleId": "quantidadeMovimentadaPositiva",
+            "origin": "l4/controleEstoque/rules.defs.ts#quantidadeMovimentadaPositiva",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "RULE_UNBOUND"
+          },
+          {
+            "ruleId": "registroMovimentacaoAtualizaSaldo",
+            "origin": "l4/controleEstoque/rules.defs.ts#registroMovimentacaoAtualizaSaldo",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "RULE_UNBOUND"
+          }
+        ],
+        "pendingRules": [
+          {
+            "ruleId": "movimentacaoEstoqueImutavel",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts",
+            "text": "Uma movimentação de estoque não pode ser alterada depois de registrada."
+          },
+          {
+            "ruleId": "quantidadeMovimentadaPositiva",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts",
+            "text": "A quantidade registrada em uma movimentação de estoque deve ser um número inteiro positivo."
+          },
+          {
+            "ruleId": "registroMovimentacaoAtualizaSaldo",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts",
+            "text": "O registro de uma entrada ou saída deve atualizar o saldo atual do produto correspondente conforme o tipo e a quantidade movimentada."
+          }
+        ],
+        "portId": "MovimentacaoEstoqueRepository",
+        "portMethods": [
+          {
+            "name": "create",
+            "params": [
+              "MovimentacaoEstoque"
+            ],
+            "returns": "MovimentacaoEstoque"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
+          },
+          {
+            "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
+          },
+          {
+            "path": "l4/controleEstoque/access.defs.ts",
+            "sha256": "sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+            "sha256": "sha256:332d8b591e82df39f38c48a8c3e9fa5598aadaf05ef0153780bfc8668ffaff8c"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
+            "sha256": "sha256:2219c8d13e2412d7ef132e7efabeeccfcddbbb50ad05f7d49c46e1819809eca2"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
+            "sha256": "sha256:ffd8fbde507e1fdf9d9dc30cbfc1b17a6f657de2617cb301df02219fc76ec67f"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+            "sha256": "sha256:216a3970415e29f391c4db5bf88c08b895feedcb8188b9f45bb7c547612fa416"
+          },
+          {
+            "path": "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
+            "sha256": "sha256:2cff350aae09d440467e18b93b28610d222124198a6cd39c88173d4af357435d"
+          },
+          {
+            "path": "l4/controleEstoque/pool/l1/web/needs.json",
+            "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
+          }
+        ]
+      },
+      {
+        "usecaseId": "createProduto",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [
+          {
+            "name": "register.createOrAttach",
+            "text": "Cadastra ou associa um produto ao controle de estoque; localiza o registro mestre e cria ou anexa a função do módulo, gravando a quantidade mínima; usado pelo estoquista no cadastro de produto."
+          }
+        ],
+        "effectiveFields": [
+          "details.identification.name",
+          "details.product.unitOfMeasure"
+        ],
+        "routes": [
+          {
+            "route": "controleEstoque.produtos.cmdCreateProduto",
+            "page": "produtos",
+            "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "inputSymbol": "CreateProdutoInput",
+            "outputSymbol": "CreateProdutoOutput",
+            "inputFields": [
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.identification.name",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details.product",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.product.unitOfMeasure",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details.controleEstoque",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque.quantidadeMinima",
+                "type": "number",
+                "optional": false
+              }
+            ],
+            "outputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "version",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.identification.subtype",
+                "type": "\"Product\"",
+                "optional": false
+              },
+              {
+                "path": "details.identification.name",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details.identification.status",
+                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
+                "optional": false
+              },
+              {
+                "path": "details.base",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.product",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.product.unitOfMeasure",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details.general",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque.quantidadeMinima",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "details.controleEstoque.saldoAtual",
+                "type": "number",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque.saldoAbaixoDoMinimo",
+                "type": "boolean",
+                "optional": true
+              }
+            ],
+            "unbound": "",
+            "access": [
+              {
+                "grantId": "gerenciarEstoque",
+                "actorRef": "estoquista",
+                "scope": "organization",
+                "anchorEntity": "",
+                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
+                "disclosure": "fullRecord",
+                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
+                "allowedFields": []
+              }
+            ]
+          }
+        ],
+        "rules": [],
+        "rulePlan": [
+          {
+            "ruleId": "avisoSaldoMinimoProduto",
+            "origin": "l4/controleEstoque/rules.defs.ts#avisoSaldoMinimoProduto",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "RULE_UNBOUND"
+          },
+          {
+            "ruleId": "quantidadeMinimaValida",
+            "origin": "l4/controleEstoque/rules.defs.ts#quantidadeMinimaValida",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "RULE_UNBOUND"
+          },
+          {
+            "ruleId": "rule-document-shape-validated",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "saldoAtualProduto",
+            "origin": "l4/controleEstoque/rules.defs.ts#saldoAtualProduto",
+            "consumer": "operation:create",
+            "enforcement": "pending",
+            "gap": "RULE_UNBOUND"
+          }
+        ],
+        "pendingRules": [
+          {
+            "ruleId": "avisoSaldoMinimoProduto",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts",
+            "text": "Um produto deve ser sinalizado com aviso de saldo baixo quando seu saldo atual for menor que sua quantidade mínima definida."
+          },
+          {
+            "ruleId": "quantidadeMinimaValida",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts",
+            "text": "A quantidade mínima definida para um produto deve ser maior ou igual a zero."
+          },
+          {
+            "ruleId": "rule-document-shape-validated",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "Addresses, consent, general and the module namespace are validated on write against the schema derived from this ontology · engine · platform: missing, nothing validates the document today"
+          },
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "A caller carrying a moduleId may write the platform keys, general and its own key; any other module key is refused with MDM_FOREIGN_NAMESPACE · engine · platform: ready"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "Identity, document, contact and login are platform layers; a module never redeclares them inside details[moduleId] · engine · platform: partial"
+          },
+          {
+            "ruleId": "saldoAtualProduto",
+            "owner": "module",
+            "source": "l4/controleEstoque/rules.defs.ts",
+            "text": "O saldo atual de cada produto é calculado pela soma das quantidades das entradas menos a soma das quantidades das saídas registradas para esse produto."
+          }
+        ],
+        "portId": "",
+        "portMethods": [],
+        "effects": [],
+        "journeys": [
+          {
+            "journeyId": "acompanharSaldos",
+            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+            "actorRef": "estoquista",
+            "goal": "Consultar os saldos atuais dos produtos e identificar itens abaixo da quantidade mínima.",
+            "steps": [
+              {
+                "stepId": "localizarProdutos",
+                "kind": "locate",
+                "transitionRef": "",
+                "description": "Localiza os produtos cadastrados para acompanhamento do estoque."
+              },
+              {
+                "stepId": "consultarSaldos",
+                "kind": "inspect",
+                "transitionRef": "",
+                "description": "Consulta os saldos atuais, as quantidades mínimas e os avisos de produtos abaixo do mínimo."
+              }
+            ]
+          },
+          {
+            "journeyId": "tratarAvisoSaldoBaixo",
+            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+            "actorRef": "estoquista",
+            "goal": "Verificar um aviso recebido sobre produto com saldo abaixo da quantidade mínima.",
+            "steps": [
+              {
+                "stepId": "consultarProdutoAvisado",
+                "kind": "inspect",
+                "transitionRef": "",
+                "description": "Consulta o saldo atual e a quantidade mínima do produto indicado no aviso."
+              }
+            ]
+          }
+        ],
+        "findings": [],
+        "sources": [
+          {
+            "path": "/_102034_/l4/ontology/mdm.defs.ts",
+            "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
+          },
+          {
+            "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
+          },
+          {
+            "path": "l4/controleEstoque/access.defs.ts",
+            "sha256": "sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+            "sha256": "sha256:332d8b591e82df39f38c48a8c3e9fa5598aadaf05ef0153780bfc8668ffaff8c"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
+            "sha256": "sha256:2219c8d13e2412d7ef132e7efabeeccfcddbbb50ad05f7d49c46e1819809eca2"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
+            "sha256": "sha256:ffd8fbde507e1fdf9d9dc30cbfc1b17a6f657de2617cb301df02219fc76ec67f"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+            "sha256": "sha256:216a3970415e29f391c4db5bf88c08b895feedcb8188b9f45bb7c547612fa416"
+          },
+          {
+            "path": "l4/controleEstoque/ontology/Produto.defs.ts",
+            "sha256": "sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348"
+          },
+          {
+            "path": "l4/controleEstoque/pool/l1/web/needs.json",
+            "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
+          }
+        ]
+      },
+      {
+        "usecaseId": "listMovimentacaoEstoque",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [
+          {
+            "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+            "page": "movimentacoes",
+            "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "inputSymbol": "ListMovimentacaoEstoqueInput",
+            "outputSymbol": "ListMovimentacaoEstoqueOutput: array of ListMovimentacaoEstoqueItem",
+            "inputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "produtoId",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "movimentadoEm",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "page",
+                "type": "number",
+                "optional": true
+              }
+            ],
+            "outputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "version",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "produtoId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentadoEm",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.tipo",
+                "type": "\"entrada\" | \"saida\"",
+                "optional": false
+              },
+              {
+                "path": "details.quantidade",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "movimentacaoEstoqueProduto",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details.identification.name",
+                "type": "string",
+                "optional": false
+              }
+            ],
+            "unbound": "",
+            "access": [
+              {
+                "grantId": "gerenciarEstoque",
+                "actorRef": "estoquista",
+                "scope": "organization",
+                "anchorEntity": "",
+                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
+                "disclosure": "fullRecord",
+                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
+                "allowedFields": []
+              }
+            ]
+          },
+          {
+            "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+            "page": "produtos",
+            "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "inputSymbol": "ListMovimentacaoEstoqueInput",
+            "outputSymbol": "ListMovimentacaoEstoqueOutput: array of ListMovimentacaoEstoqueItem",
+            "inputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "produtoId",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "movimentadoEm",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "page",
+                "type": "number",
+                "optional": true
+              }
+            ],
+            "outputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "version",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "produtoId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentadoEm",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.tipo",
+                "type": "\"entrada\" | \"saida\"",
+                "optional": false
+              },
+              {
+                "path": "details.quantidade",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "movimentacaoEstoqueProduto",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "movimentacaoEstoqueProduto.details.identification.name",
+                "type": "string",
+                "optional": false
+              }
+            ],
+            "unbound": "",
+            "access": [
+              {
+                "grantId": "gerenciarEstoque",
+                "actorRef": "estoquista",
+                "scope": "organization",
+                "anchorEntity": "",
+                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
+                "disclosure": "fullRecord",
+                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
+                "allowedFields": []
+              }
+            ]
+          }
+        ],
+        "rules": [],
+        "rulePlan": [],
+        "pendingRules": [],
+        "portId": "MovimentacaoEstoqueRepository",
+        "portMethods": [
+          {
+            "name": "list",
+            "params": [
+              "MovimentacaoEstoqueFilter"
+            ],
+            "returns": "MovimentacaoEstoque[]"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
+          },
+          {
+            "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
+          },
+          {
+            "path": "l4/controleEstoque/access.defs.ts",
+            "sha256": "sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+            "sha256": "sha256:332d8b591e82df39f38c48a8c3e9fa5598aadaf05ef0153780bfc8668ffaff8c"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
+            "sha256": "sha256:2219c8d13e2412d7ef132e7efabeeccfcddbbb50ad05f7d49c46e1819809eca2"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
+            "sha256": "sha256:ffd8fbde507e1fdf9d9dc30cbfc1b17a6f657de2617cb301df02219fc76ec67f"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+            "sha256": "sha256:216a3970415e29f391c4db5bf88c08b895feedcb8188b9f45bb7c547612fa416"
+          },
+          {
+            "path": "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
+            "sha256": "sha256:2cff350aae09d440467e18b93b28610d222124198a6cd39c88173d4af357435d"
+          },
+          {
+            "path": "l4/controleEstoque/pool/l1/web/needs.json",
+            "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
+          }
+        ]
+      },
+      {
+        "usecaseId": "listProduto",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [
+          {
+            "name": "read.byId",
+            "text": "Consulta um produto pelo identificador mestre; lê o registro pelo id no índice e documento; usado pelo estoquista ao abrir um produto localizado ou referenciado por uma movimentação."
+          },
+          {
+            "name": "locate.byName",
+            "text": "Localiza produtos pelo nome; pesquisa o texto informado entre os produtos ativos no índice mestre; usado pelo estoquista para cadastrar movimentações e acompanhar saldos."
+          }
+        ],
+        "effectiveFields": [],
+        "routes": [
+          {
+            "route": "controleEstoque.movimentacoes.qryListProduto",
+            "page": "movimentacoes",
+            "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "inputSymbol": "ListProdutoInput",
+            "outputSymbol": "ListProdutoOutput: array of ListProdutoItem",
+            "inputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.identification.subtype",
+                "type": "\"Product\"",
+                "optional": true
+              },
+              {
+                "path": "details.identification.name",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "details.identification.status",
+                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
+                "optional": true
+              },
+              {
+                "path": "page",
+                "type": "number",
+                "optional": true
+              }
+            ],
+            "outputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "version",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.identification.subtype",
+                "type": "\"Product\"",
+                "optional": false
+              },
+              {
+                "path": "details.identification.name",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details.identification.status",
+                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
+                "optional": false
+              },
+              {
+                "path": "details.base",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.product",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.product.unitOfMeasure",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details.general",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque.quantidadeMinima",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "details.controleEstoque.saldoAtual",
+                "type": "number",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque.saldoAbaixoDoMinimo",
+                "type": "boolean",
+                "optional": true
+              }
+            ],
+            "unbound": "",
+            "access": [
+              {
+                "grantId": "gerenciarEstoque",
+                "actorRef": "estoquista",
+                "scope": "organization",
+                "anchorEntity": "",
+                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
+                "disclosure": "fullRecord",
+                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
+                "allowedFields": []
+              }
+            ]
+          },
+          {
+            "route": "controleEstoque.produtos.qryListProduto",
+            "page": "produtos",
+            "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "inputSymbol": "ListProdutoInput",
+            "outputSymbol": "ListProdutoOutput: array of ListProdutoItem",
+            "inputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.identification.subtype",
+                "type": "\"Product\"",
+                "optional": true
+              },
+              {
+                "path": "details.identification.name",
+                "type": "string",
+                "optional": true
+              },
+              {
+                "path": "details.identification.status",
+                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
+                "optional": true
+              },
+              {
+                "path": "page",
+                "type": "number",
+                "optional": true
+              }
+            ],
+            "outputFields": [
+              {
+                "path": "id",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "version",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "details",
+                "type": "object",
+                "optional": false
+              },
+              {
+                "path": "details.identification",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.identification.subtype",
+                "type": "\"Product\"",
+                "optional": false
+              },
+              {
+                "path": "details.identification.name",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details.identification.status",
+                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
+                "optional": false
+              },
+              {
+                "path": "details.base",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.product",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.product.unitOfMeasure",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "path": "details.general",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque",
+                "type": "object",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque.quantidadeMinima",
+                "type": "number",
+                "optional": false
+              },
+              {
+                "path": "details.controleEstoque.saldoAtual",
+                "type": "number",
+                "optional": true
+              },
+              {
+                "path": "details.controleEstoque.saldoAbaixoDoMinimo",
+                "type": "boolean",
+                "optional": true
+              }
+            ],
+            "unbound": "",
+            "access": [
+              {
+                "grantId": "gerenciarEstoque",
+                "actorRef": "estoquista",
+                "scope": "organization",
+                "anchorEntity": "",
+                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
+                "disclosure": "fullRecord",
+                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
+                "allowedFields": []
+              }
+            ]
+          }
+        ],
+        "rules": [],
+        "rulePlan": [
+          {
+            "ruleId": "rule-document-shape-validated",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          }
+        ],
+        "pendingRules": [
+          {
+            "ruleId": "rule-document-shape-validated",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "Addresses, consent, general and the module namespace are validated on write against the schema derived from this ontology · engine · platform: missing, nothing validates the document today"
+          },
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "A caller carrying a moduleId may write the platform keys, general and its own key; any other module key is refused with MDM_FOREIGN_NAMESPACE · engine · platform: ready"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "Identity, document, contact and login are platform layers; a module never redeclares them inside details[moduleId] · engine · platform: partial"
+          }
+        ],
+        "portId": "",
+        "portMethods": [],
+        "effects": [],
+        "journeys": [
+          {
+            "journeyId": "acompanharSaldos",
+            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+            "actorRef": "estoquista",
+            "goal": "Consultar os saldos atuais dos produtos e identificar itens abaixo da quantidade mínima.",
+            "steps": [
+              {
+                "stepId": "localizarProdutos",
+                "kind": "locate",
+                "transitionRef": "",
+                "description": "Localiza os produtos cadastrados para acompanhamento do estoque."
+              },
+              {
+                "stepId": "consultarSaldos",
+                "kind": "inspect",
+                "transitionRef": "",
+                "description": "Consulta os saldos atuais, as quantidades mínimas e os avisos de produtos abaixo do mínimo."
+              }
+            ]
+          },
+          {
+            "journeyId": "tratarAvisoSaldoBaixo",
+            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+            "actorRef": "estoquista",
+            "goal": "Verificar um aviso recebido sobre produto com saldo abaixo da quantidade mínima.",
+            "steps": [
+              {
+                "stepId": "consultarProdutoAvisado",
+                "kind": "inspect",
+                "transitionRef": "",
+                "description": "Consulta o saldo atual e a quantidade mínima do produto indicado no aviso."
+              }
+            ]
+          }
+        ],
+        "findings": [],
+        "sources": [
+          {
+            "path": "/_102034_/l4/ontology/mdm.defs.ts",
+            "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
+          },
+          {
+            "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
+          },
+          {
+            "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
+          },
+          {
+            "path": "l4/controleEstoque/access.defs.ts",
+            "sha256": "sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+            "sha256": "sha256:332d8b591e82df39f38c48a8c3e9fa5598aadaf05ef0153780bfc8668ffaff8c"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
+            "sha256": "sha256:2219c8d13e2412d7ef132e7efabeeccfcddbbb50ad05f7d49c46e1819809eca2"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
+            "sha256": "sha256:ffd8fbde507e1fdf9d9dc30cbfc1b17a6f657de2617cb301df02219fc76ec67f"
+          },
+          {
+            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+            "sha256": "sha256:216a3970415e29f391c4db5bf88c08b895feedcb8188b9f45bb7c547612fa416"
+          },
+          {
+            "path": "l4/controleEstoque/ontology/Produto.defs.ts",
+            "sha256": "sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348"
+          },
+          {
+            "path": "l4/controleEstoque/pool/l1/web/needs.json",
+            "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
+          }
+        ]
+      }
+    ],
+    "sourceFindings": [],
+    "sourceHashes": [
+      {
+        "path": "/_102034_/l4/ontology/mdm.defs.ts",
+        "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
+      },
+      {
+        "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
+      },
+      {
+        "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+        "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
+      },
+      {
+        "path": "l4/controleEstoque/access.defs.ts",
+        "sha256": "sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d"
+      },
+      {
+        "path": "l4/controleEstoque/integration.defs.ts",
+        "sha256": "sha256:82f593739693f56c6d236658063d246f540bc3667da1a4ce4db076655ea752c9"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+        "sha256": "sha256:332d8b591e82df39f38c48a8c3e9fa5598aadaf05ef0153780bfc8668ffaff8c"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
+        "sha256": "sha256:2219c8d13e2412d7ef132e7efabeeccfcddbbb50ad05f7d49c46e1819809eca2"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
+        "sha256": "sha256:ffd8fbde507e1fdf9d9dc30cbfc1b17a6f657de2617cb301df02219fc76ec67f"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+        "sha256": "sha256:216a3970415e29f391c4db5bf88c08b895feedcb8188b9f45bb7c547612fa416"
+      },
+      {
+        "path": "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
+        "sha256": "sha256:2cff350aae09d440467e18b93b28610d222124198a6cd39c88173d4af357435d"
+      },
+      {
+        "path": "l4/controleEstoque/ontology/Produto.defs.ts",
+        "sha256": "sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348"
+      },
+      {
+        "path": "l4/controleEstoque/pool/l1/web/needs.json",
+        "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
+      },
+      {
+        "path": "l4/controleEstoque/rules.defs.ts",
+        "sha256": "sha256:5219a6accfd5ec5d5f6bf561a11b7f584c0aeab260ec43ad463ef021ba843e87"
+      }
+    ],
+    "files": [
+      {
+        "path": "l4/controleEstoque/rules.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/rules.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';\n\nexport const controleEstoqueRules = {\n  \"schemaVersion\": \"2026-09-16-ns5-rules-v2\",\n  \"moduleName\": \"controleEstoque\",\n  \"rules\": {\n    \"quantidadeMinimaValida\": \"A quantidade mínima definida para um produto deve ser maior ou igual a zero.\",\n    \"saldoAtualProduto\": \"O saldo atual de cada produto é calculado pela soma das quantidades das entradas menos a soma das quantidades das saídas registradas para esse produto.\",\n    \"avisoSaldoMinimoProduto\": \"Um produto deve ser sinalizado com aviso de saldo baixo quando seu saldo atual for menor que sua quantidade mínima definida.\",\n    \"movimentacaoEstoqueImutavel\": \"Uma movimentação de estoque não pode ser alterada depois de registrada.\",\n    \"quantidadeMovimentadaPositiva\": \"A quantidade registrada em uma movimentação de estoque deve ser um número inteiro positivo.\",\n    \"registroMovimentacaoAtualizaSaldo\": \"O registro de uma entrada ou saída deve atualizar o saldo atual do produto correspondente conforme o tipo e a quantidade movimentada.\"\n  }\n} as const satisfies Ns5RulesArtifactV2;\n\nexport type ControleEstoqueRulesType = typeof controleEstoqueRules;\n\nexport default controleEstoqueRules;\n"
+      },
+      {
+        "path": "l4/controleEstoque/integration.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/integration.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5IntegrationArtifact } from '/_102035_/l2/solution/types.js';\n\nexport const controleEstoqueIntegration = {\n  \"schemaVersion\": \"2026-09-12-ns5-integration-v2\",\n  \"moduleName\": \"controleEstoque\",\n  \"inbound\": [\n    {\n      \"id\": \"recebimentoRegistrado\",\n      \"kind\": \"event\",\n      \"from\": \"compras\",\n      \"event\": \"recebimentoRegistrado\",\n      \"writes\": [\n        \"MovimentacaoEstoque\"\n      ],\n      \"effect\": \"create\",\n      \"description\": \"Recebe o recebimento registrado em Compras e cria a movimentação de entrada correspondente no estoque.\",\n      \"entityRefs\": []\n    }\n  ],\n  \"outbound\": [],\n  \"plugins\": []\n} as const satisfies Ns5IntegrationArtifact;\n\nexport type ControleEstoqueIntegrationType = typeof controleEstoqueIntegration;\n\nexport default controleEstoqueIntegration;\n"
+      },
+      {
+        "path": "l4/controleEstoque/access.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/access.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';\n\nexport const controleEstoqueAccess = {\n  \"schemaVersion\": \"2026-09-12-ns5-access-v3\",\n  \"moduleName\": \"controleEstoque\",\n  \"actors\": [\n    {\n      \"actorId\": \"estoquista\",\n      \"kind\": \"internal\",\n      \"origin\": \"named\",\n      \"title\": \"Estoquista\",\n      \"description\": \"Registra e acompanha as movimentações e os saldos do estoque.\",\n      \"personEntity\": \"\"\n    }\n  ],\n  \"grants\": [\n    {\n      \"grantId\": \"gerenciarEstoque\",\n      \"actorRef\": \"estoquista\",\n      \"title\": \"Gerenciar estoque\",\n      \"description\": \"Permite ao estoquista cadastrar produtos acompanhados, registrar movimentações de entrada e saída e consultar saldos, quantidades mínimas e avisos de saldo baixo de toda a organização.\",\n      \"entityRefs\": [\n        \"Produto\",\n        \"MovimentacaoEstoque\"\n      ],\n      \"dataScope\": {\n        \"mode\": \"organization\",\n        \"description\": \"Abrange os produtos e as movimentações de estoque de toda a organização.\"\n      },\n      \"disclosure\": {\n        \"mode\": \"fullRecord\",\n        \"description\": \"Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.\"\n      }\n    }\n  ]\n} as const satisfies Ns5AccessArtifact;\n\nexport type ControleEstoqueAccessType = typeof controleEstoqueAccess;\n\nexport default controleEstoqueAccess;\n"
+      },
+      {
+        "path": "l4/controleEstoque/pool/l1/web/needs.json",
+        "text": "{\n  \"schemaVersion\": \"2026-09-21-p2-needs-v1\",\n  \"moduleName\": \"controleEstoque\",\n  \"device\": \"web\",\n  \"menuSchema\": \"2026-09-20-p2-menu-v2.2\",\n  \"pages\": [\n    {\n      \"pageId\": \"produtos\",\n      \"actors\": [\n        \"estoquista\"\n      ],\n      \"reads\": [\n        {\n          \"entity\": \"MovimentacaoEstoque\",\n          \"family\": \"tdm\",\n          \"scope\": \"organization\",\n          \"derived\": [],\n          \"from\": [\n            \"grant:gerenciarEstoque\",\n            \"journey:acompanharSaldos/consultarSaldos\",\n            \"journey:acompanharSaldos/localizarProdutos\",\n            \"journey:cadastrarProduto/informarProduto\",\n            \"journey:registrarMovimentacaoEstoque/consultarSaldo\",\n            \"journey:registrarMovimentacaoEstoque/localizarProduto\",\n            \"journey:registrarMovimentacaoEstoque/registrarMovimentacao\",\n            \"journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado\",\n            \"relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto\",\n            \"relationship:Produto/movimentacaoEstoqueProduto\"\n          ]\n        },\n        {\n          \"entity\": \"Produto\",\n          \"family\": \"mdm\",\n          \"scope\": \"organization\",\n          \"derived\": [\n            \"details.controleEstoque.saldoAbaixoDoMinimo\",\n            \"details.controleEstoque.saldoAtual\"\n          ],\n          \"from\": [\n            \"grant:gerenciarEstoque\",\n            \"journey:acompanharSaldos/consultarSaldos\",\n            \"journey:acompanharSaldos/localizarProdutos\",\n            \"journey:cadastrarProduto/informarProduto\",\n            \"journey:registrarMovimentacaoEstoque/consultarSaldo\",\n            \"journey:registrarMovimentacaoEstoque/localizarProduto\",\n            \"journey:registrarMovimentacaoEstoque/registrarMovimentacao\",\n            \"journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado\",\n            \"relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto\",\n            \"relationship:Produto/movimentacaoEstoqueProduto\"\n          ]\n        }\n      ],\n      \"writes\": [\n        {\n          \"entity\": \"MovimentacaoEstoque\",\n          \"operation\": \"create\",\n          \"transitionRef\": \"\",\n          \"from\": [\n            \"journey:registrarMovimentacaoEstoque/registrarMovimentacao\"\n          ]\n        },\n        {\n          \"entity\": \"Produto\",\n          \"operation\": \"create\",\n          \"transitionRef\": \"\",\n          \"from\": [\n            \"journey:cadastrarProduto/informarProduto\"\n          ]\n        }\n      ]\n    },\n    {\n      \"pageId\": \"movimentacoes\",\n      \"actors\": [\n        \"estoquista\"\n      ],\n      \"reads\": [\n        {\n          \"entity\": \"MovimentacaoEstoque\",\n          \"family\": \"tdm\",\n          \"scope\": \"organization\",\n          \"derived\": [],\n          \"from\": [\n            \"grant:gerenciarEstoque\",\n            \"journey:registrarMovimentacaoEstoque/consultarSaldo\",\n            \"journey:registrarMovimentacaoEstoque/localizarProduto\",\n            \"journey:registrarMovimentacaoEstoque/registrarMovimentacao\",\n            \"relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto\",\n            \"relationship:Produto/movimentacaoEstoqueProduto\"\n          ]\n        },\n        {\n          \"entity\": \"Produto\",\n          \"family\": \"mdm\",\n          \"scope\": \"organization\",\n          \"derived\": [\n            \"details.controleEstoque.saldoAbaixoDoMinimo\",\n            \"details.controleEstoque.saldoAtual\"\n          ],\n          \"from\": [\n            \"grant:gerenciarEstoque\",\n            \"journey:registrarMovimentacaoEstoque/consultarSaldo\",\n            \"journey:registrarMovimentacaoEstoque/localizarProduto\",\n            \"journey:registrarMovimentacaoEstoque/registrarMovimentacao\",\n            \"relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto\",\n            \"relationship:Produto/movimentacaoEstoqueProduto\"\n          ]\n        }\n      ],\n      \"writes\": [\n        {\n          \"entity\": \"MovimentacaoEstoque\",\n          \"operation\": \"create\",\n          \"transitionRef\": \"\",\n          \"from\": [\n            \"journey:registrarMovimentacaoEstoque/registrarMovimentacao\"\n          ]\n        }\n      ]\n    }\n  ],\n  \"meta\": {\n    \"sourceMenu\": \"pool/l2/web/menu.json\",\n    \"generatedAt\": \"2026-09-28T17:39:15.637Z\"\n  }\n}\n"
+      },
+      {
+        "path": "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';\n\nexport const controleEstoqueEntityMovimentacaoEstoque = {\n  \"schemaVersion\": \"2026-09-17-ns5-ontology-v3.1\",\n  \"moduleName\": \"controleEstoque\",\n  \"entityId\": \"MovimentacaoEstoque\",\n  \"title\": \"Movimentação de estoque\",\n  \"description\": \"Registro imutável de entrada ou saída de unidades de um produto, usado para calcular seu saldo atual.\",\n  \"displayField\": \"id\",\n  \"relationships\": {\n    \"produto\": {\n      \"relationshipId\": \"movimentacaoEstoqueProduto\",\n      \"to\": \"Produto\",\n      \"via\": \"MovimentacaoEstoque.produtoId\",\n      \"cardinality\": \"N:1\",\n      \"title\": \"Produto movimentado\",\n      \"description\": \"Cada movimentação registra uma entrada ou saída de unidades para um único produto.\",\n      \"mode\": \"fk\",\n      \"required\": \"Sempre\",\n      \"role\": \"produto\"\n    }\n  },\n  \"capabilities\": {\n    \"read.byId\": \"Consulta uma movimentação pelo identificador da linha, usando a busca por id na tela de acompanhamento do estoquista.\",\n    \"locate.byColumn\": \"Lista movimentações por produto e por data e hora de registro, com ordenação e paginação para o estoquista acompanhar o histórico.\",\n    \"count\": \"Conta as movimentações correspondentes ao produto ou período consultado, usando os filtros da lista para o cabeçalho do estoquista.\",\n    \"listByForeignKey\": \"Lista as movimentações vinculadas a um produto por produtoId, para o estoquista consultar o histórico daquele produto.\",\n    \"create\": \"Grava uma nova movimentação de entrada ou saída com produto, data, tipo e quantidade informados pelo estoquista.\",\n    \"transaction\": \"Confirma a gravação da movimentação e a atualização do saldo do produto na mesma transação, quando o estoquista registra a operação.\",\n    \"read.mdmRecord\": \"Lê o registro mestre apontado por produtoId para exibir o nome e os dados cadastrais do produto ao estoquista.\",\n    \"controleEstoque.registrarMovimentacao\": \"Registra uma entrada ou saída e aplica seu efeito ao saldo atual do produto, validando a operação para o estoquista.\"\n  },\n  \"rules\": [\n    \"movimentacaoEstoqueImutavel\",\n    \"quantidadeMovimentadaPositiva\",\n    \"registroMovimentacaoAtualizaSaldo\"\n  ],\n  \"kind\": \"entity\",\n  \"class\": \"event\",\n  \"storage\": {\n    \"target\": \"moduleDatabase\",\n    \"table\": \"controleEstoque_movimentacaoestoque\",\n    \"kind\": \"relational\"\n  },\n  \"record\": {\n    \"fields\": {\n      \"id\": {\n        \"type\": \"uuid\",\n        \"required\": true,\n        \"derived\": true,\n        \"indexed\": true,\n        \"title\": \"Id\"\n      },\n      \"version\": {\n        \"type\": \"integer\",\n        \"required\": true,\n        \"derived\": true\n      },\n      \"produtoId\": {\n        \"type\": \"record\",\n        \"required\": true,\n        \"indexed\": true,\n        \"of\": \"Address\",\n        \"to\": [\n          \"Produto\"\n        ],\n        \"title\": \"Produto\",\n        \"description\": \"Produto mestre ao qual a entrada ou saída de estoque se refere.\",\n        \"maxLength\": 0,\n        \"min\": 0,\n        \"max\": 0\n      },\n      \"movimentadoEm\": {\n        \"type\": \"timestamp\",\n        \"required\": true,\n        \"indexed\": true,\n        \"of\": \"Address\",\n        \"title\": \"Data e hora da movimentação\",\n        \"description\": \"Data e hora em que a entrada ou saída foi registrada, usada para ordenar e consultar o histórico do produto.\",\n        \"maxLength\": 0,\n        \"min\": 0,\n        \"max\": 0\n      },\n      \"details\": {\n        \"type\": \"object\",\n        \"required\": true,\n        \"of\": \"Address\",\n        \"title\": \"Dados da movimentação\",\n        \"description\": \"Dados imutáveis que caracterizam a entrada ou saída registrada para o produto.\",\n        \"maxLength\": 0,\n        \"min\": 0,\n        \"max\": 0,\n        \"fields\": {\n          \"tipo\": {\n            \"type\": \"enum\",\n            \"required\": true,\n            \"of\": \"Address\",\n            \"values\": [\n              {\n                \"value\": \"entrada\",\n                \"title\": \"Entrada\",\n                \"description\": \"Adiciona unidades ao saldo do produto.\"\n              },\n              {\n                \"value\": \"saida\",\n                \"title\": \"Saída\",\n                \"description\": \"Retira unidades do saldo do produto.\"\n              }\n            ],\n            \"title\": \"Tipo de movimentação\",\n            \"description\": \"Indica se as unidades foram adicionadas ao estoque ou retiradas dele.\",\n            \"maxLength\": 0,\n            \"min\": 0,\n            \"max\": 0\n          },\n          \"quantidade\": {\n            \"type\": \"integer\",\n            \"required\": true,\n            \"of\": \"Address\",\n            \"title\": \"Quantidade\",\n            \"description\": \"Quantidade positiva de unidades que entra ou sai do estoque.\",\n            \"maxLength\": 0,\n            \"min\": 1,\n            \"max\": 0\n          }\n        }\n      }\n    }\n  }\n} as const satisfies Ns5OntologyEntityV3;\n\nexport type ControleEstoqueEntityMovimentacaoEstoqueType = typeof controleEstoqueEntityMovimentacaoEstoque;\n\nexport default controleEstoqueEntityMovimentacaoEstoque;\n"
+      },
+      {
+        "path": "l4/controleEstoque/ontology/Produto.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/ontology/Produto.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';\n\nexport const controleEstoqueEntityProduto = {\n  \"schemaVersion\": \"2026-09-17-ns5-ontology-v3.1\",\n  \"moduleName\": \"controleEstoque\",\n  \"entityId\": \"Produto\",\n  \"title\": \"Produto\",\n  \"description\": \"Produto acompanhado pelo estoque, com quantidade mínima definida para sinalizar saldo abaixo do mínimo.\",\n  \"displayField\": \"details.identification.name\",\n  \"relationships\": {\n    \"movimentacoesEstoque\": {\n      \"relationshipId\": \"movimentacaoEstoqueProduto\",\n      \"to\": \"MovimentacaoEstoque\",\n      \"via\": \"MovimentacaoEstoque.produtoId\",\n      \"cardinality\": \"1:N\",\n      \"title\": \"Movimentações de estoque\",\n      \"description\": \"Movimentações de entrada ou saída registradas para este produto.\",\n      \"mode\": \"fk\",\n      \"direction\": \"to\",\n      \"required\": true,\n      \"role\": \"produto movimentado\"\n    }\n  },\n  \"capabilities\": {\n    \"read.byId\": \"Consulta um produto pelo identificador mestre; lê o registro pelo id no índice e documento; usado pelo estoquista ao abrir um produto localizado ou referenciado por uma movimentação.\",\n    \"locate.byName\": \"Localiza produtos pelo nome; pesquisa o texto informado entre os produtos ativos no índice mestre; usado pelo estoquista para cadastrar movimentações e acompanhar saldos.\",\n    \"register.createOrAttach\": \"Cadastra ou associa um produto ao controle de estoque; localiza o registro mestre e cria ou anexa a função do módulo, gravando a quantidade mínima; usado pelo estoquista no cadastro de produto.\",\n    \"edit.platformFields\": \"Altera os dados de catálogo usados pelo estoque, como nome e unidade de medida; atualiza os campos da plataforma no registro mestre; usado pelo estoquista na manutenção do produto.\",\n    \"edit.moduleNamespace\": \"Altera a quantidade mínima do produto; atualiza somente o espaço controleEstoque do registro mestre; usado pelo estoquista para ajustar o acompanhamento do saldo.\",\n    \"inactivate\": \"Inativa ou reativa um produto sem removê-lo do cadastro mestre; altera a situação do registro; usado pelo estoquista quando o produto deixa ou volta a ser controlado.\",\n    \"statusHistory.read\": \"Mostra as mudanças de situação do produto; consulta o histórico de status do registro mestre; usado pelo estoquista ao verificar a disponibilidade do cadastro.\",\n    \"audit\": \"Mostra quem alterou dados do produto e quando; consulta a auditoria do registro mestre; usado pelo estoquista para conferir a manutenção do cadastro.\"\n  },\n  \"rules\": [\n    \"rule-foreign-namespace-refused\",\n    \"rule-document-shape-validated\",\n    \"rule-identity-never-in-namespace\",\n    \"quantidadeMinimaValida\",\n    \"saldoAtualProduto\",\n    \"avisoSaldoMinimoProduto\"\n  ],\n  \"kind\": \"role\",\n  \"subtype\": \"Product\",\n  \"roleTag\": \"controleEstoque.Produto\",\n  \"source\": \"/_102034_/l4/ontology/mdm.defs.ts\",\n  \"record\": {\n    \"fields\": {\n      \"id\": {\n        \"type\": \"uuid\",\n        \"required\": true,\n        \"indexed\": true,\n        \"derived\": true,\n        \"description\": \"mdmId; stable through promotion and merge.\"\n      },\n      \"version\": {\n        \"type\": \"integer\",\n        \"required\": true,\n        \"derived\": true,\n        \"writePrecondition\": true,\n        \"description\": \"Bumped by the engine on every write; optimistic concurrency.\"\n      },\n      \"details\": {\n        \"type\": \"object\",\n        \"required\": true,\n        \"description\": \"Documento mestre do produto acompanhado pelo controle de estoque.\",\n        \"fields\": {\n          \"identification\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {\n              \"subtype\": {\n                \"type\": \"enum\",\n                \"required\": true,\n                \"indexed\": true,\n                \"derived\": true,\n                \"values\": [\n                  {\n                    \"value\": \"Product\",\n                    \"title\": \"Produto\",\n                    \"description\": \"Item de catálogo ou estoque.\"\n                  }\n                ],\n                \"description\": \"Identifica este cadastro mestre como um produto.\",\n                \"title\": \"Tipo de cadastro\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"name\": {\n                \"type\": \"string\",\n                \"required\": true,\n                \"indexed\": true,\n                \"maxLength\": 0,\n                \"description\": \"Nome usado pelo estoquista para localizar e reconhecer o produto controlado.\",\n                \"title\": \"Nome do produto\",\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"status\": {\n                \"type\": \"enum\",\n                \"required\": true,\n                \"indexed\": true,\n                \"derived\": true,\n                \"values\": [\n                  {\n                    \"value\": \"Active\",\n                    \"title\": \"Ativo\",\n                    \"description\": \"Cadastro disponível para uso.\"\n                  },\n                  {\n                    \"value\": \"Inactive\",\n                    \"title\": \"Inativo\",\n                    \"description\": \"Cadastro fora de uso.\"\n                  },\n                  {\n                    \"value\": \"Merged\",\n                    \"title\": \"Mesclado\",\n                    \"description\": \"Cadastro unido a outro registro mestre.\"\n                  },\n                  {\n                    \"value\": \"Blocked\",\n                    \"title\": \"Bloqueado\",\n                    \"description\": \"Cadastro bloqueado pela plataforma.\"\n                  }\n                ],\n                \"title\": \"Situação do cadastro\",\n                \"description\": \"Situação do produto no cadastro mestre, usada para indicar se ele está ativo para o controle de estoque.\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              }\n            },\n            \"description\": \"Dados de identificação do produto no cadastro mestre.\"\n          },\n          \"base\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {},\n            \"description\": \"Dados básicos comuns do registro mestre; nenhum campo desta camada é necessário neste controle.\"\n          },\n          \"product\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {\n              \"unitOfMeasure\": {\n                \"type\": \"string\",\n                \"description\": \"Unidade em que o estoquista registra entradas, saídas, saldo e quantidade mínima do produto.\",\n                \"title\": \"Unidade de medida\",\n                \"required\": true,\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              }\n            },\n            \"description\": \"Dados de catálogo do produto utilizados para interpretar as quantidades movimentadas.\"\n          },\n          \"general\": {\n            \"type\": \"object\",\n            \"owner\": \"organization\",\n            \"open\": true,\n            \"description\": \"Dados promovidos pela organização, somente para leitura neste módulo.\"\n          },\n          \"controleEstoque\": {\n            \"type\": \"object\",\n            \"owner\": \"module\",\n            \"fields\": {\n              \"quantidadeMinima\": {\n                \"type\": \"number\",\n                \"required\": true,\n                \"of\": \"Address\",\n                \"title\": \"Quantidade mínima\",\n                \"description\": \"Quantidade mínima em estoque a partir da qual o produto deve ser acompanhado por aviso.\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"saldoAtual\": {\n                \"type\": \"number\",\n                \"derived\": true,\n                \"title\": \"Saldo atual\",\n                \"description\": \"Quantidade disponível do produto, calculada pelas entradas menos as saídas registradas para este produto.\"\n              },\n              \"saldoAbaixoDoMinimo\": {\n                \"type\": \"boolean\",\n                \"derived\": true,\n                \"title\": \"Saldo abaixo do mínimo\",\n                \"description\": \"Indica que o saldo atual do produto está menor que a quantidade mínima definida para seu acompanhamento.\"\n              }\n            },\n            \"description\": \"Dados próprios deste módulo para acompanhar o nível mínimo do produto.\"\n          }\n        }\n      }\n    }\n  }\n} as const satisfies Ns5OntologyEntityV3;\n\nexport type ControleEstoqueEntityProdutoType = typeof controleEstoqueEntityProduto;\n\nexport default controleEstoqueEntityProduto;\n"
+      },
+      {
+        "path": "/_102034_/l4/ontology/mdm.defs.ts",
+        "text": "/// <mls fileReference=\"_102034_/l4/ontology/mdm.defs.ts\" enhancement=\"_blank\"/>\n/**\n * The level-1 ontology of the platform, in one file, meant to be read from start to finish.\n *\n * A record is `{ id, version, details }`, mirroring `mdm_documents`. `details` is a map of branches, and\n * every record has the same five:\n *\n *   identification  also columns of the index table — that is what makes them filterable and sortable\n *   base            what every record has, whatever its subtype\n *   <subtype>       exactly one per record, keyed by the subtype name with a lowercase first letter:\n *                   \"person\", \"company\", \"assetVehicle\". Its fields come from subtypes.<S>.fields\n *   general         the organization layer: what more than one module needed, so it was promoted\n *   <moduleId>      one key per module — only that module writes it, the others read it by name\n *\n * An example document, which is the target shape:\n *\n *   {\n *     \"identification\": { \"name\": \"Maria\", \"docType\": \"CPF\", \"docId\": \"…\", \"countryCode\": \"BR\",\n *                         \"status\": \"Active\", \"tags\": [\"agendaClinica.Paciente\"] },\n *     \"base\":           { \"aliases\": [], \"addresses\": [ … ], \"contacts\": [ … ], \"relationshipRefs\": { … } },\n *     \"person\":         { \"birthDate\": \"1990-01-01\", \"privacyConsent\": { … } },\n *     \"general\":        { },\n *     \"agendaClinica\":  { \"prontuario\": \"PR-000123\" }\n *   }\n *\n * The engine stores this document FLAT today; the branches are the target. That gap, and every other one\n * between this file and the engine, is in `knownDivergences` at the bottom — listed, not hidden.\n *\n * Reading a field: only what differs from the default is written. Absent means `required: false`,\n * `nullable: false`, title equal to the id, and origin level 1. The layer is not written either, because\n * the branch gives it: `identification` is a column, everything else lives in the document.\n *\n * Everything below the `export const` is ONE JSON literal, double-quoted, with no comments inside it, so\n * that the same extractor the screens and the agents use (`extractNs4ClassicJsonObject` + `JSON.parse`)\n * reads it whole. The ids that cross-reference each other — a capability of a subtype, an `of`, a `to` —\n * are checked by `l1/mdm/defs/mdmOntology.test.ts`, which imports this file.\n */\n\nimport type { MdmOntology } from '/_102034_/l1/mdm/defs/ontologyTypes.js';\n\nexport const mdm = {\n  \"schemaVersion\": \"2026-09-15-mdm-ontology-v2\",\n\n  \"record\": {\n    \"fields\": {\n      \"id\": { \"type\": \"uuid\", \"required\": true, \"derived\": true, \"indexed\": true, \"description\": \"mdmId; stable through promotion and merge.\" },\n      \"version\": { \"type\": \"integer\", \"required\": true, \"derived\": true, \"writePrecondition\": true, \"description\": \"Bumped by the engine on every write; optimistic concurrency.\" },\n      \"details\": { \"type\": \"object\", \"required\": true, \"groups\": [\"identification\", \"base\", \"<subtype>\", \"general\", \"<moduleId>\"], \"description\": \"The JSONB document, as a map of groups (see groups).\" }\n    },\n    \"displayField\": \"identification.name\"\n  },\n\n  \"groups\": {\n    \"identification\": {\n      \"type\": \"object\",\n      \"owner\": \"platform\",\n      \"description\": \"Also columns of the index table; that is what makes them filterable and sortable. A field earns a column only when something has to filter or sort by it.\",\n      \"fields\": {\n        \"subtype\": { \"type\": \"enum\", \"required\": true, \"derived\": true, \"indexed\": true, \"values\": [\"Person\", \"Company\", \"ContactChannel\", \"Animal\", \"Product\", \"Service\", \"Location\", \"BankAccount\", \"Document\", \"AssetGeneric\", \"AssetVehicle\", \"AssetProperty\", \"AssetEquipment\"], \"description\": \"Which subtype this record is; it decides which subtype branch the document carries.\" },\n        \"name\": { \"type\": \"string\", \"required\": true, \"indexed\": true, \"maxLength\": 200, \"description\": \"How a human recognises the record. The only text filter there is.\" },\n        \"status\": { \"type\": \"enum\", \"required\": true, \"derived\": true, \"indexed\": true, \"values\": [\"Active\", \"Inactive\", \"Merged\", \"Blocked\"] },\n        \"docType\": { \"type\": \"enum\", \"indexed\": true, \"values\": [\"SSN\", \"EIN\", \"Passport\", \"DriversLicense\", \"NationalId\", \"CPF\", \"CNPJ\", \"VAT\", \"Other\"] },\n        \"docId\": { \"type\": \"string\", \"indexed\": true, \"description\": \"The document number itself. Unique with docType by design; the unique index does not exist yet, see knownDivergences.\" },\n        \"countryCode\": { \"type\": \"string\", \"required\": true, \"indexed\": true, \"maxLength\": 2, \"pattern\": \"^[A-Z]{2}$\", \"default\": \"US\", \"description\": \"ISO 3166-1 alpha-2. Says which country the document and the legal rules belong to.\" },\n        \"tags\": { \"type\": \"string\", \"collection\": true, \"required\": true, \"derived\": true, \"description\": \"Module roles, as <moduleId>.<Entity>. Written by attachRole; this is how a module says the record is one of its own. A column with no index.\" },\n        \"mergedInto\": { \"type\": \"string\", \"derived\": true, \"description\": \"On the loser of a merge, the mdmId of the winner. A column with no index.\" },\n        \"createdAt\": { \"type\": \"string\", \"required\": true, \"derived\": true, \"indexed\": true },\n        \"updatedAt\": { \"type\": \"string\", \"required\": true, \"derived\": true, \"indexed\": true }\n      }\n    },\n    \"base\": {\n      \"type\": \"object\",\n      \"owner\": \"platform\",\n      \"description\": \"What every record has, whatever its subtype, and which nothing filters by.\",\n      \"fields\": {\n        \"moduleTypes\": { \"type\": \"string\", \"collection\": true, \"derived\": true, \"description\": \"The module roles again, kept for the engine and duplicating tags. Not a field for a reader; read tags.\" },\n        \"aliases\": { \"type\": \"string\", \"collection\": true, \"required\": true, \"description\": \"Other names the same subject answers to: trade name, maiden name, nickname.\" },\n        \"addresses\": { \"type\": \"object\", \"of\": \"Address\", \"collection\": true, \"required\": true },\n        \"contacts\": { \"type\": \"object\", \"of\": \"ContactSummary\", \"collection\": true, \"required\": true, \"derived\": true, \"description\": \"Summary of the ContactChannel records linked by HasContact. A contact is a record, never a string on this one.\" },\n        \"relationshipRefs\": { \"type\": \"object\", \"required\": true, \"derived\": true, \"description\": \"The compact keys the engine recomputes on every link and unlink. The key set is relationships[].compactKeys — it is not repeated here, and it is never written by hand.\" },\n        \"notes\": { \"type\": \"string\", \"maxLength\": 1000 }\n      }\n    },\n    \"general\": {\n      \"type\": \"object\",\n      \"owner\": \"organization\",\n      \"open\": true,\n      \"description\": \"Fields promoted by the organization when more than one module needed them; the schema lives in the project registry, so a module reads this branch and does not declare it.\"\n    },\n    \"<moduleId>\": {\n      \"type\": \"object\",\n      \"owner\": \"module\",\n      \"open\": true,\n      \"description\": \"One key per module id — Record<moduleId, object>. Only that module writes it (MDM_FOREIGN_NAMESPACE otherwise); other modules see the key by name. Never identity, document, contact or login. Example: \\\"agendaClinica\\\": { \\\"prontuario\\\": \\\"PR-000123\\\" } — its schema is the module's own ontology (Paciente.defs.ts).\"\n    }\n  },\n\n  \"types\": {\n    \"Address\": {\n      \"type\": { \"type\": \"enum\", \"required\": true, \"values\": [\"Residential\", \"Commercial\", \"Billing\", \"Delivery\", \"Other\"] },\n      \"label\": { \"type\": \"string\" },\n      \"line1\": { \"type\": \"string\", \"required\": true },\n      \"line2\": { \"type\": \"string\" },\n      \"line3\": { \"type\": \"string\" },\n      \"city\": { \"type\": \"string\" },\n      \"stateOrProvince\": { \"type\": \"string\", \"description\": \"State, province, prefecture or canton. In the US, the 2-letter code.\" },\n      \"postalCode\": { \"type\": \"string\", \"description\": \"ZIP, postcode, CEP, PIN. The format varies by country and the platform does not enforce one.\" },\n      \"countryCode\": { \"type\": \"string\", \"required\": true, \"maxLength\": 2, \"pattern\": \"^[A-Z]{2}$\", \"default\": \"US\", \"description\": \"ISO 3166-1 alpha-2. Drives how the address is formatted on screen.\" },\n      \"formatted\": { \"type\": \"string\", \"derived\": true, \"description\": \"The whole address on one line, as it would appear on an envelope. Built asynchronously.\" },\n      \"geolocation\": { \"type\": \"object\", \"of\": \"GeoPoint\" },\n      \"isPrimary\": { \"type\": \"boolean\", \"required\": true }\n    },\n    \"GeoPoint\": {\n      \"lat\": { \"type\": \"number\", \"required\": true, \"min\": -90, \"max\": 90 },\n      \"lng\": { \"type\": \"number\", \"required\": true, \"min\": -180, \"max\": 180 }\n    },\n    \"PrivacyConsent\": {\n      \"consentedAt\": { \"type\": \"timestamp\", \"required\": true },\n      \"consentVersion\": { \"type\": \"string\", \"required\": true },\n      \"channel\": { \"type\": \"string\", \"required\": true, \"description\": \"Where the consent was given: web form, paper, phone.\" },\n      \"revokedAt\": { \"type\": \"timestamp\" },\n      \"notes\": { \"type\": \"string\" }\n    },\n    \"ContactSummary\": {\n      \"mdmId\": { \"type\": \"uuid\", \"required\": true, \"description\": \"The ContactChannel record itself.\" },\n      \"title\": { \"type\": \"string\", \"required\": true }\n    }\n  },\n\n  \"subtypes\": {\n    \"Person\": {\n      \"description\": \"Natural persons: customers, employees, partners, dependents.\",\n      \"fields\": {\n        \"birthDate\": { \"type\": \"date\" },\n        \"gender\": { \"type\": \"enum\", \"values\": [\"Male\", \"Female\", \"NonBinary\", \"NotDisclosed\"] },\n        \"nationality\": { \"type\": \"string\", \"maxLength\": 2, \"pattern\": \"^[A-Z]{2}$\", \"description\": \"ISO 3166-1 alpha-2 country of nationality.\" },\n        \"occupation\": { \"type\": \"string\", \"maxLength\": 120 },\n        \"photoUrl\": { \"type\": \"string\" },\n        \"privacyConsent\": { \"type\": \"object\", \"of\": \"PrivacyConsent\", \"description\": \"Required for residents of Brazil (LGPD) and the EU (GDPR).\" }\n      },\n      \"capabilities\": [\"locate.byLogin\", \"invite.login\", \"export.personalData\", \"anonymize\"],\n      \"rules\": [\"rule-person-ssn-unique-for-us\", \"rule-person-privacy-consent-required-br-eu\"]\n    },\n    \"Company\": {\n      \"description\": \"Corporations, LLCs, nonprofits, government entities — and the internal structures of any of them.\",\n      \"fields\": {\n        \"companyKind\": { \"type\": \"enum\", \"required\": true, \"values\": [\"LegalEntity\", \"Branch\", \"Franchise\", \"BusinessUnit\", \"Group\", \"Team\", \"Department\", \"InternalOrg\"], \"description\": \"Tells a legal entity apart from an internal structure.\" },\n        \"legalName\": { \"type\": \"string\", \"required\": true, \"description\": \"Official registered name.\" },\n        \"tradeName\": { \"type\": \"string\", \"description\": \"DBA name. Also goes into aliases, so the text filter finds it.\" },\n        \"legalType\": { \"type\": \"enum\", \"values\": [\"Corporation\", \"LLC\", \"SoleProp\", \"Partnership\", \"Nonprofit\", \"Government\", \"Other\"] },\n        \"parentCompanyId\": { \"type\": \"record\", \"to\": [\"Company\"], \"description\": \"Parent in an organizational tree. The link itself is BelongsToGroup, PartOfUnit or SubsidiaryOf.\" },\n        \"externalCode\": { \"type\": \"string\", \"description\": \"ERP, HR or legacy code used by the consuming modules.\" },\n        \"foundingDate\": { \"type\": \"date\" },\n        \"taxRegime\": { \"type\": \"string\", \"description\": \"Country-specific tax class: S-Corp and C-Corp in the US, Simples Nacional in Brazil.\" },\n        \"industryCode\": { \"type\": \"string\", \"description\": \"NAICS in the US, CNAE in Brazil, or the local equivalent.\" },\n        \"website\": { \"type\": \"string\" }\n      },\n      \"rules\": [\"rule-company-ein-unique-for-us\", \"rule-company-legal-name-required\"]\n    },\n    \"ContactChannel\": {\n      \"description\": \"A phone, e-mail or social handle as a record of its own, so it can be traced, verified and shared.\",\n      \"fields\": {\n        \"contactType\": { \"type\": \"enum\", \"required\": true, \"values\": [\"Phone\", \"Email\", \"WhatsApp\", \"Instagram\", \"LinkedIn\", \"X\", \"Other\"] },\n        \"value\": { \"type\": \"string\", \"required\": true, \"description\": \"The contact itself, stored unmasked.\" },\n        \"isVerified\": { \"type\": \"boolean\", \"required\": true },\n        \"verifiedAt\": { \"type\": \"timestamp\" }\n      },\n      \"rules\": [\"rule-contact-value-unique-per-type\"]\n    },\n    \"Animal\": {\n      \"description\": \"Pets, livestock, working animals.\",\n      \"fields\": {\n        \"species\": { \"type\": \"string\" },\n        \"breed\": { \"type\": \"string\" },\n        \"birthDate\": { \"type\": \"date\" },\n        \"sex\": { \"type\": \"enum\", \"values\": [\"Male\", \"Female\", \"Unknown\"] },\n        \"color\": { \"type\": \"string\" },\n        \"microchip\": { \"type\": \"string\" },\n        \"registrationNumber\": { \"type\": \"string\", \"description\": \"Breed registry, USDA tag, or official animal id.\" },\n        \"isNeutered\": { \"type\": \"boolean\" }\n      }\n    },\n    \"Product\": {\n      \"description\": \"An inventory or catalog item that can be bought, stocked, sold or offered by suppliers.\",\n      \"fields\": {\n        \"sku\": { \"type\": \"string\", \"description\": \"Internal stock keeping unit.\" },\n        \"productType\": { \"type\": \"enum\", \"values\": [\"Physical\", \"Digital\", \"Bundle\", \"Consumable\", \"Other\"] },\n        \"category\": { \"type\": \"string\" },\n        \"brand\": { \"type\": \"string\" },\n        \"unitOfMeasure\": { \"type\": \"string\", \"description\": \"unit, box, kg, liter, hour.\" },\n        \"isInventoried\": { \"type\": \"boolean\", \"description\": \"True when stock is tracked by location.\" }\n      }\n    },\n    \"Service\": {\n      \"description\": \"A reusable service or offering that can be sold, scheduled, taught or assigned to a place. Courses are services too.\",\n      \"fields\": {\n        \"serviceCode\": { \"type\": \"string\" },\n        \"serviceKind\": { \"type\": \"enum\", \"values\": [\"Service\", \"Course\", \"Cohort\", \"Subscription\", \"AppointmentType\"], \"description\": \"Cohort is a concrete instance of a course.\" },\n        \"serviceType\": { \"type\": \"enum\", \"values\": [\"Course\", \"Consulting\", \"Maintenance\", \"Appointment\", \"Subscription\", \"Other\"] },\n        \"parentServiceId\": { \"type\": \"record\", \"to\": [\"Service\"], \"description\": \"The base service, when this one is a cohort or a derived offering.\" },\n        \"durationMinutes\": { \"type\": \"number\" },\n        \"deliveryMode\": { \"type\": \"enum\", \"values\": [\"Onsite\", \"Remote\", \"Hybrid\", \"Other\"] }\n      }\n    },\n    \"Location\": {\n      \"description\": \"A physical place used for stock or for delivering a service: room, warehouse, campus, store, branch, shelf.\",\n      \"fields\": {\n        \"locationType\": { \"type\": \"enum\", \"required\": true, \"values\": [\"Room\", \"Warehouse\", \"Building\", \"Campus\", \"Store\", \"Office\", \"Shelf\", \"Other\"] },\n        \"locationCode\": { \"type\": \"string\" },\n        \"parentLocationId\": { \"type\": \"record\", \"to\": [\"Location\"], \"description\": \"The larger place this one belongs to.\" },\n        \"capacity\": { \"type\": \"number\" },\n        \"propertyAddress\": { \"type\": \"object\", \"of\": \"Address\" }\n      }\n    },\n    \"BankAccount\": {\n      \"description\": \"Routing data only. Balances and transactions belong to the finance module, never here.\",\n      \"fields\": {\n        \"bankName\": { \"type\": \"string\" },\n        \"bankRoutingNumber\": { \"type\": \"string\", \"description\": \"ABA routing number in the US; use swift for international.\" },\n        \"accountNumber\": { \"type\": \"string\" },\n        \"accountType\": { \"type\": \"enum\", \"values\": [\"Checking\", \"Savings\", \"MoneyMarket\", \"Payment\", \"Other\"] },\n        \"swift\": { \"type\": \"string\", \"description\": \"BIC/SWIFT, for international transfers.\" },\n        \"iban\": { \"type\": \"string\" },\n        \"pixKey\": { \"type\": \"string\" },\n        \"pixKeyType\": { \"type\": \"enum\", \"values\": [\"CPF\", \"CNPJ\", \"Phone\", \"Email\", \"RandomKey\"] },\n        \"isVerified\": { \"type\": \"boolean\", \"required\": true, \"description\": \"Verified by micro-deposit, open banking or manual review.\" }\n      },\n      \"rules\": [\"rule-bank-account-holder-via-relationship\", \"rule-bank-account-routing-required-for-us\"]\n    },\n    \"Document\": {\n      \"description\": \"An indexed reference to an external file. The file itself never lives in the MDM.\",\n      \"fields\": {\n        \"originModule\": { \"type\": \"string\", \"required\": true, \"description\": \"The module that created this record.\" },\n        \"docCategory\": { \"type\": \"enum\", \"required\": true, \"values\": [\"Contract\", \"Certificate\", \"IdDocument\", \"Invoice\", \"Receipt\", \"Report\", \"Photo\", \"Other\"] },\n        \"storageBucket\": { \"type\": \"string\", \"required\": true, \"description\": \"S3 bucket, or its equivalent, holding the file.\" },\n        \"storagePath\": { \"type\": \"string\", \"required\": true, \"description\": \"Path inside the bucket. Never rewritten after creation.\" },\n        \"fileName\": { \"type\": \"string\", \"required\": true },\n        \"mimeType\": { \"type\": \"string\" },\n        \"fileSizeKb\": { \"type\": \"number\" },\n        \"issuedAt\": { \"type\": \"date\" },\n        \"expiresAt\": { \"type\": \"date\" },\n        \"issuer\": { \"type\": \"string\", \"description\": \"Name of the issuing authority, as free text. Not an mdmId.\" }\n      },\n      \"rules\": [\"rule-document-parties-via-relationships\", \"rule-document-path-immutable\"]\n    },\n    \"AssetGeneric\": {\n      \"description\": \"The fallback asset, for what does not fit vehicle, property or equipment cleanly.\",\n      \"fields\": {\n        \"assetCategory\": { \"type\": \"string\", \"description\": \"furniture, lab-item, signage, toolkit, decor.\" },\n        \"serialNumber\": { \"type\": \"string\" },\n        \"manufacturer\": { \"type\": \"string\" },\n        \"model\": { \"type\": \"string\" }\n      }\n    },\n    \"AssetVehicle\": {\n      \"description\": \"Cars, trucks, motorcycles, boats.\",\n      \"fields\": {\n        \"plate\": { \"type\": \"string\" },\n        \"vin\": { \"type\": \"string\", \"description\": \"Vehicle Identification Number.\" },\n        \"brand\": { \"type\": \"string\" },\n        \"model\": { \"type\": \"string\" },\n        \"year\": { \"type\": \"integer\" },\n        \"color\": { \"type\": \"string\" },\n        \"fuelType\": { \"type\": \"enum\", \"values\": [\"Gasoline\", \"Diesel\", \"Electric\", \"Hybrid\", \"Flex\", \"Other\"] }\n      }\n    },\n    \"AssetProperty\": {\n      \"description\": \"Real estate: residential, commercial, rural or industrial.\",\n      \"fields\": {\n        \"registrationNumber\": { \"type\": \"string\", \"description\": \"Deed number, cadastral reference, or the local equivalent.\" },\n        \"propertyAddress\": { \"type\": \"object\", \"of\": \"Address\" },\n        \"propertyType\": { \"type\": \"enum\", \"values\": [\"Residential\", \"Commercial\", \"Rural\", \"UrbanLot\", \"Industrial\", \"Other\"] },\n        \"areaSqft\": { \"type\": \"number\", \"description\": \"Area in square feet; the primary unit in the US.\" },\n        \"areaM2\": { \"type\": \"number\", \"description\": \"Area in square meters, outside the US.\" },\n        \"taxParcelId\": { \"type\": \"string\", \"description\": \"Tax parcel or assessor id in the US, or the local equivalent.\" }\n      }\n    },\n    \"AssetEquipment\": {\n      \"description\": \"Machinery, devices, infrastructure equipment.\",\n      \"fields\": {\n        \"serialNumber\": { \"type\": \"string\" },\n        \"brand\": { \"type\": \"string\" },\n        \"model\": { \"type\": \"string\" },\n        \"category\": { \"type\": \"string\" },\n        \"acquisitionDate\": { \"type\": \"date\" }\n      }\n    }\n  },\n\n  \"relationships\": [\n    { \"type\": \"Owns\", \"title\": \"Owns\", \"description\": \"A person or a company owns an asset · metadata: since, ownershipPct\", \"from\": [\"Person\", \"Company\"], \"to\": [\"AssetGeneric\", \"AssetVehicle\", \"AssetProperty\", \"AssetEquipment\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"ownedAssets\"], \"to\": [\"owners\"] } },\n    { \"type\": \"Employs\", \"title\": \"Employs\", \"description\": \"A company employs a person · metadata: role, department, startDate\", \"from\": [\"Company\"], \"to\": [\"Person\"], \"bidirectional\": false, \"roles\": [\"employee\", \"contractor\", \"intern\"], \"compactKeys\": { \"from\": [\"employees\"], \"to\": [\"employers\"] } },\n    { \"type\": \"OffersProduct\", \"title\": \"Offers product\", \"description\": \"A company puts a product in its catalog · metadata: since, supplierSku\", \"from\": [\"Company\"], \"to\": [\"Product\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"offeredProducts\"], \"to\": [\"productSuppliers\"] } },\n    { \"type\": \"OffersService\", \"title\": \"Offers service\", \"description\": \"A company or a person offers a service · metadata: since, priceTable\", \"from\": [\"Company\", \"Person\"], \"to\": [\"Service\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"offeredServices\"], \"to\": [\"serviceProviders\"] } },\n    { \"type\": \"StocksAt\", \"title\": \"Stocks at\", \"description\": \"A product or a piece of equipment is stocked at a place · metadata: quantity, unit, minLevel\", \"from\": [\"Product\", \"AssetEquipment\"], \"to\": [\"Location\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"stockLocations\"], \"to\": [\"stockedItems\"] } },\n    { \"type\": \"Teaches\", \"title\": \"Teaches\", \"description\": \"A person teaches a service or a course · metadata: role, since\", \"from\": [\"Person\"], \"to\": [\"Service\"], \"bidirectional\": false, \"roles\": [\"primary-instructor\", \"assistant-instructor\", \"substitute\"], \"compactKeys\": { \"from\": [\"taughtServices\"], \"to\": [\"instructors\"] } },\n    { \"type\": \"HappensAt\", \"title\": \"Happens at\", \"description\": \"A service is delivered at a place · metadata: scheduleLabel, weekday\", \"from\": [\"Service\"], \"to\": [\"Location\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"serviceLocations\"], \"to\": [\"scheduledServices\"] } },\n    { \"type\": \"FranchiseOf\", \"title\": \"Franchise of\", \"description\": \"A company operates as a franchise of another · metadata: contractId, territory\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"franchisors\"], \"to\": [\"franchisees\"] } },\n    { \"type\": \"BelongsToGroup\", \"title\": \"Belongs to group\", \"description\": \"A company belongs to an economic group · metadata: role\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"subsidiary-brand\"], \"compactKeys\": { \"from\": [\"groupParents\"], \"to\": [\"groupMembers\"] } },\n    { \"type\": \"PartOfUnit\", \"title\": \"Part of unit\", \"description\": \"An internal structure belongs to a larger one · metadata: role\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"department\", \"team\", \"branch-unit\"], \"compactKeys\": { \"from\": [\"unitParents\"], \"to\": [\"unitChildren\"] } },\n    { \"type\": \"ManagedBy\", \"title\": \"Managed by\", \"description\": \"A person runs a company or a service · metadata: role\", \"from\": [\"Person\"], \"to\": [\"Company\", \"Service\"], \"bidirectional\": false, \"roles\": [\"manager\", \"coordinator\"], \"compactKeys\": { \"from\": [\"managedOrganizations\"], \"to\": [\"managers\"] } },\n    { \"type\": \"ReportsTo\", \"title\": \"Reports to\", \"description\": \"A person reports to another person · metadata: role\", \"from\": [\"Person\"], \"to\": [\"Person\"], \"bidirectional\": false, \"roles\": [\"direct-report\", \"manager\"], \"compactKeys\": { \"from\": [\"reportManagers\"], \"to\": [\"reports\"] } },\n    { \"type\": \"AssignedTo\", \"title\": \"Assigned to\", \"description\": \"A person is assigned to a company or a service · metadata: role\", \"from\": [\"Person\"], \"to\": [\"Company\", \"Service\"], \"bidirectional\": false, \"roles\": [\"member\", \"assistant\", \"instructor\"], \"compactKeys\": { \"from\": [\"assignments\"], \"to\": [\"assignees\"] } },\n    { \"type\": \"Attends\", \"title\": \"Attends\", \"description\": \"A person attends a service or a course · metadata: attendanceStatus\", \"from\": [\"Person\"], \"to\": [\"Service\"], \"bidirectional\": false, \"roles\": [\"enrolled\", \"completed\"], \"compactKeys\": { \"from\": [\"attendedServices\"], \"to\": [\"attendees\"] } },\n    { \"type\": \"SuppliesProduct\", \"title\": \"Supplies product\", \"description\": \"A company supplies a product · metadata: leadTimeDays, catalogCode\", \"from\": [\"Company\"], \"to\": [\"Product\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"suppliedProducts\"], \"to\": [\"productVendors\"] } },\n    { \"type\": \"PartnersWith\", \"title\": \"Partners with\", \"description\": \"A person is a partner in a company · metadata: equityPct, role\", \"from\": [\"Person\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"managing-partner\", \"silent-partner\"], \"compactKeys\": { \"from\": [\"partners\"], \"to\": [\"partners\"] } },\n    { \"type\": \"Family\", \"title\": \"Family\", \"description\": \"Kinship between two people, read the same way from either side · metadata: degree. An emergency contact is this link with role emergency\", \"from\": [\"Person\"], \"to\": [\"Person\"], \"bidirectional\": true, \"roles\": [\"spouse\", \"child\", \"parent\", \"sibling\", \"emergency\"], \"compactKeys\": { \"from\": [\"family\"], \"to\": [\"family\"] } },\n    { \"type\": \"GuardianOf\", \"title\": \"Guardian of\", \"description\": \"A person answers for another person or for an animal · metadata: since, guardianType\", \"from\": [\"Person\"], \"to\": [\"Person\", \"Animal\"], \"bidirectional\": false, \"roles\": [\"parent\", \"guardian\", \"owner\", \"foster\"], \"compactKeys\": { \"from\": [\"pets\"], \"to\": [\"guardians\"] } },\n    { \"type\": \"CustomerOf\", \"title\": \"Customer of\", \"description\": \"A person or a company buys from a company · metadata: since, segment\", \"from\": [\"Person\", \"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"suppliers\"], \"to\": [\"customers\"] } },\n    { \"type\": \"SupplierOf\", \"title\": \"Supplier of\", \"description\": \"A company supplies another company · metadata: category, contractMdmId\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"customers\"], \"to\": [\"suppliers\"] } },\n    { \"type\": \"MemberOf\", \"title\": \"Member of\", \"description\": \"A person is a member of a company or an association · metadata: role, membershipType\", \"from\": [\"Person\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"board-member\", \"honorary\"], \"compactKeys\": { \"from\": [\"memberships\"], \"to\": [\"members\"] } },\n    { \"type\": \"HoldsAccount\", \"title\": \"Holds account\", \"description\": \"A person or a company holds a bank account · metadata: isPrimary, since\", \"from\": [\"Person\", \"Company\"], \"to\": [\"BankAccount\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"bankAccounts\"], \"to\": [\"accountHolders\"] } },\n    { \"type\": \"SubsidiaryOf\", \"title\": \"Subsidiary of\", \"description\": \"A company is a subsidiary of another · metadata: equityPct, type\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"wholly-owned\", \"affiliate\"], \"compactKeys\": { \"from\": [\"parentCompanies\"], \"to\": [\"subsidiaries\"] } },\n    { \"type\": \"LocatedAt\", \"title\": \"Located at\", \"description\": \"A person or a company sits at a property · metadata: locationType\", \"from\": [\"Person\", \"Company\"], \"to\": [\"AssetProperty\"], \"bidirectional\": false, \"roles\": [\"headquarters\", \"branch\", \"warehouse\"], \"compactKeys\": { \"from\": [\"locations\"], \"to\": [\"locatedEntities\"] } },\n    { \"type\": \"Signed\", \"title\": \"Signed\", \"description\": \"A person or a company signed a document · metadata: role\", \"from\": [\"Person\", \"Company\"], \"to\": [\"Document\"], \"bidirectional\": false, \"roles\": [\"contractor\", \"client\", \"witness\", \"notary\"], \"compactKeys\": { \"from\": [\"documents\"], \"to\": [\"signedBy\"] } },\n    { \"type\": \"HasContact\", \"title\": \"Has contact\", \"description\": \"Any record owns a contact channel; this is what fills base.contacts · metadata: isPrimary\", \"from\": [\"Person\", \"Company\", \"Product\", \"Service\", \"Location\", \"AssetGeneric\", \"AssetVehicle\", \"AssetProperty\", \"AssetEquipment\", \"Animal\", \"BankAccount\", \"Document\", \"ContactChannel\"], \"to\": [\"ContactChannel\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"contacts\"], \"to\": [\"contactOwners\"] } }\n  ],\n\n  \"capabilities\": {\n    \"read.byId\": \"Reads one record, or a handful at once, when the id is already known · get, getMany and hydrateMany over the index plus the document store, O(1) each · any screen that already holds the mdmId, and every list that has to fill in the records it points at · platform: ready\",\n    \"locate.byName\": \"Finds records whose name contains the typed text, anywhere in the string · listByType narrows by subtype and status in the index table and then matches the name in memory; aliases are not consulted and there is no default page size · anyone looking a record up · platform: partial\",\n    \"locate.byDocument\": \"Finds the single record that holds a national document (CPF, CNPJ, SSN, EIN) · findByDocument loads the index and filters in JS · whoever registers, to deduplicate before creating · platform: partial\",\n    \"locate.byContact\": \"Finds the record that owns a phone, WhatsApp handle or e-mail · findByContact loads every ContactChannel record · whoever answers an inbound call or message · platform: partial\",\n    \"locate.byLogin\": \"Finds the person behind a login e-mail · mdm_tag row with namespace login, partial unique index on (namespace, tag, module) · the session resolver · platform: ready\",\n    \"locate.byTag\": \"Finds every record carrying a given label — which is how a secondary key works here · mdm.tag.findByTag, over the index idx_mdm_tag_lookup on (entityType, tag, module); the `namespace` column keeps one key space apart from another, and the login e-mail of locate.byLogin is nothing but the namespace 'login' · a module that has to find a record by a code of its own, such as a chart or a badge number · platform: ready\",\n    \"locate.semantic\": \"Finds a record through a misspelling, a phonetic match or half a name · would need a trigram or tsvector index, or embeddings; searchVector is TEXT compared literally · reception, when the spelling is uncertain · platform: missing\",\n    \"locate.byDocumentField\": \"Filters or sorts by something that lives only in the document, such as birth month, city or any module field · would need that field promoted to an index column, or a GIN index on details; for a key the module itself controls, locate.byTag already answers without any of that · marketing and reporting · platform: missing\",\n    \"register.createOrAttach\": \"Creates the record when it does not exist and, either way, marks it with the module role · locate.byDocument, create when absent, then attachRole writes details[moduleId], the tag, the audit row and the recomputed compact refs · whoever registers · platform: ready\",\n    \"register.asProspect\": \"Records an interested party who has no document yet, and promotes it later · prospect.create with promotionSource and ttlExpiresAt, then promoteToEntity keeping the same mdmId · reception and the public site · platform: ready\",\n    \"edit.platformFields\": \"Changes the name, document, addresses, consent and the other fields the platform owns · entity.update; touching an identification field also rewrites the index row · whoever maintains the record · platform: partial\",\n    \"edit.moduleNamespace\": \"Changes only details[moduleId], which is what this module knows about the record · attachRole or update carrying the module key; any other module key is refused · the module itself · platform: ready\",\n    \"inactivate\": \"Takes the record out of use without deleting it · status Active to Inactive, and reactivate undoes it · whoever maintains the record · platform: partial\",\n    \"merge\": \"Joins two records that are the same subject, the loser pointing at the winner · mergeEntity sets status Merged and mergedInto, but the facade neither exports nor routes it · an administrator · platform: missing\",\n    \"delete\": \"Removes the record physically, and is refused while an active relationship exists · entity.delete, error MDM_DELETE_BLOCKED_BY_RELATIONSHIPS · an administrator · platform: ready\",\n    \"link\": \"Creates a versioned relationship, with a role, between two permanent records · link(from, to, type, role); the engine recomputes the compact keys on both sides · whoever maintains the record · platform: ready\",\n    \"unlink\": \"Closes a relationship while keeping its history · unlink sets status Inactive; the row is never deleted · whoever maintains the record · platform: ready\",\n    \"link.contact\": \"Adds a phone, WhatsApp handle or e-mail that belongs to this record · create a ContactChannel record and link it with HasContact; the engine fills relationshipRefs.contacts · whoever maintains the record · platform: ready\",\n    \"listLinks\": \"Shows the related records, with their validity and role · relationship.list and relatedOfMany · the record screen · platform: ready\",\n    \"attach.document\": \"Stores a photo, a scan or a signed document against the record, by category · upload to S3 or local disk, a row in mdm_attachment, presigned GET · whoever maintains the record · platform: partial\",\n    \"comment\": \"Leaves a note on the record, with one level of reply and a 15-minute edit window · mdm_comment anchored by entityType, entityId and module · whoever maintains the record · platform: ready\",\n    \"tag\": \"Marks the record with free labels inside the module namespace · mdm_tag, unique on (entityType, entityId, tag, module) · whoever maintains the record · platform: ready\",\n    \"sequence.next\": \"Issues the next number of a counter, such as a record or order number · mdm_number_sequence with SELECT … FOR UPDATE, key {module}.{entityType}.{scope} · the module, on create · platform: ready\",\n    \"config.kv\": \"Keeps a small piece of JSON configuration that more than one module reads · mdm.kv.get and mdm.kv.put over mdm_kv, a shared table keyed by one `key` column — no per-record scope, no history and no module column · a module that needs a setting the others also read · platform: ready\",\n    \"statusHistory.read\": \"Shows when the record changed status and who changed it · mdm_status_history · the record screen · platform: partial\",\n    \"audit\": \"Says who changed what, and when · mdm_audit_log, insert only · an administrator · platform: partial\",\n    \"invite.login\": \"Gives the person a login so they can see their own data · identity.invite writes the mdm_tag login row and calls collab-auth · whoever maintains the record · platform: ready\",\n    \"export.personalData\": \"Hands the subject their own data on request (LGPD art. 18, GDPR art. 15) · would need the document, the links and the attachments in a single export · an administrator · platform: missing\",\n    \"anonymize\": \"Erases the personal data while keeping the record for statistics · would pseudonymize the identification keeping the mdmId · an administrator · platform: missing\"\n  },\n\n  \"rules\": {\n    \"rule-person-ssn-unique-for-us\": \"Two permanent people in the US must not share the same SSN · engine · platform: partial, because the unique index does not exist\",\n    \"rule-person-privacy-consent-required-br-eu\": \"A person living in Brazil or the EU without a valid privacy consent is forced to Inactive · engine · platform: ready\",\n    \"rule-company-ein-unique-for-us\": \"Two permanent companies in the US must not share the same EIN · engine · platform: partial, because the unique index does not exist\",\n    \"rule-company-legal-name-required\": \"A company record is refused without a legalName · engine · platform: ready\",\n    \"rule-contact-value-unique-per-type\": \"Two contact channels must not share the same contactType and value · engine · platform: partial\",\n    \"rule-bank-account-routing-required-for-us\": \"A US bank account is refused without a bankRoutingNumber · engine · platform: ready\",\n    \"rule-bank-account-holder-via-relationship\": \"Who holds a bank account is the HoldsAccount link, never a field of the account · engine · platform: ready\",\n    \"rule-document-parties-via-relationships\": \"Who signed a document is the Signed link, never a field of the document · engine · platform: ready\",\n    \"rule-document-path-immutable\": \"Once stored, the storage key of a document is never rewritten · engine · platform: ready\",\n    \"rule-foreign-namespace-refused\": \"A caller carrying a moduleId may write the platform keys, general and its own key; any other module key is refused with MDM_FOREIGN_NAMESPACE · engine · platform: ready\",\n    \"rule-delete-blocked-by-relationships\": \"A physical delete is refused while an active relationship exists · engine · platform: ready\",\n    \"rule-document-shape-validated\": \"Addresses, consent, general and the module namespace are validated on write against the schema derived from this ontology · engine · platform: missing, nothing validates the document today\",\n    \"rule-identity-never-in-namespace\": \"Identity, document, contact and login are platform layers; a module never redeclares them inside details[moduleId] · engine · platform: partial\"\n  },\n\n  \"statuses\": [\"Active\", \"Inactive\", \"Merged\", \"Blocked\"],\n  \"docTypes\": [\"SSN\", \"EIN\", \"Passport\", \"DriversLicense\", \"NationalId\", \"CPF\", \"CNPJ\", \"VAT\", \"Other\"],\n\n  \"storage\": {\n    \"indexTable\": \"mdm_documents_entities_index\",\n    \"prospectIndexTable\": \"mdm_documents_prospects_index\",\n    \"documentTable\": \"mdm_documents\",\n    \"documentColumn\": \"details\",\n    \"indexedColumns\": [\"subtype\", \"name\", \"status\", \"docType\", \"docId\", \"countryCode\", \"createdAt\", \"updatedAt\"],\n    \"reservedKeys\": [\"identification\", \"base\", \"general\", \"<subtype>\", \"<moduleId>\"]\n  },\n\n  \"knownDivergences\": {\n    \"grouped-document\": \"The branches of this file are the target. The engine writes and reads a FLAT document today, so identification, base and the subtype branch are all one level.\",\n    \"contacts-written-from-input\": \"base.contacts is declared derived from HasContact and the engine still writes it raw from the input, duplicating relationshipRefs.contacts.\",\n    \"module-types-duplicates-tags\": \"base.moduleTypes and identification.tags carry the same module roles. tags is the one with a column; moduleTypes is kept for the engine and should disappear.\",\n    \"doc-unique-missing\": \"UNIQUE(docType, docId) is promised in defs/ontology.ts and absent from persistence.ts, so the two uniqueness rules are only partly enforced.\",\n    \"privacy-consent-value\": \"PrivacyConsent (data) and PrivacyConsentValue (interface) declare different fields; the same is true of Address and ContactSummary.\",\n    \"compact-relationship-refs-count\": \"CompactRelationshipRefs has 22 keys in the data and 48 in the interface; the interface is the real one.\",\n    \"search-vector-type\": \"searchVector is documented as tsvector and created as TEXT, compared literally, which is why locate.semantic is missing.\",\n    \"relationship-documents-table\": \"Table mdm_relationship_documents is cited and does not exist.\",\n    \"service-defs-case\": \"The JSON service definitions use PascalCase where the columns are camelCase.\",\n    \"platform-detail-keys-copy\": \"The list of platform keys exists twice, in mdmFacade.ts and integration.ts, with different contents.\",\n    \"emergency-contact-type\": \"There is no EmergencyContactOf type; a Family link with role emergency carries that meaning.\",\n    \"subtype-enum-narrowed\": \"identification.subtype is declared here with the 13 values; the engine narrows it per subtype, so a Person record only ever carries \\\"Person\\\".\",\n    \"index-only-columns\": \"The index table also has searchVector and dynamoPk, which are engine internals and no field of the document; one of the 9 indexes is on dynamoPk, which is why indexedColumns lists 8.\"\n  }\n} as const satisfies MdmOntology;\n\nexport default mdm;\n"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/journeys/acompanharSaldos.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';\n\nexport const acompanharSaldosJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"acompanharSaldos\",\n  \"business\": {\n    \"actorRef\": \"estoquista\",\n    \"title\": \"Acompanhar saldos do estoque\",\n    \"goal\": \"Consultar os saldos atuais dos produtos e identificar itens abaixo da quantidade mínima.\",\n    \"entry\": {\n      \"mode\": \"coldStart\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"localizarProdutos\",\n        \"kind\": \"locate\",\n        \"entity\": \"Produto\",\n        \"title\": \"Localizar produtos\",\n        \"description\": \"Localiza os produtos cadastrados para acompanhamento do estoque.\"\n      },\n      {\n        \"stepId\": \"consultarSaldos\",\n        \"kind\": \"inspect\",\n        \"entity\": \"Produto\",\n        \"title\": \"Consultar saldos atuais\",\n        \"description\": \"Consulta os saldos atuais, as quantidades mínimas e os avisos de produtos abaixo do mínimo.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"O estoquista identifica os produtos que exigem reposição por estarem abaixo da quantidade mínima.\",\n      \"evidence\": [\n        \"Saldo atual exibido para cada produto.\",\n        \"Aviso exibido para produto com saldo abaixo do mínimo.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:2e47a6d87a2619f21bdbb4539a1f2b08b83c3559019f1e195c2c62963e6c75a2\"\n} as const satisfies Ns5JourneyArtifact;\n\nexport type AcompanharSaldosJourneyType = typeof acompanharSaldosJourney;\n\nexport default acompanharSaldosJourney;\n"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/journeys/cadastrarProduto.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';\n\nexport const cadastrarProdutoJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"cadastrarProduto\",\n  \"business\": {\n    \"actorRef\": \"estoquista\",\n    \"title\": \"Cadastrar produto de estoque\",\n    \"goal\": \"Cadastrar um produto e definir a quantidade mínima para acompanhamento do estoque.\",\n    \"entry\": {\n      \"mode\": \"coldStart\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"informarProduto\",\n        \"kind\": \"act\",\n        \"entity\": \"Produto\",\n        \"effect\": \"create\",\n        \"title\": \"Cadastrar produto\",\n        \"description\": \"Registra o produto no estoque com sua quantidade mínima para permitir o acompanhamento do saldo.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"O produto fica disponível para registrar entradas e saídas e para monitorar o saldo mínimo.\",\n      \"evidence\": [\n        \"Produto cadastrado com quantidade mínima definida.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:24b2a9cdf5d9b30171dbee711d8f47c9bccfc925fe881d4d7740ea00ceaf5563\"\n} as const satisfies Ns5JourneyArtifact;\n\nexport type CadastrarProdutoJourneyType = typeof cadastrarProdutoJourney;\n\nexport default cadastrarProdutoJourney;\n"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';\n\nexport const registrarMovimentacaoEstoqueJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"registrarMovimentacaoEstoque\",\n  \"business\": {\n    \"actorRef\": \"estoquista\",\n    \"title\": \"Registrar movimentação de estoque\",\n    \"goal\": \"Registrar uma entrada ou saída de unidades de um produto para atualizar seu saldo.\",\n    \"entry\": {\n      \"mode\": \"contextOrLookup\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"localizarProduto\",\n        \"kind\": \"locate\",\n        \"entity\": \"Produto\",\n        \"title\": \"Localizar produto\",\n        \"description\": \"Localiza o produto que receberá uma entrada ou terá unidades retiradas do estoque.\"\n      },\n      {\n        \"stepId\": \"consultarSaldo\",\n        \"kind\": \"inspect\",\n        \"entity\": \"Produto\",\n        \"title\": \"Consultar saldo atual\",\n        \"description\": \"Confere o saldo atual e a quantidade mínima definida para o produto.\"\n      },\n      {\n        \"stepId\": \"registrarMovimentacao\",\n        \"kind\": \"act\",\n        \"entity\": \"MovimentacaoEstoque\",\n        \"effect\": \"create\",\n        \"title\": \"Registrar movimentação\",\n        \"description\": \"Registra a entrada ou saída e atualiza o saldo do produto; a movimentação permanece inalterável após o registro.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"A entrada ou saída fica registrada e o saldo atual do produto é atualizado.\",\n      \"evidence\": [\n        \"Movimentação de estoque registrada com o tipo de entrada ou saída.\",\n        \"Saldo atual do produto exibido.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:b7f0e96ea364fe3f3df1763faa602b2ae37dc590e079131744ca93e3da4446e4\"\n} as const satisfies Ns5JourneyArtifact;\n\nexport type RegistrarMovimentacaoEstoqueJourneyType = typeof registrarMovimentacaoEstoqueJourney;\n\nexport default registrarMovimentacaoEstoqueJourney;\n"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';\n\nexport const tratarAvisoSaldoBaixoJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"tratarAvisoSaldoBaixo\",\n  \"business\": {\n    \"actorRef\": \"estoquista\",\n    \"title\": \"Verificar aviso de saldo baixo\",\n    \"goal\": \"Verificar um aviso recebido sobre produto com saldo abaixo da quantidade mínima.\",\n    \"entry\": {\n      \"mode\": \"fromNotification\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"consultarProdutoAvisado\",\n        \"kind\": \"inspect\",\n        \"entity\": \"Produto\",\n        \"title\": \"Consultar produto avisado\",\n        \"description\": \"Consulta o saldo atual e a quantidade mínima do produto indicado no aviso.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"O estoquista confirma o produto com saldo abaixo do mínimo e pode providenciar sua reposição.\",\n      \"evidence\": [\n        \"Saldo atual e quantidade mínima do produto exibidos.\",\n        \"Aviso de saldo abaixo do mínimo associado ao produto.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:a9891a7f6b13b69ed088e5322408fcd0787bc4038ae476e4e8305ee1eb1ff279\"\n} as const satisfies Ns5JourneyArtifact;\n\nexport type TratarAvisoSaldoBaixoJourneyType = typeof tratarAvisoSaldoBaixoJourney;\n\nexport default tratarAvisoSaldoBaixoJourney;\n"
+      },
+      {
+        "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport const createMovimentacaoEstoqueRoute = \"controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque\" as const;\n\nexport interface CreateMovimentacaoEstoqueInput {\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n}\n\nexport interface CreateMovimentacaoEstoqueOutput {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport const listMovimentacaoEstoqueRoute = \"controleEstoque.movimentacoes.qryListMovimentacaoEstoque\" as const;\n\nexport interface ListMovimentacaoEstoqueInput {\n  \"id\"?: string;\n  \"produtoId\"?: string;\n  \"movimentadoEm\"?: string;\n  \"page\"?: number;\n}\n\nexport interface ListMovimentacaoEstoqueItem {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];\n\nexport const listProdutoRoute = \"controleEstoque.movimentacoes.qryListProduto\" as const;\n\nexport interface ListProdutoInput {\n  \"id\"?: string;\n  \"details\"?: {\n    \"identification\"?: {\n      \"subtype\"?: \"Product\";\n      \"name\"?: string;\n      \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListProdutoItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport type ListProdutoOutput = ListProdutoItem[];\n"
+      },
+      {
+        "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport const createMovimentacaoEstoqueRoute = \"controleEstoque.produtos.cmdCreateMovimentacaoEstoque\" as const;\n\nexport interface CreateMovimentacaoEstoqueInput {\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n}\n\nexport interface CreateMovimentacaoEstoqueOutput {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport const createProdutoRoute = \"controleEstoque.produtos.cmdCreateProduto\" as const;\n\nexport interface CreateProdutoInput {\n  \"details\": {\n    \"identification\"?: {\n      \"name\": string;\n    };\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n    };\n  };\n}\n\nexport interface CreateProdutoOutput {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport const listMovimentacaoEstoqueRoute = \"controleEstoque.produtos.qryListMovimentacaoEstoque\" as const;\n\nexport interface ListMovimentacaoEstoqueInput {\n  \"id\"?: string;\n  \"produtoId\"?: string;\n  \"movimentadoEm\"?: string;\n  \"page\"?: number;\n}\n\nexport interface ListMovimentacaoEstoqueItem {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];\n\nexport const listProdutoRoute = \"controleEstoque.produtos.qryListProduto\" as const;\n\nexport interface ListProdutoInput {\n  \"id\"?: string;\n  \"details\"?: {\n    \"identification\"?: {\n      \"subtype\"?: \"Product\";\n      \"name\"?: string;\n      \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListProdutoItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport type ListProdutoOutput = ListProdutoItem[];\n"
+      }
+    ],
+    "plans": [],
+    "llmCalls": 0
+  }
+}

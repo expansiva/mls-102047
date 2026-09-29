@@ -5,21 +5,21 @@ import type { Ns5IntegrationArtifact } from '/_102035_/l2/solution/types.js';
 export const controleEstoqueIntegration = {
   "schemaVersion": "2026-09-12-ns5-integration-v2",
   "moduleName": "controleEstoque",
-  "inbound": [],
-  "outbound": [
+  "inbound": [
     {
-      "id": "saldoAbaixoDoMinimo",
+      "id": "recebimentoRegistrado",
       "kind": "event",
-      "to": "any",
-      "event": "saldoAbaixoDoMinimo",
-      "on": "MovimentacaoEstoque.create",
-      "description": "Publica um aviso quando o registro de uma movimentação deixa o saldo do produto abaixo do mínimo.",
-      "entityRefs": [
-        "MovimentacaoEstoque",
-        "Produto"
-      ]
+      "from": "compras",
+      "event": "recebimentoRegistrado",
+      "writes": [
+        "MovimentacaoEstoque"
+      ],
+      "effect": "create",
+      "description": "Recebe o recebimento registrado em Compras e cria a movimentação de entrada correspondente no estoque.",
+      "entityRefs": []
     }
   ],
+  "outbound": [],
   "plugins": []
 } as const satisfies Ns5IntegrationArtifact;
 

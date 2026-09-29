@@ -4,32 +4,35 @@
     "moduleName": "controleEstoque",
     "entityId": "MovimentacaoEstoque",
     "title": "Movimentação de estoque",
-    "description": "Registro imutável de entrada ou saída de unidades de um produto para composição do saldo disponível.",
-    "displayField": "occurredAt",
+    "description": "Registro imutável de entrada ou saída de unidades de um produto, usado para calcular seu saldo atual.",
+    "displayField": "id",
     "relationships": {
       "produto": {
-        "relationshipId": "produtoMovimentacoesEstoque",
+        "relationshipId": "movimentacaoEstoqueProduto",
         "to": "Produto",
         "via": "MovimentacaoEstoque.produtoId",
         "cardinality": "N:1",
-        "title": "Produto da movimentação",
-        "description": "Cada movimentação de estoque refere-se obrigatoriamente a um produto.",
+        "title": "Produto movimentado",
+        "description": "Cada movimentação registra uma entrada ou saída de unidades para um único produto.",
         "mode": "fk",
-        "direction": "to",
-        "required": "sempre"
+        "required": "Sempre",
+        "role": "produto"
       }
     },
     "capabilities": {
-      "read.byId": "Lê uma movimentação de estoque pelo identificador da linha para o estoquista consultar seu registro.",
-      "locate.byColumn": "Lista movimentações filtradas por produto ou data e hora, com ordenação e paginação, para o estoquista acompanhar o estoque.",
-      "count": "Conta as movimentações que atendem aos filtros de produto ou período para o estoquista consultar o total da lista.",
-      "listByForeignKey": "Lista as movimentações vinculadas a um produto pelo campo produtoId para o estoquista verificar a origem do saldo disponível.",
-      "create": "Registra uma nova entrada ou saída com produto, quantidade, tipo e data e hora para o estoquista compor o saldo disponível.",
-      "read.mdmRecord": "Lê o registro mestre do produto apontado por produtoId para exibir sua identificação e saldo ao estoquista."
+      "read.byId": "Consulta uma movimentação pelo identificador da linha, usando a busca por id na tela de acompanhamento do estoquista.",
+      "locate.byColumn": "Lista movimentações por produto e por data e hora de registro, com ordenação e paginação para o estoquista acompanhar o histórico.",
+      "count": "Conta as movimentações correspondentes ao produto ou período consultado, usando os filtros da lista para o cabeçalho do estoquista.",
+      "listByForeignKey": "Lista as movimentações vinculadas a um produto por produtoId, para o estoquista consultar o histórico daquele produto.",
+      "create": "Grava uma nova movimentação de entrada ou saída com produto, data, tipo e quantidade informados pelo estoquista.",
+      "transaction": "Confirma a gravação da movimentação e a atualização do saldo do produto na mesma transação, quando o estoquista registra a operação.",
+      "read.mdmRecord": "Lê o registro mestre apontado por produtoId para exibir o nome e os dados cadastrais do produto ao estoquista.",
+      "controleEstoque.registrarMovimentacao": "Registra uma entrada ou saída e aplica seu efeito ao saldo atual do produto, validando a operação para o estoquista."
     },
     "rules": [
       "movimentacaoEstoqueImutavel",
-      "quantidadeMovimentacaoPositiva"
+      "quantidadeMovimentadaPositiva",
+      "registroMovimentacaoAtualizaSaldo"
     ],
     "kind": "entity",
     "class": "event",
@@ -61,18 +64,18 @@
             "Produto"
           ],
           "title": "Produto",
-          "description": "Produto ao qual esta entrada ou saída de estoque se refere.",
+          "description": "Produto mestre ao qual a entrada ou saída de estoque se refere.",
           "maxLength": 0,
           "min": 0,
           "max": 0
         },
-        "occurredAt": {
+        "movimentadoEm": {
           "type": "timestamp",
           "required": true,
           "indexed": true,
           "of": "Address",
           "title": "Data e hora da movimentação",
-          "description": "Data e hora em que a entrada ou saída de unidades foi registrada.",
+          "description": "Data e hora em que a entrada ou saída foi registrada, usada para ordenar e consultar o histórico do produto.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -81,40 +84,40 @@
           "type": "object",
           "required": true,
           "of": "Address",
-          "title": "Detalhes da movimentação",
-          "description": "Dados que caracterizam a entrada ou saída registrada para o produto.",
+          "title": "Dados da movimentação",
+          "description": "Dados imutáveis que caracterizam a entrada ou saída registrada para o produto.",
           "maxLength": 0,
           "min": 0,
           "max": 0,
           "fields": {
-            "movementType": {
+            "tipo": {
               "type": "enum",
               "required": true,
               "of": "Address",
               "values": [
                 {
-                  "value": "entry",
+                  "value": "entrada",
                   "title": "Entrada",
-                  "description": "Adiciona unidades ao saldo disponível do produto."
+                  "description": "Adiciona unidades ao saldo do produto."
                 },
                 {
-                  "value": "exit",
+                  "value": "saida",
                   "title": "Saída",
-                  "description": "Retira unidades do saldo disponível do produto."
+                  "description": "Retira unidades do saldo do produto."
                 }
               ],
               "title": "Tipo de movimentação",
-              "description": "Indica se as unidades foram adicionadas ou retiradas do estoque.",
+              "description": "Indica se as unidades foram adicionadas ao estoque ou retiradas dele.",
               "maxLength": 0,
               "min": 0,
               "max": 0
             },
-            "quantity": {
+            "quantidade": {
               "type": "integer",
               "required": true,
               "of": "Address",
               "title": "Quantidade",
-              "description": "Número de unidades adicionadas ou retiradas na movimentação.",
+              "description": "Quantidade positiva de unidades que entra ou sai do estoque.",
               "maxLength": 0,
               "min": 1,
               "max": 0
