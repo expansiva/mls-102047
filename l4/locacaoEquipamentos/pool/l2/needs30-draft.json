@@ -1,0 +1,221 @@
+{
+  "thread": "locacaoEquipamentos-20260929133532",
+  "round": 1,
+  "inputFile": "l4/locacaoEquipamentos/pool/l2/20260929133532_locacaoEquipamentos-20260929133532_1.json",
+  "needs": {
+    "schemaVersion": "2026-09-21-p2-needs-v1",
+    "moduleName": "locacaoEquipamentos",
+    "device": "web",
+    "menuSchema": "2026-09-20-p2-menu-v2.2",
+    "pages": [
+      {
+        "pageId": "inicio_atendente",
+        "actors": [
+          "atendente"
+        ],
+        "reads": [
+          {
+            "entity": "ContratoLocacao",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.multaAtraso"
+            ],
+            "from": [
+              "grant:atendenteGerirLocacoes",
+              "organism:highlights"
+            ]
+          },
+          {
+            "entity": "Equipamento",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.situacaoOperacional"
+            ],
+            "from": [
+              "grant:atendenteSelecionarEquipamentos",
+              "organism:highlights"
+            ]
+          },
+          {
+            "entity": "ItemLocacao",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.multaAtraso"
+            ],
+            "from": [
+              "grant:atendenteGerirLocacoes",
+              "organism:highlights"
+            ]
+          }
+        ],
+        "writes": []
+      },
+      {
+        "pageId": "contratos_locacao",
+        "actors": [
+          "atendente"
+        ],
+        "reads": [
+          {
+            "entity": "Cliente",
+            "family": "mdm",
+            "scope": "organization",
+            "derived": [],
+            "from": [
+              "grant:atendenteLocalizarCliente",
+              "journey:criarContratoLocacao/criarContrato",
+              "journey:criarContratoLocacao/localizarCliente",
+              "journey:registrarDevolucao/inspecionarContrato",
+              "journey:registrarDevolucao/localizarContrato",
+              "journey:registrarDevolucao/registrarDevolucao",
+              "relationship:Cliente/clienteContratosLocacao",
+              "relationship:ContratoLocacao/clienteContratosLocacao"
+            ]
+          },
+          {
+            "entity": "ContratoLocacao",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.multaAtraso"
+            ],
+            "from": [
+              "grant:atendenteGerirLocacoes",
+              "journey:criarContratoLocacao/criarContrato",
+              "journey:criarContratoLocacao/localizarCliente",
+              "journey:registrarDevolucao/inspecionarContrato",
+              "journey:registrarDevolucao/localizarContrato",
+              "journey:registrarDevolucao/registrarDevolucao",
+              "relationship:Cliente/clienteContratosLocacao",
+              "relationship:ContratoLocacao/clienteContratosLocacao",
+              "relationship:ContratoLocacao/contratoItensLocacao",
+              "relationship:ItemLocacao/contratoItensLocacao"
+            ]
+          },
+          {
+            "entity": "Equipamento",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.situacaoOperacional"
+            ],
+            "from": [
+              "grant:atendenteSelecionarEquipamentos",
+              "journey:criarContratoLocacao/criarContrato",
+              "journey:criarContratoLocacao/localizarCliente",
+              "journey:registrarDevolucao/inspecionarContrato",
+              "journey:registrarDevolucao/localizarContrato",
+              "journey:registrarDevolucao/registrarDevolucao",
+              "relationship:ContratoLocacao/contratoItensLocacao",
+              "relationship:Equipamento/itemLocacaoEquipamento",
+              "relationship:ItemLocacao/itemLocacaoEquipamento"
+            ]
+          },
+          {
+            "entity": "ItemLocacao",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.multaAtraso"
+            ],
+            "from": [
+              "grant:atendenteGerirLocacoes",
+              "journey:criarContratoLocacao/criarContrato",
+              "journey:criarContratoLocacao/localizarCliente",
+              "journey:registrarDevolucao/inspecionarContrato",
+              "journey:registrarDevolucao/localizarContrato",
+              "journey:registrarDevolucao/registrarDevolucao",
+              "relationship:ContratoLocacao/contratoItensLocacao",
+              "relationship:Equipamento/itemLocacaoEquipamento",
+              "relationship:ItemLocacao/contratoItensLocacao",
+              "relationship:ItemLocacao/itemLocacaoEquipamento"
+            ]
+          }
+        ],
+        "writes": [
+          {
+            "entity": "ContratoLocacao",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:criarContratoLocacao/criarContrato"
+            ]
+          },
+          {
+            "entity": "ContratoLocacao",
+            "operation": "transition",
+            "transitionRef": "registrarDevolucao",
+            "from": [
+              "journey:registrarDevolucao/registrarDevolucao"
+            ]
+          }
+        ]
+      },
+      {
+        "pageId": "inicio_gerente",
+        "actors": [
+          "gerente"
+        ],
+        "reads": [
+          {
+            "entity": "Equipamento",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.situacaoOperacional"
+            ],
+            "from": [
+              "grant:gerenteGerirInventario",
+              "organism:highlights"
+            ]
+          }
+        ],
+        "writes": []
+      },
+      {
+        "pageId": "equipamentos",
+        "actors": [
+          "gerente"
+        ],
+        "reads": [
+          {
+            "entity": "Equipamento",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.situacaoOperacional"
+            ],
+            "from": [
+              "grant:gerenteGerirInventario",
+              "journey:consultarSituacaoEquipamentos/inspecionarSituacao",
+              "journey:consultarSituacaoEquipamentos/localizarEquipamentos",
+              "relationship:Equipamento/equipamentoManutencoes",
+              "relationship:ManutencaoEquipamento/equipamentoManutencoes"
+            ]
+          },
+          {
+            "entity": "ManutencaoEquipamento",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [],
+            "from": [
+              "grant:gerenteGerirInventario",
+              "journey:consultarSituacaoEquipamentos/inspecionarSituacao",
+              "journey:consultarSituacaoEquipamentos/localizarEquipamentos",
+              "relationship:Equipamento/equipamentoManutencoes",
+              "relationship:ManutencaoEquipamento/equipamentoManutencoes"
+            ]
+          }
+        ],
+        "writes": []
+      }
+    ],
+    "meta": {
+      "sourceMenu": "pool/l2/web/menu.json",
+      "generatedAt": "2026-09-29T13:37:03.740Z"
+    }
+  }
+}
