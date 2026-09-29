@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/controleEstoque/journeys/cadastrarProduto.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const cadastrarProdutoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -30,7 +30,7 @@ export const cadastrarProdutoJourney = {
     }
   },
   "businessHash": "sha256:24b2a9cdf5d9b30171dbee711d8f47c9bccfc925fe881d4d7740ea00ceaf5563"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CadastrarProdutoJourneyType = typeof cadastrarProdutoJourney;
 

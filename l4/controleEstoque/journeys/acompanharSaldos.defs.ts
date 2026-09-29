@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/controleEstoque/journeys/acompanharSaldos.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const acompanharSaldosJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -37,7 +37,7 @@ export const acompanharSaldosJourney = {
     }
   },
   "businessHash": "sha256:2e47a6d87a2619f21bdbb4539a1f2b08b83c3559019f1e195c2c62963e6c75a2"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharSaldosJourneyType = typeof acompanharSaldosJourney;
 

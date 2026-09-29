@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/reembolsoDespesas/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const reembolsoDespesasRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -18,7 +18,7 @@ export const reembolsoDespesasRules = {
     "rulePersonPrivacyConsentRequiredBrEu": "O tratamento de dados pessoais de colaboradores deve observar o consentimento exigido no Brasil e na União Europeia.",
     "comprovanteObrigatorio": "Toda despesa registrada para reembolso deve incluir um comprovante."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type ReembolsoDespesasRulesType = typeof reembolsoDespesasRules;
 

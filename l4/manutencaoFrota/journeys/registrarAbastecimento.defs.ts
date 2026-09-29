@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/manutencaoFrota/journeys/registrarAbastecimento.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const registrarAbastecimentoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -45,7 +45,7 @@ export const registrarAbastecimentoJourney = {
     }
   },
   "businessHash": "sha256:19515bd4930b4271afc54f8ae31e7ad94b7690eb069835fb308c4873e0adc027"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarAbastecimentoJourneyType = typeof registrarAbastecimentoJourney;
 

@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -22,7 +22,7 @@ export const locacaoEquipamentosRules = {
     "maintenanceDatesValid": "A data de fim da manutenção não pode ser anterior à sua data de início.",
     "maintenanceDoesNotOverlapRental": "O período de manutenção de um equipamento não pode se sobrepor a um período de locação desse equipamento."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type LocacaoEquipamentosRulesType = typeof locacaoEquipamentosRules;
 

@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/journeys/abrirComanda.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const abrirComandaJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -38,7 +38,7 @@ export const abrirComandaJourney = {
     }
   },
   "businessHash": "sha256:11342c75532e708c14dfc42502689718e156c9e987285dd0c03ba28120a096ad"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AbrirComandaJourneyType = typeof abrirComandaJourney;
 

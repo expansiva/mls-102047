@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/compras/journeys/acompanharIndicadoresDeCompras.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const acompanharIndicadoresDeComprasJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -38,7 +38,7 @@ export const acompanharIndicadoresDeComprasJourney = {
     }
   },
   "businessHash": "sha256:91da38701e1e4dd1b473f295c84c90923fec4178aceb0867df08d59b819372b5"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharIndicadoresDeComprasJourneyType = typeof acompanharIndicadoresDeComprasJourney;
 

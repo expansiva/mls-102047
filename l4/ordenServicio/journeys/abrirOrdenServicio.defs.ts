@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/journeys/abrirOrdenServicio.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const abrirOrdenServicioJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -39,7 +39,7 @@ export const abrirOrdenServicioJourney = {
     }
   },
   "businessHash": "sha256:d9e65132b851e81906eab669fe3c0248dc9d536255505c36f25a90a3b45e94e3"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AbrirOrdenServicioJourneyType = typeof abrirOrdenServicioJourney;
 

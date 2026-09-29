@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/financeiro/journeys/emitirExtratoPorPagador.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const emitirExtratoPorPagadorJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -45,7 +45,7 @@ export const emitirExtratoPorPagadorJourney = {
     }
   },
   "businessHash": "sha256:aab4d856be67482e82d2944a0345916230269b377b653b67311cff60c1a6a27d"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type EmitirExtratoPorPagadorJourneyType = typeof emitirExtratoPorPagadorJourney;
 

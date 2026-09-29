@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/inscricaoEvento/journeys/cadastrarEpublicarEvento.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const cadastrarEpublicarEventoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -40,7 +40,7 @@ export const cadastrarEpublicarEventoJourney = {
     }
   },
   "businessHash": "sha256:cac9effd8f825650081d93d9cd7362496fd50b20b8e9b534d21e6039afb27f92"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CadastrarEpublicarEventoJourneyType = typeof cadastrarEpublicarEventoJourney;
 

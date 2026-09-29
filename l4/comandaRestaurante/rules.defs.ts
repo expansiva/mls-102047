@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -22,7 +22,7 @@ export const comandaRestauranteRules = {
     "subtotalItemComandaCalculado": "O subtotal de um item não cancelado é a quantidade registrada multiplicada pelo preço unitário registrado, e é zero quando o item está cancelado.",
     "totalComandaCalculado": "O total da comanda é a soma dos subtotais dos itens não cancelados menos o desconto aplicado, quando houver."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type ComandaRestauranteRulesType = typeof comandaRestauranteRules;
 
