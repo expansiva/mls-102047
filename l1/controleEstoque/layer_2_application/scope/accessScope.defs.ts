@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "accessScope",
   "artifactId": "accessScope",
   "moduleName": "controleEstoque",
-  "status": "blocked",
+  "status": "generated",
   "dependencies": [],
   "data": {
     "scopeId": "accessScope",

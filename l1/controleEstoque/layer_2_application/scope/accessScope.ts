@@ -1,0 +1,23 @@
+/// <mls fileReference="_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.ts" enhancement="_blank"/>
+export interface StructureGrant {
+  grantId: string;
+  actorRef: string;
+  scopeMode: string;
+  session: string;
+  pending: string;
+  disclosure: string;
+  recordField: string;
+}
+
+export const grants: readonly StructureGrant[] = [
+  {"grantId":"gerenciarEstoque","actorRef":"estoquista","scopeMode":"organization","session":"verified","pending":"","disclosure":"fullRecord","recordField":""}
+];
+
+export function resolveGrant(grantId: string): StructureGrant | { code: string; detail: string } {
+  const grant = grants.find(item => item.grantId === grantId);
+  if (!grant) return { code: 'GRANT_ABSENT', detail: `Grant ${grantId} is not declared.` };
+  if (grant.session !== 'verified') return { code: 'SESSION_UNVERIFIED', detail: `Grant ${grantId} session is not verified.` };
+  if (!grant.scopeMode) return { code: 'SCOPE_UNBOUND', detail: `Grant ${grantId} has no scope mode.` };
+  if (grant.scopeMode === 'own' && !grant.recordField) return { code: 'ACCESS_ANCHOR', detail: `Grant ${grantId} has no resolved scope path.` };
+  return grant;
+}
