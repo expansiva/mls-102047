@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/controleEstoque/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const controleEstoqueOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
@@ -35,7 +35,7 @@ export const controleEstoqueOntologyIndex = {
       "field": "MovimentacaoEstoque.produtoId"
     }
   ]
-} as const satisfies Ns5OntologyIndexV3;
+} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
 
 export type ControleEstoqueOntologyIndexType = typeof controleEstoqueOntologyIndex;
 

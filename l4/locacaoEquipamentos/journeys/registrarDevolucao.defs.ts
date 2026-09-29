@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/journeys/registrarDevolucao.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const registrarDevolucaoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -46,7 +46,7 @@ export const registrarDevolucaoJourney = {
     }
   },
   "businessHash": "sha256:9a4f219495ee6e76edd98cfc455d1a7cebebb604d94db515c44f92ca41a207a3"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarDevolucaoJourneyType = typeof registrarDevolucaoJourney;
 

@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const hiringPipelineRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -20,7 +20,7 @@ export const hiringPipelineRules = {
     "applicationUniqueCandidatePosition": "A candidate may have at most one application for the same job position.",
     "applicationRequiresOpenPosition": "An application may be created only for an open job position."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type HiringPipelineRulesType = typeof hiringPipelineRules;
 

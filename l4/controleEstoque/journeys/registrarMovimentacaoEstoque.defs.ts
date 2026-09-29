@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const registrarMovimentacaoEstoqueJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -45,7 +45,7 @@ export const registrarMovimentacaoEstoqueJourney = {
     }
   },
   "businessHash": "sha256:b7f0e96ea364fe3f3df1763faa602b2ae37dc590e079131744ca93e3da4446e4"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarMovimentacaoEstoqueJourneyType = typeof registrarMovimentacaoEstoqueJourney;
 

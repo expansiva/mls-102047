@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/inscricaoEvento/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const inscricaoEventoRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -20,7 +20,7 @@ export const inscricaoEventoRules = {
     "rulePersonPrivacyConsentRequiredBrEu": "O tratamento de dados pessoais de participantes no Brasil ou na União Europeia exige o consentimento aplicável.",
     "ruleContactValueUniquePerType": "O valor de um canal de contato deve ser único dentro do seu tipo de canal."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type InscricaoEventoRulesType = typeof inscricaoEventoRules;
 

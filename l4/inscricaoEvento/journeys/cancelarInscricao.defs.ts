@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/inscricaoEvento/journeys/cancelarInscricao.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const cancelarInscricaoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -47,7 +47,7 @@ export const cancelarInscricaoJourney = {
     }
   },
   "businessHash": "sha256:1c28983290e54ba50f3b01ec10f1eed72fd547730725e92155c43e3c9b65d3de"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CancelarInscricaoJourneyType = typeof cancelarInscricaoJourney;
 

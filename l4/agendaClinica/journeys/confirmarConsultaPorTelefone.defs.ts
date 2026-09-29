@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/agendaClinica/journeys/confirmarConsultaPorTelefone.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const confirmarConsultaPorTelefoneJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -44,7 +44,7 @@ export const confirmarConsultaPorTelefoneJourney = {
     }
   },
   "businessHash": "sha256:b73e6cb1f83886eff63121b4fd39eeec68cba3201fa34429b8a891c9a1e9cb64"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConfirmarConsultaPorTelefoneJourneyType = typeof confirmarConsultaPorTelefoneJourney;
 

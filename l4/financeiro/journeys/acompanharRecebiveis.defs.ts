@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/financeiro/journeys/acompanharRecebiveis.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const acompanharRecebiveisJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -37,7 +37,7 @@ export const acompanharRecebiveisJourney = {
     }
   },
   "businessHash": "sha256:0e7b719ab97007ed7762eae89e6701cd3a99426b58ed13c8d90e06bda131a73d"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharRecebiveisJourneyType = typeof acompanharRecebiveisJourney;
 

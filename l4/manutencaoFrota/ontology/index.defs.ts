@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/manutencaoFrota/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
@@ -142,7 +142,7 @@ export const manutencaoFrotaOntologyIndex = {
       "field": "MaintenanceOrder.workshopId"
     }
   ]
-} as const satisfies Ns5OntologyIndexV3;
+} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
 
 export type ManutencaoFrotaOntologyIndexType = typeof manutencaoFrotaOntologyIndex;
 

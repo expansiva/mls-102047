@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/financeiro/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const financeiroRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -30,7 +30,7 @@ export const financeiroRules = {
     "painelRecebiveisCalculado": "O painel de recebíveis deve consolidar, por período e origem, as quantidades e os valores em aberto, recebidos e vencidos dos títulos correspondentes.",
     "totaisExtratoCalculados": "Os totais do extrato devem corresponder às somas dos valores originais dos títulos, dos recebimentos apresentados e dos saldos em aberto apresentados no momento da emissão."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type FinanceiroRulesType = typeof financeiroRules;
 

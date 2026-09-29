@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/journeys/consultarSituacaoEquipamentos.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const consultarSituacaoEquipamentosJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -36,7 +36,7 @@ export const consultarSituacaoEquipamentosJourney = {
     }
   },
   "businessHash": "sha256:f1c14d2846a3f38dd6d23318844f6e96c13e1f64792c0cf1b9ac0beca2b9c256"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConsultarSituacaoEquipamentosJourneyType = typeof consultarSituacaoEquipamentosJourney;
 

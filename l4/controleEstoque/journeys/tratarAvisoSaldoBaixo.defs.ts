@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const tratarAvisoSaldoBaixoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -30,7 +30,7 @@ export const tratarAvisoSaldoBaixoJourney = {
     }
   },
   "businessHash": "sha256:a9891a7f6b13b69ed088e5322408fcd0787bc4038ae476e4e8305ee1eb1ff279"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type TratarAvisoSaldoBaixoJourneyType = typeof tratarAvisoSaldoBaixoJourney;
 

@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/journeys/consultarMisOrdenes.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const consultarMisOrdenesJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -37,7 +37,7 @@ export const consultarMisOrdenesJourney = {
     }
   },
   "businessHash": "sha256:82025fa7fc5f1d9ee3ed774253b05b06b4edc19d9ecbfdbbcff779f35cc147e4"
-} as const satisfies Ns5JourneyArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConsultarMisOrdenesJourneyType = typeof consultarMisOrdenesJourney;
 

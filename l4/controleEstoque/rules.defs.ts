@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/controleEstoque/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const controleEstoqueRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -13,7 +13,7 @@ export const controleEstoqueRules = {
     "quantidadeMovimentadaPositiva": "A quantidade registrada em uma movimentação de estoque deve ser um número inteiro positivo.",
     "registroMovimentacaoAtualizaSaldo": "O registro de uma entrada ou saída deve atualizar o saldo atual do produto correspondente conforme o tipo e a quantidade movimentada."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type ControleEstoqueRulesType = typeof controleEstoqueRules;
 
