@@ -4,40 +4,39 @@
     "moduleName": "controleEstoque",
     "entityId": "Produto",
     "title": "Produto",
-    "description": "Produto do cadastro mestre disponibilizado para controle de estoque, com saldo mínimo configurado no namespace do módulo e saldo atual e aviso de reposição calculados pelas movimentações.",
+    "description": "Produto acompanhado pelo estoque, com quantidade mínima definida para sinalizar saldo abaixo do mínimo.",
     "displayField": "details.identification.name",
     "relationships": {
       "movimentacoesEstoque": {
-        "relationshipId": "produtoMovimentacoesEstoque",
+        "relationshipId": "movimentacaoEstoqueProduto",
         "to": "MovimentacaoEstoque",
         "via": "MovimentacaoEstoque.produtoId",
         "cardinality": "1:N",
         "title": "Movimentações de estoque",
-        "description": "Movimentações de entrada e saída registradas para este produto, cada uma vinculada obrigatoriamente a ele.",
+        "description": "Movimentações de entrada ou saída registradas para este produto.",
         "mode": "fk",
-        "required": "quando houver movimentações de estoque registradas para o produto",
+        "direction": "to",
+        "required": true,
         "role": "produto movimentado"
       }
     },
     "capabilities": {
-      "read.byId": "Consulta um produto pelo identificador mestre, carregando seu cadastro, saldo atual calculado e saldo mínimo para o estoquista.",
-      "locate.byName": "Localiza produtos pelo nome no índice do cadastro mestre para o estoquista selecionar o item que será acompanhado ou movimentado.",
-      "register.createOrAttach": "Cria ou vincula ao controle de estoque o produto localizado no cadastro mestre e grava seu saldo mínimo para o estoquista.",
-      "edit.platformFields": "Atualiza os dados de cadastro mestre do produto, como nome e unidade de medida, para o estoquista manter a identificação usada no estoque.",
-      "edit.moduleNamespace": "Altera somente o saldo mínimo em details.controleEstoque do produto para o estoquista ajustar o limite de reposição.",
-      "inactivate": "Inativa ou reativa o produto no cadastro mestre para o estoquista retirar ou devolver o item ao uso sem apagar seu histórico.",
-      "statusHistory.read": "Mostra o histórico de mudanças de situação do produto no cadastro mestre para o estoquista acompanhar quando ele foi ativado ou inativado.",
-      "audit": "Consulta a auditoria das alterações do cadastro e do saldo mínimo do produto para o estoquista rastrear quem mudou cada informação.",
-      "controleEstoque.consultarSaldo": "Exibe o saldo atual calculado, o saldo mínimo configurado e o aviso de saldo baixo do produto para o estoquista antes e durante o acompanhamento das movimentações.",
-      "controleEstoque.listarProdutosComSaldoBaixo": "Lista os produtos cujo saldo atual calculado está abaixo do saldo mínimo para o estoquista priorizar a reposição."
+      "read.byId": "Consulta um produto pelo identificador mestre; lê o registro pelo id no índice e documento; usado pelo estoquista ao abrir um produto localizado ou referenciado por uma movimentação.",
+      "locate.byName": "Localiza produtos pelo nome; pesquisa o texto informado entre os produtos ativos no índice mestre; usado pelo estoquista para cadastrar movimentações e acompanhar saldos.",
+      "register.createOrAttach": "Cadastra ou associa um produto ao controle de estoque; localiza o registro mestre e cria ou anexa a função do módulo, gravando a quantidade mínima; usado pelo estoquista no cadastro de produto.",
+      "edit.platformFields": "Altera os dados de catálogo usados pelo estoque, como nome e unidade de medida; atualiza os campos da plataforma no registro mestre; usado pelo estoquista na manutenção do produto.",
+      "edit.moduleNamespace": "Altera a quantidade mínima do produto; atualiza somente o espaço controleEstoque do registro mestre; usado pelo estoquista para ajustar o acompanhamento do saldo.",
+      "inactivate": "Inativa ou reativa um produto sem removê-lo do cadastro mestre; altera a situação do registro; usado pelo estoquista quando o produto deixa ou volta a ser controlado.",
+      "statusHistory.read": "Mostra as mudanças de situação do produto; consulta o histórico de status do registro mestre; usado pelo estoquista ao verificar a disponibilidade do cadastro.",
+      "audit": "Mostra quem alterou dados do produto e quando; consulta a auditoria do registro mestre; usado pelo estoquista para conferir a manutenção do cadastro."
     },
     "rules": [
       "rule-foreign-namespace-refused",
       "rule-document-shape-validated",
       "rule-identity-never-in-namespace",
-      "saldoMinimoNaoNegativo",
-      "saldoAtualCalculadoPelasMovimentacoes",
-      "avisoDeSaldoBaixo"
+      "quantidadeMinimaValida",
+      "saldoAtualProduto",
+      "avisoSaldoMinimoProduto"
     ],
     "kind": "role",
     "subtype": "Product",
@@ -56,12 +55,13 @@
           "type": "integer",
           "required": true,
           "derived": true,
+          "writePrecondition": true,
           "description": "Bumped by the engine on every write; optimistic concurrency."
         },
         "details": {
           "type": "object",
           "required": true,
-          "description": "Documento do produto mestre utilizado pelo controle de estoque.",
+          "description": "Documento mestre do produto acompanhado pelo controle de estoque.",
           "fields": {
             "identification": {
               "type": "object",
@@ -76,10 +76,10 @@
                     {
                       "value": "Product",
                       "title": "Produto",
-                      "description": "Item de produto do cadastro mestre."
+                      "description": "Item de catálogo ou estoque."
                     }
                   ],
-                  "description": "Indica que este registro mestre é um produto.",
+                  "description": "Identifica este cadastro mestre como um produto.",
                   "title": "Tipo de cadastro",
                   "maxLength": 0,
                   "min": 0,
@@ -90,7 +90,7 @@
                   "required": true,
                   "indexed": true,
                   "maxLength": 0,
-                  "description": "Nome pelo qual o estoquista identifica e localiza o produto controlado.",
+                  "description": "Nome usado pelo estoquista para localizar e reconhecer o produto controlado.",
                   "title": "Nome do produto",
                   "min": 0,
                   "max": 0
@@ -104,39 +104,27 @@
                     {
                       "value": "Active",
                       "title": "Ativo",
-                      "description": "Produto disponível no cadastro mestre."
+                      "description": "Cadastro disponível para uso."
                     },
                     {
                       "value": "Inactive",
                       "title": "Inativo",
-                      "description": "Produto retirado de uso no cadastro mestre."
+                      "description": "Cadastro fora de uso."
                     },
                     {
                       "value": "Merged",
-                      "title": "Unificado",
-                      "description": "Produto incorporado a outro registro mestre."
+                      "title": "Mesclado",
+                      "description": "Cadastro unido a outro registro mestre."
                     },
                     {
                       "value": "Blocked",
                       "title": "Bloqueado",
-                      "description": "Produto bloqueado no cadastro mestre."
+                      "description": "Cadastro bloqueado pela plataforma."
                     }
                   ],
                   "title": "Situação do cadastro",
-                  "description": "Situação do produto no cadastro mestre; produtos inativos não devem ser usados em novas movimentações.",
+                  "description": "Situação do produto no cadastro mestre, usada para indicar se ele está ativo para o controle de estoque.",
                   "maxLength": 0,
-                  "min": 0,
-                  "max": 0
-                },
-                "countryCode": {
-                  "type": "string",
-                  "required": true,
-                  "indexed": true,
-                  "pattern": "^[A-Z]{2}$",
-                  "maxLength": 0,
-                  "default": "US",
-                  "description": "Código do país aplicável ao cadastro mestre do produto.",
-                  "title": "País",
                   "min": 0,
                   "max": 0
                 }
@@ -147,7 +135,7 @@
               "type": "object",
               "owner": "platform",
               "fields": {},
-              "description": "Dados básicos compartilhados do cadastro mestre; este módulo não utiliza campos próprios desta seção."
+              "description": "Dados básicos comuns do registro mestre; nenhum campo desta camada é necessário neste controle."
             },
             "product": {
               "type": "object",
@@ -155,7 +143,7 @@
               "fields": {
                 "unitOfMeasure": {
                   "type": "string",
-                  "description": "Unidade em que o produto é contado nas entradas, saídas, saldo atual e saldo mínimo.",
+                  "description": "Unidade em que o estoquista registra entradas, saídas, saldo e quantidade mínima do produto.",
                   "title": "Unidade de medida",
                   "required": true,
                   "maxLength": 0,
@@ -163,42 +151,42 @@
                   "max": 0
                 }
               },
-              "description": "Dados próprios do subtipo Produto utilizados para interpretar as quantidades movimentadas."
+              "description": "Dados de catálogo do produto utilizados para interpretar as quantidades movimentadas."
             },
             "general": {
               "type": "object",
               "owner": "organization",
               "open": true,
-              "description": "Dados promovidos pela organização, lidos conforme o cadastro corporativo."
+              "description": "Dados promovidos pela organização, somente para leitura neste módulo."
             },
             "controleEstoque": {
               "type": "object",
               "owner": "module",
               "fields": {
-                "minimumStock": {
+                "quantidadeMinima": {
                   "type": "number",
                   "required": true,
                   "of": "Address",
-                  "title": "Saldo mínimo",
-                  "description": "Quantidade mínima desejada para o produto antes de emitir aviso de reposição.",
+                  "title": "Quantidade mínima",
+                  "description": "Quantidade mínima em estoque a partir da qual o produto deve ser acompanhado por aviso.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
                 },
-                "currentStock": {
+                "saldoAtual": {
                   "type": "number",
                   "derived": true,
                   "title": "Saldo atual",
-                  "description": "Quantidade disponível calculada pelas entradas registradas menos as saídas registradas deste produto."
+                  "description": "Quantidade disponível do produto, calculada pelas entradas menos as saídas registradas para este produto."
                 },
-                "belowMinimumStock": {
+                "saldoAbaixoDoMinimo": {
                   "type": "boolean",
                   "derived": true,
-                  "title": "Aviso de saldo baixo",
-                  "description": "Indica que o saldo atual calculado do produto está abaixo do saldo mínimo configurado para reposição."
+                  "title": "Saldo abaixo do mínimo",
+                  "description": "Indica que o saldo atual do produto está menor que a quantidade mínima definida para seu acompanhamento."
                 }
               },
-              "description": "Dados específicos deste módulo para definir o limite de reposição do produto."
+              "description": "Dados próprios deste módulo para acompanhar o nível mínimo do produto."
             }
           }
         }
@@ -224,12 +212,12 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Produto",
-      "detail": "record.fields.details.controleEstoque.fields.currentStock.derived (derived[])"
+      "detail": "record.fields.details.controleEstoque.fields.saldoAtual.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "Produto",
-      "detail": "record.fields.details.controleEstoque.fields.belowMinimumStock.derived (derived[])"
+      "detail": "record.fields.details.controleEstoque.fields.saldoAbaixoDoMinimo.derived (derived[])"
     }
   ]
 }

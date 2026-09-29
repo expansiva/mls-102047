@@ -1,0 +1,1992 @@
+{
+  "schemaVersion": "2026-09-21-d1-usecases-v1",
+  "project": 102047,
+  "moduleName": "controleEstoque",
+  "llmCalls": 4,
+  "ok": true,
+  "enumerations": [
+    {
+      "entityId": "MovimentacaoEstoque",
+      "path": "details.tipo",
+      "values": [
+        "entrada",
+        "saida"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Produto",
+      "path": "details.identification.status",
+      "values": [
+        "Active",
+        "Inactive",
+        "Merged",
+        "Blocked"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Produto",
+      "path": "details.identification.subtype",
+      "values": [
+        "Product"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    }
+  ],
+  "usecases": [
+    {
+      "usecaseId": "createMovimentacaoEstoque",
+      "entityId": "MovimentacaoEstoque",
+      "operation": "create",
+      "defPath": "l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
+      "routes": [
+        "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+        "controleEstoque.produtos.cmdCreateMovimentacaoEstoque"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "create",
+          "port": "MovimentacaoEstoqueRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createMovimentacaoEstoque",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
+          "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
+          "_102047_/l4/controleEstoque/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createMovimentacaoEstoque",
+          "entityId": "MovimentacaoEstoque",
+          "operation": "create",
+          "ports": [
+            "MovimentacaoEstoqueRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createMovimentacaoEstoque",
+              "input": [
+                {
+                  "name": "produtoId",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.produtoId"
+                },
+                {
+                  "name": "movimentadoEm",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "fieldRef": "MovimentacaoEstoque.details"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.id"
+                },
+                {
+                  "name": "version",
+                  "type": "number",
+                  "fieldRef": "MovimentacaoEstoque.version"
+                },
+                {
+                  "name": "produtoId",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.produtoId"
+                },
+                {
+                  "name": "movimentadoEm",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "fieldRef": "MovimentacaoEstoque.details"
+                },
+                {
+                  "name": "movimentacaoEstoqueProduto",
+                  "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
+                }
+              ],
+              "contractRefs": [
+                {
+                  "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+                  "symbol": "CreateMovimentacaoEstoqueOutput"
+                },
+                {
+                  "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+                  "symbol": "CreateMovimentacaoEstoqueOutput"
+                }
+              ]
+            }
+          ],
+          "routeProjections": [
+            {
+              "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "produtoId",
+                "movimentadoEm",
+                "details",
+                "movimentacaoEstoqueProduto"
+              ]
+            },
+            {
+              "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "produtoId",
+                "movimentadoEm",
+                "details",
+                "movimentacaoEstoqueProduto"
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "MovimentacaoEstoqueRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "movimentacaoEstoqueImutavel",
+              "origin": "l4/controleEstoque/rules.defs.ts#movimentacaoEstoqueImutavel",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "quantidadeMovimentadaPositiva",
+              "origin": "l4/controleEstoque/rules.defs.ts#quantidadeMovimentadaPositiva",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "registroMovimentacaoAtualizaSaldo",
+              "origin": "l4/controleEstoque/rules.defs.ts#registroMovimentacaoAtualizaSaldo",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "createProduto",
+      "entityId": "Produto",
+      "operation": "create",
+      "defPath": "l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
+      "routes": [
+        "controleEstoque.produtos.cmdCreateProduto"
+      ],
+      "trustedContext": "ctx",
+      "mdm": {
+        "namespace": "controleEstoque",
+        "role": "controleEstoque.Produto",
+        "atomic": false,
+        "calls": [
+          {
+            "id": "createPerson",
+            "method": "create",
+            "target": "entity",
+            "shape": "write",
+            "capabilities": [
+              "register.createOrAttach"
+            ],
+            "alternative": false,
+            "when": [],
+            "arguments": [
+              {
+                "name": "name",
+                "role": "patch",
+                "path": "details.identification.name",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.identification.name"
+                },
+                "capability": "register.createOrAttach"
+              },
+              {
+                "name": "unitOfMeasure",
+                "role": "patch",
+                "path": "details.product.unitOfMeasure",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.product.unitOfMeasure"
+                },
+                "capability": "register.createOrAttach"
+              }
+            ],
+            "result": [
+              "mdmId",
+              "version",
+              "alreadyExists"
+            ]
+          },
+          {
+            "id": "attachRole",
+            "method": "attachRole",
+            "target": "entity",
+            "shape": "write",
+            "capabilities": [
+              "register.createOrAttach"
+            ],
+            "alternative": false,
+            "when": [],
+            "arguments": [
+              {
+                "name": "mdmId",
+                "role": "selector",
+                "origin": {
+                  "kind": "prior",
+                  "path": "mdmId",
+                  "calls": [
+                    "createPerson"
+                  ]
+                }
+              },
+              {
+                "name": "role",
+                "role": "parameter",
+                "value": "controleEstoque.Produto",
+                "origin": {
+                  "kind": "literal",
+                  "evidence": "role"
+                }
+              }
+            ],
+            "result": [
+              "mdmId",
+              "version"
+            ]
+          }
+        ],
+        "gaps": []
+      },
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "mdm",
+          "namespace": "controleEstoque",
+          "call": "create",
+          "entity": "Produto",
+          "capability": "register.createOrAttach"
+        },
+        {
+          "kind": "mdm",
+          "namespace": "controleEstoque",
+          "call": "attachRole",
+          "entity": "Produto",
+          "capability": "register.createOrAttach"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createProduto",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102034_/l4/ontology/mdm.defs.ts",
+          "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "_102047_/l4/controleEstoque/ontology/Produto.defs.ts",
+          "_102047_/l4/controleEstoque/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createProduto",
+          "entityId": "Produto",
+          "operation": "create",
+          "ports": [],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createProduto",
+              "input": [
+                {
+                  "name": "details",
+                  "type": "{ \"identification\"?: { \"name\": string; }; \"product\"?: { \"unitOfMeasure\": string; }; \"controleEstoque\"?: { \"quantidadeMinima\": number; }; }",
+                  "fieldRef": "Produto.details"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "Produto.id"
+                },
+                {
+                  "name": "version",
+                  "type": "number",
+                  "fieldRef": "Produto.version"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
+                  "fieldRef": "Produto.details"
+                }
+              ],
+              "contractRefs": [
+                {
+                  "route": "controleEstoque.produtos.cmdCreateProduto",
+                  "symbol": "CreateProdutoOutput"
+                }
+              ]
+            }
+          ],
+          "routeProjections": [
+            {
+              "route": "controleEstoque.produtos.cmdCreateProduto",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "details"
+              ]
+            }
+          ],
+          "portCalls": [],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "mdm",
+              "namespace": "controleEstoque",
+              "call": "create",
+              "entity": "Produto",
+              "capability": "register.createOrAttach"
+            },
+            {
+              "kind": "mdm",
+              "namespace": "controleEstoque",
+              "call": "attachRole",
+              "entity": "Produto",
+              "capability": "register.createOrAttach"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "avisoSaldoMinimoProduto",
+              "origin": "l4/controleEstoque/rules.defs.ts#avisoSaldoMinimoProduto",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "quantidadeMinimaValida",
+              "origin": "l4/controleEstoque/rules.defs.ts#quantidadeMinimaValida",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "rule-document-shape-validated",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "rule-foreign-namespace-refused",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "rule-identity-never-in-namespace",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "saldoAtualProduto",
+              "origin": "l4/controleEstoque/rules.defs.ts#saldoAtualProduto",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "mdm": {
+            "namespace": "controleEstoque",
+            "role": "controleEstoque.Produto",
+            "atomic": false,
+            "calls": [
+              {
+                "id": "createPerson",
+                "method": "create",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "register.createOrAttach"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "name",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.identification.name"
+                  },
+                  {
+                    "name": "unitOfMeasure",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.product.unitOfMeasure"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.product.unitOfMeasure"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "alreadyExists"
+                ]
+              },
+              {
+                "id": "attachRole",
+                "method": "attachRole",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "register.createOrAttach"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "prior",
+                      "path": "mdmId",
+                      "calls": [
+                        "createPerson"
+                      ]
+                    }
+                  },
+                  {
+                    "name": "role",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "literal",
+                      "evidence": "role"
+                    },
+                    "value": "controleEstoque.Produto"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listMovimentacaoEstoque",
+      "entityId": "MovimentacaoEstoque",
+      "operation": "list",
+      "defPath": "l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
+      "routes": [
+        "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+        "controleEstoque.produtos.qryListMovimentacaoEstoque"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "list",
+          "port": "MovimentacaoEstoqueRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listMovimentacaoEstoque",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
+          "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listMovimentacaoEstoque",
+          "entityId": "MovimentacaoEstoque",
+          "operation": "list",
+          "ports": [
+            "MovimentacaoEstoqueRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listMovimentacaoEstoque",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.id"
+                },
+                {
+                  "name": "produtoId",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.produtoId"
+                },
+                {
+                  "name": "movimentadoEm",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.id"
+                },
+                {
+                  "name": "version",
+                  "type": "number",
+                  "fieldRef": "MovimentacaoEstoque.version"
+                },
+                {
+                  "name": "produtoId",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.produtoId"
+                },
+                {
+                  "name": "movimentadoEm",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "fieldRef": "MovimentacaoEstoque.details"
+                },
+                {
+                  "name": "movimentacaoEstoqueProduto",
+                  "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
+                }
+              ],
+              "contractRefs": [
+                {
+                  "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+                  "symbol": "ListMovimentacaoEstoqueOutput"
+                },
+                {
+                  "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+                  "symbol": "ListMovimentacaoEstoqueOutput"
+                }
+              ]
+            }
+          ],
+          "routeProjections": [
+            {
+              "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "produtoId",
+                "movimentadoEm",
+                "details",
+                "movimentacaoEstoqueProduto"
+              ]
+            },
+            {
+              "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "produtoId",
+                "movimentadoEm",
+                "details",
+                "movimentacaoEstoqueProduto"
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "MovimentacaoEstoqueRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listProduto",
+      "entityId": "Produto",
+      "operation": "list",
+      "defPath": "l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts",
+      "routes": [
+        "controleEstoque.movimentacoes.qryListProduto",
+        "controleEstoque.produtos.qryListProduto"
+      ],
+      "trustedContext": "ctx",
+      "mdm": {
+        "namespace": "controleEstoque",
+        "role": "controleEstoque.Produto",
+        "atomic": false,
+        "calls": [
+          {
+            "id": "get",
+            "method": "get",
+            "target": "entity",
+            "shape": "point",
+            "capabilities": [
+              "read.byId"
+            ],
+            "alternative": false,
+            "when": [
+              {
+                "kind": "contract",
+                "path": "id",
+                "present": true
+              }
+            ],
+            "arguments": [
+              {
+                "name": "mdmId",
+                "role": "selector",
+                "path": "id",
+                "origin": {
+                  "kind": "contract",
+                  "path": "id"
+                }
+              }
+            ],
+            "result": [
+              "mdmId",
+              "version",
+              "details"
+            ]
+          },
+          {
+            "id": "listByName",
+            "method": "listByType",
+            "target": "collection",
+            "shape": "collection",
+            "capabilities": [
+              "locate.byName"
+            ],
+            "alternative": false,
+            "when": [
+              {
+                "kind": "contract",
+                "path": "details.identification.name",
+                "present": true
+              }
+            ],
+            "arguments": [
+              {
+                "name": "type",
+                "role": "parameter",
+                "value": "controleEstoque.Produto",
+                "origin": {
+                  "kind": "literal",
+                  "evidence": "role"
+                }
+              },
+              {
+                "name": "name",
+                "role": "selector",
+                "path": "details.identification.name",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.identification.name"
+                }
+              }
+            ],
+            "result": [
+              "items",
+              "page",
+              "pageSize",
+              "total"
+            ]
+          }
+        ],
+        "gaps": []
+      },
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "mdm",
+          "namespace": "controleEstoque",
+          "call": "get",
+          "entity": "Produto",
+          "capability": "read.byId"
+        },
+        {
+          "kind": "mdm",
+          "namespace": "controleEstoque",
+          "call": "listByType",
+          "entity": "Produto",
+          "capability": "locate.byName"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listProduto",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102034_/l4/ontology/mdm.defs.ts",
+          "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "_102047_/l4/controleEstoque/ontology/Produto.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listProduto",
+          "entityId": "Produto",
+          "operation": "list",
+          "ports": [],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listProduto",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "Produto.id"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"identification\"?: { \"subtype\"?: \"Product\"; \"name\"?: string; \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; }",
+                  "fieldRef": "Produto.details"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "Produto.id"
+                },
+                {
+                  "name": "version",
+                  "type": "number",
+                  "fieldRef": "Produto.version"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
+                  "fieldRef": "Produto.details"
+                }
+              ],
+              "contractRefs": [
+                {
+                  "route": "controleEstoque.movimentacoes.qryListProduto",
+                  "symbol": "ListProdutoOutput"
+                },
+                {
+                  "route": "controleEstoque.produtos.qryListProduto",
+                  "symbol": "ListProdutoOutput"
+                }
+              ]
+            }
+          ],
+          "routeProjections": [
+            {
+              "route": "controleEstoque.movimentacoes.qryListProduto",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "details"
+              ]
+            },
+            {
+              "route": "controleEstoque.produtos.qryListProduto",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "details"
+              ]
+            }
+          ],
+          "portCalls": [],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "mdm",
+              "namespace": "controleEstoque",
+              "call": "get",
+              "entity": "Produto",
+              "capability": "read.byId"
+            },
+            {
+              "kind": "mdm",
+              "namespace": "controleEstoque",
+              "call": "listByType",
+              "entity": "Produto",
+              "capability": "locate.byName"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.identification.status",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.identification.subtype",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "rule-document-shape-validated",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "rule-foreign-namespace-refused",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "rule-identity-never-in-namespace",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "mdm": {
+            "namespace": "controleEstoque",
+            "role": "controleEstoque.Produto",
+            "atomic": false,
+            "calls": [
+              {
+                "id": "get",
+                "method": "get",
+                "target": "entity",
+                "shape": "point",
+                "capabilities": [
+                  "read.byId"
+                ],
+                "alternative": false,
+                "when": [
+                  {
+                    "kind": "contract",
+                    "path": "id",
+                    "present": true
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "id"
+                    },
+                    "path": "id"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "details"
+                ]
+              },
+              {
+                "id": "listByName",
+                "method": "listByType",
+                "target": "collection",
+                "shape": "collection",
+                "capabilities": [
+                  "locate.byName"
+                ],
+                "alternative": false,
+                "when": [
+                  {
+                    "kind": "contract",
+                    "path": "details.identification.name",
+                    "present": true
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "type",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "literal",
+                      "evidence": "role"
+                    },
+                    "value": "controleEstoque.Produto"
+                  },
+                  {
+                    "name": "name",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "path": "details.identification.name"
+                  }
+                ],
+                "result": [
+                  "items",
+                  "page",
+                  "pageSize",
+                  "total"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "problems": [],
+  "normalizations": [
+    {
+      "code": "ENUMERATIONS_NOT_CONSUMED",
+      "path": "domain30.enumerations",
+      "detail": "3 enum values stay on the domain draft. usecases50 does not copy them."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listMovimentacaoEstoque.id",
+      "detail": "MovimentacaoEstoque.id is a filter of listMovimentacaoEstoque."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listProduto.details.identification.status",
+      "detail": "Produto.details.identification.status is a filter of listProduto."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listProduto.details.identification.subtype",
+      "detail": "Produto.details.identification.subtype is a filter of listProduto."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listProduto.id",
+      "detail": "Produto.id is a filter of listProduto."
+    }
+  ],
+  "emit": [
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createMovimentacaoEstoque",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
+          "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
+          "_102047_/l4/controleEstoque/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createMovimentacaoEstoque",
+          "entityId": "MovimentacaoEstoque",
+          "operation": "create",
+          "ports": [
+            "MovimentacaoEstoqueRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createMovimentacaoEstoque",
+              "input": [
+                {
+                  "name": "produtoId",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.produtoId"
+                },
+                {
+                  "name": "movimentadoEm",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "fieldRef": "MovimentacaoEstoque.details"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.id"
+                },
+                {
+                  "name": "version",
+                  "type": "number",
+                  "fieldRef": "MovimentacaoEstoque.version"
+                },
+                {
+                  "name": "produtoId",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.produtoId"
+                },
+                {
+                  "name": "movimentadoEm",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "fieldRef": "MovimentacaoEstoque.details"
+                },
+                {
+                  "name": "movimentacaoEstoqueProduto",
+                  "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
+                }
+              ],
+              "contractRefs": [
+                {
+                  "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+                  "symbol": "CreateMovimentacaoEstoqueOutput"
+                },
+                {
+                  "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+                  "symbol": "CreateMovimentacaoEstoqueOutput"
+                }
+              ]
+            }
+          ],
+          "routeProjections": [
+            {
+              "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "produtoId",
+                "movimentadoEm",
+                "details",
+                "movimentacaoEstoqueProduto"
+              ]
+            },
+            {
+              "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "produtoId",
+                "movimentadoEm",
+                "details",
+                "movimentacaoEstoqueProduto"
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "MovimentacaoEstoqueRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "movimentacaoEstoqueImutavel",
+              "origin": "l4/controleEstoque/rules.defs.ts#movimentacaoEstoqueImutavel",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "quantidadeMovimentadaPositiva",
+              "origin": "l4/controleEstoque/rules.defs.ts#quantidadeMovimentadaPositiva",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "registroMovimentacaoAtualizaSaldo",
+              "origin": "l4/controleEstoque/rules.defs.ts#registroMovimentacaoAtualizaSaldo",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/controleEstoque/usecase/createMovimentacaoEstoque",
+          "type": "usecase",
+          "defPath": "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
+          "outputPath": "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
+            "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
+            "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
+            "l4/controleEstoque/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/controleEstoque/domainEntity/MovimentacaoEstoque",
+            "102047/controleEstoque/repositoryPort/MovimentacaoEstoqueRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createProduto",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102034_/l4/ontology/mdm.defs.ts",
+          "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "_102047_/l4/controleEstoque/ontology/Produto.defs.ts",
+          "_102047_/l4/controleEstoque/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createProduto",
+          "entityId": "Produto",
+          "operation": "create",
+          "ports": [],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createProduto",
+              "input": [
+                {
+                  "name": "details",
+                  "type": "{ \"identification\"?: { \"name\": string; }; \"product\"?: { \"unitOfMeasure\": string; }; \"controleEstoque\"?: { \"quantidadeMinima\": number; }; }",
+                  "fieldRef": "Produto.details"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "Produto.id"
+                },
+                {
+                  "name": "version",
+                  "type": "number",
+                  "fieldRef": "Produto.version"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
+                  "fieldRef": "Produto.details"
+                }
+              ],
+              "contractRefs": [
+                {
+                  "route": "controleEstoque.produtos.cmdCreateProduto",
+                  "symbol": "CreateProdutoOutput"
+                }
+              ]
+            }
+          ],
+          "routeProjections": [
+            {
+              "route": "controleEstoque.produtos.cmdCreateProduto",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "details"
+              ]
+            }
+          ],
+          "portCalls": [],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "mdm",
+              "namespace": "controleEstoque",
+              "call": "create",
+              "entity": "Produto",
+              "capability": "register.createOrAttach"
+            },
+            {
+              "kind": "mdm",
+              "namespace": "controleEstoque",
+              "call": "attachRole",
+              "entity": "Produto",
+              "capability": "register.createOrAttach"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "avisoSaldoMinimoProduto",
+              "origin": "l4/controleEstoque/rules.defs.ts#avisoSaldoMinimoProduto",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "quantidadeMinimaValida",
+              "origin": "l4/controleEstoque/rules.defs.ts#quantidadeMinimaValida",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "rule-document-shape-validated",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "rule-foreign-namespace-refused",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "rule-identity-never-in-namespace",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "saldoAtualProduto",
+              "origin": "l4/controleEstoque/rules.defs.ts#saldoAtualProduto",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "mdm": {
+            "namespace": "controleEstoque",
+            "role": "controleEstoque.Produto",
+            "atomic": false,
+            "calls": [
+              {
+                "id": "createPerson",
+                "method": "create",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "register.createOrAttach"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "name",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.identification.name"
+                  },
+                  {
+                    "name": "unitOfMeasure",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.product.unitOfMeasure"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.product.unitOfMeasure"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "alreadyExists"
+                ]
+              },
+              {
+                "id": "attachRole",
+                "method": "attachRole",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "register.createOrAttach"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "prior",
+                      "path": "mdmId",
+                      "calls": [
+                        "createPerson"
+                      ]
+                    }
+                  },
+                  {
+                    "name": "role",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "literal",
+                      "evidence": "role"
+                    },
+                    "value": "controleEstoque.Produto"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/controleEstoque/usecase/createProduto",
+          "type": "usecase",
+          "defPath": "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
+          "outputPath": "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
+            "/_102034_/l4/ontology/mdm.defs.ts",
+            "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "l4/controleEstoque/ontology/Produto.defs.ts",
+            "l4/controleEstoque/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/controleEstoque/domainEntity/Produto"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listMovimentacaoEstoque",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
+          "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listMovimentacaoEstoque",
+          "entityId": "MovimentacaoEstoque",
+          "operation": "list",
+          "ports": [
+            "MovimentacaoEstoqueRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listMovimentacaoEstoque",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.id"
+                },
+                {
+                  "name": "produtoId",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.produtoId"
+                },
+                {
+                  "name": "movimentadoEm",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.id"
+                },
+                {
+                  "name": "version",
+                  "type": "number",
+                  "fieldRef": "MovimentacaoEstoque.version"
+                },
+                {
+                  "name": "produtoId",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.produtoId"
+                },
+                {
+                  "name": "movimentadoEm",
+                  "type": "string",
+                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "fieldRef": "MovimentacaoEstoque.details"
+                },
+                {
+                  "name": "movimentacaoEstoqueProduto",
+                  "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
+                }
+              ],
+              "contractRefs": [
+                {
+                  "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+                  "symbol": "ListMovimentacaoEstoqueOutput"
+                },
+                {
+                  "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+                  "symbol": "ListMovimentacaoEstoqueOutput"
+                }
+              ]
+            }
+          ],
+          "routeProjections": [
+            {
+              "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "produtoId",
+                "movimentadoEm",
+                "details",
+                "movimentacaoEstoqueProduto"
+              ]
+            },
+            {
+              "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "produtoId",
+                "movimentadoEm",
+                "details",
+                "movimentacaoEstoqueProduto"
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "MovimentacaoEstoqueRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/controleEstoque/usecase/listMovimentacaoEstoque",
+          "type": "usecase",
+          "defPath": "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
+          "outputPath": "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
+            "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
+            "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/controleEstoque/domainEntity/MovimentacaoEstoque",
+            "102047/controleEstoque/repositoryPort/MovimentacaoEstoqueRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listProduto",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102034_/l4/ontology/mdm.defs.ts",
+          "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "_102047_/l4/controleEstoque/ontology/Produto.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listProduto",
+          "entityId": "Produto",
+          "operation": "list",
+          "ports": [],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listProduto",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "Produto.id"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"identification\"?: { \"subtype\"?: \"Product\"; \"name\"?: string; \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; }",
+                  "fieldRef": "Produto.details"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "fieldRef": "Produto.id"
+                },
+                {
+                  "name": "version",
+                  "type": "number",
+                  "fieldRef": "Produto.version"
+                },
+                {
+                  "name": "details",
+                  "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
+                  "fieldRef": "Produto.details"
+                }
+              ],
+              "contractRefs": [
+                {
+                  "route": "controleEstoque.movimentacoes.qryListProduto",
+                  "symbol": "ListProdutoOutput"
+                },
+                {
+                  "route": "controleEstoque.produtos.qryListProduto",
+                  "symbol": "ListProdutoOutput"
+                }
+              ]
+            }
+          ],
+          "routeProjections": [
+            {
+              "route": "controleEstoque.movimentacoes.qryListProduto",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "details"
+              ]
+            },
+            {
+              "route": "controleEstoque.produtos.qryListProduto",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "projection": "declared",
+              "outputFields": [
+                "id",
+                "version",
+                "details"
+              ]
+            }
+          ],
+          "portCalls": [],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "mdm",
+              "namespace": "controleEstoque",
+              "call": "get",
+              "entity": "Produto",
+              "capability": "read.byId"
+            },
+            {
+              "kind": "mdm",
+              "namespace": "controleEstoque",
+              "call": "listByType",
+              "entity": "Produto",
+              "capability": "locate.byName"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.identification.status",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.identification.subtype",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "rule-document-shape-validated",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "rule-foreign-namespace-refused",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            },
+            {
+              "ruleId": "rule-identity-never-in-namespace",
+              "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "DELEGATION_UNPROVEN"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "mdm": {
+            "namespace": "controleEstoque",
+            "role": "controleEstoque.Produto",
+            "atomic": false,
+            "calls": [
+              {
+                "id": "get",
+                "method": "get",
+                "target": "entity",
+                "shape": "point",
+                "capabilities": [
+                  "read.byId"
+                ],
+                "alternative": false,
+                "when": [
+                  {
+                    "kind": "contract",
+                    "path": "id",
+                    "present": true
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "id"
+                    },
+                    "path": "id"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "details"
+                ]
+              },
+              {
+                "id": "listByName",
+                "method": "listByType",
+                "target": "collection",
+                "shape": "collection",
+                "capabilities": [
+                  "locate.byName"
+                ],
+                "alternative": false,
+                "when": [
+                  {
+                    "kind": "contract",
+                    "path": "details.identification.name",
+                    "present": true
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "type",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "literal",
+                      "evidence": "role"
+                    },
+                    "value": "controleEstoque.Produto"
+                  },
+                  {
+                    "name": "name",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "path": "details.identification.name"
+                  }
+                ],
+                "result": [
+                  "items",
+                  "page",
+                  "pageSize",
+                  "total"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/controleEstoque/usecase/listProduto",
+          "type": "usecase",
+          "defPath": "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts",
+          "outputPath": "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
+            "/_102034_/l4/ontology/mdm.defs.ts",
+            "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "l2/controleEstoque/web/contracts/produtos.defs.ts",
+            "l4/controleEstoque/ontology/Produto.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/controleEstoque/domainEntity/Produto"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    }
+  ]
+}

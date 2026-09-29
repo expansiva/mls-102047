@@ -1,11 +1,13 @@
+/// <mls fileReference="_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts" enhancement="_blank"/>
+
 export const createMovimentacaoEstoqueRoute = "controleEstoque.produtos.cmdCreateMovimentacaoEstoque" as const;
 
 export interface CreateMovimentacaoEstoqueInput {
   "produtoId": string;
-  "occurredAt": string;
+  "movimentadoEm": string;
   "details": {
-    "movementType": "entry" | "exit";
-    "quantity": number;
+    "tipo": "entrada" | "saida";
+    "quantidade": number;
   };
 }
 
@@ -13,10 +15,18 @@ export interface CreateMovimentacaoEstoqueOutput {
   "id": string;
   "version": number;
   "produtoId": string;
-  "occurredAt": string;
+  "movimentadoEm": string;
   "details": {
-    "movementType": "entry" | "exit";
-    "quantity": number;
+    "tipo": "entrada" | "saida";
+    "quantidade": number;
+  };
+  "movimentacaoEstoqueProduto"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
   };
 }
 
@@ -26,33 +36,34 @@ export interface CreateProdutoInput {
   "details": {
     "identification"?: {
       "name": string;
-      "countryCode": string;
     };
     "product"?: {
       "unitOfMeasure": string;
     };
     "controleEstoque"?: {
-      "minimumStock": number;
+      "quantidadeMinima": number;
     };
   };
 }
 
 export interface CreateProdutoOutput {
   "id": string;
+  "version": number;
   "details": {
     "identification"?: {
       "subtype": "Product";
       "name": string;
       "status": "Active" | "Inactive" | "Merged" | "Blocked";
-      "countryCode": string;
     };
+    "base"?: object;
     "product"?: {
       "unitOfMeasure": string;
     };
+    "general"?: object;
     "controleEstoque"?: {
-      "minimumStock": number;
-      "currentStock"?: number;
-      "belowMinimumStock"?: boolean;
+      "quantidadeMinima": number;
+      "saldoAtual"?: number;
+      "saldoAbaixoDoMinimo"?: boolean;
     };
   };
 }
@@ -60,9 +71,9 @@ export interface CreateProdutoOutput {
 export const listMovimentacaoEstoqueRoute = "controleEstoque.produtos.qryListMovimentacaoEstoque" as const;
 
 export interface ListMovimentacaoEstoqueInput {
-  "id": string;
-  "produtoId": string;
-  "occurredAt": string;
+  "id"?: string;
+  "produtoId"?: string;
+  "movimentadoEm"?: string;
   "page"?: number;
 }
 
@@ -70,10 +81,18 @@ export interface ListMovimentacaoEstoqueItem {
   "id": string;
   "version": number;
   "produtoId": string;
-  "occurredAt": string;
+  "movimentadoEm": string;
   "details": {
-    "movementType": "entry" | "exit";
-    "quantity": number;
+    "tipo": "entrada" | "saida";
+    "quantidade": number;
+  };
+  "movimentacaoEstoqueProduto"?: {
+    "id": string;
+    "details"?: {
+      "identification"?: {
+        "name": string;
+      };
+    };
   };
 }
 
@@ -82,13 +101,12 @@ export type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];
 export const listProdutoRoute = "controleEstoque.produtos.qryListProduto" as const;
 
 export interface ListProdutoInput {
-  "id": string;
-  "details": {
+  "id"?: string;
+  "details"?: {
     "identification"?: {
-      "subtype": "Product";
-      "name": string;
-      "status": "Active" | "Inactive" | "Merged" | "Blocked";
-      "countryCode": string;
+      "subtype"?: "Product";
+      "name"?: string;
+      "status"?: "Active" | "Inactive" | "Merged" | "Blocked";
     };
   };
   "page"?: number;
@@ -96,20 +114,22 @@ export interface ListProdutoInput {
 
 export interface ListProdutoItem {
   "id": string;
+  "version": number;
   "details": {
     "identification"?: {
       "subtype": "Product";
       "name": string;
       "status": "Active" | "Inactive" | "Merged" | "Blocked";
-      "countryCode": string;
     };
+    "base"?: object;
     "product"?: {
       "unitOfMeasure": string;
     };
+    "general"?: object;
     "controleEstoque"?: {
-      "minimumStock": number;
-      "currentStock"?: number;
-      "belowMinimumStock"?: boolean;
+      "quantidadeMinima": number;
+      "saldoAtual"?: number;
+      "saldoAbaixoDoMinimo"?: boolean;
     };
   };
 }

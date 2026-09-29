@@ -5,36 +5,6 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
-      "pageId": "controle_estoque_inicio",
-      "actors": [
-        "estoquista"
-      ],
-      "reads": [
-        {
-          "entity": "MovimentacaoEstoque",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:tratarAvisoSaldoBaixo/consultarMovimentacoesProduto"
-          ]
-        },
-        {
-          "entity": "Produto",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [
-            "details.controleEstoque.belowMinimumStock",
-            "details.controleEstoque.currentStock"
-          ],
-          "from": [
-            "journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado"
-          ]
-        }
-      ],
-      "writes": []
-    },
-    {
       "pageId": "produtos",
       "actors": [
         "estoquista"
@@ -46,8 +16,16 @@
           "scope": "organization",
           "derived": [],
           "from": [
+            "grant:gerenciarEstoque",
+            "journey:acompanharSaldos/consultarSaldos",
+            "journey:acompanharSaldos/localizarProdutos",
+            "journey:cadastrarProduto/informarProduto",
+            "journey:registrarMovimentacaoEstoque/consultarSaldo",
+            "journey:registrarMovimentacaoEstoque/localizarProduto",
             "journey:registrarMovimentacaoEstoque/registrarMovimentacao",
-            "journey:tratarAvisoSaldoBaixo/consultarMovimentacoesProduto"
+            "journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado",
+            "relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto",
+            "relationship:Produto/movimentacaoEstoqueProduto"
           ]
         },
         {
@@ -55,16 +33,20 @@
           "family": "mdm",
           "scope": "organization",
           "derived": [
-            "details.controleEstoque.belowMinimumStock",
-            "details.controleEstoque.currentStock"
+            "details.controleEstoque.saldoAbaixoDoMinimo",
+            "details.controleEstoque.saldoAtual"
           ],
           "from": [
-            "journey:acompanharSaldoProdutos/consultarSaldos",
-            "journey:acompanharSaldoProdutos/localizarProdutos",
-            "journey:cadastrarProduto/registrarProduto",
-            "journey:registrarMovimentacaoEstoque/consultarSaldoProduto",
+            "grant:gerenciarEstoque",
+            "journey:acompanharSaldos/consultarSaldos",
+            "journey:acompanharSaldos/localizarProdutos",
+            "journey:cadastrarProduto/informarProduto",
+            "journey:registrarMovimentacaoEstoque/consultarSaldo",
             "journey:registrarMovimentacaoEstoque/localizarProduto",
-            "journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado"
+            "journey:registrarMovimentacaoEstoque/registrarMovimentacao",
+            "journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado",
+            "relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto",
+            "relationship:Produto/movimentacaoEstoqueProduto"
           ]
         }
       ],
@@ -82,13 +64,13 @@
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:cadastrarProduto/registrarProduto"
+            "journey:cadastrarProduto/informarProduto"
           ]
         }
       ]
     },
     {
-      "pageId": "movimentacoes_estoque",
+      "pageId": "movimentacoes",
       "actors": [
         "estoquista"
       ],
@@ -99,8 +81,12 @@
           "scope": "organization",
           "derived": [],
           "from": [
+            "grant:gerenciarEstoque",
+            "journey:registrarMovimentacaoEstoque/consultarSaldo",
+            "journey:registrarMovimentacaoEstoque/localizarProduto",
             "journey:registrarMovimentacaoEstoque/registrarMovimentacao",
-            "journey:tratarAvisoSaldoBaixo/consultarMovimentacoesProduto"
+            "relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto",
+            "relationship:Produto/movimentacaoEstoqueProduto"
           ]
         },
         {
@@ -108,13 +94,16 @@
           "family": "mdm",
           "scope": "organization",
           "derived": [
-            "details.controleEstoque.belowMinimumStock",
-            "details.controleEstoque.currentStock"
+            "details.controleEstoque.saldoAbaixoDoMinimo",
+            "details.controleEstoque.saldoAtual"
           ],
           "from": [
-            "journey:registrarMovimentacaoEstoque/consultarSaldoProduto",
+            "grant:gerenciarEstoque",
+            "journey:registrarMovimentacaoEstoque/consultarSaldo",
             "journey:registrarMovimentacaoEstoque/localizarProduto",
-            "journey:tratarAvisoSaldoBaixo/consultarProdutoAvisado"
+            "journey:registrarMovimentacaoEstoque/registrarMovimentacao",
+            "relationship:MovimentacaoEstoque/movimentacaoEstoqueProduto",
+            "relationship:Produto/movimentacaoEstoqueProduto"
           ]
         }
       ],
@@ -132,6 +121,6 @@
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-09-21T17:40:15.530Z"
+    "generatedAt": "2026-09-28T17:39:15.637Z"
   }
 }

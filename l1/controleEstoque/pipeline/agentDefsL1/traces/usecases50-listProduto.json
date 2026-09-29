@@ -1,0 +1,75 @@
+{
+  "usecaseId": "listProduto",
+  "status": "parsed",
+  "trace": "usecases50 recorded steps for listProduto.",
+  "unitAttempts": 0,
+  "reply": [
+    {
+      "kind": "context",
+      "source": "ctx"
+    },
+    {
+      "kind": "mdm",
+      "namespace": "controleEstoque",
+      "call": "get",
+      "entity": "Produto",
+      "capability": "read.byId"
+    },
+    {
+      "kind": "mdm",
+      "namespace": "controleEstoque",
+      "call": "listByType",
+      "entity": "Produto",
+      "capability": "locate.byName"
+    }
+  ],
+  "request": {
+    "usecaseId": "listProduto",
+    "bytes": 5480,
+    "sha256": "sha256:ad4ea3a7817e44a8119c32d10f8f919b61739a365dad6713953d14cd0e9988db",
+    "snapshotHash": "sha256:6944278677131a89347b4fa7a097fad029008f6cca4ecd67dcd09cd58feb3bd8",
+    "sourceHashes": [
+      {
+        "path": "/_102034_/l4/ontology/mdm.defs.ts",
+        "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
+      },
+      {
+        "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
+      },
+      {
+        "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+        "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
+      },
+      {
+        "path": "l4/controleEstoque/access.defs.ts",
+        "sha256": "sha256:bf7735be84da33112ac4a039066285ac8e986233b0aee85bd2254193f779621d"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
+        "sha256": "sha256:332d8b591e82df39f38c48a8c3e9fa5598aadaf05ef0153780bfc8668ffaff8c"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
+        "sha256": "sha256:2219c8d13e2412d7ef132e7efabeeccfcddbbb50ad05f7d49c46e1819809eca2"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
+        "sha256": "sha256:ffd8fbde507e1fdf9d9dc30cbfc1b17a6f657de2617cb301df02219fc76ec67f"
+      },
+      {
+        "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
+        "sha256": "sha256:216a3970415e29f391c4db5bf88c08b895feedcb8188b9f45bb7c547612fa416"
+      },
+      {
+        "path": "l4/controleEstoque/ontology/Produto.defs.ts",
+        "sha256": "sha256:94864a1a4088484a4ecb947ea7924a069aaab6c6b00f49bcd8a61875f584b348"
+      },
+      {
+        "path": "l4/controleEstoque/pool/l1/web/needs.json",
+        "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
+      }
+    ],
+    "text": "Usecase listProduto is already chosen. Do not rename it.\nEntity Produto. Operation list. Storage mdm.\nMDM namespace: controleEstoque.\n\nThis operation is not a lifecycle transition.\nCapability read.byId\nConsulta um produto pelo identificador mestre; lê o registro pelo id no índice e documento; usado pelo estoquista ao abrir um produto localizado ou referenciado por uma movimentação.\nCapability locate.byName\nLocaliza produtos pelo nome; pesquisa o texto informado entre os produtos ativos no índice mestre; usado pelo estoquista para cadastrar movimentações e acompanhar saldos.\n\nRoute controleEstoque.movimentacoes.qryListProduto\nContract: l2/controleEstoque/web/contracts/movimentacoes.defs.ts\nInput ListProdutoInput\n- id?: string\n- details?: object\n- details.identification?: object\n- details.identification.subtype?: \"Product\"\n- details.identification.name?: string\n- details.identification.status?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"\n- page?: number\nOutput ListProdutoOutput: array of ListProdutoItem\n- id: string\n- version: number\n- details: object\n- details.identification?: object\n- details.identification.subtype: \"Product\"\n- details.identification.name: string\n- details.identification.status: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"\n- details.base?: object\n- details.product?: object\n- details.product.unitOfMeasure: string\n- details.general?: object\n- details.controleEstoque?: object\n- details.controleEstoque.quantidadeMinima: number\n- details.controleEstoque.saldoAtual?: number\n- details.controleEstoque.saldoAbaixoDoMinimo?: boolean\nAccess grant gerenciarEstoque\nActor: estoquista\nScope: organization\nAbrange os produtos e as movimentações de estoque de toda a organização.\nDisclosure fullRecord: Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.\n\nRoute controleEstoque.produtos.qryListProduto\nContract: l2/controleEstoque/web/contracts/produtos.defs.ts\nInput ListProdutoInput\n- id?: string\n- details?: object\n- details.identification?: object\n- details.identification.subtype?: \"Product\"\n- details.identification.name?: string\n- details.identification.status?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"\n- page?: number\nOutput ListProdutoOutput: array of ListProdutoItem\n- id: string\n- version: number\n- details: object\n- details.identification?: object\n- details.identification.subtype: \"Product\"\n- details.identification.name: string\n- details.identification.status: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"\n- details.base?: object\n- details.product?: object\n- details.product.unitOfMeasure: string\n- details.general?: object\n- details.controleEstoque?: object\n- details.controleEstoque.quantidadeMinima: number\n- details.controleEstoque.saldoAtual?: number\n- details.controleEstoque.saldoAbaixoDoMinimo?: boolean\nAccess grant gerenciarEstoque\nActor: estoquista\nScope: organization\nAbrange os produtos e as movimentações de estoque de toda a organização.\nDisclosure fullRecord: Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.\nPending rule-document-shape-validated\nGap: DELEGATION_UNPROVEN\nSource: /_102034_/l4/ontology/mdm.defs.ts\nAddresses, consent, general and the module namespace are validated on write against the schema derived from this ontology · engine · platform: missing, nothing validates the document today\nPending rule-foreign-namespace-refused\nGap: DELEGATION_UNPROVEN\nSource: /_102034_/l4/ontology/mdm.defs.ts\nA caller carrying a moduleId may write the platform keys, general and its own key; any other module key is refused with MDM_FOREIGN_NAMESPACE · engine · platform: ready\nPending rule-identity-never-in-namespace\nGap: DELEGATION_UNPROVEN\nSource: /_102034_/l4/ontology/mdm.defs.ts\nIdentity, document, contact and login are platform layers; a module never redeclares them inside details[moduleId] · engine · platform: partial\n\nPort: (none). This operation does not use a repository port.\nEffects: (none).\n\nJourney acompanharSaldos\nActor: estoquista\nGoal: Consultar os saldos atuais dos produtos e identificar itens abaixo da quantidade mínima.\nStep localizarProdutos (locate): Localiza os produtos cadastrados para acompanhamento do estoque.\nStep consultarSaldos (inspect): Consulta os saldos atuais, as quantidades mínimas e os avisos de produtos abaixo do mínimo.\n\nJourney tratarAvisoSaldoBaixo\nActor: estoquista\nGoal: Verificar um aviso recebido sobre produto com saldo abaixo da quantidade mínima.\nStep consultarProdutoAvisado (inspect): Consulta o saldo atual e a quantidade mínima do produto indicado no aviso.\n\nPlan steps only. Do not write TypeScript. Do not invent a field, a rule, an operation, a route or a type.\nA transition payload may list only a path the contract or the lifecycle payload already lists.\nMore than one repository write needs one local transaction boundary. Separate MDM facade calls are not one transaction. An external effect is not atomic.\nAuthority is ctx.\n\nEach step is one kind. A step may name only the keys of that kind:\n- mdm: kind, namespace, call, entity, capability\n  call get, capability read.byId, namespace controleEstoque, entity Produto\n  call listByType, capability locate.byName, namespace controleEstoque, entity Produto\n- context: kind, source\n  source: ctx\nA key from another kind is refused."
+  }
+}

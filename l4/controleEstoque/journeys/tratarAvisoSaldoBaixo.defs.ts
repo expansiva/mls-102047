@@ -8,7 +8,7 @@ export const tratarAvisoSaldoBaixoJourney = {
   "business": {
     "actorRef": "estoquista",
     "title": "Verificar aviso de saldo baixo",
-    "goal": "Identificar um produto cujo saldo caiu abaixo do mínimo e acompanhar sua situação.",
+    "goal": "Verificar um aviso recebido sobre produto com saldo abaixo da quantidade mínima.",
     "entry": {
       "mode": "fromNotification"
     },
@@ -18,25 +18,18 @@ export const tratarAvisoSaldoBaixoJourney = {
         "kind": "inspect",
         "entity": "Produto",
         "title": "Consultar produto avisado",
-        "description": "Consulta o produto indicado no aviso, seu saldo atual e o saldo mínimo configurado."
-      },
-      {
-        "stepId": "consultarMovimentacoesProduto",
-        "kind": "inspect",
-        "entity": "MovimentacaoEstoque",
-        "title": "Consultar movimentações do produto",
-        "description": "Consulta as movimentações já registradas do produto para acompanhar a origem do saldo atual."
+        "description": "Consulta o saldo atual e a quantidade mínima do produto indicado no aviso."
       }
     ],
     "outcome": {
-      "statement": "O estoquista confirma a situação de saldo baixo do produto avisado.",
+      "statement": "O estoquista confirma o produto com saldo abaixo do mínimo e pode providenciar sua reposição.",
       "evidence": [
-        "O produto exibido no aviso apresenta saldo atual abaixo do saldo mínimo.",
-        "As movimentações registradas do produto podem ser consultadas sem alteração."
+        "Saldo atual e quantidade mínima do produto exibidos.",
+        "Aviso de saldo abaixo do mínimo associado ao produto."
       ]
     }
   },
-  "businessHash": "sha256:59ee82bacd0f09985559760d7b0552822aa0d8025e526a4777fd99ba716af4b4"
+  "businessHash": "sha256:a9891a7f6b13b69ed088e5322408fcd0787bc4038ae476e4e8305ee1eb1ff279"
 } as const satisfies Ns5JourneyArtifact;
 
 export type TratarAvisoSaldoBaixoJourneyType = typeof tratarAvisoSaldoBaixoJourney;

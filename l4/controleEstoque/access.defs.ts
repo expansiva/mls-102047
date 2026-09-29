@@ -11,15 +11,16 @@ export const controleEstoqueAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Estoquista",
-      "description": "Profissional responsável por registrar e acompanhar as movimentações e os saldos de estoque."
+      "description": "Registra e acompanha as movimentações e os saldos do estoque.",
+      "personEntity": ""
     }
   ],
   "grants": [
     {
-      "grantId": "estoquistaControleEstoque",
+      "grantId": "gerenciarEstoque",
       "actorRef": "estoquista",
-      "title": "Controlar estoque",
-      "description": "Permite cadastrar produtos no controle de estoque, registrar movimentações imutáveis e acompanhar saldos, avisos de reposição e movimentações de todos os produtos da organização.",
+      "title": "Gerenciar estoque",
+      "description": "Permite ao estoquista cadastrar produtos acompanhados, registrar movimentações de entrada e saída e consultar saldos, quantidades mínimas e avisos de saldo baixo de toda a organização.",
       "entityRefs": [
         "Produto",
         "MovimentacaoEstoque"
@@ -29,19 +30,8 @@ export const controleEstoqueAccess = {
         "description": "Abrange os produtos e as movimentações de estoque de toda a organização."
       },
       "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Permite consultar a identificação e a unidade do produto, a configuração e os indicadores de estoque do módulo, além de todos os dados das movimentações registradas.",
-        "allowedFields": [
-          "Produto.id",
-          "Produto.details.identification",
-          "Produto.details.product",
-          "Produto.details.controleEstoque",
-          "MovimentacaoEstoque.id",
-          "MovimentacaoEstoque.version",
-          "MovimentacaoEstoque.produtoId",
-          "MovimentacaoEstoque.occurredAt",
-          "MovimentacaoEstoque.details"
-        ]
+        "mode": "fullRecord",
+        "description": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo."
       }
     }
   ]

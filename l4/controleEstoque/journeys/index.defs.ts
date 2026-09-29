@@ -9,7 +9,7 @@ export const controleEstoqueJourneyIndex = {
     {
       "journeyId": "cadastrarProduto",
       "actorRef": "estoquista",
-      "title": "Cadastrar produto para controle de estoque"
+      "title": "Cadastrar produto de estoque"
     },
     {
       "journeyId": "registrarMovimentacaoEstoque",
@@ -17,9 +17,9 @@ export const controleEstoqueJourneyIndex = {
       "title": "Registrar movimentação de estoque"
     },
     {
-      "journeyId": "acompanharSaldoProdutos",
+      "journeyId": "acompanharSaldos",
       "actorRef": "estoquista",
-      "title": "Acompanhar saldos de estoque"
+      "title": "Acompanhar saldos do estoque"
     },
     {
       "journeyId": "tratarAvisoSaldoBaixo",
