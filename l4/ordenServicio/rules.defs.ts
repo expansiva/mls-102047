@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
 
 export const ordenServicioRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -20,7 +20,7 @@ export const ordenServicioRules = {
     "receptionRequiresCustomerDeviceAndDefect": "La recepción de una orden requiere registrar el cliente, el aparato recibido y el defecto informado.",
     "customerDisclosureExcludesInternalData": "La información visible al cliente se limita al estado, diagnóstico y valor del presupuesto, y excluye los costos internos de piezas y las anotaciones del técnico."
   }
-} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
+} as const satisfies Ns5RulesArtifactV2;
 
 export type OrdenServicioRulesType = typeof ordenServicioRules;
 

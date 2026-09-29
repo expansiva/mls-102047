@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/compras/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
 
 export const comprasRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -29,7 +29,7 @@ export const comprasRules = {
     "goodsReceiptAllowedForOpenOrder": "Mercadorias só podem ser recebidas para pedido de compra em aberto.",
     "goodsReceiptPostsStockAtomically": "O registro de recebimento deve gerar a entrada em estoque de todos os produtos recebidos como uma única operação."
   }
-} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
+} as const satisfies Ns5RulesArtifactV2;
 
 export type ComprasRulesType = typeof comprasRules;
 

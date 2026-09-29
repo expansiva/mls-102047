@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/reembolsoDespesas/ontology/Colaborador.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const reembolsoDespesasEntityColaborador = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
@@ -263,7 +263,7 @@ export const reembolsoDespesasEntityColaborador = {
       }
     }
   }
-} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+} as const satisfies Ns5OntologyEntityV3;
 
 export type ReembolsoDespesasEntityColaboradorType = typeof reembolsoDespesasEntityColaborador;
 

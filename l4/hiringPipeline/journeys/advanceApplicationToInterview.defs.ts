@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/journeys/advanceApplicationToInterview.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
 
 export const advanceApplicationToInterviewJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -52,7 +52,7 @@ export const advanceApplicationToInterviewJourney = {
     }
   },
   "businessHash": "sha256:f6bcc6cba6436263bb01c55b9be1ef93f6c54236885ea313170380681207914c"
-} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
+} as const satisfies Ns5JourneyArtifact;
 
 export type AdvanceApplicationToInterviewJourneyType = typeof advanceApplicationToInterviewJourney;
 

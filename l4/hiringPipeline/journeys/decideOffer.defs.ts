@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/journeys/decideOffer.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
 
 export const decideOfferJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -68,7 +68,7 @@ export const decideOfferJourney = {
     }
   },
   "businessHash": "sha256:2ab1e944d198bcc863c62f49b7f7c6886fae94f758a1c403fb237526585d555b"
-} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
+} as const satisfies Ns5JourneyArtifact;
 
 export type DecideOfferJourneyType = typeof decideOfferJourney;
 

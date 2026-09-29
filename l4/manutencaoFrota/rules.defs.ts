@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/manutencaoFrota/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
@@ -22,7 +22,7 @@ export const manutencaoFrotaRules = {
     "repairOrderDoesNotRequirePlan": "Uma ordem de manutenção para reparo de defeito não exige vínculo com plano de manutenção preventiva.",
     "completionRequiresExitDateAndFinalCost": "A conclusão de uma ordem de manutenção exige o registro da data de saída e do custo final."
   }
-} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
+} as const satisfies Ns5RulesArtifactV2;
 
 export type ManutencaoFrotaRulesType = typeof manutencaoFrotaRules;
 

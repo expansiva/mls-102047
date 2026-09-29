@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/financeiro/ontology/PainelRecebiveis.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
 
 export const financeiroEntityPainelRecebiveis = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
@@ -133,7 +133,7 @@ export const financeiroEntityPainelRecebiveis = {
       }
     }
   }
-} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+} as const satisfies Ns5OntologyEntityV3;
 
 export type FinanceiroEntityPainelRecebiveisType = typeof financeiroEntityPainelRecebiveis;
 

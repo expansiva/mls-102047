@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/financeiro/journeys/consultarMeusTitulosErecebimentos.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
 
 export const consultarMeusTitulosErecebimentosJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -51,7 +51,7 @@ export const consultarMeusTitulosErecebimentosJourney = {
     }
   },
   "businessHash": "sha256:6fab04126ac8b2f22065a1083edf037e51142f3e8f5b71e889c0b29670129771"
-} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
+} as const satisfies Ns5JourneyArtifact;
 
 export type ConsultarMeusTitulosErecebimentosJourneyType = typeof consultarMeusTitulosErecebimentosJourney;
 
