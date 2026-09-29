@@ -18,7 +18,8 @@
             "details.multaAtraso"
           ],
           "from": [
-            "organism:summary"
+            "grant:atendenteGerirLocacoes",
+            "organism:highlights"
           ]
         },
         {
@@ -29,7 +30,8 @@
             "details.situacaoOperacional"
           ],
           "from": [
-            "organism:summary"
+            "grant:atendenteSelecionarEquipamentos",
+            "organism:highlights"
           ]
         },
         {
@@ -40,14 +42,15 @@
             "details.multaAtraso"
           ],
           "from": [
-            "organism:summary"
+            "grant:atendenteGerirLocacoes",
+            "organism:highlights"
           ]
         }
       ],
       "writes": []
     },
     {
-      "pageId": "contratos",
+      "pageId": "contratos_locacao",
       "actors": [
         "atendente"
       ],
@@ -58,7 +61,14 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "journey:criarContratoLocacao/localizarCliente"
+            "grant:atendenteLocalizarCliente",
+            "journey:criarContratoLocacao/criarContrato",
+            "journey:criarContratoLocacao/localizarCliente",
+            "journey:registrarDevolucao/inspecionarContrato",
+            "journey:registrarDevolucao/localizarContrato",
+            "journey:registrarDevolucao/registrarDevolucao",
+            "relationship:Cliente/clienteContratosLocacao",
+            "relationship:ContratoLocacao/clienteContratosLocacao"
           ]
         },
         {
@@ -69,10 +79,55 @@
             "details.multaAtraso"
           ],
           "from": [
+            "grant:atendenteGerirLocacoes",
             "journey:criarContratoLocacao/criarContrato",
+            "journey:criarContratoLocacao/localizarCliente",
             "journey:registrarDevolucao/inspecionarContrato",
             "journey:registrarDevolucao/localizarContrato",
-            "journey:registrarDevolucao/registrarDevolucao"
+            "journey:registrarDevolucao/registrarDevolucao",
+            "relationship:Cliente/clienteContratosLocacao",
+            "relationship:ContratoLocacao/clienteContratosLocacao",
+            "relationship:ContratoLocacao/contratoItensLocacao",
+            "relationship:ItemLocacao/contratoItensLocacao"
+          ]
+        },
+        {
+          "entity": "Equipamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.situacaoOperacional"
+          ],
+          "from": [
+            "grant:atendenteSelecionarEquipamentos",
+            "journey:criarContratoLocacao/criarContrato",
+            "journey:criarContratoLocacao/localizarCliente",
+            "journey:registrarDevolucao/inspecionarContrato",
+            "journey:registrarDevolucao/localizarContrato",
+            "journey:registrarDevolucao/registrarDevolucao",
+            "relationship:ContratoLocacao/contratoItensLocacao",
+            "relationship:Equipamento/itemLocacaoEquipamento",
+            "relationship:ItemLocacao/itemLocacaoEquipamento"
+          ]
+        },
+        {
+          "entity": "ItemLocacao",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.multaAtraso"
+          ],
+          "from": [
+            "grant:atendenteGerirLocacoes",
+            "journey:criarContratoLocacao/criarContrato",
+            "journey:criarContratoLocacao/localizarCliente",
+            "journey:registrarDevolucao/inspecionarContrato",
+            "journey:registrarDevolucao/localizarContrato",
+            "journey:registrarDevolucao/registrarDevolucao",
+            "relationship:ContratoLocacao/contratoItensLocacao",
+            "relationship:Equipamento/itemLocacaoEquipamento",
+            "relationship:ItemLocacao/contratoItensLocacao",
+            "relationship:ItemLocacao/itemLocacaoEquipamento"
           ]
         }
       ],
@@ -109,7 +164,8 @@
             "details.situacaoOperacional"
           ],
           "from": [
-            "organism:summary"
+            "grant:gerenteGerirInventario",
+            "organism:highlights"
           ]
         }
       ],
@@ -129,8 +185,24 @@
             "details.situacaoOperacional"
           ],
           "from": [
+            "grant:gerenteGerirInventario",
             "journey:consultarSituacaoEquipamentos/inspecionarSituacao",
-            "journey:consultarSituacaoEquipamentos/localizarEquipamentos"
+            "journey:consultarSituacaoEquipamentos/localizarEquipamentos",
+            "relationship:Equipamento/equipamentoManutencoes",
+            "relationship:ManutencaoEquipamento/equipamentoManutencoes"
+          ]
+        },
+        {
+          "entity": "ManutencaoEquipamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenteGerirInventario",
+            "journey:consultarSituacaoEquipamentos/inspecionarSituacao",
+            "journey:consultarSituacaoEquipamentos/localizarEquipamentos",
+            "relationship:Equipamento/equipamentoManutencoes",
+            "relationship:ManutencaoEquipamento/equipamentoManutencoes"
           ]
         }
       ],
@@ -139,6 +211,6 @@
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-09-21T18:05:02.084Z"
+    "generatedAt": "2026-09-29T13:37:03.740Z"
   }
 }

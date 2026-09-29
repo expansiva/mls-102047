@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026-09-21-p2-effort-v1.1",
+  "schemaVersion": "2026-09-21-p2-effort-v1.2",
   "moduleName": "locacaoEquipamentos",
   "device": "web",
   "totals": {
@@ -10,19 +10,19 @@
       "done": 0
     },
     "endpoints": {
-      "toCreate": 9,
+      "toCreate": 12,
       "toUpdate": 0,
       "toRemove": 0,
       "done": 0
     },
     "usecases": {
-      "toCreate": 6,
+      "toCreate": 7,
       "toUpdate": 0,
       "toRemove": 0,
       "done": 0
     },
     "tables": {
-      "toCreate": 3,
+      "toCreate": 4,
       "toUpdate": 0,
       "toRemove": 0,
       "done": 0
@@ -43,17 +43,19 @@
       ]
     },
     {
-      "pageId": "contratos",
+      "pageId": "contratos_locacao",
       "label": "Contratos de locação",
       "actors": [
         "atendente"
       ],
       "status": "toCreate",
       "endpoints": [
-        "locacaoEquipamentos.contratos.cmdCreateContratoLocacao",
-        "locacaoEquipamentos.contratos.cmdRegistrarDevolucao",
-        "locacaoEquipamentos.contratos.qryListCliente",
-        "locacaoEquipamentos.contratos.qryListContratoLocacao"
+        "locacaoEquipamentos.contratos_locacao.cmdCreateContratoLocacao",
+        "locacaoEquipamentos.contratos_locacao.cmdRegistrarDevolucao",
+        "locacaoEquipamentos.contratos_locacao.qryListCliente",
+        "locacaoEquipamentos.contratos_locacao.qryListContratoLocacao",
+        "locacaoEquipamentos.contratos_locacao.qryListEquipamento",
+        "locacaoEquipamentos.contratos_locacao.qryListItemLocacao"
       ]
     },
     {
@@ -75,37 +77,52 @@
       ],
       "status": "toCreate",
       "endpoints": [
-        "locacaoEquipamentos.equipamentos.qryListEquipamento"
+        "locacaoEquipamentos.equipamentos.qryListEquipamento",
+        "locacaoEquipamentos.equipamentos.qryListManutencaoEquipamento"
       ]
     }
   ],
   "endpoints": [
     {
-      "route": "locacaoEquipamentos.contratos.cmdCreateContratoLocacao",
-      "page": "contratos",
+      "route": "locacaoEquipamentos.contratos_locacao.cmdCreateContratoLocacao",
+      "page": "contratos_locacao",
       "kind": "cmd",
       "usecaseRef": "createContratoLocacao",
       "status": "toCreate"
     },
     {
-      "route": "locacaoEquipamentos.contratos.cmdRegistrarDevolucao",
-      "page": "contratos",
+      "route": "locacaoEquipamentos.contratos_locacao.cmdRegistrarDevolucao",
+      "page": "contratos_locacao",
       "kind": "cmd",
       "usecaseRef": "registrarDevolucao",
       "status": "toCreate"
     },
     {
-      "route": "locacaoEquipamentos.contratos.qryListCliente",
-      "page": "contratos",
+      "route": "locacaoEquipamentos.contratos_locacao.qryListCliente",
+      "page": "contratos_locacao",
       "kind": "qry",
       "usecaseRef": "listCliente",
       "status": "toCreate"
     },
     {
-      "route": "locacaoEquipamentos.contratos.qryListContratoLocacao",
-      "page": "contratos",
+      "route": "locacaoEquipamentos.contratos_locacao.qryListContratoLocacao",
+      "page": "contratos_locacao",
       "kind": "qry",
       "usecaseRef": "listContratoLocacao",
+      "status": "toCreate"
+    },
+    {
+      "route": "locacaoEquipamentos.contratos_locacao.qryListEquipamento",
+      "page": "contratos_locacao",
+      "kind": "qry",
+      "usecaseRef": "listEquipamento",
+      "status": "toCreate"
+    },
+    {
+      "route": "locacaoEquipamentos.contratos_locacao.qryListItemLocacao",
+      "page": "contratos_locacao",
+      "kind": "qry",
+      "usecaseRef": "listItemLocacao",
       "status": "toCreate"
     },
     {
@@ -113,6 +130,13 @@
       "page": "equipamentos",
       "kind": "qry",
       "usecaseRef": "listEquipamento",
+      "status": "toCreate"
+    },
+    {
+      "route": "locacaoEquipamentos.equipamentos.qryListManutencaoEquipamento",
+      "page": "equipamentos",
+      "kind": "qry",
+      "usecaseRef": "listManutencaoEquipamento",
       "status": "toCreate"
     },
     {
@@ -181,6 +205,13 @@
       "existing": ""
     },
     {
+      "usecaseId": "listManutencaoEquipamento",
+      "entity": "ManutencaoEquipamento",
+      "operation": "list",
+      "status": "toCreate",
+      "existing": ""
+    },
+    {
       "usecaseId": "registrarDevolucao",
       "entity": "ContratoLocacao",
       "operation": "transition",
@@ -203,13 +234,209 @@
       "tableId": "itemLocacao",
       "entity": "ItemLocacao",
       "status": "toCreate"
+    },
+    {
+      "tableId": "manutencaoEquipamento",
+      "entity": "ManutencaoEquipamento",
+      "status": "toCreate"
     }
   ],
   "removed": [],
+  "testSupport": [
+    {
+      "id": "data:ContratoLocacao",
+      "actorRefs": [
+        "atendente"
+      ],
+      "entityRefs": [
+        "Cliente",
+        "ContratoLocacao"
+      ],
+      "sourceRefs": [
+        "grant:atendenteGerirLocacoes",
+        "journey:criarContratoLocacao/criarContrato",
+        "journey:criarContratoLocacao/localizarCliente",
+        "journey:registrarDevolucao/inspecionarContrato",
+        "journey:registrarDevolucao/localizarContrato",
+        "journey:registrarDevolucao/registrarDevolucao",
+        "ontology:ContratoLocacao/lifecycleStates/open",
+        "organism:highlights",
+        "relationship:Cliente/clienteContratosLocacao",
+        "relationship:ContratoLocacao/clienteContratosLocacao",
+        "relationship:ContratoLocacao/contratoItensLocacao",
+        "relationship:ItemLocacao/contratoItensLocacao"
+      ],
+      "status": "toCreate",
+      "owner": "L1",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "FIXTURE_EXECUTOR_UNREFERENCED: no L1 fixture executor creates and removes contratoLocacao rows by execution id"
+    },
+    {
+      "id": "data:Equipamento",
+      "actorRefs": [
+        "atendente",
+        "gerente"
+      ],
+      "entityRefs": [
+        "Equipamento"
+      ],
+      "sourceRefs": [
+        "grant:atendenteSelecionarEquipamentos",
+        "grant:gerenteGerirInventario",
+        "journey:consultarSituacaoEquipamentos/inspecionarSituacao",
+        "journey:consultarSituacaoEquipamentos/localizarEquipamentos",
+        "journey:criarContratoLocacao/criarContrato",
+        "journey:criarContratoLocacao/localizarCliente",
+        "journey:registrarDevolucao/inspecionarContrato",
+        "journey:registrarDevolucao/localizarContrato",
+        "journey:registrarDevolucao/registrarDevolucao",
+        "organism:highlights",
+        "relationship:ContratoLocacao/contratoItensLocacao",
+        "relationship:Equipamento/equipamentoManutencoes",
+        "relationship:Equipamento/itemLocacaoEquipamento",
+        "relationship:ItemLocacao/itemLocacaoEquipamento",
+        "relationship:ManutencaoEquipamento/equipamentoManutencoes"
+      ],
+      "status": "toCreate",
+      "owner": "L1",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "FIXTURE_EXECUTOR_UNREFERENCED: no L1 fixture executor creates and removes equipamento rows by execution id"
+    },
+    {
+      "id": "data:ItemLocacao",
+      "actorRefs": [
+        "atendente"
+      ],
+      "entityRefs": [
+        "ContratoLocacao",
+        "Equipamento",
+        "ItemLocacao"
+      ],
+      "sourceRefs": [
+        "grant:atendenteGerirLocacoes",
+        "journey:criarContratoLocacao/criarContrato",
+        "journey:criarContratoLocacao/localizarCliente",
+        "journey:registrarDevolucao/inspecionarContrato",
+        "journey:registrarDevolucao/localizarContrato",
+        "journey:registrarDevolucao/registrarDevolucao",
+        "organism:highlights",
+        "relationship:ContratoLocacao/contratoItensLocacao",
+        "relationship:Equipamento/itemLocacaoEquipamento",
+        "relationship:ItemLocacao/contratoItensLocacao",
+        "relationship:ItemLocacao/itemLocacaoEquipamento"
+      ],
+      "status": "toCreate",
+      "owner": "L1",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "FIXTURE_EXECUTOR_UNREFERENCED: no L1 fixture executor creates and removes itemLocacao rows by execution id"
+    },
+    {
+      "id": "data:ManutencaoEquipamento",
+      "actorRefs": [
+        "gerente"
+      ],
+      "entityRefs": [
+        "Equipamento",
+        "ManutencaoEquipamento"
+      ],
+      "sourceRefs": [
+        "grant:gerenteGerirInventario",
+        "journey:consultarSituacaoEquipamentos/inspecionarSituacao",
+        "journey:consultarSituacaoEquipamentos/localizarEquipamentos",
+        "relationship:Equipamento/equipamentoManutencoes",
+        "relationship:ManutencaoEquipamento/equipamentoManutencoes"
+      ],
+      "status": "toCreate",
+      "owner": "L1",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "FIXTURE_EXECUTOR_UNREFERENCED: no L1 fixture executor creates and removes manutencaoEquipamento rows by execution id"
+    },
+    {
+      "id": "identity:atendente",
+      "actorRefs": [
+        "atendente"
+      ],
+      "entityRefs": [],
+      "sourceRefs": [
+        "access:actors/atendente",
+        "grant:atendenteGerirLocacoes",
+        "grant:atendenteLocalizarCliente",
+        "grant:atendenteSelecionarEquipamentos",
+        "journey:criarContratoLocacao/criarContrato",
+        "journey:criarContratoLocacao/localizarCliente",
+        "journey:registrarDevolucao/inspecionarContrato",
+        "journey:registrarDevolucao/localizarContrato",
+        "journey:registrarDevolucao/registrarDevolucao",
+        "organism:highlights",
+        "relationship:Cliente/clienteContratosLocacao",
+        "relationship:ContratoLocacao/clienteContratosLocacao",
+        "relationship:ContratoLocacao/contratoItensLocacao",
+        "relationship:Equipamento/itemLocacaoEquipamento",
+        "relationship:ItemLocacao/contratoItensLocacao",
+        "relationship:ItemLocacao/itemLocacaoEquipamento"
+      ],
+      "status": "toCreate",
+      "owner": "runtime",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "PERSON_ENTITY_UNDECLARED: actor atendente declares no personEntity; the test identity cannot be bound"
+    },
+    {
+      "id": "identity:gerente",
+      "actorRefs": [
+        "gerente"
+      ],
+      "entityRefs": [],
+      "sourceRefs": [
+        "access:actors/gerente",
+        "grant:gerenteGerirInventario",
+        "journey:consultarSituacaoEquipamentos/inspecionarSituacao",
+        "journey:consultarSituacaoEquipamentos/localizarEquipamentos",
+        "organism:highlights",
+        "relationship:Equipamento/equipamentoManutencoes",
+        "relationship:ManutencaoEquipamento/equipamentoManutencoes"
+      ],
+      "status": "toCreate",
+      "owner": "runtime",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "PERSON_ENTITY_UNDECLARED: actor gerente declares no personEntity; the test identity cannot be bound"
+    },
+    {
+      "id": "mdm:Cliente",
+      "actorRefs": [
+        "atendente"
+      ],
+      "entityRefs": [
+        "Cliente"
+      ],
+      "sourceRefs": [
+        "grant:atendenteLocalizarCliente",
+        "journey:criarContratoLocacao/criarContrato",
+        "journey:criarContratoLocacao/localizarCliente",
+        "journey:registrarDevolucao/inspecionarContrato",
+        "journey:registrarDevolucao/localizarContrato",
+        "journey:registrarDevolucao/registrarDevolucao",
+        "ontology:ContratoLocacao/relationships",
+        "relationship:Cliente/clienteContratosLocacao",
+        "relationship:ContratoLocacao/clienteContratosLocacao"
+      ],
+      "status": "toCreate",
+      "owner": "runtime",
+      "executorRef": "",
+      "cleanupRef": "",
+      "gap": "RUNTIME_MDM_FIXTURE_UNREFERENCED: no verified runtime capability provisions and removes Cliente records by execution id"
+    }
+  ],
   "unattributed": [],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
     "sourceBackend": "pool/l2/web/backend.json",
-    "generatedAt": "2026-09-21T18:05:03.287Z"
+    "sourceVersion": "2026-09-21-p1-backend-v1.2",
+    "generatedAt": "2026-09-29T13:37:04.945Z"
   }
 }
