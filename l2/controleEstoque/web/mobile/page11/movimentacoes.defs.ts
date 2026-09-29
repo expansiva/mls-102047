@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l2/controleEstoque/web/mobile/page11/movimentacoes.defs.ts" enhancement="_blank"/>
 
-export const definition = "Page: Movimentações (movimentacoes).\n\nPurpose: Permitir que o estoquista consulte as movimentações de estoque e registre uma entrada ou saída de unidades para um produto, atualizando o saldo correspondente.\n\nActors: estoquista.\n\nExperience: category guidance; No explicit style preference; used the category guidance. Selected category guidance for page11.\n\nSelected source: _102020_/l4/collabux/templates/categoryList.json sha256:9b1275fc3db9069c67dad58c10768614c9146217a8794365813166a218725beb.\n\nAuthority references: actor:estoquista.\n\nThe approved shared definition, DTOs, grants, rules and design-system dependencies are authoritative. Do not add operations, data, state, permissions, totals or saves absent from those sources.\n\nOperation create on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules movimentacaoEstoqueImutavel (l4/controleEstoque/rules.defs.ts#rules.movimentacaoEstoqueImutavel), quantidadeMovimentadaPositiva (l4/controleEstoque/rules.defs.ts#rules.quantidadeMovimentadaPositiva), registroMovimentacaoAtualizaSaldo (l4/controleEstoque/rules.defs.ts#rules.registroMovimentacaoAtualizaSaldo).\n\nOperation list on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nOperation list on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nPresentation: mobile.\n\nCompose for a fluid narrow viewport: preview at 390px and check 360px and 430px. Reflow lists, details and panels into a readable sequence where needed; do not squeeze a desktop table or allow horizontal overflow. Keep actions touch-accessible and keyboard operable. Choose the sequence for this page rather than applying one mobile template everywhere.\n\nEach organism below belongs to its existing shared content scenario. When that scenario is inactive, keep its content mounted but hidden, inert and outside keyboard focus. Do not invent content scenarios or controls.\n\nOrganism organism.list.1 (list) in content content.list; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListMovimentacaoEstoqueOutput.movimentacaoEstoqueProduto.details.identification.name, ListMovimentacaoEstoqueOutput.movimentadoEm, ListMovimentacaoEstoqueOutput.details.tipo, ListMovimentacaoEstoqueOutput.details.quantidade. Mostra as movimentações em registros sequenciais de leitura rápida, priorizando nome do produto, data e hora, tipo e quantidade sem exigir rolagem horizontal. O histórico mantém estados acessíveis de carregamento, vazio e erro e pode ser percorrido por toque e por leitor de tela.\n\nOrganism organism.form.1 (form) in content content.form; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.id, ListProdutoOutput.details.identification.name, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Organiza o registro em sequência de toque: escolha do produto com seu saldo atual e quantidade mínima, seguida de data e hora, tipo e quantidade positiva. Os controles têm rótulos e indicação de obrigatoriedade, mantêm mensagens de validação próximas ao campo e preservam acesso por teclado e tecnologias assistivas em telas estreitas.\n\nOrganism organism.actions.1 (actions) in content content.actions; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListMovimentacaoEstoqueOutput.id, ListProdutoOutput.details.controleEstoque.saldoAtual. Disponibiliza um acionamento de toque claro para registrar a movimentação quando todos os dados obrigatórios estiverem preenchidos. Exibe processamento sem permitir envio duplicado e comunica sucesso ou erro de forma acessível; no sucesso, atualiza o histórico com a identificação do registro e o saldo atual do produto. O registro permanece inalterável depois de concluído." as const;
+export const definition = "Page: Movimentações (movimentacoes).\n\nPurpose: O estoquista consulta o histórico de movimentações e os saldos dos produtos, seleciona um produto e registra uma entrada ou saída com data e hora, tipo e quantidade positiva para atualizar o saldo.\n\nActors: estoquista.\n\nExperience: category guidance; No explicit style preference; used the category guidance. Selected category guidance for page11.\n\nSelected source: _102020_/l4/collabux/templates/categoryList.json sha256:9b1275fc3db9069c67dad58c10768614c9146217a8794365813166a218725beb.\n\nAuthority references: actor:estoquista.\n\nThe approved shared definition, DTOs, grants, rules and design-system dependencies are authoritative. Do not add operations, data, state, permissions, totals or saves absent from those sources.\n\nOperation create on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules movimentacaoEstoqueImutavel (l4/controleEstoque/rules.defs.ts#rules.movimentacaoEstoqueImutavel), quantidadeMovimentadaPositiva (l4/controleEstoque/rules.defs.ts#rules.quantidadeMovimentadaPositiva), registroMovimentacaoAtualizaSaldo (l4/controleEstoque/rules.defs.ts#rules.registroMovimentacaoAtualizaSaldo).\n\nOperation list on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nOperation list on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nPresentation: mobile.\n\nCompose for a fluid narrow viewport: preview at 390px and check 360px and 430px. Reflow lists, details and panels into a readable sequence where needed; do not squeeze a desktop table or allow horizontal overflow. Keep actions touch-accessible and keyboard operable. Choose the sequence for this page rather than applying one mobile template everywhere.\n\nEach organism below belongs to its existing shared content scenario. When that scenario is inactive, keep its content mounted but hidden, inert and outside keyboard focus. Do not invent content scenarios or controls.\n\nOrganism organism.list.1 (list) in content content.list; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListMovimentacaoEstoqueOutput.movimentadoEm, ListMovimentacaoEstoqueOutput.details.tipo, ListMovimentacaoEstoqueOutput.details.quantidade, ListMovimentacaoEstoqueOutput.movimentacaoEstoqueProduto.details.identification.name, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Em tela estreita, prioriza uma leitura sequencial e tocável do histórico, mostrando em cada registro o produto relacionado, data e hora, tipo e quantidade. Mantém a possibilidade de localizar e selecionar um produto para consultar saldo atual, quantidade mínima e indicação de saldo abaixo do mínimo, sem depender de rolagem horizontal. Os estados de carregamento, ausência de registros e erro da consulta são comunicados com texto acessível.\n\nOrganism organism.form.1 (form) in content content.form; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Organiza o registro em sequência de leitura e toque: contexto do produto selecionado com nome, saldo atual, quantidade mínima e alerta de saldo abaixo do mínimo, seguido de data e hora, tipo e quantidade. Mantém todos os campos obrigatórios e a seleção do produto, com rótulos associados, áreas de toque adequadas e feedback de validação e erro anunciado de forma acessível, sem remover capacidades em telas de 360 a 430 pixels.\n\nOrganism organism.actions.1 (actions) in content content.actions; declared capabilities/actions: createMovimentacaoEstoque, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.controleEstoque.saldoAtual. Mantém um comando de registro claramente identificável e acessível por toque após o preenchimento dos campos obrigatórios. Durante o envio, informa processamento e evita novo disparo; em sucesso ou erro, fornece retorno anunciado. Ao concluir, conserva a atualização do histórico e da consulta de produtos para exibir o saldo atual resultante, sem permitir editar uma movimentação registrada." as const;
 
 export const pipeline = [
   {
@@ -222,13 +222,26 @@ export const pipeline = [
             "candidates": [
               "groupviewdata--ml-vertical-record-list"
             ],
-            "reason": "A coleção de movimentações pode ser apresentada como itens empilhados e escaneáveis em largura reduzida.",
+            "reason": "Uma lista vertical de registros preserva a leitura do histórico em espaço reduzido.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
             "usageContractReference": "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
             "usageContractVia": "stor",
             "usageContractSha256": "sha256:23632c5755e10bf0b0fd2b396c497bb15de577cbcbc1c01ccdb7a27a383c68c9"
+          },
+          {
+            "groupId": "groupSelectOne",
+            "candidates": [
+              "groupselectone--ml-select-one-autocomplete"
+            ],
+            "reason": "A seleção de um produto entre os resultados disponíveis pode exigir localização em uma lista maior.",
+            "indexReference": "_102040_/l2/molecules/groupselectone/index.defs.ts",
+            "indexVia": "stor",
+            "indexSha256": "sha256:20b935861b3c60bddb4b2d6890d5189988430900c74338e5b58f2f2243273a5e",
+            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupSelectOne/usage.ts",
+            "usageContractVia": "stor",
+            "usageContractSha256": "sha256:71f1e28821255daecedd4f2ccd77031042841a18ee52c6bd2aa4327a81654783"
           }
         ]
       },
@@ -393,9 +406,9 @@ export const pipeline = [
             "groupId": "groupSelectOne",
             "candidates": [
               "groupselectone--ml-select-one-autocomplete",
-              "groupselectone--ml-segmented-control"
+              "groupselectone--ml-radio-group"
             ],
-            "reason": "A seleção de produto pode exigir localização em uma lista e o tipo possui duas opções mutuamente exclusivas.",
+            "reason": "O produto continua sendo uma única seleção e o tipo possui duas opções mutuamente exclusivas.",
             "indexReference": "_102040_/l2/molecules/groupselectone/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:20b935861b3c60bddb4b2d6890d5189988430900c74338e5b58f2f2243273a5e",
@@ -408,7 +421,7 @@ export const pipeline = [
             "candidates": [
               "groupenterdatetime--ml-datetime-picker"
             ],
-            "reason": "A movimentação exige data e hora.",
+            "reason": "A data e hora continuam sendo informadas diretamente no registro.",
             "indexReference": "_102040_/l2/molecules/groupenterdatetime/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:2ba95b71fec77f2f7ee120e37d41d2a11a6672423a7a0a924112d5cf90a717dd",
@@ -421,7 +434,7 @@ export const pipeline = [
             "candidates": [
               "groupenternumber--ml-number-stepper"
             ],
-            "reason": "A quantidade positiva é informada em um controle adequado ao toque.",
+            "reason": "A quantidade positiva pode ser informada com controle adequado ao toque.",
             "indexReference": "_102040_/l2/molecules/groupenternumber/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:94a52c28ec828918c77800447f098381bc32de7e922344d8f4ec68924211cc62",
@@ -593,7 +606,7 @@ export const pipeline = [
             "candidates": [
               "grouptriggeraction--ml-button-standard"
             ],
-            "reason": "O organismo dispara o comando de registro com estado de carregamento.",
+            "reason": "O comando principal precisa de alvo de toque claro e suporte a estado de processamento.",
             "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
@@ -607,7 +620,7 @@ export const pipeline = [
               "groupnotifyuser--ml-toast-notification",
               "groupnotifyuser--ml-contextual-feedback"
             ],
-            "reason": "O comando precisa informar sucesso e erro sem ocultar o contexto do preenchimento.",
+            "reason": "Os estados de sucesso e falha do registro requerem retorno imediato e acessível.",
             "indexReference": "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:85dae4dc3ad57039dfeb5f9a091bfcbbb0263b74709cdca72f002a6168d382f7",

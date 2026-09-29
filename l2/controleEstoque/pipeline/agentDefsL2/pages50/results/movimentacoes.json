@@ -4,8 +4,8 @@
   "module": "controleEstoque",
   "pageId": "movimentacoes",
   "status": "approved",
-  "snapshotHash": "sha256:83f9cf72153a2ce33f60a360c0bb111b1b1b9dca5de92a6809f818d9996ee05f",
-  "sharedHash": "sha256:5427bd34dbafd55d8581caaf1f77db15be97935da6a08c9eed353192ccfcbf7c",
+  "snapshotHash": "sha256:7683c4a6bb31614607945bd1d0cdcd00963fedca2b9bdb0abaea33711f1a9a14",
+  "sharedHash": "sha256:2b55f96eb4bad83ce80b4d8220c6bc652d6af96660067c2d186dc111f0ea392e",
   "contextHash": "sha256:4d983481a475a701b7cdffe1ef4bb6d56a9937d96eacc96b9a03610aa8e908c9",
   "catalogHash": "sha256:285e42e596b7bde092824c38a446f23d7bd4ac40fc551a0e0d58be6d08f135dc",
   "skillHashes": {
@@ -13,7 +13,7 @@
     "_102020_/l2/agentDefsL2/skills/pageCategories/inventoryControl.md": "sha256:c7c546b14df520e4c4b9808883803fa4fdfdacd02731ffe83bd8f8aed4ff3c90"
   },
   "categoryRef": "inventoryControl",
-  "categoryReason": "A página concentra a consulta do histórico de entradas e saídas e o registro manual de movimentações que atualizam o saldo de produtos.",
+  "categoryReason": "A página concentra a consulta de entradas e saídas e o registro de movimentações que atualizam o saldo de produtos, funções próprias do controle de estoque.",
   "categoryEvidenceRefs": [
     "listMovimentacaoEstoque",
     "listProduto",
@@ -25,8 +25,8 @@
     "organism.actions.1"
   ],
   "moleculeReasons": {
-    "desktop": "As recomendações priorizam a consulta estruturada do histórico, o preenchimento validado da movimentação e o acionamento com retorno de estado.",
-    "mobile": "No mobile, o histórico é priorizado como registros empilhados e o preenchimento e envio preservam controles de toque legíveis e feedback acessível."
+    "desktop": "As recomendações cobrem a leitura estruturada do histórico, a seleção do produto, os campos editáveis do registro e o disparo do comando com retorno de estado.",
+    "mobile": "No mobile, as recomendações privilegiam registros em sequência, seleção com busca e controles tocáveis, preservando consulta, registro e retorno de estado."
   },
   "moleculeReceipt": {
     "schemaVersion": "2026-09-23-agent-defs-l2-molecule-receipt-v2",
@@ -497,13 +497,26 @@
             "candidates": [
               "groupviewtable--ml-data-table"
             ],
-            "reason": "A consulta retorna uma coleção de movimentações com campos estruturados para leitura comparativa.",
+            "reason": "O histórico possui registros com campos estruturados que precisam ser consultados de forma comparável.",
             "indexReference": "_102040_/l2/molecules/groupviewtable/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:c63469f28e5e81594f34672f8959fba283b99c9869c60e3def070091642e70c9",
             "usageContractReference": "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts",
             "usageContractVia": "stor",
             "usageContractSha256": "sha256:230955ba3517ab88fa6eb2ec4bcb1db7eeceaa260928f7c9020ea41788b2b23c"
+          },
+          {
+            "groupId": "groupSelectOne",
+            "candidates": [
+              "groupselectone--ml-combobox"
+            ],
+            "reason": "A seleção de um único produto usa a consulta de produtos disponíveis.",
+            "indexReference": "_102040_/l2/molecules/groupselectone/index.defs.ts",
+            "indexVia": "stor",
+            "indexSha256": "sha256:20b935861b3c60bddb4b2d6890d5189988430900c74338e5b58f2f2243273a5e",
+            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupSelectOne/usage.ts",
+            "usageContractVia": "stor",
+            "usageContractSha256": "sha256:71f1e28821255daecedd4f2ccd77031042841a18ee52c6bd2aa4327a81654783"
           }
         ]
       },
@@ -668,9 +681,9 @@
             "groupId": "groupSelectOne",
             "candidates": [
               "groupselectone--ml-combobox",
-              "groupselectone--ml-radio-group"
+              "groupselectone--ml-select"
             ],
-            "reason": "Há seleção única de produto e escolha entre os tipos de movimentação.",
+            "reason": "O produto é selecionado de uma lista e o tipo da movimentação exige uma única opção.",
             "indexReference": "_102040_/l2/molecules/groupselectone/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:20b935861b3c60bddb4b2d6890d5189988430900c74338e5b58f2f2243273a5e",
@@ -683,7 +696,7 @@
             "candidates": [
               "groupenterdatetime--ml-datetime-picker"
             ],
-            "reason": "A movimentação exige data e hora.",
+            "reason": "O registro exige a informação editável de data e hora da movimentação.",
             "indexReference": "_102040_/l2/molecules/groupenterdatetime/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:2ba95b71fec77f2f7ee120e37d41d2a11a6672423a7a0a924112d5cf90a717dd",
@@ -696,7 +709,7 @@
             "candidates": [
               "groupenternumber--ml-number-input"
             ],
-            "reason": "A quantidade é um número inteiro positivo informado pelo estoquista.",
+            "reason": "A quantidade é uma entrada numérica positiva.",
             "indexReference": "_102040_/l2/molecules/groupenternumber/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:94a52c28ec828918c77800447f098381bc32de7e922344d8f4ec68924211cc62",
@@ -868,7 +881,7 @@
             "candidates": [
               "grouptriggeraction--ml-button-standard"
             ],
-            "reason": "O organismo executa o comando de registro da movimentação.",
+            "reason": "O registro é um comando primário único que deve indicar indisponibilidade ou processamento.",
             "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
@@ -882,7 +895,7 @@
               "groupnotifyuser--ml-toast-notification",
               "groupnotifyuser--ml-contextual-feedback"
             ],
-            "reason": "O comando possui estados de sucesso, carregamento e erro que precisam ser comunicados.",
+            "reason": "O comando possui estados de sucesso e erro que exigem retorno claro ao estoquista.",
             "indexReference": "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:85dae4dc3ad57039dfeb5f9a091bfcbbb0263b74709cdca72f002a6168d382f7",
@@ -1056,13 +1069,26 @@
             "candidates": [
               "groupviewdata--ml-vertical-record-list"
             ],
-            "reason": "A coleção de movimentações pode ser apresentada como itens empilhados e escaneáveis em largura reduzida.",
+            "reason": "Uma lista vertical de registros preserva a leitura do histórico em espaço reduzido.",
             "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
             "usageContractReference": "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
             "usageContractVia": "stor",
             "usageContractSha256": "sha256:23632c5755e10bf0b0fd2b396c497bb15de577cbcbc1c01ccdb7a27a383c68c9"
+          },
+          {
+            "groupId": "groupSelectOne",
+            "candidates": [
+              "groupselectone--ml-select-one-autocomplete"
+            ],
+            "reason": "A seleção de um produto entre os resultados disponíveis pode exigir localização em uma lista maior.",
+            "indexReference": "_102040_/l2/molecules/groupselectone/index.defs.ts",
+            "indexVia": "stor",
+            "indexSha256": "sha256:20b935861b3c60bddb4b2d6890d5189988430900c74338e5b58f2f2243273a5e",
+            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupSelectOne/usage.ts",
+            "usageContractVia": "stor",
+            "usageContractSha256": "sha256:71f1e28821255daecedd4f2ccd77031042841a18ee52c6bd2aa4327a81654783"
           }
         ]
       },
@@ -1227,9 +1253,9 @@
             "groupId": "groupSelectOne",
             "candidates": [
               "groupselectone--ml-select-one-autocomplete",
-              "groupselectone--ml-segmented-control"
+              "groupselectone--ml-radio-group"
             ],
-            "reason": "A seleção de produto pode exigir localização em uma lista e o tipo possui duas opções mutuamente exclusivas.",
+            "reason": "O produto continua sendo uma única seleção e o tipo possui duas opções mutuamente exclusivas.",
             "indexReference": "_102040_/l2/molecules/groupselectone/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:20b935861b3c60bddb4b2d6890d5189988430900c74338e5b58f2f2243273a5e",
@@ -1242,7 +1268,7 @@
             "candidates": [
               "groupenterdatetime--ml-datetime-picker"
             ],
-            "reason": "A movimentação exige data e hora.",
+            "reason": "A data e hora continuam sendo informadas diretamente no registro.",
             "indexReference": "_102040_/l2/molecules/groupenterdatetime/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:2ba95b71fec77f2f7ee120e37d41d2a11a6672423a7a0a924112d5cf90a717dd",
@@ -1255,7 +1281,7 @@
             "candidates": [
               "groupenternumber--ml-number-stepper"
             ],
-            "reason": "A quantidade positiva é informada em um controle adequado ao toque.",
+            "reason": "A quantidade positiva pode ser informada com controle adequado ao toque.",
             "indexReference": "_102040_/l2/molecules/groupenternumber/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:94a52c28ec828918c77800447f098381bc32de7e922344d8f4ec68924211cc62",
@@ -1427,7 +1453,7 @@
             "candidates": [
               "grouptriggeraction--ml-button-standard"
             ],
-            "reason": "O organismo dispara o comando de registro com estado de carregamento.",
+            "reason": "O comando principal precisa de alvo de toque claro e suporte a estado de processamento.",
             "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
@@ -1441,7 +1467,7 @@
               "groupnotifyuser--ml-toast-notification",
               "groupnotifyuser--ml-contextual-feedback"
             ],
-            "reason": "O comando precisa informar sucesso e erro sem ocultar o contexto do preenchimento.",
+            "reason": "Os estados de sucesso e falha do registro requerem retorno imediato e acessível.",
             "indexReference": "_102040_/l2/molecules/groupnotifyuser/index.defs.ts",
             "indexVia": "stor",
             "indexSha256": "sha256:85dae4dc3ad57039dfeb5f9a091bfcbbb0263b74709cdca72f002a6168d382f7",
@@ -1454,8 +1480,8 @@
     ]
   },
   "sourceHashes": {
-    "desktop": "sha256:93886a2401a66e21b063cde3e67c8b50abe47340832e6c1d1d3d7199d393241f",
-    "mobile": "sha256:39a2c1994743edbeda2d94c6501704dac75385d93e8631ccf6c7d3f56e9da187"
+    "desktop": "sha256:090ae2a27f6ac3d77255ac66483faeb320fb54f86ab3464bb6d9613128957b39",
+    "mobile": "sha256:ecc374527dc17eb8bf26e1ea1af66b031f40d74424c1a841c16b334cd0085ed4"
   },
   "artifactPaths": {
     "desktop": "l2/controleEstoque/web/desktop/page11/movimentacoes.defs.ts",
@@ -1465,5 +1491,5 @@
     "desktop": "movimentacoes__desktop__page11",
     "mobile": "movimentacoes__mobile__page11"
   },
-  "attempts": 2
+  "attempts": 1
 }
