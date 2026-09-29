@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "usecase",
   "artifactId": "listProduto",
   "moduleName": "controleEstoque",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [
     "_102034_/l4/ontology/mdm.defs.ts",
     "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",

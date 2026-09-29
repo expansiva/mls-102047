@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "domainEntity",
   "artifactId": "Produto",
   "moduleName": "controleEstoque",
-  "status": "blocked",
+  "status": "generated",
   "dependencies": [],
   "data": {
     "entityId": "Produto",

@@ -5,7 +5,7 @@ export const definition = {
   "artifactType": "usecase",
   "artifactId": "createMovimentacaoEstoque",
   "moduleName": "controleEstoque",
-  "status": "pending",
+  "status": "generated",
   "dependencies": [
     "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
     "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
