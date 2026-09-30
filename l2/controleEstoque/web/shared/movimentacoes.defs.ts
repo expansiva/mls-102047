@@ -1,1426 +1,562 @@
 /// <mls fileReference="_102047_/l2/controleEstoque/web/shared/movimentacoes.defs.ts" enhancement="_blank"/>
 
 export const definition = {
-  "schemaVersion": "2026-09-26-agent-defs-l2-shared-v4",
-  "moduleName": "controleEstoque",
+  "schemaVersion": "2026-09-29-agent-defs-l2-definition-v1",
+  "artifactType": "shared",
   "pageId": "movimentacoes",
-  "pageName": "Movimentações",
-  "baseClassName": "MovimentacoesShared",
-  "routePattern": "/movimentacoes",
+  "intent": "Acompanho as entradas e saídas já registradas. Registro uma entrada ou saída de unidades de um produto. Registro a movimentação e atualizo o saldo.",
+  "references": [
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/access.defs.ts"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/ontology/Produto.defs.ts"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/rules.defs.ts"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/workflows.defs.ts"
+    }
+  ],
   "contractRef": {
-    "defPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-    "calls": [
-      {
-        "actionId": "createMovimentacaoEstoque",
-        "routeConst": "createMovimentacaoEstoqueRoute",
-        "inputType": "CreateMovimentacaoEstoqueInput",
-        "outputType": "CreateMovimentacaoEstoqueOutput"
-      },
-      {
-        "actionId": "listMovimentacaoEstoque",
-        "routeConst": "listMovimentacaoEstoqueRoute",
-        "inputType": "ListMovimentacaoEstoqueInput",
-        "outputType": "ListMovimentacaoEstoqueOutput"
-      },
-      {
-        "actionId": "listProduto",
-        "routeConst": "listProdutoRoute",
-        "inputType": "ListProdutoInput",
-        "outputType": "ListProdutoOutput"
-      }
-    ]
+    "purpose": "page operation contract",
+    "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts"
   },
   "states": [
     {
-      "stateKey": "ui.movimentacoes.pageStatus",
-      "memberName": "pageStatus",
-      "name": "pageStatus",
-      "kind": "pageStatus",
-      "defaultValue": "idle",
-      "valueSet": [
-        "idle",
-        "loading",
-        "empty",
-        "success",
-        "error"
-      ]
-    },
-    {
-      "stateKey": "ui.movimentacoes.scenary",
-      "memberName": "scenary",
-      "name": "scenary",
-      "kind": "uiScenary",
-      "defaultValue": "base",
-      "valueSet": [
-        "base",
-        "createMovimentacaoEstoque"
-      ]
-    },
-    {
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.input.produtoId",
-      "memberName": "stateCreateMovimentacaoEstoqueProdutoId",
-      "name": "produtoId",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Produto",
-      "description": "Produto mestre ao qual a entrada ou saída de estoque se refere.",
-      "actionRef": "createMovimentacaoEstoque",
-      "contractRef": "CreateMovimentacaoEstoqueInput.produtoId",
-      "ontologyRef": "MovimentacaoEstoque.produtoId",
-      "dtoPath": "produtoId",
+      "id": "stateCreateMovimentacaoEstoqueProdutoId",
+      "purpose": "Produto",
+      "origin": {
+        "purpose": "selectedEntity",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueInput.produtoId"
+      },
+      "typeRef": {
+        "purpose": "contract input type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueInput.produtoId"
+      },
+      "uiType": "string",
+      "required": true,
+      "selection": {
+        "sourceActionRef": "listProduto",
+        "resultStateRef": "stateListProdutoResult",
+        "identityRef": {
+          "purpose": "selected record identity",
+          "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "fragment": "ListProdutoOutput.id"
+        }
+      },
       "source": "selectedEntity",
       "presentation": "selection",
-      "editable": false,
-      "required": true
+      "editable": false
     },
     {
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.input.movimentadoEm",
-      "memberName": "stateCreateMovimentacaoEstoqueMovimentadoEm",
-      "name": "movimentadoEm",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Data e hora da movimentação",
-      "description": "Data e hora em que a entrada ou saída foi registrada, usada para ordenar e consultar o histórico do produto.",
-      "actionRef": "createMovimentacaoEstoque",
-      "contractRef": "CreateMovimentacaoEstoqueInput.movimentadoEm",
-      "ontologyRef": "MovimentacaoEstoque.movimentadoEm",
-      "dtoPath": "movimentadoEm",
+      "id": "stateCreateMovimentacaoEstoqueMovimentadoEm",
+      "purpose": "Data e hora da movimentação",
+      "origin": {
+        "purpose": "userInput",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueInput.movimentadoEm"
+      },
+      "typeRef": {
+        "purpose": "contract input type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueInput.movimentadoEm"
+      },
+      "uiType": "string",
+      "required": true,
       "source": "userInput",
       "presentation": "form",
-      "editable": true,
-      "required": true
+      "editable": true
     },
     {
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.input.details.tipo",
-      "memberName": "stateCreateMovimentacaoEstoqueDetailsTipo",
-      "name": "tipo",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Tipo de movimentação",
-      "description": "Indica se as unidades foram adicionadas ao estoque ou retiradas dele.",
-      "enumOptions": [
-        {
-          "value": "entrada",
-          "label": "Entrada"
-        },
-        {
-          "value": "saida",
-          "label": "Saída"
-        }
-      ],
-      "valueSet": [
+      "id": "stateCreateMovimentacaoEstoqueDetailsTipo",
+      "purpose": "Tipo de movimentação",
+      "origin": {
+        "purpose": "userInput",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueInput.details.tipo"
+      },
+      "typeRef": {
+        "purpose": "contract input type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueInput.details.tipo"
+      },
+      "uiType": "string",
+      "required": true,
+      "values": [
         "entrada",
         "saida"
       ],
-      "actionRef": "createMovimentacaoEstoque",
-      "contractRef": "CreateMovimentacaoEstoqueInput.details.tipo",
-      "ontologyRef": "MovimentacaoEstoque.details.tipo",
-      "dtoPath": "details.tipo",
       "source": "userInput",
       "presentation": "form",
-      "editable": true,
-      "required": true
+      "editable": true
     },
     {
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.input.details.quantidade",
-      "memberName": "stateCreateMovimentacaoEstoqueDetailsQuantidade",
-      "name": "quantidade",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Quantidade",
-      "description": "Quantidade positiva de unidades que entra ou sai do estoque.",
-      "actionRef": "createMovimentacaoEstoque",
-      "contractRef": "CreateMovimentacaoEstoqueInput.details.quantidade",
-      "ontologyRef": "MovimentacaoEstoque.details.quantidade",
-      "dtoPath": "details.quantidade",
+      "id": "stateCreateMovimentacaoEstoqueDetailsQuantidade",
+      "purpose": "Quantidade",
+      "origin": {
+        "purpose": "userInput",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueInput.details.quantidade"
+      },
+      "typeRef": {
+        "purpose": "contract input type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueInput.details.quantidade"
+      },
+      "uiType": "number",
+      "required": true,
       "source": "userInput",
       "presentation": "form",
-      "editable": true,
-      "required": true
+      "editable": true
     },
     {
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.status",
-      "memberName": "stateCreateMovimentacaoEstoqueStatus",
-      "name": "createMovimentacaoEstoqueStatus",
-      "kind": "actionStatus",
-      "defaultValue": "idle",
-      "valueSet": [
+      "id": "stateCreateMovimentacaoEstoqueResult",
+      "purpose": "create result",
+      "typeRef": {
+        "purpose": "contract output type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "CreateMovimentacaoEstoqueOutput"
+      }
+    },
+    {
+      "id": "stateCreateMovimentacaoEstoqueStatus",
+      "purpose": "request feedback status",
+      "uiType": "string",
+      "initialValue": "idle",
+      "values": [
         "idle",
         "loading",
         "success",
         "error"
-      ],
-      "actionRef": "createMovimentacaoEstoque"
+      ]
     },
     {
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.error",
-      "memberName": "stateCreateMovimentacaoEstoqueError",
-      "name": "createMovimentacaoEstoqueError",
-      "kind": "actionError",
-      "defaultValue": null,
-      "actionRef": "createMovimentacaoEstoque"
+      "id": "stateCreateMovimentacaoEstoqueError",
+      "purpose": "request feedback error",
+      "uiType": "object"
     },
     {
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.result",
-      "memberName": "stateCreateMovimentacaoEstoqueResult",
-      "name": "createMovimentacaoEstoqueResult",
-      "kind": "commandOutput",
-      "defaultValue": null,
-      "actionRef": "createMovimentacaoEstoque",
-      "contractRef": "CreateMovimentacaoEstoqueOutput",
-      "outputShape": "object"
-    },
-    {
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.input.id",
-      "memberName": "stateListMovimentacaoEstoqueId",
-      "name": "id",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Id",
-      "actionRef": "listMovimentacaoEstoque",
-      "contractRef": "ListMovimentacaoEstoqueInput.id",
-      "ontologyRef": "MovimentacaoEstoque.id",
-      "dtoPath": "id",
-      "source": "userInput",
-      "presentation": "form",
-      "editable": true,
-      "required": false
-    },
-    {
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.input.produtoId",
-      "memberName": "stateListMovimentacaoEstoqueProdutoId",
-      "name": "produtoId",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Produto",
-      "description": "Produto mestre ao qual a entrada ou saída de estoque se refere.",
-      "actionRef": "listMovimentacaoEstoque",
-      "contractRef": "ListMovimentacaoEstoqueInput.produtoId",
-      "ontologyRef": "MovimentacaoEstoque.produtoId",
-      "dtoPath": "produtoId",
-      "source": "selectedEntity",
-      "presentation": "selection",
-      "editable": false,
-      "required": false
-    },
-    {
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.input.movimentadoEm",
-      "memberName": "stateListMovimentacaoEstoqueMovimentadoEm",
-      "name": "movimentadoEm",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Data e hora da movimentação",
-      "description": "Data e hora em que a entrada ou saída foi registrada, usada para ordenar e consultar o histórico do produto.",
-      "actionRef": "listMovimentacaoEstoque",
-      "contractRef": "ListMovimentacaoEstoqueInput.movimentadoEm",
-      "ontologyRef": "MovimentacaoEstoque.movimentadoEm",
-      "dtoPath": "movimentadoEm",
-      "source": "userInput",
-      "presentation": "form",
-      "editable": true,
-      "required": false
-    },
-    {
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.input.page",
-      "memberName": "stateListMovimentacaoEstoquePage",
-      "name": "page",
-      "kind": "input",
-      "defaultValue": null,
-      "actionRef": "listMovimentacaoEstoque",
-      "contractRef": "ListMovimentacaoEstoqueInput.page",
-      "ontologyRef": "MovimentacaoEstoque.$page",
-      "dtoPath": "page",
+      "id": "stateListMovimentacaoEstoquePage",
+      "purpose": "routeParam page",
+      "origin": {
+        "purpose": "routeParam",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "ListMovimentacaoEstoqueInput.page"
+      },
+      "typeRef": {
+        "purpose": "contract input type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "ListMovimentacaoEstoqueInput.page"
+      },
+      "uiType": "number",
+      "required": false,
       "source": "routeParam",
       "presentation": "route",
-      "editable": false,
-      "required": false
+      "editable": false
     },
     {
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.status",
-      "memberName": "stateListMovimentacaoEstoqueStatus",
-      "name": "listMovimentacaoEstoqueStatus",
-      "kind": "actionStatus",
-      "defaultValue": "idle",
-      "valueSet": [
+      "id": "stateListMovimentacaoEstoqueResult",
+      "purpose": "list result",
+      "typeRef": {
+        "purpose": "contract output type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "ListMovimentacaoEstoqueOutput"
+      },
+      "uiType": "object"
+    },
+    {
+      "id": "stateListMovimentacaoEstoqueStatus",
+      "purpose": "request feedback status",
+      "uiType": "string",
+      "initialValue": "idle",
+      "values": [
         "idle",
         "loading",
         "success",
         "error"
-      ],
-      "actionRef": "listMovimentacaoEstoque"
+      ]
     },
     {
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.error",
-      "memberName": "stateListMovimentacaoEstoqueError",
-      "name": "listMovimentacaoEstoqueError",
-      "kind": "actionError",
-      "defaultValue": null,
-      "actionRef": "listMovimentacaoEstoque"
+      "id": "stateListMovimentacaoEstoqueError",
+      "purpose": "request feedback error",
+      "uiType": "object"
     },
     {
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.result",
-      "memberName": "stateListMovimentacaoEstoqueResult",
-      "name": "listMovimentacaoEstoqueResult",
-      "kind": "queryResult",
-      "defaultValue": [],
-      "actionRef": "listMovimentacaoEstoque",
-      "contractRef": "ListMovimentacaoEstoqueOutput",
-      "outputShape": "array"
-    },
-    {
-      "stateKey": "ui.movimentacoes.listProduto.input.id",
-      "memberName": "stateListProdutoId",
-      "name": "id",
-      "kind": "input",
-      "defaultValue": null,
-      "description": "mdmId; stable through promotion and merge.",
-      "actionRef": "listProduto",
-      "contractRef": "ListProdutoInput.id",
-      "ontologyRef": "Produto.id",
-      "dtoPath": "id",
-      "source": "userInput",
-      "presentation": "form",
-      "editable": true,
-      "required": false
-    },
-    {
-      "stateKey": "ui.movimentacoes.listProduto.input.details.identification.subtype",
-      "memberName": "stateListProdutoDetailsIdentificationSubtype",
-      "name": "subtype",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Tipo de cadastro",
-      "description": "Identifica este cadastro mestre como um produto.",
-      "enumOptions": [
-        {
-          "value": "Product",
-          "label": "Produto"
-        }
-      ],
-      "valueSet": [
-        "Product"
-      ],
-      "actionRef": "listProduto",
-      "contractRef": "ListProdutoInput.details.identification.subtype",
-      "ontologyRef": "Produto.details.identification.subtype",
-      "dtoPath": "details.identification.subtype",
-      "source": "userInput",
-      "presentation": "form",
-      "editable": true,
-      "required": false
-    },
-    {
-      "stateKey": "ui.movimentacoes.listProduto.input.details.identification.name",
-      "memberName": "stateListProdutoDetailsIdentificationName",
-      "name": "name",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Nome do produto",
-      "description": "Nome usado pelo estoquista para localizar e reconhecer o produto controlado.",
-      "actionRef": "listProduto",
-      "contractRef": "ListProdutoInput.details.identification.name",
-      "ontologyRef": "Produto.details.identification.name",
-      "dtoPath": "details.identification.name",
-      "source": "userInput",
-      "presentation": "form",
-      "editable": true,
-      "required": false
-    },
-    {
-      "stateKey": "ui.movimentacoes.listProduto.input.details.identification.status",
-      "memberName": "stateListProdutoDetailsIdentificationStatus",
-      "name": "status",
-      "kind": "input",
-      "defaultValue": null,
-      "title": "Situação do cadastro",
-      "description": "Situação do produto no cadastro mestre, usada para indicar se ele está ativo para o controle de estoque.",
-      "enumOptions": [
-        {
-          "value": "Active",
-          "label": "Ativo"
-        },
-        {
-          "value": "Inactive",
-          "label": "Inativo"
-        },
-        {
-          "value": "Merged",
-          "label": "Mesclado"
-        },
-        {
-          "value": "Blocked",
-          "label": "Bloqueado"
-        }
-      ],
-      "valueSet": [
-        "Active",
-        "Inactive",
-        "Merged",
-        "Blocked"
-      ],
-      "actionRef": "listProduto",
-      "contractRef": "ListProdutoInput.details.identification.status",
-      "ontologyRef": "Produto.details.identification.status",
-      "dtoPath": "details.identification.status",
-      "source": "userInput",
-      "presentation": "form",
-      "editable": true,
-      "required": false
-    },
-    {
-      "stateKey": "ui.movimentacoes.listProduto.input.page",
-      "memberName": "stateListProdutoPage",
-      "name": "page",
-      "kind": "input",
-      "defaultValue": null,
-      "actionRef": "listProduto",
-      "contractRef": "ListProdutoInput.page",
-      "ontologyRef": "Produto.$page",
-      "dtoPath": "page",
+      "id": "stateListProdutoPage",
+      "purpose": "routeParam page",
+      "origin": {
+        "purpose": "routeParam",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "ListProdutoInput.page"
+      },
+      "typeRef": {
+        "purpose": "contract input type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "ListProdutoInput.page"
+      },
+      "uiType": "number",
+      "required": false,
       "source": "routeParam",
       "presentation": "route",
-      "editable": false,
-      "required": false
+      "editable": false
     },
     {
-      "stateKey": "ui.movimentacoes.listProduto.status",
-      "memberName": "stateListProdutoStatus",
-      "name": "listProdutoStatus",
-      "kind": "actionStatus",
-      "defaultValue": "idle",
-      "valueSet": [
+      "id": "stateListProdutoResult",
+      "purpose": "list result",
+      "typeRef": {
+        "purpose": "contract output type",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "ListProdutoOutput"
+      },
+      "uiType": "object"
+    },
+    {
+      "id": "stateListProdutoStatus",
+      "purpose": "request feedback status",
+      "uiType": "string",
+      "initialValue": "idle",
+      "values": [
         "idle",
         "loading",
         "success",
         "error"
-      ],
-      "actionRef": "listProduto"
+      ]
     },
     {
-      "stateKey": "ui.movimentacoes.listProduto.error",
-      "memberName": "stateListProdutoError",
-      "name": "listProdutoError",
-      "kind": "actionError",
-      "defaultValue": null,
-      "actionRef": "listProduto"
-    },
-    {
-      "stateKey": "ui.movimentacoes.listProduto.result",
-      "memberName": "stateListProdutoResult",
-      "name": "listProdutoResult",
-      "kind": "queryResult",
-      "defaultValue": [],
-      "actionRef": "listProduto",
-      "contractRef": "ListProdutoOutput",
-      "outputShape": "array"
+      "id": "stateListProdutoError",
+      "purpose": "request feedback error",
+      "uiType": "object"
     }
   ],
   "actions": [
     {
-      "actionId": "set:scenario",
-      "methodName": "setScenario",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.scenary"
+      "id": "createMovimentacaoEstoque",
+      "callRef": {
+        "purpose": "create operation",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "createMovimentacaoEstoqueRoute"
+      },
+      "inputs": [
+        {
+          "parameterRef": {
+            "purpose": "contract input parameter",
+            "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "fragment": "CreateMovimentacaoEstoqueInput.produtoId"
+          },
+          "stateRef": "stateCreateMovimentacaoEstoqueProdutoId"
+        },
+        {
+          "parameterRef": {
+            "purpose": "contract input parameter",
+            "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "fragment": "CreateMovimentacaoEstoqueInput.movimentadoEm"
+          },
+          "stateRef": "stateCreateMovimentacaoEstoqueMovimentadoEm"
+        },
+        {
+          "parameterRef": {
+            "purpose": "contract input parameter",
+            "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "fragment": "CreateMovimentacaoEstoqueInput.details.tipo"
+          },
+          "stateRef": "stateCreateMovimentacaoEstoqueDetailsTipo"
+        },
+        {
+          "parameterRef": {
+            "purpose": "contract input parameter",
+            "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "fragment": "CreateMovimentacaoEstoqueInput.details.quantidade"
+          },
+          "stateRef": "stateCreateMovimentacaoEstoqueDetailsQuantidade"
+        }
       ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.scenary"
-    },
-    {
-      "actionId": "select:createMovimentacaoEstoque:produtoId",
-      "methodName": "selectCreateMovimentacaoEstoqueProdutoId",
-      "kind": "selection",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.createMovimentacaoEstoque.input.produtoId"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.input.produtoId",
-      "selection": {
-        "sourceActionId": "listProduto",
-        "resultStateKey": "ui.movimentacoes.listProduto.result",
-        "identityPath": "id"
-      }
-    },
-    {
-      "actionId": "set:createMovimentacaoEstoque:movimentadoEm",
-      "methodName": "setCreateMovimentacaoEstoqueMovimentadoEm",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.createMovimentacaoEstoque.input.movimentadoEm"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.input.movimentadoEm"
-    },
-    {
-      "actionId": "set:createMovimentacaoEstoque:details.tipo",
-      "methodName": "setCreateMovimentacaoEstoqueDetailsTipo",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.createMovimentacaoEstoque.input.details.tipo"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.input.details.tipo"
-    },
-    {
-      "actionId": "set:createMovimentacaoEstoque:details.quantidade",
-      "methodName": "setCreateMovimentacaoEstoqueDetailsQuantidade",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.createMovimentacaoEstoque.input.details.quantidade"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.createMovimentacaoEstoque.input.details.quantidade"
-    },
-    {
-      "actionId": "createMovimentacaoEstoque",
-      "methodName": "runCreateMovimentacaoEstoque",
-      "kind": "command",
-      "commandRef": "createMovimentacaoEstoque",
-      "routeRef": "createMovimentacaoEstoqueRoute",
-      "inputTypeRef": "CreateMovimentacaoEstoqueInput",
-      "outputTypeRef": "CreateMovimentacaoEstoqueOutput",
-      "inputStateKeys": [
-        "ui.movimentacoes.createMovimentacaoEstoque.input.produtoId",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.movimentadoEm",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.details.tipo",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.details.quantidade"
-      ],
-      "outputStateKeys": [
-        "ui.movimentacoes.createMovimentacaoEstoque.result"
-      ],
-      "statusStateKey": "ui.movimentacoes.createMovimentacaoEstoque.status",
-      "errorStateKey": "ui.movimentacoes.createMovimentacaoEstoque.error",
-      "refreshActionIds": [
+      "resultStateRef": "stateCreateMovimentacaoEstoqueResult",
+      "statusStateRef": "stateCreateMovimentacaoEstoqueStatus",
+      "errorStateRef": "stateCreateMovimentacaoEstoqueError",
+      "refreshActionRefs": [
         "listMovimentacaoEstoque",
         "listProduto"
       ],
-      "operationBinding": {
-        "actorRef": "estoquista",
-        "grantRefs": [
-          "gerenciarEstoque"
-        ],
-        "authorities": [
-          "estoquista"
-        ],
-        "ruleRefs": [
-          {
-            "ruleId": "movimentacaoEstoqueImutavel",
-            "file": "l4/controleEstoque/rules.defs.ts",
-            "symbol": "rules.movimentacaoEstoqueImutavel",
-            "description": "Uma movimentação de estoque não pode ser alterada depois de registrada."
+      "authorityRefs": [
+        {
+          "purpose": "actor estoquista",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "actors.estoquista"
+        },
+        {
+          "purpose": "grant gerenciarEstoque",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "grants.gerenciarEstoque"
+        },
+        {
+          "purpose": "authority estoquista",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "authorities.estoquista"
+        },
+        {
+          "purpose": "rule movimentacaoEstoqueImutavel",
+          "fileRef": "l4/controleEstoque/rules.defs.ts",
+          "fragment": "rules.movimentacaoEstoqueImutavel"
+        },
+        {
+          "purpose": "rule quantidadeMovimentadaPositiva",
+          "fileRef": "l4/controleEstoque/rules.defs.ts",
+          "fragment": "rules.quantidadeMovimentadaPositiva"
+        },
+        {
+          "purpose": "rule registroMovimentacaoAtualizaSaldo",
+          "fileRef": "l4/controleEstoque/rules.defs.ts",
+          "fragment": "rules.registroMovimentacaoAtualizaSaldo"
+        }
+      ]
+    },
+    {
+      "id": "listMovimentacaoEstoque",
+      "callRef": {
+        "purpose": "list operation",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "listMovimentacaoEstoqueRoute"
+      },
+      "inputs": [
+        {
+          "parameterRef": {
+            "purpose": "contract input parameter",
+            "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "fragment": "ListMovimentacaoEstoqueInput.page"
           },
-          {
-            "ruleId": "quantidadeMovimentadaPositiva",
-            "file": "l4/controleEstoque/rules.defs.ts",
-            "symbol": "rules.quantidadeMovimentadaPositiva",
-            "description": "A quantidade registrada em uma movimentação de estoque deve ser um número inteiro positivo."
+          "stateRef": "stateListMovimentacaoEstoquePage"
+        }
+      ],
+      "resultStateRef": "stateListMovimentacaoEstoqueResult",
+      "statusStateRef": "stateListMovimentacaoEstoqueStatus",
+      "errorStateRef": "stateListMovimentacaoEstoqueError",
+      "authorityRefs": [
+        {
+          "purpose": "actor estoquista",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "actors.estoquista"
+        },
+        {
+          "purpose": "grant gerenciarEstoque",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "grants.gerenciarEstoque"
+        },
+        {
+          "purpose": "authority estoquista",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "authorities.estoquista"
+        }
+      ],
+      "initialLoad": true
+    },
+    {
+      "id": "listProduto",
+      "callRef": {
+        "purpose": "list operation",
+        "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "fragment": "listProdutoRoute"
+      },
+      "inputs": [
+        {
+          "parameterRef": {
+            "purpose": "contract input parameter",
+            "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+            "fragment": "ListProdutoInput.page"
           },
-          {
-            "ruleId": "registroMovimentacaoAtualizaSaldo",
-            "file": "l4/controleEstoque/rules.defs.ts",
-            "symbol": "rules.registroMovimentacaoAtualizaSaldo",
-            "description": "O registro de uma entrada ou saída deve atualizar o saldo atual do produto correspondente conforme o tipo e a quantidade movimentada."
-          }
-        ],
-        "sourceHashes": [
-          "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
-          "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
-          "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
-        ]
-      },
-      "operationBindings": [
-        {
-          "actorRef": "estoquista",
-          "grantRefs": [
-            "gerenciarEstoque"
-          ],
-          "authorities": [
-            "estoquista"
-          ],
-          "ruleRefs": [
-            {
-              "ruleId": "movimentacaoEstoqueImutavel",
-              "file": "l4/controleEstoque/rules.defs.ts",
-              "symbol": "rules.movimentacaoEstoqueImutavel",
-              "description": "Uma movimentação de estoque não pode ser alterada depois de registrada."
-            },
-            {
-              "ruleId": "quantidadeMovimentadaPositiva",
-              "file": "l4/controleEstoque/rules.defs.ts",
-              "symbol": "rules.quantidadeMovimentadaPositiva",
-              "description": "A quantidade registrada em uma movimentação de estoque deve ser um número inteiro positivo."
-            },
-            {
-              "ruleId": "registroMovimentacaoAtualizaSaldo",
-              "file": "l4/controleEstoque/rules.defs.ts",
-              "symbol": "rules.registroMovimentacaoAtualizaSaldo",
-              "description": "O registro de uma entrada ou saída deve atualizar o saldo atual do produto correspondente conforme o tipo e a quantidade movimentada."
-            }
-          ],
-          "sourceHashes": [
-            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
-            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
-            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
-          ]
+          "stateRef": "stateListProdutoPage"
         }
-      ]
-    },
-    {
-      "actionId": "set:listMovimentacaoEstoque:id",
-      "methodName": "setListMovimentacaoEstoqueId",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.listMovimentacaoEstoque.input.id"
       ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.input.id"
-    },
-    {
-      "actionId": "select:listMovimentacaoEstoque:produtoId",
-      "methodName": "selectListMovimentacaoEstoqueProdutoId",
-      "kind": "selection",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.listMovimentacaoEstoque.input.produtoId"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.input.produtoId",
-      "selection": {
-        "sourceActionId": "listProduto",
-        "resultStateKey": "ui.movimentacoes.listProduto.result",
-        "identityPath": "id"
-      }
-    },
-    {
-      "actionId": "set:listMovimentacaoEstoque:movimentadoEm",
-      "methodName": "setListMovimentacaoEstoqueMovimentadoEm",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.listMovimentacaoEstoque.input.movimentadoEm"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.input.movimentadoEm"
-    },
-    {
-      "actionId": "listMovimentacaoEstoque",
-      "methodName": "runListMovimentacaoEstoque",
-      "kind": "query",
-      "commandRef": "listMovimentacaoEstoque",
-      "routeRef": "listMovimentacaoEstoqueRoute",
-      "inputTypeRef": "ListMovimentacaoEstoqueInput",
-      "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-      "inputStateKeys": [
-        "ui.movimentacoes.listMovimentacaoEstoque.input.id",
-        "ui.movimentacoes.listMovimentacaoEstoque.input.produtoId",
-        "ui.movimentacoes.listMovimentacaoEstoque.input.movimentadoEm",
-        "ui.movimentacoes.listMovimentacaoEstoque.input.page"
-      ],
-      "outputStateKeys": [
-        "ui.movimentacoes.listMovimentacaoEstoque.result"
-      ],
-      "statusStateKey": "ui.movimentacoes.listMovimentacaoEstoque.status",
-      "errorStateKey": "ui.movimentacoes.listMovimentacaoEstoque.error",
-      "refreshActionIds": [],
-      "operationBinding": {
-        "actorRef": "estoquista",
-        "grantRefs": [
-          "gerenciarEstoque"
-        ],
-        "authorities": [
-          "estoquista"
-        ],
-        "ruleRefs": [],
-        "sourceHashes": [
-          "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
-          "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
-          "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
-        ]
-      },
-      "operationBindings": [
+      "resultStateRef": "stateListProdutoResult",
+      "statusStateRef": "stateListProdutoStatus",
+      "errorStateRef": "stateListProdutoError",
+      "authorityRefs": [
         {
-          "actorRef": "estoquista",
-          "grantRefs": [
-            "gerenciarEstoque"
-          ],
-          "authorities": [
-            "estoquista"
-          ],
-          "ruleRefs": [],
-          "sourceHashes": [
-            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
-            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
-            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
-          ]
-        }
-      ]
-    },
-    {
-      "actionId": "set:listProduto:id",
-      "methodName": "setListProdutoId",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.listProduto.input.id"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.listProduto.input.id"
-    },
-    {
-      "actionId": "set:listProduto:details.identification.subtype",
-      "methodName": "setListProdutoDetailsIdentificationSubtype",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.listProduto.input.details.identification.subtype"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.listProduto.input.details.identification.subtype"
-    },
-    {
-      "actionId": "set:listProduto:details.identification.name",
-      "methodName": "setListProdutoDetailsIdentificationName",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.listProduto.input.details.identification.name"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.listProduto.input.details.identification.name"
-    },
-    {
-      "actionId": "set:listProduto:details.identification.status",
-      "methodName": "setListProdutoDetailsIdentificationStatus",
-      "kind": "stateSetter",
-      "inputStateKeys": [],
-      "outputStateKeys": [
-        "ui.movimentacoes.listProduto.input.details.identification.status"
-      ],
-      "statusStateKey": "",
-      "errorStateKey": "",
-      "refreshActionIds": [],
-      "stateKey": "ui.movimentacoes.listProduto.input.details.identification.status"
-    },
-    {
-      "actionId": "listProduto",
-      "methodName": "runListProduto",
-      "kind": "query",
-      "commandRef": "listProduto",
-      "routeRef": "listProdutoRoute",
-      "inputTypeRef": "ListProdutoInput",
-      "outputTypeRef": "ListProdutoOutput",
-      "inputStateKeys": [
-        "ui.movimentacoes.listProduto.input.id",
-        "ui.movimentacoes.listProduto.input.details.identification.subtype",
-        "ui.movimentacoes.listProduto.input.details.identification.name",
-        "ui.movimentacoes.listProduto.input.details.identification.status",
-        "ui.movimentacoes.listProduto.input.page"
-      ],
-      "outputStateKeys": [
-        "ui.movimentacoes.listProduto.result"
-      ],
-      "statusStateKey": "ui.movimentacoes.listProduto.status",
-      "errorStateKey": "ui.movimentacoes.listProduto.error",
-      "refreshActionIds": [],
-      "operationBinding": {
-        "actorRef": "estoquista",
-        "grantRefs": [
-          "gerenciarEstoque"
-        ],
-        "authorities": [
-          "estoquista"
-        ],
-        "ruleRefs": [],
-        "sourceHashes": [
-          "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
-          "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
-          "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
-        ]
-      },
-      "operationBindings": [
+          "purpose": "actor estoquista",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "actors.estoquista"
+        },
         {
-          "actorRef": "estoquista",
-          "grantRefs": [
-            "gerenciarEstoque"
-          ],
-          "authorities": [
-            "estoquista"
-          ],
-          "ruleRefs": [],
-          "sourceHashes": [
-            "l4/controleEstoque/ontology/Produto.defs.ts#sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557",
-            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
-            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
-          ]
+          "purpose": "grant gerenciarEstoque",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "grants.gerenciarEstoque"
+        },
+        {
+          "purpose": "authority estoquista",
+          "fileRef": "l4/controleEstoque/access.defs.ts",
+          "fragment": "authorities.estoquista"
         }
-      ]
+      ],
+      "initialLoad": true
     }
   ],
-  "scenaries": [
+  "contents": [
     {
-      "value": "base",
-      "kind": "base",
-      "actionId": "listMovimentacaoEstoque",
-      "preconditions": [],
-      "methodName": "enterBaseScenario",
-      "operationBindings": [
+      "id": "contentList",
+      "intent": "Acompanho as entradas e saídas já registradas.",
+      "visibleWhen": [
         {
-          "actorRef": "estoquista",
-          "grantRefs": [
-            "gerenciarEstoque"
-          ],
-          "authorities": [
-            "estoquista"
-          ],
-          "ruleRefs": [],
-          "sourceHashes": [
-            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
-            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
-            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
-          ]
+          "purpose": "visible in scenario base",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.base"
+        },
+        {
+          "purpose": "visible in scenario consultarSaldo",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.consultarSaldo"
+        },
+        {
+          "purpose": "visible in scenario createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.createMovimentacaoEstoque"
         }
-      ]
+      ],
+      "inactiveBehavior": "hiddenInertOutOfFocus"
     },
     {
-      "value": "createMovimentacaoEstoque",
-      "kind": "command",
-      "actionId": "createMovimentacaoEstoque",
+      "id": "contentForm",
+      "intent": "Registro uma entrada ou saída de unidades de um produto.",
+      "visibleWhen": [
+        {
+          "purpose": "visible in scenario base",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.base"
+        },
+        {
+          "purpose": "visible in scenario consultarSaldo",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.consultarSaldo"
+        },
+        {
+          "purpose": "visible in scenario createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.createMovimentacaoEstoque"
+        }
+      ],
+      "inactiveBehavior": "hiddenInertOutOfFocus"
+    },
+    {
+      "id": "contentActions",
+      "intent": "Registro a movimentação e atualizo o saldo.",
+      "visibleWhen": [
+        {
+          "purpose": "visible in scenario base",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.base"
+        },
+        {
+          "purpose": "visible in scenario consultarSaldo",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.consultarSaldo"
+        },
+        {
+          "purpose": "visible in scenario createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
+          "fragment": "scenarios.createMovimentacaoEstoque"
+        }
+      ],
+      "inactiveBehavior": "hiddenInertOutOfFocus"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "base",
+      "actionRef": "listMovimentacaoEstoque",
+      "contentRefs": [
+        "contentList",
+        "contentForm",
+        "contentActions"
+      ],
+      "preconditions": []
+    },
+    {
+      "id": "consultarSaldo",
+      "actionRef": "listProduto",
+      "contentRefs": [
+        "contentList",
+        "contentForm",
+        "contentActions"
+      ],
+      "preconditions": []
+    },
+    {
+      "id": "createMovimentacaoEstoque",
+      "actionRef": "createMovimentacaoEstoque",
+      "contentRefs": [
+        "contentList",
+        "contentForm",
+        "contentActions"
+      ],
       "preconditions": [
-        "ui.movimentacoes.createMovimentacaoEstoque.input.produtoId",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.movimentadoEm",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.details.tipo",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.details.quantidade"
-      ],
-      "methodName": "enterCreateMovimentacaoEstoqueScenario",
-      "operationBindings": [
         {
-          "actorRef": "estoquista",
-          "grantRefs": [
-            "gerenciarEstoque"
-          ],
-          "authorities": [
-            "estoquista"
-          ],
-          "ruleRefs": [
-            {
-              "ruleId": "movimentacaoEstoqueImutavel",
-              "file": "l4/controleEstoque/rules.defs.ts",
-              "symbol": "rules.movimentacaoEstoqueImutavel",
-              "description": "Uma movimentação de estoque não pode ser alterada depois de registrada."
-            },
-            {
-              "ruleId": "quantidadeMovimentadaPositiva",
-              "file": "l4/controleEstoque/rules.defs.ts",
-              "symbol": "rules.quantidadeMovimentadaPositiva",
-              "description": "A quantidade registrada em uma movimentação de estoque deve ser um número inteiro positivo."
-            },
-            {
-              "ruleId": "registroMovimentacaoAtualizaSaldo",
-              "file": "l4/controleEstoque/rules.defs.ts",
-              "symbol": "rules.registroMovimentacaoAtualizaSaldo",
-              "description": "O registro de uma entrada ou saída deve atualizar o saldo atual do produto correspondente conforme o tipo e a quantidade movimentada."
-            }
-          ],
-          "sourceHashes": [
-            "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts#sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549",
-            "l4/controleEstoque/access.defs.ts#sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da",
-            "l4/controleEstoque/rules.defs.ts#sha256:1b7872806ecc60b0b44e4a348bda6f0b300720354f64b30b35d0be28033f7a87"
-          ]
+          "purpose": "scenario precondition",
+          "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "fragment": "CreateMovimentacaoEstoqueInput.produtoId"
+        },
+        {
+          "purpose": "scenario precondition",
+          "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "fragment": "CreateMovimentacaoEstoqueInput.movimentadoEm"
+        },
+        {
+          "purpose": "scenario precondition",
+          "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "fragment": "CreateMovimentacaoEstoqueInput.details.tipo"
+        },
+        {
+          "purpose": "scenario precondition",
+          "fileRef": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+          "fragment": "CreateMovimentacaoEstoqueInput.details.quantidade"
         }
       ]
     }
   ],
-  "initialLoads": [
+  "authorityRefs": [
     {
-      "actionId": "listMovimentacaoEstoque",
-      "stateKey": "ui.movimentacoes.listMovimentacaoEstoque.result"
+      "purpose": "actor estoquista",
+      "fileRef": "l4/controleEstoque/access.defs.ts",
+      "fragment": "actors.estoquista"
     },
     {
-      "actionId": "listProduto",
-      "stateKey": "ui.movimentacoes.listProduto.result"
-    }
-  ],
-  "dataBindings": [
-    {
-      "actionId": "createMovimentacaoEstoque",
-      "kind": "command",
-      "routeRef": "createMovimentacaoEstoqueRoute",
-      "inputTypeRef": "CreateMovimentacaoEstoqueInput",
-      "outputTypeRef": "CreateMovimentacaoEstoqueOutput",
-      "inputStateKeys": [
-        "ui.movimentacoes.createMovimentacaoEstoque.input.produtoId",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.movimentadoEm",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.details.tipo",
-        "ui.movimentacoes.createMovimentacaoEstoque.input.details.quantidade"
-      ],
-      "resultStateKey": "ui.movimentacoes.createMovimentacaoEstoque.result"
+      "purpose": "grant gerenciarEstoque",
+      "fileRef": "l4/controleEstoque/access.defs.ts",
+      "fragment": "grants.gerenciarEstoque"
     },
     {
-      "actionId": "listMovimentacaoEstoque",
-      "kind": "query",
-      "routeRef": "listMovimentacaoEstoqueRoute",
-      "inputTypeRef": "ListMovimentacaoEstoqueInput",
-      "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-      "inputStateKeys": [
-        "ui.movimentacoes.listMovimentacaoEstoque.input.id",
-        "ui.movimentacoes.listMovimentacaoEstoque.input.produtoId",
-        "ui.movimentacoes.listMovimentacaoEstoque.input.movimentadoEm",
-        "ui.movimentacoes.listMovimentacaoEstoque.input.page"
-      ],
-      "resultStateKey": "ui.movimentacoes.listMovimentacaoEstoque.result"
+      "purpose": "authority estoquista",
+      "fileRef": "l4/controleEstoque/access.defs.ts",
+      "fragment": "authorities.estoquista"
     },
     {
-      "actionId": "listProduto",
-      "kind": "query",
-      "routeRef": "listProdutoRoute",
-      "inputTypeRef": "ListProdutoInput",
-      "outputTypeRef": "ListProdutoOutput",
-      "inputStateKeys": [
-        "ui.movimentacoes.listProduto.input.id",
-        "ui.movimentacoes.listProduto.input.details.identification.subtype",
-        "ui.movimentacoes.listProduto.input.details.identification.name",
-        "ui.movimentacoes.listProduto.input.details.identification.status",
-        "ui.movimentacoes.listProduto.input.page"
-      ],
-      "resultStateKey": "ui.movimentacoes.listProduto.result"
-    }
-  ],
-  "coverage": [
-    {
-      "organismId": "organism.list.1",
-      "sourceIndex": 0,
-      "kind": "list",
-      "contentRef": "content.list",
-      "content": "Acompanho as entradas e saídas já registradas.",
-      "scenarioRefs": [
-        "base",
-        "createMovimentacaoEstoque"
-      ],
-      "capabilityRefs": [
-        "createMovimentacaoEstoque",
-        "listMovimentacaoEstoque",
-        "listProduto"
-      ],
-      "outputFieldsByCapability": {
-        "createMovimentacaoEstoque": [],
-        "listMovimentacaoEstoque": [
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "id"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "version"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "produtoId"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentadoEm"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details.tipo"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details.quantidade"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.id"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details.identification"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details.identification.name"
-          }
-        ],
-        "listProduto": [
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "id"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "version"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.subtype"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.name"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.status"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.base"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.product"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.product.unitOfMeasure"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.general"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.quantidadeMinima"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.saldoAtual"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-          }
-        ]
-      },
-      "source": {
-        "kind": "list",
-        "text": "Acompanho as entradas e saídas já registradas."
-      }
+      "purpose": "rule movimentacaoEstoqueImutavel",
+      "fileRef": "l4/controleEstoque/rules.defs.ts",
+      "fragment": "rules.movimentacaoEstoqueImutavel"
     },
     {
-      "organismId": "organism.form.1",
-      "sourceIndex": 1,
-      "kind": "form",
-      "contentRef": "content.form",
-      "content": "Registro uma entrada ou saída de unidades de um produto.",
-      "scenarioRefs": [
-        "base",
-        "createMovimentacaoEstoque"
-      ],
-      "capabilityRefs": [
-        "createMovimentacaoEstoque",
-        "listMovimentacaoEstoque",
-        "listProduto"
-      ],
-      "outputFieldsByCapability": {
-        "createMovimentacaoEstoque": [],
-        "listMovimentacaoEstoque": [
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "id"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "version"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "produtoId"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentadoEm"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details.tipo"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details.quantidade"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.id"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details.identification"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details.identification.name"
-          }
-        ],
-        "listProduto": [
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "id"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "version"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.subtype"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.name"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.status"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.base"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.product"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.product.unitOfMeasure"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.general"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.quantidadeMinima"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.saldoAtual"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-          }
-        ]
-      },
-      "source": {
-        "kind": "form",
-        "text": "Registro uma entrada ou saída de unidades de um produto."
-      }
+      "purpose": "rule quantidadeMovimentadaPositiva",
+      "fileRef": "l4/controleEstoque/rules.defs.ts",
+      "fragment": "rules.quantidadeMovimentadaPositiva"
     },
     {
-      "organismId": "organism.actions.1",
-      "sourceIndex": 2,
-      "kind": "actions",
-      "contentRef": "content.actions",
-      "content": "Registro a movimentação e atualizo o saldo.",
-      "scenarioRefs": [
-        "base",
-        "createMovimentacaoEstoque"
-      ],
-      "capabilityRefs": [
-        "createMovimentacaoEstoque",
-        "listMovimentacaoEstoque",
-        "listProduto"
-      ],
-      "outputFieldsByCapability": {
-        "createMovimentacaoEstoque": [],
-        "listMovimentacaoEstoque": [
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "id"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "version"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "produtoId"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentadoEm"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details.tipo"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "details.quantidade"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.id"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details.identification"
-          },
-          {
-            "actionId": "listMovimentacaoEstoque",
-            "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-            "path": "movimentacaoEstoqueProduto.details.identification.name"
-          }
-        ],
-        "listProduto": [
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "id"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "version"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.subtype"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.name"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.identification.status"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.base"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.product"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.product.unitOfMeasure"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.general"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.quantidadeMinima"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.saldoAtual"
-          },
-          {
-            "actionId": "listProduto",
-            "outputTypeRef": "ListProdutoOutput",
-            "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-          }
-        ]
-      },
-      "source": {
-        "kind": "actions",
-        "text": "Registro a movimentação e atualizo o saldo."
-      }
+      "purpose": "rule registroMovimentacaoAtualizaSaldo",
+      "fileRef": "l4/controleEstoque/rules.defs.ts",
+      "fragment": "rules.registroMovimentacaoAtualizaSaldo"
+    },
+    {
+      "purpose": "page authority actor:estoquista",
+      "fileRef": "l4/controleEstoque/access.defs.ts",
+      "fragment": "authorities.actor:estoquista"
     }
   ]
 } as const;
-
-export const pipeline = [
-  {
-    "id": "movimentacoes__l2_shared",
-    "type": "l2_shared",
-    "defPath": "l2/controleEstoque/web/shared/movimentacoes.defs.ts",
-    "outputPath": "l2/controleEstoque/web/shared/movimentacoes.ts",
-    "dependsFiles": [
-      "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-      "_102029_.d.ts",
-      "l4/controleEstoque/access.defs.ts",
-      "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
-      "l4/controleEstoque/ontology/Produto.defs.ts",
-      "l4/controleEstoque/rules.defs.ts",
-      "l4/controleEstoque/workflows.defs.ts"
-    ],
-    "dependsOn": [],
-    "skills": [
-      "_102020_/l2/agentDefsL2/skills/genD2SharedTs.ts"
-    ]
-  }
-] as const;
