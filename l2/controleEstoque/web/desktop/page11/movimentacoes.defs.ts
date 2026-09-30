@@ -2,15 +2,15 @@
 
 export const definition = {
   "template": {
-    "category": "inventoryControl",
+    "category": "_102020_/l4/collabux/templates/inventoryControl/page21.md",
     "experience": "splitViewOperations"
   },
-  "intent": "Permitir ao estoquista registrar uma entrada ou saída de unidades de um produto e acompanhar o histórico já gravado, para que o saldo atual seja atualizado.",
+  "intent": "O estoquista registra uma entrada ou saída de unidades de um produto e acompanha o histórico já lançado, para atualizar o saldo atual com um registro que permanece inalterável.",
   "sections": [
     {
-      "id": "registrarMovimentacao",
+      "id": "registroMovimentacao",
       "priority": "primary",
-      "purpose": "Reúne o formulário da movimentação e a confirmação do registro para o estoquista informar o produto, o tipo e a quantidade e gravar a operação que atualiza o saldo.",
+      "purpose": "Reúne a localização do produto, a conferência do saldo e o preenchimento da entrada ou saída, para o estoquista gravar a movimentação no mesmo contexto em que vê o efeito no estoque.",
       "organisms": [
         "formularioMovimentacao",
         "acoesRegistro"
@@ -19,26 +19,26 @@ export const definition = {
     {
       "id": "historicoMovimentacoes",
       "priority": "main",
-      "purpose": "Apresenta as entradas e saídas já registradas para conferência do histórico que permanece inalterável após a gravação.",
+      "purpose": "Mostra as entradas e saídas já registradas para o estoquista conferir o histórico que alimenta o saldo, sem reabrir lançamentos encerrados.",
       "organisms": [
-        "listaMovimentacoes"
+        "historicoMovimentacoes"
       ]
     }
   ],
   "organisms": {
-    "listaMovimentacoes": {
+    "historicoMovimentacoes": {
       "kind": "list",
-      "text": "Mostra as entradas e saídas já gravadas, com produto, tipo, quantidade e momento do registro, para o estoquista conferir o histórico imutável do estoque.",
+      "text": "Lista as entradas e saídas já registradas, com produto, tipo, quantidade e data, para o estoquista acompanhar o histórico imutável que calcula o saldo.",
       "intents": []
     },
     "formularioMovimentacao": {
       "kind": "form",
-      "text": "Mostra o produto localizado, o saldo atual e os campos de tipo e quantidade para o estoquista informar uma entrada ou saída antes de gravá-la.",
+      "text": "Localiza o produto, exibe o saldo atual e a quantidade mínima e pede tipo, quantidade e momento da operação, para o estoquista informar uma entrada ou saída antes de gravá-la.",
       "intents": []
     },
     "acoesRegistro": {
       "kind": "actions",
-      "text": "Confirma o registro da movimentação e aplica o efeito no saldo atual do produto, deixando o lançamento inalterável.",
+      "text": "Confirma o registro da movimentação para gravar a entrada ou saída e atualizar o saldo atual do produto, deixando o lançamento inalterável depois da gravação.",
       "intents": [
         {
           "id": "registrarMovimentacao",
@@ -48,33 +48,38 @@ export const definition = {
     }
   },
   "molecules": {
-    "listaMovimentacoes": [
+    "historicoMovimentacoes": [
       {
-        "role": "view",
+        "role": "records",
         "preferred": "groupviewtable--ml-data-table",
-        "alternative": "groupviewtable--ml-advanced-data-table"
+        "alternative": "groupviewdata--ml-timeline-view"
       }
     ],
     "formularioMovimentacao": [
       {
-        "role": "select",
+        "role": "product",
         "preferred": "groupselectone--ml-select-one-autocomplete",
         "alternative": "groupselectone--ml-combobox"
       },
       {
-        "role": "enter",
-        "preferred": "groupenternumber--ml-number-input",
-        "alternative": "groupenternumber--ml-number-stepper"
+        "role": "movementType",
+        "preferred": "groupselectone--ml-segmented-control",
+        "alternative": "groupselectone--ml-radio-group"
+      },
+      {
+        "role": "quantity",
+        "preferred": "groupenternumber--ml-number-stepper",
+        "alternative": "groupenternumber--ml-number-input"
       }
     ],
     "acoesRegistro": [
       {
-        "role": "trigger",
+        "role": "submit",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-split-button"
       },
       {
-        "role": "notify",
+        "role": "feedback",
         "preferred": "groupnotifyuser--ml-toast-notification",
         "alternative": "groupnotifyuser--ml-contextual-feedback"
       }

@@ -2,50 +2,43 @@
 
 export const definition = {
   "template": {
-    "category": "inventoryControl",
+    "category": "_102020_/l4/collabux/templates/inventoryControl/page21.md",
     "experience": "splitViewOperations"
   },
-  "intent": "Em conteúdo estreito e fluido em torno de 390px, ainda usável em 360px e 430px, o estoquista informa a movimentação, confirma o registro e em seguida consulta o histórico de entradas e saídas para atualizar o saldo.",
+  "intent": "Em conteúdo estreito e fluido em torno de 390px, também usável em 360px e 430px, o estoquista registra uma entrada ou saída e consulta o histórico recente, para atualizar o saldo sem depender de uma grade fixa.",
   "sections": [
     {
-      "id": "registrarMovimentacao",
+      "id": "registroMovimentacao",
       "priority": "primary",
-      "purpose": "Concentra o formulário em coluna única para localizar o produto, ver o saldo e informar tipo e quantidade da movimentação.",
+      "purpose": "Empilha localização do produto, conferência do saldo e preenchimento da entrada ou saída em faixa estreita, para o estoquista concluir o lançamento com o polegar sem sair do fluxo.",
       "organisms": [
-        "formularioMovimentacao"
-      ]
-    },
-    {
-      "id": "confirmarRegistro",
-      "priority": "main",
-      "purpose": "Mantém a confirmação do registro imediatamente abaixo dos dados informados, para gravar a entrada ou saída e atualizar o saldo.",
-      "organisms": [
+        "formularioMovimentacao",
         "acoesRegistro"
       ]
     },
     {
       "id": "historicoMovimentacoes",
       "priority": "secondary",
-      "purpose": "Empilha o histórico já gravado depois da ação, para o estoquista conferir as movimentações em leitura contínua na largura estreita.",
+      "purpose": "Mostra o histórico recente em lista fluida abaixo do lançamento, para o estoquista conferir entradas e saídas já gravadas depois de registrar a operação.",
       "organisms": [
-        "listaMovimentacoes"
+        "historicoMovimentacoes"
       ]
     }
   ],
   "organisms": {
-    "listaMovimentacoes": {
+    "historicoMovimentacoes": {
       "kind": "list",
-      "text": "Lista as entradas e saídas já gravadas em registros empilhados, com produto, tipo, quantidade e momento, para consulta do histórico imutável na tela estreita.",
+      "text": "Apresenta as entradas e saídas já registradas em sequência estreita, com produto, tipo, quantidade e data, para o estoquista conferir o histórico imutável no telefone.",
       "intents": []
     },
     "formularioMovimentacao": {
       "kind": "form",
-      "text": "Apresenta em sequência o produto localizado, o saldo atual e os campos de tipo e quantidade para o estoquista informar a movimentação antes de gravá-la.",
+      "text": "Localiza o produto, mostra o saldo atual e a quantidade mínima e pede tipo, quantidade e momento da operação em campos empilhados, para o estoquista informar a entrada ou saída na faixa estreita.",
       "intents": []
     },
     "acoesRegistro": {
       "kind": "actions",
-      "text": "Confirma o registro da movimentação e aplica o efeito no saldo atual do produto, deixando o lançamento inalterável.",
+      "text": "Oferece a confirmação visível na faixa estreita para gravar a movimentação, atualizar o saldo e avisar que o lançamento não poderá ser alterado depois.",
       "intents": [
         {
           "id": "registrarMovimentacao",
@@ -55,35 +48,40 @@ export const definition = {
     }
   },
   "molecules": {
-    "listaMovimentacoes": [
+    "historicoMovimentacoes": [
       {
-        "role": "view",
+        "role": "records",
         "preferred": "groupviewdata--ml-vertical-record-list",
         "alternative": "groupviewtable--ml-responsive-table"
       }
     ],
     "formularioMovimentacao": [
       {
-        "role": "select",
+        "role": "product",
         "preferred": "groupselectone--ml-select-one-autocomplete",
-        "alternative": "groupselectone--ml-select"
+        "alternative": "groupselectone--ml-combobox"
       },
       {
-        "role": "enter",
+        "role": "movementType",
+        "preferred": "groupselectone--ml-segmented-control",
+        "alternative": "groupselectone--ml-radio-group"
+      },
+      {
+        "role": "quantity",
         "preferred": "groupenternumber--ml-number-stepper",
         "alternative": "groupenternumber--ml-number-input"
       }
     ],
     "acoesRegistro": [
       {
-        "role": "trigger",
+        "role": "submit",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-icon-button"
       },
       {
-        "role": "notify",
+        "role": "feedback",
         "preferred": "groupnotifyuser--ml-toast-notification",
-        "alternative": "groupnotifyuser--ml-contextual-feedback"
+        "alternative": "groupnotifyuser--ml-notify-banner"
       }
     ]
   }
