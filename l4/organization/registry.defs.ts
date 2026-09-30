@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/organization/registry.defs.ts" enhancement="_blank"/>
 
-import type { Ns4SolutionRegistryArtifact } from '/_102035_/l2/agentNewSolution/types.js';
+import type { Ns4SolutionRegistryArtifact } from '/_102035_/l2/solution/helpers/ns4Types.js';
 
 export const solutionRegistry = {
   "schemaVersion": "ns4-solution-registry-v1",
