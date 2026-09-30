@@ -1,1149 +1,676 @@
 /// <mls fileReference="_102047_/l2/controleEstoque/web/desktop/page11/produtos.defs.ts" enhancement="_blank"/>
 
-export const definition = "Page: Produtos (produtos).\n\nPurpose: O estoquista consulta os produtos, seus saldos atuais, quantidades mínimas e avisos de saldo baixo; cadastra produtos com a quantidade mínima e registra entradas ou saídas para atualizar o saldo do produto selecionado.\n\nActors: estoquista.\n\nExperience: category guidance; No explicit style preference; used the category guidance. Selected category guidance for page11.\n\nSelected source: _102020_/l4/collabux/templates/categoryList.json sha256:9b1275fc3db9069c67dad58c10768614c9146217a8794365813166a218725beb.\n\nAuthority references: actor:estoquista.\n\nThe approved shared definition, DTOs, grants, rules and design-system dependencies are authoritative. Do not add operations, data, state, permissions, totals or saves absent from those sources.\n\nOperation create on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules movimentacaoEstoqueImutavel (l4/controleEstoque/rules.defs.ts#rules.movimentacaoEstoqueImutavel), quantidadeMovimentadaPositiva (l4/controleEstoque/rules.defs.ts#rules.quantidadeMovimentadaPositiva), registroMovimentacaoAtualizaSaldo (l4/controleEstoque/rules.defs.ts#rules.registroMovimentacaoAtualizaSaldo).\n\nOperation create on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules rule-foreign-namespace-refused (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-foreign-namespace-refused]), rule-document-shape-validated (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-document-shape-validated]), rule-identity-never-in-namespace (l4/controleEstoque/ontology/Produto.defs.ts#rules[rule-identity-never-in-namespace]), quantidadeMinimaValida (l4/controleEstoque/rules.defs.ts#rules.quantidadeMinimaValida), saldoAtualProduto (l4/controleEstoque/rules.defs.ts#rules.saldoAtualProduto), avisoSaldoMinimoProduto (l4/controleEstoque/rules.defs.ts#rules.avisoSaldoMinimoProduto).\n\nOperation list on MovimentacaoEstoque: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nOperation list on Produto: actor estoquista; grants gerenciarEstoque; authorities estoquista; rules none.\n\nPresentation: desktop.\n\nEach organism below belongs to its existing shared content scenario. When that scenario is inactive, keep its content mounted but hidden, inert and outside keyboard focus. Do not invent content scenarios or controls.\n\nOrganism organism.summary.1 (summary) in content content.summary; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual. Apresenta o saldo atual dos produtos para acompanhamento do estoque, identificando cada produto pelo nome e pela unidade de medida. Durante o carregamento, comunica o andamento; sem produtos, informa a ausência de registros; e, em caso de falha, expõe uma mensagem de erro acessível.\n\nOrganism organism.highlights.1 (highlights) in content content.highlights; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Evidencia os produtos cujo saldo atual está abaixo da quantidade mínima, com nome, saldo, mínimo configurado e indicação de saldo baixo. Comunica carregamento, ausência de produtos sinalizados e erro de consulta de maneira anunciável por tecnologias assistivas.\n\nOrganism organism.list.1 (list) in content content.list; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.identification.status, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Permite localizar e consultar os produtos cadastrados pelo nome e pelos filtros disponíveis de tipo de cadastro e situação. Apresenta nome, situação, unidade de medida, saldo atual, quantidade mínima e aviso de saldo baixo; informa carregamento, ausência de resultados e erro, com pesquisa e consulta acessíveis por teclado.\n\nOrganism organism.detail.1 (detail) in content content.detail; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.identification.status, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.saldoAtual, ListProdutoOutput.details.controleEstoque.quantidadeMinima, ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo. Mostra o produto consultado com nome, situação, unidade de medida, saldo atual, quantidade mínima e aviso de saldo baixo, para confirmar sua condição de estoque. Durante a consulta, comunica o carregamento; se o produto não for retornado, informa indisponibilidade; e, se houver falha, apresenta erro acessível.\n\nOrganism organism.form.1 (form) in content content.form; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.quantidadeMinima. Coleta nome do produto, unidade de medida e quantidade mínima para cadastrar o produto no controle de estoque. Acompanha a lista atualizada de produtos pelo nome, unidade de medida e mínimo configurado após o cadastro. Identifica os campos necessários, orienta que a quantidade mínima deve ser maior ou igual a zero e comunica validações, envio em andamento e falha de forma acessível.\n\nOrganism organism.actions.1 (actions) in content content.actions; declared capabilities/actions: createMovimentacaoEstoque, createProduto, listMovimentacaoEstoque, listProduto; cited output fields: ListProdutoOutput.details.identification.name, ListProdutoOutput.details.product.unitOfMeasure, ListProdutoOutput.details.controleEstoque.quantidadeMinima. Disponibiliza o comando para cadastrar o produto após o preenchimento das informações exigidas e reflete na consulta atualizada o nome, a unidade de medida e a quantidade mínima cadastrados. O acionamento possui rótulo acessível, evita reenvio durante o processamento e comunica sucesso ou erro do comando." as const;
-
-export const pipeline = [
-  {
-    "id": "produtos__desktop__page11",
-    "type": "l2_page",
-    "defPath": "l2/controleEstoque/web/desktop/page11/produtos.defs.ts",
-    "outputPath": "l2/controleEstoque/web/desktop/page11/produtos.ts",
-    "dependsFiles": [
-      "l2/controleEstoque/web/shared/produtos.ts",
-      "l2/designSystem.ts",
-      "l2/controleEstoque/web/contracts/produtos.defs.ts",
-      "_102029_.d.ts",
-      "_102020_/l2/molecules/ml-scenary.ts",
-      "l4/controleEstoque/access.defs.ts",
-      "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
-      "l4/controleEstoque/ontology/Produto.defs.ts",
-      "l4/controleEstoque/rules.defs.ts",
-      "l4/controleEstoque/workflows.defs.ts"
-    ],
-    "dependsOn": [
-      "produtos__l2_shared"
-    ],
-    "categoryRef": "inventoryControl",
-    "skills": [
-      "_102020_/l2/agentDefsL2/skills/genD2PageRenderTs.ts",
-      "_102020_/l2/agentDefsL2/skills/pageCategories/inventoryControl.md",
-      "_102020_/l4/collabux/templates/categoryList.json",
-      "_102040_/l2/molecules/groupviewdata/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
-      "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
-      "_102040_/l2/molecules/groupviewtable/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts",
-      "_102040_/l2/molecules/groupviewcard/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts",
-      "_102040_/l2/molecules/groupentertext/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
-      "_102040_/l2/molecules/groupenternumber/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupEnterNumber/usage.ts",
-      "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
-      "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts"
-    ],
-    "templateSelection": {
-      "categoryRef": "inventoryControl",
-      "experiencePage": null,
-      "experienceId": null,
-      "styleId": null,
-      "layoutId": null,
-      "targetPage": "page11",
-      "reason": "No explicit style preference; used the category guidance. Selected category guidance for page11.",
-      "requirementsMet": [],
-      "digest": "sha256:b39a0b2d4cfb411e232248026a7c00c6cfe0b07a21300eadc70037ecc6def41c",
-      "sources": [
+export const definition = {
+  "schemaVersion": "2026-09-29-agent-defs-l2-definition-v1",
+  "artifactType": "page11",
+  "pageId": "produtos",
+  "device": "desktop",
+  "intent": "O estoquista consulta os produtos cadastrados, seus saldos atuais, quantidades mínimas e avisos de saldo abaixo do mínimo, e cadastra produtos com nome, unidade de medida e quantidade mínima para acompanhamento do estoque.",
+  "sharedRef": {
+    "purpose": "shared interaction definition",
+    "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts"
+  },
+  "references": [
+    {
+      "purpose": "project design system",
+      "fileRef": "l2/designSystem.ts"
+    },
+    {
+      "purpose": "page category inventoryControl",
+      "fileRef": "_102020_/l2/agentDefsL2/skills/pageCategories/inventoryControl.md"
+    },
+    {
+      "purpose": "technical page definition guidance",
+      "fileRef": "_102020_/l2/agentDefsL2/skills/genD2Page11Definition.ts"
+    },
+    {
+      "purpose": "selected category-catalog-entry template source",
+      "fileRef": "_102020_/l4/collabux/templates/categoryList.json"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/access.defs.ts"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/ontology/Produto.defs.ts"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/rules.defs.ts"
+    },
+    {
+      "purpose": "page journey, rule, authority or ontology source",
+      "fileRef": "l4/controleEstoque/workflows.defs.ts"
+    }
+  ],
+  "presentation": {
+    "categoryRef": {
+      "purpose": "page category inventoryControl",
+      "fileRef": "_102020_/l2/agentDefsL2/skills/pageCategories/inventoryControl.md"
+    },
+    "reason": "No explicit style preference; used the category guidance. Selected category guidance for page11."
+  },
+  "organisms": [
+    {
+      "id": "organism.summary.1",
+      "kind": "summary",
+      "description": "Apresenta uma visão rapidamente examinável dos produtos com seus nomes e saldos atuais. Enquanto a consulta estiver em andamento, informa o carregamento; se não houver produtos, explica que não há saldo a acompanhar; em caso de falha, apresenta um erro perceptível e recuperável. As informações possuem rótulos claros e podem ser percorridas por teclado.",
+      "contentRef": "contentSummary",
+      "capabilityRefs": [
         {
-          "role": "category-catalog-entry",
-          "reference": "_102020_/l4/collabux/templates/categoryList.json",
-          "sha256": "sha256:9b1275fc3db9069c67dad58c10768614c9146217a8794365813166a218725beb"
+          "purpose": "shared action createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action createProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createProduto"
+        },
+        {
+          "purpose": "shared action listMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action listProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listProduto"
+        }
+      ],
+      "journeyRefs": [
+        {
+          "purpose": "page journey acompanharSaldos",
+          "fileRef": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts"
+        },
+        {
+          "purpose": "page journey cadastrarProduto",
+          "fileRef": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts"
+        },
+        {
+          "purpose": "page journey registrarMovimentacaoEstoque",
+          "fileRef": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts"
+        },
+        {
+          "purpose": "page journey tratarAvisoSaldoBaixo",
+          "fileRef": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts"
+        }
+      ],
+      "fieldRefs": [
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.identification.name"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.saldoAtual"
         }
       ]
     },
-    "coverage": [
-      {
-        "organismId": "organism.summary.1",
-        "sourceIndex": 0,
-        "kind": "summary",
-        "contentRef": "content.summary",
-        "scenarioRefs": [
-          "base",
-          "detail",
-          "createMovimentacaoEstoque",
-          "createProduto"
-        ],
-        "capabilityRefs": [
-          "createMovimentacaoEstoque",
-          "createProduto",
-          "listMovimentacaoEstoque",
-          "listProduto"
-        ],
-        "outputFieldsByCapability": {
-          "createMovimentacaoEstoque": [],
-          "createProduto": [],
-          "listMovimentacaoEstoque": [
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "produtoId"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentadoEm"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.tipo"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.quantidade"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification.name"
-            }
-          ],
-          "listProduto": [
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.subtype"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.name"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.status"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.base"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product.unitOfMeasure"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.general"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.quantidadeMinima"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAtual"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-            }
-          ]
+    {
+      "id": "organism.highlights.1",
+      "kind": "highlights",
+      "description": "Destaca os produtos cujo indicador informa saldo abaixo do mínimo, identificando cada produto e exibindo saldo atual e quantidade mínima para orientar a reposição. Exibe carregamento, ausência de avisos e falha de consulta de forma compreensível, sem depender apenas de cor, com leitura e foco acessíveis por teclado.",
+      "contentRef": "contentHighlights",
+      "capabilityRefs": [
+        {
+          "purpose": "shared action createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createMovimentacaoEstoque"
         },
-        "moleculeRecommendations": [
-          {
-            "groupId": "groupViewData",
-            "candidates": [
-              "groupviewdata--ml-card-grid"
-            ],
-            "reason": "Os saldos são informações de múltiplos produtos e podem ser consultados como registros individuais.",
-            "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:23632c5755e10bf0b0fd2b396c497bb15de577cbcbc1c01ccdb7a27a383c68c9"
-          }
-        ]
+        {
+          "purpose": "shared action createProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createProduto"
+        },
+        {
+          "purpose": "shared action listMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action listProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listProduto"
+        }
+      ],
+      "journeyRefs": [
+        {
+          "purpose": "page journey acompanharSaldos",
+          "fileRef": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts"
+        },
+        {
+          "purpose": "page journey cadastrarProduto",
+          "fileRef": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts"
+        },
+        {
+          "purpose": "page journey registrarMovimentacaoEstoque",
+          "fileRef": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts"
+        },
+        {
+          "purpose": "page journey tratarAvisoSaldoBaixo",
+          "fileRef": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts"
+        }
+      ],
+      "fieldRefs": [
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.identification.name"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.saldoAtual"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.quantidadeMinima"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo"
+        }
+      ]
+    },
+    {
+      "id": "organism.list.1",
+      "kind": "list",
+      "description": "Lista os produtos cadastrados para localização e comparação, mostrando nome, unidade de medida, saldo atual, quantidade mínima e indicação de saldo abaixo do mínimo. Mantém estados explícitos de carregamento, lista vazia e erro; cada registro pode receber foco e ser acionado por teclado para consulta.",
+      "contentRef": "contentList",
+      "capabilityRefs": [
+        {
+          "purpose": "shared action createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action createProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createProduto"
+        },
+        {
+          "purpose": "shared action listMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action listProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listProduto"
+        }
+      ],
+      "journeyRefs": [
+        {
+          "purpose": "page journey acompanharSaldos",
+          "fileRef": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts"
+        },
+        {
+          "purpose": "page journey cadastrarProduto",
+          "fileRef": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts"
+        },
+        {
+          "purpose": "page journey registrarMovimentacaoEstoque",
+          "fileRef": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts"
+        },
+        {
+          "purpose": "page journey tratarAvisoSaldoBaixo",
+          "fileRef": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts"
+        }
+      ],
+      "fieldRefs": [
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.identification.name"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.product.unitOfMeasure"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.saldoAtual"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.quantidadeMinima"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo"
+        }
+      ]
+    },
+    {
+      "id": "organism.detail.1",
+      "kind": "detail",
+      "description": "Mostra os detalhes do produto em contexto: nome, unidade de medida, saldo atual, quantidade mínima e o indicador de saldo abaixo do mínimo. Ao não haver produto disponível ou ocorrer erro, comunica o estado em texto; os valores são associados a rótulos e seguem uma ordem de leitura acessível.",
+      "contentRef": "contentDetail",
+      "capabilityRefs": [
+        {
+          "purpose": "shared action createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action createProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createProduto"
+        },
+        {
+          "purpose": "shared action listMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action listProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listProduto"
+        }
+      ],
+      "journeyRefs": [
+        {
+          "purpose": "page journey acompanharSaldos",
+          "fileRef": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts"
+        },
+        {
+          "purpose": "page journey cadastrarProduto",
+          "fileRef": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts"
+        },
+        {
+          "purpose": "page journey registrarMovimentacaoEstoque",
+          "fileRef": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts"
+        },
+        {
+          "purpose": "page journey tratarAvisoSaldoBaixo",
+          "fileRef": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts"
+        }
+      ],
+      "fieldRefs": [
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.identification.name"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.product.unitOfMeasure"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.saldoAtual"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.quantidadeMinima"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.saldoAbaixoDoMinimo"
+        }
+      ]
+    },
+    {
+      "id": "organism.form.1",
+      "kind": "form",
+      "description": "Oferece o cadastro de produto com campos editáveis para nome, unidade de medida e quantidade mínima. Apresenta rótulos, ajuda e validação de quantidade mínima junto ao campo, preserva os valores informados quando houver erro e informa o processamento do cadastro. Após a conclusão, a presença do produto com os dados cadastrados fica disponível na consulta; todos os campos e mensagens são acessíveis por teclado.",
+      "contentRef": "contentForm",
+      "capabilityRefs": [
+        {
+          "purpose": "shared action createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action createProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createProduto"
+        },
+        {
+          "purpose": "shared action listMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action listProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listProduto"
+        }
+      ],
+      "journeyRefs": [
+        {
+          "purpose": "page journey acompanharSaldos",
+          "fileRef": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts"
+        },
+        {
+          "purpose": "page journey cadastrarProduto",
+          "fileRef": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts"
+        },
+        {
+          "purpose": "page journey registrarMovimentacaoEstoque",
+          "fileRef": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts"
+        },
+        {
+          "purpose": "page journey tratarAvisoSaldoBaixo",
+          "fileRef": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts"
+        }
+      ],
+      "fieldRefs": [
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.identification.name"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.product.unitOfMeasure"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.quantidadeMinima"
+        }
+      ]
+    },
+    {
+      "id": "organism.actions.1",
+      "kind": "actions",
+      "description": "Disponibiliza a ação de cadastrar o produto informado. A ação fica claramente identificada, pode ser ativada por teclado, evita novo envio enquanto o cadastro está em processamento e anuncia sucesso ou erro. Quando concluído, o produto cadastrado passa a estar disponível na lista com nome, unidade de medida e quantidade mínima.",
+      "contentRef": "contentActions",
+      "capabilityRefs": [
+        {
+          "purpose": "shared action createMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action createProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.createProduto"
+        },
+        {
+          "purpose": "shared action listMovimentacaoEstoque",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listMovimentacaoEstoque"
+        },
+        {
+          "purpose": "shared action listProduto",
+          "fileRef": "l2/controleEstoque/web/shared/produtos.defs.ts",
+          "fragment": "actions.listProduto"
+        }
+      ],
+      "journeyRefs": [
+        {
+          "purpose": "page journey acompanharSaldos",
+          "fileRef": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts"
+        },
+        {
+          "purpose": "page journey cadastrarProduto",
+          "fileRef": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts"
+        },
+        {
+          "purpose": "page journey registrarMovimentacaoEstoque",
+          "fileRef": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts"
+        },
+        {
+          "purpose": "page journey tratarAvisoSaldoBaixo",
+          "fileRef": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts"
+        }
+      ],
+      "fieldRefs": [
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.identification.name"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.product.unitOfMeasure"
+        },
+        {
+          "purpose": "selected output field",
+          "fileRef": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+          "fragment": "ListProdutoOutput.details.controleEstoque.quantidadeMinima"
+        }
+      ]
+    }
+  ],
+  "moleculeRecommendations": [
+    {
+      "organismRef": "organism.summary.1",
+      "role": "consulta tabular de saldos",
+      "preferred": {
+        "tag": "groupviewtable--ml-responsive-data-table",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupviewtable/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts"
+        },
+        "reason": "Suporta listagem tabular acessível com estados de carregamento, vazio e erro para os saldos."
       },
-      {
-        "organismId": "organism.highlights.1",
-        "sourceIndex": 1,
-        "kind": "highlights",
-        "contentRef": "content.highlights",
-        "scenarioRefs": [
-          "base",
-          "detail",
-          "createMovimentacaoEstoque",
-          "createProduto"
-        ],
-        "capabilityRefs": [
-          "createMovimentacaoEstoque",
-          "createProduto",
-          "listMovimentacaoEstoque",
-          "listProduto"
-        ],
-        "outputFieldsByCapability": {
-          "createMovimentacaoEstoque": [],
-          "createProduto": [],
-          "listMovimentacaoEstoque": [
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "produtoId"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentadoEm"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.tipo"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.quantidade"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification.name"
-            }
-          ],
-          "listProduto": [
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.subtype"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.name"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.status"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.base"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product.unitOfMeasure"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.general"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.quantidadeMinima"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAtual"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-            }
-          ]
+      "alternative": {
+        "tag": "groupviewtable--ml-view-table",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupviewtable/index.defs.ts"
         },
-        "moleculeRecommendations": [
-          {
-            "groupId": "groupViewData",
-            "candidates": [
-              "groupviewdata--ml-card-grid"
-            ],
-            "reason": "Os produtos que requerem atenção podem ser destacados individualmente com os dados que justificam o aviso.",
-            "indexReference": "_102040_/l2/molecules/groupviewdata/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:4c2e33ab4b2eb697a3a015dd1b423f3146f490564f3d728d9d275efdfcdd0910",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupViewData/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:23632c5755e10bf0b0fd2b396c497bb15de577cbcbc1c01ccdb7a27a383c68c9"
-          }
-        ]
-      },
-      {
-        "organismId": "organism.list.1",
-        "sourceIndex": 2,
-        "kind": "list",
-        "contentRef": "content.list",
-        "scenarioRefs": [
-          "base",
-          "detail",
-          "createMovimentacaoEstoque",
-          "createProduto"
-        ],
-        "capabilityRefs": [
-          "createMovimentacaoEstoque",
-          "createProduto",
-          "listMovimentacaoEstoque",
-          "listProduto"
-        ],
-        "outputFieldsByCapability": {
-          "createMovimentacaoEstoque": [],
-          "createProduto": [],
-          "listMovimentacaoEstoque": [
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "produtoId"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentadoEm"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.tipo"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.quantidade"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification.name"
-            }
-          ],
-          "listProduto": [
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.subtype"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.name"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.status"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.base"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product.unitOfMeasure"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.general"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.quantidadeMinima"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAtual"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-            }
-          ]
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts"
         },
-        "moleculeRecommendations": [
-          {
-            "groupId": "groupSearchContent",
-            "candidates": [
-              "groupsearchcontent--ml-search-filters"
-            ],
-            "reason": "O nome do produto é um critério disponível para localizar cadastros.",
-            "indexReference": "_102040_/l2/molecules/groupsearchcontent/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:4458436e93cf3d9d2ee59d0b9d1e27cbfd4b8c93c5c46f7f877f9eedef966867",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupSearchContent/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:1caf53d5f4027944d7904bdc8bc6e59ad33930072d1f3158b129d575cfbcdd85"
-          },
-          {
-            "groupId": "groupViewTable",
-            "candidates": [
-              "groupviewtable--ml-data-table"
-            ],
-            "reason": "A coleção possui campos de identificação e controle de estoque adequados à consulta estruturada.",
-            "indexReference": "_102040_/l2/molecules/groupviewtable/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:c63469f28e5e81594f34672f8959fba283b99c9869c60e3def070091642e70c9",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:230955ba3517ab88fa6eb2ec4bcb1db7eeceaa260928f7c9020ea41788b2b23c"
-          }
-        ]
-      },
-      {
-        "organismId": "organism.detail.1",
-        "sourceIndex": 3,
-        "kind": "detail",
-        "contentRef": "content.detail",
-        "scenarioRefs": [
-          "base",
-          "detail",
-          "createMovimentacaoEstoque",
-          "createProduto"
-        ],
-        "capabilityRefs": [
-          "createMovimentacaoEstoque",
-          "createProduto",
-          "listMovimentacaoEstoque",
-          "listProduto"
-        ],
-        "outputFieldsByCapability": {
-          "createMovimentacaoEstoque": [],
-          "createProduto": [],
-          "listMovimentacaoEstoque": [
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "produtoId"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentadoEm"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.tipo"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.quantidade"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification.name"
-            }
-          ],
-          "listProduto": [
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.subtype"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.name"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.status"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.base"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product.unitOfMeasure"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.general"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.quantidadeMinima"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAtual"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-            }
-          ]
-        },
-        "moleculeRecommendations": [
-          {
-            "groupId": "groupViewCard",
-            "candidates": [
-              "groupviewcard--ml-view-card-horizontal"
-            ],
-            "reason": "Os dados do produto formam uma unidade de consulta com metadados e condição de estoque.",
-            "indexReference": "_102040_/l2/molecules/groupviewcard/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:cdfd46bdd1403f4c5e591a95c20760cdcdea27a08a35e3ac65f3445195efdbc0",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:48c753bba438f309527c84f761b2d5de6e6dc434a862579cefeeb32716a034b8"
-          }
-        ]
-      },
-      {
-        "organismId": "organism.form.1",
-        "sourceIndex": 4,
-        "kind": "form",
-        "contentRef": "content.form",
-        "scenarioRefs": [
-          "base",
-          "detail",
-          "createMovimentacaoEstoque",
-          "createProduto"
-        ],
-        "capabilityRefs": [
-          "createMovimentacaoEstoque",
-          "createProduto",
-          "listMovimentacaoEstoque",
-          "listProduto"
-        ],
-        "outputFieldsByCapability": {
-          "createMovimentacaoEstoque": [],
-          "createProduto": [],
-          "listMovimentacaoEstoque": [
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "produtoId"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentadoEm"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.tipo"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.quantidade"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification.name"
-            }
-          ],
-          "listProduto": [
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.subtype"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.name"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.status"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.base"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product.unitOfMeasure"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.general"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.quantidadeMinima"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAtual"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-            }
-          ]
-        },
-        "moleculeRecommendations": [
-          {
-            "groupId": "groupEnterText",
-            "candidates": [
-              "groupentertext--ml-enter-text"
-            ],
-            "reason": "Nome do produto e unidade de medida são valores textuais de uma linha.",
-            "indexReference": "_102040_/l2/molecules/groupentertext/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:224a115414c9a393b96ffece5577e00e65975f049f6d11e6fadcce6a1e73cd48",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:42b85a1e9fc97f1c12ae621670afa7cc7262cb62998eba133171cc0f7be32028"
-          },
-          {
-            "groupId": "groupEnterNumber",
-            "candidates": [
-              "groupenternumber--ml-number-input"
-            ],
-            "reason": "A quantidade mínima é um valor numérico informado pelo estoquista.",
-            "indexReference": "_102040_/l2/molecules/groupenternumber/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:94a52c28ec828918c77800447f098381bc32de7e922344d8f4ec68924211cc62",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupEnterNumber/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:46387e26474ca57c3c351992faf4cc924b14df799cf437115e8c593ff2a23de6"
-          }
-        ]
-      },
-      {
-        "organismId": "organism.actions.1",
-        "sourceIndex": 5,
-        "kind": "actions",
-        "contentRef": "content.actions",
-        "scenarioRefs": [
-          "base",
-          "detail",
-          "createMovimentacaoEstoque",
-          "createProduto"
-        ],
-        "capabilityRefs": [
-          "createMovimentacaoEstoque",
-          "createProduto",
-          "listMovimentacaoEstoque",
-          "listProduto"
-        ],
-        "outputFieldsByCapability": {
-          "createMovimentacaoEstoque": [],
-          "createProduto": [],
-          "listMovimentacaoEstoque": [
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "produtoId"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentadoEm"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.tipo"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "details.quantidade"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.id"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification"
-            },
-            {
-              "actionId": "listMovimentacaoEstoque",
-              "outputTypeRef": "ListMovimentacaoEstoqueOutput",
-              "path": "movimentacaoEstoqueProduto.details.identification.name"
-            }
-          ],
-          "listProduto": [
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "id"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "version"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.subtype"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.name"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.identification.status"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.base"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.product.unitOfMeasure"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.general"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.quantidadeMinima"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAtual"
-            },
-            {
-              "actionId": "listProduto",
-              "outputTypeRef": "ListProdutoOutput",
-              "path": "details.controleEstoque.saldoAbaixoDoMinimo"
-            }
-          ]
-        },
-        "moleculeRecommendations": [
-          {
-            "groupId": "groupTriggerAction",
-            "candidates": [
-              "grouptriggeraction--ml-button-standard"
-            ],
-            "reason": "O cadastro é um comando explícito de envio do produto informado.",
-            "indexReference": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts",
-            "indexVia": "stor",
-            "indexSha256": "sha256:f7ba36337caf565fb16272cf98af9410b52155e5fb9d603fc6b7c2213284679c",
-            "usageContractReference": "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts",
-            "usageContractVia": "stor",
-            "usageContractSha256": "sha256:1d4607aa57f6f738a1518456d2ee8db44c5c7d0f612cd5e76f09c89dfcb126ed"
-          }
-        ]
+        "reason": "É uma alternativa compacta para leitura simples, mas oferece menos adaptação declarada."
       }
-    ]
-  }
-] as const;
+    },
+    {
+      "organismRef": "organism.summary.1",
+      "role": "indicador de carregamento",
+      "preferred": {
+        "tag": "groupshowprogress--ml-indeterminate-spinner",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupshowprogress/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupShowProgress/usage.ts"
+        },
+        "reason": "A duração da consulta de produtos é desconhecida."
+      }
+    },
+    {
+      "organismRef": "organism.highlights.1",
+      "role": "itens destacados de saldo baixo",
+      "preferred": {
+        "tag": "groupviewcard--ml-vertical-card",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupviewcard/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts"
+        },
+        "reason": "Acomoda identificação e contexto de alerta de cada produto sem pressupor mídia."
+      },
+      "alternative": {
+        "tag": "groupviewcard--ml-view-card-horizontal",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupviewcard/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts"
+        },
+        "reason": "Pode condensar itens de alerta em leitura densa."
+      }
+    },
+    {
+      "organismRef": "organism.list.1",
+      "role": "listagem de produtos",
+      "preferred": {
+        "tag": "groupviewtable--ml-responsive-data-table",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupviewtable/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts"
+        },
+        "reason": "Apresenta campos estruturados e estados de dados acessíveis."
+      },
+      "alternative": {
+        "tag": "groupviewtable--ml-view-table",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupviewtable/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupViewTable/usage.ts"
+        },
+        "reason": "Pode servir à leitura compacta sem interação adicional."
+      }
+    },
+    {
+      "organismRef": "organism.detail.1",
+      "role": "detalhe do produto",
+      "preferred": {
+        "tag": "groupviewcard--ml-vertical-card",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupviewcard/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupViewCard/usage.ts"
+        },
+        "reason": "Organiza os valores do produto em blocos legíveis e neutros."
+      }
+    },
+    {
+      "organismRef": "organism.form.1",
+      "role": "campos textuais do produto",
+      "preferred": {
+        "tag": "groupentertext--ml-enter-text",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupentertext/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts"
+        },
+        "reason": "Atende nome e unidade de medida como entradas simples de uma linha."
+      },
+      "alternative": {
+        "tag": "groupentertext--ml-floating-text-input",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupentertext/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupEnterText/usage.ts"
+        },
+        "reason": "Também aceita texto de uma linha com rótulo flutuante."
+      }
+    },
+    {
+      "organismRef": "organism.form.1",
+      "role": "quantidade mínima",
+      "preferred": {
+        "tag": "groupenternumber--ml-number-input",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupenternumber/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupEnterNumber/usage.ts"
+        },
+        "reason": "Permite informar diretamente a quantidade mínima numérica."
+      },
+      "alternative": {
+        "tag": "groupenternumber--ml-number-stepper",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupenternumber/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupEnterNumber/usage.ts"
+        },
+        "reason": "Pode facilitar ajustes unitários de quantidade."
+      }
+    },
+    {
+      "organismRef": "organism.actions.1",
+      "role": "envio do cadastro",
+      "preferred": {
+        "tag": "grouptriggeraction--ml-button-standard",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/grouptriggeraction/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupTriggerAction/usage.ts"
+        },
+        "reason": "É a ação primária única de cadastrar com suporte a carregamento."
+      }
+    },
+    {
+      "organismRef": "organism.actions.1",
+      "role": "retorno do cadastro",
+      "preferred": {
+        "tag": "groupnotifyuser--ml-toast-notification",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupnotifyuser/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts"
+        },
+        "reason": "Confirma o resultado do cadastro sem interromper a consulta."
+      },
+      "alternative": {
+        "tag": "groupnotifyuser--ml-notify-banner",
+        "indexRef": {
+          "purpose": "selected molecule catalog index",
+          "fileRef": "_102040_/l2/molecules/groupnotifyuser/index.defs.ts"
+        },
+        "usageRef": {
+          "purpose": "selected molecule usage contract",
+          "fileRef": "_102020_/l2/aura/molecules/skills/groupNotifyUser/usage.ts"
+        },
+        "reason": "Pode manter uma falha de cadastro visível no conteúdo."
+      }
+    }
+  ]
+} as const;
