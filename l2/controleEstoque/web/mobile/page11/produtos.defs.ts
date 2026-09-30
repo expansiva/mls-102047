@@ -2,33 +2,33 @@
 
 export const definition = {
   "template": {
-    "category": "inventoryControl",
+    "category": "_102020_/l4/collabux/templates/inventoryControl/page21.md",
     "experience": "splitViewOperations"
   },
-  "intent": "Permitir ao estoquista, em conteúdo estreito e fluido, priorizar avisos de saldo baixo, localizar produtos, conferir saldo e mínimo e cadastrar um novo item para o controle de estoque.",
+  "intent": "Em conteúdo estreito e fluido, o estoquista vê primeiro os avisos de saldo baixo, depois localiza e confere produtos e cadastra um novo item quando necessário.",
   "sections": [
     {
-      "id": "avisosReposicao",
+      "id": "alertas",
       "priority": "primary",
-      "purpose": "Coloca na frente os produtos abaixo do mínimo para o estoquista tratar a reposição na faixa estreita do aparelho.",
+      "purpose": "Coloca na frente, em cerca de 390px e ainda usável em 360px e 430px, os produtos abaixo do mínimo para o estoquista tratar a reposição.",
       "organisms": [
         "alertasSaldoBaixo"
       ]
     },
     {
-      "id": "consultaProdutos",
+      "id": "consulta",
       "priority": "main",
-      "purpose": "Empilha o resumo de saldos, a busca da lista e o detalhe do produto em coluna fluida para conferir disponibilidade e mínimo.",
+      "purpose": "Empilha saldos, busca, lista e detalhe em coluna fluida para localizar e conferir um produto na largura estreita.",
       "organisms": [
-        "resumoSaldos",
+        "saldoAtual",
         "listaProdutos",
         "detalheProduto"
       ]
     },
     {
-      "id": "novoProduto",
+      "id": "cadastro",
       "priority": "secondary",
-      "purpose": "Apresenta o formulário e a ação de cadastro em sequência vertical para registrar o produto com sua quantidade mínima.",
+      "purpose": "Mantém o cadastro ao final, com campos e ação em sequência vertical no conteúdo estreito.",
       "organisms": [
         "formularioProduto",
         "acoesCadastro"
@@ -36,24 +36,24 @@ export const definition = {
     }
   ],
   "organisms": {
-    "resumoSaldos": {
+    "saldoAtual": {
       "kind": "summary",
-      "text": "Mostra o saldo atual de cada produto em lista compacta para o estoquista varrer a disponibilidade na tela estreita.",
+      "text": "Mostra o saldo atual de cada produto em lista compacta para o estoquista avaliar a disponibilidade no telefone.",
       "intents": []
     },
     "alertasSaldoBaixo": {
       "kind": "highlights",
-      "text": "Destaca os produtos com saldo abaixo da quantidade mínima para o estoquista ver primeiro o que precisa de reposição.",
+      "text": "Destaca primeiro os produtos com saldo abaixo da quantidade mínima para o estoquista priorizar a reposição em tela estreita.",
       "intents": []
     },
     "listaProdutos": {
       "kind": "list",
-      "text": "Permite buscar e percorrer os produtos cadastrados para o estoquista localizar o item na coluna estreita.",
+      "text": "Lista os produtos cadastrados com busca pelo nome para o estoquista localizar o item sem depender de tabela larga.",
       "intents": []
     },
     "detalheProduto": {
       "kind": "detail",
-      "text": "Mostra o produto escolhido com saldo atual e quantidade mínima para o estoquista confirmar a situação e, se preciso, seguir para registrar uma movimentação.",
+      "text": "Apresenta o produto escolhido com saldo atual, quantidade mínima e unidade para conferência e para seguir ao registro de uma movimentação.",
       "intents": [
         {
           "id": "abrirMovimentacoes",
@@ -64,12 +64,12 @@ export const definition = {
     },
     "formularioProduto": {
       "kind": "form",
-      "text": "Permite informar o nome do produto, a unidade de medida e a quantidade mínima em campos empilhados para o acompanhamento do estoque.",
+      "text": "Recebe o nome do produto, a unidade de medida e a quantidade mínima em campos empilhados para incluir o item no acompanhamento.",
       "intents": []
     },
     "acoesCadastro": {
       "kind": "actions",
-      "text": "Confirma o cadastro do produto para que ele fique disponível no controle de saldos e nas movimentações.",
+      "text": "Confirma o cadastro do produto para disponibilizá-lo às movimentações e ao monitoramento do saldo.",
       "intents": [
         {
           "id": "cadastrarProduto",
@@ -79,16 +79,16 @@ export const definition = {
     }
   },
   "molecules": {
-    "resumoSaldos": [
+    "saldoAtual": [
       {
-        "role": "display",
+        "role": "view",
         "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-card-grid"
+        "alternative": "groupviewtable--ml-responsive-table"
       }
     ],
     "alertasSaldoBaixo": [
       {
-        "role": "display",
+        "role": "view",
         "preferred": "groupviewdata--ml-vertical-record-list",
         "alternative": "groupviewdata--ml-card-grid"
       }
@@ -100,21 +100,21 @@ export const definition = {
         "alternative": "groupsearchcontent--ml-search-filters"
       },
       {
-        "role": "display",
+        "role": "view",
         "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-card-grid"
+        "alternative": "groupviewtable--ml-responsive-table"
       }
     ],
     "detalheProduto": [
       {
-        "role": "display",
-        "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-horizontal"
+        "role": "card",
+        "preferred": "groupviewcard--ml-view-card-horizontal",
+        "alternative": "groupviewcard--ml-vertical-card"
       },
       {
         "role": "metric",
-        "preferred": "groupviewmetric--ml-metric-card",
-        "alternative": "groupviewmetric--ml-metric-big-number"
+        "preferred": "groupviewmetric--ml-metric-big-number",
+        "alternative": "groupviewmetric--ml-metric-card"
       }
     ],
     "formularioProduto": [
