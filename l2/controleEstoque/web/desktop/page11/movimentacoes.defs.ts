@@ -5,21 +5,21 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/inventoryControl/page21.md",
     "experience": "splitViewOperations"
   },
-  "intent": "O estoquista registra uma entrada ou saída de unidades de um produto e acompanha o histórico já lançado, para atualizar o saldo atual com um registro que permanece inalterável.",
+  "intent": "O estoquista registra uma entrada ou saída de unidades de um produto para atualizar o saldo e acompanha as movimentações já gravadas, que permanecem inalteráveis depois do registro.",
   "sections": [
     {
       "id": "registroMovimentacao",
       "priority": "primary",
-      "purpose": "Reúne a localização do produto, a conferência do saldo e o preenchimento da entrada ou saída, para o estoquista gravar a movimentação no mesmo contexto em que vê o efeito no estoque.",
+      "purpose": "Reúne a captura da movimentação e a confirmação do registro para o estoquista localizar o produto, conferir o saldo e gravar a entrada ou a saída.",
       "organisms": [
         "formularioMovimentacao",
-        "acoesRegistro"
+        "confirmarMovimentacao"
       ]
     },
     {
-      "id": "historicoMovimentacoes",
+      "id": "historicoRegistrado",
       "priority": "main",
-      "purpose": "Mostra as entradas e saídas já registradas para o estoquista conferir o histórico que alimenta o saldo, sem reabrir lançamentos encerrados.",
+      "purpose": "Apresenta as entradas e saídas já registradas para o estoquista acompanhar o histórico imutável do estoque.",
       "organisms": [
         "historicoMovimentacoes"
       ]
@@ -28,17 +28,17 @@ export const definition = {
   "organisms": {
     "historicoMovimentacoes": {
       "kind": "list",
-      "text": "Lista as entradas e saídas já registradas, com produto, tipo, quantidade e data, para o estoquista acompanhar o histórico imutável que calcula o saldo.",
+      "text": "Mostra as entradas e saídas já registradas, com produto, tipo, quantidade e data e hora, para o estoquista acompanhar o histórico que não pode ser alterado depois da gravação.",
       "intents": []
     },
     "formularioMovimentacao": {
       "kind": "form",
-      "text": "Localiza o produto, exibe o saldo atual e a quantidade mínima e pede tipo, quantidade e momento da operação, para o estoquista informar uma entrada ou saída antes de gravá-la.",
+      "text": "Permite localizar o produto, conferir o saldo atual e a quantidade mínima e informar se a movimentação é entrada ou saída e quantas unidades serão movimentadas.",
       "intents": []
     },
-    "acoesRegistro": {
+    "confirmarMovimentacao": {
       "kind": "actions",
-      "text": "Confirma o registro da movimentação para gravar a entrada ou saída e atualizar o saldo atual do produto, deixando o lançamento inalterável depois da gravação.",
+      "text": "Grava a movimentação de estoque e atualiza o saldo atual do produto; depois do registro a movimentação permanece inalterável e o novo saldo fica visível.",
       "intents": [
         {
           "id": "registrarMovimentacao",
@@ -50,14 +50,14 @@ export const definition = {
   "molecules": {
     "historicoMovimentacoes": [
       {
-        "role": "records",
+        "role": "collection",
         "preferred": "groupviewtable--ml-data-table",
-        "alternative": "groupviewdata--ml-timeline-view"
+        "alternative": "groupviewtable--ml-view-table"
       }
     ],
     "formularioMovimentacao": [
       {
-        "role": "product",
+        "role": "productLookup",
         "preferred": "groupselectone--ml-select-one-autocomplete",
         "alternative": "groupselectone--ml-combobox"
       },
@@ -72,7 +72,7 @@ export const definition = {
         "alternative": "groupenternumber--ml-number-input"
       }
     ],
-    "acoesRegistro": [
+    "confirmarMovimentacao": [
       {
         "role": "submit",
         "preferred": "grouptriggeraction--ml-button-standard",
@@ -82,6 +82,11 @@ export const definition = {
         "role": "feedback",
         "preferred": "groupnotifyuser--ml-toast-notification",
         "alternative": "groupnotifyuser--ml-contextual-feedback"
+      },
+      {
+        "role": "updatedBalance",
+        "preferred": "groupviewmetric--ml-metric-card",
+        "alternative": "groupviewmetric--ml-metric-big-number"
       }
     ]
   }

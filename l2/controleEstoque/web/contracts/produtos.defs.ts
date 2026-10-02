@@ -12,8 +12,8 @@ export interface ProdutoLoad {
     };
     controleEstoque: {
       readonly saldoAtual: number;
-      quantidadeMinima: number;
       readonly saldoAbaixoDoMinimo: boolean;
+      quantidadeMinima: number;
     };
   };
 }
@@ -39,7 +39,15 @@ export interface ProdutosContracts {
     input: { search?: string; page?: number; pageSize?: number };
     output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };
     meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };
-    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];
+    rules: ['saldoAtualProduto', 'avisoSaldoMinimoProduto'];
+    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };
+  };
+  'controleEstoque.produtos.loadProdutos': {
+    kind: 'qry';
+    input: { search?: string; page?: number; pageSize?: number };
+    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };
+    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };
+    rules: ['saldoAtualProduto', 'avisoSaldoMinimoProduto'];
     access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };
   };
   'controleEstoque.produtos.cadastrarProduto': {
@@ -48,7 +56,7 @@ export interface ProdutosContracts {
     input: { details: { identification: { name: string }; product: { unitOfMeasure: string }; controleEstoque: { quantidadeMinima: number } } };
     output: { produto: ProdutoCadastrarProduto };
     meta: { output: { produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };
-    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];
+    rules: ['quantidadeMinimaValida'];
     access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };
   };
 }

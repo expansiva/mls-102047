@@ -5,55 +5,55 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/inventoryControl/page21.md",
     "experience": "splitViewOperations"
   },
-  "intent": "Em conteúdo estreito e fluido, o estoquista vê primeiro os avisos de saldo baixo, depois localiza e confere produtos e cadastra um novo item quando necessário.",
+  "intent": "Ajudar o estoquista, em conteúdo estreito e fluido em torno de 390px e ainda usável em 360px e 430px, a ver primeiro os avisos de saldo baixo, conferir saldos, localizar e consultar produtos e cadastrar um novo item com quantidade mínima.",
   "sections": [
     {
-      "id": "alertas",
+      "id": "visaoEstoque",
       "priority": "primary",
-      "purpose": "Coloca na frente, em cerca de 390px e ainda usável em 360px e 430px, os produtos abaixo do mínimo para o estoquista tratar a reposição.",
+      "purpose": "Empilhar em coluna estreita e fluida os avisos de saldo abaixo do mínimo e, em seguida, o panorama de saldos, cabendo em cerca de 390px e permanecendo usável em 360px e 430px.",
       "organisms": [
-        "alertasSaldoBaixo"
+        "alertasSaldoBaixo",
+        "saldosResumo"
       ]
     },
     {
-      "id": "consulta",
+      "id": "consultaItens",
       "priority": "main",
-      "purpose": "Empilha saldos, busca, lista e detalhe em coluna fluida para localizar e conferir um produto na largura estreita.",
+      "purpose": "Seguir na mesma coluna fluida com a lista para localizar o produto e o detalhe com saldo e mínimo, sem grade fixa.",
       "organisms": [
-        "saldoAtual",
         "listaProdutos",
         "detalheProduto"
       ]
     },
     {
-      "id": "cadastro",
+      "id": "novoProduto",
       "priority": "secondary",
-      "purpose": "Mantém o cadastro ao final, com campos e ação em sequência vertical no conteúdo estreito.",
+      "purpose": "Encerrar a coluna estreita com o formulário e a ação de cadastrar o produto e a quantidade mínima.",
       "organisms": [
-        "formularioProduto",
+        "formularioCadastro",
         "acoesCadastro"
       ]
     }
   ],
   "organisms": {
-    "saldoAtual": {
+    "saldosResumo": {
       "kind": "summary",
-      "text": "Mostra o saldo atual de cada produto em lista compacta para o estoquista avaliar a disponibilidade no telefone.",
+      "text": "Mostra o saldo atual de cada produto do estoque para o estoquista enxergar rapidamente a disponibilidade na largura estreita.",
       "intents": []
     },
     "alertasSaldoBaixo": {
       "kind": "highlights",
-      "text": "Destaca primeiro os produtos com saldo abaixo da quantidade mínima para o estoquista priorizar a reposição em tela estreita.",
+      "text": "Destaca no topo os produtos com saldo abaixo da quantidade mínima para o estoquista priorizar a reposição no telefone.",
       "intents": []
     },
     "listaProdutos": {
       "kind": "list",
-      "text": "Lista os produtos cadastrados com busca pelo nome para o estoquista localizar o item sem depender de tabela larga.",
+      "text": "Lista os produtos cadastrados no estoque para o estoquista localizar o item que deseja acompanhar, em leitura vertical contínua.",
       "intents": []
     },
     "detalheProduto": {
       "kind": "detail",
-      "text": "Apresenta o produto escolhido com saldo atual, quantidade mínima e unidade para conferência e para seguir ao registro de uma movimentação.",
+      "text": "Apresenta o produto escolhido, o saldo atual e a quantidade mínima para o estoquista confirmar a situação e, se precisar repor, seguir para registrar uma movimentação.",
       "intents": [
         {
           "id": "abrirMovimentacoes",
@@ -62,14 +62,14 @@ export const definition = {
         }
       ]
     },
-    "formularioProduto": {
+    "formularioCadastro": {
       "kind": "form",
-      "text": "Recebe o nome do produto, a unidade de medida e a quantidade mínima em campos empilhados para incluir o item no acompanhamento.",
+      "text": "Recebe o produto, a unidade de medida e a quantidade mínima para iniciar o acompanhamento do estoque no fluxo estreito.",
       "intents": []
     },
     "acoesCadastro": {
       "kind": "actions",
-      "text": "Confirma o cadastro do produto para disponibilizá-lo às movimentações e ao monitoramento do saldo.",
+      "text": "Confirma o cadastro do produto no estoque com a quantidade mínima informada.",
       "intents": [
         {
           "id": "cadastrarProduto",
@@ -79,35 +79,30 @@ export const definition = {
     }
   },
   "molecules": {
-    "saldoAtual": [
+    "saldosResumo": [
       {
-        "role": "view",
-        "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewtable--ml-responsive-table"
+        "role": "display",
+        "preferred": "groupviewtable--ml-responsive-table",
+        "alternative": "groupviewtable--ml-responsive-data-table"
       }
     ],
     "alertasSaldoBaixo": [
       {
-        "role": "view",
+        "role": "display",
         "preferred": "groupviewdata--ml-vertical-record-list",
         "alternative": "groupviewdata--ml-card-grid"
       }
     ],
     "listaProdutos": [
       {
-        "role": "search",
-        "preferred": "groupsearchcontent--ml-search-bar",
-        "alternative": "groupsearchcontent--ml-search-filters"
-      },
-      {
-        "role": "view",
-        "preferred": "groupviewdata--ml-vertical-record-list",
+        "role": "display",
+        "preferred": "groupviewtable--ml-responsive-data-table",
         "alternative": "groupviewtable--ml-responsive-table"
       }
     ],
     "detalheProduto": [
       {
-        "role": "card",
+        "role": "record",
         "preferred": "groupviewcard--ml-view-card-horizontal",
         "alternative": "groupviewcard--ml-vertical-card"
       },
@@ -117,16 +112,11 @@ export const definition = {
         "alternative": "groupviewmetric--ml-metric-card"
       }
     ],
-    "formularioProduto": [
+    "formularioCadastro": [
       {
-        "role": "text",
-        "preferred": "groupentertext--ml-enter-text",
-        "alternative": "groupentertext--ml-floating-text-input"
-      },
-      {
-        "role": "number",
-        "preferred": "groupenternumber--ml-number-input",
-        "alternative": "groupenternumber--ml-number-stepper"
+        "role": "quantity",
+        "preferred": "groupenternumber--ml-number-stepper",
+        "alternative": "groupenternumber--ml-number-input"
       }
     ],
     "acoesCadastro": [
