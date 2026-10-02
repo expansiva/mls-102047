@@ -9,7 +9,6 @@ export const definition = {
   "dependencies": [
     "_102034_/l4/ontology/mdm.defs.ts",
     "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
-    "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
     "_102047_/l4/controleEstoque/ontology/Produto.defs.ts",
     "_102047_/l4/controleEstoque/rules.defs.ts"
   ],
@@ -25,44 +24,126 @@ export const definition = {
         "input": [
           {
             "name": "details",
-            "type": "{ \"identification\"?: { \"name\": string; }; \"product\"?: { \"unitOfMeasure\": string; }; \"controleEstoque\"?: { \"quantidadeMinima\": number; }; }",
+            "type": "object",
             "fieldRef": "Produto.details"
+          },
+          {
+            "name": "details.identification",
+            "type": "object",
+            "fieldRef": "Produto.details.identification"
+          },
+          {
+            "name": "details.identification.name",
+            "type": "string",
+            "fieldRef": "Produto.details.identification.name"
+          },
+          {
+            "name": "details.base",
+            "type": "object",
+            "fieldRef": "Produto.details.base"
+          },
+          {
+            "name": "details.product",
+            "type": "object",
+            "fieldRef": "Produto.details.product"
+          },
+          {
+            "name": "details.product.unitOfMeasure",
+            "type": "string",
+            "fieldRef": "Produto.details.product.unitOfMeasure"
+          },
+          {
+            "name": "details.general",
+            "type": "object",
+            "fieldRef": "Produto.details.general"
+          },
+          {
+            "name": "details.controleEstoque",
+            "type": "object",
+            "fieldRef": "Produto.details.controleEstoque"
+          },
+          {
+            "name": "details.controleEstoque.quantidadeMinima",
+            "type": "number",
+            "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
           }
         ],
         "output": [
           {
             "name": "id",
-            "type": "string",
+            "type": "uuid",
             "fieldRef": "Produto.id"
           },
           {
             "name": "version",
-            "type": "number",
+            "type": "integer",
             "fieldRef": "Produto.version"
           },
           {
             "name": "details",
-            "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
+            "type": "object",
             "fieldRef": "Produto.details"
-          }
-        ],
-        "contractRefs": [
+          },
           {
-            "route": "controleEstoque.produtos.cmdCreateProduto",
-            "symbol": "CreateProdutoOutput"
+            "name": "details.identification",
+            "type": "object",
+            "fieldRef": "Produto.details.identification"
+          },
+          {
+            "name": "details.identification.subtype",
+            "type": "enum",
+            "fieldRef": "Produto.details.identification.subtype"
+          },
+          {
+            "name": "details.identification.name",
+            "type": "string",
+            "fieldRef": "Produto.details.identification.name"
+          },
+          {
+            "name": "details.identification.status",
+            "type": "enum",
+            "fieldRef": "Produto.details.identification.status"
+          },
+          {
+            "name": "details.base",
+            "type": "object",
+            "fieldRef": "Produto.details.base"
+          },
+          {
+            "name": "details.product",
+            "type": "object",
+            "fieldRef": "Produto.details.product"
+          },
+          {
+            "name": "details.product.unitOfMeasure",
+            "type": "string",
+            "fieldRef": "Produto.details.product.unitOfMeasure"
+          },
+          {
+            "name": "details.general",
+            "type": "object",
+            "fieldRef": "Produto.details.general"
+          },
+          {
+            "name": "details.controleEstoque",
+            "type": "object",
+            "fieldRef": "Produto.details.controleEstoque"
+          },
+          {
+            "name": "details.controleEstoque.quantidadeMinima",
+            "type": "number",
+            "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
+          },
+          {
+            "name": "details.controleEstoque.saldoAtual",
+            "type": "number",
+            "fieldRef": "Produto.details.controleEstoque.saldoAtual"
+          },
+          {
+            "name": "details.controleEstoque.saldoAbaixoDoMinimo",
+            "type": "boolean",
+            "fieldRef": "Produto.details.controleEstoque.saldoAbaixoDoMinimo"
           }
-        ]
-      }
-    ],
-    "routeProjections": [
-      {
-        "route": "controleEstoque.produtos.cmdCreateProduto",
-        "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "projection": "declared",
-        "outputFields": [
-          "id",
-          "version",
-          "details"
         ]
       }
     ],

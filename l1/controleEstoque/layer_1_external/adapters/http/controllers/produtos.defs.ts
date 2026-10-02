@@ -8,46 +8,31 @@ export const definition = {
   "status": "generated",
   "dependencies": [
     "_102047_/l1/controleEstoque/layer_1_external/auth/authorityMap.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+    "_102047_/l1/controleEstoque/layer_2_application/requests/produtos.defs.ts",
+    "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts"
   ],
   "data": {
     "pageId": "produtos",
     "handlers": [
       {
-        "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+        "route": "controleEstoque.produtos.cadastrarProduto",
         "kind": "command",
-        "usecaseId": "createMovimentacaoEstoque",
         "grantIds": [
           "gerenciarEstoque"
-        ]
+        ],
+        "serviceFunction": "controleEstoque.produtos.cadastrarProduto",
+        "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+        "contractInterface": "ProdutosContracts"
       },
       {
-        "route": "controleEstoque.produtos.cmdCreateProduto",
-        "kind": "command",
-        "usecaseId": "createProduto",
-        "grantIds": [
-          "gerenciarEstoque"
-        ]
-      },
-      {
-        "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+        "route": "controleEstoque.produtos.load",
         "kind": "query",
-        "usecaseId": "listMovimentacaoEstoque",
         "grantIds": [
           "gerenciarEstoque"
-        ]
-      },
-      {
-        "route": "controleEstoque.produtos.qryListProduto",
-        "kind": "query",
-        "usecaseId": "listProduto",
-        "grantIds": [
-          "gerenciarEstoque"
-        ]
+        ],
+        "serviceFunction": "controleEstoque.produtos.load",
+        "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+        "contractInterface": "ProdutosContracts"
       }
     ]
   }

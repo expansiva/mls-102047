@@ -9,8 +9,6 @@ export const definition = {
   "dependencies": [
     "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
     "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
-    "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-    "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
     "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
   ],
   "data": {
@@ -27,92 +25,52 @@ export const definition = {
         "input": [
           {
             "name": "id",
-            "type": "string",
+            "type": "uuid",
             "fieldRef": "MovimentacaoEstoque.id"
           },
           {
             "name": "produtoId",
-            "type": "string",
+            "type": "record",
             "fieldRef": "MovimentacaoEstoque.produtoId"
           },
           {
             "name": "movimentadoEm",
-            "type": "string",
+            "type": "timestamp",
             "fieldRef": "MovimentacaoEstoque.movimentadoEm"
           },
           {
+            "name": "details",
+            "type": "object",
+            "fieldRef": "MovimentacaoEstoque.details"
+          },
+          {
+            "name": "details.tipo",
+            "type": "enum",
+            "fieldRef": "MovimentacaoEstoque.details.tipo"
+          },
+          {
+            "name": "details.quantidade",
+            "type": "integer",
+            "fieldRef": "MovimentacaoEstoque.details.quantidade"
+          },
+          {
             "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
             "type": "number"
           }
         ],
         "output": [
           {
-            "name": "id",
-            "type": "string",
-            "fieldRef": "MovimentacaoEstoque.id"
+            "name": "items",
+            "type": "MovimentacaoEstoque"
           },
           {
-            "name": "version",
-            "type": "number",
-            "fieldRef": "MovimentacaoEstoque.version"
-          },
-          {
-            "name": "produtoId",
-            "type": "string",
-            "fieldRef": "MovimentacaoEstoque.produtoId"
-          },
-          {
-            "name": "movimentadoEm",
-            "type": "string",
-            "fieldRef": "MovimentacaoEstoque.movimentadoEm"
-          },
-          {
-            "name": "details",
-            "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
-            "fieldRef": "MovimentacaoEstoque.details"
-          },
-          {
-            "name": "movimentacaoEstoqueProduto",
-            "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
+            "name": "hasMore",
+            "type": "boolean"
           }
-        ],
-        "contractRefs": [
-          {
-            "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-            "symbol": "ListMovimentacaoEstoqueOutput"
-          },
-          {
-            "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-            "symbol": "ListMovimentacaoEstoqueOutput"
-          }
-        ]
-      }
-    ],
-    "routeProjections": [
-      {
-        "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-        "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-        "projection": "declared",
-        "outputFields": [
-          "id",
-          "version",
-          "produtoId",
-          "movimentadoEm",
-          "details",
-          "movimentacaoEstoqueProduto"
-        ]
-      },
-      {
-        "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-        "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "projection": "declared",
-        "outputFields": [
-          "id",
-          "version",
-          "produtoId",
-          "movimentadoEm",
-          "details",
-          "movimentacaoEstoqueProduto"
         ]
       }
     ],

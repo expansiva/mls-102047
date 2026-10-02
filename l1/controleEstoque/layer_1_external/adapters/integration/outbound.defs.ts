@@ -13,16 +13,11 @@ export const definition = {
     "inbound": [
       {
         "inboundId": "recebimentoRegistrado",
-        "operations": [],
+        "operations": [
+          "createMovimentacaoEstoque"
+        ],
         "mechanism": "",
-        "consumer": "recebimentoRegistrado"
-      }
-    ],
-    "gaps": [
-      {
-        "itemId": "recebimentoRegistrado",
-        "kind": "inbound",
-        "code": "POOL_ABSENT"
+        "consumer": "createMovimentacaoEstoque"
       }
     ]
   }

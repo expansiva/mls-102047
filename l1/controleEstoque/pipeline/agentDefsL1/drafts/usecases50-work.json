@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "2026-09-21-d1-usecases-v1",
-  "repairs": 0,
+  "schemaVersion": "2026-10-01-d1-usecases-v2",
+  "repairs": 1,
   "request": {
     "project": 102047,
     "moduleName": "controleEstoque",
@@ -10,8 +10,7 @@
         "entity": "MovimentacaoEstoque",
         "operation": "create",
         "routes": [
-          "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-          "controleEstoque.produtos.cmdCreateMovimentacaoEstoque"
+          "controleEstoque.movimentacoes.registrarMovimentacao"
         ],
         "defPath": "l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts"
       },
@@ -20,7 +19,7 @@
         "entity": "Produto",
         "operation": "create",
         "routes": [
-          "controleEstoque.produtos.cmdCreateProduto"
+          "controleEstoque.produtos.cadastrarProduto"
         ],
         "defPath": "l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts"
       },
@@ -29,8 +28,7 @@
         "entity": "MovimentacaoEstoque",
         "operation": "list",
         "routes": [
-          "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-          "controleEstoque.produtos.qryListMovimentacaoEstoque"
+          "controleEstoque.movimentacoes.load"
         ],
         "defPath": "l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts"
       },
@@ -39,54 +37,10 @@
         "entity": "Produto",
         "operation": "list",
         "routes": [
-          "controleEstoque.movimentacoes.qryListProduto",
-          "controleEstoque.produtos.qryListProduto"
+          "controleEstoque.movimentacoes.load",
+          "controleEstoque.produtos.load"
         ],
         "defPath": "l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
-      }
-    ],
-    "routes": [
-      {
-        "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-        "page": "movimentacoes",
-        "kind": "cmd",
-        "usecaseRef": "createMovimentacaoEstoque"
-      },
-      {
-        "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-        "page": "movimentacoes",
-        "kind": "qry",
-        "usecaseRef": "listMovimentacaoEstoque"
-      },
-      {
-        "route": "controleEstoque.movimentacoes.qryListProduto",
-        "page": "movimentacoes",
-        "kind": "qry",
-        "usecaseRef": "listProduto"
-      },
-      {
-        "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
-        "page": "produtos",
-        "kind": "cmd",
-        "usecaseRef": "createMovimentacaoEstoque"
-      },
-      {
-        "route": "controleEstoque.produtos.cmdCreateProduto",
-        "page": "produtos",
-        "kind": "cmd",
-        "usecaseRef": "createProduto"
-      },
-      {
-        "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-        "page": "produtos",
-        "kind": "qry",
-        "usecaseRef": "listMovimentacaoEstoque"
-      },
-      {
-        "route": "controleEstoque.produtos.qryListProduto",
-        "page": "produtos",
-        "kind": "qry",
-        "usecaseRef": "listProduto"
       }
     ],
     "ports": [
@@ -361,12 +315,12 @@
       {
         "pageId": "movimentacoes",
         "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport const createMovimentacaoEstoqueRoute = \"controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque\" as const;\n\nexport interface CreateMovimentacaoEstoqueInput {\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n}\n\nexport interface CreateMovimentacaoEstoqueOutput {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport const listMovimentacaoEstoqueRoute = \"controleEstoque.movimentacoes.qryListMovimentacaoEstoque\" as const;\n\nexport interface ListMovimentacaoEstoqueInput {\n  \"id\"?: string;\n  \"produtoId\"?: string;\n  \"movimentadoEm\"?: string;\n  \"page\"?: number;\n}\n\nexport interface ListMovimentacaoEstoqueItem {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];\n\nexport const listProdutoRoute = \"controleEstoque.movimentacoes.qryListProduto\" as const;\n\nexport interface ListProdutoInput {\n  \"id\"?: string;\n  \"details\"?: {\n    \"identification\"?: {\n      \"subtype\"?: \"Product\";\n      \"name\"?: string;\n      \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListProdutoItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport type ListProdutoOutput = ListProdutoItem[];\n"
+        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface MovimentacaoEstoqueLoad {\n  id: string;\n  produtoId: string;\n  movimentadoEm: string;\n  details: {\n    tipo: 'entrada' | 'saida';\n    quantidade: number;\n  };\n}\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n      readonly saldoAtual: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface MovimentacoesContracts {\n  'controleEstoque.movimentacoes.load': {\n    kind: 'qry';\n    input: { produtoId?: string; page?: number; pageSize?: number };\n    output: { movimentacoes: MovimentacaoEstoqueLoad[]; produtos: ProdutoLoad[]; pageHistoricoMovimentacoes: number; pageSizeHistoricoMovimentacoes: number; hasMoreHistoricoMovimentacoes: boolean };\n    meta: { output: { movimentacoes: { entity: 'MovimentacaoEstoque'; many: true }; produtos: { entity: 'Produto'; many: true } }; lists: { historicoMovimentacoes: { key: 'movimentacoes'; page: 'pageHistoricoMovimentacoes'; pageSize: 'pageSizeHistoricoMovimentacoes'; hasMore: 'hasMoreHistoricoMovimentacoes' } }; params: { produtoId: { filters: 'movimentacoes'; field: 'produtoId' }; page: { pages: 'historicoMovimentacoes' }; pageSize: { pages: 'historicoMovimentacoes' } } };\n    rules: ['movimentacaoEstoqueImutavel', 'quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo', 'quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.movimentacoes.registrarMovimentacao': {\n    kind: 'cmd';\n    writes: 'MovimentacaoEstoque.create';\n    input: { produtoId: string; movimentadoEm: string; details: { tipo: 'entrada' | 'saida'; quantidade: number } };\n    output: { movimentacaoEstoque: MovimentacaoEstoqueLoad };\n    meta: { output: { movimentacaoEstoque: { entity: 'MovimentacaoEstoque'; many: false } }; lists: {}; params: {} };\n    rules: ['movimentacaoEstoqueImutavel', 'quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
       },
       {
         "pageId": "produtos",
         "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport const createMovimentacaoEstoqueRoute = \"controleEstoque.produtos.cmdCreateMovimentacaoEstoque\" as const;\n\nexport interface CreateMovimentacaoEstoqueInput {\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n}\n\nexport interface CreateMovimentacaoEstoqueOutput {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport const createProdutoRoute = \"controleEstoque.produtos.cmdCreateProduto\" as const;\n\nexport interface CreateProdutoInput {\n  \"details\": {\n    \"identification\"?: {\n      \"name\": string;\n    };\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n    };\n  };\n}\n\nexport interface CreateProdutoOutput {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport const listMovimentacaoEstoqueRoute = \"controleEstoque.produtos.qryListMovimentacaoEstoque\" as const;\n\nexport interface ListMovimentacaoEstoqueInput {\n  \"id\"?: string;\n  \"produtoId\"?: string;\n  \"movimentadoEm\"?: string;\n  \"page\"?: number;\n}\n\nexport interface ListMovimentacaoEstoqueItem {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];\n\nexport const listProdutoRoute = \"controleEstoque.produtos.qryListProduto\" as const;\n\nexport interface ListProdutoInput {\n  \"id\"?: string;\n  \"details\"?: {\n    \"identification\"?: {\n      \"subtype\"?: \"Product\";\n      \"name\"?: string;\n      \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListProdutoItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport type ListProdutoOutput = ListProdutoItem[];\n"
+        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      readonly saldoAtual: number;\n      quantidadeMinima: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface ProdutoCadastrarProduto {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n    };\n  };\n}\n\nexport interface ProdutosContracts {\n  'controleEstoque.produtos.load': {\n    kind: 'qry';\n    input: { search?: string; page?: number; pageSize?: number };\n    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };\n    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };\n    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.produtos.cadastrarProduto': {\n    kind: 'cmd';\n    writes: 'Produto.create';\n    input: { details: { identification: { name: string }; product: { unitOfMeasure: string }; controleEstoque: { quantidadeMinima: number } } };\n    output: { produto: ProdutoCadastrarProduto };\n    meta: { output: { produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };\n    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
       }
     ],
     "contexts": [
@@ -376,226 +330,7 @@
         "transition": null,
         "capabilities": [],
         "effectiveFields": [],
-        "routes": [
-          {
-            "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-            "page": "movimentacoes",
-            "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "inputSymbol": "CreateMovimentacaoEstoqueInput",
-            "outputSymbol": "CreateMovimentacaoEstoqueOutput",
-            "inputFields": [
-              {
-                "path": "produtoId",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentadoEm",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.tipo",
-                "type": "\"entrada\" | \"saida\"",
-                "optional": false
-              },
-              {
-                "path": "details.quantidade",
-                "type": "number",
-                "optional": false
-              }
-            ],
-            "outputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "version",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "produtoId",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentadoEm",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.tipo",
-                "type": "\"entrada\" | \"saida\"",
-                "optional": false
-              },
-              {
-                "path": "details.quantidade",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "movimentacaoEstoqueProduto",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details.identification.name",
-                "type": "string",
-                "optional": false
-              }
-            ],
-            "unbound": "",
-            "access": [
-              {
-                "grantId": "gerenciarEstoque",
-                "actorRef": "estoquista",
-                "scope": "organization",
-                "anchorEntity": "",
-                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
-                "disclosure": "fullRecord",
-                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
-                "allowedFields": []
-              }
-            ]
-          },
-          {
-            "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
-            "page": "produtos",
-            "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-            "inputSymbol": "CreateMovimentacaoEstoqueInput",
-            "outputSymbol": "CreateMovimentacaoEstoqueOutput",
-            "inputFields": [
-              {
-                "path": "produtoId",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentadoEm",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.tipo",
-                "type": "\"entrada\" | \"saida\"",
-                "optional": false
-              },
-              {
-                "path": "details.quantidade",
-                "type": "number",
-                "optional": false
-              }
-            ],
-            "outputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "version",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "produtoId",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentadoEm",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.tipo",
-                "type": "\"entrada\" | \"saida\"",
-                "optional": false
-              },
-              {
-                "path": "details.quantidade",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "movimentacaoEstoqueProduto",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details.identification.name",
-                "type": "string",
-                "optional": false
-              }
-            ],
-            "unbound": "",
-            "access": [
-              {
-                "grantId": "gerenciarEstoque",
-                "actorRef": "estoquista",
-                "scope": "organization",
-                "anchorEntity": "",
-                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
-                "disclosure": "fullRecord",
-                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
-                "allowedFields": []
-              }
-            ]
-          }
-        ],
+        "routes": [],
         "rules": [],
         "rulePlan": [
           {
@@ -655,40 +390,8 @@
         "findings": [],
         "sources": [
           {
-            "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
-          },
-          {
-            "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-            "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
-          },
-          {
-            "path": "l4/controleEstoque/access.defs.ts",
-            "sha256": "sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
-            "sha256": "sha256:19459dca314773b9044527cb607878a1f5a5c7ee03100e7b7c16009e19d11d76"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
-            "sha256": "sha256:6dd712167a88c6dc85fce3f42d0bddb2d76a7694b5306bc7f9389db46840c256"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
-            "sha256": "sha256:3469ee6c982e7b22585ec8631b4a9fbd3aecb51ac64984af4e99db37afc50fac"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
-            "sha256": "sha256:bb8ea0f724696e0ddc16424f05775b55835fe62c3f9c9fbc5b6e2b317a6f339d"
-          },
-          {
             "path": "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
             "sha256": "sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549"
-          },
-          {
-            "path": "l4/controleEstoque/pool/l1/web/needs.json",
-            "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
           }
         ]
       },
@@ -706,142 +409,7 @@
           "details.identification.name",
           "details.product.unitOfMeasure"
         ],
-        "routes": [
-          {
-            "route": "controleEstoque.produtos.cmdCreateProduto",
-            "page": "produtos",
-            "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-            "inputSymbol": "CreateProdutoInput",
-            "outputSymbol": "CreateProdutoOutput",
-            "inputFields": [
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.identification.name",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details.product",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.product.unitOfMeasure",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details.controleEstoque",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque.quantidadeMinima",
-                "type": "number",
-                "optional": false
-              }
-            ],
-            "outputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "version",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.identification.subtype",
-                "type": "\"Product\"",
-                "optional": false
-              },
-              {
-                "path": "details.identification.name",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details.identification.status",
-                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
-                "optional": false
-              },
-              {
-                "path": "details.base",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.product",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.product.unitOfMeasure",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details.general",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque.quantidadeMinima",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "details.controleEstoque.saldoAtual",
-                "type": "number",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque.saldoAbaixoDoMinimo",
-                "type": "boolean",
-                "optional": true
-              }
-            ],
-            "unbound": "",
-            "access": [
-              {
-                "grantId": "gerenciarEstoque",
-                "actorRef": "estoquista",
-                "scope": "organization",
-                "anchorEntity": "",
-                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
-                "disclosure": "fullRecord",
-                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
-                "allowedFields": []
-              }
-            ]
-          }
-        ],
+        "routes": [],
         "rules": [],
         "rulePlan": [
           {
@@ -928,42 +496,7 @@
         "portId": "",
         "portMethods": [],
         "effects": [],
-        "journeys": [
-          {
-            "journeyId": "acompanharSaldos",
-            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
-            "actorRef": "estoquista",
-            "goal": "Consultar os saldos atuais dos produtos e identificar itens abaixo da quantidade mínima.",
-            "steps": [
-              {
-                "stepId": "localizarProdutos",
-                "kind": "locate",
-                "transitionRef": "",
-                "description": "Localiza os produtos cadastrados para acompanhamento do estoque."
-              },
-              {
-                "stepId": "consultarSaldos",
-                "kind": "inspect",
-                "transitionRef": "",
-                "description": "Consulta os saldos atuais, as quantidades mínimas e os avisos de produtos abaixo do mínimo."
-              }
-            ]
-          },
-          {
-            "journeyId": "tratarAvisoSaldoBaixo",
-            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
-            "actorRef": "estoquista",
-            "goal": "Verificar um aviso recebido sobre produto com saldo abaixo da quantidade mínima.",
-            "steps": [
-              {
-                "stepId": "consultarProdutoAvisado",
-                "kind": "inspect",
-                "transitionRef": "",
-                "description": "Consulta o saldo atual e a quantidade mínima do produto indicado no aviso."
-              }
-            ]
-          }
-        ],
+        "journeys": [],
         "findings": [],
         "sources": [
           {
@@ -971,36 +504,8 @@
             "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
           },
           {
-            "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-            "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
-          },
-          {
-            "path": "l4/controleEstoque/access.defs.ts",
-            "sha256": "sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
-            "sha256": "sha256:19459dca314773b9044527cb607878a1f5a5c7ee03100e7b7c16009e19d11d76"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
-            "sha256": "sha256:6dd712167a88c6dc85fce3f42d0bddb2d76a7694b5306bc7f9389db46840c256"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
-            "sha256": "sha256:3469ee6c982e7b22585ec8631b4a9fbd3aecb51ac64984af4e99db37afc50fac"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
-            "sha256": "sha256:bb8ea0f724696e0ddc16424f05775b55835fe62c3f9c9fbc5b6e2b317a6f339d"
-          },
-          {
             "path": "l4/controleEstoque/ontology/Produto.defs.ts",
             "sha256": "sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557"
-          },
-          {
-            "path": "l4/controleEstoque/pool/l1/web/needs.json",
-            "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
           }
         ]
       },
@@ -1010,216 +515,7 @@
         "transition": null,
         "capabilities": [],
         "effectiveFields": [],
-        "routes": [
-          {
-            "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-            "page": "movimentacoes",
-            "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "inputSymbol": "ListMovimentacaoEstoqueInput",
-            "outputSymbol": "ListMovimentacaoEstoqueOutput: array of ListMovimentacaoEstoqueItem",
-            "inputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "produtoId",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "movimentadoEm",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "page",
-                "type": "number",
-                "optional": true
-              }
-            ],
-            "outputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "version",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "produtoId",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentadoEm",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.tipo",
-                "type": "\"entrada\" | \"saida\"",
-                "optional": false
-              },
-              {
-                "path": "details.quantidade",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "movimentacaoEstoqueProduto",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details.identification.name",
-                "type": "string",
-                "optional": false
-              }
-            ],
-            "unbound": "",
-            "access": [
-              {
-                "grantId": "gerenciarEstoque",
-                "actorRef": "estoquista",
-                "scope": "organization",
-                "anchorEntity": "",
-                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
-                "disclosure": "fullRecord",
-                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
-                "allowedFields": []
-              }
-            ]
-          },
-          {
-            "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-            "page": "produtos",
-            "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-            "inputSymbol": "ListMovimentacaoEstoqueInput",
-            "outputSymbol": "ListMovimentacaoEstoqueOutput: array of ListMovimentacaoEstoqueItem",
-            "inputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "produtoId",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "movimentadoEm",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "page",
-                "type": "number",
-                "optional": true
-              }
-            ],
-            "outputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "version",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "produtoId",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentadoEm",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.tipo",
-                "type": "\"entrada\" | \"saida\"",
-                "optional": false
-              },
-              {
-                "path": "details.quantidade",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "movimentacaoEstoqueProduto",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "movimentacaoEstoqueProduto.details.identification.name",
-                "type": "string",
-                "optional": false
-              }
-            ],
-            "unbound": "",
-            "access": [
-              {
-                "grantId": "gerenciarEstoque",
-                "actorRef": "estoquista",
-                "scope": "organization",
-                "anchorEntity": "",
-                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
-                "disclosure": "fullRecord",
-                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
-                "allowedFields": []
-              }
-            ]
-          }
-        ],
+        "routes": [],
         "rules": [],
         "rulePlan": [],
         "pendingRules": [],
@@ -1238,40 +534,8 @@
         "findings": [],
         "sources": [
           {
-            "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
-          },
-          {
-            "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-            "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
-          },
-          {
-            "path": "l4/controleEstoque/access.defs.ts",
-            "sha256": "sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
-            "sha256": "sha256:19459dca314773b9044527cb607878a1f5a5c7ee03100e7b7c16009e19d11d76"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
-            "sha256": "sha256:6dd712167a88c6dc85fce3f42d0bddb2d76a7694b5306bc7f9389db46840c256"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
-            "sha256": "sha256:3469ee6c982e7b22585ec8631b4a9fbd3aecb51ac64984af4e99db37afc50fac"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
-            "sha256": "sha256:bb8ea0f724696e0ddc16424f05775b55835fe62c3f9c9fbc5b6e2b317a6f339d"
-          },
-          {
             "path": "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
             "sha256": "sha256:27dee69852129a16a21ec26a9099a741b1b3f205a70fe2ddc28655120b495549"
-          },
-          {
-            "path": "l4/controleEstoque/pool/l1/web/needs.json",
-            "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
           }
         ]
       },
@@ -1290,276 +554,7 @@
           }
         ],
         "effectiveFields": [],
-        "routes": [
-          {
-            "route": "controleEstoque.movimentacoes.qryListProduto",
-            "page": "movimentacoes",
-            "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "inputSymbol": "ListProdutoInput",
-            "outputSymbol": "ListProdutoOutput: array of ListProdutoItem",
-            "inputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.identification.subtype",
-                "type": "\"Product\"",
-                "optional": true
-              },
-              {
-                "path": "details.identification.name",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "details.identification.status",
-                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
-                "optional": true
-              },
-              {
-                "path": "page",
-                "type": "number",
-                "optional": true
-              }
-            ],
-            "outputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "version",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.identification.subtype",
-                "type": "\"Product\"",
-                "optional": false
-              },
-              {
-                "path": "details.identification.name",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details.identification.status",
-                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
-                "optional": false
-              },
-              {
-                "path": "details.base",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.product",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.product.unitOfMeasure",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details.general",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque.quantidadeMinima",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "details.controleEstoque.saldoAtual",
-                "type": "number",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque.saldoAbaixoDoMinimo",
-                "type": "boolean",
-                "optional": true
-              }
-            ],
-            "unbound": "",
-            "access": [
-              {
-                "grantId": "gerenciarEstoque",
-                "actorRef": "estoquista",
-                "scope": "organization",
-                "anchorEntity": "",
-                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
-                "disclosure": "fullRecord",
-                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
-                "allowedFields": []
-              }
-            ]
-          },
-          {
-            "route": "controleEstoque.produtos.qryListProduto",
-            "page": "produtos",
-            "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-            "inputSymbol": "ListProdutoInput",
-            "outputSymbol": "ListProdutoOutput: array of ListProdutoItem",
-            "inputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.identification.subtype",
-                "type": "\"Product\"",
-                "optional": true
-              },
-              {
-                "path": "details.identification.name",
-                "type": "string",
-                "optional": true
-              },
-              {
-                "path": "details.identification.status",
-                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
-                "optional": true
-              },
-              {
-                "path": "page",
-                "type": "number",
-                "optional": true
-              }
-            ],
-            "outputFields": [
-              {
-                "path": "id",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "version",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "details",
-                "type": "object",
-                "optional": false
-              },
-              {
-                "path": "details.identification",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.identification.subtype",
-                "type": "\"Product\"",
-                "optional": false
-              },
-              {
-                "path": "details.identification.name",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details.identification.status",
-                "type": "\"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"",
-                "optional": false
-              },
-              {
-                "path": "details.base",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.product",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.product.unitOfMeasure",
-                "type": "string",
-                "optional": false
-              },
-              {
-                "path": "details.general",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque",
-                "type": "object",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque.quantidadeMinima",
-                "type": "number",
-                "optional": false
-              },
-              {
-                "path": "details.controleEstoque.saldoAtual",
-                "type": "number",
-                "optional": true
-              },
-              {
-                "path": "details.controleEstoque.saldoAbaixoDoMinimo",
-                "type": "boolean",
-                "optional": true
-              }
-            ],
-            "unbound": "",
-            "access": [
-              {
-                "grantId": "gerenciarEstoque",
-                "actorRef": "estoquista",
-                "scope": "organization",
-                "anchorEntity": "",
-                "scopeDetail": "Abrange os produtos e as movimentações de estoque de toda a organização.",
-                "disclosure": "fullRecord",
-                "disclosureDetail": "Permite visualizar todos os dados dos produtos acompanhados e das movimentações de estoque, inclusive saldo atual, quantidade mínima e aviso de saldo abaixo do mínimo.",
-                "allowedFields": []
-              }
-            ]
-          }
-        ],
+        "routes": [],
         "rules": [],
         "rulePlan": [
           {
@@ -1607,42 +602,7 @@
         "portId": "",
         "portMethods": [],
         "effects": [],
-        "journeys": [
-          {
-            "journeyId": "acompanharSaldos",
-            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
-            "actorRef": "estoquista",
-            "goal": "Consultar os saldos atuais dos produtos e identificar itens abaixo da quantidade mínima.",
-            "steps": [
-              {
-                "stepId": "localizarProdutos",
-                "kind": "locate",
-                "transitionRef": "",
-                "description": "Localiza os produtos cadastrados para acompanhamento do estoque."
-              },
-              {
-                "stepId": "consultarSaldos",
-                "kind": "inspect",
-                "transitionRef": "",
-                "description": "Consulta os saldos atuais, as quantidades mínimas e os avisos de produtos abaixo do mínimo."
-              }
-            ]
-          },
-          {
-            "journeyId": "tratarAvisoSaldoBaixo",
-            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
-            "actorRef": "estoquista",
-            "goal": "Verificar um aviso recebido sobre produto com saldo abaixo da quantidade mínima.",
-            "steps": [
-              {
-                "stepId": "consultarProdutoAvisado",
-                "kind": "inspect",
-                "transitionRef": "",
-                "description": "Consulta o saldo atual e a quantidade mínima do produto indicado no aviso."
-              }
-            ]
-          }
-        ],
+        "journeys": [],
         "findings": [],
         "sources": [
           {
@@ -1650,40 +610,8 @@
             "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
           },
           {
-            "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
-          },
-          {
-            "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-            "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
-          },
-          {
-            "path": "l4/controleEstoque/access.defs.ts",
-            "sha256": "sha256:47f0109c8317ed94d3abc15736b8b022a094d4394a33a9f3a4d43a36262835da"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/acompanharSaldos.defs.ts",
-            "sha256": "sha256:19459dca314773b9044527cb607878a1f5a5c7ee03100e7b7c16009e19d11d76"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/cadastrarProduto.defs.ts",
-            "sha256": "sha256:6dd712167a88c6dc85fce3f42d0bddb2d76a7694b5306bc7f9389db46840c256"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/registrarMovimentacaoEstoque.defs.ts",
-            "sha256": "sha256:3469ee6c982e7b22585ec8631b4a9fbd3aecb51ac64984af4e99db37afc50fac"
-          },
-          {
-            "path": "l4/controleEstoque/journeys/tratarAvisoSaldoBaixo.defs.ts",
-            "sha256": "sha256:bb8ea0f724696e0ddc16424f05775b55835fe62c3f9c9fbc5b6e2b317a6f339d"
-          },
-          {
             "path": "l4/controleEstoque/ontology/Produto.defs.ts",
             "sha256": "sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557"
-          },
-          {
-            "path": "l4/controleEstoque/pool/l1/web/needs.json",
-            "sha256": "sha256:fa98142acd6dacea9058c4ce83e20f939e60a30d5dd56078ca0ff7d6f95d6431"
           }
         ]
       }
@@ -1696,11 +624,11 @@
       },
       {
         "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-        "sha256": "sha256:59a181df0bf49470bca14323911baf239370ad5dc8414ad860daba8cfc4a2dcd"
+        "sha256": "sha256:c6815b5f6a25f6bab0ead3c48cb3cf53ba149ae949256afd8001794ea81f2e13"
       },
       {
         "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "sha256": "sha256:9129f38218abd3f9641b3ce6ea2e280fc51e771030a872f265def5d703f4b816"
+        "sha256": "sha256:c5818f6f6566cf522685b47b76471e0f4b3d2761d0f346f56168071366fe7228"
       },
       {
         "path": "l4/controleEstoque/access.defs.ts",
@@ -1790,11 +718,11 @@
       },
       {
         "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport const createMovimentacaoEstoqueRoute = \"controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque\" as const;\n\nexport interface CreateMovimentacaoEstoqueInput {\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n}\n\nexport interface CreateMovimentacaoEstoqueOutput {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport const listMovimentacaoEstoqueRoute = \"controleEstoque.movimentacoes.qryListMovimentacaoEstoque\" as const;\n\nexport interface ListMovimentacaoEstoqueInput {\n  \"id\"?: string;\n  \"produtoId\"?: string;\n  \"movimentadoEm\"?: string;\n  \"page\"?: number;\n}\n\nexport interface ListMovimentacaoEstoqueItem {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];\n\nexport const listProdutoRoute = \"controleEstoque.movimentacoes.qryListProduto\" as const;\n\nexport interface ListProdutoInput {\n  \"id\"?: string;\n  \"details\"?: {\n    \"identification\"?: {\n      \"subtype\"?: \"Product\";\n      \"name\"?: string;\n      \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListProdutoItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport type ListProdutoOutput = ListProdutoItem[];\n"
+        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface MovimentacaoEstoqueLoad {\n  id: string;\n  produtoId: string;\n  movimentadoEm: string;\n  details: {\n    tipo: 'entrada' | 'saida';\n    quantidade: number;\n  };\n}\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n      readonly saldoAtual: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface MovimentacoesContracts {\n  'controleEstoque.movimentacoes.load': {\n    kind: 'qry';\n    input: { produtoId?: string; page?: number; pageSize?: number };\n    output: { movimentacoes: MovimentacaoEstoqueLoad[]; produtos: ProdutoLoad[]; pageHistoricoMovimentacoes: number; pageSizeHistoricoMovimentacoes: number; hasMoreHistoricoMovimentacoes: boolean };\n    meta: { output: { movimentacoes: { entity: 'MovimentacaoEstoque'; many: true }; produtos: { entity: 'Produto'; many: true } }; lists: { historicoMovimentacoes: { key: 'movimentacoes'; page: 'pageHistoricoMovimentacoes'; pageSize: 'pageSizeHistoricoMovimentacoes'; hasMore: 'hasMoreHistoricoMovimentacoes' } }; params: { produtoId: { filters: 'movimentacoes'; field: 'produtoId' }; page: { pages: 'historicoMovimentacoes' }; pageSize: { pages: 'historicoMovimentacoes' } } };\n    rules: ['movimentacaoEstoqueImutavel', 'quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo', 'quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.movimentacoes.registrarMovimentacao': {\n    kind: 'cmd';\n    writes: 'MovimentacaoEstoque.create';\n    input: { produtoId: string; movimentadoEm: string; details: { tipo: 'entrada' | 'saida'; quantidade: number } };\n    output: { movimentacaoEstoque: MovimentacaoEstoqueLoad };\n    meta: { output: { movimentacaoEstoque: { entity: 'MovimentacaoEstoque'; many: false } }; lists: {}; params: {} };\n    rules: ['movimentacaoEstoqueImutavel', 'quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
       },
       {
         "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport const createMovimentacaoEstoqueRoute = \"controleEstoque.produtos.cmdCreateMovimentacaoEstoque\" as const;\n\nexport interface CreateMovimentacaoEstoqueInput {\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n}\n\nexport interface CreateMovimentacaoEstoqueOutput {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport const createProdutoRoute = \"controleEstoque.produtos.cmdCreateProduto\" as const;\n\nexport interface CreateProdutoInput {\n  \"details\": {\n    \"identification\"?: {\n      \"name\": string;\n    };\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n    };\n  };\n}\n\nexport interface CreateProdutoOutput {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport const listMovimentacaoEstoqueRoute = \"controleEstoque.produtos.qryListMovimentacaoEstoque\" as const;\n\nexport interface ListMovimentacaoEstoqueInput {\n  \"id\"?: string;\n  \"produtoId\"?: string;\n  \"movimentadoEm\"?: string;\n  \"page\"?: number;\n}\n\nexport interface ListMovimentacaoEstoqueItem {\n  \"id\": string;\n  \"version\": number;\n  \"produtoId\": string;\n  \"movimentadoEm\": string;\n  \"details\": {\n    \"tipo\": \"entrada\" | \"saida\";\n    \"quantidade\": number;\n  };\n  \"movimentacaoEstoqueProduto\"?: {\n    \"id\": string;\n    \"details\"?: {\n      \"identification\"?: {\n        \"name\": string;\n      };\n    };\n  };\n}\n\nexport type ListMovimentacaoEstoqueOutput = ListMovimentacaoEstoqueItem[];\n\nexport const listProdutoRoute = \"controleEstoque.produtos.qryListProduto\" as const;\n\nexport interface ListProdutoInput {\n  \"id\"?: string;\n  \"details\"?: {\n    \"identification\"?: {\n      \"subtype\"?: \"Product\";\n      \"name\"?: string;\n      \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n  };\n  \"page\"?: number;\n}\n\nexport interface ListProdutoItem {\n  \"id\": string;\n  \"version\": number;\n  \"details\": {\n    \"identification\"?: {\n      \"subtype\": \"Product\";\n      \"name\": string;\n      \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\";\n    };\n    \"base\"?: object;\n    \"product\"?: {\n      \"unitOfMeasure\": string;\n    };\n    \"general\"?: object;\n    \"controleEstoque\"?: {\n      \"quantidadeMinima\": number;\n      \"saldoAtual\"?: number;\n      \"saldoAbaixoDoMinimo\"?: boolean;\n    };\n  };\n}\n\nexport type ListProdutoOutput = ListProdutoItem[];\n"
+        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      readonly saldoAtual: number;\n      quantidadeMinima: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface ProdutoCadastrarProduto {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n    };\n  };\n}\n\nexport interface ProdutosContracts {\n  'controleEstoque.produtos.load': {\n    kind: 'qry';\n    input: { search?: string; page?: number; pageSize?: number };\n    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };\n    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };\n    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.produtos.cadastrarProduto': {\n    kind: 'cmd';\n    writes: 'Produto.create';\n    input: { details: { identification: { name: string }; product: { unitOfMeasure: string }; controleEstoque: { quantidadeMinima: number } } };\n    output: { produto: ProdutoCadastrarProduto };\n    meta: { output: { produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };\n    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
       }
     ],
     "plans": [],

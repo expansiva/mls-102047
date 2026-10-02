@@ -8,37 +8,31 @@ export const definition = {
   "status": "generated",
   "dependencies": [
     "_102047_/l1/controleEstoque/layer_1_external/auth/authorityMap.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
-    "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+    "_102047_/l1/controleEstoque/layer_2_application/requests/movimentacoes.defs.ts",
+    "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts"
   ],
   "data": {
     "pageId": "movimentacoes",
     "handlers": [
       {
-        "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+        "route": "controleEstoque.movimentacoes.load",
+        "kind": "query",
+        "grantIds": [
+          "gerenciarEstoque"
+        ],
+        "serviceFunction": "controleEstoque.movimentacoes.load",
+        "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "contractInterface": "MovimentacoesContracts"
+      },
+      {
+        "route": "controleEstoque.movimentacoes.registrarMovimentacao",
         "kind": "command",
-        "usecaseId": "createMovimentacaoEstoque",
         "grantIds": [
           "gerenciarEstoque"
-        ]
-      },
-      {
-        "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-        "kind": "query",
-        "usecaseId": "listMovimentacaoEstoque",
-        "grantIds": [
-          "gerenciarEstoque"
-        ]
-      },
-      {
-        "route": "controleEstoque.movimentacoes.qryListProduto",
-        "kind": "query",
-        "usecaseId": "listProduto",
-        "grantIds": [
-          "gerenciarEstoque"
-        ]
+        ],
+        "serviceFunction": "controleEstoque.movimentacoes.registrarMovimentacao",
+        "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "contractInterface": "MovimentacoesContracts"
       }
     ]
   }

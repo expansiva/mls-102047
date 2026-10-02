@@ -9,8 +9,6 @@ export const definition = {
   "dependencies": [
     "_102034_/l4/ontology/mdm.defs.ts",
     "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
-    "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-    "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
     "_102047_/l4/controleEstoque/ontology/Produto.defs.ts"
   ],
   "data": {
@@ -25,67 +23,92 @@ export const definition = {
         "input": [
           {
             "name": "id",
-            "type": "string",
+            "type": "uuid",
             "fieldRef": "Produto.id"
           },
           {
             "name": "details",
-            "type": "{ \"identification\"?: { \"subtype\"?: \"Product\"; \"name\"?: string; \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; }",
+            "type": "object",
             "fieldRef": "Produto.details"
           },
           {
+            "name": "details.identification",
+            "type": "object",
+            "fieldRef": "Produto.details.identification"
+          },
+          {
+            "name": "details.identification.subtype",
+            "type": "enum",
+            "fieldRef": "Produto.details.identification.subtype"
+          },
+          {
+            "name": "details.identification.name",
+            "type": "string",
+            "fieldRef": "Produto.details.identification.name"
+          },
+          {
+            "name": "details.identification.status",
+            "type": "enum",
+            "fieldRef": "Produto.details.identification.status"
+          },
+          {
+            "name": "details.base",
+            "type": "object",
+            "fieldRef": "Produto.details.base"
+          },
+          {
+            "name": "details.product",
+            "type": "object",
+            "fieldRef": "Produto.details.product"
+          },
+          {
+            "name": "details.product.unitOfMeasure",
+            "type": "string",
+            "fieldRef": "Produto.details.product.unitOfMeasure"
+          },
+          {
+            "name": "details.general",
+            "type": "object",
+            "fieldRef": "Produto.details.general"
+          },
+          {
+            "name": "details.controleEstoque",
+            "type": "object",
+            "fieldRef": "Produto.details.controleEstoque"
+          },
+          {
+            "name": "details.controleEstoque.quantidadeMinima",
+            "type": "number",
+            "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
+          },
+          {
+            "name": "details.controleEstoque.saldoAtual",
+            "type": "number",
+            "fieldRef": "Produto.details.controleEstoque.saldoAtual"
+          },
+          {
+            "name": "details.controleEstoque.saldoAbaixoDoMinimo",
+            "type": "boolean",
+            "fieldRef": "Produto.details.controleEstoque.saldoAbaixoDoMinimo"
+          },
+          {
             "name": "page",
+            "type": "number"
+          },
+          {
+            "name": "pageSize",
             "type": "number"
           }
         ],
         "output": [
           {
-            "name": "id",
-            "type": "string",
-            "fieldRef": "Produto.id"
+            "name": "items",
+            "type": "Produto"
           },
           {
-            "name": "version",
-            "type": "number",
-            "fieldRef": "Produto.version"
-          },
-          {
-            "name": "details",
-            "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
-            "fieldRef": "Produto.details"
+            "name": "hasMore",
+            "type": "boolean"
           }
-        ],
-        "contractRefs": [
-          {
-            "route": "controleEstoque.movimentacoes.qryListProduto",
-            "symbol": "ListProdutoOutput"
-          },
-          {
-            "route": "controleEstoque.produtos.qryListProduto",
-            "symbol": "ListProdutoOutput"
-          }
-        ]
-      }
-    ],
-    "routeProjections": [
-      {
-        "route": "controleEstoque.movimentacoes.qryListProduto",
-        "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-        "projection": "declared",
-        "outputFields": [
-          "id",
-          "version",
-          "details"
-        ]
-      },
-      {
-        "route": "controleEstoque.produtos.qryListProduto",
-        "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "projection": "declared",
-        "outputFields": [
-          "id",
-          "version",
-          "details"
         ]
       }
     ],
@@ -113,6 +136,16 @@ export const definition = {
       }
     ],
     "uses": [
+      {
+        "path": "details.controleEstoque.saldoAbaixoDoMinimo",
+        "role": "filter",
+        "source": "input"
+      },
+      {
+        "path": "details.controleEstoque.saldoAtual",
+        "role": "filter",
+        "source": "input"
+      },
       {
         "path": "details.identification.status",
         "role": "filter",
@@ -170,13 +203,7 @@ export const definition = {
             "read.byId"
           ],
           "alternative": false,
-          "when": [
-            {
-              "kind": "contract",
-              "path": "id",
-              "present": true
-            }
-          ],
+          "when": [],
           "arguments": [
             {
               "name": "mdmId",

@@ -433,16 +433,16 @@ export const scenarioCatalog = {
       "testFile": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.test.ts",
       "cases": [
         {
-          "caseId": "movimentacoes.auth.cmdCreateMovimentacaoEstoque",
+          "caseId": "movimentacoes.auth.load",
           "gate": "auth",
-          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.load",
           "expectation": "An http caller with no authority is refused before the usecase.",
           "preconditions": [
             "verifiedAuthorities is empty",
             "source is http"
           ],
           "actorId": "",
-          "routine": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+          "routine": "controleEstoque.movimentacoes.load",
           "mutating": false,
           "expect": {
             "ok": false,
@@ -462,45 +462,16 @@ export const scenarioCatalog = {
           "synthetic": []
         },
         {
-          "caseId": "movimentacoes.auth.qryListMovimentacaoEstoque",
+          "caseId": "movimentacoes.auth.registrarMovimentacao",
           "gate": "auth",
-          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.registrarMovimentacao",
           "expectation": "An http caller with no authority is refused before the usecase.",
           "preconditions": [
             "verifiedAuthorities is empty",
             "source is http"
           ],
           "actorId": "",
-          "routine": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-          "mutating": false,
-          "expect": {
-            "ok": false,
-            "status": 403,
-            "errorCode": "FORBIDDEN_ACTOR",
-            "ruleId": null,
-            "forbiddenFields": [],
-            "isolatedActorField": null
-          },
-          "expectedFailure": null,
-          "runner": "route",
-          "caller": {
-            "source": "http",
-            "authorities": []
-          },
-          "mandatory": true,
-          "synthetic": []
-        },
-        {
-          "caseId": "movimentacoes.auth.qryListProduto",
-          "gate": "auth",
-          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.qryListProduto",
-          "expectation": "An http caller with no authority is refused before the usecase.",
-          "preconditions": [
-            "verifiedAuthorities is empty",
-            "source is http"
-          ],
-          "actorId": "",
-          "routine": "controleEstoque.movimentacoes.qryListProduto",
+          "routine": "controleEstoque.movimentacoes.registrarMovimentacao",
           "mutating": false,
           "expect": {
             "ok": false,
@@ -553,16 +524,16 @@ export const scenarioCatalog = {
       "testFile": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.test.ts",
       "cases": [
         {
-          "caseId": "produtos.auth.cmdCreateMovimentacaoEstoque",
+          "caseId": "produtos.auth.cadastrarProduto",
           "gate": "auth",
-          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.defs.ts#controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.defs.ts#controleEstoque.produtos.cadastrarProduto",
           "expectation": "An http caller with no authority is refused before the usecase.",
           "preconditions": [
             "verifiedAuthorities is empty",
             "source is http"
           ],
           "actorId": "",
-          "routine": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+          "routine": "controleEstoque.produtos.cadastrarProduto",
           "mutating": false,
           "expect": {
             "ok": false,
@@ -582,74 +553,16 @@ export const scenarioCatalog = {
           "synthetic": []
         },
         {
-          "caseId": "produtos.auth.cmdCreateProduto",
+          "caseId": "produtos.auth.load",
           "gate": "auth",
-          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.defs.ts#controleEstoque.produtos.cmdCreateProduto",
+          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.defs.ts#controleEstoque.produtos.load",
           "expectation": "An http caller with no authority is refused before the usecase.",
           "preconditions": [
             "verifiedAuthorities is empty",
             "source is http"
           ],
           "actorId": "",
-          "routine": "controleEstoque.produtos.cmdCreateProduto",
-          "mutating": false,
-          "expect": {
-            "ok": false,
-            "status": 403,
-            "errorCode": "FORBIDDEN_ACTOR",
-            "ruleId": null,
-            "forbiddenFields": [],
-            "isolatedActorField": null
-          },
-          "expectedFailure": null,
-          "runner": "route",
-          "caller": {
-            "source": "http",
-            "authorities": []
-          },
-          "mandatory": true,
-          "synthetic": []
-        },
-        {
-          "caseId": "produtos.auth.qryListMovimentacaoEstoque",
-          "gate": "auth",
-          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.defs.ts#controleEstoque.produtos.qryListMovimentacaoEstoque",
-          "expectation": "An http caller with no authority is refused before the usecase.",
-          "preconditions": [
-            "verifiedAuthorities is empty",
-            "source is http"
-          ],
-          "actorId": "",
-          "routine": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-          "mutating": false,
-          "expect": {
-            "ok": false,
-            "status": 403,
-            "errorCode": "FORBIDDEN_ACTOR",
-            "ruleId": null,
-            "forbiddenFields": [],
-            "isolatedActorField": null
-          },
-          "expectedFailure": null,
-          "runner": "route",
-          "caller": {
-            "source": "http",
-            "authorities": []
-          },
-          "mandatory": true,
-          "synthetic": []
-        },
-        {
-          "caseId": "produtos.auth.qryListProduto",
-          "gate": "auth",
-          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.defs.ts#controleEstoque.produtos.qryListProduto",
-          "expectation": "An http caller with no authority is refused before the usecase.",
-          "preconditions": [
-            "verifiedAuthorities is empty",
-            "source is http"
-          ],
-          "actorId": "",
-          "routine": "controleEstoque.produtos.qryListProduto",
+          "routine": "controleEstoque.produtos.load",
           "mutating": false,
           "expect": {
             "ok": false,

@@ -1,8 +1,43 @@
 /// <mls fileReference="_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.ts" enhancement="_blank"/>
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type { CreateProdutoInput as CreateProdutoInput_0, CreateProdutoOutput as CreateProdutoOutput_0 } from '/_102047_/l2/controleEstoque/web/contracts/produtos.defs.js';
-export async function createProduto(input: CreateProdutoInput_0, ctx: RequestContext): Promise<CreateProdutoOutput_0> {
+export interface CreateProdutoInput extends Record<string, unknown> {
+  details: {
+    identification: {
+      name: string;
+    };
+    base: Record<string, unknown>;
+    product: {
+      unitOfMeasure: string;
+    };
+    general: Record<string, unknown>;
+    controleEstoque: {
+      quantidadeMinima: number;
+    };
+  };
+}
+export interface CreateProdutoOutput extends Record<string, unknown> {
+  id: string;
+  version: number;
+  details: {
+    identification: {
+      subtype: string;
+      name: string;
+      status: string;
+    };
+    base: Record<string, unknown>;
+    product: {
+      unitOfMeasure: string;
+    };
+    general: Record<string, unknown>;
+    controleEstoque: {
+      quantidadeMinima: number;
+      saldoAtual: number;
+      saldoAbaixoDoMinimo: boolean;
+    };
+  };
+}
+export async function createProduto(input: CreateProdutoInput, ctx: RequestContext): Promise<CreateProdutoOutput> {
     const body = input as unknown as Record<string, unknown>;
   const present = (value: unknown): boolean => value !== undefined && value !== null && value !== '';
   const readPath = (source: unknown, path: string): unknown => {
@@ -57,5 +92,5 @@ export async function createProduto(input: CreateProdutoInput_0, ctx: RequestCon
   remember("attachRole", { mdmId: attached.mdmId, version: attached.version, details: attached.details } as Record<string, unknown>);
   const chosen = ["createPerson","attachRole"].map(key => priors[key]).find(item => present(item["mdmId"]));
   if (!chosen) throw new AppError('NOT_FOUND', 'Record was not found.', 404);
-  return pack(chosen) as unknown as CreateProdutoOutput_0;
+  return pack(chosen) as unknown as CreateProdutoOutput;
 }

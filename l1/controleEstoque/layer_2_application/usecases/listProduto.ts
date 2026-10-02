@@ -1,9 +1,34 @@
 /// <mls fileReference="_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.ts" enhancement="_blank"/>
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type { ListProdutoInput as ListProdutoInput_0, ListProdutoOutput as ListProdutoOutput_0 } from '/_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.js';
-import type { ListProdutoInput as ListProdutoInput_1, ListProdutoOutput as ListProdutoOutput_1 } from '/_102047_/l2/controleEstoque/web/contracts/produtos.defs.js';
-export async function listProduto(input: ListProdutoInput_0 | ListProdutoInput_1, ctx: RequestContext): Promise<ListProdutoOutput_0 | ListProdutoOutput_1> {
+import type { Produto } from '/_102047_/l1/controleEstoque/layer_3_domain/entities/produto.js';
+export interface ListProdutoInput extends Record<string, unknown> {
+  id: string;
+  details: {
+    identification: {
+      subtype: string;
+      name: string;
+      status: string;
+    };
+    base: Record<string, unknown>;
+    product: {
+      unitOfMeasure: string;
+    };
+    general: Record<string, unknown>;
+    controleEstoque: {
+      quantidadeMinima: number;
+      saldoAtual: number;
+      saldoAbaixoDoMinimo: boolean;
+    };
+  };
+  page: number;
+  pageSize: number;
+}
+export interface ListProdutoOutput extends Record<string, unknown> {
+  items: Produto[];
+  hasMore: boolean;
+}
+export async function listProduto(input: ListProdutoInput, ctx: RequestContext): Promise<ListProdutoOutput> {
     const body = input as unknown as Record<string, unknown>;
   const present = (value: unknown): boolean => value !== undefined && value !== null && value !== '';
   const readPath = (source: unknown, path: string): unknown => {
@@ -48,7 +73,7 @@ export async function listProduto(input: ListProdutoInput_0 | ListProdutoInput_1
   if (present(readPath(body, "id"))) {
     const found = await ctx.mdm.entity.get({ mdmId: String(readPath(body, "id")) });
     remember("get", { mdmId: found.mdmId, version: found.version, details: found.details } as Record<string, unknown>);
-    return [pack(found as unknown as Record<string, unknown>)] as unknown as ListProdutoOutput_0 | ListProdutoOutput_1;
+    return [pack(found as unknown as Record<string, unknown>)] as unknown as ListProdutoOutput;
   }
   if (present(readPath(body, "details.identification.name"))) {
     const page = await ctx.mdm.collection.listByType({ "type": "controleEstoque.Produto", "name": readPath(body, "details.identification.name") } as never);
@@ -58,7 +83,7 @@ export async function listProduto(input: ListProdutoInput_0 | ListProdutoInput_1
       const full = typeof row.version === 'number' ? row : await hydrate(row);
       rows.push(pack(full));
     }
-    return rows as unknown as ListProdutoOutput_0 | ListProdutoOutput_1;
+    return rows as unknown as ListProdutoOutput;
   }
-  return [] as unknown as ListProdutoOutput_0 | ListProdutoOutput_1;
+  return [] as unknown as ListProdutoOutput;
 }

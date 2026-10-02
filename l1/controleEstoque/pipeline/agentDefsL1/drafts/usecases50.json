@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026-09-21-d1-usecases-v1",
+  "schemaVersion": "2026-10-01-d1-usecases-v2",
   "project": 102047,
   "moduleName": "controleEstoque",
   "llmCalls": 4,
@@ -47,8 +47,7 @@
       "operation": "create",
       "defPath": "l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
       "routes": [
-        "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-        "controleEstoque.produtos.cmdCreateMovimentacaoEstoque"
+        "controleEstoque.movimentacoes.registrarMovimentacao"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -73,8 +72,6 @@
         "dependencies": [
           "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
           "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
           "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
           "_102047_/l4/controleEstoque/rules.defs.ts"
         ],
@@ -92,88 +89,66 @@
               "input": [
                 {
                   "name": "produtoId",
-                  "type": "string",
+                  "type": "record",
                   "fieldRef": "MovimentacaoEstoque.produtoId"
                 },
                 {
                   "name": "movimentadoEm",
-                  "type": "string",
+                  "type": "timestamp",
                   "fieldRef": "MovimentacaoEstoque.movimentadoEm"
                 },
                 {
                   "name": "details",
-                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "type": "object",
                   "fieldRef": "MovimentacaoEstoque.details"
+                },
+                {
+                  "name": "details.tipo",
+                  "type": "enum",
+                  "fieldRef": "MovimentacaoEstoque.details.tipo"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "MovimentacaoEstoque.details.quantidade"
                 }
               ],
               "output": [
                 {
                   "name": "id",
-                  "type": "string",
+                  "type": "uuid",
                   "fieldRef": "MovimentacaoEstoque.id"
                 },
                 {
                   "name": "version",
-                  "type": "number",
+                  "type": "integer",
                   "fieldRef": "MovimentacaoEstoque.version"
                 },
                 {
                   "name": "produtoId",
-                  "type": "string",
+                  "type": "record",
                   "fieldRef": "MovimentacaoEstoque.produtoId"
                 },
                 {
                   "name": "movimentadoEm",
-                  "type": "string",
+                  "type": "timestamp",
                   "fieldRef": "MovimentacaoEstoque.movimentadoEm"
                 },
                 {
                   "name": "details",
-                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "type": "object",
                   "fieldRef": "MovimentacaoEstoque.details"
                 },
                 {
-                  "name": "movimentacaoEstoqueProduto",
-                  "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
-                }
-              ],
-              "contractRefs": [
-                {
-                  "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-                  "symbol": "CreateMovimentacaoEstoqueOutput"
+                  "name": "details.tipo",
+                  "type": "enum",
+                  "fieldRef": "MovimentacaoEstoque.details.tipo"
                 },
                 {
-                  "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
-                  "symbol": "CreateMovimentacaoEstoqueOutput"
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "MovimentacaoEstoque.details.quantidade"
                 }
-              ]
-            }
-          ],
-          "routeProjections": [
-            {
-              "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "produtoId",
-                "movimentadoEm",
-                "details",
-                "movimentacaoEstoqueProduto"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
-              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "produtoId",
-                "movimentadoEm",
-                "details",
-                "movimentacaoEstoqueProduto"
               ]
             }
           ],
@@ -230,7 +205,7 @@
       "operation": "create",
       "defPath": "l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
       "routes": [
-        "controleEstoque.produtos.cmdCreateProduto"
+        "controleEstoque.produtos.cadastrarProduto"
       ],
       "trustedContext": "ctx",
       "mdm": {
@@ -346,7 +321,6 @@
         "dependencies": [
           "_102034_/l4/ontology/mdm.defs.ts",
           "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
           "_102047_/l4/controleEstoque/ontology/Produto.defs.ts",
           "_102047_/l4/controleEstoque/rules.defs.ts"
         ],
@@ -362,44 +336,126 @@
               "input": [
                 {
                   "name": "details",
-                  "type": "{ \"identification\"?: { \"name\": string; }; \"product\"?: { \"unitOfMeasure\": string; }; \"controleEstoque\"?: { \"quantidadeMinima\": number; }; }",
+                  "type": "object",
                   "fieldRef": "Produto.details"
+                },
+                {
+                  "name": "details.identification",
+                  "type": "object",
+                  "fieldRef": "Produto.details.identification"
+                },
+                {
+                  "name": "details.identification.name",
+                  "type": "string",
+                  "fieldRef": "Produto.details.identification.name"
+                },
+                {
+                  "name": "details.base",
+                  "type": "object",
+                  "fieldRef": "Produto.details.base"
+                },
+                {
+                  "name": "details.product",
+                  "type": "object",
+                  "fieldRef": "Produto.details.product"
+                },
+                {
+                  "name": "details.product.unitOfMeasure",
+                  "type": "string",
+                  "fieldRef": "Produto.details.product.unitOfMeasure"
+                },
+                {
+                  "name": "details.general",
+                  "type": "object",
+                  "fieldRef": "Produto.details.general"
+                },
+                {
+                  "name": "details.controleEstoque",
+                  "type": "object",
+                  "fieldRef": "Produto.details.controleEstoque"
+                },
+                {
+                  "name": "details.controleEstoque.quantidadeMinima",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
                 }
               ],
               "output": [
                 {
                   "name": "id",
-                  "type": "string",
+                  "type": "uuid",
                   "fieldRef": "Produto.id"
                 },
                 {
                   "name": "version",
-                  "type": "number",
+                  "type": "integer",
                   "fieldRef": "Produto.version"
                 },
                 {
                   "name": "details",
-                  "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
+                  "type": "object",
                   "fieldRef": "Produto.details"
-                }
-              ],
-              "contractRefs": [
+                },
                 {
-                  "route": "controleEstoque.produtos.cmdCreateProduto",
-                  "symbol": "CreateProdutoOutput"
+                  "name": "details.identification",
+                  "type": "object",
+                  "fieldRef": "Produto.details.identification"
+                },
+                {
+                  "name": "details.identification.subtype",
+                  "type": "enum",
+                  "fieldRef": "Produto.details.identification.subtype"
+                },
+                {
+                  "name": "details.identification.name",
+                  "type": "string",
+                  "fieldRef": "Produto.details.identification.name"
+                },
+                {
+                  "name": "details.identification.status",
+                  "type": "enum",
+                  "fieldRef": "Produto.details.identification.status"
+                },
+                {
+                  "name": "details.base",
+                  "type": "object",
+                  "fieldRef": "Produto.details.base"
+                },
+                {
+                  "name": "details.product",
+                  "type": "object",
+                  "fieldRef": "Produto.details.product"
+                },
+                {
+                  "name": "details.product.unitOfMeasure",
+                  "type": "string",
+                  "fieldRef": "Produto.details.product.unitOfMeasure"
+                },
+                {
+                  "name": "details.general",
+                  "type": "object",
+                  "fieldRef": "Produto.details.general"
+                },
+                {
+                  "name": "details.controleEstoque",
+                  "type": "object",
+                  "fieldRef": "Produto.details.controleEstoque"
+                },
+                {
+                  "name": "details.controleEstoque.quantidadeMinima",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
+                },
+                {
+                  "name": "details.controleEstoque.saldoAtual",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.saldoAtual"
+                },
+                {
+                  "name": "details.controleEstoque.saldoAbaixoDoMinimo",
+                  "type": "boolean",
+                  "fieldRef": "Produto.details.controleEstoque.saldoAbaixoDoMinimo"
                 }
-              ]
-            }
-          ],
-          "routeProjections": [
-            {
-              "route": "controleEstoque.produtos.cmdCreateProduto",
-              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "details"
               ]
             }
           ],
@@ -566,8 +622,7 @@
       "operation": "list",
       "defPath": "l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
       "routes": [
-        "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-        "controleEstoque.produtos.qryListMovimentacaoEstoque"
+        "controleEstoque.movimentacoes.load"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -592,8 +647,6 @@
         "dependencies": [
           "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
           "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
           "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
         ],
         "data": {
@@ -610,92 +663,52 @@
               "input": [
                 {
                   "name": "id",
-                  "type": "string",
+                  "type": "uuid",
                   "fieldRef": "MovimentacaoEstoque.id"
                 },
                 {
                   "name": "produtoId",
-                  "type": "string",
+                  "type": "record",
                   "fieldRef": "MovimentacaoEstoque.produtoId"
                 },
                 {
                   "name": "movimentadoEm",
-                  "type": "string",
+                  "type": "timestamp",
                   "fieldRef": "MovimentacaoEstoque.movimentadoEm"
                 },
                 {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "MovimentacaoEstoque.details"
+                },
+                {
+                  "name": "details.tipo",
+                  "type": "enum",
+                  "fieldRef": "MovimentacaoEstoque.details.tipo"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "MovimentacaoEstoque.details.quantidade"
+                },
+                {
                   "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
                   "type": "number"
                 }
               ],
               "output": [
                 {
-                  "name": "id",
-                  "type": "string",
-                  "fieldRef": "MovimentacaoEstoque.id"
+                  "name": "items",
+                  "type": "MovimentacaoEstoque"
                 },
                 {
-                  "name": "version",
-                  "type": "number",
-                  "fieldRef": "MovimentacaoEstoque.version"
-                },
-                {
-                  "name": "produtoId",
-                  "type": "string",
-                  "fieldRef": "MovimentacaoEstoque.produtoId"
-                },
-                {
-                  "name": "movimentadoEm",
-                  "type": "string",
-                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
-                },
-                {
-                  "name": "details",
-                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
-                  "fieldRef": "MovimentacaoEstoque.details"
-                },
-                {
-                  "name": "movimentacaoEstoqueProduto",
-                  "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
+                  "name": "hasMore",
+                  "type": "boolean"
                 }
-              ],
-              "contractRefs": [
-                {
-                  "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-                  "symbol": "ListMovimentacaoEstoqueOutput"
-                },
-                {
-                  "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-                  "symbol": "ListMovimentacaoEstoqueOutput"
-                }
-              ]
-            }
-          ],
-          "routeProjections": [
-            {
-              "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "produtoId",
-                "movimentadoEm",
-                "details",
-                "movimentacaoEstoqueProduto"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "produtoId",
-                "movimentadoEm",
-                "details",
-                "movimentacaoEstoqueProduto"
               ]
             }
           ],
@@ -736,8 +749,8 @@
       "operation": "list",
       "defPath": "l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts",
       "routes": [
-        "controleEstoque.movimentacoes.qryListProduto",
-        "controleEstoque.produtos.qryListProduto"
+        "controleEstoque.movimentacoes.load",
+        "controleEstoque.produtos.load"
       ],
       "trustedContext": "ctx",
       "mdm": {
@@ -754,13 +767,7 @@
               "read.byId"
             ],
             "alternative": false,
-            "when": [
-              {
-                "kind": "contract",
-                "path": "id",
-                "present": true
-              }
-            ],
+            "when": [],
             "arguments": [
               {
                 "name": "mdmId",
@@ -854,8 +861,6 @@
         "dependencies": [
           "_102034_/l4/ontology/mdm.defs.ts",
           "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
           "_102047_/l4/controleEstoque/ontology/Produto.defs.ts"
         ],
         "data": {
@@ -870,67 +875,92 @@
               "input": [
                 {
                   "name": "id",
-                  "type": "string",
+                  "type": "uuid",
                   "fieldRef": "Produto.id"
                 },
                 {
                   "name": "details",
-                  "type": "{ \"identification\"?: { \"subtype\"?: \"Product\"; \"name\"?: string; \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; }",
+                  "type": "object",
                   "fieldRef": "Produto.details"
                 },
                 {
+                  "name": "details.identification",
+                  "type": "object",
+                  "fieldRef": "Produto.details.identification"
+                },
+                {
+                  "name": "details.identification.subtype",
+                  "type": "enum",
+                  "fieldRef": "Produto.details.identification.subtype"
+                },
+                {
+                  "name": "details.identification.name",
+                  "type": "string",
+                  "fieldRef": "Produto.details.identification.name"
+                },
+                {
+                  "name": "details.identification.status",
+                  "type": "enum",
+                  "fieldRef": "Produto.details.identification.status"
+                },
+                {
+                  "name": "details.base",
+                  "type": "object",
+                  "fieldRef": "Produto.details.base"
+                },
+                {
+                  "name": "details.product",
+                  "type": "object",
+                  "fieldRef": "Produto.details.product"
+                },
+                {
+                  "name": "details.product.unitOfMeasure",
+                  "type": "string",
+                  "fieldRef": "Produto.details.product.unitOfMeasure"
+                },
+                {
+                  "name": "details.general",
+                  "type": "object",
+                  "fieldRef": "Produto.details.general"
+                },
+                {
+                  "name": "details.controleEstoque",
+                  "type": "object",
+                  "fieldRef": "Produto.details.controleEstoque"
+                },
+                {
+                  "name": "details.controleEstoque.quantidadeMinima",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
+                },
+                {
+                  "name": "details.controleEstoque.saldoAtual",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.saldoAtual"
+                },
+                {
+                  "name": "details.controleEstoque.saldoAbaixoDoMinimo",
+                  "type": "boolean",
+                  "fieldRef": "Produto.details.controleEstoque.saldoAbaixoDoMinimo"
+                },
+                {
                   "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
                   "type": "number"
                 }
               ],
               "output": [
                 {
-                  "name": "id",
-                  "type": "string",
-                  "fieldRef": "Produto.id"
+                  "name": "items",
+                  "type": "Produto"
                 },
                 {
-                  "name": "version",
-                  "type": "number",
-                  "fieldRef": "Produto.version"
-                },
-                {
-                  "name": "details",
-                  "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
-                  "fieldRef": "Produto.details"
+                  "name": "hasMore",
+                  "type": "boolean"
                 }
-              ],
-              "contractRefs": [
-                {
-                  "route": "controleEstoque.movimentacoes.qryListProduto",
-                  "symbol": "ListProdutoOutput"
-                },
-                {
-                  "route": "controleEstoque.produtos.qryListProduto",
-                  "symbol": "ListProdutoOutput"
-                }
-              ]
-            }
-          ],
-          "routeProjections": [
-            {
-              "route": "controleEstoque.movimentacoes.qryListProduto",
-              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "details"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.qryListProduto",
-              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "details"
               ]
             }
           ],
@@ -958,6 +988,16 @@
             }
           ],
           "uses": [
+            {
+              "path": "details.controleEstoque.saldoAbaixoDoMinimo",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.controleEstoque.saldoAtual",
+              "role": "filter",
+              "source": "input"
+            },
             {
               "path": "details.identification.status",
               "role": "filter",
@@ -1015,13 +1055,7 @@
                   "read.byId"
                 ],
                 "alternative": false,
-                "when": [
-                  {
-                    "kind": "contract",
-                    "path": "id",
-                    "present": true
-                  }
-                ],
+                "when": [],
                 "arguments": [
                   {
                     "name": "mdmId",
@@ -1102,6 +1136,16 @@
     },
     {
       "code": "DERIVED_FILTER",
+      "path": "listProduto.details.controleEstoque.saldoAbaixoDoMinimo",
+      "detail": "Produto.details.controleEstoque.saldoAbaixoDoMinimo is a filter of listProduto."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listProduto.details.controleEstoque.saldoAtual",
+      "detail": "Produto.details.controleEstoque.saldoAtual is a filter of listProduto."
+    },
+    {
+      "code": "DERIVED_FILTER",
       "path": "listProduto.details.identification.status",
       "detail": "Produto.details.identification.status is a filter of listProduto."
     },
@@ -1127,8 +1171,6 @@
         "dependencies": [
           "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
           "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
           "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
           "_102047_/l4/controleEstoque/rules.defs.ts"
         ],
@@ -1146,88 +1188,66 @@
               "input": [
                 {
                   "name": "produtoId",
-                  "type": "string",
+                  "type": "record",
                   "fieldRef": "MovimentacaoEstoque.produtoId"
                 },
                 {
                   "name": "movimentadoEm",
-                  "type": "string",
+                  "type": "timestamp",
                   "fieldRef": "MovimentacaoEstoque.movimentadoEm"
                 },
                 {
                   "name": "details",
-                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "type": "object",
                   "fieldRef": "MovimentacaoEstoque.details"
+                },
+                {
+                  "name": "details.tipo",
+                  "type": "enum",
+                  "fieldRef": "MovimentacaoEstoque.details.tipo"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "MovimentacaoEstoque.details.quantidade"
                 }
               ],
               "output": [
                 {
                   "name": "id",
-                  "type": "string",
+                  "type": "uuid",
                   "fieldRef": "MovimentacaoEstoque.id"
                 },
                 {
                   "name": "version",
-                  "type": "number",
+                  "type": "integer",
                   "fieldRef": "MovimentacaoEstoque.version"
                 },
                 {
                   "name": "produtoId",
-                  "type": "string",
+                  "type": "record",
                   "fieldRef": "MovimentacaoEstoque.produtoId"
                 },
                 {
                   "name": "movimentadoEm",
-                  "type": "string",
+                  "type": "timestamp",
                   "fieldRef": "MovimentacaoEstoque.movimentadoEm"
                 },
                 {
                   "name": "details",
-                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
+                  "type": "object",
                   "fieldRef": "MovimentacaoEstoque.details"
                 },
                 {
-                  "name": "movimentacaoEstoqueProduto",
-                  "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
-                }
-              ],
-              "contractRefs": [
-                {
-                  "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-                  "symbol": "CreateMovimentacaoEstoqueOutput"
+                  "name": "details.tipo",
+                  "type": "enum",
+                  "fieldRef": "MovimentacaoEstoque.details.tipo"
                 },
                 {
-                  "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
-                  "symbol": "CreateMovimentacaoEstoqueOutput"
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "MovimentacaoEstoque.details.quantidade"
                 }
-              ]
-            }
-          ],
-          "routeProjections": [
-            {
-              "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "produtoId",
-                "movimentadoEm",
-                "details",
-                "movimentacaoEstoqueProduto"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
-              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "produtoId",
-                "movimentadoEm",
-                "details",
-                "movimentacaoEstoqueProduto"
               ]
             }
           ],
@@ -1287,8 +1307,6 @@
           "dependsFiles": [
             "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
             "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
-            "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "l2/controleEstoque/web/contracts/produtos.defs.ts",
             "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts",
             "l4/controleEstoque/rules.defs.ts"
           ],
@@ -1313,7 +1331,6 @@
         "dependencies": [
           "_102034_/l4/ontology/mdm.defs.ts",
           "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
           "_102047_/l4/controleEstoque/ontology/Produto.defs.ts",
           "_102047_/l4/controleEstoque/rules.defs.ts"
         ],
@@ -1329,44 +1346,126 @@
               "input": [
                 {
                   "name": "details",
-                  "type": "{ \"identification\"?: { \"name\": string; }; \"product\"?: { \"unitOfMeasure\": string; }; \"controleEstoque\"?: { \"quantidadeMinima\": number; }; }",
+                  "type": "object",
                   "fieldRef": "Produto.details"
+                },
+                {
+                  "name": "details.identification",
+                  "type": "object",
+                  "fieldRef": "Produto.details.identification"
+                },
+                {
+                  "name": "details.identification.name",
+                  "type": "string",
+                  "fieldRef": "Produto.details.identification.name"
+                },
+                {
+                  "name": "details.base",
+                  "type": "object",
+                  "fieldRef": "Produto.details.base"
+                },
+                {
+                  "name": "details.product",
+                  "type": "object",
+                  "fieldRef": "Produto.details.product"
+                },
+                {
+                  "name": "details.product.unitOfMeasure",
+                  "type": "string",
+                  "fieldRef": "Produto.details.product.unitOfMeasure"
+                },
+                {
+                  "name": "details.general",
+                  "type": "object",
+                  "fieldRef": "Produto.details.general"
+                },
+                {
+                  "name": "details.controleEstoque",
+                  "type": "object",
+                  "fieldRef": "Produto.details.controleEstoque"
+                },
+                {
+                  "name": "details.controleEstoque.quantidadeMinima",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
                 }
               ],
               "output": [
                 {
                   "name": "id",
-                  "type": "string",
+                  "type": "uuid",
                   "fieldRef": "Produto.id"
                 },
                 {
                   "name": "version",
-                  "type": "number",
+                  "type": "integer",
                   "fieldRef": "Produto.version"
                 },
                 {
                   "name": "details",
-                  "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
+                  "type": "object",
                   "fieldRef": "Produto.details"
-                }
-              ],
-              "contractRefs": [
+                },
                 {
-                  "route": "controleEstoque.produtos.cmdCreateProduto",
-                  "symbol": "CreateProdutoOutput"
+                  "name": "details.identification",
+                  "type": "object",
+                  "fieldRef": "Produto.details.identification"
+                },
+                {
+                  "name": "details.identification.subtype",
+                  "type": "enum",
+                  "fieldRef": "Produto.details.identification.subtype"
+                },
+                {
+                  "name": "details.identification.name",
+                  "type": "string",
+                  "fieldRef": "Produto.details.identification.name"
+                },
+                {
+                  "name": "details.identification.status",
+                  "type": "enum",
+                  "fieldRef": "Produto.details.identification.status"
+                },
+                {
+                  "name": "details.base",
+                  "type": "object",
+                  "fieldRef": "Produto.details.base"
+                },
+                {
+                  "name": "details.product",
+                  "type": "object",
+                  "fieldRef": "Produto.details.product"
+                },
+                {
+                  "name": "details.product.unitOfMeasure",
+                  "type": "string",
+                  "fieldRef": "Produto.details.product.unitOfMeasure"
+                },
+                {
+                  "name": "details.general",
+                  "type": "object",
+                  "fieldRef": "Produto.details.general"
+                },
+                {
+                  "name": "details.controleEstoque",
+                  "type": "object",
+                  "fieldRef": "Produto.details.controleEstoque"
+                },
+                {
+                  "name": "details.controleEstoque.quantidadeMinima",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
+                },
+                {
+                  "name": "details.controleEstoque.saldoAtual",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.saldoAtual"
+                },
+                {
+                  "name": "details.controleEstoque.saldoAbaixoDoMinimo",
+                  "type": "boolean",
+                  "fieldRef": "Produto.details.controleEstoque.saldoAbaixoDoMinimo"
                 }
-              ]
-            }
-          ],
-          "routeProjections": [
-            {
-              "route": "controleEstoque.produtos.cmdCreateProduto",
-              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "details"
               ]
             }
           ],
@@ -1536,7 +1635,6 @@
           "dependsFiles": [
             "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
             "/_102034_/l4/ontology/mdm.defs.ts",
-            "l2/controleEstoque/web/contracts/produtos.defs.ts",
             "l4/controleEstoque/ontology/Produto.defs.ts",
             "l4/controleEstoque/rules.defs.ts"
           ],
@@ -1560,8 +1658,6 @@
         "dependencies": [
           "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
           "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
           "_102047_/l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
         ],
         "data": {
@@ -1578,92 +1674,52 @@
               "input": [
                 {
                   "name": "id",
-                  "type": "string",
+                  "type": "uuid",
                   "fieldRef": "MovimentacaoEstoque.id"
                 },
                 {
                   "name": "produtoId",
-                  "type": "string",
+                  "type": "record",
                   "fieldRef": "MovimentacaoEstoque.produtoId"
                 },
                 {
                   "name": "movimentadoEm",
-                  "type": "string",
+                  "type": "timestamp",
                   "fieldRef": "MovimentacaoEstoque.movimentadoEm"
                 },
                 {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "MovimentacaoEstoque.details"
+                },
+                {
+                  "name": "details.tipo",
+                  "type": "enum",
+                  "fieldRef": "MovimentacaoEstoque.details.tipo"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "MovimentacaoEstoque.details.quantidade"
+                },
+                {
                   "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
                   "type": "number"
                 }
               ],
               "output": [
                 {
-                  "name": "id",
-                  "type": "string",
-                  "fieldRef": "MovimentacaoEstoque.id"
+                  "name": "items",
+                  "type": "MovimentacaoEstoque"
                 },
                 {
-                  "name": "version",
-                  "type": "number",
-                  "fieldRef": "MovimentacaoEstoque.version"
-                },
-                {
-                  "name": "produtoId",
-                  "type": "string",
-                  "fieldRef": "MovimentacaoEstoque.produtoId"
-                },
-                {
-                  "name": "movimentadoEm",
-                  "type": "string",
-                  "fieldRef": "MovimentacaoEstoque.movimentadoEm"
-                },
-                {
-                  "name": "details",
-                  "type": "{ \"tipo\": \"entrada\" | \"saida\"; \"quantidade\": number; }",
-                  "fieldRef": "MovimentacaoEstoque.details"
-                },
-                {
-                  "name": "movimentacaoEstoqueProduto",
-                  "type": "{ \"id\": string; \"details\"?: { \"identification\"?: { \"name\": string; }; }; }"
+                  "name": "hasMore",
+                  "type": "boolean"
                 }
-              ],
-              "contractRefs": [
-                {
-                  "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-                  "symbol": "ListMovimentacaoEstoqueOutput"
-                },
-                {
-                  "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-                  "symbol": "ListMovimentacaoEstoqueOutput"
-                }
-              ]
-            }
-          ],
-          "routeProjections": [
-            {
-              "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "produtoId",
-                "movimentadoEm",
-                "details",
-                "movimentacaoEstoqueProduto"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "produtoId",
-                "movimentadoEm",
-                "details",
-                "movimentacaoEstoqueProduto"
               ]
             }
           ],
@@ -1707,8 +1763,6 @@
           "dependsFiles": [
             "_102047_/l1/controleEstoque/layer_3_domain/entities/movimentacaoEstoque.defs.ts",
             "_102047_/l1/controleEstoque/layer_2_application/ports/movimentacaoEstoqueRepository.defs.ts",
-            "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "l2/controleEstoque/web/contracts/produtos.defs.ts",
             "l4/controleEstoque/ontology/MovimentacaoEstoque.defs.ts"
           ],
           "dependsOn": [
@@ -1732,8 +1786,6 @@
         "dependencies": [
           "_102034_/l4/ontology/mdm.defs.ts",
           "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts",
           "_102047_/l4/controleEstoque/ontology/Produto.defs.ts"
         ],
         "data": {
@@ -1748,67 +1800,92 @@
               "input": [
                 {
                   "name": "id",
-                  "type": "string",
+                  "type": "uuid",
                   "fieldRef": "Produto.id"
                 },
                 {
                   "name": "details",
-                  "type": "{ \"identification\"?: { \"subtype\"?: \"Product\"; \"name\"?: string; \"status\"?: \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; }",
+                  "type": "object",
                   "fieldRef": "Produto.details"
                 },
                 {
+                  "name": "details.identification",
+                  "type": "object",
+                  "fieldRef": "Produto.details.identification"
+                },
+                {
+                  "name": "details.identification.subtype",
+                  "type": "enum",
+                  "fieldRef": "Produto.details.identification.subtype"
+                },
+                {
+                  "name": "details.identification.name",
+                  "type": "string",
+                  "fieldRef": "Produto.details.identification.name"
+                },
+                {
+                  "name": "details.identification.status",
+                  "type": "enum",
+                  "fieldRef": "Produto.details.identification.status"
+                },
+                {
+                  "name": "details.base",
+                  "type": "object",
+                  "fieldRef": "Produto.details.base"
+                },
+                {
+                  "name": "details.product",
+                  "type": "object",
+                  "fieldRef": "Produto.details.product"
+                },
+                {
+                  "name": "details.product.unitOfMeasure",
+                  "type": "string",
+                  "fieldRef": "Produto.details.product.unitOfMeasure"
+                },
+                {
+                  "name": "details.general",
+                  "type": "object",
+                  "fieldRef": "Produto.details.general"
+                },
+                {
+                  "name": "details.controleEstoque",
+                  "type": "object",
+                  "fieldRef": "Produto.details.controleEstoque"
+                },
+                {
+                  "name": "details.controleEstoque.quantidadeMinima",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.quantidadeMinima"
+                },
+                {
+                  "name": "details.controleEstoque.saldoAtual",
+                  "type": "number",
+                  "fieldRef": "Produto.details.controleEstoque.saldoAtual"
+                },
+                {
+                  "name": "details.controleEstoque.saldoAbaixoDoMinimo",
+                  "type": "boolean",
+                  "fieldRef": "Produto.details.controleEstoque.saldoAbaixoDoMinimo"
+                },
+                {
                   "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
                   "type": "number"
                 }
               ],
               "output": [
                 {
-                  "name": "id",
-                  "type": "string",
-                  "fieldRef": "Produto.id"
+                  "name": "items",
+                  "type": "Produto"
                 },
                 {
-                  "name": "version",
-                  "type": "number",
-                  "fieldRef": "Produto.version"
-                },
-                {
-                  "name": "details",
-                  "type": "{ \"identification\"?: { \"subtype\": \"Product\"; \"name\": string; \"status\": \"Active\" | \"Inactive\" | \"Merged\" | \"Blocked\"; }; \"base\"?: object; \"product\"?: { \"unitOfMeasure\": string; }; \"general\"?: object; \"controleEstoque\"?: { \"quantidadeMinima\": number; \"saldoAtual\"?: number; \"saldoAbaixoDoMinimo\"?: boolean; }; }",
-                  "fieldRef": "Produto.details"
+                  "name": "hasMore",
+                  "type": "boolean"
                 }
-              ],
-              "contractRefs": [
-                {
-                  "route": "controleEstoque.movimentacoes.qryListProduto",
-                  "symbol": "ListProdutoOutput"
-                },
-                {
-                  "route": "controleEstoque.produtos.qryListProduto",
-                  "symbol": "ListProdutoOutput"
-                }
-              ]
-            }
-          ],
-          "routeProjections": [
-            {
-              "route": "controleEstoque.movimentacoes.qryListProduto",
-              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "details"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.qryListProduto",
-              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-              "projection": "declared",
-              "outputFields": [
-                "id",
-                "version",
-                "details"
               ]
             }
           ],
@@ -1836,6 +1913,16 @@
             }
           ],
           "uses": [
+            {
+              "path": "details.controleEstoque.saldoAbaixoDoMinimo",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.controleEstoque.saldoAtual",
+              "role": "filter",
+              "source": "input"
+            },
             {
               "path": "details.identification.status",
               "role": "filter",
@@ -1893,13 +1980,7 @@
                   "read.byId"
                 ],
                 "alternative": false,
-                "when": [
-                  {
-                    "kind": "contract",
-                    "path": "id",
-                    "present": true
-                  }
-                ],
+                "when": [],
                 "arguments": [
                   {
                     "name": "mdmId",
@@ -1974,8 +2055,6 @@
           "dependsFiles": [
             "_102047_/l1/controleEstoque/layer_3_domain/entities/produto.defs.ts",
             "/_102034_/l4/ontology/mdm.defs.ts",
-            "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-            "l2/controleEstoque/web/contracts/produtos.defs.ts",
             "l4/controleEstoque/ontology/Produto.defs.ts"
           ],
           "dependsOn": [

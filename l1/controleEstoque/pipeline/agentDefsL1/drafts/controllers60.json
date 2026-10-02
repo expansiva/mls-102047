@@ -1,10 +1,10 @@
 {
-  "schemaVersion": "2026-09-22-d1-controllers-v1",
+  "schemaVersion": "2026-10-01-d1-controllers-adapter",
   "project": 102047,
   "moduleName": "controleEstoque",
   "llmCalls": 0,
   "ok": true,
-  "measuredRoutes": 7,
+  "measuredRoutes": 4,
   "measuredPages": 2,
   "enumerations": [
     {
@@ -48,14 +48,16 @@
       "defPath": "l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts",
       "handlers": [
         {
-          "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+          "route": "controleEstoque.movimentacoes.load",
           "pageId": "movimentacoes",
-          "kind": "command",
-          "usecaseId": "createMovimentacaoEstoque",
-          "functionName": "createMovimentacaoEstoque",
+          "kind": "query",
+          "usecaseId": "",
+          "functionName": "",
+          "serviceFunction": "controleEstoque.movimentacoes.load",
           "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "inputSymbol": "CreateMovimentacaoEstoqueInput",
-          "outputSymbol": "CreateMovimentacaoEstoqueOutput",
+          "contractInterface": "MovimentacoesContracts",
+          "inputSymbol": "",
+          "outputSymbol": "",
           "status": "toCreate",
           "preserved": false,
           "grantIds": [
@@ -65,11 +67,17 @@
             "shape": "object",
             "fields": [
               "id",
-              "version",
               "produtoId",
               "movimentadoEm",
-              "details",
-              "movimentacaoEstoqueProduto"
+              "details.tipo",
+              "details.quantidade",
+              "id",
+              "details.identification.name",
+              "details.identification.status",
+              "details.product.unitOfMeasure",
+              "details.controleEstoque.quantidadeMinima",
+              "details.controleEstoque.saldoAtual",
+              "details.controleEstoque.saldoAbaixoDoMinimo"
             ],
             "envelope": "passthrough"
           },
@@ -107,84 +115,29 @@
           ]
         },
         {
-          "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
+          "route": "controleEstoque.movimentacoes.registrarMovimentacao",
           "pageId": "movimentacoes",
-          "kind": "query",
-          "usecaseId": "listMovimentacaoEstoque",
-          "functionName": "listMovimentacaoEstoque",
+          "kind": "command",
+          "usecaseId": "",
+          "functionName": "",
+          "serviceFunction": "controleEstoque.movimentacoes.registrarMovimentacao",
           "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "inputSymbol": "ListMovimentacaoEstoqueInput",
-          "outputSymbol": "ListMovimentacaoEstoqueOutput",
+          "contractInterface": "MovimentacoesContracts",
+          "inputSymbol": "",
+          "outputSymbol": "",
           "status": "toCreate",
           "preserved": false,
           "grantIds": [
             "gerenciarEstoque"
           ],
           "projection": {
-            "shape": "array",
+            "shape": "object",
             "fields": [
               "id",
-              "version",
               "produtoId",
               "movimentadoEm",
-              "details",
-              "movimentacaoEstoqueProduto"
-            ],
-            "envelope": "passthrough"
-          },
-          "session": "verified",
-          "steps": [
-            "transport",
-            "session",
-            "authorize",
-            "call",
-            "project",
-            "bff"
-          ],
-          "scopePlan": [
-            {
-              "grantId": "gerenciarEstoque",
-              "actorRef": "estoquista",
-              "entityRefs": [
-                "Produto",
-                "MovimentacaoEstoque"
-              ],
-              "disclosure": "fullRecord",
-              "allowedFields": [],
-              "anchorEntity": "",
-              "relationships": [
-                {
-                  "relationshipId": "movimentacaoEstoqueProduto",
-                  "from": "MovimentacaoEstoque",
-                  "to": "Produto",
-                  "field": "MovimentacaoEstoque.produtoId"
-                }
-              ],
-              "pending": "",
-              "emittedBy": "support70"
-            }
-          ]
-        },
-        {
-          "route": "controleEstoque.movimentacoes.qryListProduto",
-          "pageId": "movimentacoes",
-          "kind": "query",
-          "usecaseId": "listProduto",
-          "functionName": "listProduto",
-          "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-          "inputSymbol": "ListProdutoInput",
-          "outputSymbol": "ListProdutoOutput",
-          "status": "toCreate",
-          "preserved": false,
-          "grantIds": [
-            "gerenciarEstoque"
-          ],
-          "projection": {
-            "shape": "array",
-            "fields": [
-              "id",
-              "version",
-              "details"
+              "details.tipo",
+              "details.quantidade"
             ],
             "envelope": "passthrough"
           },
@@ -231,37 +184,31 @@
         "status": "pending",
         "dependencies": [
           "_102047_/l1/controleEstoque/layer_1_external/auth/authorityMap.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+          "_102047_/l1/controleEstoque/layer_2_application/requests/movimentacoes.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts"
         ],
         "data": {
           "pageId": "movimentacoes",
           "handlers": [
             {
-              "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+              "route": "controleEstoque.movimentacoes.load",
+              "kind": "query",
+              "grantIds": [
+                "gerenciarEstoque"
+              ],
+              "serviceFunction": "controleEstoque.movimentacoes.load",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "contractInterface": "MovimentacoesContracts"
+            },
+            {
+              "route": "controleEstoque.movimentacoes.registrarMovimentacao",
               "kind": "command",
-              "usecaseId": "createMovimentacaoEstoque",
               "grantIds": [
                 "gerenciarEstoque"
-              ]
-            },
-            {
-              "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-              "kind": "query",
-              "usecaseId": "listMovimentacaoEstoque",
-              "grantIds": [
-                "gerenciarEstoque"
-              ]
-            },
-            {
-              "route": "controleEstoque.movimentacoes.qryListProduto",
-              "kind": "query",
-              "usecaseId": "listProduto",
-              "grantIds": [
-                "gerenciarEstoque"
-              ]
+              ],
+              "serviceFunction": "controleEstoque.movimentacoes.registrarMovimentacao",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "contractInterface": "MovimentacoesContracts"
             }
           ]
         }
@@ -272,14 +219,16 @@
       "defPath": "l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.defs.ts",
       "handlers": [
         {
-          "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+          "route": "controleEstoque.produtos.cadastrarProduto",
           "pageId": "produtos",
           "kind": "command",
-          "usecaseId": "createMovimentacaoEstoque",
-          "functionName": "createMovimentacaoEstoque",
+          "usecaseId": "",
+          "functionName": "",
+          "serviceFunction": "controleEstoque.produtos.cadastrarProduto",
           "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-          "inputSymbol": "CreateMovimentacaoEstoqueInput",
-          "outputSymbol": "CreateMovimentacaoEstoqueOutput",
+          "contractInterface": "ProdutosContracts",
+          "inputSymbol": "",
+          "outputSymbol": "",
           "status": "toCreate",
           "preserved": false,
           "grantIds": [
@@ -289,11 +238,9 @@
             "shape": "object",
             "fields": [
               "id",
-              "version",
-              "produtoId",
-              "movimentadoEm",
-              "details",
-              "movimentacaoEstoqueProduto"
+              "details.identification.name",
+              "details.product.unitOfMeasure",
+              "details.controleEstoque.quantidadeMinima"
             ],
             "envelope": "passthrough"
           },
@@ -331,14 +278,16 @@
           ]
         },
         {
-          "route": "controleEstoque.produtos.cmdCreateProduto",
+          "route": "controleEstoque.produtos.load",
           "pageId": "produtos",
-          "kind": "command",
-          "usecaseId": "createProduto",
-          "functionName": "createProduto",
+          "kind": "query",
+          "usecaseId": "",
+          "functionName": "",
+          "serviceFunction": "controleEstoque.produtos.load",
           "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-          "inputSymbol": "CreateProdutoInput",
-          "outputSymbol": "CreateProdutoOutput",
+          "contractInterface": "ProdutosContracts",
+          "inputSymbol": "",
+          "outputSymbol": "",
           "status": "toCreate",
           "preserved": false,
           "grantIds": [
@@ -348,123 +297,12 @@
             "shape": "object",
             "fields": [
               "id",
-              "version",
-              "details"
-            ],
-            "envelope": "passthrough"
-          },
-          "session": "verified",
-          "steps": [
-            "transport",
-            "session",
-            "authorize",
-            "call",
-            "project",
-            "bff"
-          ],
-          "scopePlan": [
-            {
-              "grantId": "gerenciarEstoque",
-              "actorRef": "estoquista",
-              "entityRefs": [
-                "Produto",
-                "MovimentacaoEstoque"
-              ],
-              "disclosure": "fullRecord",
-              "allowedFields": [],
-              "anchorEntity": "",
-              "relationships": [
-                {
-                  "relationshipId": "movimentacaoEstoqueProduto",
-                  "from": "MovimentacaoEstoque",
-                  "to": "Produto",
-                  "field": "MovimentacaoEstoque.produtoId"
-                }
-              ],
-              "pending": "",
-              "emittedBy": "support70"
-            }
-          ]
-        },
-        {
-          "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
-          "pageId": "produtos",
-          "kind": "query",
-          "usecaseId": "listMovimentacaoEstoque",
-          "functionName": "listMovimentacaoEstoque",
-          "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-          "inputSymbol": "ListMovimentacaoEstoqueInput",
-          "outputSymbol": "ListMovimentacaoEstoqueOutput",
-          "status": "toCreate",
-          "preserved": false,
-          "grantIds": [
-            "gerenciarEstoque"
-          ],
-          "projection": {
-            "shape": "array",
-            "fields": [
-              "id",
-              "version",
-              "produtoId",
-              "movimentadoEm",
-              "details",
-              "movimentacaoEstoqueProduto"
-            ],
-            "envelope": "passthrough"
-          },
-          "session": "verified",
-          "steps": [
-            "transport",
-            "session",
-            "authorize",
-            "call",
-            "project",
-            "bff"
-          ],
-          "scopePlan": [
-            {
-              "grantId": "gerenciarEstoque",
-              "actorRef": "estoquista",
-              "entityRefs": [
-                "Produto",
-                "MovimentacaoEstoque"
-              ],
-              "disclosure": "fullRecord",
-              "allowedFields": [],
-              "anchorEntity": "",
-              "relationships": [
-                {
-                  "relationshipId": "movimentacaoEstoqueProduto",
-                  "from": "MovimentacaoEstoque",
-                  "to": "Produto",
-                  "field": "MovimentacaoEstoque.produtoId"
-                }
-              ],
-              "pending": "",
-              "emittedBy": "support70"
-            }
-          ]
-        },
-        {
-          "route": "controleEstoque.produtos.qryListProduto",
-          "pageId": "produtos",
-          "kind": "query",
-          "usecaseId": "listProduto",
-          "functionName": "listProduto",
-          "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-          "inputSymbol": "ListProdutoInput",
-          "outputSymbol": "ListProdutoOutput",
-          "status": "toCreate",
-          "preserved": false,
-          "grantIds": [
-            "gerenciarEstoque"
-          ],
-          "projection": {
-            "shape": "array",
-            "fields": [
-              "id",
-              "version",
-              "details"
+              "details.identification.name",
+              "details.identification.status",
+              "details.product.unitOfMeasure",
+              "details.controleEstoque.saldoAtual",
+              "details.controleEstoque.quantidadeMinima",
+              "details.controleEstoque.saldoAbaixoDoMinimo"
             ],
             "envelope": "passthrough"
           },
@@ -511,46 +349,348 @@
         "status": "pending",
         "dependencies": [
           "_102047_/l1/controleEstoque/layer_1_external/auth/authorityMap.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+          "_102047_/l1/controleEstoque/layer_2_application/requests/produtos.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts"
         ],
         "data": {
           "pageId": "produtos",
           "handlers": [
             {
-              "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+              "route": "controleEstoque.produtos.cadastrarProduto",
               "kind": "command",
-              "usecaseId": "createMovimentacaoEstoque",
               "grantIds": [
                 "gerenciarEstoque"
-              ]
+              ],
+              "serviceFunction": "controleEstoque.produtos.cadastrarProduto",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "contractInterface": "ProdutosContracts"
             },
             {
-              "route": "controleEstoque.produtos.cmdCreateProduto",
-              "kind": "command",
-              "usecaseId": "createProduto",
-              "grantIds": [
-                "gerenciarEstoque"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+              "route": "controleEstoque.produtos.load",
               "kind": "query",
-              "usecaseId": "listMovimentacaoEstoque",
               "grantIds": [
                 "gerenciarEstoque"
+              ],
+              "serviceFunction": "controleEstoque.produtos.load",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "contractInterface": "ProdutosContracts"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "services": [
+    {
+      "pageId": "movimentacoes",
+      "defPath": "l1/controleEstoque/layer_2_application/requests/movimentacoes.defs.ts",
+      "requests": [
+        {
+          "route": "controleEstoque.movimentacoes.load",
+          "kind": "qry",
+          "uses": [
+            "listMovimentacaoEstoque",
+            "listProduto"
+          ],
+          "transaction": "none",
+          "outputs": [
+            {
+              "key": "movimentacoes",
+              "entity": "MovimentacaoEstoque",
+              "fields": [
+                "id",
+                "produtoId",
+                "movimentadoEm",
+                "details.tipo",
+                "details.quantidade"
               ]
             },
             {
-              "route": "controleEstoque.produtos.qryListProduto",
-              "kind": "query",
-              "usecaseId": "listProduto",
-              "grantIds": [
-                "gerenciarEstoque"
+              "key": "produtos",
+              "entity": "Produto",
+              "fields": [
+                "id",
+                "details.identification.name",
+                "details.identification.status",
+                "details.product.unitOfMeasure",
+                "details.controleEstoque.quantidadeMinima",
+                "details.controleEstoque.saldoAtual",
+                "details.controleEstoque.saldoAbaixoDoMinimo"
               ]
+            }
+          ],
+          "params": [
+            {
+              "name": "produtoId",
+              "target": "movimentacoes",
+              "field": "produtoId"
+            },
+            {
+              "name": "page",
+              "target": "movimentacoes",
+              "pages": "historicoMovimentacoes"
+            },
+            {
+              "name": "pageSize",
+              "target": "movimentacoes",
+              "pages": "historicoMovimentacoes"
+            }
+          ]
+        },
+        {
+          "route": "controleEstoque.movimentacoes.registrarMovimentacao",
+          "kind": "cmd",
+          "uses": [
+            "createMovimentacaoEstoque"
+          ],
+          "transaction": "single",
+          "outputs": [
+            {
+              "key": "movimentacaoEstoque",
+              "entity": "MovimentacaoEstoque",
+              "fields": [
+                "id",
+                "produtoId",
+                "movimentadoEm",
+                "details.tipo",
+                "details.quantidade"
+              ]
+            }
+          ],
+          "params": []
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "requestService",
+        "artifactId": "movimentacoes",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+        ],
+        "data": {
+          "pageId": "movimentacoes",
+          "requests": [
+            {
+              "route": "controleEstoque.movimentacoes.load",
+              "kind": "qry",
+              "uses": [
+                "listMovimentacaoEstoque",
+                "listProduto"
+              ],
+              "transaction": "none",
+              "outputs": [
+                {
+                  "key": "movimentacoes",
+                  "entity": "MovimentacaoEstoque",
+                  "fields": [
+                    "id",
+                    "produtoId",
+                    "movimentadoEm",
+                    "details.tipo",
+                    "details.quantidade"
+                  ]
+                },
+                {
+                  "key": "produtos",
+                  "entity": "Produto",
+                  "fields": [
+                    "id",
+                    "details.identification.name",
+                    "details.identification.status",
+                    "details.product.unitOfMeasure",
+                    "details.controleEstoque.quantidadeMinima",
+                    "details.controleEstoque.saldoAtual",
+                    "details.controleEstoque.saldoAbaixoDoMinimo"
+                  ]
+                }
+              ],
+              "params": [
+                {
+                  "name": "produtoId",
+                  "target": "movimentacoes",
+                  "field": "produtoId"
+                },
+                {
+                  "name": "page",
+                  "target": "movimentacoes",
+                  "pages": "historicoMovimentacoes"
+                },
+                {
+                  "name": "pageSize",
+                  "target": "movimentacoes",
+                  "pages": "historicoMovimentacoes"
+                }
+              ]
+            },
+            {
+              "route": "controleEstoque.movimentacoes.registrarMovimentacao",
+              "kind": "cmd",
+              "uses": [
+                "createMovimentacaoEstoque"
+              ],
+              "transaction": "single",
+              "outputs": [
+                {
+                  "key": "movimentacaoEstoque",
+                  "entity": "MovimentacaoEstoque",
+                  "fields": [
+                    "id",
+                    "produtoId",
+                    "movimentadoEm",
+                    "details.tipo",
+                    "details.quantidade"
+                  ]
+                }
+              ],
+              "params": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "pageId": "produtos",
+      "defPath": "l1/controleEstoque/layer_2_application/requests/produtos.defs.ts",
+      "requests": [
+        {
+          "route": "controleEstoque.produtos.load",
+          "kind": "qry",
+          "uses": [
+            "listProduto"
+          ],
+          "transaction": "none",
+          "outputs": [
+            {
+              "key": "produtos",
+              "entity": "Produto",
+              "fields": [
+                "id",
+                "details.identification.name",
+                "details.identification.status",
+                "details.product.unitOfMeasure",
+                "details.controleEstoque.saldoAtual",
+                "details.controleEstoque.quantidadeMinima",
+                "details.controleEstoque.saldoAbaixoDoMinimo"
+              ]
+            }
+          ],
+          "params": [
+            {
+              "name": "search",
+              "target": "produtos",
+              "field": "details.identification.name"
+            },
+            {
+              "name": "page",
+              "target": "produtos",
+              "pages": "listaProdutos"
+            },
+            {
+              "name": "pageSize",
+              "target": "produtos",
+              "pages": "listaProdutos"
+            }
+          ]
+        },
+        {
+          "route": "controleEstoque.produtos.cadastrarProduto",
+          "kind": "cmd",
+          "uses": [
+            "createProduto"
+          ],
+          "transaction": "single",
+          "outputs": [
+            {
+              "key": "produto",
+              "entity": "Produto",
+              "fields": [
+                "id",
+                "details.identification.name",
+                "details.product.unitOfMeasure",
+                "details.controleEstoque.quantidadeMinima"
+              ]
+            }
+          ],
+          "params": []
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "requestService",
+        "artifactId": "produtos",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+        ],
+        "data": {
+          "pageId": "produtos",
+          "requests": [
+            {
+              "route": "controleEstoque.produtos.load",
+              "kind": "qry",
+              "uses": [
+                "listProduto"
+              ],
+              "transaction": "none",
+              "outputs": [
+                {
+                  "key": "produtos",
+                  "entity": "Produto",
+                  "fields": [
+                    "id",
+                    "details.identification.name",
+                    "details.identification.status",
+                    "details.product.unitOfMeasure",
+                    "details.controleEstoque.saldoAtual",
+                    "details.controleEstoque.quantidadeMinima",
+                    "details.controleEstoque.saldoAbaixoDoMinimo"
+                  ]
+                }
+              ],
+              "params": [
+                {
+                  "name": "search",
+                  "target": "produtos",
+                  "field": "details.identification.name"
+                },
+                {
+                  "name": "page",
+                  "target": "produtos",
+                  "pages": "listaProdutos"
+                },
+                {
+                  "name": "pageSize",
+                  "target": "produtos",
+                  "pages": "listaProdutos"
+                }
+              ]
+            },
+            {
+              "route": "controleEstoque.produtos.cadastrarProduto",
+              "kind": "cmd",
+              "uses": [
+                "createProduto"
+              ],
+              "transaction": "single",
+              "outputs": [
+                {
+                  "key": "produto",
+                  "entity": "Produto",
+                  "fields": [
+                    "id",
+                    "details.identification.name",
+                    "details.product.unitOfMeasure",
+                    "details.controleEstoque.quantidadeMinima"
+                  ]
+                }
+              ],
+              "params": []
             }
           ]
         }
@@ -575,37 +715,31 @@
         "status": "pending",
         "dependencies": [
           "_102047_/l1/controleEstoque/layer_1_external/auth/authorityMap.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+          "_102047_/l1/controleEstoque/layer_2_application/requests/movimentacoes.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts"
         ],
         "data": {
           "pageId": "movimentacoes",
           "handlers": [
             {
-              "route": "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
+              "route": "controleEstoque.movimentacoes.load",
+              "kind": "query",
+              "grantIds": [
+                "gerenciarEstoque"
+              ],
+              "serviceFunction": "controleEstoque.movimentacoes.load",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "contractInterface": "MovimentacoesContracts"
+            },
+            {
+              "route": "controleEstoque.movimentacoes.registrarMovimentacao",
               "kind": "command",
-              "usecaseId": "createMovimentacaoEstoque",
               "grantIds": [
                 "gerenciarEstoque"
-              ]
-            },
-            {
-              "route": "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-              "kind": "query",
-              "usecaseId": "listMovimentacaoEstoque",
-              "grantIds": [
-                "gerenciarEstoque"
-              ]
-            },
-            {
-              "route": "controleEstoque.movimentacoes.qryListProduto",
-              "kind": "query",
-              "usecaseId": "listProduto",
-              "grantIds": [
-                "gerenciarEstoque"
-              ]
+              ],
+              "serviceFunction": "controleEstoque.movimentacoes.registrarMovimentacao",
+              "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+              "contractInterface": "MovimentacoesContracts"
             }
           ]
         }
@@ -618,16 +752,12 @@
           "outputPath": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.ts",
           "outputAvailability": "future",
           "dependsFiles": [
-            "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
-            "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
-            "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts",
+            "_102047_/l1/controleEstoque/layer_2_application/requests/movimentacoes.defs.ts",
             "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
             "_102047_/l1/controleEstoque/layer_1_external/auth/authorityMap.defs.ts"
           ],
           "dependsOn": [
-            "102047/controleEstoque/usecase/createMovimentacaoEstoque",
-            "102047/controleEstoque/usecase/listMovimentacaoEstoque",
-            "102047/controleEstoque/usecase/listProduto",
+            "102047/controleEstoque/requestService/movimentacoes",
             "102047/controleEstoque/accessScope/accessScope",
             "102047/controleEstoque/authorityMap/authorityMap"
           ],
@@ -636,9 +766,8 @@
             "_102021_/l2/agentDefsL1/skills/httpController.md"
           ],
           "routes": [
-            "controleEstoque.movimentacoes.cmdCreateMovimentacaoEstoque",
-            "controleEstoque.movimentacoes.qryListMovimentacaoEstoque",
-            "controleEstoque.movimentacoes.qryListProduto"
+            "controleEstoque.movimentacoes.load",
+            "controleEstoque.movimentacoes.registrarMovimentacao"
           ]
         }
       ]
@@ -652,46 +781,31 @@
         "status": "pending",
         "dependencies": [
           "_102047_/l1/controleEstoque/layer_1_external/auth/authorityMap.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
-          "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+          "_102047_/l1/controleEstoque/layer_2_application/requests/produtos.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts"
         ],
         "data": {
           "pageId": "produtos",
           "handlers": [
             {
-              "route": "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
+              "route": "controleEstoque.produtos.cadastrarProduto",
               "kind": "command",
-              "usecaseId": "createMovimentacaoEstoque",
               "grantIds": [
                 "gerenciarEstoque"
-              ]
+              ],
+              "serviceFunction": "controleEstoque.produtos.cadastrarProduto",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "contractInterface": "ProdutosContracts"
             },
             {
-              "route": "controleEstoque.produtos.cmdCreateProduto",
-              "kind": "command",
-              "usecaseId": "createProduto",
-              "grantIds": [
-                "gerenciarEstoque"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.qryListMovimentacaoEstoque",
+              "route": "controleEstoque.produtos.load",
               "kind": "query",
-              "usecaseId": "listMovimentacaoEstoque",
               "grantIds": [
                 "gerenciarEstoque"
-              ]
-            },
-            {
-              "route": "controleEstoque.produtos.qryListProduto",
-              "kind": "query",
-              "usecaseId": "listProduto",
-              "grantIds": [
-                "gerenciarEstoque"
-              ]
+              ],
+              "serviceFunction": "controleEstoque.produtos.load",
+              "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+              "contractInterface": "ProdutosContracts"
             }
           ]
         }
@@ -704,18 +818,12 @@
           "outputPath": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.ts",
           "outputAvailability": "future",
           "dependsFiles": [
-            "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
-            "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
-            "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
-            "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts",
+            "_102047_/l1/controleEstoque/layer_2_application/requests/produtos.defs.ts",
             "_102047_/l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
             "_102047_/l1/controleEstoque/layer_1_external/auth/authorityMap.defs.ts"
           ],
           "dependsOn": [
-            "102047/controleEstoque/usecase/createMovimentacaoEstoque",
-            "102047/controleEstoque/usecase/createProduto",
-            "102047/controleEstoque/usecase/listMovimentacaoEstoque",
-            "102047/controleEstoque/usecase/listProduto",
+            "102047/controleEstoque/requestService/produtos",
             "102047/controleEstoque/accessScope/accessScope",
             "102047/controleEstoque/authorityMap/authorityMap"
           ],
@@ -724,10 +832,232 @@
             "_102021_/l2/agentDefsL1/skills/httpController.md"
           ],
           "routes": [
-            "controleEstoque.produtos.cmdCreateMovimentacaoEstoque",
-            "controleEstoque.produtos.cmdCreateProduto",
-            "controleEstoque.produtos.qryListMovimentacaoEstoque",
-            "controleEstoque.produtos.qryListProduto"
+            "controleEstoque.produtos.cadastrarProduto",
+            "controleEstoque.produtos.load"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "requestService",
+        "artifactId": "movimentacoes",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+        ],
+        "data": {
+          "pageId": "movimentacoes",
+          "requests": [
+            {
+              "route": "controleEstoque.movimentacoes.load",
+              "kind": "qry",
+              "uses": [
+                "listMovimentacaoEstoque",
+                "listProduto"
+              ],
+              "transaction": "none",
+              "outputs": [
+                {
+                  "key": "movimentacoes",
+                  "entity": "MovimentacaoEstoque",
+                  "fields": [
+                    "id",
+                    "produtoId",
+                    "movimentadoEm",
+                    "details.tipo",
+                    "details.quantidade"
+                  ]
+                },
+                {
+                  "key": "produtos",
+                  "entity": "Produto",
+                  "fields": [
+                    "id",
+                    "details.identification.name",
+                    "details.identification.status",
+                    "details.product.unitOfMeasure",
+                    "details.controleEstoque.quantidadeMinima",
+                    "details.controleEstoque.saldoAtual",
+                    "details.controleEstoque.saldoAbaixoDoMinimo"
+                  ]
+                }
+              ],
+              "params": [
+                {
+                  "name": "produtoId",
+                  "target": "movimentacoes",
+                  "field": "produtoId"
+                },
+                {
+                  "name": "page",
+                  "target": "movimentacoes",
+                  "pages": "historicoMovimentacoes"
+                },
+                {
+                  "name": "pageSize",
+                  "target": "movimentacoes",
+                  "pages": "historicoMovimentacoes"
+                }
+              ]
+            },
+            {
+              "route": "controleEstoque.movimentacoes.registrarMovimentacao",
+              "kind": "cmd",
+              "uses": [
+                "createMovimentacaoEstoque"
+              ],
+              "transaction": "single",
+              "outputs": [
+                {
+                  "key": "movimentacaoEstoque",
+                  "entity": "MovimentacaoEstoque",
+                  "fields": [
+                    "id",
+                    "produtoId",
+                    "movimentadoEm",
+                    "details.tipo",
+                    "details.quantidade"
+                  ]
+                }
+              ],
+              "params": []
+            }
+          ]
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/controleEstoque/requestService/movimentacoes",
+          "type": "requestService",
+          "defPath": "_102047_/l1/controleEstoque/layer_2_application/requests/movimentacoes.defs.ts",
+          "outputPath": "_102047_/l1/controleEstoque/layer_2_application/requests/movimentacoes.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
+            "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
+            "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/controleEstoque/usecase/createMovimentacaoEstoque",
+            "102047/controleEstoque/usecase/listMovimentacaoEstoque",
+            "102047/controleEstoque/usecase/listProduto"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/requestService.md"
+          ],
+          "routes": [
+            "controleEstoque.movimentacoes.load",
+            "controleEstoque.movimentacoes.registrarMovimentacao"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "requestService",
+        "artifactId": "produtos",
+        "moduleName": "controleEstoque",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
+          "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+        ],
+        "data": {
+          "pageId": "produtos",
+          "requests": [
+            {
+              "route": "controleEstoque.produtos.load",
+              "kind": "qry",
+              "uses": [
+                "listProduto"
+              ],
+              "transaction": "none",
+              "outputs": [
+                {
+                  "key": "produtos",
+                  "entity": "Produto",
+                  "fields": [
+                    "id",
+                    "details.identification.name",
+                    "details.identification.status",
+                    "details.product.unitOfMeasure",
+                    "details.controleEstoque.saldoAtual",
+                    "details.controleEstoque.quantidadeMinima",
+                    "details.controleEstoque.saldoAbaixoDoMinimo"
+                  ]
+                }
+              ],
+              "params": [
+                {
+                  "name": "search",
+                  "target": "produtos",
+                  "field": "details.identification.name"
+                },
+                {
+                  "name": "page",
+                  "target": "produtos",
+                  "pages": "listaProdutos"
+                },
+                {
+                  "name": "pageSize",
+                  "target": "produtos",
+                  "pages": "listaProdutos"
+                }
+              ]
+            },
+            {
+              "route": "controleEstoque.produtos.cadastrarProduto",
+              "kind": "cmd",
+              "uses": [
+                "createProduto"
+              ],
+              "transaction": "single",
+              "outputs": [
+                {
+                  "key": "produto",
+                  "entity": "Produto",
+                  "fields": [
+                    "id",
+                    "details.identification.name",
+                    "details.product.unitOfMeasure",
+                    "details.controleEstoque.quantidadeMinima"
+                  ]
+                }
+              ],
+              "params": []
+            }
+          ]
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/controleEstoque/requestService/produtos",
+          "type": "requestService",
+          "defPath": "_102047_/l1/controleEstoque/layer_2_application/requests/produtos.defs.ts",
+          "outputPath": "_102047_/l1/controleEstoque/layer_2_application/requests/produtos.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts",
+            "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/controleEstoque/usecase/createProduto",
+            "102047/controleEstoque/usecase/listProduto"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/requestService.md"
+          ],
+          "routes": [
+            "controleEstoque.produtos.load",
+            "controleEstoque.produtos.cadastrarProduto"
           ]
         }
       ]
