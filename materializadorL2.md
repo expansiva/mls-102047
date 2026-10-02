@@ -1,6 +1,6 @@
 # Materializador L2 novo — briefing para quem vai construir
 
-> Escrito em 30/09/2026 pelo planner L2 a pedido do Wagner, para quem vai construir o novo
+> Escrito em 30/09/2026 (atualizado em 02/10) pelo planner L2 a pedido do Wagner, para quem vai construir o novo
 > materializador do frontend e não acompanhou as decisões. O que está aqui é **desenho decidido**,
 > com as frases do Wagner. O que ainda não existe está marcado como **pendente**. Na dúvida, a fonte
 > de verdade são os arquivos citados, não este resumo.
@@ -26,8 +26,8 @@ Para cada página `<pageId>` de um módulo `<mod>` do projeto cliente, em `l2/<m
 
 | arquivo | o que é | estado em 30/09 |
 |---|---|---|
-| `contracts/<pageId>.defs.ts` | **contrato BFF v2**: os pedidos da página, com tipos literais de input/output, `rules` e `access` | pendente (tasks d2_54–58) |
-| `shared/<pageId>.defs.ts` | **shared v2**: states, funções, pedidos, forms, parâmetros de entrada, jornadas, rules e access, comuns aos dois devices | pendente (tasks d2_54–58) |
+| `contracts/<pageId>.defs.ts` | **contrato BFF v2**: os pedidos da página, com tipos literais de input/output, `meta`, `rules` e `access` | **existe** (controleEstoque, 01/10) |
+| `shared/<pageId>.defs.ts` | **shared v2**: states, funções, pedidos, forms, parâmetros de entrada, jornadas, rules e access, comuns aos dois devices | **existe** (controleEstoque, 01/10) |
 | `desktop/page11/<pageId>.defs.ts` | **page11 v2 desktop**: intenção, sections com `purpose`, organismos em prosa com intents, moléculas sugeridas, template collabux | **existe** (controleEstoque) |
 | `mobile/page11/<pageId>.defs.ts` | page11 v2 mobile, com os mesmos organismos e prosa própria | **existe** (controleEstoque) |
 
@@ -35,7 +35,9 @@ Formatos e exemplos:
 - page11 v2: `todo/gerarApp/l2/doc/plano_d2_page11_v2_2026-09-30.md`;
 - shared v2 e contrato v2: `todo/gerarApp/l2/doc/plano_d2_shared_contrato_2026-09-30.md`.
 
-Exemplo real de page11 v2: `mls-102047/l2/controleEstoque/web/desktop/page11/produtos.defs.ts`.
+Exemplos reais: `mls-102047/l2/controleEstoque/web/{contracts,shared,desktop/page11,mobile/page11}/produtos.defs.ts`.
+O controleEstoque foi regerado em 02/10 com a d2_62 e a d2_63a (`mls-102047` `7eded58`), e já tem `load<Key>` e o
+retorno do comando (seção 5).
 
 Também servem de contexto:
 - o template collabux referenciado em `page11.template`, em `_102020_/l4/collabux/templates/<categoria>/<page>.md`. Nas palavras do próprio template: *"the defs wins on DATA and this skill wins on BEHAVIOR"*;
@@ -82,10 +84,11 @@ exatamente, porque as páginas e os testes dependem deles.
 
 - **Paginação e filtro.** Wagner: *"o shared deve ter condições de comandar isto, ler mais dados e
   atualizar os states"*.
-  - Listas com busca ou paginação têm um pedido próprio, que devolve `{ items, page, pageSize, hasMore }`.
-  - `filter<List>` recarrega do início e substitui a lista.
-  - `loadMore<List>` busca a próxima página e acrescenta.
-  - A carga inicial chama a primeira página.
+  - A carga inicial `load` já traz a 1ª página de cada lista, com as chaves de paginação no output.
+  - Cada lista com busca ou paginação tem um pedido próprio, `load<Key>` (Key = chave da lista no output), que
+    devolve **só** aquela lista e as chaves de paginação. Ele usa a mesma projeção e o mesmo `meta` do `load`.
+  - `filter<List>` chama `load<Key>` desde o início e substitui a lista; `loadMore<List>` chama a próxima
+    página e acrescenta. Nenhum dos dois chama `load`, então os outros objetos da página não são recarregados.
 - **Forms.** O menu separa o organismo de campos (`form`) do organismo de botão (`actions`). O shared
   os une em `forms: { <form>: { organism, submit } }`. O form é um state, e a função de envio lê esse
   state. A página renderiza os dois organismos ligados ao mesmo state.
@@ -97,8 +100,15 @@ exatamente, porque as páginas e os testes dependem deles.
   - O efeito é declarado: selecionar, filtrar ou pré-preencher.
   - Os parâmetros com `persist` são gravados no localStorage ao mudar.
   - O tipo vem do contrato; converter de verdade (number/boolean) em vez de fazer cast.
+- **Comando.** Todo state em `updates` de um comando é alimentado por uma chave do retorno dele. Exemplo:
+  `registrarMovimentacao` devolve `{ movimentacaoEstoque, produto }`, porque o saldo do produto muda. O código
+  atualiza os states com esse retorno.
 - **Navegação.** As funções `navigate` levam `carries` (ex. `produtoId: produtoSelecionado.id`) para os
-  `entry.params` da página de destino.
+  `entry.params` da página de destino. Só `navigate` tem `carries`, e `navigate` não tem `sets`.
+- **Seleção.** Um parâmetro com efeito `select:<organism>` guarda o id na URL. O state é sempre o **item**,
+  resolvido pelo id na lista carregada, e nunca o id solto.
+- **Rules por pedido.** Cada pedido traz só as regras pertinentes a ele, e todo comando mantém pelo menos uma
+  regra da entidade que escreve.
 - **Jornadas.** `journeys` diz qual passo de negócio cada organismo e função atende, e em qual página o
   passo continua (`continuesIn`). Use para textos, foco e ordem de interação, e depois para os casos de teste.
 
@@ -128,12 +138,11 @@ exatamente, porque as páginas e os testes dependem deles.
 
 ## 7. Pendências que afetam o materializador
 
-- **Shared v2 e contrato v2 ainda não foram gerados** (tasks d2_54–58). Até lá, só o page11 v2 existe, e
-  só no controleEstoque.
-- **O backend ainda não aceita o contrato v2.** O `agentDefsL1` só lê o formato antigo e deriva usecase
-  de endpoint, o que viola o hexagonal. Wagner decidiu corrigir isso **depois** do aceite dos defs L2
-  novos (`todo/gerarApp/l1/tasks/backlog/fromPlannerL2_contrato_bff_v2.md`). Até lá, um app gerado
-  ponta a ponta não roda.
+- **Defs L2 completos só no controleEstoque** (seção 2). A validação geral com vários
+  módulos é do Wagner.
+- **Backend v2.** Wagner liberou o L1 em 01/10. O L1 passou a ler as rotas do contrato v2 e a compor os
+  pedidos em usecases; o backend v2 do controleEstoque foi gerado (`mls-102047` `bc647be`). Fila e estado:
+  `todo/gerarApp/l1/tasks/backlog/00_l1_contrato_v2.md`.
 - **O que se gera a partir do contrato** (item 3.1) e **como o `.d.ts` do shared é produzido e salvo**
   estão por desenhar.
 - **Página × workflow** (tela anexada a uma task) ainda não foi definido e não aparece nos defs.
