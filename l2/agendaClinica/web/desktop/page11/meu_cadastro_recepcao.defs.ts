@@ -5,76 +5,68 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/entityRecordManagement/page21.md",
     "experience": "focusedRecordForm"
   },
-  "intent": "Permitir que a recepcionista consulte o próprio cadastro de atuação na clínica e grave identificação e privacidade, mantendo um único registro pessoal sem listagem.",
+  "intent": "A recepcionista consulta o próprio cadastro já selecionado na sessão e atualiza os dados de atuação na clínica, para manter identificação e privacidade corretas no atendimento da recepção.",
   "sections": [
     {
-      "id": "resumoAtuacao",
+      "id": "currentProfile",
       "priority": "primary",
-      "purpose": "Apresentar o resumo do cadastro da recepcionista para ela reconhecer nome, documento e situação atuais antes de editar.",
+      "purpose": "Mostra o resumo do cadastro da recepcionista autenticada para ela conferir identificação, documento e privacidade antes de editar.",
       "organisms": [
-        "dadosAtuacao"
+        "ownReceptionistDetail"
       ]
     },
     {
-      "id": "edicaoAtuacao",
+      "id": "profileForm",
       "priority": "main",
-      "purpose": "Concentrar a edição dos dados de identificação e privacidade que a recepcionista pode manter neste cadastro próprio.",
+      "purpose": "Reúne os campos editáveis do próprio cadastro para a recepcionista corrigir identificação e consentimento de privacidade.",
       "organisms": [
-        "formularioAtuacao"
+        "ownReceptionistForm"
       ]
     },
     {
-      "id": "comandosCadastro",
+      "id": "profileActions",
       "priority": "secondary",
-      "purpose": "Disponibilizar a criação e a gravação do cadastro próprio e da atuação profissional declarada nesta página.",
+      "purpose": "Oferece os comandos para gravar o cadastro próprio, criando o registro de recepcionista ou atualizando o que já está selecionado.",
       "organisms": [
-        "acoesCadastro"
+        "ownReceptionistActions"
       ]
     }
   ],
   "organisms": {
-    "dadosAtuacao": {
+    "ownReceptionistDetail": {
       "kind": "detail",
-      "text": "Mostra nome, documento, situação e consentimento do próprio cadastro para a recepcionista confirmar quem está autenticada e quais dados de atuação já estão registrados.",
+      "text": "Exibe identificação, documento e consentimento do próprio cadastro de recepcionista para a profissional confirmar como está registrada na clínica.",
       "intents": []
     },
-    "formularioAtuacao": {
+    "ownReceptionistForm": {
       "kind": "form",
-      "text": "Reúne os campos de identificação e privacidade do próprio cadastro para a recepcionista corrigir nome, documento, país e consentimento e preparar a gravação da atuação na clínica.",
+      "text": "Recebe as alterações de nome, documento e consentimento de privacidade do próprio cadastro para manter os dados de atuação alinhados à clínica.",
       "intents": []
     },
-    "acoesCadastro": {
+    "ownReceptionistActions": {
       "kind": "actions",
-      "text": "Oferece criar ou salvar o próprio cadastro de recepcionista e criar ou atualizar o cadastro profissional associado, para concluir a manutenção sem sair desta página.",
+      "text": "Dispara a criação ou a atualização do próprio cadastro de recepcionista após a conferência e a edição dos dados de atuação.",
       "intents": [
         {
-          "id": "salvarCadastroRecepcao",
+          "id": "createOwnReceptionist",
           "kind": "submit"
         },
         {
-          "id": "criarCadastroRecepcao",
-          "kind": "submit"
-        },
-        {
-          "id": "salvarCadastroProfissional",
-          "kind": "submit"
-        },
-        {
-          "id": "criarCadastroProfissional",
+          "id": "updateOwnReceptionist",
           "kind": "submit"
         }
       ]
     }
   },
   "molecules": {
-    "dadosAtuacao": [
+    "ownReceptionistDetail": [
       {
         "role": "profileCard",
         "preferred": "groupviewcard--ml-profile-card",
         "alternative": "groupviewcard--ml-view-card-horizontal"
       }
     ],
-    "formularioAtuacao": [
+    "ownReceptionistForm": [
       {
         "role": "nameField",
         "preferred": "groupentertext--ml-enter-text",
@@ -86,36 +78,16 @@ export const definition = {
         "alternative": "groupentertext--ml-enter-text"
       },
       {
-        "role": "documentTypeField",
-        "preferred": "groupselectone--ml-select-dropdown",
-        "alternative": "groupselectone--ml-select"
-      },
-      {
-        "role": "countryField",
-        "preferred": "groupentertext--ml-enter-text",
-        "alternative": "groupentertext--ml-floating-text-input"
-      },
-      {
-        "role": "privacyField",
-        "preferred": "groupenterboolean--ml-checkbox-preference",
-        "alternative": "groupenterboolean--ml-toggle-switch"
-      },
-      {
-        "role": "feedback",
-        "preferred": "groupnotifyuser--ml-contextual-feedback",
-        "alternative": "groupnotifyuser--ml-toast-notification"
+        "role": "saveFeedback",
+        "preferred": "groupnotifyuser--ml-toast-notification",
+        "alternative": "groupnotifyuser--ml-contextual-feedback"
       }
     ],
-    "acoesCadastro": [
+    "ownReceptionistActions": [
       {
-        "role": "primaryAction",
+        "role": "maintainCommands",
         "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-split-button"
-      },
-      {
-        "role": "actionGroup",
-        "preferred": "grouptriggeraction--ml-button-group",
-        "alternative": "grouptriggeraction--ml-button-standard"
+        "alternative": "grouptriggeraction--ml-button-group"
       }
     ]
   }
