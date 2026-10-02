@@ -123,16 +123,16 @@ export const definition = {
       {
         "kind": "mdm",
         "namespace": "controleEstoque",
-        "call": "get",
+        "call": "listByType",
         "entity": "Produto",
-        "capability": "read.byId"
+        "capability": "locate.byName"
       },
       {
         "kind": "mdm",
         "namespace": "controleEstoque",
-        "call": "listByType",
+        "call": "get",
         "entity": "Produto",
-        "capability": "locate.byName"
+        "capability": "read.byId"
       }
     ],
     "uses": [
