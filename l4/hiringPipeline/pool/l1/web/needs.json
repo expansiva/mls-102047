@@ -19,15 +19,15 @@
             "details.remainingHeadcount"
           ],
           "from": [
-            "organism:alerts",
-            "organism:summary"
+            "grant:recruiterPositionsAndApplications",
+            "organism:highlights"
           ]
         }
       ],
       "writes": []
     },
     {
-      "pageId": "job_positions",
+      "pageId": "recruiter_applications",
       "actors": [
         "recruiter"
       ],
@@ -38,82 +38,24 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "journey:recordApplicationRejection/inspectApplicationForRejection",
-            "journey:recordApplicationRejection/locateApplicationForRejection",
-            "journey:recordApplicationRejection/recordRejection",
-            "journey:startApplicationScreening/createApplication"
-          ]
-        },
-        {
-          "entity": "Candidate",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "journey:startApplicationScreening/inspectCandidateForApplication",
-            "journey:startApplicationScreening/locateCandidateForApplication"
-          ]
-        },
-        {
-          "entity": "JobPosition",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [
-            "details.filledHeadcount",
-            "details.remainingHeadcount"
-          ],
-          "from": [
-            "journey:openJobPosition/createJobPosition",
-            "journey:recordApplicationRejection/inspectPositionForRejection",
-            "journey:startApplicationScreening/inspectJobPositionRequirements",
-            "journey:startApplicationScreening/locateOpenJobPosition",
-            "process:closeFilledPositionProcess"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Application",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:startApplicationScreening/createApplication"
-          ]
-        },
-        {
-          "entity": "Application",
-          "operation": "transition",
-          "transitionRef": "rejectApplication",
-          "from": [
-            "journey:recordApplicationRejection/recordRejection"
-          ]
-        },
-        {
-          "entity": "JobPosition",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:openJobPosition/createJobPosition"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "candidates",
-      "actors": [
-        "recruiter"
-      ],
-      "reads": [
-        {
-          "entity": "Application",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
+            "grant:recruiterPositionsAndApplications",
+            "journey:advanceApplicationToInterview/inspectCandidateQualifications",
             "journey:advanceApplicationToInterview/inspectScreeningApplication",
             "journey:advanceApplicationToInterview/locateScreeningApplication",
             "journey:advanceApplicationToInterview/moveToInterview",
-            "journey:startApplicationScreening/createApplication"
+            "journey:recordApplicationRejection/inspectApplicationForRejection",
+            "journey:recordApplicationRejection/inspectPositionForRejection",
+            "journey:recordApplicationRejection/locateApplicationForRejection",
+            "journey:recordApplicationRejection/recordRejection",
+            "journey:startApplicationScreening/createApplication",
+            "journey:startApplicationScreening/inspectCandidateForApplication",
+            "journey:startApplicationScreening/inspectJobPositionRequirements",
+            "journey:startApplicationScreening/locateCandidateForApplication",
+            "journey:startApplicationScreening/locateOpenJobPosition",
+            "relationship:Application/applicationCandidate",
+            "relationship:Application/applicationJobPosition",
+            "relationship:Candidate/applicationCandidate",
+            "relationship:JobPosition/applicationJobPosition"
           ]
         },
         {
@@ -122,11 +64,47 @@
           "scope": "organization",
           "derived": [],
           "from": [
+            "grant:recruiterCandidateRegistry",
             "journey:advanceApplicationToInterview/inspectCandidateQualifications",
-            "journey:registerCandidate/locateCandidate",
-            "journey:registerCandidate/registerCandidateRecord",
+            "journey:advanceApplicationToInterview/inspectScreeningApplication",
+            "journey:advanceApplicationToInterview/locateScreeningApplication",
+            "journey:advanceApplicationToInterview/moveToInterview",
+            "journey:recordApplicationRejection/inspectApplicationForRejection",
+            "journey:recordApplicationRejection/inspectPositionForRejection",
+            "journey:recordApplicationRejection/locateApplicationForRejection",
+            "journey:recordApplicationRejection/recordRejection",
+            "journey:startApplicationScreening/createApplication",
             "journey:startApplicationScreening/inspectCandidateForApplication",
-            "journey:startApplicationScreening/locateCandidateForApplication"
+            "journey:startApplicationScreening/inspectJobPositionRequirements",
+            "journey:startApplicationScreening/locateCandidateForApplication",
+            "journey:startApplicationScreening/locateOpenJobPosition",
+            "relationship:Application/applicationCandidate",
+            "relationship:Candidate/applicationCandidate"
+          ]
+        },
+        {
+          "entity": "HiringManager",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:recruiterCandidateRegistry",
+            "journey:advanceApplicationToInterview/inspectCandidateQualifications",
+            "journey:advanceApplicationToInterview/inspectScreeningApplication",
+            "journey:advanceApplicationToInterview/locateScreeningApplication",
+            "journey:advanceApplicationToInterview/moveToInterview",
+            "journey:recordApplicationRejection/inspectApplicationForRejection",
+            "journey:recordApplicationRejection/inspectPositionForRejection",
+            "journey:recordApplicationRejection/locateApplicationForRejection",
+            "journey:recordApplicationRejection/recordRejection",
+            "journey:startApplicationScreening/createApplication",
+            "journey:startApplicationScreening/inspectCandidateForApplication",
+            "journey:startApplicationScreening/inspectJobPositionRequirements",
+            "journey:startApplicationScreening/locateCandidateForApplication",
+            "journey:startApplicationScreening/locateOpenJobPosition",
+            "relationship:HiringManager/jobPositionHiringManager",
+            "relationship:JobPosition/applicationJobPosition",
+            "relationship:JobPosition/jobPositionHiringManager"
           ]
         },
         {
@@ -138,8 +116,24 @@
             "details.remainingHeadcount"
           ],
           "from": [
+            "grant:recruiterPositionsAndApplications",
+            "journey:advanceApplicationToInterview/inspectCandidateQualifications",
+            "journey:advanceApplicationToInterview/inspectScreeningApplication",
+            "journey:advanceApplicationToInterview/locateScreeningApplication",
+            "journey:advanceApplicationToInterview/moveToInterview",
+            "journey:recordApplicationRejection/inspectApplicationForRejection",
+            "journey:recordApplicationRejection/inspectPositionForRejection",
+            "journey:recordApplicationRejection/locateApplicationForRejection",
+            "journey:recordApplicationRejection/recordRejection",
+            "journey:startApplicationScreening/createApplication",
+            "journey:startApplicationScreening/inspectCandidateForApplication",
             "journey:startApplicationScreening/inspectJobPositionRequirements",
-            "journey:startApplicationScreening/locateOpenJobPosition"
+            "journey:startApplicationScreening/locateCandidateForApplication",
+            "journey:startApplicationScreening/locateOpenJobPosition",
+            "relationship:Application/applicationJobPosition",
+            "relationship:HiringManager/jobPositionHiringManager",
+            "relationship:JobPosition/applicationJobPosition",
+            "relationship:JobPosition/jobPositionHiringManager"
           ]
         }
       ],
@@ -160,6 +154,84 @@
             "journey:advanceApplicationToInterview/moveToInterview"
           ]
         },
+        {
+          "entity": "Application",
+          "operation": "transition",
+          "transitionRef": "rejectApplication",
+          "from": [
+            "journey:recordApplicationRejection/recordRejection"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "recruiter_candidates",
+      "actors": [
+        "recruiter"
+      ],
+      "reads": [
+        {
+          "entity": "Application",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:recruiterPositionsAndApplications",
+            "journey:registerCandidate/locateCandidate",
+            "journey:registerCandidate/registerCandidateRecord",
+            "relationship:Application/applicationCandidate",
+            "relationship:Application/applicationJobPosition",
+            "relationship:Candidate/applicationCandidate",
+            "relationship:JobPosition/applicationJobPosition"
+          ]
+        },
+        {
+          "entity": "Candidate",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:recruiterCandidateRegistry",
+            "journey:registerCandidate/locateCandidate",
+            "journey:registerCandidate/registerCandidateRecord",
+            "relationship:Application/applicationCandidate",
+            "relationship:Candidate/applicationCandidate",
+            "relationship:Candidate/candidateHasContact",
+            "relationship:CandidateContact/candidateHasContact"
+          ]
+        },
+        {
+          "entity": "CandidateContact",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:recruiterCandidateRegistry",
+            "journey:registerCandidate/locateCandidate",
+            "journey:registerCandidate/registerCandidateRecord",
+            "relationship:Candidate/candidateHasContact",
+            "relationship:CandidateContact/candidateHasContact"
+          ]
+        },
+        {
+          "entity": "JobPosition",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.filledHeadcount",
+            "details.remainingHeadcount"
+          ],
+          "from": [
+            "grant:recruiterPositionsAndApplications",
+            "journey:registerCandidate/locateCandidate",
+            "journey:registerCandidate/registerCandidateRecord",
+            "relationship:Application/applicationJobPosition",
+            "relationship:Candidate/applicationCandidate",
+            "relationship:JobPosition/applicationJobPosition"
+          ]
+        }
+      ],
+      "writes": [
         {
           "entity": "Candidate",
           "operation": "create",
@@ -171,7 +243,7 @@
       ]
     },
     {
-      "pageId": "applications",
+      "pageId": "recruiter_positions",
       "actors": [
         "recruiter"
       ],
@@ -182,13 +254,12 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "journey:advanceApplicationToInterview/inspectScreeningApplication",
-            "journey:advanceApplicationToInterview/locateScreeningApplication",
-            "journey:advanceApplicationToInterview/moveToInterview",
-            "journey:recordApplicationRejection/inspectApplicationForRejection",
-            "journey:recordApplicationRejection/locateApplicationForRejection",
-            "journey:recordApplicationRejection/recordRejection",
-            "journey:startApplicationScreening/createApplication"
+            "grant:recruiterPositionsAndApplications",
+            "journey:openJobPosition/createJobPosition",
+            "relationship:Application/applicationCandidate",
+            "relationship:Application/applicationJobPosition",
+            "relationship:Candidate/applicationCandidate",
+            "relationship:JobPosition/applicationJobPosition"
           ]
         },
         {
@@ -197,9 +268,23 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "journey:advanceApplicationToInterview/inspectCandidateQualifications",
-            "journey:startApplicationScreening/inspectCandidateForApplication",
-            "journey:startApplicationScreening/locateCandidateForApplication"
+            "grant:recruiterCandidateRegistry",
+            "journey:openJobPosition/createJobPosition",
+            "relationship:Application/applicationCandidate",
+            "relationship:Candidate/applicationCandidate",
+            "relationship:JobPosition/applicationJobPosition"
+          ]
+        },
+        {
+          "entity": "HiringManager",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:recruiterCandidateRegistry",
+            "journey:openJobPosition/createJobPosition",
+            "relationship:HiringManager/jobPositionHiringManager",
+            "relationship:JobPosition/jobPositionHiringManager"
           ]
         },
         {
@@ -211,35 +296,23 @@
             "details.remainingHeadcount"
           ],
           "from": [
-            "journey:recordApplicationRejection/inspectPositionForRejection",
-            "journey:startApplicationScreening/inspectJobPositionRequirements",
-            "journey:startApplicationScreening/locateOpenJobPosition"
+            "grant:recruiterPositionsAndApplications",
+            "journey:openJobPosition/createJobPosition",
+            "process:closeFilledPositionProcess",
+            "relationship:Application/applicationJobPosition",
+            "relationship:HiringManager/jobPositionHiringManager",
+            "relationship:JobPosition/applicationJobPosition",
+            "relationship:JobPosition/jobPositionHiringManager"
           ]
         }
       ],
       "writes": [
         {
-          "entity": "Application",
+          "entity": "JobPosition",
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:startApplicationScreening/createApplication"
-          ]
-        },
-        {
-          "entity": "Application",
-          "operation": "transition",
-          "transitionRef": "moveToInterview",
-          "from": [
-            "journey:advanceApplicationToInterview/moveToInterview"
-          ]
-        },
-        {
-          "entity": "Application",
-          "operation": "transition",
-          "transitionRef": "rejectApplication",
-          "from": [
-            "journey:recordApplicationRejection/recordRejection"
+            "journey:openJobPosition/createJobPosition"
           ]
         }
       ]
@@ -259,15 +332,15 @@
             "details.remainingHeadcount"
           ],
           "from": [
-            "organism:alerts",
-            "organism:summary"
+            "grant:hiringManagerManagedPositions",
+            "organism:highlights"
           ]
         }
       ],
       "writes": []
     },
     {
-      "pageId": "managed_applications",
+      "pageId": "hiring_manager_applications",
       "actors": [
         "hiringManager"
       ],
@@ -278,12 +351,19 @@
           "scope": "own",
           "derived": [],
           "from": [
+            "grant:hiringManagerManagedPositions",
             "journey:decideHiringOutcome/inspectOfferedApplication",
+            "journey:decideHiringOutcome/inspectPositionHeadcount",
             "journey:decideHiringOutcome/locateOfferedApplication",
             "journey:decideHiringOutcome/moveToHired",
+            "journey:decideOffer/inspectCandidateForOffer",
             "journey:decideOffer/inspectInterviewApplication",
             "journey:decideOffer/locateInterviewApplication",
-            "journey:decideOffer/moveToOffer"
+            "journey:decideOffer/moveToOffer",
+            "relationship:Application/applicationCandidate",
+            "relationship:Application/applicationJobPosition",
+            "relationship:Candidate/applicationCandidate",
+            "relationship:JobPosition/applicationJobPosition"
           ]
         },
         {
@@ -292,7 +372,17 @@
           "scope": "own",
           "derived": [],
           "from": [
-            "journey:decideOffer/inspectCandidateForOffer"
+            "grant:hiringManagerCandidatesForManagedPositions",
+            "journey:decideHiringOutcome/inspectOfferedApplication",
+            "journey:decideHiringOutcome/inspectPositionHeadcount",
+            "journey:decideHiringOutcome/locateOfferedApplication",
+            "journey:decideHiringOutcome/moveToHired",
+            "journey:decideOffer/inspectCandidateForOffer",
+            "journey:decideOffer/inspectInterviewApplication",
+            "journey:decideOffer/locateInterviewApplication",
+            "journey:decideOffer/moveToOffer",
+            "relationship:Application/applicationCandidate",
+            "relationship:Candidate/applicationCandidate"
           ]
         },
         {
@@ -304,8 +394,17 @@
             "details.remainingHeadcount"
           ],
           "from": [
+            "grant:hiringManagerManagedPositions",
+            "journey:decideHiringOutcome/inspectOfferedApplication",
             "journey:decideHiringOutcome/inspectPositionHeadcount",
-            "process:closeFilledPositionProcess"
+            "journey:decideHiringOutcome/locateOfferedApplication",
+            "journey:decideHiringOutcome/moveToHired",
+            "journey:decideOffer/inspectCandidateForOffer",
+            "journey:decideOffer/inspectInterviewApplication",
+            "journey:decideOffer/locateInterviewApplication",
+            "journey:decideOffer/moveToOffer",
+            "relationship:Application/applicationJobPosition",
+            "relationship:JobPosition/applicationJobPosition"
           ]
         }
       ],
@@ -329,22 +428,11 @@
       ]
     },
     {
-      "pageId": "managed_positions",
+      "pageId": "hiring_manager_positions",
       "actors": [
         "hiringManager"
       ],
       "reads": [
-        {
-          "entity": "Application",
-          "family": "tdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "journey:decideHiringOutcome/inspectOfferedApplication",
-            "journey:decideHiringOutcome/locateOfferedApplication",
-            "journey:decideHiringOutcome/moveToHired"
-          ]
-        },
         {
           "entity": "JobPosition",
           "family": "tdm",
@@ -354,25 +442,16 @@
             "details.remainingHeadcount"
           ],
           "from": [
-            "journey:decideHiringOutcome/inspectPositionHeadcount",
+            "grant:hiringManagerManagedPositions",
             "process:closeFilledPositionProcess"
           ]
         }
       ],
-      "writes": [
-        {
-          "entity": "Application",
-          "operation": "transition",
-          "transitionRef": "moveToHired",
-          "from": [
-            "journey:decideHiringOutcome/moveToHired"
-          ]
-        }
-      ]
+      "writes": []
     }
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-09-21T17:49:38.871Z"
+    "generatedAt": "2026-10-02T16:07:25.724Z"
   }
 }

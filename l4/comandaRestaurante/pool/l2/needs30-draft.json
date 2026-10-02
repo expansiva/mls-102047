@@ -1,0 +1,188 @@
+{
+  "thread": "comandaRestaurante-20261002160334",
+  "round": 1,
+  "inputFile": "l4/comandaRestaurante/pool/l2/20261002160334_comandaRestaurante-20261002160334_1.json",
+  "needs": {
+    "schemaVersion": "2026-09-21-p2-needs-v1",
+    "moduleName": "comandaRestaurante",
+    "device": "web",
+    "menuSchema": "2026-09-20-p2-menu-v2.2",
+    "pages": [
+      {
+        "pageId": "atendimento_garcom",
+        "actors": [
+          "garcom"
+        ],
+        "reads": [
+          {
+            "entity": "Comanda",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.total"
+            ],
+            "from": [
+              "grant:garcomAtendimento",
+              "journey:abrirComanda/criarComanda",
+              "journey:abrirComanda/localizarMesa",
+              "journey:cancelarItemLancado/cancelarLancamento",
+              "journey:cancelarItemLancado/inspecionarLancamento",
+              "journey:cancelarItemLancado/localizarComandaParaCancelamento",
+              "journey:lancarItemNaComanda/consultarCardapio",
+              "journey:lancarItemNaComanda/localizarComandaAberta",
+              "journey:lancarItemNaComanda/registrarItem",
+              "relationship:Comanda/comandaMesa",
+              "relationship:Comanda/itemComandaComanda",
+              "relationship:ItemComanda/itemComandaComanda",
+              "relationship:Mesa/comandaMesa"
+            ]
+          },
+          {
+            "entity": "ItemCardapio",
+            "family": "mdm",
+            "scope": "organization",
+            "derived": [],
+            "from": [
+              "grant:garcomAtendimento",
+              "journey:abrirComanda/criarComanda",
+              "journey:abrirComanda/localizarMesa",
+              "journey:cancelarItemLancado/cancelarLancamento",
+              "journey:cancelarItemLancado/inspecionarLancamento",
+              "journey:cancelarItemLancado/localizarComandaParaCancelamento",
+              "journey:lancarItemNaComanda/consultarCardapio",
+              "journey:lancarItemNaComanda/localizarComandaAberta",
+              "journey:lancarItemNaComanda/registrarItem",
+              "relationship:Comanda/itemComandaComanda",
+              "relationship:ItemCardapio/itemComandaItemCardapio",
+              "relationship:ItemComanda/itemComandaItemCardapio"
+            ]
+          },
+          {
+            "entity": "ItemComanda",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.subtotal"
+            ],
+            "from": [
+              "grant:garcomAtendimento",
+              "journey:abrirComanda/criarComanda",
+              "journey:abrirComanda/localizarMesa",
+              "journey:cancelarItemLancado/cancelarLancamento",
+              "journey:cancelarItemLancado/inspecionarLancamento",
+              "journey:cancelarItemLancado/localizarComandaParaCancelamento",
+              "journey:lancarItemNaComanda/consultarCardapio",
+              "journey:lancarItemNaComanda/localizarComandaAberta",
+              "journey:lancarItemNaComanda/registrarItem",
+              "relationship:Comanda/itemComandaComanda",
+              "relationship:ItemCardapio/itemComandaItemCardapio",
+              "relationship:ItemComanda/itemComandaComanda",
+              "relationship:ItemComanda/itemComandaItemCardapio"
+            ]
+          },
+          {
+            "entity": "Mesa",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.available"
+            ],
+            "from": [
+              "grant:garcomAtendimento",
+              "journey:abrirComanda/criarComanda",
+              "journey:abrirComanda/localizarMesa",
+              "journey:cancelarItemLancado/cancelarLancamento",
+              "journey:cancelarItemLancado/inspecionarLancamento",
+              "journey:cancelarItemLancado/localizarComandaParaCancelamento",
+              "journey:lancarItemNaComanda/consultarCardapio",
+              "journey:lancarItemNaComanda/localizarComandaAberta",
+              "journey:lancarItemNaComanda/registrarItem",
+              "relationship:Comanda/comandaMesa",
+              "relationship:Mesa/comandaMesa"
+            ]
+          }
+        ],
+        "writes": [
+          {
+            "entity": "Comanda",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:abrirComanda/criarComanda"
+            ]
+          },
+          {
+            "entity": "ItemComanda",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:lancarItemNaComanda/registrarItem"
+            ]
+          },
+          {
+            "entity": "ItemComanda",
+            "operation": "transition",
+            "transitionRef": "cancelarItem",
+            "from": [
+              "journey:cancelarItemLancado/cancelarLancamento"
+            ]
+          }
+        ]
+      },
+      {
+        "pageId": "fechamento_caixa",
+        "actors": [
+          "caixa"
+        ],
+        "reads": [
+          {
+            "entity": "Comanda",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.total"
+            ],
+            "from": [
+              "grant:caixaFechamento",
+              "journey:fecharComanda/concluirFechamento",
+              "journey:fecharComanda/consultarTotal",
+              "journey:fecharComanda/localizarComandaParaFechamento",
+              "relationship:Comanda/comandaMesa",
+              "relationship:Mesa/comandaMesa"
+            ]
+          },
+          {
+            "entity": "Mesa",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.available"
+            ],
+            "from": [
+              "grant:caixaFechamento",
+              "journey:fecharComanda/concluirFechamento",
+              "journey:fecharComanda/consultarTotal",
+              "journey:fecharComanda/localizarComandaParaFechamento",
+              "relationship:Comanda/comandaMesa",
+              "relationship:Mesa/comandaMesa"
+            ]
+          }
+        ],
+        "writes": [
+          {
+            "entity": "Comanda",
+            "operation": "transition",
+            "transitionRef": "fecharComanda",
+            "from": [
+              "journey:fecharComanda/concluirFechamento"
+            ]
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "sourceMenu": "pool/l2/web/menu.json",
+      "generatedAt": "2026-10-02T16:04:02.130Z"
+    }
+  }
+}

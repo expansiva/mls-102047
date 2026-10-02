@@ -5,107 +5,7 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
-      "pageId": "motorista_inicio",
-      "actors": [
-        "motorista"
-      ],
-      "reads": [
-        {
-          "entity": "Vehicle",
-          "family": "mdm",
-          "scope": "own",
-          "derived": [
-            "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
-          ],
-          "from": [
-            "organism:summary"
-          ]
-        }
-      ],
-      "writes": []
-    },
-    {
-      "pageId": "meus_veiculos",
-      "actors": [
-        "motorista"
-      ],
-      "reads": [
-        {
-          "entity": "Fueling",
-          "family": "tdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "journey:registrarAbastecimento/registrarAbastecimento"
-          ]
-        },
-        {
-          "entity": "Vehicle",
-          "family": "mdm",
-          "scope": "own",
-          "derived": [
-            "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
-          ],
-          "from": [
-            "journey:consultarVeiculosAtribuidos/inspecionarVeiculoAtribuido",
-            "journey:consultarVeiculosAtribuidos/localizarVeiculosAtribuidos",
-            "journey:registrarAbastecimento/inspecionarVeiculo",
-            "journey:registrarAbastecimento/localizarVeiculoAtribuido"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Fueling",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:registrarAbastecimento/registrarAbastecimento"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "meus_abastecimentos",
-      "actors": [
-        "motorista"
-      ],
-      "reads": [
-        {
-          "entity": "Fueling",
-          "family": "tdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "journey:registrarAbastecimento/registrarAbastecimento"
-          ]
-        },
-        {
-          "entity": "Vehicle",
-          "family": "mdm",
-          "scope": "own",
-          "derived": [
-            "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
-          ],
-          "from": [
-            "journey:registrarAbastecimento/inspecionarVeiculo",
-            "journey:registrarAbastecimento/localizarVeiculoAtribuido"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Fueling",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:registrarAbastecimento/registrarAbastecimento"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "gestor_inicio",
+      "pageId": "painel",
       "actors": [
         "gestor"
       ],
@@ -118,6 +18,7 @@
             "details.completed"
           ],
           "from": [
+            "grant:gestorGerenciarFrota",
             "organism:summary"
           ]
         },
@@ -131,6 +32,7 @@
             "details.preventiveOverdue"
           ],
           "from": [
+            "grant:gestorGerenciarFrota",
             "organism:summary"
           ]
         },
@@ -142,6 +44,7 @@
             "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
           ],
           "from": [
+            "grant:gestorGerenciarFrota",
             "organism:summary"
           ]
         }
@@ -149,47 +52,139 @@
       "writes": []
     },
     {
-      "pageId": "veiculos_frota",
+      "pageId": "veiculos",
       "actors": [
         "gestor"
       ],
       "reads": [
         {
-          "entity": "MaintenanceOrder",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [
-            "details.completed"
-          ],
-          "from": [
-            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito"
-          ]
-        },
-        {
-          "entity": "MaintenancePlan",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [
-            "details.nextPreventiveDate",
-            "details.nextPreventiveMileage",
-            "details.preventiveOverdue"
-          ],
-          "from": [
-            "journey:cadastrarPlanoPreventivo/cadastrarPlano"
-          ]
-        },
-        {
-          "entity": "Vehicle",
+          "entity": "Driver",
           "family": "mdm",
           "scope": "organization",
-          "derived": [
-            "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
-          ],
+          "derived": [],
           "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
             "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
             "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
             "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
-            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota"
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "relationship:Driver/vehicleAssignedDrivers",
+            "relationship:Driver/vehicleAssignmentDriver",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentDriver"
+          ]
+        },
+        {
+          "entity": "MaintenanceOrder",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.completed"
+          ],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "relationship:MaintenanceOrder/maintenanceOrderPlan",
+            "relationship:MaintenanceOrder/maintenanceOrderVehicle",
+            "relationship:MaintenanceOrder/maintenanceOrderWorkshop",
+            "relationship:MaintenancePlan/maintenanceOrderPlan",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Workshop/maintenanceOrderWorkshop"
+          ]
+        },
+        {
+          "entity": "MaintenancePlan",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.nextPreventiveDate",
+            "details.nextPreventiveMileage",
+            "details.preventiveOverdue"
+          ],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "relationship:MaintenanceOrder/maintenanceOrderPlan",
+            "relationship:MaintenancePlan/maintenanceOrderPlan",
+            "relationship:MaintenancePlan/maintenancePlanVehicle",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle"
+          ]
+        },
+        {
+          "entity": "Vehicle",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
+          ],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "relationship:Driver/vehicleAssignedDrivers",
+            "relationship:MaintenanceOrder/maintenanceOrderVehicle",
+            "relationship:MaintenancePlan/maintenancePlanVehicle",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentVehicle"
+          ]
+        },
+        {
+          "entity": "VehicleAssignment",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "relationship:Driver/vehicleAssignmentDriver",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentDriver",
+            "relationship:VehicleAssignment/vehicleAssignmentVehicle"
+          ]
+        },
+        {
+          "entity": "Workshop",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "relationship:MaintenanceOrder/maintenanceOrderWorkshop",
+            "relationship:Vehicle/maintenanceOrderVehicle"
           ]
         }
       ],
@@ -219,6 +214,26 @@
       ],
       "reads": [
         {
+          "entity": "Driver",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:Driver/vehicleAssignedDrivers",
+            "relationship:Driver/vehicleAssignmentDriver",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentDriver"
+          ]
+        },
+        {
           "entity": "MaintenanceOrder",
           "family": "tdm",
           "scope": "organization",
@@ -226,7 +241,19 @@
             "details.completed"
           ],
           "from": [
-            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva"
+            "grant:gestorGerenciarFrota",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:MaintenanceOrder/maintenanceOrderPlan",
+            "relationship:MaintenanceOrder/maintenanceOrderVehicle",
+            "relationship:MaintenanceOrder/maintenanceOrderWorkshop",
+            "relationship:MaintenancePlan/maintenanceOrderPlan",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Workshop/maintenanceOrderWorkshop"
           ]
         },
         {
@@ -239,8 +266,17 @@
             "details.preventiveOverdue"
           ],
           "from": [
+            "grant:gestorGerenciarFrota",
             "journey:cadastrarPlanoPreventivo/cadastrarPlano",
-            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo"
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:MaintenanceOrder/maintenanceOrderPlan",
+            "relationship:MaintenancePlan/maintenanceOrderPlan",
+            "relationship:MaintenancePlan/maintenancePlanVehicle",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle"
           ]
         },
         {
@@ -251,8 +287,56 @@
             "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
           ],
           "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
             "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
-            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota"
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:Driver/vehicleAssignedDrivers",
+            "relationship:MaintenanceOrder/maintenanceOrderVehicle",
+            "relationship:MaintenancePlan/maintenancePlanVehicle",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentVehicle"
+          ]
+        },
+        {
+          "entity": "VehicleAssignment",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:Driver/vehicleAssignmentDriver",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentDriver",
+            "relationship:VehicleAssignment/vehicleAssignmentVehicle"
+          ]
+        },
+        {
+          "entity": "Workshop",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:cadastrarPlanoPreventivo/cadastrarPlano",
+            "journey:cadastrarPlanoPreventivo/inspecionarVeiculoDaFrota",
+            "journey:cadastrarPlanoPreventivo/localizarVeiculoDaFrota",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:MaintenanceOrder/maintenanceOrderWorkshop",
+            "relationship:Vehicle/maintenanceOrderVehicle"
           ]
         }
       ],
@@ -282,6 +366,26 @@
       ],
       "reads": [
         {
+          "entity": "Driver",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:Driver/vehicleAssignedDrivers",
+            "relationship:Driver/vehicleAssignmentDriver",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentDriver"
+          ]
+        },
+        {
           "entity": "MaintenanceOrder",
           "family": "tdm",
           "scope": "organization",
@@ -289,11 +393,22 @@
             "details.completed"
           ],
           "from": [
+            "grant:gestorGerenciarFrota",
             "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
             "journey:atualizarOrdemManutencao/atualizarDadosDaOrdem",
             "journey:atualizarOrdemManutencao/inspecionarOrdemManutencao",
             "journey:atualizarOrdemManutencao/localizarOrdemManutencao",
-            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva"
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:MaintenanceOrder/maintenanceOrderPlan",
+            "relationship:MaintenanceOrder/maintenanceOrderVehicle",
+            "relationship:MaintenanceOrder/maintenanceOrderWorkshop",
+            "relationship:MaintenancePlan/maintenanceOrderPlan",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Workshop/maintenanceOrderWorkshop"
           ]
         },
         {
@@ -306,7 +421,20 @@
             "details.preventiveOverdue"
           ],
           "from": [
-            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo"
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:atualizarOrdemManutencao/atualizarDadosDaOrdem",
+            "journey:atualizarOrdemManutencao/inspecionarOrdemManutencao",
+            "journey:atualizarOrdemManutencao/localizarOrdemManutencao",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:MaintenanceOrder/maintenanceOrderPlan",
+            "relationship:MaintenancePlan/maintenanceOrderPlan",
+            "relationship:MaintenancePlan/maintenancePlanVehicle",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle"
           ]
         },
         {
@@ -317,8 +445,67 @@
             "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
           ],
           "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
             "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito"
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:atualizarOrdemManutencao/atualizarDadosDaOrdem",
+            "journey:atualizarOrdemManutencao/inspecionarOrdemManutencao",
+            "journey:atualizarOrdemManutencao/localizarOrdemManutencao",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:Driver/vehicleAssignedDrivers",
+            "relationship:MaintenanceOrder/maintenanceOrderVehicle",
+            "relationship:MaintenancePlan/maintenanceOrderPlan",
+            "relationship:MaintenancePlan/maintenancePlanVehicle",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentVehicle"
+          ]
+        },
+        {
+          "entity": "VehicleAssignment",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:atualizarOrdemManutencao/atualizarDadosDaOrdem",
+            "journey:atualizarOrdemManutencao/inspecionarOrdemManutencao",
+            "journey:atualizarOrdemManutencao/localizarOrdemManutencao",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:Driver/vehicleAssignmentDriver",
+            "relationship:Vehicle/maintenanceOrderVehicle",
+            "relationship:Vehicle/maintenancePlanVehicle",
+            "relationship:Vehicle/vehicleAssignedDrivers",
+            "relationship:Vehicle/vehicleAssignmentVehicle",
+            "relationship:VehicleAssignment/vehicleAssignmentDriver",
+            "relationship:VehicleAssignment/vehicleAssignmentVehicle"
+          ]
+        },
+        {
+          "entity": "Workshop",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "journey:abrirOrdemPorDefeito/abrirOrdemPorDefeito",
+            "journey:abrirOrdemPorDefeito/inspecionarVeiculoComDefeito",
+            "journey:abrirOrdemPorDefeito/localizarVeiculoComDefeito",
+            "journey:atualizarOrdemManutencao/atualizarDadosDaOrdem",
+            "journey:atualizarOrdemManutencao/inspecionarOrdemManutencao",
+            "journey:atualizarOrdemManutencao/localizarOrdemManutencao",
+            "journey:tratarAlertaPreventivaVencida/abrirOrdemPreventiva",
+            "journey:tratarAlertaPreventivaVencida/inspecionarAlertaPreventivo",
+            "relationship:MaintenanceOrder/maintenanceOrderWorkshop",
+            "relationship:Workshop/maintenanceOrderWorkshop"
           ]
         }
       ],
@@ -343,7 +530,7 @@
       ]
     },
     {
-      "pageId": "cadastros_operacionais",
+      "pageId": "motoristas",
       "actors": [
         "gestor"
       ],
@@ -354,35 +541,7 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "organism:form"
-          ]
-        },
-        {
-          "entity": "Vehicle",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [
-            "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
-          ],
-          "from": [
-            "organism:form"
-          ]
-        },
-        {
-          "entity": "VehicleAssignment",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "organism:form"
-          ]
-        },
-        {
-          "entity": "Workshop",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
+            "grant:gestorGerenciarFrota",
             "organism:form"
           ]
         }
@@ -403,39 +562,27 @@
           "from": [
             "organism:form"
           ]
-        },
+        }
+      ]
+    },
+    {
+      "pageId": "oficinas",
+      "actors": [
+        "gestor"
+      ],
+      "reads": [
         {
-          "entity": "Vehicle",
-          "operation": "create",
-          "transitionRef": "",
+          "entity": "Workshop",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
           "from": [
+            "grant:gestorGerenciarFrota",
             "organism:form"
           ]
-        },
-        {
-          "entity": "Vehicle",
-          "operation": "update",
-          "transitionRef": "",
-          "from": [
-            "organism:form"
-          ]
-        },
-        {
-          "entity": "VehicleAssignment",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "organism:form"
-          ]
-        },
-        {
-          "entity": "VehicleAssignment",
-          "operation": "update",
-          "transitionRef": "",
-          "from": [
-            "organism:form"
-          ]
-        },
+        }
+      ],
+      "writes": [
         {
           "entity": "Workshop",
           "operation": "create",
@@ -453,10 +600,119 @@
           ]
         }
       ]
+    },
+    {
+      "pageId": "atribuicoes",
+      "actors": [
+        "gestor"
+      ],
+      "reads": [
+        {
+          "entity": "VehicleAssignment",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorGerenciarFrota",
+            "organism:form"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "VehicleAssignment",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "organism:form"
+          ]
+        },
+        {
+          "entity": "VehicleAssignment",
+          "operation": "update",
+          "transitionRef": "",
+          "from": [
+            "organism:form"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "painel_motorista",
+      "actors": [
+        "motorista"
+      ],
+      "reads": [
+        {
+          "entity": "Vehicle",
+          "family": "mdm",
+          "scope": "own",
+          "derived": [
+            "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
+          ],
+          "from": [
+            "grant:motoristaVeiculosAtribuidos",
+            "organism:highlights"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "veiculos_atribuidos",
+      "actors": [
+        "motorista"
+      ],
+      "reads": [
+        {
+          "entity": "Fueling",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "grant:motoristaAbastecimentosProprios",
+            "journey:consultarVeiculosAtribuidos/inspecionarVeiculoAtribuido",
+            "journey:consultarVeiculosAtribuidos/localizarVeiculosAtribuidos",
+            "journey:registrarAbastecimento/inspecionarVeiculo",
+            "journey:registrarAbastecimento/localizarVeiculoAtribuido",
+            "journey:registrarAbastecimento/registrarAbastecimento",
+            "relationship:Fueling/fuelingVehicle",
+            "relationship:Vehicle/fuelingVehicle"
+          ]
+        },
+        {
+          "entity": "Vehicle",
+          "family": "mdm",
+          "scope": "own",
+          "derived": [
+            "details.manutencaoFrota.preventiveMaintenanceMileageOverdue"
+          ],
+          "from": [
+            "grant:motoristaVeiculosAtribuidos",
+            "journey:consultarVeiculosAtribuidos/inspecionarVeiculoAtribuido",
+            "journey:consultarVeiculosAtribuidos/localizarVeiculosAtribuidos",
+            "journey:registrarAbastecimento/inspecionarVeiculo",
+            "journey:registrarAbastecimento/localizarVeiculoAtribuido",
+            "journey:registrarAbastecimento/registrarAbastecimento",
+            "relationship:Fueling/fuelingVehicle",
+            "relationship:Vehicle/fuelingVehicle"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Fueling",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:registrarAbastecimento/registrarAbastecimento"
+          ]
+        }
+      ]
     }
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-09-21T17:53:13.102Z"
+    "generatedAt": "2026-10-02T16:13:20.973Z"
   }
 }
