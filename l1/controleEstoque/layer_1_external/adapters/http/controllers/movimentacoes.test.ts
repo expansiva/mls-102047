@@ -114,6 +114,201 @@ export const scenarioCases = {
       "runner": "module",
       "mandatory": true,
       "synthetic": []
+    },
+    {
+      "caseId": "movimentacoes.contract.registrarMovimentacao.produtoId",
+      "gate": "contract",
+      "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.registrarMovimentacao",
+      "expectation": "Runs as estoquista.",
+      "preconditions": [
+        "produtoId omitted"
+      ],
+      "actorId": "estoquista",
+      "routine": "controleEstoque.movimentacoes.registrarMovimentacao",
+      "mutating": false,
+      "expect": {
+        "ok": false,
+        "status": 400,
+        "errorCode": "VALIDATION_ERROR",
+        "ruleId": null,
+        "forbiddenFields": [],
+        "isolatedActorField": null
+      },
+      "expectedFailure": null,
+      "runner": "route",
+      "caller": {
+        "source": "http",
+        "authorities": [
+          "controleEstoque:estoquista"
+        ]
+      },
+      "mandatory": true,
+      "synthetic": []
+    },
+    {
+      "caseId": "movimentacoes.minimal.load",
+      "gate": "business",
+      "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.load",
+      "expectation": "Runs as estoquista.",
+      "preconditions": [],
+      "actorId": "estoquista",
+      "routine": "controleEstoque.movimentacoes.load",
+      "mutating": false,
+      "expect": {
+        "ok": true,
+        "status": 200,
+        "errorCode": null,
+        "ruleId": null,
+        "forbiddenFields": [],
+        "isolatedActorField": null
+      },
+      "expectedFailure": {
+        "caseId": "movimentacoes.minimal.load",
+        "stage": "structure",
+        "errorCode": "USECASE_NOT_IMPLEMENTED",
+        "status": 501
+      },
+      "runner": "route",
+      "caller": {
+        "source": "http",
+        "authorities": [
+          "controleEstoque:estoquista"
+        ]
+      },
+      "mandatory": true,
+      "synthetic": []
+    },
+    {
+      "caseId": "movimentacoes.minimal.loadMovimentacoes",
+      "gate": "business",
+      "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.loadMovimentacoes",
+      "expectation": "Runs as estoquista.",
+      "preconditions": [],
+      "actorId": "estoquista",
+      "routine": "controleEstoque.movimentacoes.loadMovimentacoes",
+      "mutating": false,
+      "expect": {
+        "ok": true,
+        "status": 200,
+        "errorCode": null,
+        "ruleId": null,
+        "forbiddenFields": [],
+        "isolatedActorField": null
+      },
+      "expectedFailure": {
+        "caseId": "movimentacoes.minimal.loadMovimentacoes",
+        "stage": "structure",
+        "errorCode": "USECASE_NOT_IMPLEMENTED",
+        "status": 501
+      },
+      "runner": "route",
+      "caller": {
+        "source": "http",
+        "authorities": [
+          "controleEstoque:estoquista"
+        ]
+      },
+      "mandatory": true,
+      "synthetic": []
+    },
+    {
+      "caseId": "movimentacoes.shape.load",
+      "gate": "business",
+      "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.load",
+      "expectation": "Runs as estoquista.",
+      "preconditions": [],
+      "actorId": "estoquista",
+      "routine": "controleEstoque.movimentacoes.load",
+      "mutating": false,
+      "expect": {
+        "ok": true,
+        "status": 200,
+        "errorCode": null,
+        "ruleId": null,
+        "forbiddenFields": [],
+        "isolatedActorField": null
+      },
+      "expectedFailure": {
+        "caseId": "movimentacoes.shape.load",
+        "stage": "structure",
+        "errorCode": "USECASE_NOT_IMPLEMENTED",
+        "status": 501
+      },
+      "runner": "route",
+      "caller": {
+        "source": "http",
+        "authorities": [
+          "controleEstoque:estoquista"
+        ]
+      },
+      "mandatory": true,
+      "synthetic": []
+    },
+    {
+      "caseId": "movimentacoes.shape.loadMovimentacoes",
+      "gate": "business",
+      "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.loadMovimentacoes",
+      "expectation": "Runs as estoquista.",
+      "preconditions": [],
+      "actorId": "estoquista",
+      "routine": "controleEstoque.movimentacoes.loadMovimentacoes",
+      "mutating": false,
+      "expect": {
+        "ok": true,
+        "status": 200,
+        "errorCode": null,
+        "ruleId": null,
+        "forbiddenFields": [],
+        "isolatedActorField": null
+      },
+      "expectedFailure": {
+        "caseId": "movimentacoes.shape.loadMovimentacoes",
+        "stage": "structure",
+        "errorCode": "USECASE_NOT_IMPLEMENTED",
+        "status": 501
+      },
+      "runner": "route",
+      "caller": {
+        "source": "http",
+        "authorities": [
+          "controleEstoque:estoquista"
+        ]
+      },
+      "mandatory": true,
+      "synthetic": []
+    },
+    {
+      "caseId": "movimentacoes.success.registrarMovimentacao",
+      "gate": "business",
+      "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.registrarMovimentacao",
+      "expectation": "Runs as estoquista.",
+      "preconditions": [],
+      "actorId": "estoquista",
+      "routine": "controleEstoque.movimentacoes.registrarMovimentacao",
+      "mutating": true,
+      "expect": {
+        "ok": true,
+        "status": 200,
+        "errorCode": null,
+        "ruleId": null,
+        "forbiddenFields": [],
+        "isolatedActorField": null
+      },
+      "expectedFailure": {
+        "caseId": "movimentacoes.success.registrarMovimentacao",
+        "stage": "structure",
+        "errorCode": "USECASE_NOT_IMPLEMENTED",
+        "status": 501
+      },
+      "runner": "route",
+      "caller": {
+        "source": "http",
+        "authorities": [
+          "controleEstoque:estoquista"
+        ]
+      },
+      "mandatory": true,
+      "synthetic": []
     }
   ]
 } as const;
