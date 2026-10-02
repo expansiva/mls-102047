@@ -65,56 +65,47 @@ export const definition = {
   "states": {
     "produtos": {
       "source": "load.produtos",
-      "description": "Produtos carregados para resumo de saldos, avisos, lista e detalhe."
+      "description": "Produtos carregados para consulta, saldos e alertas."
     },
     "produtoSelecionado": {
       "source": "entry.params.produtoId",
-      "description": "Produto selecionado na lista carregada."
+      "description": "Produto selecionado para detalhamento."
     },
     "buscaProdutos": {
       "source": "entry.params.search",
-      "description": "Termo de busca da lista de produtos."
+      "description": "Busca aplicada à lista de produtos."
     },
     "paginaProdutos": {
       "source": "entry.params.page",
-      "description": "Página solicitada da lista de produtos."
+      "description": "Página da lista de produtos."
     },
     "produtoCadastro": {
       "source": "cadastrarProduto.input",
-      "description": "Dados do produto em cadastro."
+      "description": "Dados do produto informados para cadastro."
     },
     "produtoCadastrado": {
       "source": "cadastrarProduto.produto",
-      "description": "Produto criado no cadastro."
+      "description": "Produto retornado após o cadastro."
     }
   },
   "functions": {
     "load": {
-      "description": "Carrega produtos para saldos, avisos, lista e detalhe.",
+      "description": "Carrega os produtos, saldos e alertas de estoque.",
       "calls": "load",
-      "sets": "produtos",
-      "updates": [
-        "produtoSelecionado"
-      ]
+      "sets": "produtos"
     },
     "filterListaProdutos": {
-      "description": "Recarrega a primeira página de produtos conforme a busca e a página.",
+      "description": "Recarrega a primeira página de produtos conforme os filtros.",
       "calls": "loadProdutos",
-      "sets": "produtos",
-      "updates": [
-        "produtoSelecionado"
-      ]
+      "sets": "produtos"
     },
     "loadMoreListaProdutos": {
-      "description": "Acrescenta a próxima página de produtos conforme a busca e a página.",
+      "description": "Carrega a próxima página de produtos.",
       "calls": "loadProdutos",
-      "sets": "produtos",
-      "updates": [
-        "produtoSelecionado"
-      ]
+      "sets": "produtos"
     },
     "cadastrarProduto": {
-      "description": "Cria o produto informado e atualiza os produtos carregados.",
+      "description": "Cadastra o produto informado e atualiza a lista de produtos.",
       "calls": "cadastrarProduto",
       "sets": "produtoCadastrado",
       "updates": [
@@ -134,7 +125,8 @@ export const definition = {
       "step": "acompanharSaldos/consultarSaldos",
       "organisms": [
         "saldosResumo",
-        "alertasSaldoBaixo"
+        "alertasSaldoBaixo",
+        "listaProdutos"
       ],
       "functions": [
         "load"
@@ -143,8 +135,7 @@ export const definition = {
     {
       "step": "acompanharSaldos/localizarProdutos",
       "organisms": [
-        "listaProdutos",
-        "detalheProduto"
+        "listaProdutos"
       ],
       "functions": [
         "filterListaProdutos",
@@ -178,8 +169,6 @@ export const definition = {
         "detalheProduto"
       ],
       "functions": [
-        "filterListaProdutos",
-        "loadMoreListaProdutos",
         "abrirMovimentacoes"
       ],
       "continuesIn": "movimentacoes"
@@ -201,8 +190,9 @@ export const definition = {
         "detalheProduto"
       ],
       "functions": [
-        "load"
-      ]
+        "abrirMovimentacoes"
+      ],
+      "continuesIn": "movimentacoes"
     }
   ],
   "rules": {

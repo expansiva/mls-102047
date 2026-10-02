@@ -56,58 +56,58 @@ export const definition = {
     }
   },
   "states": {
-    "movimentacoes": {
+    "historicoMovimentacoes": {
       "source": "load.movimentacoes",
-      "description": "Histórico de movimentações carregado."
+      "description": "Movimentações registradas do produto filtrado."
     },
     "produtos": {
       "source": "load.produtos",
-      "description": "Produtos com saldo e aviso de estoque."
+      "description": "Produtos disponíveis com saldo e aviso de estoque."
     },
-    "produtoIdFiltro": {
+    "produtoId": {
       "source": "entry.params.produtoId",
-      "description": "Produto usado para filtrar o histórico."
+      "description": "Identificador do produto usado no filtro do histórico."
     },
     "paginaHistorico": {
       "source": "entry.params.page",
-      "description": "Página solicitada do histórico."
+      "description": "Página solicitada do histórico de movimentações."
     },
     "movimentacaoEmEdicao": {
       "source": "registrarMovimentacao.input",
-      "description": "Dados da movimentação em preenchimento."
+      "description": "Dados da movimentação a registrar."
     },
     "movimentacaoRegistrada": {
       "source": "registrarMovimentacao.movimentacaoEstoque",
-      "description": "Movimentação registrada."
+      "description": "Movimentação de estoque registrada."
     }
   },
   "functions": {
     "load": {
-      "description": "Carrega produtos e o histórico inicial de movimentações.",
+      "description": "Carrega o histórico inicial de movimentações e os produtos.",
       "calls": "load",
-      "sets": "movimentacoes",
+      "sets": "historicoMovimentacoes",
       "updates": [
         "produtos"
       ]
     },
     "filterHistoricoMovimentacoes": {
-      "description": "Recarrega o histórico desde a primeira página conforme o produto e a página informados.",
+      "description": "Recarrega a primeira página do histórico conforme produto e página.",
       "calls": "loadMovimentacoes",
-      "sets": "movimentacoes",
+      "sets": "historicoMovimentacoes",
       "updates": []
     },
     "loadMoreHistoricoMovimentacoes": {
       "description": "Acrescenta a próxima página ao histórico de movimentações.",
       "calls": "loadMovimentacoes",
-      "sets": "movimentacoes",
+      "sets": "historicoMovimentacoes",
       "updates": []
     },
     "registrarMovimentacao": {
-      "description": "Registra a movimentação de estoque e atualiza o histórico e o saldo do produto.",
+      "description": "Registra a movimentação e atualiza os saldos do produto.",
       "calls": "registrarMovimentacao",
       "sets": "movimentacaoRegistrada",
       "updates": [
-        "movimentacoes",
+        "historicoMovimentacoes",
         "produtos"
       ]
     }
