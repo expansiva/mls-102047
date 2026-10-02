@@ -24,11 +24,21 @@
         "defPath": "l1/controleEstoque/layer_2_application/usecases/createProduto.defs.ts"
       },
       {
+        "usecaseId": "getProduto",
+        "entity": "Produto",
+        "operation": "get",
+        "routes": [
+          "controleEstoque.movimentacoes.registrarMovimentacao"
+        ],
+        "defPath": "l1/controleEstoque/layer_2_application/usecases/getProduto.defs.ts"
+      },
+      {
         "usecaseId": "listMovimentacaoEstoque",
         "entity": "MovimentacaoEstoque",
         "operation": "list",
         "routes": [
-          "controleEstoque.movimentacoes.load"
+          "controleEstoque.movimentacoes.load",
+          "controleEstoque.movimentacoes.loadMovimentacoes"
         ],
         "defPath": "l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts"
       },
@@ -38,7 +48,8 @@
         "operation": "list",
         "routes": [
           "controleEstoque.movimentacoes.load",
-          "controleEstoque.produtos.load"
+          "controleEstoque.produtos.load",
+          "controleEstoque.produtos.loadProdutos"
         ],
         "defPath": "l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
       }
@@ -315,12 +326,12 @@
       {
         "pageId": "movimentacoes",
         "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface MovimentacaoEstoqueLoad {\n  id: string;\n  produtoId: string;\n  movimentadoEm: string;\n  details: {\n    tipo: 'entrada' | 'saida';\n    quantidade: number;\n  };\n}\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n      readonly saldoAtual: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface MovimentacoesContracts {\n  'controleEstoque.movimentacoes.load': {\n    kind: 'qry';\n    input: { produtoId?: string; page?: number; pageSize?: number };\n    output: { movimentacoes: MovimentacaoEstoqueLoad[]; produtos: ProdutoLoad[]; pageHistoricoMovimentacoes: number; pageSizeHistoricoMovimentacoes: number; hasMoreHistoricoMovimentacoes: boolean };\n    meta: { output: { movimentacoes: { entity: 'MovimentacaoEstoque'; many: true }; produtos: { entity: 'Produto'; many: true } }; lists: { historicoMovimentacoes: { key: 'movimentacoes'; page: 'pageHistoricoMovimentacoes'; pageSize: 'pageSizeHistoricoMovimentacoes'; hasMore: 'hasMoreHistoricoMovimentacoes' } }; params: { produtoId: { filters: 'movimentacoes'; field: 'produtoId' }; page: { pages: 'historicoMovimentacoes' }; pageSize: { pages: 'historicoMovimentacoes' } } };\n    rules: ['movimentacaoEstoqueImutavel', 'quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo', 'quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.movimentacoes.registrarMovimentacao': {\n    kind: 'cmd';\n    writes: 'MovimentacaoEstoque.create';\n    input: { produtoId: string; movimentadoEm: string; details: { tipo: 'entrada' | 'saida'; quantidade: number } };\n    output: { movimentacaoEstoque: MovimentacaoEstoqueLoad };\n    meta: { output: { movimentacaoEstoque: { entity: 'MovimentacaoEstoque'; many: false } }; lists: {}; params: {} };\n    rules: ['movimentacaoEstoqueImutavel', 'quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
+        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface MovimentacaoEstoqueLoad {\n  id: string;\n  produtoId: string;\n  movimentadoEm: string;\n  details: {\n    tipo: 'entrada' | 'saida';\n    quantidade: number;\n  };\n}\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n      readonly saldoAtual: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface MovimentacaoEstoqueRegistrarMovimentacao {\n  id: string;\n  produtoId: string;\n  details: {\n    tipo: 'entrada' | 'saida';\n    quantidade: number;\n  };\n}\n\nexport interface MovimentacoesContracts {\n  'controleEstoque.movimentacoes.load': {\n    kind: 'qry';\n    input: { produtoId?: string; page?: number; pageSize?: number };\n    output: { movimentacoes: MovimentacaoEstoqueLoad[]; produtos: ProdutoLoad[]; pageHistoricoMovimentacoes: number; pageSizeHistoricoMovimentacoes: number; hasMoreHistoricoMovimentacoes: boolean };\n    meta: { output: { movimentacoes: { entity: 'MovimentacaoEstoque'; many: true }; produtos: { entity: 'Produto'; many: true } }; lists: { historicoMovimentacoes: { key: 'movimentacoes'; page: 'pageHistoricoMovimentacoes'; pageSize: 'pageSizeHistoricoMovimentacoes'; hasMore: 'hasMoreHistoricoMovimentacoes' } }; params: { produtoId: { filters: 'movimentacoes'; field: 'produtoId' }; page: { pages: 'historicoMovimentacoes' }; pageSize: { pages: 'historicoMovimentacoes' } } };\n    rules: ['saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.movimentacoes.loadMovimentacoes': {\n    kind: 'qry';\n    input: { produtoId?: string; page?: number; pageSize?: number };\n    output: { movimentacoes: MovimentacaoEstoqueLoad[]; pageHistoricoMovimentacoes: number; pageSizeHistoricoMovimentacoes: number; hasMoreHistoricoMovimentacoes: boolean };\n    meta: { output: { movimentacoes: { entity: 'MovimentacaoEstoque'; many: true } }; lists: { historicoMovimentacoes: { key: 'movimentacoes'; page: 'pageHistoricoMovimentacoes'; pageSize: 'pageSizeHistoricoMovimentacoes'; hasMore: 'hasMoreHistoricoMovimentacoes' } }; params: { produtoId: { filters: 'movimentacoes'; field: 'produtoId' }; page: { pages: 'historicoMovimentacoes' }; pageSize: { pages: 'historicoMovimentacoes' } } };\n    rules: [];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.movimentacoes.registrarMovimentacao': {\n    kind: 'cmd';\n    writes: 'MovimentacaoEstoque.create';\n    input: { produtoId: string; details: { tipo: 'entrada' | 'saida'; quantidade: number } };\n    output: { movimentacaoEstoque: MovimentacaoEstoqueRegistrarMovimentacao; produto: ProdutoLoad };\n    meta: { output: { movimentacaoEstoque: { entity: 'MovimentacaoEstoque'; many: false }; produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };\n    rules: ['quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
       },
       {
         "pageId": "produtos",
         "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      readonly saldoAtual: number;\n      quantidadeMinima: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface ProdutoCadastrarProduto {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n    };\n  };\n}\n\nexport interface ProdutosContracts {\n  'controleEstoque.produtos.load': {\n    kind: 'qry';\n    input: { search?: string; page?: number; pageSize?: number };\n    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };\n    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };\n    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.produtos.cadastrarProduto': {\n    kind: 'cmd';\n    writes: 'Produto.create';\n    input: { details: { identification: { name: string }; product: { unitOfMeasure: string }; controleEstoque: { quantidadeMinima: number } } };\n    output: { produto: ProdutoCadastrarProduto };\n    meta: { output: { produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };\n    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
+        "source": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      readonly saldoAtual: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n      quantidadeMinima: number;\n    };\n  };\n}\n\nexport interface ProdutoCadastrarProduto {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n    };\n  };\n}\n\nexport interface ProdutosContracts {\n  'controleEstoque.produtos.load': {\n    kind: 'qry';\n    input: { search?: string; page?: number; pageSize?: number };\n    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };\n    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };\n    rules: ['saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.produtos.loadProdutos': {\n    kind: 'qry';\n    input: { search?: string; page?: number; pageSize?: number };\n    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };\n    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };\n    rules: ['saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.produtos.cadastrarProduto': {\n    kind: 'cmd';\n    writes: 'Produto.create';\n    input: { details: { identification: { name: string }; product: { unitOfMeasure: string }; controleEstoque: { quantidadeMinima: number } } };\n    output: { produto: ProdutoCadastrarProduto };\n    meta: { output: { produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };\n    rules: ['quantidadeMinimaValida'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
       }
     ],
     "contexts": [
@@ -510,6 +521,78 @@
         ]
       },
       {
+        "usecaseId": "getProduto",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [
+          {
+            "name": "read.byId",
+            "text": "Consulta um produto pelo identificador mestre; lê o registro pelo id no índice e documento; usado pelo estoquista ao abrir um produto localizado ou referenciado por uma movimentação."
+          }
+        ],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [
+          {
+            "ruleId": "rule-document-shape-validated",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
+            "consumer": "operation:get",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
+            "consumer": "operation:get",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
+            "consumer": "operation:get",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          }
+        ],
+        "pendingRules": [
+          {
+            "ruleId": "rule-document-shape-validated",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "Addresses, consent, general and the module namespace are validated on write against the schema derived from this ontology · engine · platform: missing, nothing validates the document today"
+          },
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "A caller carrying a moduleId may write the platform keys, general and its own key; any other module key is refused with MDM_FOREIGN_NAMESPACE · engine · platform: ready"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "Identity, document, contact and login are platform layers; a module never redeclares them inside details[moduleId] · engine · platform: partial"
+          }
+        ],
+        "portId": "",
+        "portMethods": [],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "/_102034_/l4/ontology/mdm.defs.ts",
+            "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
+          },
+          {
+            "path": "l4/controleEstoque/ontology/Produto.defs.ts",
+            "sha256": "sha256:d72afd5390e92f408c41b59ea09ffb17fab91daeebc56e170dd4ad41deae2557"
+          }
+        ]
+      },
+      {
         "usecaseId": "listMovimentacaoEstoque",
         "lifecycle": false,
         "transition": null,
@@ -624,11 +707,11 @@
       },
       {
         "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-        "sha256": "sha256:c6815b5f6a25f6bab0ead3c48cb3cf53ba149ae949256afd8001794ea81f2e13"
+        "sha256": "sha256:83c69fe1111b31842bd2f02ef3417ba6f9f2dd6d069b28ebfa2d1608034df5b0"
       },
       {
         "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "sha256": "sha256:c5818f6f6566cf522685b47b76471e0f4b3d2761d0f346f56168071366fe7228"
+        "sha256": "sha256:3f0d601587c28834323805b591b586a1d03edfef59b15fecc6fbf417a7e8d30d"
       },
       {
         "path": "l4/controleEstoque/access.defs.ts",
@@ -718,11 +801,11 @@
       },
       {
         "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface MovimentacaoEstoqueLoad {\n  id: string;\n  produtoId: string;\n  movimentadoEm: string;\n  details: {\n    tipo: 'entrada' | 'saida';\n    quantidade: number;\n  };\n}\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n      readonly saldoAtual: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface MovimentacoesContracts {\n  'controleEstoque.movimentacoes.load': {\n    kind: 'qry';\n    input: { produtoId?: string; page?: number; pageSize?: number };\n    output: { movimentacoes: MovimentacaoEstoqueLoad[]; produtos: ProdutoLoad[]; pageHistoricoMovimentacoes: number; pageSizeHistoricoMovimentacoes: number; hasMoreHistoricoMovimentacoes: boolean };\n    meta: { output: { movimentacoes: { entity: 'MovimentacaoEstoque'; many: true }; produtos: { entity: 'Produto'; many: true } }; lists: { historicoMovimentacoes: { key: 'movimentacoes'; page: 'pageHistoricoMovimentacoes'; pageSize: 'pageSizeHistoricoMovimentacoes'; hasMore: 'hasMoreHistoricoMovimentacoes' } }; params: { produtoId: { filters: 'movimentacoes'; field: 'produtoId' }; page: { pages: 'historicoMovimentacoes' }; pageSize: { pages: 'historicoMovimentacoes' } } };\n    rules: ['movimentacaoEstoqueImutavel', 'quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo', 'quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.movimentacoes.registrarMovimentacao': {\n    kind: 'cmd';\n    writes: 'MovimentacaoEstoque.create';\n    input: { produtoId: string; movimentadoEm: string; details: { tipo: 'entrada' | 'saida'; quantidade: number } };\n    output: { movimentacaoEstoque: MovimentacaoEstoqueLoad };\n    meta: { output: { movimentacaoEstoque: { entity: 'MovimentacaoEstoque'; many: false } }; lists: {}; params: {} };\n    rules: ['movimentacaoEstoqueImutavel', 'quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
+        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/movimentacoes.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface MovimentacaoEstoqueLoad {\n  id: string;\n  produtoId: string;\n  movimentadoEm: string;\n  details: {\n    tipo: 'entrada' | 'saida';\n    quantidade: number;\n  };\n}\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n      readonly saldoAtual: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface MovimentacaoEstoqueRegistrarMovimentacao {\n  id: string;\n  produtoId: string;\n  details: {\n    tipo: 'entrada' | 'saida';\n    quantidade: number;\n  };\n}\n\nexport interface MovimentacoesContracts {\n  'controleEstoque.movimentacoes.load': {\n    kind: 'qry';\n    input: { produtoId?: string; page?: number; pageSize?: number };\n    output: { movimentacoes: MovimentacaoEstoqueLoad[]; produtos: ProdutoLoad[]; pageHistoricoMovimentacoes: number; pageSizeHistoricoMovimentacoes: number; hasMoreHistoricoMovimentacoes: boolean };\n    meta: { output: { movimentacoes: { entity: 'MovimentacaoEstoque'; many: true }; produtos: { entity: 'Produto'; many: true } }; lists: { historicoMovimentacoes: { key: 'movimentacoes'; page: 'pageHistoricoMovimentacoes'; pageSize: 'pageSizeHistoricoMovimentacoes'; hasMore: 'hasMoreHistoricoMovimentacoes' } }; params: { produtoId: { filters: 'movimentacoes'; field: 'produtoId' }; page: { pages: 'historicoMovimentacoes' }; pageSize: { pages: 'historicoMovimentacoes' } } };\n    rules: ['saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.movimentacoes.loadMovimentacoes': {\n    kind: 'qry';\n    input: { produtoId?: string; page?: number; pageSize?: number };\n    output: { movimentacoes: MovimentacaoEstoqueLoad[]; pageHistoricoMovimentacoes: number; pageSizeHistoricoMovimentacoes: number; hasMoreHistoricoMovimentacoes: boolean };\n    meta: { output: { movimentacoes: { entity: 'MovimentacaoEstoque'; many: true } }; lists: { historicoMovimentacoes: { key: 'movimentacoes'; page: 'pageHistoricoMovimentacoes'; pageSize: 'pageSizeHistoricoMovimentacoes'; hasMore: 'hasMoreHistoricoMovimentacoes' } }; params: { produtoId: { filters: 'movimentacoes'; field: 'produtoId' }; page: { pages: 'historicoMovimentacoes' }; pageSize: { pages: 'historicoMovimentacoes' } } };\n    rules: [];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.movimentacoes.registrarMovimentacao': {\n    kind: 'cmd';\n    writes: 'MovimentacaoEstoque.create';\n    input: { produtoId: string; details: { tipo: 'entrada' | 'saida'; quantidade: number } };\n    output: { movimentacaoEstoque: MovimentacaoEstoqueRegistrarMovimentacao; produto: ProdutoLoad };\n    meta: { output: { movimentacaoEstoque: { entity: 'MovimentacaoEstoque'; many: false }; produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };\n    rules: ['quantidadeMovimentadaPositiva', 'registroMovimentacaoAtualizaSaldo'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
       },
       {
         "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      readonly saldoAtual: number;\n      quantidadeMinima: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n    };\n  };\n}\n\nexport interface ProdutoCadastrarProduto {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n    };\n  };\n}\n\nexport interface ProdutosContracts {\n  'controleEstoque.produtos.load': {\n    kind: 'qry';\n    input: { search?: string; page?: number; pageSize?: number };\n    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };\n    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };\n    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.produtos.cadastrarProduto': {\n    kind: 'cmd';\n    writes: 'Produto.create';\n    input: { details: { identification: { name: string }; product: { unitOfMeasure: string }; controleEstoque: { quantidadeMinima: number } } };\n    output: { produto: ProdutoCadastrarProduto };\n    meta: { output: { produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };\n    rules: ['quantidadeMinimaValida', 'saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
+        "text": "/// <mls fileReference=\"_102047_/l2/controleEstoque/web/contracts/produtos.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface ProdutoLoad {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      readonly saldoAtual: number;\n      readonly saldoAbaixoDoMinimo: boolean;\n      quantidadeMinima: number;\n    };\n  };\n}\n\nexport interface ProdutoCadastrarProduto {\n  id: string;\n  details: {\n    identification: {\n      name: string;\n    };\n    product: {\n      unitOfMeasure: string;\n    };\n    controleEstoque: {\n      quantidadeMinima: number;\n    };\n  };\n}\n\nexport interface ProdutosContracts {\n  'controleEstoque.produtos.load': {\n    kind: 'qry';\n    input: { search?: string; page?: number; pageSize?: number };\n    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };\n    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };\n    rules: ['saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.produtos.loadProdutos': {\n    kind: 'qry';\n    input: { search?: string; page?: number; pageSize?: number };\n    output: { produtos: ProdutoLoad[]; pageListaProdutos: number; pageSizeListaProdutos: number; hasMoreListaProdutos: boolean };\n    meta: { output: { produtos: { entity: 'Produto'; many: true } }; lists: { listaProdutos: { key: 'produtos'; page: 'pageListaProdutos'; pageSize: 'pageSizeListaProdutos'; hasMore: 'hasMoreListaProdutos' } }; params: { search: { filters: 'produtos'; field: 'details.identification.name' }; page: { pages: 'listaProdutos' }; pageSize: { pages: 'listaProdutos' } } };\n    rules: ['saldoAtualProduto', 'avisoSaldoMinimoProduto'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n  'controleEstoque.produtos.cadastrarProduto': {\n    kind: 'cmd';\n    writes: 'Produto.create';\n    input: { details: { identification: { name: string }; product: { unitOfMeasure: string }; controleEstoque: { quantidadeMinima: number } } };\n    output: { produto: ProdutoCadastrarProduto };\n    meta: { output: { produto: { entity: 'Produto'; many: false } }; lists: {}; params: {} };\n    rules: ['quantidadeMinimaValida'];\n    access: { actors: ['estoquista']; grants: ['gerenciarEstoque']; scope: 'organization' };\n  };\n}\n"
       }
     ],
     "plans": [],

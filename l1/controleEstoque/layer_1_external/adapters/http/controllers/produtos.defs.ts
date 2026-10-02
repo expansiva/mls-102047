@@ -33,6 +33,16 @@ export const definition = {
         "serviceFunction": "controleEstoque.produtos.load",
         "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
         "contractInterface": "ProdutosContracts"
+      },
+      {
+        "route": "controleEstoque.produtos.loadProdutos",
+        "kind": "query",
+        "grantIds": [
+          "gerenciarEstoque"
+        ],
+        "serviceFunction": "controleEstoque.produtos.loadProdutos",
+        "contractPath": "l2/controleEstoque/web/contracts/produtos.defs.ts",
+        "contractInterface": "ProdutosContracts"
       }
     ]
   }

@@ -298,6 +298,69 @@ export const scenarioCatalog = {
       ]
     },
     {
+      "scenarioId": "getProduto",
+      "source": "_102047_/l1/controleEstoque/layer_2_application/usecases/getProduto.defs.ts",
+      "artifactType": "usecase",
+      "artifactId": "getProduto",
+      "handlerId": "structure.usecase",
+      "productionFile": "_102047_/l1/controleEstoque/layer_2_application/usecases/getProduto.ts",
+      "testFile": "_102047_/l1/controleEstoque/layer_2_application/usecases/getProduto.test.ts",
+      "cases": [
+        {
+          "caseId": "getProduto.compile",
+          "gate": "compile",
+          "source": "usecase structure",
+          "expectation": "The emitted file imports. A broken import is a failure, not an expected red.",
+          "preconditions": [],
+          "actorId": "",
+          "routine": "",
+          "mutating": false,
+          "expect": {
+            "ok": true,
+            "status": 0,
+            "errorCode": null,
+            "ruleId": null,
+            "forbiddenFields": [],
+            "isolatedActorField": null
+          },
+          "expectedFailure": null,
+          "runner": "module",
+          "mandatory": true,
+          "synthetic": []
+        },
+        {
+          "caseId": "getProduto.reachesStub",
+          "gate": "business",
+          "source": "_102047_/l1/controleEstoque/layer_2_application/usecases/getProduto.defs.ts#operation",
+          "expectation": "A valid call reaches the structure stub. Import, auth and database errors are not this red.",
+          "preconditions": [
+            "memory store",
+            "no database"
+          ],
+          "actorId": "",
+          "routine": "",
+          "mutating": false,
+          "expect": {
+            "ok": true,
+            "status": 200,
+            "errorCode": null,
+            "ruleId": null,
+            "forbiddenFields": [],
+            "isolatedActorField": null
+          },
+          "runner": "module",
+          "expectedFailure": {
+            "caseId": "getProduto.reachesStub",
+            "stage": "structure",
+            "errorCode": "USECASE_NOT_IMPLEMENTED",
+            "status": 501
+          },
+          "mandatory": true,
+          "synthetic": []
+        }
+      ]
+    },
+    {
       "scenarioId": "listMovimentacaoEstoque",
       "source": "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
       "artifactType": "usecase",
@@ -462,6 +525,35 @@ export const scenarioCatalog = {
           "synthetic": []
         },
         {
+          "caseId": "movimentacoes.auth.loadMovimentacoes",
+          "gate": "auth",
+          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.loadMovimentacoes",
+          "expectation": "An http caller with no authority is refused before the usecase.",
+          "preconditions": [
+            "verifiedAuthorities is empty",
+            "source is http"
+          ],
+          "actorId": "",
+          "routine": "controleEstoque.movimentacoes.loadMovimentacoes",
+          "mutating": false,
+          "expect": {
+            "ok": false,
+            "status": 403,
+            "errorCode": "FORBIDDEN_ACTOR",
+            "ruleId": null,
+            "forbiddenFields": [],
+            "isolatedActorField": null
+          },
+          "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
+          "mandatory": true,
+          "synthetic": []
+        },
+        {
           "caseId": "movimentacoes.auth.registrarMovimentacao",
           "gate": "auth",
           "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/movimentacoes.defs.ts#controleEstoque.movimentacoes.registrarMovimentacao",
@@ -563,6 +655,35 @@ export const scenarioCatalog = {
           ],
           "actorId": "",
           "routine": "controleEstoque.produtos.load",
+          "mutating": false,
+          "expect": {
+            "ok": false,
+            "status": 403,
+            "errorCode": "FORBIDDEN_ACTOR",
+            "ruleId": null,
+            "forbiddenFields": [],
+            "isolatedActorField": null
+          },
+          "expectedFailure": null,
+          "runner": "route",
+          "caller": {
+            "source": "http",
+            "authorities": []
+          },
+          "mandatory": true,
+          "synthetic": []
+        },
+        {
+          "caseId": "produtos.auth.loadProdutos",
+          "gate": "auth",
+          "source": "_102047_/l1/controleEstoque/layer_1_external/adapters/http/controllers/produtos.defs.ts#controleEstoque.produtos.loadProdutos",
+          "expectation": "An http caller with no authority is refused before the usecase.",
+          "preconditions": [
+            "verifiedAuthorities is empty",
+            "source is http"
+          ],
+          "actorId": "",
+          "routine": "controleEstoque.produtos.loadProdutos",
           "mutating": false,
           "expect": {
             "ok": false,

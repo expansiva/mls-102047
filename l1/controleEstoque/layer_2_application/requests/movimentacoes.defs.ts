@@ -8,6 +8,7 @@ export const definition = {
   "status": "generated",
   "dependencies": [
     "_102047_/l1/controleEstoque/layer_2_application/usecases/createMovimentacaoEstoque.defs.ts",
+    "_102047_/l1/controleEstoque/layer_2_application/usecases/getProduto.defs.ts",
     "_102047_/l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
     "_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts"
   ],
@@ -67,10 +68,49 @@ export const definition = {
         ]
       },
       {
+        "route": "controleEstoque.movimentacoes.loadMovimentacoes",
+        "kind": "qry",
+        "uses": [
+          "listMovimentacaoEstoque"
+        ],
+        "transaction": "none",
+        "outputs": [
+          {
+            "key": "movimentacoes",
+            "entity": "MovimentacaoEstoque",
+            "fields": [
+              "id",
+              "produtoId",
+              "movimentadoEm",
+              "details.tipo",
+              "details.quantidade"
+            ]
+          }
+        ],
+        "params": [
+          {
+            "name": "produtoId",
+            "target": "movimentacoes",
+            "field": "produtoId"
+          },
+          {
+            "name": "page",
+            "target": "movimentacoes",
+            "pages": "historicoMovimentacoes"
+          },
+          {
+            "name": "pageSize",
+            "target": "movimentacoes",
+            "pages": "historicoMovimentacoes"
+          }
+        ]
+      },
+      {
         "route": "controleEstoque.movimentacoes.registrarMovimentacao",
         "kind": "cmd",
         "uses": [
-          "createMovimentacaoEstoque"
+          "createMovimentacaoEstoque",
+          "getProduto"
         ],
         "transaction": "single",
         "outputs": [
@@ -80,9 +120,21 @@ export const definition = {
             "fields": [
               "id",
               "produtoId",
-              "movimentadoEm",
               "details.tipo",
               "details.quantidade"
+            ]
+          },
+          {
+            "key": "produto",
+            "entity": "Produto",
+            "fields": [
+              "id",
+              "details.identification.name",
+              "details.identification.status",
+              "details.product.unitOfMeasure",
+              "details.controleEstoque.quantidadeMinima",
+              "details.controleEstoque.saldoAtual",
+              "details.controleEstoque.saldoAbaixoDoMinimo"
             ]
           }
         ],

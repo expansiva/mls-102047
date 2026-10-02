@@ -8,6 +8,7 @@ import type { ProdutosContracts } from '/_102047_/l2/controleEstoque/web/contrac
 export const routes: ControllerRoute[] = [
   { key: 'controleEstoque.produtos.cadastrarProduto', handler: handleCadastrarProduto },
   { key: 'controleEstoque.produtos.load', handler: handleLoad },
+  { key: 'controleEstoque.produtos.loadProdutos', handler: handleLoadProdutos },
 ];
 
 async function handleCadastrarProduto(input: IRequestEnvelope): Promise<BffResponse<ProdutosContracts['controleEstoque.produtos.cadastrarProduto']['output']>> {
@@ -28,6 +29,16 @@ async function handleLoad(input: IRequestEnvelope): Promise<BffResponse<Produtos
   const params = scopeParams(input.request.params, input.ctx, ['gerenciarEstoque']) as ProdutosContracts['controleEstoque.produtos.load']['input'];
   const data = await requests["controleEstoque.produtos.load"](params as Record<string, unknown>, input.ctx);
   return { ok: true, data: data as ProdutosContracts['controleEstoque.produtos.load']['output'], error: null };
+}
+
+async function handleLoadProdutos(input: IRequestEnvelope): Promise<BffResponse<ProdutosContracts['controleEstoque.produtos.loadProdutos']['output']>> {
+  const denied = authorize(input.request, ['gerenciarEstoque']);
+  if (denied) throw denied;
+  const invalid = validateInput(input.request.params, [], ['search', 'page', 'pageSize'], []);
+  if (invalid) throw invalid;
+  const params = scopeParams(input.request.params, input.ctx, ['gerenciarEstoque']) as ProdutosContracts['controleEstoque.produtos.loadProdutos']['input'];
+  const data = await requests["controleEstoque.produtos.loadProdutos"](params as Record<string, unknown>, input.ctx);
+  return { ok: true, data: data as ProdutosContracts['controleEstoque.produtos.loadProdutos']['output'], error: null };
 }
 
 function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string } }, grantIds: readonly string[]): Record<string, unknown> {

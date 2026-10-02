@@ -12,15 +12,15 @@
   "sources": [
     {
       "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
-      "sha256": "sha256:c6815b5f6a25f6bab0ead3c48cb3cf53ba149ae949256afd8001794ea81f2e13",
-      "bytes": 2432,
+      "sha256": "sha256:83c69fe1111b31842bd2f02ef3417ba6f9f2dd6d069b28ebfa2d1608034df5b0",
+      "bytes": 3368,
       "schemaVersion": "",
       "state": "present"
     },
     {
       "path": "l2/controleEstoque/web/contracts/produtos.defs.ts",
-      "sha256": "sha256:c5818f6f6566cf522685b47b76471e0f4b3d2761d0f346f56168071366fe7228",
-      "bytes": 2137,
+      "sha256": "sha256:3f0d601587c28834323805b591b586a1d03edfef59b15fecc6fbf417a7e8d30d",
+      "bytes": 2848,
       "schemaVersion": "",
       "state": "present"
     },
@@ -157,6 +157,7 @@
         "pageId": "movimentacoes",
         "routes": [
           "controleEstoque.movimentacoes.load",
+          "controleEstoque.movimentacoes.loadMovimentacoes",
           "controleEstoque.movimentacoes.registrarMovimentacao"
         ]
       },
@@ -164,7 +165,8 @@
         "pageId": "produtos",
         "routes": [
           "controleEstoque.produtos.cadastrarProduto",
-          "controleEstoque.produtos.load"
+          "controleEstoque.produtos.load",
+          "controleEstoque.produtos.loadProdutos"
         ]
       }
     ],
@@ -212,6 +214,42 @@
         ]
       },
       {
+        "route": "controleEstoque.movimentacoes.loadMovimentacoes",
+        "pageId": "movimentacoes",
+        "kind": "qry",
+        "writes": "",
+        "outputs": [
+          {
+            "key": "movimentacoes",
+            "entity": "MovimentacaoEstoque",
+            "many": true,
+            "page": "pageHistoricoMovimentacoes",
+            "pageSize": "pageSizeHistoricoMovimentacoes",
+            "hasMore": "hasMoreHistoricoMovimentacoes"
+          }
+        ],
+        "params": [
+          {
+            "name": "produtoId",
+            "target": "movimentacoes",
+            "field": "produtoId"
+          },
+          {
+            "name": "page",
+            "target": "movimentacoes",
+            "pages": "historicoMovimentacoes"
+          },
+          {
+            "name": "pageSize",
+            "target": "movimentacoes",
+            "pages": "historicoMovimentacoes"
+          }
+        ],
+        "uses": [
+          "listMovimentacaoEstoque"
+        ]
+      },
+      {
         "route": "controleEstoque.movimentacoes.registrarMovimentacao",
         "pageId": "movimentacoes",
         "kind": "cmd",
@@ -221,11 +259,17 @@
             "key": "movimentacaoEstoque",
             "entity": "MovimentacaoEstoque",
             "many": false
+          },
+          {
+            "key": "produto",
+            "entity": "Produto",
+            "many": false
           }
         ],
         "params": [],
         "uses": [
-          "createMovimentacaoEstoque"
+          "createMovimentacaoEstoque",
+          "getProduto"
         ]
       },
       {
@@ -247,6 +291,42 @@
       },
       {
         "route": "controleEstoque.produtos.load",
+        "pageId": "produtos",
+        "kind": "qry",
+        "writes": "",
+        "outputs": [
+          {
+            "key": "produtos",
+            "entity": "Produto",
+            "many": true,
+            "page": "pageListaProdutos",
+            "pageSize": "pageSizeListaProdutos",
+            "hasMore": "hasMoreListaProdutos"
+          }
+        ],
+        "params": [
+          {
+            "name": "search",
+            "target": "produtos",
+            "field": "details.identification.name"
+          },
+          {
+            "name": "page",
+            "target": "produtos",
+            "pages": "listaProdutos"
+          },
+          {
+            "name": "pageSize",
+            "target": "produtos",
+            "pages": "listaProdutos"
+          }
+        ],
+        "uses": [
+          "listProduto"
+        ]
+      },
+      {
+        "route": "controleEstoque.produtos.loadProdutos",
         "pageId": "produtos",
         "kind": "qry",
         "writes": "",
@@ -306,6 +386,17 @@
         ]
       },
       {
+        "usecaseId": "getProduto",
+        "entity": "Produto",
+        "operation": "get",
+        "status": "toCreate",
+        "existing": "",
+        "identity": "getProduto",
+        "routes": [
+          "controleEstoque.movimentacoes.registrarMovimentacao"
+        ]
+      },
+      {
         "usecaseId": "listMovimentacaoEstoque",
         "entity": "MovimentacaoEstoque",
         "operation": "list",
@@ -313,7 +404,8 @@
         "existing": "",
         "identity": "listMovimentacaoEstoque",
         "routes": [
-          "controleEstoque.movimentacoes.load"
+          "controleEstoque.movimentacoes.load",
+          "controleEstoque.movimentacoes.loadMovimentacoes"
         ]
       },
       {
@@ -325,7 +417,8 @@
         "identity": "listProduto",
         "routes": [
           "controleEstoque.movimentacoes.load",
-          "controleEstoque.produtos.load"
+          "controleEstoque.produtos.load",
+          "controleEstoque.produtos.loadProdutos"
         ]
       }
     ],
@@ -358,12 +451,15 @@
       "identity": "movimentacoes",
       "ownerRefs": [
         "endpoint:controleEstoque.movimentacoes.load",
+        "endpoint:controleEstoque.movimentacoes.loadMovimentacoes",
         "endpoint:controleEstoque.movimentacoes.registrarMovimentacao"
       ],
       "dependsOn": [
+        "requestService:movimentacoes",
         "usecase:listMovimentacaoEstoque",
         "usecase:listProduto",
         "usecase:createMovimentacaoEstoque",
+        "usecase:getProduto",
         "scope:access"
       ]
     },
@@ -375,9 +471,11 @@
       "identity": "produtos",
       "ownerRefs": [
         "endpoint:controleEstoque.produtos.cadastrarProduto",
-        "endpoint:controleEstoque.produtos.load"
+        "endpoint:controleEstoque.produtos.load",
+        "endpoint:controleEstoque.produtos.loadProdutos"
       ],
       "dependsOn": [
+        "requestService:produtos",
         "usecase:createProduto",
         "usecase:listProduto",
         "scope:access"
@@ -473,6 +571,40 @@
       ]
     },
     {
+      "id": "requestService:movimentacoes",
+      "artifactType": "requestService",
+      "defPath": "l1/controleEstoque/layer_2_application/requests/movimentacoes.defs.ts",
+      "action": "create",
+      "identity": "movimentacoes",
+      "ownerRefs": [
+        "endpoint:controleEstoque.movimentacoes.load",
+        "endpoint:controleEstoque.movimentacoes.loadMovimentacoes",
+        "endpoint:controleEstoque.movimentacoes.registrarMovimentacao"
+      ],
+      "dependsOn": [
+        "usecase:listMovimentacaoEstoque",
+        "usecase:listProduto",
+        "usecase:createMovimentacaoEstoque",
+        "usecase:getProduto"
+      ]
+    },
+    {
+      "id": "requestService:produtos",
+      "artifactType": "requestService",
+      "defPath": "l1/controleEstoque/layer_2_application/requests/produtos.defs.ts",
+      "action": "create",
+      "identity": "produtos",
+      "ownerRefs": [
+        "endpoint:controleEstoque.produtos.cadastrarProduto",
+        "endpoint:controleEstoque.produtos.load",
+        "endpoint:controleEstoque.produtos.loadProdutos"
+      ],
+      "dependsOn": [
+        "usecase:createProduto",
+        "usecase:listProduto"
+      ]
+    },
+    {
       "id": "scope:access",
       "artifactType": "accessScope",
       "defPath": "l1/controleEstoque/layer_2_application/scope/accessScope.defs.ts",
@@ -515,6 +647,21 @@
       ]
     },
     {
+      "id": "usecase:getProduto",
+      "artifactType": "usecase",
+      "defPath": "l1/controleEstoque/layer_2_application/usecases/getProduto.defs.ts",
+      "action": "create",
+      "identity": "getProduto",
+      "ownerRefs": [
+        "usecase:getProduto",
+        "endpoint:controleEstoque.movimentacoes.registrarMovimentacao"
+      ],
+      "dependsOn": [
+        "entity:Produto",
+        "scope:access"
+      ]
+    },
+    {
       "id": "usecase:listMovimentacaoEstoque",
       "artifactType": "usecase",
       "defPath": "l1/controleEstoque/layer_2_application/usecases/listMovimentacaoEstoque.defs.ts",
@@ -522,7 +669,8 @@
       "identity": "listMovimentacaoEstoque",
       "ownerRefs": [
         "usecase:listMovimentacaoEstoque",
-        "endpoint:controleEstoque.movimentacoes.load"
+        "endpoint:controleEstoque.movimentacoes.load",
+        "endpoint:controleEstoque.movimentacoes.loadMovimentacoes"
       ],
       "dependsOn": [
         "entity:MovimentacaoEstoque",
@@ -539,7 +687,8 @@
       "ownerRefs": [
         "usecase:listProduto",
         "endpoint:controleEstoque.movimentacoes.load",
-        "endpoint:controleEstoque.produtos.load"
+        "endpoint:controleEstoque.produtos.load",
+        "endpoint:controleEstoque.produtos.loadProdutos"
       ],
       "dependsOn": [
         "entity:Produto",
@@ -566,13 +715,22 @@
       "identity": "Produto",
       "ownerRefs": [
         "usecase:createProduto",
+        "usecase:getProduto",
         "usecase:listProduto"
       ],
       "dependsOn": []
     }
   ],
   "removed": [],
-  "problems": [],
+  "problems": [
+    {
+      "severity": "review",
+      "code": "USECASE_FROM_CONTRACT",
+      "path": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+      "message": "Route controleEstoque.movimentacoes.registrarMovimentacao needs Produto.get, which is not in the planned pool. Usecase getProduto was created from the contract.",
+      "ownerRef": "getProduto"
+    }
+  ],
   "consumersReleased": true,
-  "snapshotHash": "sha256:d664e25c3326d016969735262b03af50a7afc6dbe1d56a2bb1100c43020cf42c"
+  "snapshotHash": "sha256:5b8c4e2c5442645ea694a2958c3b6bf121d88d0cfc1bbe8eda40f7c61fc89fca"
 }

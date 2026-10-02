@@ -9,7 +9,14 @@ export const requests = {
   const bound: RequestContext = ctx;
   const step0 = await listProduto(input as Parameters<typeof listProduto>[0], bound);
   const out: Record<string, unknown> = {};
-  out["produtos"] = projectOutput((step0 && typeof step0 === 'object' ? (step0 as Record<string, unknown>).items : undefined), ["id", "details.identification.name", "details.identification.status", "details.product.unitOfMeasure", "details.controleEstoque.saldoAtual", "details.controleEstoque.quantidadeMinima", "details.controleEstoque.saldoAbaixoDoMinimo"]);
+  out["produtos"] = projectOutput((step0 && typeof step0 === 'object' ? (step0 as Record<string, unknown>).items : undefined), ["id", "details.identification.name", "details.identification.status", "details.product.unitOfMeasure", "details.controleEstoque.saldoAtual", "details.controleEstoque.saldoAbaixoDoMinimo", "details.controleEstoque.quantidadeMinima"]);
+  return out;
+  },
+  "controleEstoque.produtos.loadProdutos": async function (input: Record<string, unknown>, ctx: RequestContext): Promise<Record<string, unknown>> {
+  const bound: RequestContext = ctx;
+  const step0 = await listProduto(input as Parameters<typeof listProduto>[0], bound);
+  const out: Record<string, unknown> = {};
+  out["produtos"] = projectOutput((step0 && typeof step0 === 'object' ? (step0 as Record<string, unknown>).items : undefined), ["id", "details.identification.name", "details.identification.status", "details.product.unitOfMeasure", "details.controleEstoque.saldoAtual", "details.controleEstoque.saldoAbaixoDoMinimo", "details.controleEstoque.quantidadeMinima"]);
   return out;
   },
   "controleEstoque.produtos.cadastrarProduto": async function (input: Record<string, unknown>, ctx: RequestContext): Promise<Record<string, unknown>> {

@@ -1,9 +1,9 @@
-/// <mls fileReference="_102047_/l1/controleEstoque/layer_2_application/usecases/listProduto.defs.ts" enhancement="_blank"/>
+/// <mls fileReference="_102047_/l1/controleEstoque/layer_2_application/usecases/getProduto.defs.ts" enhancement="_blank"/>
 
 export const definition = {
   "schemaVersion": "2026-09-24-d1-definition-v2",
   "artifactType": "usecase",
-  "artifactId": "listProduto",
+  "artifactId": "getProduto",
   "moduleName": "controleEstoque",
   "status": "generated",
   "dependencies": [
@@ -12,19 +12,31 @@ export const definition = {
     "_102047_/l4/controleEstoque/ontology/Produto.defs.ts"
   ],
   "data": {
-    "usecaseId": "listProduto",
+    "usecaseId": "getProduto",
     "entityId": "Produto",
-    "operation": "list",
+    "operation": "get",
     "ports": [],
     "rulesApplied": [],
     "functions": [
       {
-        "functionName": "listProduto",
+        "functionName": "getProduto",
         "input": [
           {
             "name": "id",
             "type": "uuid",
             "fieldRef": "Produto.id"
+          }
+        ],
+        "output": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "fieldRef": "Produto.id"
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "fieldRef": "Produto.version"
           },
           {
             "name": "details",
@@ -90,24 +102,6 @@ export const definition = {
             "name": "details.controleEstoque.saldoAbaixoDoMinimo",
             "type": "boolean",
             "fieldRef": "Produto.details.controleEstoque.saldoAbaixoDoMinimo"
-          },
-          {
-            "name": "page",
-            "type": "number"
-          },
-          {
-            "name": "pageSize",
-            "type": "number"
-          }
-        ],
-        "output": [
-          {
-            "name": "items",
-            "type": "Produto"
-          },
-          {
-            "name": "hasMore",
-            "type": "boolean"
           }
         ]
       }
@@ -126,36 +120,9 @@ export const definition = {
         "call": "get",
         "entity": "Produto",
         "capability": "read.byId"
-      },
-      {
-        "kind": "mdm",
-        "namespace": "controleEstoque",
-        "call": "listByType",
-        "entity": "Produto",
-        "capability": "locate.byName"
       }
     ],
     "uses": [
-      {
-        "path": "details.controleEstoque.saldoAbaixoDoMinimo",
-        "role": "filter",
-        "source": "input"
-      },
-      {
-        "path": "details.controleEstoque.saldoAtual",
-        "role": "filter",
-        "source": "input"
-      },
-      {
-        "path": "details.identification.status",
-        "role": "filter",
-        "source": "input"
-      },
-      {
-        "path": "details.identification.subtype",
-        "role": "filter",
-        "source": "input"
-      },
       {
         "path": "id",
         "role": "filter",
@@ -167,21 +134,21 @@ export const definition = {
       {
         "ruleId": "rule-document-shape-validated",
         "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
-        "consumer": "operation:list",
+        "consumer": "operation:get",
         "enforcement": "pending",
         "gap": "DELEGATION_UNPROVEN"
       },
       {
         "ruleId": "rule-foreign-namespace-refused",
         "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
-        "consumer": "operation:list",
+        "consumer": "operation:get",
         "enforcement": "pending",
         "gap": "DELEGATION_UNPROVEN"
       },
       {
         "ruleId": "rule-identity-never-in-namespace",
         "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
-        "consumer": "operation:list",
+        "consumer": "operation:get",
         "enforcement": "pending",
         "gap": "DELEGATION_UNPROVEN"
       }
@@ -192,7 +159,7 @@ export const definition = {
     "mdm": {
       "namespace": "controleEstoque",
       "role": "controleEstoque.Produto",
-      "atomic": false,
+      "atomic": true,
       "calls": [
         {
           "id": "get",
@@ -219,49 +186,6 @@ export const definition = {
             "mdmId",
             "version",
             "details"
-          ]
-        },
-        {
-          "id": "listByName",
-          "method": "listByType",
-          "target": "collection",
-          "shape": "collection",
-          "capabilities": [
-            "locate.byName"
-          ],
-          "alternative": false,
-          "when": [
-            {
-              "kind": "contract",
-              "path": "details.identification.name",
-              "present": true
-            }
-          ],
-          "arguments": [
-            {
-              "name": "type",
-              "role": "parameter",
-              "origin": {
-                "kind": "literal",
-                "evidence": "role"
-              },
-              "value": "controleEstoque.Produto"
-            },
-            {
-              "name": "name",
-              "role": "selector",
-              "origin": {
-                "kind": "contract",
-                "path": "details.identification.name"
-              },
-              "path": "details.identification.name"
-            }
-          ],
-          "result": [
-            "items",
-            "page",
-            "pageSize",
-            "total"
           ]
         }
       ]

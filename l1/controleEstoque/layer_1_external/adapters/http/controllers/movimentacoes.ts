@@ -7,6 +7,7 @@ import type { MovimentacoesContracts } from '/_102047_/l2/controleEstoque/web/co
 
 export const routes: ControllerRoute[] = [
   { key: 'controleEstoque.movimentacoes.load', handler: handleLoad },
+  { key: 'controleEstoque.movimentacoes.loadMovimentacoes', handler: handleLoadMovimentacoes },
   { key: 'controleEstoque.movimentacoes.registrarMovimentacao', handler: handleRegistrarMovimentacao },
 ];
 
@@ -20,10 +21,20 @@ async function handleLoad(input: IRequestEnvelope): Promise<BffResponse<Moviment
   return { ok: true, data: data as MovimentacoesContracts['controleEstoque.movimentacoes.load']['output'], error: null };
 }
 
+async function handleLoadMovimentacoes(input: IRequestEnvelope): Promise<BffResponse<MovimentacoesContracts['controleEstoque.movimentacoes.loadMovimentacoes']['output']>> {
+  const denied = authorize(input.request, ['gerenciarEstoque']);
+  if (denied) throw denied;
+  const invalid = validateInput(input.request.params, [], ['produtoId', 'page', 'pageSize'], []);
+  if (invalid) throw invalid;
+  const params = scopeParams(input.request.params, input.ctx, ['gerenciarEstoque']) as MovimentacoesContracts['controleEstoque.movimentacoes.loadMovimentacoes']['input'];
+  const data = await requests["controleEstoque.movimentacoes.loadMovimentacoes"](params as Record<string, unknown>, input.ctx);
+  return { ok: true, data: data as MovimentacoesContracts['controleEstoque.movimentacoes.loadMovimentacoes']['output'], error: null };
+}
+
 async function handleRegistrarMovimentacao(input: IRequestEnvelope): Promise<BffResponse<MovimentacoesContracts['controleEstoque.movimentacoes.registrarMovimentacao']['output']>> {
   const denied = authorize(input.request, ['gerenciarEstoque']);
   if (denied) throw denied;
-  const invalid = validateInput(input.request.params, ['produtoId', 'movimentadoEm', 'details', 'details.tipo', 'details.quantidade'], ['produtoId', 'movimentadoEm', 'details', 'details.tipo', 'details.quantidade'], []);
+  const invalid = validateInput(input.request.params, ['produtoId', 'details', 'details.tipo', 'details.quantidade'], ['produtoId', 'details', 'details.tipo', 'details.quantidade'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['gerenciarEstoque']) as MovimentacoesContracts['controleEstoque.movimentacoes.registrarMovimentacao']['input'];
   const data = await requests["controleEstoque.movimentacoes.registrarMovimentacao"](params as Record<string, unknown>, input.ctx);

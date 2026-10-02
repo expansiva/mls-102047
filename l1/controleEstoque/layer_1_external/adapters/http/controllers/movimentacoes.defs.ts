@@ -25,6 +25,16 @@ export const definition = {
         "contractInterface": "MovimentacoesContracts"
       },
       {
+        "route": "controleEstoque.movimentacoes.loadMovimentacoes",
+        "kind": "query",
+        "grantIds": [
+          "gerenciarEstoque"
+        ],
+        "serviceFunction": "controleEstoque.movimentacoes.loadMovimentacoes",
+        "contractPath": "l2/controleEstoque/web/contracts/movimentacoes.defs.ts",
+        "contractInterface": "MovimentacoesContracts"
+      },
+      {
         "route": "controleEstoque.movimentacoes.registrarMovimentacao",
         "kind": "command",
         "grantIds": [

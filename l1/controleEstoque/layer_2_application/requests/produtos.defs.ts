@@ -30,8 +30,48 @@ export const definition = {
               "details.identification.status",
               "details.product.unitOfMeasure",
               "details.controleEstoque.saldoAtual",
-              "details.controleEstoque.quantidadeMinima",
-              "details.controleEstoque.saldoAbaixoDoMinimo"
+              "details.controleEstoque.saldoAbaixoDoMinimo",
+              "details.controleEstoque.quantidadeMinima"
+            ]
+          }
+        ],
+        "params": [
+          {
+            "name": "search",
+            "target": "produtos",
+            "field": "details.identification.name"
+          },
+          {
+            "name": "page",
+            "target": "produtos",
+            "pages": "listaProdutos"
+          },
+          {
+            "name": "pageSize",
+            "target": "produtos",
+            "pages": "listaProdutos"
+          }
+        ]
+      },
+      {
+        "route": "controleEstoque.produtos.loadProdutos",
+        "kind": "qry",
+        "uses": [
+          "listProduto"
+        ],
+        "transaction": "none",
+        "outputs": [
+          {
+            "key": "produtos",
+            "entity": "Produto",
+            "fields": [
+              "id",
+              "details.identification.name",
+              "details.identification.status",
+              "details.product.unitOfMeasure",
+              "details.controleEstoque.saldoAtual",
+              "details.controleEstoque.saldoAbaixoDoMinimo",
+              "details.controleEstoque.quantidadeMinima"
             ]
           }
         ],
