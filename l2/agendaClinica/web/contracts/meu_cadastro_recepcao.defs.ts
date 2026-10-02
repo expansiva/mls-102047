@@ -3,7 +3,6 @@
 export interface RecepcionistaLoad {
   id: string;
   readonly version: number;
-  readonly version: number;
   details: {
     identification: string;
     person: string;
@@ -24,7 +23,6 @@ export interface RecepcionistaCreateOwnReceptionist {
       privacyConsent: string;
     };
   };
-  readonly version: number;
 }
 
 export interface Meu_cadastro_recepcaoContracts {

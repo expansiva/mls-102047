@@ -7,7 +7,6 @@ export interface ConsultaLoad {
   profissionalId: string;
   scheduledAt: string;
   status: 'scheduled' | 'confirmed' | 'attended' | 'missed';
-  readonly version: number;
 }
 
 export interface PacienteLoad {
@@ -23,16 +22,6 @@ export interface ProfissionalLoad {
     identification: string;
     person: string;
   };
-}
-
-export interface ConsultaLoadConsulta {
-  id: string;
-  readonly version: number;
-  readonly version: number;
-  pacienteId: string;
-  profissionalId: string;
-  scheduledAt: string;
-  status: 'scheduled' | 'confirmed' | 'attended' | 'missed';
 }
 
 export interface PacienteLoadConsulta {
@@ -57,7 +46,6 @@ export interface ConsultaRegistrarAgendamento {
   pacienteId: string;
   profissionalId: string;
   scheduledAt: string;
-  readonly version: number;
 }
 
 export interface Consultas_recepcaoContracts {
@@ -80,7 +68,7 @@ export interface Consultas_recepcaoContracts {
   'agendaClinica.consultas_recepcao.loadConsulta': {
     kind: 'qry';
     input: { id?: string };
-    output: { consulta: ConsultaLoadConsulta };
+    output: { consulta: ConsultaLoad };
     meta: { output: { consulta: { entity: 'Consulta'; many: false } }; lists: {}; params: { id: { filters: 'consulta'; field: 'id' } } };
     rules: ['transicoesConsultaValidas'];
     access: { actors: ['recepcionista']; grants: ['cadastrarPacientes', 'consultarCanaisDosPacientes', 'organizarAgenda', 'consultarProfissionaisParaAgenda']; scope: 'organization' };

@@ -6,7 +6,6 @@ export interface ConsultaLoad {
   scheduledAt: string;
   status: 'scheduled' | 'confirmed' | 'attended' | 'missed';
   pacienteId: string;
-  readonly version: number;
   details: {
     attendanceNote: string;
   };
@@ -28,7 +27,6 @@ export interface ConsultaRegistrarAtendimento {
   details: {
     attendanceNote: string;
   };
-  readonly version: number;
 }
 
 export interface Agenda_profissionalContracts {
