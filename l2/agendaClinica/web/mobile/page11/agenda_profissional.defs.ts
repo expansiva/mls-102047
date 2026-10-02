@@ -2,40 +2,33 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/operationsQueue/page21.md",
-    "experience": "workQueueSplit"
+    "category": "_102020_/l4/collabux/templates/calendarScheduling/page21.md",
+    "experience": "calendarGrid"
   },
-  "intent": "Permitir que o profissional percorra em coluna estreita as consultas da sua agenda do dia, confira o paciente da consulta escolhida e registre a conclusão com anotação.",
+  "intent": "Em conteúdo estreito e fluido em torno de 390px, também usável em 360px e 430px, o profissional localiza as consultas do dia, confere o paciente e registra o atendimento com anotação.",
   "sections": [
     {
-      "id": "agendaDiaria",
+      "id": "agendaDoDia",
       "priority": "primary",
-      "purpose": "Empilhar a agenda do dia em conteúdo fluido em torno de 390px, ainda utilizável em 360px e 430px, para o profissional localizar uma consulta ao percorrer a lista.",
+      "purpose": "Começar pela agenda do dia em conteúdo fluido em torno de 390px, ainda usável em 360px e 430px, para localizar a consulta própria pelo horário e pelo paciente.",
       "organisms": [
         "consultasDoDia"
       ]
     },
     {
-      "id": "consultaAtual",
+      "id": "consultaSelecionada",
       "priority": "main",
-      "purpose": "Seguir com o detalhe da consulta escolhida em leitura contínua na largura estreita, para conferir horário, situação e paciente antes de concluir.",
+      "purpose": "Em seguida, mostrar os detalhes da consulta e do paciente em leitura empilhada, adequada à largura estreita.",
       "organisms": [
         "detalheConsulta"
       ]
     },
     {
-      "id": "registroDoDia",
-      "priority": "main",
-      "purpose": "Oferecer o registro da anotação e da conclusão em sequência fluida depois da conferência, sem depender de colunas fixas.",
-      "organisms": [
-        "registroAtendimento"
-      ]
-    },
-    {
-      "id": "comandosAgenda",
+      "id": "conclusaoDoAtendimento",
       "priority": "secondary",
-      "purpose": "Manter as ações de consultar a agenda e registrar o atendimento ao final do fluxo estreito, ao alcance do profissional.",
+      "purpose": "Ao final do conteúdo estreito, oferecer a anotação e o contexto de ações para concluir o atendimento sem layout rígido.",
       "organisms": [
+        "registroAtendimento",
         "acoesAgenda"
       ]
     }
@@ -43,17 +36,17 @@ export const definition = {
   "organisms": {
     "consultasDoDia": {
       "kind": "list",
-      "text": "Lista em sequência as consultas do profissional previstas para o dia, com horário, situação e paciente, para localizar o atendimento a abrir na tela estreita.",
+      "text": "Empilha as consultas do dia do profissional, com horário, situação e paciente, para localizar um atendimento na largura estreita.",
       "intents": []
     },
     "detalheConsulta": {
       "kind": "detail",
-      "text": "Mostra os dados da consulta selecionada e a identificação do paciente vinculado, para conferir o atendimento antes de concluir.",
+      "text": "Mostra os dados da consulta selecionada e a identificação do paciente, para conferência antes de concluir o atendimento.",
       "intents": []
     },
     "registroAtendimento": {
       "kind": "form",
-      "text": "Captura a anotação do atendimento e conclui a consulta selecionada como atendida, para registrar o trabalho realizado.",
+      "text": "Recebe a anotação do atendimento e conclui a consulta selecionada como atendida, no fluxo estreito após a conferência.",
       "intents": [
         {
           "id": "registrarAtendimento",
@@ -63,57 +56,52 @@ export const definition = {
     },
     "acoesAgenda": {
       "kind": "actions",
-      "text": "Disponibiliza as ações de consultar a agenda diária e registrar o atendimento de uma consulta própria do profissional.",
-      "intents": [
-        {
-          "id": "confirmarRegistroAtendimento",
-          "kind": "submit"
-        }
-      ]
+      "text": "Oferece o contexto de consultar a agenda e registrar o atendimento da consulta própria depois da leitura, sem repetir a gravação do formulário.",
+      "intents": []
     }
   },
   "molecules": {
     "consultasDoDia": [
       {
-        "role": "search",
-        "preferred": "groupsearchcontent--ml-search-bar",
-        "alternative": "groupsearchcontent--ml-search-filters"
+        "role": "viewSchedule",
+        "preferred": "groupviewdata--ml-timeline-view",
+        "alternative": "groupviewdata--ml-vertical-record-list"
       },
       {
-        "role": "view",
-        "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-timeline-view"
+        "role": "locateItem",
+        "preferred": "groupsearchcontent--ml-search-bar",
+        "alternative": "groupsearchcontent--ml-search-filters"
       }
     ],
     "detalheConsulta": [
       {
-        "role": "card",
+        "role": "showSummary",
         "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-horizontal"
+        "alternative": "groupviewcard--ml-profile-card"
       }
     ],
     "registroAtendimento": [
       {
-        "role": "note",
+        "role": "enterNote",
         "preferred": "groupentertext--ml-multiline-text",
         "alternative": "groupentertext--ml-enter-text"
       },
       {
-        "role": "submit",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-button-group"
-      }
-    ],
-    "acoesAgenda": [
-      {
-        "role": "action",
+        "role": "confirmSubmit",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-icon-button"
       },
       {
-        "role": "feedback",
-        "preferred": "groupnotifyuser--ml-toast-notification",
-        "alternative": "groupnotifyuser--ml-notify-banner"
+        "role": "notifyResult",
+        "preferred": "groupnotifyuser--ml-contextual-feedback",
+        "alternative": "groupnotifyuser--ml-toast-notification"
+      }
+    ],
+    "acoesAgenda": [
+      {
+        "role": "runActions",
+        "preferred": "grouptriggeraction--ml-button-standard",
+        "alternative": "grouptriggeraction--ml-button-group"
       }
     ]
   }

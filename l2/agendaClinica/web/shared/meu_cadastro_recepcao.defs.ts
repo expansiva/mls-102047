@@ -50,35 +50,35 @@ export const definition = {
     }
   },
   "states": {
-    "recepcionista": {
+    "ownReceptionist": {
       "source": "load.recepcionista",
-      "description": "Recepcionista exibida e editada no cadastro."
+      "description": "Current receptionist profile."
     },
     "docId": {
       "source": "entry.params.docId",
-      "description": "Documento usado para preencher o cadastro."
+      "description": "Prefilled receptionist document identifier."
     }
   },
   "functions": {
     "load": {
-      "description": "Carrega o cadastro da recepcionista.",
+      "description": "Loads the receptionist profile.",
       "calls": "load",
-      "sets": "recepcionista"
+      "sets": "ownReceptionist"
     },
     "createOwnReceptionist": {
-      "description": "Cria o cadastro da recepcionista.",
+      "description": "Creates the receptionist profile.",
       "calls": "createOwnReceptionist",
-      "sets": "recepcionista",
+      "sets": "ownReceptionist",
       "updates": [
-        "recepcionista"
+        "ownReceptionist"
       ]
     },
     "updateOwnReceptionist": {
-      "description": "Atualiza o cadastro da recepcionista.",
+      "description": "Updates the receptionist profile.",
       "calls": "updateOwnReceptionist",
-      "sets": "recepcionista",
+      "sets": "ownReceptionist",
       "updates": [
-        "recepcionista"
+        "ownReceptionist"
       ]
     }
   },

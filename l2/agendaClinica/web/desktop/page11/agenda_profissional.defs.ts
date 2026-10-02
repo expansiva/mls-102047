@@ -2,32 +2,32 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/operationsQueue/page21.md",
-    "experience": "workQueueSplit"
+    "category": "_102020_/l4/collabux/templates/calendarScheduling/page21.md",
+    "experience": "calendarGrid"
   },
-  "intent": "Permitir que o profissional veja somente as consultas da sua agenda do dia, localize um atendimento, confira o paciente vinculado e registre a conclusão com a anotação do atendimento.",
+  "intent": "Mostrar ao profissional as consultas da própria agenda do dia, permitir conferir o paciente da consulta selecionada e registrar o atendimento realizado com anotação.",
   "sections": [
     {
-      "id": "agendaDiaria",
+      "id": "agendaDoDia",
       "priority": "primary",
-      "purpose": "Apresentar as consultas previstas para o dia na agenda do profissional, para localizar rapidamente o atendimento que ele vai abrir.",
+      "purpose": "Priorizar a leitura da agenda do dia para o profissional reconhecer horários, pacientes e situação das próprias consultas.",
       "organisms": [
         "consultasDoDia"
       ]
     },
     {
-      "id": "consultaAtual",
+      "id": "consultaEmFoco",
       "priority": "main",
-      "purpose": "Mostrar os dados da consulta selecionada e o paciente do atendimento, e permitir registrar a conclusão com anotação no mesmo contexto.",
+      "purpose": "Depois da lista, concentrar a consulta selecionada e o registro da anotação para concluir o atendimento com segurança.",
       "organisms": [
         "detalheConsulta",
         "registroAtendimento"
       ]
     },
     {
-      "id": "comandosAgenda",
+      "id": "comandosDaAgenda",
       "priority": "secondary",
-      "purpose": "Reunir as ações para consultar a agenda diária e confirmar o registro do atendimento de uma consulta própria.",
+      "purpose": "Disponibilizar o contexto de ações da agenda diária depois da conferência dos dados da consulta própria.",
       "organisms": [
         "acoesAgenda"
       ]
@@ -36,17 +36,17 @@ export const definition = {
   "organisms": {
     "consultasDoDia": {
       "kind": "list",
-      "text": "Lista as consultas do profissional previstas para o dia, com horário, situação e paciente, para localizar o atendimento a abrir.",
+      "text": "Lista as consultas previstas para hoje na agenda do profissional, com horário, situação e paciente, para localizar o atendimento a consultar ou concluir.",
       "intents": []
     },
     "detalheConsulta": {
       "kind": "detail",
-      "text": "Mostra os dados da consulta selecionada e a identificação do paciente vinculado, para o profissional conferir o atendimento antes de concluir.",
+      "text": "Apresenta os dados da consulta selecionada e a identificação do paciente vinculado, para o profissional conferir o atendimento antes de registrá-lo.",
       "intents": []
     },
     "registroAtendimento": {
       "kind": "form",
-      "text": "Captura a anotação do atendimento e conclui a consulta selecionada como atendida, para registrar o trabalho realizado.",
+      "text": "Permite informar a anotação do atendimento e concluir a consulta selecionada como atendida.",
       "intents": [
         {
           "id": "registrarAtendimento",
@@ -56,57 +56,52 @@ export const definition = {
     },
     "acoesAgenda": {
       "kind": "actions",
-      "text": "Disponibiliza as ações de consultar a agenda diária e registrar o atendimento de uma consulta própria do profissional.",
-      "intents": [
-        {
-          "id": "confirmarRegistroAtendimento",
-          "kind": "submit"
-        }
-      ]
+      "text": "Reúne o contexto de consultar a agenda do dia e registrar o atendimento de uma consulta própria, sem repetir a gravação já feita no formulário.",
+      "intents": []
     }
   },
   "molecules": {
     "consultasDoDia": [
       {
-        "role": "search",
-        "preferred": "groupsearchcontent--ml-search-bar",
-        "alternative": "groupsearchcontent--ml-search-filters"
-      },
-      {
-        "role": "view",
+        "role": "viewSchedule",
         "preferred": "groupviewdata--ml-calendar-view",
         "alternative": "groupviewdata--ml-timeline-view"
+      },
+      {
+        "role": "locateItem",
+        "preferred": "groupsearchcontent--ml-search-bar",
+        "alternative": "groupsearchcontent--ml-search-filters"
       }
     ],
     "detalheConsulta": [
       {
-        "role": "card",
+        "role": "showSummary",
         "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-profile-card"
+        "alternative": "groupviewcard--ml-view-card-horizontal"
       }
     ],
     "registroAtendimento": [
       {
-        "role": "note",
+        "role": "enterNote",
         "preferred": "groupentertext--ml-multiline-text",
         "alternative": "groupentertext--ml-enter-text"
       },
       {
-        "role": "submit",
+        "role": "confirmSubmit",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-button-group"
+      },
+      {
+        "role": "notifyResult",
+        "preferred": "groupnotifyuser--ml-toast-notification",
+        "alternative": "groupnotifyuser--ml-contextual-feedback"
       }
     ],
     "acoesAgenda": [
       {
-        "role": "action",
+        "role": "runActions",
         "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-split-button"
-      },
-      {
-        "role": "feedback",
-        "preferred": "groupnotifyuser--ml-toast-notification",
-        "alternative": "groupnotifyuser--ml-contextual-feedback"
+        "alternative": "grouptriggeraction--ml-button-group"
       }
     ]
   }

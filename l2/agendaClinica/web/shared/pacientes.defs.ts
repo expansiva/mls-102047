@@ -79,78 +79,105 @@ export const definition = {
     }
   },
   "states": {
-    "patientList": {
+    "pacientes": {
       "source": "load.pacientes",
-      "description": "Loaded patient list."
+      "description": "Lista paginada de pacientes."
     },
-    "patientSelection": {
-      "source": "entry.params.pacienteId",
-      "description": "Selected patient resolved from the loaded patient list."
-    },
-    "patientDetail": {
-      "source": "loadPaciente.paciente",
-      "description": "Loaded selected patient detail."
-    },
-    "patientSearch": {
+    "termoBusca": {
       "source": "entry.params.search",
-      "description": "Patient list search filter."
+      "description": "Termo de busca de pacientes."
     },
-    "patientPage": {
+    "paginaPacientes": {
       "source": "entry.params.page",
-      "description": "Patient list page filter."
+      "description": "Página solicitada da lista de pacientes."
     },
-    "patientDocumentPrefill": {
+    "pacienteSelecionado": {
+      "source": "entry.params.pacienteId",
+      "description": "Paciente selecionado pelo identificador."
+    },
+    "documentoPreenchido": {
       "source": "entry.params.docId",
-      "description": "Patient document identifier prefill."
+      "description": "Documento para preenchimento inicial do cadastro."
     },
-    "patientFormDraft": {
+    "dadosPaciente": {
       "source": "submitPatientCreate.input",
-      "description": "Patient creation input."
+      "description": "Dados informados para cadastro do paciente."
     },
-    "createdPatient": {
+    "pacienteDetalhe": {
+      "source": "loadPaciente.paciente",
+      "description": "Dados detalhados do paciente selecionado."
+    },
+    "pacienteCriado": {
       "source": "submitPatientCreate.paciente",
-      "description": "Created patient."
+      "description": "Paciente criado."
     }
   },
   "functions": {
     "load": {
-      "description": "Loads the patient list.",
+      "description": "Carrega a primeira página de pacientes.",
       "calls": "load",
-      "sets": "patientList"
+      "sets": "pacientes"
     },
     "filterPatientList": {
-      "description": "Reloads the patient list from the first page using the search and page filters.",
+      "description": "Recarrega a lista de pacientes conforme busca e página.",
       "calls": "loadPacientes",
-      "sets": "patientList"
+      "sets": "pacientes"
     },
     "loadMorePatientList": {
-      "description": "Appends the next patient list page.",
+      "description": "Acrescenta a próxima página de pacientes.",
       "calls": "loadPacientes",
-      "sets": "patientList"
+      "sets": "pacientes"
     },
     "submitPatientCreate": {
-      "description": "Creates a patient.",
+      "description": "Cadastra o paciente informado.",
       "calls": "submitPatientCreate",
-      "sets": "createdPatient",
+      "sets": "pacienteCriado",
       "updates": [
-        "patientList",
-        "patientDetail"
+        "pacientes"
       ]
     },
     "loadPaciente": {
-      "description": "Loads the selected patient detail.",
+      "description": "Carrega os dados detalhados do paciente selecionado.",
       "calls": "loadPaciente",
-      "sets": "patientDetail"
+      "sets": "pacienteDetalhe"
     },
     "openConsultas": {
-      "description": "Navigates to consultation scheduling for the selected patient.",
+      "description": "Abre as consultas do paciente selecionado.",
       "navigate": "consultas_recepcao",
       "carries": {
-        "pacienteId": "patientSelection.id"
+        "pacienteId": "pacienteSelecionado.id"
       }
     }
   },
   "journeys": [
+    {
+      "step": "agendarConsulta/localizarPaciente",
+      "organisms": [
+        "patientList",
+        "patientActions"
+      ],
+      "functions": [
+        "openConsultas"
+      ]
+    },
+    {
+      "step": "agendarConsulta/localizarProfissional",
+      "organisms": [],
+      "functions": [],
+      "continuesIn": "consultas_recepcao"
+    },
+    {
+      "step": "agendarConsulta/registrarAgendamento",
+      "organisms": [],
+      "functions": [],
+      "continuesIn": "consultas_recepcao"
+    },
+    {
+      "step": "agendarConsulta/verificarHorarioDisponivel",
+      "organisms": [],
+      "functions": [],
+      "continuesIn": "consultas_recepcao"
+    },
     {
       "step": "cadastrarPaciente/informarDadosPaciente",
       "organisms": [
@@ -162,77 +189,21 @@ export const definition = {
       ]
     },
     {
-      "step": "agendarConsulta/localizarPaciente",
-      "organisms": [
-        "patientList",
-        "patientDetail",
-        "patientActions"
-      ],
-      "functions": [
-        "loadPaciente",
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
-    },
-    {
-      "step": "agendarConsulta/localizarProfissional",
-      "organisms": [
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
-    },
-    {
-      "step": "agendarConsulta/registrarAgendamento",
-      "organisms": [
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
-    },
-    {
-      "step": "agendarConsulta/verificarHorarioDisponivel",
-      "organisms": [
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
-    },
-    {
       "step": "confirmarConsulta/consultarContatoPaciente",
-      "organisms": [
-        "patientDetail",
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
+      "organisms": [],
+      "functions": [],
       "continuesIn": "consultas_recepcao"
     },
     {
       "step": "confirmarConsulta/localizarConsultaParaConfirmacao",
-      "organisms": [
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
+      "organisms": [],
+      "functions": [],
       "continuesIn": "consultas_recepcao"
     },
     {
       "step": "confirmarConsulta/registrarConfirmacao",
-      "organisms": [
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
+      "organisms": [],
+      "functions": [],
       "continuesIn": "consultas_recepcao"
     }
   ],
