@@ -1,14 +1,14 @@
 {
   "plan": {
     "moduleName": "reembolsoDespesas",
-    "businessDomain": "Reembolso de despesas",
+    "businessDomain": "Reembolso de despesas corporativas",
     "entities": [
       {
         "entityId": "Colaborador",
         "kind": "role",
         "family": "mdm",
         "title": "Colaborador",
-        "description": "Pessoa colaboradora que registra, acompanha, corrige e reenvia as próprias despesas para reembolso.",
+        "description": "Pessoa colaboradora que registra e acompanha as próprias despesas.",
         "displayField": "details.identification.name",
         "subtype": "Person",
         "roleTag": "reembolsoDespesas.Colaborador",
@@ -19,9 +19,8 @@
         "kind": "role",
         "family": "mdm",
         "title": "Gestor da equipe",
-        "description": "Pessoa responsável por avaliar as despesas dos colaboradores de sua equipe.",
+        "description": "Pessoa responsável por analisar e decidir as despesas dos colaboradores de sua equipe.",
         "displayField": "details.identification.name",
-        "writer": "crud",
         "subtype": "Person",
         "roleTag": "reembolsoDespesas.GestorEquipe",
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
@@ -31,7 +30,7 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Despesa",
-        "description": "Solicitação de reembolso de uma despesa registrada por um colaborador, submetida à aprovação e posteriormente ao pagamento.",
+        "description": "Solicitação de reembolso registrada por um colaborador, submetida à aprovação e posteriormente ao pagamento.",
         "displayField": "id",
         "class": "core",
         "storage": {
@@ -43,27 +42,39 @@
     ],
     "relationships": [
       {
-        "relationshipId": "despesaDoColaborador",
+        "relationshipId": "expenseCollaborator",
         "from": "Despesa",
         "to": "Colaborador",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada despesa pertence obrigatoriamente ao colaborador que a registrou.",
+        "description": "Cada despesa é registrada por um único colaborador.",
         "field": "Despesa.colaboradorId"
       },
       {
-        "relationshipId": "colaboradorReportaGestor",
+        "relationshipId": "collaboratorReportsToManager",
         "from": "Colaborador",
         "to": "GestorEquipe",
         "type": "manyToOne",
-        "required": false,
+        "required": true,
         "mode": "mdmRelationship",
-        "description": "O colaborador reporta-se ao gestor da equipe que pode avaliar suas despesas.",
+        "description": "O colaborador se reporta ao gestor responsável por sua equipe.",
         "roles": [
           "direct-report"
         ],
         "catalogType": "ReportsTo"
+      },
+      {
+        "relationshipId": "managerTeamExpenses",
+        "from": "GestorEquipe",
+        "to": "Despesa",
+        "type": "oneToMany",
+        "required": false,
+        "mode": "throughTable",
+        "description": "O gestor acessa as despesas registradas pelos colaboradores que se reportam a ele.",
+        "through": "Despesa",
+        "path": "GestorEquipe <-[ReportsTo]- Colaborador <-[Despesa.colaboradorId]- Despesa",
+        "derived": true
       }
     ],
     "normalizations": [
@@ -90,47 +101,44 @@
       "moduleName": "reembolsoDespesas",
       "entityId": "Colaborador",
       "title": "Colaborador",
-      "description": "Pessoa colaboradora que registra, acompanha, corrige e reenvia as próprias despesas para reembolso.",
+      "description": "Pessoa colaboradora que registra e acompanha as próprias despesas.",
       "displayField": "details.identification.name",
       "relationships": {
-        "despesaDoColaborador": {
-          "relationshipId": "despesaDoColaborador",
+        "despesasRegistradas": {
+          "relationshipId": "expenseCollaborator",
           "to": "Despesa",
           "via": "Despesa.colaboradorId",
           "cardinality": "1:N",
-          "title": "Despesas do colaborador",
-          "description": "Despesas registradas pelo colaborador; cada uma pertence obrigatoriamente a este colaborador.",
+          "title": "Despesas registradas",
+          "description": "Despesas que foram registradas por este colaborador.",
           "mode": "fk",
           "direction": "to",
-          "required": "Sempre que uma despesa for registrada.",
-          "role": "colaborador"
+          "required": "Sempre, para cada despesa registrada por este colaborador."
         },
-        "colaboradorReportaGestor": {
-          "relationshipId": "colaboradorReportaGestor",
+        "gestorResponsavel": {
+          "relationshipId": "collaboratorReportsToManager",
           "to": "GestorEquipe",
           "via": "ReportsTo",
           "cardinality": "N:1",
-          "title": "Gestor da equipe",
-          "description": "Vínculo ReportsTo pelo qual o colaborador se reporta ao gestor que pode avaliar suas despesas.",
+          "title": "Gestor responsável",
+          "description": "Gestor de equipe ao qual o colaborador se reporta para fins de aprovação de despesas.",
           "roles": [
             "direct-report"
           ],
-          "required": "Quando o colaborador estiver vinculado a uma equipe com gestor responsável."
+          "required": "Enquanto o colaborador estiver ativo neste módulo."
         }
       },
       "capabilities": {
-        "read.byId": "Consulta o colaborador pelo identificador mestre para apresentar seu nome e seus vínculos nas despesas · por mdmId no índice e no documento mestre · colaborador, gestor da equipe e financeiro.",
-        "locate.byName": "Localiza um colaborador pelo nome ao associar ou conferir registros de reembolso · por busca textual no índice de pessoas · gestor da equipe e financeiro.",
-        "locate.byDocument": "Localiza a pessoa pelo documento para evitar duplicidade ao habilitá-la como colaboradora · por tipo e número de documento no cadastro mestre · o módulo ao registrar ou vincular colaborador.",
-        "register.createOrAttach": "Cria a pessoa quando ausente ou anexa o papel de Colaborador quando ela já existe · por documento ou contato, com a tag reembolsoDespesas.Colaborador · o módulo ao habilitar uma pessoa para registrar despesas.",
-        "edit.platformFields": "Atualiza dados cadastrais de plataforma que identificam o colaborador · pela atualização do registro mestre e de seus índices · quem mantém o cadastro de colaboradores.",
-        "edit.moduleNamespace": "Atualiza somente o espaço reembolsoDespesas do colaborador, que não possui dados adicionais neste caso · pela chave details.reembolsoDespesas do documento mestre · o módulo de reembolso de despesas.",
-        "inactivate": "Inativa ou reativa o papel do colaborador sem excluir seu registro mestre · pela situação ativa ou inativa no MDM · quem mantém o cadastro de colaboradores.",
-        "link": "Vincula o colaborador ao gestor responsável da equipe · pelo relacionamento versionado ReportsTo com papel direct-report · quem mantém a estrutura de equipes.",
-        "unlink": "Encerra o vínculo vigente entre colaborador e gestor sem apagar seu histórico · pela inativação do relacionamento ReportsTo · quem mantém a estrutura de equipes.",
-        "listLinks": "Exibe o gestor atual e o histórico de vínculos do colaborador · pela lista de relacionamentos mestre com papel e vigência · gestor da equipe e financeiro, quando necessário para consulta.",
-        "invite.login": "Concede acesso para que a pessoa consulte e registre somente as próprias despesas · pelo convite que cria o identificador de login no índice da plataforma · quem habilita o colaborador no módulo.",
-        "audit": "Consulta quem alterou o cadastro ou os vínculos do colaborador e quando · pelo log de auditoria do MDM · administração autorizada."
+        "read.byId": "Consulta um colaborador pelo identificador mestre · usa leitura direta pelo mdmId · usado pelas telas de despesas e de aprovação para apresentar o responsável.",
+        "locate.byName": "Localiza colaboradores pelo nome · pesquisa o índice de pessoas ativas por texto · usado na manutenção da vinculação do colaborador ao gestor.",
+        "locate.byDocument": "Localiza uma pessoa pelo documento nacional · consulta o índice de documento antes do vínculo ao módulo · usado para evitar criar colaboradores duplicados.",
+        "register.createOrAttach": "Cria ou vincula a pessoa existente ao papel de Colaborador · localiza pelo documento e anexa a etiqueta reembolsoDespesas.Colaborador · usado pelo processo interno que habilita a pessoa a registrar despesas.",
+        "link": "Vincula o colaborador ao gestor responsável · cria o relacionamento versionado ReportsTo com o papel direct-report · usado na definição da equipe responsável pela aprovação.",
+        "unlink": "Encerra a vinculação do colaborador ao gestor · inativa o relacionamento ReportsTo preservando seu histórico · usado quando há mudança de gestor ou equipe.",
+        "listLinks": "Lista os vínculos do colaborador · consulta relacionamentos ativos e seu período de validade · usado para verificar o gestor responsável pela equipe.",
+        "inactivate": "Inativa o cadastro mestre do colaborador · altera a situação do registro sem excluí-lo · usado pela administração quando a pessoa deixa de poder registrar despesas.",
+        "statusHistory.read": "Consulta o histórico de situação do colaborador · lê as mudanças de status registradas pela plataforma · usado pela administração para acompanhar ativações e inativações.",
+        "audit": "Consulta as alterações auditadas do colaborador · lê a trilha de auditoria do cadastro mestre · usado pela administração em conferências."
       },
       "rules": [
         "rule-foreign-namespace-refused",
@@ -155,12 +163,13 @@
             "type": "integer",
             "required": true,
             "derived": true,
+            "writePrecondition": true,
             "description": "Bumped by the engine on every write; optimistic concurrency."
           },
           "details": {
             "type": "object",
             "required": true,
-            "description": "Registro mestre da pessoa colaboradora, com os dados da plataforma e o espaço próprio do módulo de reembolso de despesas.",
+            "description": "Registro mestre da pessoa colaboradora, com dados da plataforma e o espaço do módulo de reembolso de despesas.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -175,10 +184,10 @@
                       {
                         "value": "Person",
                         "title": "Pessoa",
-                        "description": "Pessoa natural cadastrada na plataforma."
+                        "description": "Pessoa física."
                       }
                     ],
-                    "description": "Indica que este registro mestre é de uma pessoa.",
+                    "description": "Indica que este registro mestre é de uma pessoa colaboradora.",
                     "title": "Tipo de cadastro",
                     "maxLength": 0,
                     "min": 0,
@@ -189,7 +198,7 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 0,
-                    "description": "Nome pelo qual o colaborador é reconhecido no registro de despesas e nas consultas.",
+                    "description": "Nome pelo qual o colaborador é reconhecido nas despesas e nas aprovações.",
                     "title": "Nome",
                     "min": 0,
                     "max": 0
@@ -203,26 +212,26 @@
                       {
                         "value": "Active",
                         "title": "Ativo",
-                        "description": "Registro disponível para uso."
+                        "description": "Cadastro disponível para uso."
                       },
                       {
                         "value": "Inactive",
                         "title": "Inativo",
-                        "description": "Registro fora de uso."
+                        "description": "Cadastro fora de uso."
                       },
                       {
                         "value": "Merged",
                         "title": "Mesclado",
-                        "description": "Registro unido a outro cadastro mestre."
+                        "description": "Cadastro incorporado a outro registro mestre."
                       },
                       {
                         "value": "Blocked",
                         "title": "Bloqueado",
-                        "description": "Registro bloqueado pela plataforma."
+                        "description": "Cadastro bloqueado pela plataforma."
                       }
                     ],
                     "title": "Situação do cadastro",
-                    "description": "Situação do registro mestre do colaborador na plataforma.",
+                    "description": "Situação de atividade do registro mestre do colaborador.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -234,17 +243,17 @@
                       {
                         "value": "SSN",
                         "title": "SSN",
-                        "description": "Social Security Number."
+                        "description": "Número de seguridade social dos Estados Unidos."
                       },
                       {
                         "value": "EIN",
                         "title": "EIN",
-                        "description": "Employer Identification Number."
+                        "description": "Identificador fiscal empresarial dos Estados Unidos."
                       },
                       {
                         "value": "Passport",
                         "title": "Passaporte",
-                        "description": "Documento de viagem."
+                        "description": "Documento de passaporte."
                       },
                       {
                         "value": "DriversLicense",
@@ -269,16 +278,16 @@
                       {
                         "value": "VAT",
                         "title": "VAT",
-                        "description": "Identificador tributário."
+                        "description": "Identificador tributário de valor agregado."
                       },
                       {
                         "value": "Other",
                         "title": "Outro",
-                        "description": "Outro tipo de documento."
+                        "description": "Outro documento aceito pela plataforma."
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional usado para deduplicar o colaborador no cadastro mestre.",
+                    "description": "Tipo do documento nacional usado para identificar e evitar duplicidade no cadastro do colaborador.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -286,7 +295,7 @@
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do documento nacional do colaborador, usado na deduplicação do cadastro mestre.",
+                    "description": "Número do documento do colaborador, usado com o tipo para deduplicação.",
                     "title": "Número do documento",
                     "maxLength": 0,
                     "min": 0,
@@ -299,13 +308,24 @@
                     "pattern": "^[A-Z]{2}$",
                     "maxLength": 0,
                     "default": "US",
-                    "description": "Código ISO do país aplicável ao documento e às regras do colaborador.",
+                    "description": "Código ISO do país aplicável ao documento e às regras legais do colaborador.",
                     "title": "País",
+                    "min": 0,
+                    "max": 0
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Etiquetas derivadas pela plataforma, incluindo a função de Colaborador neste módulo.",
+                    "title": "Etiquetas",
+                    "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação da pessoa usados para reconhecê-la, localizá-la e controlar sua atividade no cadastro mestre."
+                "description": "Dados de identificação usados para reconhecer, localizar e manter o colaborador no cadastro mestre."
               },
               "base": {
                 "type": "object",
@@ -315,20 +335,30 @@
                     "type": "object",
                     "required": true,
                     "derived": true,
-                    "description": "Referências compactas, recalculadas pela plataforma, dos relacionamentos do colaborador, incluindo sua vinculação ao gestor.",
+                    "description": "Referências derivadas dos relacionamentos ativos do colaborador, incluindo a vinculação ao gestor responsável.",
                     "title": "Referências de relacionamentos",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados comuns do registro mestre necessários para consultar os vínculos organizacionais do colaborador."
+                "description": "Dados comuns do cadastro mestre usados para consultar os vínculos do colaborador."
               },
               "person": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {},
-                "description": "Dados específicos de pessoa natural mantidos pela plataforma."
+                "fields": {
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consentimento de privacidade da pessoa colaboradora, quando exigido pela legislação aplicável.",
+                    "title": "Consentimento de privacidade",
+                    "maxLength": 0,
+                    "min": 0,
+                    "max": 0
+                  }
+                },
+                "description": "Dados da pessoa mantidos pela plataforma para o colaborador."
               },
               "general": {
                 "type": "object",
@@ -352,42 +382,55 @@
       "moduleName": "reembolsoDespesas",
       "entityId": "GestorEquipe",
       "title": "Gestor da equipe",
-      "description": "Pessoa responsável por avaliar as despesas dos colaboradores de sua equipe.",
+      "description": "Pessoa responsável por analisar e decidir as despesas dos colaboradores de sua equipe.",
       "displayField": "details.identification.name",
       "relationships": {
-        "colaboradoresReportam": {
-          "relationshipId": "colaboradorReportaGestor",
+        "colaboradores": {
+          "relationshipId": "collaboratorReportsToManager",
           "to": "Colaborador",
           "via": "ReportsTo",
           "cardinality": "1:N",
           "title": "Colaboradores da equipe",
-          "description": "Colaboradores que se reportam a este gestor e cujas despesas ele pode avaliar.",
+          "description": "Colaboradores que se reportam a este gestor por meio do relacionamento mestre ReportsTo, com o papel direct-report.",
           "roles": [
             "direct-report"
           ],
-          "direction": "to"
+          "direction": "to",
+          "required": "Não é obrigatória para o gestor; um gestor pode ainda não ter colaboradores vinculados."
+        },
+        "despesasDaEquipe": {
+          "relationshipId": "managerTeamExpenses",
+          "to": "Despesa",
+          "via": "Despesa",
+          "cardinality": "1:N",
+          "title": "Despesas da equipe",
+          "description": "Despesas registradas por colaboradores que se reportam a este gestor, lidas pelo caminho derivado de equipe.",
+          "mode": "throughTable",
+          "path": "GestorEquipe <-[ReportsTo]- Colaborador <-[Despesa.colaboradorId]- Despesa",
+          "derived": true,
+          "required": "Não é obrigatória; o gestor pode não ter despesas de equipe registradas.",
+          "role": "gestor responsável"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um gestor pelo identificador mestre · usa leitura direta por mdmId · usado pelo módulo ao apresentar o responsável pela avaliação.",
-        "locate.byName": "Localiza gestores pelo nome · pesquisa o índice de pessoas ativas por texto do nome · usada ao vincular ou manter a equipe.",
-        "locate.byDocument": "Localiza um gestor pelo CPF · consulta o índice de documento para evitar duplicidade · usada no cadastro do gestor.",
-        "register.createOrAttach": "Cria ou associa a pessoa ao papel de gestor da equipe · localiza pelo documento e anexa a etiqueta reembolsoDespesas.GestorEquipe quando necessário · usada na manutenção dos gestores.",
-        "edit.platformFields": "Atualiza os dados cadastrais de plataforma do gestor · grava os campos permitidos do registro mestre e atualiza o índice · usada na manutenção cadastral.",
-        "edit.moduleNamespace": "Atualiza exclusivamente o namespace do módulo do gestor · grava somente details.reembolsoDespesas · usada pelo módulo caso passe a haver dado exclusivo do papel.",
-        "inactivate": "Inativa ou reativa o papel de gestor sem apagar a pessoa · altera a situação do registro mestre · usada quando o gestor deixa ou retoma a responsabilidade pela equipe.",
-        "link": "Vincula colaboradores a este gestor · cria a relação versionada ReportsTo com o papel direct-report · usada na definição da equipe.",
-        "unlink": "Encerra o vínculo de um colaborador com este gestor · inativa a relação ReportsTo preservando seu histórico · usada quando muda a gestão da equipe.",
-        "listLinks": "Lista os colaboradores relacionados ao gestor · consulta os vínculos ReportsTo e sua vigência · usada para determinar as despesas que o gestor pode avaliar.",
-        "audit": "Consulta as alterações do cadastro do gestor · lê a trilha de auditoria do registro mestre · usada na conferência administrativa."
+        "read.byId": "Lê um gestor da equipe pelo identificador mestre · usa leitura por mdmId no índice e no documento MDM · usado pelas telas que exibem o responsável pela análise de uma despesa.",
+        "locate.byName": "Localiza gestores pelo nome · pesquisa o nome indexado entre registros do subtipo Pessoa · usado na manutenção dos responsáveis pelas equipes.",
+        "locate.byDocument": "Localiza um gestor pelo documento nacional · consulta o documento para deduplicar antes de criar ou anexar o papel · usado por quem cadastra gestores.",
+        "register.createOrAttach": "Cria a pessoa quando ausente ou anexa o papel de gestor quando ela já existe · deduplica por documento e grava a tag reembolsoDespesas.GestorEquipe · usado por administradores na composição das equipes.",
+        "edit.platformFields": "Atualiza os dados mestres permitidos do gestor · altera os campos de identificação da pessoa no MDM · usado por administradores que mantêm o cadastro.",
+        "inactivate": "Inativa ou reativa o gestor sem apagá-lo · altera a situação mestre Active ou Inactive · usado por administradores quando o responsável deixa de atuar.",
+        "link": "Vincula colaboradores a este gestor · cria o relacionamento versionado ReportsTo com o papel adequado · usado por administradores ao definir a equipe.",
+        "unlink": "Encerra o vínculo de um colaborador com este gestor · inativa o relacionamento ReportsTo mantendo seu histórico · usado por administradores ao reorganizar a equipe.",
+        "listLinks": "Lista os colaboradores e demais vínculos do gestor · consulta relacionamentos MDM com validade e papel · usado pelo gestor e por administradores para conferir a equipe.",
+        "audit": "Consulta as alterações do cadastro e dos vínculos do gestor · lê a auditoria de escritas do MDM · usado por administradores para rastreabilidade."
       },
       "rules": [
         "rule-foreign-namespace-refused",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "rule-person-ssn-unique-for-us",
         "rule-person-privacy-consent-required-br-eu"
       ],
-      "writer": "crud",
       "kind": "role",
       "subtype": "Person",
       "roleTag": "reembolsoDespesas.GestorEquipe",
@@ -405,12 +448,13 @@
             "type": "integer",
             "required": true,
             "derived": true,
+            "writePrecondition": true,
             "description": "Bumped by the engine on every write; optimistic concurrency."
           },
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da pessoa que atua como gestor da equipe no módulo de reembolso de despesas.",
+            "description": "Dados mestres da pessoa que exerce o papel de gestor da equipe no módulo de reembolso de despesas.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -425,11 +469,11 @@
                       {
                         "value": "Person",
                         "title": "Pessoa",
-                        "description": "Pessoa física."
+                        "description": "Pessoa física cadastrada no MDM."
                       }
                     ],
-                    "description": "Indica que este registro mestre é uma pessoa.",
-                    "title": "Subtipo",
+                    "description": "Identifica este registro mestre como uma pessoa que pode exercer o papel de gestor da equipe.",
+                    "title": "Tipo de cadastro",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -438,8 +482,8 @@
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "maxLength": 0,
-                    "description": "Nome pelo qual o gestor da equipe é identificado nas avaliações de despesas.",
+                    "maxLength": 255,
+                    "description": "Nome pelo qual o gestor da equipe é identificado nas análises de despesas.",
                     "title": "Nome",
                     "min": 0,
                     "max": 0
@@ -453,26 +497,26 @@
                       {
                         "value": "Active",
                         "title": "Ativo",
-                        "description": "Registro disponível para uso."
+                        "description": "Cadastro disponível para uso."
                       },
                       {
                         "value": "Inactive",
                         "title": "Inativo",
-                        "description": "Registro fora de uso."
+                        "description": "Cadastro fora de uso."
                       },
                       {
                         "value": "Merged",
-                        "title": "Unificado",
-                        "description": "Registro unificado a outro cadastro mestre."
+                        "title": "Mesclado",
+                        "description": "Cadastro incorporado a outro registro mestre."
                       },
                       {
                         "value": "Blocked",
                         "title": "Bloqueado",
-                        "description": "Registro bloqueado pela plataforma."
+                        "description": "Cadastro bloqueado pela plataforma."
                       }
                     ],
-                    "title": "Situação no cadastro mestre",
-                    "description": "Situação de atividade do registro mestre do gestor.",
+                    "title": "Situação do cadastro",
+                    "description": "Situação mestre do gestor, usada para manter ativa ou inativa sua participação no módulo.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -482,13 +526,53 @@
                     "indexed": true,
                     "values": [
                       {
+                        "value": "SSN",
+                        "title": "SSN",
+                        "description": "Número de seguridade social dos Estados Unidos."
+                      },
+                      {
+                        "value": "EIN",
+                        "title": "EIN",
+                        "description": "Identificador fiscal empresarial dos Estados Unidos."
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte",
+                        "description": "Documento de passaporte."
+                      },
+                      {
+                        "value": "DriversLicense",
+                        "title": "Carteira de motorista",
+                        "description": "Documento de habilitação."
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento nacional",
+                        "description": "Documento nacional de identificação."
+                      },
+                      {
                         "value": "CPF",
                         "title": "CPF",
                         "description": "Cadastro de Pessoas Físicas."
+                      },
+                      {
+                        "value": "CNPJ",
+                        "title": "CNPJ",
+                        "description": "Cadastro Nacional da Pessoa Jurídica."
+                      },
+                      {
+                        "value": "VAT",
+                        "title": "VAT",
+                        "description": "Identificador fiscal de valor agregado."
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro",
+                        "description": "Outro tipo de documento aceito pela plataforma."
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do gestor.",
+                    "description": "Tipo do documento nacional usado para localizar ou deduplicar o gestor no MDM.",
                     "maxLength": 0,
                     "min": 0,
                     "max": 0
@@ -496,9 +580,9 @@
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do documento nacional do gestor, quando informado.",
+                    "description": "Número do documento nacional usado para identificar o gestor já existente no MDM.",
                     "title": "Número do documento",
-                    "maxLength": 0,
+                    "maxLength": 100,
                     "min": 0,
                     "max": 0
                   },
@@ -507,55 +591,33 @@
                     "required": true,
                     "indexed": true,
                     "pattern": "^[A-Z]{2}$",
-                    "maxLength": 0,
+                    "maxLength": 2,
                     "default": "US",
-                    "description": "Código do país aplicável ao documento e às regras cadastrais do gestor.",
+                    "description": "Código ISO do país que define as regras aplicáveis ao documento e à pessoa gestora.",
                     "title": "País",
-                    "min": 0,
-                    "max": 0
-                  },
-                  "tags": {
-                    "type": "string",
-                    "required": true,
-                    "collection": true,
-                    "derived": true,
-                    "description": "Etiquetas derivadas que incluem o papel de GestorEquipe no módulo.",
-                    "title": "Etiquetas",
-                    "maxLength": 0,
                     "min": 0,
                     "max": 0
                   }
                 },
-                "description": "Dados de identificação da pessoa gestora mantidos pela plataforma."
+                "description": "Dados de identificação da pessoa reconhecida como gestor da equipe."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {
-                  "relationshipRefs": {
-                    "type": "object",
-                    "required": true,
-                    "derived": true,
-                    "description": "Referências compactas derivadas dos relacionamentos do gestor, incluindo os colaboradores que se reportam a ele.",
-                    "title": "Referências de relacionamentos",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Dados comuns do registro mestre, incluindo referências de relacionamentos calculadas pela plataforma."
+                "fields": {},
+                "description": "Dados base da pessoa mantidos pela plataforma; este papel não utiliza campos adicionais nesta camada."
               },
               "person": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {},
-                "description": "Dados específicos de pessoa física mantidos pela plataforma; nenhum é necessário para a avaliação de despesas."
+                "description": "Dados específicos de pessoa física mantidos pela plataforma; este papel não utiliza campos adicionais nesta camada."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização e compartilhados entre módulos, somente para leitura neste módulo."
+                "description": "Campos promovidos pela organização, lidos pelo módulo quando existentes e não declarados por ele."
               },
               "reembolsoDespesas": {
                 "type": "object",
@@ -573,40 +635,55 @@
       "moduleName": "reembolsoDespesas",
       "entityId": "Despesa",
       "title": "Despesa",
-      "description": "Solicitação de reembolso de uma despesa registrada por um colaborador, submetida à aprovação e posteriormente ao pagamento.",
+      "description": "Solicitação de reembolso registrada por um colaborador, submetida à aprovação e posteriormente ao pagamento.",
       "displayField": "id",
       "relationships": {
         "colaborador": {
-          "relationshipId": "despesaDoColaborador",
+          "relationshipId": "expenseCollaborator",
           "to": "Colaborador",
           "via": "Despesa.colaboradorId",
           "cardinality": "N:1",
-          "title": "Colaborador da despesa",
-          "description": "Colaborador que registrou a despesa e ao qual ela pertence.",
+          "title": "Colaborador responsável",
+          "description": "Cada despesa é registrada por um único colaborador.",
           "mode": "fk",
           "required": "sempre",
           "role": "registrante"
+        },
+        "gestorDaEquipe": {
+          "relationshipId": "managerTeamExpenses",
+          "to": "GestorEquipe",
+          "via": "Despesa",
+          "cardinality": "N:1",
+          "title": "Gestor da equipe",
+          "description": "O gestor acessa esta despesa por meio da relação ReportsTo com o colaborador que a registrou.",
+          "mode": "throughTable",
+          "path": "GestorEquipe <-[ReportsTo]- Colaborador <-[Despesa.colaboradorId]- Despesa",
+          "derived": true,
+          "direction": "to",
+          "required": "quando o colaborador estiver vinculado a um gestor por ReportsTo",
+          "role": "aprovadorDaEquipe"
         }
       },
       "capabilities": {
-        "read.byId": "Consulta uma despesa pelo identificador da solicitação · busca a linha pelo id no repositório · colaborador, gestor da equipe e financeiro em suas telas autorizadas.",
-        "locate.byColumn": "Lista despesas por colaborador e situação, com ordenação e paginação · filtra as colunas indexadas colaboradorId e status · colaborador nas próprias despesas, gestor nas despesas da equipe e financeiro nas aprovadas.",
-        "count": "Conta as despesas que atendem aos filtros de colaborador e situação · executa a mesma consulta filtrada sem paginação · colaborador, gestor da equipe e financeiro nos totais das listas.",
-        "listByForeignKey": "Lista as despesas vinculadas a um ou mais colaboradores · consulta pela chave estrangeira colaboradorId · telas de acompanhamento de despesas do colaborador e da equipe.",
-        "create": "Registra uma nova despesa própria já pendente de aprovação · insere a solicitação com seus dados e o vínculo ao colaborador da sessão · colaborador.",
-        "update": "Corrige os dados de uma despesa rejeitada antes do reenvio · atualiza parcialmente a linha pelo id · colaborador titular da despesa.",
-        "transition": "Move a despesa entre pendente de aprovação, rejeitada, aprovada e paga · atualiza a coluna indexada de situação sob as regras da solicitação · colaborador, gestor da equipe e financeiro conforme cada transição.",
-        "read.mdmRecord": "Lê o registro mestre do colaborador vinculado à despesa · hidrata o registro indicado por colaboradorId · telas que precisam identificar o colaborador titular.",
-        "attach.document": "Anexa o comprovante da despesa à solicitação · armazena o arquivo por categoria ancorado na linha da despesa · colaborador ao registrar ou corrigir a despesa e gestor ao consultá-la."
+        "read.byId": "Consulta uma despesa pelo identificador da linha no repositório da tabela, para colaborador responsável, gestor da equipe ou financeiro conforme o escopo de acesso.",
+        "locate.byColumn": "Lista despesas por situação e colaborador em colunas indexadas, para o colaborador acompanhar as próprias, o gestor analisar as da equipe e o financeiro consultar as aprovadas.",
+        "count": "Conta as despesas que atendem aos filtros de situação e escopo de acesso, para os cabeçalhos das listas de colaborador, gestor e financeiro.",
+        "listByForeignKey": "Lista despesas pelo vínculo indexado com um colaborador, inclusive para vários colaboradores da equipe, para as telas de acompanhamento e aprovação.",
+        "create": "Cria uma despesa em rascunho com os dados informados pelo colaborador, para o próprio colaborador iniciar uma solicitação de reembolso.",
+        "update": "Atualiza os dados de uma despesa rejeitada sem alterar seu vínculo de colaborador, para o colaborador corrigi-la antes do único reenvio permitido.",
+        "transition": "Move a despesa entre as situações do fluxo por atualização da coluna de situação, para colaborador enviar ou reenviar, gestor aprovar ou rejeitar e financeiro registrar o pagamento.",
+        "read.mdmRecord": "Lê o registro mestre do colaborador apontado pela chave estrangeira, para identificar o responsável pela despesa nas telas autorizadas.",
+        "attach.document": "Anexa o comprovante à linha da despesa por categoria de documento, para o colaborador apresentar evidência e gestor ou financeiro autorizado consultá-la."
       },
       "rules": [
-        "despesaPropria",
-        "despesaDaEquipe",
-        "comprovanteObrigatorio",
-        "motivoRejeicaoObrigatorio",
-        "unicoReenvioPermitido",
-        "pagamentoApenasAprovada",
-        "dataPagamentoObrigatoria"
+        "expenseOwnerOnly",
+        "managerTeamExpenseAccess",
+        "financeApprovedExpenseAccess",
+        "validExpenseData",
+        "proofRequiredBeforeSubmission",
+        "rejectionReasonRequired",
+        "singleResubmission",
+        "paymentDateRequired"
       ],
       "kind": "entity",
       "class": "core",
@@ -638,7 +715,7 @@
               "Colaborador"
             ],
             "title": "Colaborador",
-            "description": "Colaborador ao qual a solicitação de reembolso pertence.",
+            "description": "Colaborador que registrou a solicitação de reembolso.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -650,28 +727,33 @@
             "of": "ContactSummary",
             "values": [
               {
-                "value": "pendingApproval",
-                "title": "Pendente de aprovação",
-                "description": "Aguardando a avaliação do gestor da equipe."
+                "value": "draft",
+                "title": "Rascunho",
+                "description": "Despesa registrada e ainda não enviada para aprovação."
+              },
+              {
+                "value": "awaitingApproval",
+                "title": "Aguardando aprovação",
+                "description": "Despesa enviada e disponível para decisão do gestor da equipe."
               },
               {
                 "value": "rejected",
                 "title": "Rejeitada",
-                "description": "Rejeitada pelo gestor e disponível para uma única correção e reenvio."
+                "description": "Despesa recusada pelo gestor, com motivo informado."
               },
               {
                 "value": "approved",
                 "title": "Aprovada",
-                "description": "Aprovada pelo gestor e disponível para registro do pagamento."
+                "description": "Despesa aprovada e aguardando o registro do pagamento."
               },
               {
                 "value": "paid",
                 "title": "Paga",
-                "description": "Pagamento registrado pelo financeiro."
+                "description": "Pagamento da despesa registrado pelo financeiro."
               }
             ],
             "title": "Situação",
-            "description": "Etapa atual da solicitação de reembolso.",
+            "description": "Etapa atual da despesa no fluxo de aprovação e pagamento.",
             "maxLength": 0,
             "min": 0,
             "max": 0
@@ -681,12 +763,12 @@
             "required": true,
             "of": "ContactSummary",
             "title": "Dados da despesa",
-            "description": "Dados informados para solicitar o reembolso, a decisão do gestor e o pagamento.",
+            "description": "Informações declaradas para o reembolso, a rejeição e o pagamento da despesa.",
             "maxLength": 0,
             "min": 0,
             "max": 0,
             "fields": {
-              "expenseDate": {
+              "dataDespesa": {
                 "type": "date",
                 "required": true,
                 "of": "ContactSummary",
@@ -696,56 +778,56 @@
                 "min": 0,
                 "max": 0
               },
-              "category": {
+              "categoria": {
                 "type": "string",
                 "required": true,
                 "of": "ContactSummary",
                 "title": "Categoria",
                 "description": "Categoria informada pelo colaborador para classificar a despesa.",
-                "maxLength": 100,
+                "maxLength": 120,
                 "min": 0,
                 "max": 0
               },
-              "amount": {
+              "valor": {
                 "type": "money",
                 "required": true,
                 "of": "ContactSummary",
                 "title": "Valor",
                 "description": "Valor solicitado para reembolso.",
                 "maxLength": 0,
-                "min": 0,
+                "min": 0.01,
                 "max": 0
               },
-              "description": {
+              "descricao": {
                 "type": "text",
                 "required": true,
                 "of": "ContactSummary",
                 "title": "Descrição",
                 "description": "Descrição da despesa informada pelo colaborador.",
-                "maxLength": 0,
+                "maxLength": 2000,
                 "min": 0,
                 "max": 0
               },
-              "rejectionReason": {
+              "motivoRejeicao": {
                 "type": "text",
                 "of": "ContactSummary",
                 "title": "Motivo da rejeição",
-                "description": "Motivo informado pelo gestor quando rejeita a despesa.",
-                "maxLength": 0,
+                "description": "Justificativa informada pelo gestor ao rejeitar a despesa.",
+                "maxLength": 2000,
                 "min": 0,
                 "max": 0
               },
-              "resubmissionCount": {
-                "type": "integer",
+              "reenvioRealizado": {
+                "type": "boolean",
                 "required": true,
                 "of": "ContactSummary",
-                "title": "Quantidade de reenvios",
-                "description": "Quantidade de vezes que a despesa rejeitada foi corrigida e reenviada para avaliação.",
+                "title": "Reenvio realizado",
+                "description": "Indica se a despesa rejeitada já foi corrigida e reenviada para uma nova aprovação.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               },
-              "paymentDate": {
+              "dataPagamento": {
                 "type": "date",
                 "of": "ContactSummary",
                 "title": "Data de pagamento",
@@ -760,7 +842,11 @@
       },
       "lifecycleStates": [
         {
-          "state": "pendingApproval",
+          "state": "draft",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "awaitingApproval",
           "reachedBy": "actor"
         },
         {
@@ -778,47 +864,71 @@
       ],
       "transitions": [
         {
+          "transitionId": "enviarParaAprovacao",
+          "from": [
+            "draft"
+          ],
+          "to": "awaitingApproval",
+          "by": [
+            "colaborador"
+          ],
+          "description": "Envia a despesa registrada para análise do gestor da equipe.",
+          "payload": [],
+          "ruleRefs": [
+            "proofRequiredBeforeSubmission",
+            "expenseOwnerOnly",
+            "validExpenseData"
+          ]
+        },
+        {
           "transitionId": "reenviarParaAprovacao",
           "from": [
             "rejected"
           ],
-          "to": "pendingApproval",
+          "to": "awaitingApproval",
           "by": [
             "colaborador"
           ],
-          "description": "Reenvia uma despesa rejeitada, após correção, para nova avaliação do gestor.",
+          "description": "Reenvia para análise uma despesa rejeitada que foi corrigida pelo colaborador.",
+          "payload": [],
           "ruleRefs": [
-            "unicoReenvioPermitido",
-            "despesaPropria"
+            "expenseOwnerOnly",
+            "singleResubmission",
+            "proofRequiredBeforeSubmission",
+            "validExpenseData"
           ]
         },
         {
-          "transitionId": "registrarDecisaoDaDespesa",
+          "transitionId": "aprovarDespesa",
           "from": [
-            "pendingApproval"
+            "awaitingApproval"
           ],
           "to": "approved",
           "by": [
             "gestorEquipe"
           ],
-          "description": "Registra a aprovação do gestor e encaminha a despesa ao financeiro para pagamento.",
+          "description": "Aprova a despesa da equipe para disponibilizá-la ao financeiro.",
+          "payload": [],
           "ruleRefs": [
-            "despesaDaEquipe"
+            "managerTeamExpenseAccess"
           ]
         },
         {
           "transitionId": "rejeitarDespesa",
           "from": [
-            "pendingApproval"
+            "awaitingApproval"
           ],
           "to": "rejected",
           "by": [
             "gestorEquipe"
           ],
-          "description": "Registra a rejeição do gestor, com o motivo disponível ao colaborador.",
+          "description": "Rejeita a despesa da equipe e registra a justificativa da decisão.",
+          "payload": [
+            "details.motivoRejeicao"
+          ],
           "ruleRefs": [
-            "despesaDaEquipe",
-            "motivoRejeicaoObrigatorio"
+            "managerTeamExpenseAccess",
+            "rejectionReasonRequired"
           ]
         },
         {
@@ -830,10 +940,13 @@
           "by": [
             "financeiro"
           ],
-          "description": "Registra o pagamento de uma despesa aprovada.",
+          "description": "Registra o pagamento da despesa aprovada.",
+          "payload": [
+            "details.dataPagamento"
+          ],
           "ruleRefs": [
-            "pagamentoApenasAprovada",
-            "dataPagamentoObrigatoria"
+            "financeApprovedExpenseAccess",
+            "paymentDateRequired"
           ]
         }
       ]
@@ -841,27 +954,39 @@
   ],
   "relationships": [
     {
-      "relationshipId": "despesaDoColaborador",
+      "relationshipId": "expenseCollaborator",
       "from": "Despesa",
       "to": "Colaborador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada despesa pertence obrigatoriamente ao colaborador que a registrou.",
+      "description": "Cada despesa é registrada por um único colaborador.",
       "field": "Despesa.colaboradorId"
     },
     {
-      "relationshipId": "colaboradorReportaGestor",
+      "relationshipId": "collaboratorReportsToManager",
       "from": "Colaborador",
       "to": "GestorEquipe",
       "type": "manyToOne",
-      "required": false,
+      "required": true,
       "mode": "mdmRelationship",
-      "description": "O colaborador reporta-se ao gestor da equipe que pode avaliar suas despesas.",
+      "description": "O colaborador se reporta ao gestor responsável por sua equipe.",
       "catalogType": "ReportsTo",
       "roles": [
         "direct-report"
       ]
+    },
+    {
+      "relationshipId": "managerTeamExpenses",
+      "from": "GestorEquipe",
+      "to": "Despesa",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "O gestor acessa as despesas registradas pelos colaboradores que se reportam a ele.",
+      "through": "Despesa",
+      "path": "GestorEquipe <-[ReportsTo]- Colaborador <-[Despesa.colaboradorId]- Despesa",
+      "derived": true
     }
   ],
   "removedOrphans": [],
@@ -906,11 +1031,6 @@
       "kind": "tightened",
       "entityId": "GestorEquipe",
       "detail": "GestorEquipe.details.identification.subtype.values"
-    },
-    {
-      "kind": "tightened",
-      "entityId": "GestorEquipe",
-      "detail": "GestorEquipe.details.identification.docType.values"
     },
     {
       "kind": "namespaceEmpty",

@@ -1,13 +1,13 @@
 {
   "moduleName": "reembolsoDespesas",
-  "businessDomain": "Reembolso de despesas",
+  "businessDomain": "Reembolso de despesas corporativas",
   "entities": [
     {
       "entityId": "Colaborador",
       "kind": "role",
       "family": "mdm",
       "title": "Colaborador",
-      "description": "Pessoa colaboradora que registra, acompanha, corrige e reenvia as próprias despesas para reembolso.",
+      "description": "Pessoa colaboradora que registra e acompanha as próprias despesas.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "reembolsoDespesas.Colaborador",
@@ -18,9 +18,8 @@
       "kind": "role",
       "family": "mdm",
       "title": "Gestor da equipe",
-      "description": "Pessoa responsável por avaliar as despesas dos colaboradores de sua equipe.",
+      "description": "Pessoa responsável por analisar e decidir as despesas dos colaboradores de sua equipe.",
       "displayField": "details.identification.name",
-      "writer": "crud",
       "subtype": "Person",
       "roleTag": "reembolsoDespesas.GestorEquipe",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
@@ -30,7 +29,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Despesa",
-      "description": "Solicitação de reembolso de uma despesa registrada por um colaborador, submetida à aprovação e posteriormente ao pagamento.",
+      "description": "Solicitação de reembolso registrada por um colaborador, submetida à aprovação e posteriormente ao pagamento.",
       "displayField": "id",
       "class": "core",
       "storage": {
@@ -42,27 +41,39 @@
   ],
   "relationships": [
     {
-      "relationshipId": "despesaDoColaborador",
+      "relationshipId": "expenseCollaborator",
       "from": "Despesa",
       "to": "Colaborador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada despesa pertence obrigatoriamente ao colaborador que a registrou.",
+      "description": "Cada despesa é registrada por um único colaborador.",
       "field": "Despesa.colaboradorId"
     },
     {
-      "relationshipId": "colaboradorReportaGestor",
+      "relationshipId": "collaboratorReportsToManager",
       "from": "Colaborador",
       "to": "GestorEquipe",
       "type": "manyToOne",
-      "required": false,
+      "required": true,
       "mode": "mdmRelationship",
-      "description": "O colaborador reporta-se ao gestor da equipe que pode avaliar suas despesas.",
+      "description": "O colaborador se reporta ao gestor responsável por sua equipe.",
       "roles": [
         "direct-report"
       ],
       "catalogType": "ReportsTo"
+    },
+    {
+      "relationshipId": "managerTeamExpenses",
+      "from": "GestorEquipe",
+      "to": "Despesa",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "O gestor acessa as despesas registradas pelos colaboradores que se reportam a ele.",
+      "through": "Despesa",
+      "path": "GestorEquipe <-[ReportsTo]- Colaborador <-[Despesa.colaboradorId]- Despesa",
+      "derived": true
     }
   ],
   "normalizations": [

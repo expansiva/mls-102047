@@ -565,62 +565,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-18T08:27:38.096Z"
     },
     {
-      "moduleName": "reembolsoDespesas",
-      "actors": [
-        {
-          "actorId": "colaborador",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gestorEquipe",
-          "kind": "internal"
-        },
-        {
-          "actorId": "financeiro",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "reembolsoDespesas.Colaborador",
-          "namespace": "reembolsoDespesas"
-        },
-        {
-          "subtype": "Person",
-          "roleTag": "reembolsoDespesas.GestorEquipe",
-          "namespace": "reembolsoDespesas"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Colaborador",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "GestorEquipe",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Despesa",
-          "kind": "entity",
-          "class": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "despesaAprovada",
-          "on": "Despesa.registrarDecisaoDaDespesa"
-        }
-      ],
-      "updatedAt": "2026-09-18T07:25:13.858Z"
-    },
-    {
       "moduleName": "locacaoEquipamentos",
       "actors": [
         {
@@ -789,6 +733,62 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-02T06:20:06.842Z"
+    },
+    {
+      "moduleName": "reembolsoDespesas",
+      "actors": [
+        {
+          "actorId": "colaborador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gestorEquipe",
+          "kind": "internal"
+        },
+        {
+          "actorId": "financeiro",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "reembolsoDespesas.Colaborador",
+          "namespace": "reembolsoDespesas"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "reembolsoDespesas.GestorEquipe",
+          "namespace": "reembolsoDespesas"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Colaborador",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "GestorEquipe",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Despesa",
+          "kind": "entity",
+          "class": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "aprovarDespesa",
+          "on": "Despesa.aprovarDespesa"
+        }
+      ],
+      "updatedAt": "2026-10-02T15:30:35.579Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

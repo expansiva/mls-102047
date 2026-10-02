@@ -1,105 +1,78 @@
 /// <mls fileReference="_102047_/l4/reembolsoDespesas/workflows.defs.ts" enhancement="_blank"/>
 
-import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5WorkflowsArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const reembolsoDespesasWorkflows = {
   "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "reembolsoDespesas",
   "processes": [
     {
-      "processId": "submeterEAvaliarDespesa",
-      "title": "Submeter e avaliar despesa",
-      "description": "Orquestra o envio de uma despesa pelo colaborador e sua avaliação pelo gestor da equipe.",
+      "processId": "aprovarDespesaEnviada",
+      "title": "Analisar despesa enviada",
+      "description": "Encaminha uma despesa enviada pelo colaborador para análise e decisão do gestor da equipe.",
       "trigger": {
-        "kind": "manual",
-        "actorRef": "colaborador"
+        "kind": "event",
+        "event": "Despesa.enviarParaAprovacao"
       },
       "tasks": [
         {
-          "taskId": "registrarEnviarDespesa",
-          "kind": "human",
-          "actorRef": "colaborador",
-          "journeyRef": "registrarEenviarDespesa",
-          "next": [
-            "avaliarDespesaEquipe"
-          ],
-          "description": "O colaborador registra sua despesa e a encaminha para aprovação do gestor da equipe."
-        },
-        {
-          "taskId": "avaliarDespesaEquipe",
+          "taskId": "analisarDecidirDespesaEnviada",
           "kind": "human",
           "actorRef": "gestorEquipe",
-          "journeyRef": "avaliarDespesaDaEquipe",
+          "journeyRef": "analisarDecidirDespesa",
           "next": [],
-          "description": "O gestor da equipe avalia a despesa encaminhada e registra a aprovação ou rejeição com o motivo."
+          "description": "O gestor da equipe analisa a despesa enviada e decide aprová-la ou rejeitá-la, informando o motivo da rejeição."
         }
       ]
     },
     {
-      "processId": "reavaliarDespesaReenviada",
-      "title": "Reavaliar despesa reenviada",
-      "description": "Encaminha uma despesa corrigida e reenviada para nova avaliação do gestor da equipe.",
+      "processId": "aprovarDespesaReenviada",
+      "title": "Analisar despesa reenviada",
+      "description": "Encaminha uma despesa corrigida e reenviada pelo colaborador para nova análise do gestor da equipe.",
       "trigger": {
         "kind": "event",
         "event": "Despesa.reenviarParaAprovacao"
       },
       "tasks": [
         {
-          "taskId": "avaliarDespesaReenviada",
+          "taskId": "analisarDecidirDespesaReenviada",
           "kind": "human",
           "actorRef": "gestorEquipe",
-          "journeyRef": "avaliarDespesaDaEquipe",
+          "journeyRef": "analisarDecidirDespesa",
           "next": [],
-          "description": "O gestor da equipe avalia a despesa corrigida e reenviada e registra a nova decisão."
-        }
-      ]
-    },
-    {
-      "processId": "registrarPagamentoDespesaAprovada",
-      "title": "Registrar pagamento de despesa aprovada",
-      "description": "Permite ao financeiro registrar o pagamento de uma despesa que foi aprovada.",
-      "trigger": {
-        "kind": "event",
-        "event": "Despesa.registrarDecisaoDaDespesa"
-      },
-      "tasks": [
-        {
-          "taskId": "registrarPagamentoDespesa",
-          "kind": "human",
-          "actorRef": "financeiro",
-          "journeyRef": "registrarPagamentoDeDespesa",
-          "next": [],
-          "description": "O financeiro localiza a despesa aprovada e registra a respectiva data de pagamento."
+          "description": "O gestor da equipe analisa novamente a despesa corrigida e decide aprová-la ou rejeitá-la, informando o motivo da rejeição."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "registrarEenviarDespesa",
-      "inProcess": true,
-      "processId": "submeterEAvaliarDespesa"
-    },
-    {
-      "journeyId": "consultarPropriasDespesas",
+      "journeyId": "registrarEnviarDespesa",
       "inProcess": false
     },
     {
-      "journeyId": "corrigirEreenviarDespesa",
+      "journeyId": "consultarMinhasDespesas",
       "inProcess": false
     },
     {
-      "journeyId": "avaliarDespesaDaEquipe",
-      "inProcess": true,
-      "processId": "submeterEAvaliarDespesa"
+      "journeyId": "corrigirReenviarDespesa",
+      "inProcess": false
     },
     {
-      "journeyId": "registrarPagamentoDeDespesa",
+      "journeyId": "analisarDecidirDespesa",
       "inProcess": true,
-      "processId": "registrarPagamentoDespesaAprovada"
+      "processId": "aprovarDespesaEnviada"
+    },
+    {
+      "journeyId": "consultarDespesasAprovadas",
+      "inProcess": false
+    },
+    {
+      "journeyId": "registrarPagamentoDespesa",
+      "inProcess": false
     }
   ]
-} as const satisfies Ns5WorkflowsArtifact;
+} as const satisfies Ns5Readonly<Ns5WorkflowsArtifact>;
 
 export type ReembolsoDespesasWorkflowsType = typeof reembolsoDespesasWorkflows;
 

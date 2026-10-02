@@ -6,24 +6,28 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:17:52.458Z",
+      "updatedAt": "2026-10-02T15:26:04.134Z",
       "artifactPaths": [
         "l4/reembolsoDespesas/module.defs.ts"
       ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      },
       "actors": [
         {
           "actorId": "colaborador",
           "kind": "internal",
           "origin": "named",
           "title": "Colaborador",
-          "description": "Registra, envia, corrige e consulta as próprias despesas para reembolso."
+          "description": "Registra despesas próprias e as envia para aprovação."
         },
         {
           "actorId": "gestorEquipe",
           "kind": "internal",
           "origin": "named",
           "title": "Gestor da equipe",
-          "description": "Avalia as despesas da equipe, aprovando-as ou rejeitando-as com um motivo."
+          "description": "Aprova ou rejeita as despesas da sua equipe, informando o motivo da rejeição."
         },
         {
           "actorId": "financeiro",
@@ -42,42 +46,51 @@
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:19:23.143Z",
+      "updatedAt": "2026-10-02T15:26:36.526Z",
       "artifactPaths": [
-        "l4/reembolsoDespesas/journeys/registrarEenviarDespesa.defs.ts",
-        "l4/reembolsoDespesas/journeys/consultarPropriasDespesas.defs.ts",
-        "l4/reembolsoDespesas/journeys/corrigirEreenviarDespesa.defs.ts",
-        "l4/reembolsoDespesas/journeys/avaliarDespesaDaEquipe.defs.ts",
-        "l4/reembolsoDespesas/journeys/registrarPagamentoDeDespesa.defs.ts",
+        "l4/reembolsoDespesas/journeys/registrarEnviarDespesa.defs.ts",
+        "l4/reembolsoDespesas/journeys/consultarMinhasDespesas.defs.ts",
+        "l4/reembolsoDespesas/journeys/corrigirReenviarDespesa.defs.ts",
+        "l4/reembolsoDespesas/journeys/analisarDecidirDespesa.defs.ts",
+        "l4/reembolsoDespesas/journeys/consultarDespesasAprovadas.defs.ts",
+        "l4/reembolsoDespesas/journeys/registrarPagamentoDespesa.defs.ts",
         "l4/reembolsoDespesas/journeys/index.defs.ts"
       ],
       "decideStepCount": 1,
       "droppedActors": [],
+      "compile": {
+        "status": "clean",
+        "files": 7
+      },
       "normalizations": [
         {
           "kind": "dropTransitionRef",
-          "journeyId": "registrarEenviarDespesa",
+          "journeyId": "registrarEnviarDespesa",
           "stepId": "registrarDespesa",
-          "detail": "transitionRef x dropped; effect is create."
+          "detail": "transitionRef create dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
-          "journeyId": "corrigirEreenviarDespesa",
+          "journeyId": "corrigirReenviarDespesa",
           "stepId": "corrigirDespesa",
-          "detail": "transitionRef corrigirDespesa dropped; effect is update."
+          "detail": "transitionRef corrigir dropped; effect is update."
         }
       ]
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:20:32.304Z",
+      "updatedAt": "2026-10-02T15:26:58.125Z",
       "artifactPaths": [
         "l4/reembolsoDespesas/workflows.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:22:58.123Z",
+      "updatedAt": "2026-10-02T15:28:45.662Z",
       "artifactPaths": [
         "l4/reembolsoDespesas/ontology/Colaborador.defs.ts",
         "l4/reembolsoDespesas/ontology/GestorEquipe.defs.ts",
@@ -89,6 +102,10 @@
         "GestorEquipe"
       ],
       "liftedAggregateEntities": [],
+      "compile": {
+        "status": "clean",
+        "files": 4
+      },
       "normalizations": [
         {
           "kind": "derivedFromPlatform",
@@ -131,11 +148,6 @@
           "detail": "GestorEquipe.details.identification.subtype.values"
         },
         {
-          "kind": "tightened",
-          "entityId": "GestorEquipe",
-          "detail": "GestorEquipe.details.identification.docType.values"
-        },
-        {
           "kind": "namespaceEmpty",
           "entityId": "GestorEquipe",
           "detail": "details.reembolsoDespesas"
@@ -151,27 +163,28 @@
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
         "rule-person-privacy-consent-required-br-eu",
-        "despesaPropria",
-        "despesaDaEquipe",
-        "comprovanteObrigatorio",
-        "motivoRejeicaoObrigatorio",
-        "unicoReenvioPermitido",
-        "pagamentoApenasAprovada",
-        "dataPagamentoObrigatoria"
+        "rule-person-ssn-unique-for-us",
+        "expenseOwnerOnly",
+        "managerTeamExpenseAccess",
+        "financeApprovedExpenseAccess",
+        "validExpenseData",
+        "proofRequiredBeforeSubmission",
+        "rejectionReasonRequired",
+        "singleResubmission",
+        "paymentDateRequired"
       ],
       "citedCapabilities": [
         "read.byId",
         "locate.byName",
         "locate.byDocument",
         "register.createOrAttach",
-        "edit.platformFields",
-        "edit.moduleNamespace",
-        "inactivate",
         "link",
         "unlink",
         "listLinks",
-        "invite.login",
+        "inactivate",
+        "statusHistory.read",
         "audit",
+        "edit.platformFields",
         "locate.byColumn",
         "count",
         "listByForeignKey",
@@ -182,30 +195,63 @@
         "attach.document"
       ]
     },
+    "judge35": {
+      "status": "approved",
+      "updatedAt": "2026-10-02T15:29:01.875Z",
+      "artifactPaths": [
+        "l4/reembolsoDespesas/pipeline/judge35-draft.json"
+      ],
+      "normalizations": [
+        {
+          "kind": "judgeComment",
+          "detail": "NS5_JUDGE_COVERED_ACT uncited:Despesa.aprovarDespesa: Step analisarDecidirDespesa.decidirDespesa is not an act."
+        },
+        {
+          "kind": "judgeComment",
+          "detail": "NS5_JUDGE_COVERED_ACT uncited:Despesa.rejeitarDespesa: Step analisarDecidirDespesa.decidirDespesa is not an act."
+        },
+        {
+          "kind": "judgeComment",
+          "detail": "NS5_JUDGE_COVERED_KIND decide:Despesa.awaitingApproval: coveredByAct applies only to an uncited human transition."
+        }
+      ]
+    },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:23:25.789Z",
+      "updatedAt": "2026-10-02T15:29:24.174Z",
       "artifactPaths": [
         "l4/reembolsoDespesas/rules.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:24:41.563Z",
+      "updatedAt": "2026-10-02T15:30:19.099Z",
       "artifactPaths": [
         "l4/reembolsoDespesas/access.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:25:13.670Z",
+      "updatedAt": "2026-10-02T15:30:35.393Z",
       "artifactPaths": [
         "l4/reembolsoDespesas/integration.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:25:13.858Z",
+      "updatedAt": "2026-10-02T15:30:35.593Z",
       "artifactPaths": [
         "l4/reembolsoDespesas/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -220,17 +266,20 @@
     "module": "reembolsoDespesas",
     "rebuildAll": true
   },
-  "updatedAt": "2026-09-21T18:01:36.778Z",
+  "updatedAt": "2026-10-02T15:30:35.593Z",
   "rebuildAll": {
     "deleted": [
+      "l1/reembolsoDespesas/pipeline/pipeline.json",
+      "l2/reembolsoDespesas/pipeline/menu20-draft.json",
+      "l2/reembolsoDespesas/pipeline/pipeline.json",
       "l4/reembolsoDespesas/access.defs.ts",
       "l4/reembolsoDespesas/integration.defs.ts",
-      "l4/reembolsoDespesas/journeys/acompanharMinhasDespesas.defs.ts",
       "l4/reembolsoDespesas/journeys/avaliarDespesaDaEquipe.defs.ts",
+      "l4/reembolsoDespesas/journeys/consultarPropriasDespesas.defs.ts",
       "l4/reembolsoDespesas/journeys/corrigirEreenviarDespesa.defs.ts",
       "l4/reembolsoDespesas/journeys/index.defs.ts",
       "l4/reembolsoDespesas/journeys/registrarEenviarDespesa.defs.ts",
-      "l4/reembolsoDespesas/journeys/registrarPagamentoDespesa.defs.ts",
+      "l4/reembolsoDespesas/journeys/registrarPagamentoDeDespesa.defs.ts",
       "l4/reembolsoDespesas/module.defs.ts",
       "l4/reembolsoDespesas/ontology/Colaborador.defs.ts",
       "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
@@ -241,124 +290,34 @@
       "l4/reembolsoDespesas/pipeline/integration70-draft.json",
       "l4/reembolsoDespesas/pipeline/journeys20-draft.json",
       "l4/reembolsoDespesas/pipeline/module10-draft.json",
-      "l4/reembolsoDespesas/pipeline/ontology30-Colaborador-draft.json",
-      "l4/reembolsoDespesas/pipeline/ontology30-Despesa-draft.json",
-      "l4/reembolsoDespesas/pipeline/ontology30-GestorEquipe-draft.json",
-      "l4/reembolsoDespesas/pipeline/ontology30-bindings-draft.json",
       "l4/reembolsoDespesas/pipeline/ontology30-draft.json",
+      "l4/reembolsoDespesas/pipeline/ontology30-entity-Colaborador-draft.json",
+      "l4/reembolsoDespesas/pipeline/ontology30-entity-Despesa-draft.json",
+      "l4/reembolsoDespesas/pipeline/ontology30-entity-GestorEquipe-draft.json",
       "l4/reembolsoDespesas/pipeline/ontology30-plan-draft.json",
       "l4/reembolsoDespesas/pipeline/pipeline.json",
       "l4/reembolsoDespesas/pipeline/rules40-draft.json",
       "l4/reembolsoDespesas/pipeline/run01_newsolution5.json",
       "l4/reembolsoDespesas/pipeline/workflows50-draft.json",
+      "l4/reembolsoDespesas/pool/l1/20260921180046_reembolsoDespesas-20260921180046_1.json",
+      "l4/reembolsoDespesas/pool/l1/20260921180135_reembolsoDespesas-20260921180046_1.json",
+      "l4/reembolsoDespesas/pool/l1/web/l4diff.json",
+      "l4/reembolsoDespesas/pool/l1/web/needs.json",
+      "l4/reembolsoDespesas/pool/l2/20260921180046_reembolsoDespesas-20260921180046_1.json",
+      "l4/reembolsoDespesas/pool/l2/20260921180136_reembolsoDespesas-20260921180046_1.json",
+      "l4/reembolsoDespesas/pool/l2/web/backend.json",
+      "l4/reembolsoDespesas/pool/l2/web/effort.json",
+      "l4/reembolsoDespesas/pool/l2/web/l4diff.json",
+      "l4/reembolsoDespesas/pool/l2/web/menu.json",
+      "l4/reembolsoDespesas/pool/l4/20260921180136_reembolsoDespesas-20260921180046_1.json",
       "l4/reembolsoDespesas/rules.defs.ts",
       "l4/reembolsoDespesas/workflows.defs.ts"
     ],
     "edited": [
       "l4/organization/registry.defs.ts",
+      "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-09-18T07:17:52.448Z"
-  },
-  "pool": [
-    {
-      "at": "2026-09-19T09:44:33.590Z",
-      "file": "l4/reembolsoDespesas/pool/l2/20260919094433_reembolsoDespesas-20260919094433_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "reembolsoDespesas-20260919094433",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-19T09:44:33.590Z",
-      "file": "l4/reembolsoDespesas/pool/l1/20260919094433_reembolsoDespesas-20260919094433_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "reembolsoDespesas-20260919094433",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T18:00:46.031Z",
-      "file": "l4/reembolsoDespesas/pool/l1/20260919094433_reembolsoDespesas-20260919094433_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "reembolsoDespesas-20260919094433",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T18:00:46.031Z",
-      "file": "l4/reembolsoDespesas/pool/l2/20260919094433_reembolsoDespesas-20260919094433_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "reembolsoDespesas-20260919094433",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T18:00:46.458Z",
-      "file": "l4/reembolsoDespesas/pool/l2/20260921180046_reembolsoDespesas-20260921180046_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "reembolsoDespesas-20260921180046",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T18:00:46.458Z",
-      "file": "l4/reembolsoDespesas/pool/l1/20260921180046_reembolsoDespesas-20260921180046_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "reembolsoDespesas-20260921180046",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T18:01:35.687Z",
-      "file": "l4/reembolsoDespesas/pool/l1/20260921180135_reembolsoDespesas-20260921180046_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "reembolsoDespesas-20260921180046",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T18:01:36.224Z",
-      "file": "l4/reembolsoDespesas/pool/l2/20260921180136_reembolsoDespesas-20260921180046_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "reembolsoDespesas-20260921180046",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    }
-  ],
-  "poolWiped": [
-    "l4/reembolsoDespesas/pool/l1/20260919094433_reembolsoDespesas-20260919094433_1.json",
-    "l4/reembolsoDespesas/pool/l2/20260919094433_reembolsoDespesas-20260919094433_1.json",
-    "l4/reembolsoDespesas/pool/l2/web/menu.json"
-  ],
-  "plOrchestration": [
-    {
-      "round": 1,
-      "l2": "done",
-      "l1": "done",
-      "effort": "done"
-    },
-    {
-      "round": 2,
-      "l2": "skipped",
-      "l1": "skipped",
-      "effort": "skipped"
-    }
-  ]
+    "at": "2026-10-02T15:26:03.910Z"
+  }
 }

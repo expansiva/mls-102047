@@ -4,42 +4,55 @@
     "moduleName": "reembolsoDespesas",
     "entityId": "GestorEquipe",
     "title": "Gestor da equipe",
-    "description": "Pessoa responsável por avaliar as despesas dos colaboradores de sua equipe.",
+    "description": "Pessoa responsável por analisar e decidir as despesas dos colaboradores de sua equipe.",
     "displayField": "details.identification.name",
     "relationships": {
-      "colaboradoresReportam": {
-        "relationshipId": "colaboradorReportaGestor",
+      "colaboradores": {
+        "relationshipId": "collaboratorReportsToManager",
         "to": "Colaborador",
         "via": "ReportsTo",
         "cardinality": "1:N",
         "title": "Colaboradores da equipe",
-        "description": "Colaboradores que se reportam a este gestor e cujas despesas ele pode avaliar.",
+        "description": "Colaboradores que se reportam a este gestor por meio do relacionamento mestre ReportsTo, com o papel direct-report.",
         "roles": [
           "direct-report"
         ],
-        "direction": "to"
+        "direction": "to",
+        "required": "Não é obrigatória para o gestor; um gestor pode ainda não ter colaboradores vinculados."
+      },
+      "despesasDaEquipe": {
+        "relationshipId": "managerTeamExpenses",
+        "to": "Despesa",
+        "via": "Despesa",
+        "cardinality": "1:N",
+        "title": "Despesas da equipe",
+        "description": "Despesas registradas por colaboradores que se reportam a este gestor, lidas pelo caminho derivado de equipe.",
+        "mode": "throughTable",
+        "path": "GestorEquipe <-[ReportsTo]- Colaborador <-[Despesa.colaboradorId]- Despesa",
+        "derived": true,
+        "required": "Não é obrigatória; o gestor pode não ter despesas de equipe registradas.",
+        "role": "gestor responsável"
       }
     },
     "capabilities": {
-      "read.byId": "Consulta um gestor pelo identificador mestre · usa leitura direta por mdmId · usado pelo módulo ao apresentar o responsável pela avaliação.",
-      "locate.byName": "Localiza gestores pelo nome · pesquisa o índice de pessoas ativas por texto do nome · usada ao vincular ou manter a equipe.",
-      "locate.byDocument": "Localiza um gestor pelo CPF · consulta o índice de documento para evitar duplicidade · usada no cadastro do gestor.",
-      "register.createOrAttach": "Cria ou associa a pessoa ao papel de gestor da equipe · localiza pelo documento e anexa a etiqueta reembolsoDespesas.GestorEquipe quando necessário · usada na manutenção dos gestores.",
-      "edit.platformFields": "Atualiza os dados cadastrais de plataforma do gestor · grava os campos permitidos do registro mestre e atualiza o índice · usada na manutenção cadastral.",
-      "edit.moduleNamespace": "Atualiza exclusivamente o namespace do módulo do gestor · grava somente details.reembolsoDespesas · usada pelo módulo caso passe a haver dado exclusivo do papel.",
-      "inactivate": "Inativa ou reativa o papel de gestor sem apagar a pessoa · altera a situação do registro mestre · usada quando o gestor deixa ou retoma a responsabilidade pela equipe.",
-      "link": "Vincula colaboradores a este gestor · cria a relação versionada ReportsTo com o papel direct-report · usada na definição da equipe.",
-      "unlink": "Encerra o vínculo de um colaborador com este gestor · inativa a relação ReportsTo preservando seu histórico · usada quando muda a gestão da equipe.",
-      "listLinks": "Lista os colaboradores relacionados ao gestor · consulta os vínculos ReportsTo e sua vigência · usada para determinar as despesas que o gestor pode avaliar.",
-      "audit": "Consulta as alterações do cadastro do gestor · lê a trilha de auditoria do registro mestre · usada na conferência administrativa."
+      "read.byId": "Lê um gestor da equipe pelo identificador mestre · usa leitura por mdmId no índice e no documento MDM · usado pelas telas que exibem o responsável pela análise de uma despesa.",
+      "locate.byName": "Localiza gestores pelo nome · pesquisa o nome indexado entre registros do subtipo Pessoa · usado na manutenção dos responsáveis pelas equipes.",
+      "locate.byDocument": "Localiza um gestor pelo documento nacional · consulta o documento para deduplicar antes de criar ou anexar o papel · usado por quem cadastra gestores.",
+      "register.createOrAttach": "Cria a pessoa quando ausente ou anexa o papel de gestor quando ela já existe · deduplica por documento e grava a tag reembolsoDespesas.GestorEquipe · usado por administradores na composição das equipes.",
+      "edit.platformFields": "Atualiza os dados mestres permitidos do gestor · altera os campos de identificação da pessoa no MDM · usado por administradores que mantêm o cadastro.",
+      "inactivate": "Inativa ou reativa o gestor sem apagá-lo · altera a situação mestre Active ou Inactive · usado por administradores quando o responsável deixa de atuar.",
+      "link": "Vincula colaboradores a este gestor · cria o relacionamento versionado ReportsTo com o papel adequado · usado por administradores ao definir a equipe.",
+      "unlink": "Encerra o vínculo de um colaborador com este gestor · inativa o relacionamento ReportsTo mantendo seu histórico · usado por administradores ao reorganizar a equipe.",
+      "listLinks": "Lista os colaboradores e demais vínculos do gestor · consulta relacionamentos MDM com validade e papel · usado pelo gestor e por administradores para conferir a equipe.",
+      "audit": "Consulta as alterações do cadastro e dos vínculos do gestor · lê a auditoria de escritas do MDM · usado por administradores para rastreabilidade."
     },
     "rules": [
       "rule-foreign-namespace-refused",
       "rule-document-shape-validated",
       "rule-identity-never-in-namespace",
+      "rule-person-ssn-unique-for-us",
       "rule-person-privacy-consent-required-br-eu"
     ],
-    "writer": "crud",
     "kind": "role",
     "subtype": "Person",
     "roleTag": "reembolsoDespesas.GestorEquipe",
@@ -57,12 +70,13 @@
           "type": "integer",
           "required": true,
           "derived": true,
+          "writePrecondition": true,
           "description": "Bumped by the engine on every write; optimistic concurrency."
         },
         "details": {
           "type": "object",
           "required": true,
-          "description": "Documento mestre da pessoa que atua como gestor da equipe no módulo de reembolso de despesas.",
+          "description": "Dados mestres da pessoa que exerce o papel de gestor da equipe no módulo de reembolso de despesas.",
           "fields": {
             "identification": {
               "type": "object",
@@ -77,11 +91,11 @@
                     {
                       "value": "Person",
                       "title": "Pessoa",
-                      "description": "Pessoa física."
+                      "description": "Pessoa física cadastrada no MDM."
                     }
                   ],
-                  "description": "Indica que este registro mestre é uma pessoa.",
-                  "title": "Subtipo",
+                  "description": "Identifica este registro mestre como uma pessoa que pode exercer o papel de gestor da equipe.",
+                  "title": "Tipo de cadastro",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -90,8 +104,8 @@
                   "type": "string",
                   "required": true,
                   "indexed": true,
-                  "maxLength": 0,
-                  "description": "Nome pelo qual o gestor da equipe é identificado nas avaliações de despesas.",
+                  "maxLength": 255,
+                  "description": "Nome pelo qual o gestor da equipe é identificado nas análises de despesas.",
                   "title": "Nome",
                   "min": 0,
                   "max": 0
@@ -105,26 +119,26 @@
                     {
                       "value": "Active",
                       "title": "Ativo",
-                      "description": "Registro disponível para uso."
+                      "description": "Cadastro disponível para uso."
                     },
                     {
                       "value": "Inactive",
                       "title": "Inativo",
-                      "description": "Registro fora de uso."
+                      "description": "Cadastro fora de uso."
                     },
                     {
                       "value": "Merged",
-                      "title": "Unificado",
-                      "description": "Registro unificado a outro cadastro mestre."
+                      "title": "Mesclado",
+                      "description": "Cadastro incorporado a outro registro mestre."
                     },
                     {
                       "value": "Blocked",
                       "title": "Bloqueado",
-                      "description": "Registro bloqueado pela plataforma."
+                      "description": "Cadastro bloqueado pela plataforma."
                     }
                   ],
-                  "title": "Situação no cadastro mestre",
-                  "description": "Situação de atividade do registro mestre do gestor.",
+                  "title": "Situação do cadastro",
+                  "description": "Situação mestre do gestor, usada para manter ativa ou inativa sua participação no módulo.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -134,13 +148,53 @@
                   "indexed": true,
                   "values": [
                     {
+                      "value": "SSN",
+                      "title": "SSN",
+                      "description": "Número de seguridade social dos Estados Unidos."
+                    },
+                    {
+                      "value": "EIN",
+                      "title": "EIN",
+                      "description": "Identificador fiscal empresarial dos Estados Unidos."
+                    },
+                    {
+                      "value": "Passport",
+                      "title": "Passaporte",
+                      "description": "Documento de passaporte."
+                    },
+                    {
+                      "value": "DriversLicense",
+                      "title": "Carteira de motorista",
+                      "description": "Documento de habilitação."
+                    },
+                    {
+                      "value": "NationalId",
+                      "title": "Documento nacional",
+                      "description": "Documento nacional de identificação."
+                    },
+                    {
                       "value": "CPF",
                       "title": "CPF",
                       "description": "Cadastro de Pessoas Físicas."
+                    },
+                    {
+                      "value": "CNPJ",
+                      "title": "CNPJ",
+                      "description": "Cadastro Nacional da Pessoa Jurídica."
+                    },
+                    {
+                      "value": "VAT",
+                      "title": "VAT",
+                      "description": "Identificador fiscal de valor agregado."
+                    },
+                    {
+                      "value": "Other",
+                      "title": "Outro",
+                      "description": "Outro tipo de documento aceito pela plataforma."
                     }
                   ],
                   "title": "Tipo de documento",
-                  "description": "Tipo do documento nacional usado para identificar e evitar duplicidade do gestor.",
+                  "description": "Tipo do documento nacional usado para localizar ou deduplicar o gestor no MDM.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -148,9 +202,9 @@
                 "docId": {
                   "type": "string",
                   "indexed": true,
-                  "description": "Número do documento nacional do gestor, quando informado.",
+                  "description": "Número do documento nacional usado para identificar o gestor já existente no MDM.",
                   "title": "Número do documento",
-                  "maxLength": 0,
+                  "maxLength": 100,
                   "min": 0,
                   "max": 0
                 },
@@ -159,55 +213,33 @@
                   "required": true,
                   "indexed": true,
                   "pattern": "^[A-Z]{2}$",
-                  "maxLength": 0,
+                  "maxLength": 2,
                   "default": "US",
-                  "description": "Código do país aplicável ao documento e às regras cadastrais do gestor.",
+                  "description": "Código ISO do país que define as regras aplicáveis ao documento e à pessoa gestora.",
                   "title": "País",
-                  "min": 0,
-                  "max": 0
-                },
-                "tags": {
-                  "type": "string",
-                  "required": true,
-                  "collection": true,
-                  "derived": true,
-                  "description": "Etiquetas derivadas que incluem o papel de GestorEquipe no módulo.",
-                  "title": "Etiquetas",
-                  "maxLength": 0,
                   "min": 0,
                   "max": 0
                 }
               },
-              "description": "Dados de identificação da pessoa gestora mantidos pela plataforma."
+              "description": "Dados de identificação da pessoa reconhecida como gestor da equipe."
             },
             "base": {
               "type": "object",
               "owner": "platform",
-              "fields": {
-                "relationshipRefs": {
-                  "type": "object",
-                  "required": true,
-                  "derived": true,
-                  "description": "Referências compactas derivadas dos relacionamentos do gestor, incluindo os colaboradores que se reportam a ele.",
-                  "title": "Referências de relacionamentos",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
-                }
-              },
-              "description": "Dados comuns do registro mestre, incluindo referências de relacionamentos calculadas pela plataforma."
+              "fields": {},
+              "description": "Dados base da pessoa mantidos pela plataforma; este papel não utiliza campos adicionais nesta camada."
             },
             "person": {
               "type": "object",
               "owner": "platform",
               "fields": {},
-              "description": "Dados específicos de pessoa física mantidos pela plataforma; nenhum é necessário para a avaliação de despesas."
+              "description": "Dados específicos de pessoa física mantidos pela plataforma; este papel não utiliza campos adicionais nesta camada."
             },
             "general": {
               "type": "object",
               "owner": "organization",
               "open": true,
-              "description": "Dados promovidos pela organização e compartilhados entre módulos, somente para leitura neste módulo."
+              "description": "Campos promovidos pela organização, lidos pelo módulo quando existentes e não declarados por ele."
             },
             "reembolsoDespesas": {
               "type": "object",
@@ -230,11 +262,6 @@
       "kind": "tightened",
       "entityId": "GestorEquipe",
       "detail": "GestorEquipe.details.identification.subtype.values"
-    },
-    {
-      "kind": "tightened",
-      "entityId": "GestorEquipe",
-      "detail": "GestorEquipe.details.identification.docType.values"
     },
     {
       "kind": "namespaceEmpty",
