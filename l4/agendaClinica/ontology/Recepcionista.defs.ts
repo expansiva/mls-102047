@@ -1,25 +1,25 @@
 /// <mls fileReference="_102047_/l4/agendaClinica/ontology/Recepcionista.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaEntityRecepcionista = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
   "entityId": "Recepcionista",
   "title": "Recepcionista",
-  "description": "Pessoa da clínica que atua no cadastro de pacientes, agendamento, confirmação telefônica e registro de faltas.",
+  "description": "Pessoa da clínica que cadastra pacientes e opera os agendamentos.",
   "displayField": "details.identification.name",
   "relationships": {},
   "capabilities": {
-    "read.byId": "Consulta uma recepcionista pelo identificador mestre, por leitura direta no índice e no documento, para telas da clínica que já possuem seu registro.",
-    "locate.byName": "Localiza recepcionistas pelo nome no índice de pessoas, para a clínica encontrar ou conferir o cadastro antes de usá-lo.",
-    "locate.byDocument": "Localiza uma recepcionista pelo documento nacional, consultando o índice para evitar que a clínica duplique a mesma pessoa.",
-    "register.createOrAttach": "Cria a pessoa quando ela não existe ou anexa o papel de Recepcionista quando já existe, por deduplicação documental e gravação da marca de papel, para a organização cadastrar a equipe de recepção.",
-    "edit.platformFields": "Atualiza os dados de identificação da recepcionista nos campos mantidos pela plataforma, reindexando a identificação quando necessário, para a clínica manter o cadastro correto.",
-    "inactivate": "Inativa ou reativa o registro mestre da recepcionista pela situação da plataforma, para a clínica retirar uma recepcionista que não atua mais sem apagar seu histórico.",
-    "statusHistory.read": "Exibe o histórico de mudanças de situação do registro mestre, consultando o histórico da plataforma, para a clínica acompanhar inativações e reativações.",
-    "audit": "Exibe quem alterou os dados da recepcionista e quando, pela auditoria imutável da plataforma, para a clínica realizar conferências administrativas.",
-    "invite.login": "Habilita o acesso da recepcionista por convite, criando o índice de login vinculado ao mesmo registro mestre, para que ela entre no módulo com o perfil de recepcionista."
+    "read.byId": "Lê uma recepcionista pelo identificador mestre já conhecido, por consulta direta ao índice e ao documento, para as telas administrativas da clínica.",
+    "locate.byName": "Localiza recepcionistas pelo nome informado, usando a busca por nome do cadastro mestre, para a administração autorizada da clínica.",
+    "locate.byDocument": "Localiza uma recepcionista pelo documento nacional, para evitar duplicidade antes de vinculá-la à função, pela consulta de documento do MDM usada pela administração autorizada.",
+    "register.createOrAttach": "Cria ou vincula uma pessoa existente ao papel de recepcionista, deduplicando pelo documento e anexando a role agendaClinica.Recepcionista, para a administração autorizada da clínica.",
+    "edit.platformFields": "Atualiza os dados de identificação e o consentimento de privacidade mantidos pela plataforma, regravando o índice quando necessário, para a administração autorizada da clínica.",
+    "inactivate": "Inativa ou reativa o cadastro mestre da recepcionista sem excluí-lo, por alteração de situação, para a administração autorizada da clínica.",
+    "listLinks": "Exibe os vínculos ativos e históricos da recepcionista registrados no MDM, pela consulta de relacionamentos, para a administração autorizada da clínica.",
+    "invite.login": "Concede acesso de login à recepcionista por convite, criando o identificador de login no índice da organização, para a administração autorizada da clínica.",
+    "audit": "Consulta quem alterou os dados da recepcionista e quando, pelo histórico de auditoria do MDM, para a administração autorizada da clínica."
   },
   "rules": [
     "rule-foreign-namespace-refused",
@@ -51,7 +51,7 @@ export const agendaClinicaEntityRecepcionista = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Registro mestre da pessoa que exerce o papel de recepcionista na clínica.",
+        "description": "Documento mestre da pessoa que atua como recepcionista na clínica.",
         "fields": {
           "identification": {
             "type": "object",
@@ -66,11 +66,11 @@ export const agendaClinicaEntityRecepcionista = {
                   {
                     "value": "Person",
                     "title": "Pessoa",
-                    "description": "Pessoa física que atua como recepcionista."
+                    "description": "Pessoa física."
                   }
                 ],
-                "description": "Subtipo do registro mestre, definido pela plataforma como pessoa.",
-                "title": "Subtipo",
+                "description": "Indica que este registro mestre é de uma pessoa que exerce a função de recepcionista.",
+                "title": "Tipo de cadastro",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -93,27 +93,27 @@ export const agendaClinicaEntityRecepcionista = {
                 "values": [
                   {
                     "value": "Active",
-                    "title": "Ativa",
-                    "description": "Recepcionista disponível no cadastro mestre."
+                    "title": "Ativo",
+                    "description": "Cadastro disponível para uso."
                   },
                   {
                     "value": "Inactive",
-                    "title": "Inativa",
-                    "description": "Recepcionista inativada no cadastro mestre."
+                    "title": "Inativo",
+                    "description": "Cadastro retirado de uso."
                   },
                   {
                     "value": "Merged",
-                    "title": "Unificada",
-                    "description": "Registro unificado a outro registro mestre."
+                    "title": "Mesclado",
+                    "description": "Cadastro incorporado a outro registro mestre."
                   },
                   {
                     "value": "Blocked",
-                    "title": "Bloqueada",
-                    "description": "Registro bloqueado pela plataforma."
+                    "title": "Bloqueado",
+                    "description": "Cadastro bloqueado pela plataforma."
                   }
                 ],
-                "title": "Situação",
-                "description": "Situação do registro mestre da recepcionista, controlada pela plataforma.",
+                "title": "Situação do cadastro",
+                "description": "Situação do registro mestre da recepcionista na plataforma.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -125,12 +125,12 @@ export const agendaClinicaEntityRecepcionista = {
                   {
                     "value": "SSN",
                     "title": "SSN",
-                    "description": "Número de seguridade social."
+                    "description": "Número de seguridade social dos Estados Unidos."
                   },
                   {
                     "value": "EIN",
                     "title": "EIN",
-                    "description": "Número de identificação empresarial."
+                    "description": "Identificador fiscal de empresa dos Estados Unidos."
                   },
                   {
                     "value": "Passport",
@@ -145,7 +145,7 @@ export const agendaClinicaEntityRecepcionista = {
                   {
                     "value": "NationalId",
                     "title": "Documento nacional",
-                    "description": "Documento nacional de identidade."
+                    "description": "Documento nacional de identificação."
                   },
                   {
                     "value": "CPF",
@@ -159,8 +159,8 @@ export const agendaClinicaEntityRecepcionista = {
                   },
                   {
                     "value": "VAT",
-                    "title": "VAT",
-                    "description": "Identificação tributária."
+                    "title": "Identificação fiscal",
+                    "description": "Número de identificação fiscal."
                   },
                   {
                     "value": "Other",
@@ -169,7 +169,7 @@ export const agendaClinicaEntityRecepcionista = {
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional usado para identificar e evitar duplicidade da recepcionista.",
+                "description": "Tipo do documento nacional usado para identificar e evitar duplicidade no cadastro da recepcionista.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -177,7 +177,7 @@ export const agendaClinicaEntityRecepcionista = {
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento nacional da recepcionista, usado na deduplicação do registro mestre.",
+                "description": "Número do documento nacional da recepcionista, quando informado.",
                 "title": "Número do documento",
                 "maxLength": 0,
                 "min": 0,
@@ -190,31 +190,41 @@ export const agendaClinicaEntityRecepcionista = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 0,
                 "default": "US",
-                "description": "Código ISO do país ao qual pertencem o documento e as regras aplicáveis à recepcionista.",
-                "title": "País do documento",
+                "description": "Código do país que define as regras aplicáveis ao documento e ao cadastro da recepcionista.",
+                "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Dados de identificação da pessoa, mantidos pela plataforma e usados para reconhecer a recepcionista."
+            "description": "Dados de identificação da pessoa reconhecidos pela plataforma e usados para localizar e manter a recepcionista."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Ramo de dados básicos da plataforma; nenhum dado básico adicional é usado especificamente para o papel de recepcionista."
+            "description": "Dados básicos da plataforma sobre a recepcionista que este módulo não precisa complementar."
           },
           "person": {
             "type": "object",
             "owner": "platform",
-            "fields": {},
-            "description": "Ramo de dados pessoais da plataforma; nenhum dado pessoal adicional é usado especificamente para o papel de recepcionista."
+            "fields": {
+              "privacyConsent": {
+                "type": "object",
+                "of": "PrivacyConsent",
+                "description": "Consentimento de privacidade da recepcionista, quando exigido pela legislação aplicável.",
+                "title": "Consentimento de privacidade",
+                "maxLength": 0,
+                "min": 0,
+                "max": 0
+              }
+            },
+            "description": "Dados pessoais da plataforma necessários para registrar o consentimento de privacidade da recepcionista."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos e mantidos pela organização, apenas disponíveis para leitura neste módulo."
+            "description": "Dados promovidos pela organização, apenas para leitura neste módulo."
           },
           "agendaClinica": {
             "type": "object",
@@ -226,7 +236,7 @@ export const agendaClinicaEntityRecepcionista = {
       }
     }
   }
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type AgendaClinicaEntityRecepcionistaType = typeof agendaClinicaEntityRecepcionista;
 

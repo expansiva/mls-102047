@@ -1,43 +1,45 @@
 /// <mls fileReference="_102047_/l4/agendaClinica/ontology/ContatoPaciente.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaEntityContatoPaciente = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
   "entityId": "ContatoPaciente",
   "title": "Contato do paciente",
-  "description": "Canal de contato mestre vinculado ao paciente, utilizado para a confirmação telefônica de consultas.",
+  "description": "Canal de contato mestre do paciente, consultado pela recepção para confirmação telefônica.",
   "displayField": "details.identification.name",
   "relationships": {
-    "paciente": {
+    "pacientes": {
       "relationshipId": "pacienteHasContact",
       "to": "Paciente",
       "via": "HasContact",
       "cardinality": "N:1",
       "title": "Paciente vinculado",
-      "description": "Paciente ao qual este telefone mestre está vinculado para confirmação de consultas.",
+      "description": "Paciente que possui este canal de contato mestre para a recepção realizar confirmações.",
       "direction": "to",
-      "role": "canal de contato"
+      "required": "Nunca é obrigatório para o canal de contato existir.",
+      "role": "HasContact"
     }
   },
   "capabilities": {
-    "read.byId": "Consulta um canal de contato pelo identificador mestre para exibir o telefone do paciente vinculado, usada pela recepcionista e pelas telas da agenda.",
-    "locate.byName": "Localiza canais de contato pelo nome reconhecível no cadastro mestre, usada pela recepcionista ao conferir um telefone.",
-    "locate.byContact": "Localiza o canal mestre que possui um telefone informado, usado pela recepcionista durante a confirmação de consultas.",
-    "register.createOrAttach": "Cria ou vincula o telefone mestre já existente ao papel de contato de paciente da agenda clínica, usado pela recepcionista ao cadastrar ou atualizar o paciente.",
-    "edit.platformFields": "Atualiza o nome e os dados de plataforma do telefone mestre, usado pela recepcionista quando o paciente informa alteração do contato.",
-    "inactivate": "Inativa ou reativa um telefone mestre sem apagá-lo, usado pela recepcionista quando o canal deixa de servir para contato.",
-    "link": "Vincula este canal mestre ao paciente pela relação HasContact, usado pela recepcionista para disponibilizar o telefone na confirmação de consultas.",
-    "unlink": "Encerra o vínculo deste canal com o paciente mantendo seu histórico, usado pela recepcionista quando o telefone não pertence mais ao paciente.",
-    "listLinks": "Lista os pacientes vinculados a este canal de contato e a vigência dos vínculos, usado pela recepcionista para conferir a titularidade do telefone.",
-    "audit": "Mostra quem alterou ou vinculou o canal de contato e quando, usado para auditoria administrativa da clínica."
+    "read.byId": "Consulta um canal de contato pelo identificador mestre, por leitura direta do registro, para a recepcionista preencher e conferir os dados do paciente.",
+    "locate.byName": "Localiza canais de contato pelo nome identificado no cadastro, pela busca textual no índice mestre, para a recepcionista encontrar um canal já registrado.",
+    "locate.byContact": "Localiza o registro mestre associado a um telefone, pela busca do valor do canal de contato, para a recepcionista evitar duplicidade ao cadastrar ou confirmar o telefone.",
+    "register.createOrAttach": "Cria ou reutiliza um canal de telefone mestre e anexa o papel da agenda clínica, por busca prévia do contato e vínculo do namespace do módulo, para a recepcionista cadastrar o telefone do paciente.",
+    "edit.platformFields": "Atualiza o nome e os dados permitidos do canal de contato mestre, pela atualização do registro MDM, para a recepcionista corrigir um telefone de paciente.",
+    "inactivate": "Inativa ou reativa o canal de contato sem removê-lo, pela alteração da situação mestre, para a recepcionista deixar de usar um telefone desatualizado.",
+    "link": "Vincula este canal de contato ao paciente por meio do relacionamento mestre HasContact versionado, para a recepcionista disponibilizar o telefone nas confirmações.",
+    "unlink": "Encerra o vínculo HasContact preservando seu histórico, pela inativação do relacionamento mestre, para a recepcionista desvincular um telefone que não pertence mais ao paciente.",
+    "listLinks": "Exibe os pacientes relacionados e a vigência dos vínculos, pela consulta de relacionamentos MDM, para a recepcionista conferir a quem o telefone está associado.",
+    "statusHistory.read": "Mostra as mudanças de situação do canal de contato, pelo histórico de status mestre, para a recepcionista conferir quando um telefone foi ativado ou inativado.",
+    "audit": "Mostra quem alterou os dados do canal e quando, pela auditoria mestre, para a recepção rastrear mudanças no telefone do paciente."
   },
   "rules": [
     "rule-foreign-namespace-refused",
+    "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
-    "rule-contact-value-unique-per-type",
-    "rule-document-shape-validated"
+    "rule-contact-value-unique-per-type"
   ],
   "kind": "role",
   "subtype": "ContactChannel",
@@ -62,7 +64,7 @@ export const agendaClinicaEntityContatoPaciente = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre do canal de contato utilizado pela clínica para confirmar consultas.",
+        "description": "Documento mestre do canal de contato usado pela recepção para confirmar consultas.",
         "fields": {
           "identification": {
             "type": "object",
@@ -77,11 +79,11 @@ export const agendaClinicaEntityContatoPaciente = {
                   {
                     "value": "ContactChannel",
                     "title": "Canal de contato",
-                    "description": "Registro mestre de telefone, e-mail ou outro canal."
+                    "description": "Canal de contato mestre."
                   }
                 ],
-                "description": "Indica que este registro mestre é um canal de contato.",
-                "title": "Subtipo",
+                "description": "Identifica este registro mestre como um canal de contato.",
+                "title": "Tipo do cadastro mestre",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -91,8 +93,8 @@ export const agendaClinicaEntityContatoPaciente = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 0,
-                "description": "Nome pelo qual a recepcionista reconhece o telefone do paciente ao confirmar uma consulta.",
-                "title": "Nome do contato",
+                "description": "Identificação legível do canal de contato para a recepção.",
+                "title": "Nome do canal",
                 "min": 0,
                 "max": 0
               },
@@ -105,26 +107,26 @@ export const agendaClinicaEntityContatoPaciente = {
                   {
                     "value": "Active",
                     "title": "Ativo",
-                    "description": "Canal disponível para contato."
+                    "description": "Canal disponível para uso."
                   },
                   {
                     "value": "Inactive",
                     "title": "Inativo",
-                    "description": "Canal não utilizado para contato."
+                    "description": "Canal fora de uso."
                   },
                   {
                     "value": "Merged",
                     "title": "Mesclado",
-                    "description": "Canal incorporado a outro registro mestre."
+                    "description": "Canal incorporado a outro cadastro mestre."
                   },
                   {
                     "value": "Blocked",
                     "title": "Bloqueado",
-                    "description": "Canal impedido de uso."
+                    "description": "Canal bloqueado pela organização."
                   }
                 ],
-                "title": "Situação",
-                "description": "Situação mestre do canal de contato para indicar se ele pode continuar sendo utilizado.",
+                "title": "Situação do cadastro",
+                "description": "Situação mestre do canal de contato utilizado nas confirmações.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -133,22 +135,22 @@ export const agendaClinicaEntityContatoPaciente = {
                 "type": "string",
                 "required": true,
                 "indexed": true,
-                "pattern": "^BR$",
+                "pattern": "^[A-Z]{2}$",
                 "maxLength": 0,
                 "default": "US",
-                "description": "Código do país aplicável ao telefone usado pela clínica.",
+                "description": "Código do país aplicável ao canal de contato.",
                 "title": "País",
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Identificação do canal de contato no cadastro mestre."
+            "description": "Dados de identificação do canal de contato mestre."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados comuns do registro mestre de contato."
+            "description": "Dados base do registro mestre que a agenda clínica consulta quando necessário."
           },
           "contactChannel": {
             "type": "object",
@@ -161,11 +163,11 @@ export const agendaClinicaEntityContatoPaciente = {
                   {
                     "value": "Phone",
                     "title": "Telefone",
-                    "description": "Telefone usado para confirmar consultas."
+                    "description": "Telefone para contato com o paciente."
                   }
                 ],
                 "title": "Tipo de contato",
-                "description": "Tipo do canal utilizado pela recepcionista para confirmação telefônica.",
+                "description": "Tipo do canal usado para a confirmação telefônica de consultas.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
@@ -173,7 +175,7 @@ export const agendaClinicaEntityContatoPaciente = {
               "value": {
                 "type": "string",
                 "required": true,
-                "description": "Número de telefone do paciente utilizado na confirmação de consultas.",
+                "description": "Número de telefone do paciente, armazenado sem mascaramento.",
                 "title": "Telefone",
                 "maxLength": 0,
                 "min": 0,
@@ -183,19 +185,19 @@ export const agendaClinicaEntityContatoPaciente = {
                 "type": "boolean",
                 "required": true,
                 "title": "Telefone verificado",
-                "description": "Indica se o telefone foi verificado como canal válido do paciente.",
+                "description": "Indica se o telefone foi verificado como pertencente ao paciente.",
                 "maxLength": 0,
                 "min": 0,
                 "max": 0
               }
             },
-            "description": "Telefone mestre vinculado ao paciente para confirmação de consultas."
+            "description": "Telefone mestre vinculado ao paciente e usado pela recepção na confirmação de consultas."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização, somente para leitura neste módulo."
+            "description": "Dados promovidos pela organização, somente para leitura pela agenda clínica."
           },
           "agendaClinica": {
             "type": "object",
@@ -207,7 +209,7 @@ export const agendaClinicaEntityContatoPaciente = {
       }
     }
   }
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type AgendaClinicaEntityContatoPacienteType = typeof agendaClinicaEntityContatoPaciente;
 

@@ -1,11 +1,11 @@
 /// <mls fileReference="_102047_/l4/agendaClinica/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const agendaClinicaOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
-  "businessDomain": "Agenda clínica para cadastro de pacientes, agendamento, confirmação e registro de atendimentos.",
+  "businessDomain": "Agenda clínica para cadastro de pacientes, agendamento e realização de consultas.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "agendaClinica",
@@ -46,7 +46,7 @@ export const agendaClinicaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é agendada para um paciente.",
+      "description": "Cada consulta é marcada para um paciente.",
       "field": "Consulta.pacienteId"
     },
     {
@@ -56,7 +56,7 @@ export const agendaClinicaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é agendada para um profissional.",
+      "description": "Cada consulta é realizada por um profissional.",
       "field": "Consulta.profissionalId"
     },
     {
@@ -66,11 +66,11 @@ export const agendaClinicaOntologyIndex = {
       "type": "oneToMany",
       "required": false,
       "mode": "mdmRelationship",
-      "description": "O paciente pode ter canais de contato mestre, inclusive telefone, para confirmação de consultas.",
+      "description": "O paciente pode possuir canais de contato mestre usados pela recepção para confirmação.",
       "catalogType": "HasContact"
     }
   ]
-} as const satisfies Ns5OntologyIndexV3;
+} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
 
 export type AgendaClinicaOntologyIndexType = typeof agendaClinicaOntologyIndex;
 

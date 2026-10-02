@@ -677,6 +677,38 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-20T10:52:08.240Z"
     },
     {
+      "moduleName": "controleEstoque",
+      "actors": [
+        {
+          "actorId": "estoquista",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Product",
+          "roleTag": "controleEstoque.Produto",
+          "namespace": "controleEstoque"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Produto",
+          "kind": "role",
+          "mdmSubtype": "Product",
+          "class": "mdm"
+        },
+        {
+          "entityId": "MovimentacaoEstoque",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [],
+      "updatedAt": "2026-09-28T17:36:36.016Z"
+    },
+    {
       "moduleName": "agendaClinica",
       "actors": [
         {
@@ -744,6 +776,10 @@ export const solutionRegistry = {
       ],
       "events": [
         {
+          "eventId": "confirmarConsulta",
+          "on": "Consulta.confirmarConsulta"
+        },
+        {
           "eventId": "registrarFalta",
           "on": "Consulta.registrarFalta"
         },
@@ -752,39 +788,7 @@ export const solutionRegistry = {
           "on": "Consulta.registrarAtendimento"
         }
       ],
-      "updatedAt": "2026-09-25T11:24:15.402Z"
-    },
-    {
-      "moduleName": "controleEstoque",
-      "actors": [
-        {
-          "actorId": "estoquista",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Product",
-          "roleTag": "controleEstoque.Produto",
-          "namespace": "controleEstoque"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Produto",
-          "kind": "role",
-          "mdmSubtype": "Product",
-          "class": "mdm"
-        },
-        {
-          "entityId": "MovimentacaoEstoque",
-          "kind": "entity",
-          "class": "event"
-        }
-      ],
-      "events": [],
-      "updatedAt": "2026-09-28T17:36:36.016Z"
+      "updatedAt": "2026-10-02T06:20:06.842Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;
