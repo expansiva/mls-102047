@@ -91,20 +91,20 @@
     },
     {
       "path": "l4/reembolsoDespesas/pool/l1/web/needs.json",
-      "sha256": "sha256:04a0a1b58c4d0be89424c5e1785e43565fced17d363fa3e5f7de5c4c2c66136e",
-      "bytes": 4125,
+      "sha256": "sha256:1389e2403d5c287ef7299529818cc417ce25c94df3d67bae7023c7a356e1a4ae",
+      "bytes": 4584,
       "schemaVersion": "2026-09-21-p2-needs-v1"
     },
     {
       "path": "l4/reembolsoDespesas/pool/l2/web/backend.json",
-      "sha256": "sha256:216378ff1a3e501b56f1da2b452b715994991b9523959979a827535d88ee1299",
-      "bytes": 10568,
+      "sha256": "sha256:1d24e5c1d3a26d661f6ff9db75e61ff8c80bd51ec29eecf71d0dce47d9b24910",
+      "bytes": 12319,
       "schemaVersion": "2026-09-21-p1-backend-v1.2"
     },
     {
       "path": "l4/reembolsoDespesas/pool/l2/web/effort.json",
-      "sha256": "sha256:e7ca16ddf97508814ccb857ddb1002576b5409fde8ce808bdfb31748df39822e",
-      "bytes": 9619,
+      "sha256": "sha256:37bf37408411320de3584fa05d701baf9582b80e89c157e42628c0137022bd68",
+      "bytes": 10665,
       "schemaVersion": "2026-09-21-p2-effort-v1.2"
     },
     {
@@ -340,6 +340,7 @@
             "usecaseId": "registrarPagamento",
             "entity": "Despesa",
             "operation": "transition",
+            "transitionRef": "registrarPagamento",
             "ports": [
               "Despesa"
             ],
@@ -527,8 +528,47 @@
             ]
           }
         ],
-        "writes": [],
+        "writes": [
+          {
+            "entity": "Despesa",
+            "operation": "transition",
+            "transitionRef": "aprovarDespesa",
+            "from": [
+              "journey:analisarDecidirDespesa/decidirDespesa"
+            ]
+          },
+          {
+            "entity": "Despesa",
+            "operation": "transition",
+            "transitionRef": "rejeitarDespesa",
+            "from": [
+              "journey:analisarDecidirDespesa/decidirDespesa"
+            ]
+          }
+        ],
         "endpoints": [
+          {
+            "route": "reembolsoDespesas.despesas_da_equipe.cmdAprovarDespesa",
+            "page": "despesas_da_equipe",
+            "kind": "cmd",
+            "usecaseRef": "aprovarDespesa",
+            "status": "toCreate",
+            "tableRefs": [
+              "despesa"
+            ],
+            "noTable": "ok"
+          },
+          {
+            "route": "reembolsoDespesas.despesas_da_equipe.cmdRejeitarDespesa",
+            "page": "despesas_da_equipe",
+            "kind": "cmd",
+            "usecaseRef": "rejeitarDespesa",
+            "status": "toCreate",
+            "tableRefs": [
+              "despesa"
+            ],
+            "noTable": "ok"
+          },
           {
             "route": "reembolsoDespesas.despesas_da_equipe.qryListColaborador",
             "page": "despesas_da_equipe",
@@ -551,6 +591,38 @@
           }
         ],
         "usecases": [
+          {
+            "usecaseId": "aprovarDespesa",
+            "entity": "Despesa",
+            "operation": "transition",
+            "transitionRef": "aprovarDespesa",
+            "ports": [
+              "Despesa"
+            ],
+            "status": "toCreate",
+            "existing": "",
+            "reason": "no l1 usecase for Despesa.transition",
+            "tableRefs": [
+              "despesa"
+            ],
+            "noTable": "ok"
+          },
+          {
+            "usecaseId": "rejeitarDespesa",
+            "entity": "Despesa",
+            "operation": "transition",
+            "transitionRef": "rejeitarDespesa",
+            "ports": [
+              "Despesa"
+            ],
+            "status": "toCreate",
+            "existing": "",
+            "reason": "no l1 usecase for Despesa.transition",
+            "tableRefs": [
+              "despesa"
+            ],
+            "noTable": "ok"
+          },
           {
             "usecaseId": "listColaborador",
             "entity": "Colaborador",
@@ -579,6 +651,101 @@
           }
         ],
         "operationBindings": [
+          {
+            "pageId": "despesas_da_equipe",
+            "route": "reembolsoDespesas.despesas_da_equipe.cmdAprovarDespesa",
+            "entityId": "Despesa",
+            "operation": "transition",
+            "actorRef": "gestorEquipe",
+            "grantRefs": [
+              "gestorAnalisaDespesasDaEquipe"
+            ],
+            "authorities": [
+              "gestorEquipe"
+            ],
+            "inputFields": [],
+            "transition": {
+              "transitionId": "aprovarDespesa",
+              "from": [
+                "awaitingApproval"
+              ],
+              "to": "approved",
+              "by": [
+                "gestorEquipe"
+              ],
+              "payload": []
+            },
+            "ruleRefs": [
+              {
+                "ruleId": "managerTeamExpenseAccess",
+                "file": "l4/reembolsoDespesas/rules.defs.ts",
+                "symbol": "rules.managerTeamExpenseAccess",
+                "description": "O gestor da equipe somente pode consultar, aprovar ou rejeitar despesas de colaboradores de sua própria equipe."
+              }
+            ],
+            "sourceHashes": [
+              "l4/reembolsoDespesas/ontology/Despesa.defs.ts#sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97",
+              "l4/reembolsoDespesas/access.defs.ts#sha256:e0158830801753dd2ad7f6a7748b2cd83cdb5c49befa806edec98649e3f9a2e0",
+              "l4/reembolsoDespesas/rules.defs.ts#sha256:ada573a05887aacd9c75a0607e75bd7251fb54488034bf99a1264f1aff610976"
+            ]
+          },
+          {
+            "pageId": "despesas_da_equipe",
+            "route": "reembolsoDespesas.despesas_da_equipe.cmdRejeitarDespesa",
+            "entityId": "Despesa",
+            "operation": "transition",
+            "actorRef": "gestorEquipe",
+            "grantRefs": [
+              "gestorAnalisaDespesasDaEquipe"
+            ],
+            "authorities": [
+              "gestorEquipe"
+            ],
+            "inputFields": [
+              {
+                "path": "Despesa.details",
+                "origin": "actor",
+                "required": true
+              },
+              {
+                "path": "Despesa.details.motivoRejeicao",
+                "origin": "actor",
+                "required": true
+              }
+            ],
+            "transition": {
+              "transitionId": "rejeitarDespesa",
+              "from": [
+                "awaitingApproval"
+              ],
+              "to": "rejected",
+              "by": [
+                "gestorEquipe"
+              ],
+              "payload": [
+                "details.motivoRejeicao"
+              ]
+            },
+            "ruleRefs": [
+              {
+                "ruleId": "managerTeamExpenseAccess",
+                "file": "l4/reembolsoDespesas/rules.defs.ts",
+                "symbol": "rules.managerTeamExpenseAccess",
+                "description": "O gestor da equipe somente pode consultar, aprovar ou rejeitar despesas de colaboradores de sua própria equipe."
+              },
+              {
+                "ruleId": "rejectionReasonRequired",
+                "file": "l4/reembolsoDespesas/rules.defs.ts",
+                "symbol": "rules.rejectionReasonRequired",
+                "description": "A rejeição de uma despesa exige o registro de um motivo pelo gestor da equipe."
+              }
+            ],
+            "sourceHashes": [
+              "l4/reembolsoDespesas/ontology/Despesa.defs.ts#sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97",
+              "l4/reembolsoDespesas/access.defs.ts#sha256:e0158830801753dd2ad7f6a7748b2cd83cdb5c49befa806edec98649e3f9a2e0",
+              "l4/reembolsoDespesas/rules.defs.ts#sha256:ada573a05887aacd9c75a0607e75bd7251fb54488034bf99a1264f1aff610976"
+            ]
+          },
           {
             "pageId": "despesas_da_equipe",
             "route": "reembolsoDespesas.despesas_da_equipe.qryListColaborador",
@@ -866,6 +1033,7 @@
             "usecaseId": "enviarParaAprovacao",
             "entity": "Despesa",
             "operation": "transition",
+            "transitionRef": "enviarParaAprovacao",
             "ports": [
               "Despesa"
             ],
@@ -881,6 +1049,7 @@
             "usecaseId": "reenviarParaAprovacao",
             "entity": "Despesa",
             "operation": "transition",
+            "transitionRef": "reenviarParaAprovacao",
             "ports": [
               "Despesa"
             ],
@@ -1318,8 +1487,8 @@
     "remove": [],
     "counts": {
       "pages": 4,
-      "endpoints": 9,
-      "usecases": 7,
+      "endpoints": 11,
+      "usecases": 9,
       "destinations": 16,
       "materializationItems": 12
     }
@@ -1339,51 +1508,11 @@
       "pageId": "inicio"
     },
     {
-      "severity": "review",
-      "code": "OWN_ANCHOR_OUTSIDE_GRANT_ENTITIES",
-      "file": "l4/access.defs.ts",
-      "message": "own grant 'colaboradorGerenciaPropriasDespesas' anchors 'Colaborador' outside entityRefs",
-      "pageId": "minhas_despesas",
-      "route": "reembolsoDespesas.minhas_despesas.cmdCreateDespesa"
-    },
-    {
-      "severity": "review",
-      "code": "OWN_ANCHOR_OUTSIDE_GRANT_ENTITIES",
-      "file": "l4/access.defs.ts",
-      "message": "own grant 'colaboradorGerenciaPropriasDespesas' anchors 'Colaborador' outside entityRefs",
-      "pageId": "minhas_despesas",
-      "route": "reembolsoDespesas.minhas_despesas.cmdEnviarParaAprovacao"
-    },
-    {
-      "severity": "review",
-      "code": "OWN_ANCHOR_OUTSIDE_GRANT_ENTITIES",
-      "file": "l4/access.defs.ts",
-      "message": "own grant 'colaboradorGerenciaPropriasDespesas' anchors 'Colaborador' outside entityRefs",
-      "pageId": "minhas_despesas",
-      "route": "reembolsoDespesas.minhas_despesas.cmdReenviarParaAprovacao"
-    },
-    {
-      "severity": "review",
-      "code": "OWN_ANCHOR_OUTSIDE_GRANT_ENTITIES",
-      "file": "l4/access.defs.ts",
-      "message": "own grant 'colaboradorGerenciaPropriasDespesas' anchors 'Colaborador' outside entityRefs",
-      "pageId": "minhas_despesas",
-      "route": "reembolsoDespesas.minhas_despesas.cmdUpdateDespesa"
-    },
-    {
-      "severity": "review",
-      "code": "OWN_ANCHOR_OUTSIDE_GRANT_ENTITIES",
-      "file": "l4/access.defs.ts",
-      "message": "own grant 'colaboradorGerenciaPropriasDespesas' anchors 'Colaborador' outside entityRefs",
-      "pageId": "minhas_despesas",
-      "route": "reembolsoDespesas.minhas_despesas.qryListDespesa"
-    },
-    {
       "severity": "info",
       "code": "NO_COMMON_RELEASE_IDENTITY",
       "file": "input20",
       "message": "Sources have content hashes and structural consistency checks, but no shared release identity exists across all planners."
     }
   ],
-  "snapshotHash": "sha256:9e11b8a310ab7498c82e95b068e06027f0ae701d2222be27448c8a1e3c7c7b20"
+  "snapshotHash": "sha256:8e3946d68fcbf293126df6f9aa16af03b67108d4aaaba73de7a4220aa71c9b94"
 }

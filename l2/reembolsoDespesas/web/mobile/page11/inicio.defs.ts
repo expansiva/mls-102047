@@ -2,24 +2,24 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/activityNotificationHub/page21.md",
-    "experience": "inboxSplit"
+    "category": "_102020_/l4/collabux/templates/operationsQueue/page21.md",
+    "experience": "workQueueSplit"
   },
-  "intent": "Mostrar em coluna fluida e estreita, em torno de 390px e usável em 360px e 430px, as despesas da equipe que esperam análise, para o gestor ver o que precisa decidir.",
+  "intent": "Em conteúdo fluido e estreito em torno de 390px, também usável em 360px e 430px, mostra ao gestor a fila de despesas da equipe que aguardam análise e decisão, para ele ver o que precisa tratar agora e seguir para analisar.",
   "sections": [
     {
-      "id": "caixaEntrada",
+      "id": "filaAnalise",
       "priority": "primary",
-      "purpose": "Empilhar em leitura contínua e estreita, fluida em torno de 390px e usável em 360px e 430px, a caixa de entrada das despesas pendentes da equipe.",
+      "purpose": "Empilha em coluna estreita e fluida as despesas pendentes da equipe para o gestor varrer o que espera decisão e abrir a análise.",
       "organisms": [
-        "caixaEntradaDespesas"
+        "despesasPendentesEquipe"
       ]
     }
   ],
   "organisms": {
-    "caixaEntradaDespesas": {
+    "despesasPendentesEquipe": {
       "kind": "inbox",
-      "text": "Comunica em leitura estreita as despesas da equipe que ainda esperam análise, para o gestor identificar o que precisa decidir mesmo em tela estreita e seguir para a análise.",
+      "text": "Comunica ao gestor, em lista estreita e contínua, as despesas da equipe que estão esperando ele analisar e decidir, para que ele enxergue a fila de pendências e siga para a análise.",
       "intents": [
         {
           "id": "abrirDespesasDaEquipe",
@@ -30,7 +30,7 @@ export const definition = {
     }
   },
   "molecules": {
-    "caixaEntradaDespesas": [
+    "despesasPendentesEquipe": [
       {
         "role": "viewData",
         "preferred": "groupviewdata--ml-vertical-record-list",

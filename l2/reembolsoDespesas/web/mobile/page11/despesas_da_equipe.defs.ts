@@ -2,88 +2,87 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/operationsQueue/page21.md",
-    "experience": "workQueueSplit"
+    "category": "_102020_/l4/collabux/templates/approvalWorkflow/page21.md",
+    "experience": "readAndDecide"
   },
-  "intent": "Em conteúdo fluido e estreito, cerca de 390px e utilizável em 360px e 430px, o gestor percorre as despesas pendentes da equipe, confere a selecionada e decide aprovar ou rejeitar.",
+  "intent": "Em coluna estreita e fluida em torno de 390px, também usável em 360px e 430px, o gestor percorre as despesas pendentes da equipe, analisa a selecionada e decide aprovar ou rejeitar informando o motivo.",
   "sections": [
     {
-      "id": "filaPendentes",
+      "id": "pendingQueue",
       "priority": "primary",
-      "purpose": "Empilha em coluna estreita as despesas pendentes da equipe para o gestor escolher qual analisar no telefone.",
+      "purpose": "Empilha as despesas pendentes da equipe em faixa estreita para o gestor localizar qual analisar.",
       "organisms": [
-        "pendingExpensesList"
+        "pendingTeamExpenses"
       ]
     },
     {
-      "id": "analiseDespesa",
+      "id": "review",
       "priority": "main",
-      "purpose": "Segue a leitura com os dados, o colaborador e o comprovante da despesa escolhida, em fluxo contínuo utilizável em 360px a 430px.",
+      "purpose": "Mostra em sequência os dados, o colaborador e o comprovante da despesa escolhida, cabendo em cerca de 390px.",
       "organisms": [
-        "expenseAnalysis"
+        "expenseReview"
       ]
     },
     {
-      "id": "decisaoDespesa",
+      "id": "decision",
       "priority": "secondary",
-      "purpose": "Mantém ao final da coluna as ações de aprovar ou rejeitar com motivo, sem exigir grade fixa nem sair do fluxo.",
+      "purpose": "Mantém aprovação, rejeição e motivo ao alcance do polegar após a leitura da despesa.",
       "organisms": [
-        "expenseDecision"
+        "approvalDecision"
       ]
     }
   ],
   "organisms": {
-    "pendingExpensesList": {
+    "pendingTeamExpenses": {
       "kind": "list",
-      "text": "Mostra em lista vertical as despesas pendentes da equipe, com colaborador, valor e situação, para o gestor tocar e abrir a que vai analisar.",
+      "text": "Lista as despesas da equipe que aguardam decisão, com colaborador, data, categoria, valor e situação, para o gestor achar o próximo item em tela estreita.",
       "intents": []
     },
-    "expenseAnalysis": {
+    "expenseReview": {
       "kind": "detail",
-      "text": "Apresenta em cartão os dados da despesa, o colaborador e o comprovante, para conferência completa em tela estreita antes da decisão.",
+      "text": "Exibe os dados da despesa selecionada, o colaborador e o comprovante em bloco vertical, para conferir o reembolso antes de decidir.",
       "intents": []
     },
-    "expenseDecision": {
+    "approvalDecision": {
       "kind": "actions",
-      "text": "Oferece aprovar a despesa ou rejeitá-la informando o motivo, com controles empilhados ao alcance do polegar.",
-      "intents": []
+      "text": "Oferece aprovar a despesa ou rejeitá-la com o motivo, para o gestor concluir a análise sem sair do fluxo estreito.",
+      "intents": [
+        {
+          "id": "approveExpense",
+          "kind": "submit"
+        },
+        {
+          "id": "rejectExpense",
+          "kind": "submit"
+        }
+      ]
     }
   },
   "molecules": {
-    "pendingExpensesList": [
+    "pendingTeamExpenses": [
       {
-        "role": "searchContent",
-        "preferred": "groupsearchcontent--ml-search-bar",
-        "alternative": "groupsearchcontent--ml-search-filters"
-      },
-      {
-        "role": "viewData",
+        "role": "queue",
         "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-card-grid"
+        "alternative": "groupviewtable--ml-responsive-table"
       }
     ],
-    "expenseAnalysis": [
+    "expenseReview": [
       {
-        "role": "viewCard",
+        "role": "summary",
         "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-media"
+        "alternative": "groupviewcard--ml-view-card-horizontal"
       }
     ],
-    "expenseDecision": [
+    "approvalDecision": [
       {
-        "role": "enterText",
+        "role": "rejectionReason",
         "preferred": "groupentertext--ml-multiline-text",
         "alternative": "groupentertext--ml-enter-text"
       },
       {
-        "role": "selectOne",
-        "preferred": "groupselectone--ml-radio-group",
-        "alternative": "groupselectone--ml-segmented-control"
-      },
-      {
-        "role": "triggerAction",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-button-group"
+        "role": "decision",
+        "preferred": "grouptriggeraction--ml-button-group",
+        "alternative": "grouptriggeraction--ml-button-standard"
       }
     ]
   }

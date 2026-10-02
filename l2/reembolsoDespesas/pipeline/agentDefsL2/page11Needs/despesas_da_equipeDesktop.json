@@ -1,6 +1,6 @@
 {
   "organisms": {
-    "pendingExpensesList": {
+    "pendingTeamExpenses": {
       "reads": [
         "Despesa.id",
         "Despesa.colaboradorId",
@@ -8,14 +8,14 @@
         "Despesa.details.dataDespesa",
         "Despesa.details.categoria",
         "Despesa.details.valor",
-        "Colaborador.id",
-        "Colaborador.details.identification.name"
+        "Despesa.details.reenvioRealizado",
+        "Colaborador.details.identification"
       ],
       "edits": [],
-      "selects": "expenseAnalysis",
+      "selects": "expenseReview",
       "submits": []
     },
-    "expenseAnalysis": {
+    "expenseReview": {
       "reads": [
         "Despesa.id",
         "Despesa.colaboradorId",
@@ -24,24 +24,35 @@
         "Despesa.details.categoria",
         "Despesa.details.valor",
         "Despesa.details.descricao",
-        "Despesa.details.reenvioRealizado",
         "Despesa.details.motivoRejeicao",
+        "Despesa.details.reenvioRealizado",
         "Colaborador.id",
-        "Colaborador.details.identification.name"
+        "Colaborador.details.identification"
       ],
       "edits": [],
       "selects": "",
       "submits": []
     },
-    "expenseDecision": {
+    "approvalDecision": {
       "reads": [
         "Despesa.id",
         "Despesa.status",
         "Despesa.details.motivoRejeicao"
       ],
-      "edits": [],
+      "edits": [
+        "Despesa.details.motivoRejeicao"
+      ],
       "selects": "",
-      "submits": []
+      "submits": [
+        {
+          "intentId": "approveExpense",
+          "write": "Despesa.aprovarDespesa"
+        },
+        {
+          "intentId": "rejectExpense",
+          "write": "Despesa.rejeitarDespesa"
+        }
+      ]
     }
   }
 }

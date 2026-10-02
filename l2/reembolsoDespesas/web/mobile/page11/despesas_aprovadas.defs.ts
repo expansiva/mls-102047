@@ -5,28 +5,28 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/financialTransactions/page21.md",
     "experience": "ledgerTable"
   },
-  "intent": "Em uma coluna estreita e contínua, o financeiro percorre as despesas aprovadas que aguardam pagamento, confere os dados da escolhida e informa a data em que o reembolso foi pago.",
+  "intent": "Em uma coluna estreita e fluida, permitir ao financeiro percorrer as despesas aprovadas a pagar, abrir os dados da selecionada e informar a data de pagamento.",
   "sections": [
     {
-      "id": "filaPagamento",
+      "id": "paymentQueue",
       "priority": "primary",
-      "purpose": "No fluxo estreito em torno de 390px, ainda usável em 360px e 430px, a lista vem primeiro para localizar rapidamente a despesa aprovada a pagar.",
+      "purpose": "Empilhar a fila de despesas aprovadas em conteúdo fluido perto de 390px, ainda utilizável em 360px e 430px, para o financeiro localizar o que falta pagar.",
       "organisms": [
         "approvedExpensesList"
       ]
     },
     {
-      "id": "conferenciaDespesa",
+      "id": "expenseReview",
       "priority": "main",
-      "purpose": "O detalhe da despesa selecionada segue em conteúdo fluido e estreito, para conferir colaborador, valor e descrição antes de registrar o pagamento.",
+      "purpose": "Mostrar abaixo da fila, no mesmo fluxo estreito, os dados da despesa selecionada para conferência antes de pagar.",
       "organisms": [
         "approvedExpenseDetail"
       ]
     },
     {
-      "id": "registroPagamento",
+      "id": "paymentCapture",
       "priority": "secondary",
-      "purpose": "O campo da data de pagamento fecha o fluxo estreito, ao alcance após a conferência, para confirmar a liquidação da despesa aprovada.",
+      "purpose": "Seguir no fluxo estreito com a data de pagamento e a confirmação do registro do reembolso.",
       "organisms": [
         "paymentDateForm"
       ]
@@ -35,20 +35,20 @@ export const definition = {
   "organisms": {
     "approvedExpensesList": {
       "kind": "list",
-      "text": "Lista em coluna as despesas aprovadas que aguardam pagamento, destacando colaborador, categoria, valor e situação para escolher qual reembolso liquidar.",
+      "text": "Lista em sequência as despesas aprovadas que aguardam pagamento, com colaborador, valor, categoria e data, para o financeiro escolher o reembolso a pagar na tela estreita.",
       "intents": []
     },
     "approvedExpenseDetail": {
       "kind": "detail",
-      "text": "Mostra em bloco contínuo os dados da despesa aprovada selecionada — colaborador, data, categoria, valor, descrição e situação — para conferência antes do pagamento.",
+      "text": "Mostra os dados da despesa aprovada selecionada — colaborador, categoria, valor, descrição, situação e data de pagamento, se houver — para conferência no fluxo estreito antes de pagar.",
       "intents": []
     },
     "paymentDateForm": {
       "kind": "form",
-      "text": "Oferece a data de pagamento da despesa aprovada no final do fluxo estreito, para o financeiro registrar quando o reembolso foi pago.",
+      "text": "Permite informar a data em que o pagamento foi realizado e confirmar o registro, encerrando a despesa aprovada como paga.",
       "intents": [
         {
-          "id": "registrarPagamento",
+          "id": "registerPayment",
           "kind": "submit"
         }
       ]
@@ -59,21 +59,26 @@ export const definition = {
       {
         "role": "collection",
         "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-card-grid"
+        "alternative": "groupviewtable--ml-responsive-table"
       }
     ],
     "approvedExpenseDetail": [
       {
         "role": "summary",
-        "preferred": "groupviewcard--ml-view-card-horizontal",
-        "alternative": "groupviewcard--ml-vertical-card"
+        "preferred": "groupviewcard--ml-vertical-card",
+        "alternative": "groupviewcard--ml-view-card-horizontal"
       }
     ],
     "paymentDateForm": [
       {
-        "role": "date",
+        "role": "dateEntry",
         "preferred": "groupenterdate--ml-compact-calendar",
         "alternative": "groupenterdate--ml-date-picker"
+      },
+      {
+        "role": "confirmAction",
+        "preferred": "grouptriggeraction--ml-button-standard",
+        "alternative": "grouptriggeraction--ml-icon-button"
       }
     ]
   }

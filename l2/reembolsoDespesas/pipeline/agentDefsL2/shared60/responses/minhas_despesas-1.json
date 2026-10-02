@@ -1,0 +1,247 @@
+{
+  "attempt": "1",
+  "model": "openai/gpt-5.6-terra-pro",
+  "promptChars": 14801,
+  "receivedAt": "2026-10-02T21:10:39.028Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Shared",
+      "arguments": {
+        "states": [
+          {
+            "id": "colaboradorId",
+            "source": "entry.params.colaboradorId",
+            "description": "Identificador do colaborador usado para filtrar as despesas."
+          },
+          {
+            "id": "page",
+            "source": "entry.params.page",
+            "description": "Página solicitada da lista de despesas."
+          },
+          {
+            "id": "minhasDespesas",
+            "source": "load.minhasDespesas",
+            "description": "Lista paginada de despesas do colaborador."
+          },
+          {
+            "id": "detalheDespesa",
+            "source": "entry.params.despesaId",
+            "description": "Despesa selecionada na lista para consulta, correção ou envio."
+          }
+        ],
+        "functions": [
+          {
+            "id": "load",
+            "description": "Carrega a primeira página das despesas do colaborador.",
+            "calls": "load",
+            "sets": "minhasDespesas"
+          },
+          {
+            "id": "filterListaMinhasDespesas",
+            "description": "Recarrega a primeira página das despesas conforme os filtros informados.",
+            "calls": "loadMinhasDespesas",
+            "sets": "minhasDespesas"
+          },
+          {
+            "id": "loadMoreListaMinhasDespesas",
+            "description": "Acrescenta a próxima página de despesas à lista.",
+            "calls": "loadMinhasDespesas",
+            "sets": "minhasDespesas"
+          },
+          {
+            "id": "registrarDespesa",
+            "description": "Registra uma nova despesa.",
+            "calls": "registrarDespesa",
+            "sets": "detalheDespesa",
+            "updates": [
+              "minhasDespesas"
+            ]
+          },
+          {
+            "id": "corrigirDespesa",
+            "description": "Corrige a despesa selecionada.",
+            "calls": "corrigirDespesa",
+            "sets": "detalheDespesa",
+            "updates": [
+              "minhasDespesas"
+            ]
+          },
+          {
+            "id": "enviarParaAprovacao",
+            "description": "Envia a despesa selecionada para aprovação.",
+            "calls": "enviarParaAprovacao",
+            "sets": "detalheDespesa",
+            "updates": [
+              "minhasDespesas"
+            ]
+          },
+          {
+            "id": "reenviarParaAprovacao",
+            "description": "Reenvia para aprovação a despesa rejeitada selecionada.",
+            "calls": "reenviarParaAprovacao",
+            "sets": "detalheDespesa",
+            "updates": [
+              "minhasDespesas"
+            ]
+          }
+        ],
+        "journeys": [
+          {
+            "step": "consultarMinhasDespesas/consultarDespesa",
+            "organisms": [
+              "listaMinhasDespesas",
+              "detalheDespesa"
+            ],
+            "functions": [
+              "load"
+            ]
+          },
+          {
+            "step": "consultarMinhasDespesas/localizarMinhasDespesas",
+            "organisms": [
+              "listaMinhasDespesas"
+            ],
+            "functions": [
+              "filterListaMinhasDespesas",
+              "loadMoreListaMinhasDespesas"
+            ]
+          },
+          {
+            "step": "corrigirReenviarDespesa/consultarMotivoRejeicao",
+            "organisms": [
+              "detalheDespesa"
+            ],
+            "functions": [
+              "load"
+            ]
+          },
+          {
+            "step": "corrigirReenviarDespesa/localizarDespesaRejeitada",
+            "organisms": [
+              "listaMinhasDespesas",
+              "detalheDespesa"
+            ],
+            "functions": [
+              "filterListaMinhasDespesas"
+            ]
+          },
+          {
+            "step": "corrigirReenviarDespesa/corrigirDespesa",
+            "organisms": [
+              "formularioDespesa"
+            ],
+            "functions": [
+              "corrigirDespesa"
+            ]
+          },
+          {
+            "step": "corrigirReenviarDespesa/reenviarDespesa",
+            "organisms": [
+              "formularioDespesa",
+              "acoesDespesa"
+            ],
+            "functions": [
+              "reenviarParaAprovacao"
+            ]
+          },
+          {
+            "step": "registrarEnviarDespesa/registrarDespesa",
+            "organisms": [
+              "formularioDespesa"
+            ],
+            "functions": [
+              "registrarDespesa"
+            ]
+          },
+          {
+            "step": "registrarEnviarDespesa/enviarParaAprovacao",
+            "organisms": [
+              "formularioDespesa",
+              "acoesDespesa"
+            ],
+            "functions": [
+              "enviarParaAprovacao"
+            ]
+          }
+        ],
+        "commandReturns": [
+          {
+            "requestId": "registrarDespesa",
+            "returns": [
+              "despesa"
+            ]
+          },
+          {
+            "requestId": "corrigirDespesa",
+            "returns": [
+              "despesa"
+            ]
+          },
+          {
+            "requestId": "enviarParaAprovacao",
+            "returns": [
+              "despesa"
+            ]
+          },
+          {
+            "requestId": "reenviarParaAprovacao",
+            "returns": [
+              "despesa"
+            ]
+          }
+        ],
+        "requestRules": [
+          {
+            "requestId": "load",
+            "rules": [
+              "expenseOwnerOnly"
+            ]
+          },
+          {
+            "requestId": "loadMinhasDespesas",
+            "rules": [
+              "expenseOwnerOnly"
+            ]
+          },
+          {
+            "requestId": "registrarDespesa",
+            "rules": [
+              "validExpenseData"
+            ]
+          },
+          {
+            "requestId": "corrigirDespesa",
+            "rules": [
+              "expenseOwnerOnly",
+              "validExpenseData",
+              "singleResubmission"
+            ]
+          },
+          {
+            "requestId": "enviarParaAprovacao",
+            "rules": [
+              "expenseOwnerOnly",
+              "validExpenseData",
+              "proofRequiredBeforeSubmission"
+            ]
+          },
+          {
+            "requestId": "reenviarParaAprovacao",
+            "rules": [
+              "expenseOwnerOnly",
+              "validExpenseData",
+              "proofRequiredBeforeSubmission",
+              "singleResubmission"
+            ]
+          }
+        ]
+      }
+    },
+    "status": "completed",
+    "stepId": 14,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

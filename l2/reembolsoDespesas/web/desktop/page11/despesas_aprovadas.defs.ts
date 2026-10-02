@@ -5,22 +5,29 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/financialTransactions/page21.md",
     "experience": "ledgerTable"
   },
-  "intent": "O financeiro localiza as despesas aprovadas que ainda aguardam pagamento, confere os dados de cada reembolso e registra a data em que o pagamento foi efetuado.",
+  "intent": "Ajudar o financeiro a localizar as despesas aprovadas que ainda aguardam pagamento, conferir os dados de cada reembolso e registrar a data em que o pagamento foi feito.",
   "sections": [
     {
-      "id": "filaPagamento",
+      "id": "paymentQueue",
       "priority": "primary",
-      "purpose": "Mantém visível a fila de despesas aprovadas com colaborador, categoria, valor e situação para o financeiro escolher qual reembolso liquidar.",
+      "purpose": "Mostrar a fila de despesas aprovadas para o financeiro encontrar o que ainda precisa ser pago.",
       "organisms": [
         "approvedExpensesList"
       ]
     },
     {
-      "id": "conferenciaPagamento",
+      "id": "expenseReview",
       "priority": "main",
-      "purpose": "Reúne os dados da despesa escolhida e o registro da data de pagamento no mesmo contexto, para conferir o reembolso e confirmar a liquidação.",
+      "purpose": "Exibir os dados da despesa aprovada selecionada para conferência antes do registro do pagamento.",
       "organisms": [
-        "approvedExpenseDetail",
+        "approvedExpenseDetail"
+      ]
+    },
+    {
+      "id": "paymentCapture",
+      "priority": "secondary",
+      "purpose": "Capturar a data de pagamento e confirmar o registro do reembolso da despesa conferida.",
+      "organisms": [
         "paymentDateForm"
       ]
     }
@@ -28,20 +35,20 @@ export const definition = {
   "organisms": {
     "approvedExpensesList": {
       "kind": "list",
-      "text": "Mostra as despesas aprovadas que aguardam pagamento, com colaborador, categoria, valor e situação, para o financeiro localizar o próximo reembolso a liquidar.",
+      "text": "Mostra as despesas aprovadas que ainda aguardam pagamento, com colaborador, valor, categoria e data, para o financeiro localizar o reembolso a pagar.",
       "intents": []
     },
     "approvedExpenseDetail": {
       "kind": "detail",
-      "text": "Apresenta colaborador, data, categoria, valor, descrição e situação da despesa aprovada selecionada, para o financeiro conferir o que será pago.",
+      "text": "Apresenta os dados da despesa aprovada selecionada — colaborador, categoria, valor, descrição, situação e data de pagamento, se houver — para o financeiro conferir o reembolso antes de pagar.",
       "intents": []
     },
     "paymentDateForm": {
       "kind": "form",
-      "text": "Permite informar a data em que a despesa aprovada foi paga e confirmar o registro, para marcar o reembolso como pago.",
+      "text": "Permite informar a data em que o pagamento foi realizado e confirmar o registro, encerrando a despesa aprovada como paga.",
       "intents": [
         {
-          "id": "registrarPagamento",
+          "id": "registerPayment",
           "kind": "submit"
         }
       ]
@@ -51,22 +58,27 @@ export const definition = {
     "approvedExpensesList": [
       {
         "role": "collection",
-        "preferred": "groupviewtable--ml-data-table",
-        "alternative": "groupviewtable--ml-advanced-data-table"
+        "preferred": "groupviewtable--ml-advanced-data-table",
+        "alternative": "groupviewtable--ml-data-table"
       }
     ],
     "approvedExpenseDetail": [
       {
         "role": "summary",
-        "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-horizontal"
+        "preferred": "groupviewcard--ml-view-card-horizontal",
+        "alternative": "groupviewcard--ml-vertical-card"
       }
     ],
     "paymentDateForm": [
       {
-        "role": "date",
+        "role": "dateEntry",
         "preferred": "groupenterdate--ml-date-picker",
         "alternative": "groupenterdate--ml-date-shortcut-picker"
+      },
+      {
+        "role": "confirmAction",
+        "preferred": "grouptriggeraction--ml-button-standard",
+        "alternative": "grouptriggeraction--ml-icon-button"
       }
     ]
   }
