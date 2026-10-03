@@ -1,9 +1,9 @@
-/// <mls fileReference="_102047_/l1/agendaClinica/layer_2_application/usecases/confirmarConsulta.defs.ts" enhancement="_blank"/>
+/// <mls fileReference="_102047_/l1/agendaClinica/layer_2_application/usecases/registrarFalta.defs.ts" enhancement="_blank"/>
 
 export const definition = {
   "schemaVersion": "2026-09-24-d1-definition-v2",
   "artifactType": "usecase",
-  "artifactId": "confirmarConsulta",
+  "artifactId": "registrarFalta",
   "moduleName": "agendaClinica",
   "status": "pending",
   "dependencies": [
@@ -14,7 +14,7 @@ export const definition = {
     "_102047_/l4/agendaClinica/rules.defs.ts"
   ],
   "data": {
-    "usecaseId": "confirmarConsulta",
+    "usecaseId": "registrarFalta",
     "entityId": "Consulta",
     "operation": "transition",
     "ports": [
@@ -25,7 +25,7 @@ export const definition = {
     ],
     "functions": [
       {
-        "functionName": "confirmarConsulta",
+        "functionName": "registrarFalta",
         "input": [
           {
             "name": "id",
@@ -88,9 +88,9 @@ export const definition = {
     "transactional": false,
     "effects": [
       {
-        "eventId": "confirmarConsulta",
+        "eventId": "registrarFalta",
         "path": "l4/agendaClinica/integration.defs.ts",
-        "symbol": "confirmarConsulta"
+        "symbol": "registrarFalta"
       }
     ],
     "sequence": [
@@ -99,22 +99,22 @@ export const definition = {
         "source": "ctx"
       },
       {
-        "kind": "rule",
-        "ruleId": "transicoesConsultaValidas"
-      },
-      {
-        "kind": "transition",
-        "transitionId": "confirmarConsulta",
-        "payload": []
-      },
-      {
         "kind": "port",
         "call": "transition",
         "port": "ConsultaRepository"
       },
       {
+        "kind": "rule",
+        "ruleId": "transicoesConsultaValidas"
+      },
+      {
+        "kind": "transition",
+        "transitionId": "registrarFalta",
+        "payload": []
+      },
+      {
         "kind": "effect",
-        "eventId": "confirmarConsulta"
+        "eventId": "registrarFalta"
       }
     ],
     "uses": [
@@ -139,8 +139,8 @@ export const definition = {
     "rulePlan": [
       {
         "ruleId": "transicoesConsultaValidas",
-        "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#transitions.confirmarConsulta.ruleRefs",
-        "consumer": "usecase:confirmarConsulta",
+        "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#transitions.registrarFalta.ruleRefs",
+        "consumer": "usecase:registrarFalta",
         "enforcement": "local",
         "gap": ""
       }
@@ -148,12 +148,12 @@ export const definition = {
     "transaction": {
       "boundary": "none"
     },
-    "transitionRef": "confirmarConsulta",
+    "transitionRef": "registrarFalta",
     "lifecycle": {
-      "transitionId": "confirmarConsulta",
+      "transitionId": "registrarFalta",
       "payload": [],
       "sourcePath": "l4/agendaClinica/ontology/Consulta.defs.ts",
-      "symbol": "confirmarConsulta"
+      "symbol": "registrarFalta"
     }
   }
 } as const;

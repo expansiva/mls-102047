@@ -1,9 +1,9 @@
-/// <mls fileReference="_102047_/l1/agendaClinica/layer_2_application/usecases/confirmarConsulta.defs.ts" enhancement="_blank"/>
+/// <mls fileReference="_102047_/l1/agendaClinica/layer_2_application/usecases/registrarAtendimento.defs.ts" enhancement="_blank"/>
 
 export const definition = {
   "schemaVersion": "2026-09-24-d1-definition-v2",
   "artifactType": "usecase",
-  "artifactId": "confirmarConsulta",
+  "artifactId": "registrarAtendimento",
   "moduleName": "agendaClinica",
   "status": "pending",
   "dependencies": [
@@ -14,18 +14,19 @@ export const definition = {
     "_102047_/l4/agendaClinica/rules.defs.ts"
   ],
   "data": {
-    "usecaseId": "confirmarConsulta",
+    "usecaseId": "registrarAtendimento",
     "entityId": "Consulta",
     "operation": "transition",
     "ports": [
       "ConsultaRepository"
     ],
     "rulesApplied": [
+      "atendimentoExigeAnotacao",
       "transicoesConsultaValidas"
     ],
     "functions": [
       {
-        "functionName": "confirmarConsulta",
+        "functionName": "registrarAtendimento",
         "input": [
           {
             "name": "id",
@@ -36,6 +37,11 @@ export const definition = {
             "name": "version",
             "type": "integer",
             "fieldRef": "Consulta.version"
+          },
+          {
+            "name": "details.attendanceNote",
+            "type": "text",
+            "fieldRef": "Consulta.details.attendanceNote"
           }
         ],
         "output": [
@@ -88,9 +94,9 @@ export const definition = {
     "transactional": false,
     "effects": [
       {
-        "eventId": "confirmarConsulta",
+        "eventId": "registrarAtendimento",
         "path": "l4/agendaClinica/integration.defs.ts",
-        "symbol": "confirmarConsulta"
+        "symbol": "registrarAtendimento"
       }
     ],
     "sequence": [
@@ -100,12 +106,18 @@ export const definition = {
       },
       {
         "kind": "rule",
+        "ruleId": "atendimentoExigeAnotacao"
+      },
+      {
+        "kind": "rule",
         "ruleId": "transicoesConsultaValidas"
       },
       {
         "kind": "transition",
-        "transitionId": "confirmarConsulta",
-        "payload": []
+        "transitionId": "registrarAtendimento",
+        "payload": [
+          "details.attendanceNote"
+        ]
       },
       {
         "kind": "port",
@@ -114,7 +126,7 @@ export const definition = {
       },
       {
         "kind": "effect",
-        "eventId": "confirmarConsulta"
+        "eventId": "registrarAtendimento"
       }
     ],
     "uses": [
@@ -127,9 +139,19 @@ export const definition = {
         "path": "version",
         "role": "concurrency",
         "source": "input"
+      },
+      {
+        "path": "details.attendanceNote",
+        "role": "write",
+        "source": "payload"
       }
     ],
     "rules": [
+      {
+        "ruleId": "atendimentoExigeAnotacao",
+        "path": "l4/agendaClinica/rules.defs.ts",
+        "symbol": "atendimentoExigeAnotacao"
+      },
       {
         "ruleId": "transicoesConsultaValidas",
         "path": "l4/agendaClinica/rules.defs.ts",
@@ -138,9 +160,16 @@ export const definition = {
     ],
     "rulePlan": [
       {
+        "ruleId": "atendimentoExigeAnotacao",
+        "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#transitions.registrarAtendimento.ruleRefs",
+        "consumer": "usecase:registrarAtendimento",
+        "enforcement": "local",
+        "gap": ""
+      },
+      {
         "ruleId": "transicoesConsultaValidas",
-        "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#transitions.confirmarConsulta.ruleRefs",
-        "consumer": "usecase:confirmarConsulta",
+        "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#transitions.registrarAtendimento.ruleRefs",
+        "consumer": "usecase:registrarAtendimento",
         "enforcement": "local",
         "gap": ""
       }
@@ -148,12 +177,14 @@ export const definition = {
     "transaction": {
       "boundary": "none"
     },
-    "transitionRef": "confirmarConsulta",
+    "transitionRef": "registrarAtendimento",
     "lifecycle": {
-      "transitionId": "confirmarConsulta",
-      "payload": [],
+      "transitionId": "registrarAtendimento",
+      "payload": [
+        "details.attendanceNote"
+      ],
       "sourcePath": "l4/agendaClinica/ontology/Consulta.defs.ts",
-      "symbol": "confirmarConsulta"
+      "symbol": "registrarAtendimento"
     }
   }
 } as const;
