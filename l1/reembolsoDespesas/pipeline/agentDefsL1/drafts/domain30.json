@@ -1,0 +1,1306 @@
+{
+  "schemaVersion": "2026-09-21-d1-domain-v1",
+  "project": 102047,
+  "moduleName": "reembolsoDespesas",
+  "llmCalls": 0,
+  "ok": true,
+  "entities": [
+    {
+      "entityId": "Colaborador",
+      "action": "create",
+      "defPath": "l1/reembolsoDespesas/layer_3_domain/entities/colaborador.defs.ts",
+      "storageTarget": "mdm",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [],
+      "enumerations": [
+        {
+          "path": "details.identification.subtype",
+          "values": [
+            "Person"
+          ]
+        },
+        {
+          "path": "details.identification.status",
+          "values": [
+            "Active",
+            "Inactive",
+            "Merged",
+            "Blocked"
+          ]
+        },
+        {
+          "path": "details.identification.docType",
+          "values": [
+            "SSN",
+            "EIN",
+            "Passport",
+            "DriversLicense",
+            "NationalId",
+            "CPF",
+            "CNPJ",
+            "VAT",
+            "Other"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "rule-foreign-namespace-refused",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-document-shape-validated",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-identity-never-in-namespace",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-person-privacy-consent-required-br-eu",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Colaborador",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Colaborador",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.docType",
+              "type": "enum"
+            },
+            {
+              "name": "details.identification.docId",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.tags",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.base.relationshipRefs",
+              "type": "object",
+              "derived": true
+            },
+            {
+              "name": "details.person",
+              "type": "object"
+            },
+            {
+              "name": "details.person.privacyConsent",
+              "type": "object"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.reembolsoDespesas",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "Despesa",
+      "action": "create",
+      "defPath": "l1/reembolsoDespesas/layer_3_domain/entities/despesa.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": "draft",
+      "uniqueKeys": [],
+      "enumerations": [
+        {
+          "path": "status",
+          "values": [
+            "draft",
+            "awaitingApproval",
+            "rejected",
+            "approved",
+            "paid"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "expenseOwnerOnly",
+          "owner": "module",
+          "source": "l4/reembolsoDespesas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "managerTeamExpenseAccess",
+          "owner": "module",
+          "source": "l4/reembolsoDespesas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "financeApprovedExpenseAccess",
+          "owner": "module",
+          "source": "l4/reembolsoDespesas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "validExpenseData",
+          "owner": "module",
+          "source": "l4/reembolsoDespesas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "proofRequiredBeforeSubmission",
+          "owner": "module",
+          "source": "l4/reembolsoDespesas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "rejectionReasonRequired",
+          "owner": "module",
+          "source": "l4/reembolsoDespesas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "singleResubmission",
+          "owner": "module",
+          "source": "l4/reembolsoDespesas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "paymentDateRequired",
+          "owner": "module",
+          "source": "l4/reembolsoDespesas/rules.defs.ts",
+          "placement": "application"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Despesa",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Despesa",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "colaboradorId",
+              "type": "record",
+              "ref": "Colaborador"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.dataDespesa",
+              "type": "date"
+            },
+            {
+              "name": "details.categoria",
+              "type": "string"
+            },
+            {
+              "name": "details.valor",
+              "type": "money"
+            },
+            {
+              "name": "details.descricao",
+              "type": "text"
+            },
+            {
+              "name": "details.motivoRejeicao",
+              "type": "text"
+            },
+            {
+              "name": "details.reenvioRealizado",
+              "type": "boolean"
+            },
+            {
+              "name": "details.dataPagamento",
+              "type": "date"
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "draft",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "awaitingApproval",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "rejected",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "approved",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "paid",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "enviarParaAprovacao",
+                "from": [
+                  "draft"
+                ],
+                "to": "awaitingApproval",
+                "by": [
+                  "colaborador"
+                ],
+                "ruleRefs": [
+                  "proofRequiredBeforeSubmission",
+                  "expenseOwnerOnly",
+                  "validExpenseData"
+                ]
+              },
+              {
+                "transitionId": "reenviarParaAprovacao",
+                "from": [
+                  "rejected"
+                ],
+                "to": "awaitingApproval",
+                "by": [
+                  "colaborador"
+                ],
+                "ruleRefs": [
+                  "expenseOwnerOnly",
+                  "singleResubmission",
+                  "proofRequiredBeforeSubmission",
+                  "validExpenseData"
+                ]
+              },
+              {
+                "transitionId": "aprovarDespesa",
+                "from": [
+                  "awaitingApproval"
+                ],
+                "to": "approved",
+                "by": [
+                  "gestorEquipe"
+                ],
+                "ruleRefs": [
+                  "managerTeamExpenseAccess"
+                ]
+              },
+              {
+                "transitionId": "rejeitarDespesa",
+                "from": [
+                  "awaitingApproval"
+                ],
+                "to": "rejected",
+                "by": [
+                  "gestorEquipe"
+                ],
+                "ruleRefs": [
+                  "managerTeamExpenseAccess",
+                  "rejectionReasonRequired"
+                ]
+              },
+              {
+                "transitionId": "registrarPagamento",
+                "from": [
+                  "approved"
+                ],
+                "to": "paid",
+                "by": [
+                  "financeiro"
+                ],
+                "ruleRefs": [
+                  "financeApprovedExpenseAccess",
+                  "paymentDateRequired"
+                ]
+              }
+            ]
+          },
+          "invariants": [],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "GestorEquipe",
+      "action": "create",
+      "defPath": "l1/reembolsoDespesas/layer_3_domain/entities/gestorEquipe.defs.ts",
+      "storageTarget": "mdm",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [],
+      "enumerations": [
+        {
+          "path": "details.identification.subtype",
+          "values": [
+            "Person"
+          ]
+        },
+        {
+          "path": "details.identification.status",
+          "values": [
+            "Active",
+            "Inactive",
+            "Merged",
+            "Blocked"
+          ]
+        },
+        {
+          "path": "details.identification.docType",
+          "values": [
+            "SSN",
+            "EIN",
+            "Passport",
+            "DriversLicense",
+            "NationalId",
+            "CPF",
+            "CNPJ",
+            "VAT",
+            "Other"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "rule-foreign-namespace-refused",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-document-shape-validated",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-identity-never-in-namespace",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-person-ssn-unique-for-us",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-person-privacy-consent-required-br-eu",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "GestorEquipe",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "GestorEquipe",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.docType",
+              "type": "enum"
+            },
+            {
+              "name": "details.identification.docId",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.person",
+              "type": "object"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.reembolsoDespesas",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [],
+          "imports": []
+        }
+      }
+    }
+  ],
+  "valueObjects": [],
+  "problems": [],
+  "normalizations": [
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.base.relationshipRefs",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "Colaborador.record.fields.details.base.relationshipRefs",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.base",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.general",
+      "detail": "description,open,owner"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "Colaborador.record.fields.details.general",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.identification.countryCode",
+      "detail": "default,description,indexed,max,maxLength,min,pattern,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.identification.docId",
+      "detail": "description,indexed,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.identification.docType",
+      "detail": "description,indexed,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.identification.name",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.identification.status",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.identification.subtype",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.identification.tags",
+      "detail": "collection,description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.identification",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.person.privacyConsent",
+      "detail": "description,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Colaborador.record.fields.details.person.privacyConsent",
+      "detail": "PrivacyConsent"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "Colaborador.record.fields.details.person.privacyConsent",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.person",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details.reembolsoDespesas",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.details",
+      "detail": "description,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.id",
+      "detail": "description,indexed,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Colaborador.record.fields.version",
+      "detail": "description,required,writePrecondition"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "Colaborador",
+      "detail": "no lifecycleStates and no transitions"
+    },
+    {
+      "code": "ROLE_STORAGE_MDM",
+      "path": "Colaborador",
+      "detail": "kind role has no storage target"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.colaboradorId",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.colaboradorId",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.details.categoria",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.details.categoria",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.details.dataDespesa",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.details.dataDespesa",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.details.dataPagamento",
+      "detail": "description,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.details.dataPagamento",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.details.descricao",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.details.descricao",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.details.motivoRejeicao",
+      "detail": "description,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.details.motivoRejeicao",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.details.reenvioRealizado",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.details.reenvioRealizado",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.details.valor",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.details.valor",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.details",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.details",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.status",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Despesa.record.fields.status",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Despesa.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Despesa.transitions.0",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Despesa.transitions.1",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Despesa.transitions.2",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Despesa.transitions.3",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Despesa.transitions.4",
+      "detail": "description,payload"
+    },
+    {
+      "code": "INITIAL_STATE_DERIVED",
+      "path": "Despesa",
+      "detail": "draft"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.base",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.general",
+      "detail": "description,open,owner"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "GestorEquipe.record.fields.details.general",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.identification.countryCode",
+      "detail": "default,description,indexed,max,maxLength,min,pattern,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.identification.docId",
+      "detail": "description,indexed,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.identification.docType",
+      "detail": "description,indexed,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.identification.name",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.identification.status",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.identification.subtype",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.identification",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.person",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details.reembolsoDespesas",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.details",
+      "detail": "description,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.id",
+      "detail": "description,indexed,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "GestorEquipe.record.fields.version",
+      "detail": "description,required,writePrecondition"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "GestorEquipe",
+      "detail": "no lifecycleStates and no transitions"
+    },
+    {
+      "code": "ROLE_STORAGE_MDM",
+      "path": "GestorEquipe",
+      "detail": "kind role has no storage target"
+    },
+    {
+      "code": "NESTED_KEPT",
+      "path": "reembolsoDespesas",
+      "detail": "No nested object is the target of a record reference. Nested fields stay on the entity."
+    }
+  ],
+  "preserved": [],
+  "removed": [],
+  "emit": [
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Colaborador",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Colaborador",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.docType",
+              "type": "enum"
+            },
+            {
+              "name": "details.identification.docId",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.tags",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.base.relationshipRefs",
+              "type": "object",
+              "derived": true
+            },
+            {
+              "name": "details.person",
+              "type": "object"
+            },
+            {
+              "name": "details.person.privacyConsent",
+              "type": "object"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.reembolsoDespesas",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/reembolsoDespesas/domainEntity/Colaborador",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/colaborador.defs.ts",
+          "outputPath": "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/colaborador.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Despesa",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/colaborador.defs.ts"
+        ],
+        "data": {
+          "entityId": "Despesa",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "colaboradorId",
+              "type": "record",
+              "ref": "Colaborador"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.dataDespesa",
+              "type": "date"
+            },
+            {
+              "name": "details.categoria",
+              "type": "string"
+            },
+            {
+              "name": "details.valor",
+              "type": "money"
+            },
+            {
+              "name": "details.descricao",
+              "type": "text"
+            },
+            {
+              "name": "details.motivoRejeicao",
+              "type": "text"
+            },
+            {
+              "name": "details.reenvioRealizado",
+              "type": "boolean"
+            },
+            {
+              "name": "details.dataPagamento",
+              "type": "date"
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "draft",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "awaitingApproval",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "rejected",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "approved",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "paid",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "enviarParaAprovacao",
+                "from": [
+                  "draft"
+                ],
+                "to": "awaitingApproval",
+                "by": [
+                  "colaborador"
+                ],
+                "ruleRefs": [
+                  "proofRequiredBeforeSubmission",
+                  "expenseOwnerOnly",
+                  "validExpenseData"
+                ]
+              },
+              {
+                "transitionId": "reenviarParaAprovacao",
+                "from": [
+                  "rejected"
+                ],
+                "to": "awaitingApproval",
+                "by": [
+                  "colaborador"
+                ],
+                "ruleRefs": [
+                  "expenseOwnerOnly",
+                  "singleResubmission",
+                  "proofRequiredBeforeSubmission",
+                  "validExpenseData"
+                ]
+              },
+              {
+                "transitionId": "aprovarDespesa",
+                "from": [
+                  "awaitingApproval"
+                ],
+                "to": "approved",
+                "by": [
+                  "gestorEquipe"
+                ],
+                "ruleRefs": [
+                  "managerTeamExpenseAccess"
+                ]
+              },
+              {
+                "transitionId": "rejeitarDespesa",
+                "from": [
+                  "awaitingApproval"
+                ],
+                "to": "rejected",
+                "by": [
+                  "gestorEquipe"
+                ],
+                "ruleRefs": [
+                  "managerTeamExpenseAccess",
+                  "rejectionReasonRequired"
+                ]
+              },
+              {
+                "transitionId": "registrarPagamento",
+                "from": [
+                  "approved"
+                ],
+                "to": "paid",
+                "by": [
+                  "financeiro"
+                ],
+                "ruleRefs": [
+                  "financeApprovedExpenseAccess",
+                  "paymentDateRequired"
+                ]
+              }
+            ]
+          },
+          "invariants": [],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/reembolsoDespesas/domainEntity/Despesa",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/despesa.defs.ts",
+          "outputPath": "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/despesa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/colaborador.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/reembolsoDespesas/domainEntity/Colaborador"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "GestorEquipe",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "GestorEquipe",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.docType",
+              "type": "enum"
+            },
+            {
+              "name": "details.identification.docId",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.person",
+              "type": "object"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.reembolsoDespesas",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/reembolsoDespesas/domainEntity/GestorEquipe",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/gestorEquipe.defs.ts",
+          "outputPath": "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/gestorEquipe.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    }
+  ]
+}

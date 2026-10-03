@@ -1,0 +1,1451 @@
+{
+  "schemaVersion": "2026-10-01-d1-usecases-v2",
+  "repairs": 1,
+  "request": {
+    "project": 102047,
+    "moduleName": "reembolsoDespesas",
+    "usecases": [
+      {
+        "usecaseId": "aprovarDespesa",
+        "entity": "Despesa",
+        "operation": "transition",
+        "transitionRef": "aprovarDespesa",
+        "routes": [
+          "reembolsoDespesas.despesas_da_equipe.approveExpense"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/aprovarDespesa.defs.ts"
+      },
+      {
+        "usecaseId": "createDespesa",
+        "entity": "Despesa",
+        "operation": "create",
+        "routes": [
+          "reembolsoDespesas.minhas_despesas.registrarDespesa"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/createDespesa.defs.ts"
+      },
+      {
+        "usecaseId": "enviarParaAprovacao",
+        "entity": "Despesa",
+        "operation": "transition",
+        "transitionRef": "enviarParaAprovacao",
+        "routes": [
+          "reembolsoDespesas.minhas_despesas.enviarParaAprovacao"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/enviarParaAprovacao.defs.ts"
+      },
+      {
+        "usecaseId": "listColaborador",
+        "entity": "Colaborador",
+        "operation": "list",
+        "routes": [
+          "reembolsoDespesas.despesas_da_equipe.load"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/listColaborador.defs.ts"
+      },
+      {
+        "usecaseId": "listDespesa",
+        "entity": "Despesa",
+        "operation": "list",
+        "routes": [
+          "reembolsoDespesas.despesas_aprovadas.load",
+          "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
+          "reembolsoDespesas.despesas_da_equipe.load",
+          "reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe",
+          "reembolsoDespesas.minhas_despesas.load",
+          "reembolsoDespesas.minhas_despesas.loadMinhasDespesas"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/listDespesa.defs.ts"
+      },
+      {
+        "usecaseId": "reenviarParaAprovacao",
+        "entity": "Despesa",
+        "operation": "transition",
+        "transitionRef": "reenviarParaAprovacao",
+        "routes": [
+          "reembolsoDespesas.minhas_despesas.reenviarParaAprovacao"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/reenviarParaAprovacao.defs.ts"
+      },
+      {
+        "usecaseId": "registrarPagamento",
+        "entity": "Despesa",
+        "operation": "transition",
+        "transitionRef": "registrarPagamento",
+        "routes": [
+          "reembolsoDespesas.despesas_aprovadas.registerPayment"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/registrarPagamento.defs.ts"
+      },
+      {
+        "usecaseId": "rejeitarDespesa",
+        "entity": "Despesa",
+        "operation": "transition",
+        "transitionRef": "rejeitarDespesa",
+        "routes": [
+          "reembolsoDespesas.despesas_da_equipe.rejectExpense"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/rejeitarDespesa.defs.ts"
+      },
+      {
+        "usecaseId": "updateDespesa",
+        "entity": "Despesa",
+        "operation": "update",
+        "routes": [
+          "reembolsoDespesas.minhas_despesas.corrigirDespesa"
+        ],
+        "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/updateDespesa.defs.ts"
+      }
+    ],
+    "ports": [
+      {
+        "portId": "DespesaRepository",
+        "entityId": "Despesa",
+        "defPath": "l1/reembolsoDespesas/layer_2_application/ports/despesaRepository.defs.ts",
+        "methods": [
+          "create",
+          "list",
+          "update",
+          "transition"
+        ],
+        "signatures": [
+          {
+            "name": "create",
+            "params": [
+              "Despesa"
+            ],
+            "returns": "Despesa"
+          },
+          {
+            "name": "list",
+            "params": [
+              "DespesaFilter"
+            ],
+            "returns": "Despesa[]"
+          },
+          {
+            "name": "update",
+            "params": [
+              "Despesa"
+            ],
+            "returns": "Despesa"
+          },
+          {
+            "name": "transition",
+            "params": [
+              "Despesa",
+              "transitionId"
+            ],
+            "returns": "Despesa"
+          }
+        ]
+      }
+    ],
+    "entities": [
+      {
+        "entityId": "Colaborador",
+        "storageTarget": "mdm",
+        "defPath": "l1/reembolsoDespesas/layer_3_domain/entities/colaborador.defs.ts",
+        "namespace": "reembolsoDespesas",
+        "fields": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "derived": true
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "derived": true
+          },
+          {
+            "name": "details",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.identification",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.identification.subtype",
+            "type": "enum",
+            "derived": true
+          },
+          {
+            "name": "details.identification.name",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.identification.status",
+            "type": "enum",
+            "derived": true
+          },
+          {
+            "name": "details.identification.docType",
+            "type": "enum",
+            "derived": false
+          },
+          {
+            "name": "details.identification.docId",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.identification.countryCode",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.identification.tags",
+            "type": "string",
+            "derived": true
+          },
+          {
+            "name": "details.base",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.base.relationshipRefs",
+            "type": "object",
+            "derived": true
+          },
+          {
+            "name": "details.person",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.person.privacyConsent",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.general",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.reembolsoDespesas",
+            "type": "object",
+            "derived": false
+          }
+        ],
+        "transitions": [],
+        "rules": [
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-document-shape-validated",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-person-privacy-consent-required-br-eu",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          }
+        ],
+        "uniqueKeys": [],
+        "enumerations": [
+          {
+            "path": "details.identification.subtype",
+            "values": [
+              "Person"
+            ]
+          },
+          {
+            "path": "details.identification.status",
+            "values": [
+              "Active",
+              "Inactive",
+              "Merged",
+              "Blocked"
+            ]
+          },
+          {
+            "path": "details.identification.docType",
+            "values": [
+              "SSN",
+              "EIN",
+              "Passport",
+              "DriversLicense",
+              "NationalId",
+              "CPF",
+              "CNPJ",
+              "VAT",
+              "Other"
+            ]
+          }
+        ],
+        "capabilities": [
+          "audit",
+          "inactivate",
+          "link",
+          "listLinks",
+          "locate.byDocument",
+          "locate.byName",
+          "read.byId",
+          "register.createOrAttach",
+          "statusHistory.read",
+          "unlink"
+        ],
+        "platformFields": [
+          "details.identification.countryCode",
+          "details.identification.docId",
+          "details.identification.docType",
+          "details.identification.name",
+          "details.person.privacyConsent"
+        ]
+      },
+      {
+        "entityId": "Despesa",
+        "storageTarget": "moduleDatabase",
+        "defPath": "l1/reembolsoDespesas/layer_3_domain/entities/despesa.defs.ts",
+        "namespace": "",
+        "fields": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "derived": true
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "derived": true
+          },
+          {
+            "name": "colaboradorId",
+            "type": "record",
+            "derived": false
+          },
+          {
+            "name": "status",
+            "type": "enum",
+            "derived": false
+          },
+          {
+            "name": "details",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.dataDespesa",
+            "type": "date",
+            "derived": false
+          },
+          {
+            "name": "details.categoria",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.valor",
+            "type": "money",
+            "derived": false
+          },
+          {
+            "name": "details.descricao",
+            "type": "text",
+            "derived": false
+          },
+          {
+            "name": "details.motivoRejeicao",
+            "type": "text",
+            "derived": false
+          },
+          {
+            "name": "details.reenvioRealizado",
+            "type": "boolean",
+            "derived": false
+          },
+          {
+            "name": "details.dataPagamento",
+            "type": "date",
+            "derived": false
+          }
+        ],
+        "transitions": [
+          {
+            "transitionId": "enviarParaAprovacao",
+            "from": [
+              "draft"
+            ],
+            "to": "awaitingApproval",
+            "by": [
+              "colaborador"
+            ],
+            "ruleRefs": [
+              "proofRequiredBeforeSubmission",
+              "expenseOwnerOnly",
+              "validExpenseData"
+            ],
+            "payload": [],
+            "description": "Envia a despesa registrada para análise do gestor da equipe."
+          },
+          {
+            "transitionId": "reenviarParaAprovacao",
+            "from": [
+              "rejected"
+            ],
+            "to": "awaitingApproval",
+            "by": [
+              "colaborador"
+            ],
+            "ruleRefs": [
+              "expenseOwnerOnly",
+              "singleResubmission",
+              "proofRequiredBeforeSubmission",
+              "validExpenseData"
+            ],
+            "payload": [],
+            "description": "Reenvia para análise uma despesa rejeitada que foi corrigida pelo colaborador."
+          },
+          {
+            "transitionId": "aprovarDespesa",
+            "from": [
+              "awaitingApproval"
+            ],
+            "to": "approved",
+            "by": [
+              "gestorEquipe"
+            ],
+            "ruleRefs": [
+              "managerTeamExpenseAccess"
+            ],
+            "payload": [],
+            "description": "Aprova a despesa da equipe para disponibilizá-la ao financeiro."
+          },
+          {
+            "transitionId": "rejeitarDespesa",
+            "from": [
+              "awaitingApproval"
+            ],
+            "to": "rejected",
+            "by": [
+              "gestorEquipe"
+            ],
+            "ruleRefs": [
+              "managerTeamExpenseAccess",
+              "rejectionReasonRequired"
+            ],
+            "payload": [
+              "details.motivoRejeicao"
+            ],
+            "description": "Rejeita a despesa da equipe e registra a justificativa da decisão."
+          },
+          {
+            "transitionId": "registrarPagamento",
+            "from": [
+              "approved"
+            ],
+            "to": "paid",
+            "by": [
+              "financeiro"
+            ],
+            "ruleRefs": [
+              "financeApprovedExpenseAccess",
+              "paymentDateRequired"
+            ],
+            "payload": [
+              "details.dataPagamento"
+            ],
+            "description": "Registra o pagamento da despesa aprovada."
+          }
+        ],
+        "rules": [
+          {
+            "ruleId": "expenseOwnerOnly",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts"
+          },
+          {
+            "ruleId": "managerTeamExpenseAccess",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts"
+          },
+          {
+            "ruleId": "financeApprovedExpenseAccess",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts"
+          },
+          {
+            "ruleId": "validExpenseData",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts"
+          },
+          {
+            "ruleId": "proofRequiredBeforeSubmission",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts"
+          },
+          {
+            "ruleId": "rejectionReasonRequired",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts"
+          },
+          {
+            "ruleId": "singleResubmission",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts"
+          },
+          {
+            "ruleId": "paymentDateRequired",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts"
+          }
+        ],
+        "uniqueKeys": [],
+        "enumerations": [
+          {
+            "path": "status",
+            "values": [
+              "draft",
+              "awaitingApproval",
+              "rejected",
+              "approved",
+              "paid"
+            ]
+          }
+        ],
+        "capabilities": [
+          "attach.document",
+          "count",
+          "create",
+          "listByForeignKey",
+          "locate.byColumn",
+          "read.byId",
+          "read.mdmRecord",
+          "transition",
+          "update"
+        ],
+        "platformFields": []
+      },
+      {
+        "entityId": "GestorEquipe",
+        "storageTarget": "mdm",
+        "defPath": "l1/reembolsoDespesas/layer_3_domain/entities/gestorEquipe.defs.ts",
+        "namespace": "reembolsoDespesas",
+        "fields": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "derived": true
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "derived": true
+          },
+          {
+            "name": "details",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.identification",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.identification.subtype",
+            "type": "enum",
+            "derived": true
+          },
+          {
+            "name": "details.identification.name",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.identification.status",
+            "type": "enum",
+            "derived": true
+          },
+          {
+            "name": "details.identification.docType",
+            "type": "enum",
+            "derived": false
+          },
+          {
+            "name": "details.identification.docId",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.identification.countryCode",
+            "type": "string",
+            "derived": false
+          },
+          {
+            "name": "details.base",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.person",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.general",
+            "type": "object",
+            "derived": false
+          },
+          {
+            "name": "details.reembolsoDespesas",
+            "type": "object",
+            "derived": false
+          }
+        ],
+        "transitions": [],
+        "rules": [
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-document-shape-validated",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-person-ssn-unique-for-us",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          },
+          {
+            "ruleId": "rule-person-privacy-consent-required-br-eu",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts"
+          }
+        ],
+        "uniqueKeys": [],
+        "enumerations": [
+          {
+            "path": "details.identification.subtype",
+            "values": [
+              "Person"
+            ]
+          },
+          {
+            "path": "details.identification.status",
+            "values": [
+              "Active",
+              "Inactive",
+              "Merged",
+              "Blocked"
+            ]
+          },
+          {
+            "path": "details.identification.docType",
+            "values": [
+              "SSN",
+              "EIN",
+              "Passport",
+              "DriversLicense",
+              "NationalId",
+              "CPF",
+              "CNPJ",
+              "VAT",
+              "Other"
+            ]
+          }
+        ],
+        "capabilities": [
+          "audit",
+          "edit.platformFields",
+          "inactivate",
+          "link",
+          "listLinks",
+          "locate.byDocument",
+          "locate.byName",
+          "read.byId",
+          "register.createOrAttach",
+          "unlink"
+        ],
+        "platformFields": [
+          "details.identification.countryCode",
+          "details.identification.docId",
+          "details.identification.docType",
+          "details.identification.name"
+        ]
+      }
+    ],
+    "moduleRules": [
+      "expenseOwnerOnly",
+      "financeApprovedExpenseAccess",
+      "managerTeamExpenseAccess",
+      "paymentDateRequired",
+      "proofRequiredBeforeSubmission",
+      "rejectionReasonRequired",
+      "singleResubmission",
+      "validExpenseData"
+    ],
+    "outbound": [
+      {
+        "eventId": "aprovarDespesa",
+        "on": "Despesa.aprovarDespesa",
+        "kind": "event",
+        "to": "financeiro",
+        "description": "Publica a despesa aprovada para que o módulo financeiro possa tratá-la."
+      }
+    ],
+    "contracts": [
+      {
+        "pageId": "despesas_aprovadas",
+        "path": "l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.ts",
+        "source": "/// <mls fileReference=\"_102047_/l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface DespesaLoad {\n  id: string;\n  readonly version: number;\n  colaboradorId: string;\n  status: 'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid';\n  details: {\n    dataDespesa: string;\n    categoria: string;\n    valor: string;\n    dataPagamento: string;\n  };\n}\n\nexport interface DespesaRegisterPayment {\n  id: string;\n  readonly version: number;\n  details: {\n    dataPagamento: string;\n  };\n}\n\nexport interface Despesas_aprovadasContracts {\n  'reembolsoDespesas.despesas_aprovadas.load': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { despesasAprovadas: DespesaLoad[]; pageApprovedExpensesList: number; pageSizeApprovedExpensesList: number; hasMoreApprovedExpensesList: boolean };\n    meta: { output: { despesasAprovadas: { entity: 'Despesa'; many: true } }; lists: { approvedExpensesList: { key: 'despesasAprovadas'; page: 'pageApprovedExpensesList'; pageSize: 'pageSizeApprovedExpensesList'; hasMore: 'hasMoreApprovedExpensesList' } }; params: { colaboradorId: { filters: 'despesasAprovadas'; field: 'colaboradorId' }; page: { pages: 'approvedExpensesList' }; pageSize: { pages: 'approvedExpensesList' } } };\n    rules: ['financeApprovedExpenseAccess'];\n    access: { actors: ['financeiro']; grants: ['financeiroConsultaEpagaDespesasAprovadas']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { despesasAprovadas: DespesaLoad[]; pageApprovedExpensesList: number; pageSizeApprovedExpensesList: number; hasMoreApprovedExpensesList: boolean };\n    meta: { output: { despesasAprovadas: { entity: 'Despesa'; many: true } }; lists: { approvedExpensesList: { key: 'despesasAprovadas'; page: 'pageApprovedExpensesList'; pageSize: 'pageSizeApprovedExpensesList'; hasMore: 'hasMoreApprovedExpensesList' } }; params: { colaboradorId: { filters: 'despesasAprovadas'; field: 'colaboradorId' }; page: { pages: 'approvedExpensesList' }; pageSize: { pages: 'approvedExpensesList' } } };\n    rules: ['financeApprovedExpenseAccess'];\n    access: { actors: ['financeiro']; grants: ['financeiroConsultaEpagaDespesasAprovadas']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_aprovadas.registerPayment': {\n    kind: 'cmd';\n    writes: 'Despesa.registrarPagamento';\n    input: { details: { dataPagamento: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaRegisterPayment };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['financeApprovedExpenseAccess', 'paymentDateRequired'];\n    access: { actors: ['financeiro']; grants: ['financeiroConsultaEpagaDespesasAprovadas']; scope: 'related' };\n  };\n}\n"
+      },
+      {
+        "pageId": "despesas_da_equipe",
+        "path": "l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts",
+        "source": "/// <mls fileReference=\"_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface DespesaLoad {\n  id: string;\n  readonly version: number;\n  colaboradorId: string;\n  status: 'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid';\n  details: {\n    dataDespesa: string;\n    categoria: string;\n    valor: string;\n    reenvioRealizado: boolean;\n    motivoRejeicao: string;\n  };\n}\n\nexport interface ColaboradorLoad {\n  id: string;\n  details: {\n    identification: string;\n  };\n}\n\nexport interface DespesaApproveExpense {\n  id: string;\n  readonly version: number;\n  details: {\n    motivoRejeicao: string;\n  };\n}\n\nexport interface Despesas_da_equipeContracts {\n  'reembolsoDespesas.despesas_da_equipe.load': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { despesasDaEquipe: DespesaLoad[]; colaborador: ColaboradorLoad[]; pagePendingTeamExpenses: number; pageSizePendingTeamExpenses: number; hasMorePendingTeamExpenses: boolean };\n    meta: { output: { despesasDaEquipe: { entity: 'Despesa'; many: true }; colaborador: { entity: 'Colaborador'; many: true } }; lists: { pendingTeamExpenses: { key: 'despesasDaEquipe'; page: 'pagePendingTeamExpenses'; pageSize: 'pageSizePendingTeamExpenses'; hasMore: 'hasMorePendingTeamExpenses' } }; params: { colaboradorId: { filters: 'despesasDaEquipe'; field: 'colaboradorId' }; page: { pages: 'pendingTeamExpenses' }; pageSize: { pages: 'pendingTeamExpenses' } } };\n    rules: ['managerTeamExpenseAccess'];\n    access: { actors: ['gestorEquipe']; grants: ['gestorAnalisaDespesasDaEquipe']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { despesasDaEquipe: DespesaLoad[]; pagePendingTeamExpenses: number; pageSizePendingTeamExpenses: number; hasMorePendingTeamExpenses: boolean };\n    meta: { output: { despesasDaEquipe: { entity: 'Despesa'; many: true } }; lists: { pendingTeamExpenses: { key: 'despesasDaEquipe'; page: 'pagePendingTeamExpenses'; pageSize: 'pageSizePendingTeamExpenses'; hasMore: 'hasMorePendingTeamExpenses' } }; params: { colaboradorId: { filters: 'despesasDaEquipe'; field: 'colaboradorId' }; page: { pages: 'pendingTeamExpenses' }; pageSize: { pages: 'pendingTeamExpenses' } } };\n    rules: ['managerTeamExpenseAccess'];\n    access: { actors: ['gestorEquipe']; grants: ['gestorAnalisaDespesasDaEquipe']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_da_equipe.approveExpense': {\n    kind: 'cmd';\n    writes: 'Despesa.aprovarDespesa';\n    input: { details: { motivoRejeicao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaApproveExpense };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['managerTeamExpenseAccess'];\n    access: { actors: ['gestorEquipe']; grants: ['gestorAnalisaDespesasDaEquipe']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_da_equipe.rejectExpense': {\n    kind: 'cmd';\n    writes: 'Despesa.rejeitarDespesa';\n    input: { details: { motivoRejeicao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaApproveExpense };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['managerTeamExpenseAccess', 'rejectionReasonRequired'];\n    access: { actors: ['gestorEquipe']; grants: ['gestorAnalisaDespesasDaEquipe']; scope: 'related' };\n  };\n}\n"
+      },
+      {
+        "pageId": "minhas_despesas",
+        "path": "l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts",
+        "source": "/// <mls fileReference=\"_102047_/l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface DespesaLoad {\n  id: string;\n  readonly version: number;\n  status: 'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid';\n  details: {\n    dataDespesa: string;\n    categoria: string;\n    valor: string;\n    descricao: string;\n    reenvioRealizado: boolean;\n  };\n}\n\nexport interface DespesaRegistrarDespesa {\n  id: string;\n  readonly version: number;\n  details: {\n    dataDespesa: string;\n    categoria: string;\n    valor: string;\n    descricao: string;\n  };\n}\n\nexport interface Minhas_despesasContracts {\n  'reembolsoDespesas.minhas_despesas.load': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { minhasDespesas: DespesaLoad[]; pageListaMinhasDespesas: number; pageSizeListaMinhasDespesas: number; hasMoreListaMinhasDespesas: boolean };\n    meta: { output: { minhasDespesas: { entity: 'Despesa'; many: true } }; lists: { listaMinhasDespesas: { key: 'minhasDespesas'; page: 'pageListaMinhasDespesas'; pageSize: 'pageSizeListaMinhasDespesas'; hasMore: 'hasMoreListaMinhasDespesas' } }; params: { colaboradorId: { filters: 'minhasDespesas'; field: 'colaboradorId' }; page: { pages: 'listaMinhasDespesas' }; pageSize: { pages: 'listaMinhasDespesas' } } };\n    rules: ['expenseOwnerOnly'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.loadMinhasDespesas': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { minhasDespesas: DespesaLoad[]; pageListaMinhasDespesas: number; pageSizeListaMinhasDespesas: number; hasMoreListaMinhasDespesas: boolean };\n    meta: { output: { minhasDespesas: { entity: 'Despesa'; many: true } }; lists: { listaMinhasDespesas: { key: 'minhasDespesas'; page: 'pageListaMinhasDespesas'; pageSize: 'pageSizeListaMinhasDespesas'; hasMore: 'hasMoreListaMinhasDespesas' } }; params: { colaboradorId: { filters: 'minhasDespesas'; field: 'colaboradorId' }; page: { pages: 'listaMinhasDespesas' }; pageSize: { pages: 'listaMinhasDespesas' } } };\n    rules: ['expenseOwnerOnly'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.registrarDespesa': {\n    kind: 'cmd';\n    writes: 'Despesa.create';\n    input: { details: { dataDespesa: string; categoria: string; valor: string; descricao: string }; colaboradorId: string };\n    output: { despesa: DespesaRegistrarDespesa };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['validExpenseData'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.corrigirDespesa': {\n    kind: 'cmd';\n    writes: 'Despesa.update';\n    input: { details: { dataDespesa: string; categoria: string; valor: string; descricao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaRegistrarDespesa };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['expenseOwnerOnly', 'validExpenseData', 'singleResubmission'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.enviarParaAprovacao': {\n    kind: 'cmd';\n    writes: 'Despesa.enviarParaAprovacao';\n    input: { details: { dataDespesa: string; categoria: string; valor: string; descricao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaRegistrarDespesa };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['expenseOwnerOnly', 'validExpenseData', 'proofRequiredBeforeSubmission'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.reenviarParaAprovacao': {\n    kind: 'cmd';\n    writes: 'Despesa.reenviarParaAprovacao';\n    input: { details: { dataDespesa: string; categoria: string; valor: string; descricao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaRegistrarDespesa };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['expenseOwnerOnly', 'validExpenseData', 'proofRequiredBeforeSubmission', 'singleResubmission'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n}\n"
+      }
+    ],
+    "contexts": [
+      {
+        "usecaseId": "aprovarDespesa",
+        "lifecycle": true,
+        "transition": {
+          "transitionId": "aprovarDespesa",
+          "from": [
+            "awaitingApproval"
+          ],
+          "to": "approved",
+          "by": [
+            "gestorEquipe"
+          ],
+          "ruleRefs": [
+            "managerTeamExpenseAccess"
+          ],
+          "payload": [],
+          "description": "Aprova a despesa da equipe para disponibilizá-la ao financeiro."
+        },
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [],
+        "pendingRules": [],
+        "portId": "DespesaRepository",
+        "portMethods": [
+          {
+            "name": "transition",
+            "params": [
+              "Despesa",
+              "transitionId"
+            ],
+            "returns": "Despesa"
+          }
+        ],
+        "effects": [
+          {
+            "eventId": "aprovarDespesa",
+            "on": "Despesa.aprovarDespesa",
+            "kind": "event",
+            "to": "financeiro",
+            "description": "Publica a despesa aprovada para que o módulo financeiro possa tratá-la."
+          }
+        ],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l4/reembolsoDespesas/integration.defs.ts",
+            "sha256": "sha256:1fd63a1496f80b83eefa6776393130d5f6c469633fe01e664e3f8861cdafbfcc"
+          },
+          {
+            "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+            "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+          },
+          {
+            "path": "l4/reembolsoDespesas/rules.defs.ts",
+            "sha256": "sha256:ada573a05887aacd9c75a0607e75bd7251fb54488034bf99a1264f1aff610976"
+          }
+        ]
+      },
+      {
+        "usecaseId": "createDespesa",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [],
+        "pendingRules": [],
+        "portId": "DespesaRepository",
+        "portMethods": [
+          {
+            "name": "create",
+            "params": [
+              "Despesa"
+            ],
+            "returns": "Despesa"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+            "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+          }
+        ]
+      },
+      {
+        "usecaseId": "enviarParaAprovacao",
+        "lifecycle": true,
+        "transition": {
+          "transitionId": "enviarParaAprovacao",
+          "from": [
+            "draft"
+          ],
+          "to": "awaitingApproval",
+          "by": [
+            "colaborador"
+          ],
+          "ruleRefs": [
+            "proofRequiredBeforeSubmission",
+            "expenseOwnerOnly",
+            "validExpenseData"
+          ],
+          "payload": [],
+          "description": "Envia a despesa registrada para análise do gestor da equipe."
+        },
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [],
+        "pendingRules": [],
+        "portId": "DespesaRepository",
+        "portMethods": [
+          {
+            "name": "transition",
+            "params": [
+              "Despesa",
+              "transitionId"
+            ],
+            "returns": "Despesa"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l4/reembolsoDespesas/integration.defs.ts",
+            "sha256": "sha256:1fd63a1496f80b83eefa6776393130d5f6c469633fe01e664e3f8861cdafbfcc"
+          },
+          {
+            "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+            "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+          },
+          {
+            "path": "l4/reembolsoDespesas/rules.defs.ts",
+            "sha256": "sha256:ada573a05887aacd9c75a0607e75bd7251fb54488034bf99a1264f1aff610976"
+          }
+        ]
+      },
+      {
+        "usecaseId": "listColaborador",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [
+          {
+            "name": "read.byId",
+            "text": "Consulta um colaborador pelo identificador mestre · usa leitura direta pelo mdmId · usado pelas telas de despesas e de aprovação para apresentar o responsável."
+          },
+          {
+            "name": "locate.byDocument",
+            "text": "Localiza uma pessoa pelo documento nacional · consulta o índice de documento antes do vínculo ao módulo · usado para evitar criar colaboradores duplicados."
+          },
+          {
+            "name": "locate.byName",
+            "text": "Localiza colaboradores pelo nome · pesquisa o índice de pessoas ativas por texto · usado na manutenção da vinculação do colaborador ao gestor."
+          },
+          {
+            "name": "listLinks",
+            "text": "Lista os vínculos do colaborador · consulta relacionamentos ativos e seu período de validade · usado para verificar o gestor responsável pela equipe."
+          }
+        ],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [
+          {
+            "ruleId": "rule-document-shape-validated",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          },
+          {
+            "ruleId": "rule-person-privacy-consent-required-br-eu",
+            "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-person-privacy-consent-required-br-eu",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "DELEGATION_UNPROVEN"
+          }
+        ],
+        "pendingRules": [
+          {
+            "ruleId": "rule-document-shape-validated",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "Addresses, consent, general and the module namespace are validated on write against the schema derived from this ontology · engine · platform: missing, nothing validates the document today"
+          },
+          {
+            "ruleId": "rule-foreign-namespace-refused",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "A caller carrying a moduleId may write the platform keys, general and its own key; any other module key is refused with MDM_FOREIGN_NAMESPACE · engine · platform: ready"
+          },
+          {
+            "ruleId": "rule-identity-never-in-namespace",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "Identity, document, contact and login are platform layers; a module never redeclares them inside details[moduleId] · engine · platform: partial"
+          },
+          {
+            "ruleId": "rule-person-privacy-consent-required-br-eu",
+            "owner": "platform",
+            "source": "/_102034_/l4/ontology/mdm.defs.ts",
+            "text": "A person living in Brazil or the EU without a valid privacy consent is forced to Inactive · engine · platform: ready"
+          }
+        ],
+        "portId": "",
+        "portMethods": [],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "/_102034_/l4/ontology/mdm.defs.ts",
+            "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
+          },
+          {
+            "path": "l4/reembolsoDespesas/ontology/Colaborador.defs.ts",
+            "sha256": "sha256:e75e2d3d13c464187e56944407c217aae12c16bf556460ce0c0e169d6ac6905f"
+          }
+        ]
+      },
+      {
+        "usecaseId": "listDespesa",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [
+          {
+            "ruleId": "expenseOwnerOnly",
+            "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "APPLICABILITY_UNDECLARED"
+          },
+          {
+            "ruleId": "financeApprovedExpenseAccess",
+            "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "APPLICABILITY_UNDECLARED"
+          },
+          {
+            "ruleId": "managerTeamExpenseAccess",
+            "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "APPLICABILITY_UNDECLARED"
+          },
+          {
+            "ruleId": "paymentDateRequired",
+            "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "APPLICABILITY_UNDECLARED"
+          },
+          {
+            "ruleId": "proofRequiredBeforeSubmission",
+            "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "APPLICABILITY_UNDECLARED"
+          },
+          {
+            "ruleId": "rejectionReasonRequired",
+            "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "APPLICABILITY_UNDECLARED"
+          },
+          {
+            "ruleId": "singleResubmission",
+            "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "APPLICABILITY_UNDECLARED"
+          },
+          {
+            "ruleId": "validExpenseData",
+            "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+            "consumer": "operation:list",
+            "enforcement": "pending",
+            "gap": "APPLICABILITY_UNDECLARED"
+          }
+        ],
+        "pendingRules": [
+          {
+            "ruleId": "expenseOwnerOnly",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts",
+            "text": "Cada colaborador somente pode consultar, corrigir ou reenviar despesas que tenha registrado."
+          },
+          {
+            "ruleId": "financeApprovedExpenseAccess",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts",
+            "text": "O financeiro somente pode consultar despesas aprovadas."
+          },
+          {
+            "ruleId": "managerTeamExpenseAccess",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts",
+            "text": "O gestor da equipe somente pode consultar, aprovar ou rejeitar despesas de colaboradores de sua própria equipe."
+          },
+          {
+            "ruleId": "paymentDateRequired",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts",
+            "text": "O registro de pagamento de uma despesa aprovada exige a data de pagamento."
+          },
+          {
+            "ruleId": "proofRequiredBeforeSubmission",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts",
+            "text": "Uma despesa somente pode ser enviada para aprovação quando possuir comprovante."
+          },
+          {
+            "ruleId": "rejectionReasonRequired",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts",
+            "text": "A rejeição de uma despesa exige o registro de um motivo pelo gestor da equipe."
+          },
+          {
+            "ruleId": "singleResubmission",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts",
+            "text": "Uma despesa rejeitada somente pode ser corrigida e reenviada uma vez."
+          },
+          {
+            "ruleId": "validExpenseData",
+            "owner": "module",
+            "source": "l4/reembolsoDespesas/rules.defs.ts",
+            "text": "Uma despesa deve conter data, categoria, valor e descrição para ser registrada ou enviada para aprovação."
+          }
+        ],
+        "portId": "DespesaRepository",
+        "portMethods": [
+          {
+            "name": "list",
+            "params": [
+              "DespesaFilter"
+            ],
+            "returns": "Despesa[]"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+            "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+          }
+        ]
+      },
+      {
+        "usecaseId": "reenviarParaAprovacao",
+        "lifecycle": true,
+        "transition": {
+          "transitionId": "reenviarParaAprovacao",
+          "from": [
+            "rejected"
+          ],
+          "to": "awaitingApproval",
+          "by": [
+            "colaborador"
+          ],
+          "ruleRefs": [
+            "expenseOwnerOnly",
+            "singleResubmission",
+            "proofRequiredBeforeSubmission",
+            "validExpenseData"
+          ],
+          "payload": [],
+          "description": "Reenvia para análise uma despesa rejeitada que foi corrigida pelo colaborador."
+        },
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [],
+        "pendingRules": [],
+        "portId": "DespesaRepository",
+        "portMethods": [
+          {
+            "name": "transition",
+            "params": [
+              "Despesa",
+              "transitionId"
+            ],
+            "returns": "Despesa"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l4/reembolsoDespesas/integration.defs.ts",
+            "sha256": "sha256:1fd63a1496f80b83eefa6776393130d5f6c469633fe01e664e3f8861cdafbfcc"
+          },
+          {
+            "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+            "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+          },
+          {
+            "path": "l4/reembolsoDespesas/rules.defs.ts",
+            "sha256": "sha256:ada573a05887aacd9c75a0607e75bd7251fb54488034bf99a1264f1aff610976"
+          }
+        ]
+      },
+      {
+        "usecaseId": "registrarPagamento",
+        "lifecycle": true,
+        "transition": {
+          "transitionId": "registrarPagamento",
+          "from": [
+            "approved"
+          ],
+          "to": "paid",
+          "by": [
+            "financeiro"
+          ],
+          "ruleRefs": [
+            "financeApprovedExpenseAccess",
+            "paymentDateRequired"
+          ],
+          "payload": [
+            "details.dataPagamento"
+          ],
+          "description": "Registra o pagamento da despesa aprovada."
+        },
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [],
+        "pendingRules": [],
+        "portId": "DespesaRepository",
+        "portMethods": [
+          {
+            "name": "transition",
+            "params": [
+              "Despesa",
+              "transitionId"
+            ],
+            "returns": "Despesa"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l4/reembolsoDespesas/integration.defs.ts",
+            "sha256": "sha256:1fd63a1496f80b83eefa6776393130d5f6c469633fe01e664e3f8861cdafbfcc"
+          },
+          {
+            "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+            "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+          },
+          {
+            "path": "l4/reembolsoDespesas/rules.defs.ts",
+            "sha256": "sha256:ada573a05887aacd9c75a0607e75bd7251fb54488034bf99a1264f1aff610976"
+          }
+        ]
+      },
+      {
+        "usecaseId": "rejeitarDespesa",
+        "lifecycle": true,
+        "transition": {
+          "transitionId": "rejeitarDespesa",
+          "from": [
+            "awaitingApproval"
+          ],
+          "to": "rejected",
+          "by": [
+            "gestorEquipe"
+          ],
+          "ruleRefs": [
+            "managerTeamExpenseAccess",
+            "rejectionReasonRequired"
+          ],
+          "payload": [
+            "details.motivoRejeicao"
+          ],
+          "description": "Rejeita a despesa da equipe e registra a justificativa da decisão."
+        },
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [],
+        "pendingRules": [],
+        "portId": "DespesaRepository",
+        "portMethods": [
+          {
+            "name": "transition",
+            "params": [
+              "Despesa",
+              "transitionId"
+            ],
+            "returns": "Despesa"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l4/reembolsoDespesas/integration.defs.ts",
+            "sha256": "sha256:1fd63a1496f80b83eefa6776393130d5f6c469633fe01e664e3f8861cdafbfcc"
+          },
+          {
+            "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+            "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+          },
+          {
+            "path": "l4/reembolsoDespesas/rules.defs.ts",
+            "sha256": "sha256:ada573a05887aacd9c75a0607e75bd7251fb54488034bf99a1264f1aff610976"
+          }
+        ]
+      },
+      {
+        "usecaseId": "updateDespesa",
+        "lifecycle": false,
+        "transition": null,
+        "capabilities": [],
+        "effectiveFields": [],
+        "routes": [],
+        "rules": [],
+        "rulePlan": [],
+        "pendingRules": [],
+        "portId": "DespesaRepository",
+        "portMethods": [
+          {
+            "name": "update",
+            "params": [
+              "Despesa"
+            ],
+            "returns": "Despesa"
+          }
+        ],
+        "effects": [],
+        "journeys": [],
+        "findings": [],
+        "sources": [
+          {
+            "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+            "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+          }
+        ]
+      }
+    ],
+    "sourceFindings": [],
+    "sourceHashes": [
+      {
+        "path": "/_102034_/l4/ontology/mdm.defs.ts",
+        "sha256": "sha256:3bae63952f7ad722df418ed3dd21a7c556fc6f9d024cdb743fc40405e29ff411"
+      },
+      {
+        "path": "l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.ts",
+        "sha256": "sha256:836c7cadda1ad4814e4fcac781cd79c035109a7be34a036c12267fab3c602572"
+      },
+      {
+        "path": "l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts",
+        "sha256": "sha256:d2ca1aa55ccc3f773e4f649afc7256852a1bb6b36bc3a6e460354b003453892e"
+      },
+      {
+        "path": "l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts",
+        "sha256": "sha256:282f6fd3e3dce417ee573334b18a14e4d138661506cff41f4627bc082977ee2b"
+      },
+      {
+        "path": "l4/reembolsoDespesas/access.defs.ts",
+        "sha256": "sha256:e0158830801753dd2ad7f6a7748b2cd83cdb5c49befa806edec98649e3f9a2e0"
+      },
+      {
+        "path": "l4/reembolsoDespesas/integration.defs.ts",
+        "sha256": "sha256:1fd63a1496f80b83eefa6776393130d5f6c469633fe01e664e3f8861cdafbfcc"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/analisarDecidirDespesa.defs.ts",
+        "sha256": "sha256:137587aab39b8072f2484800ae66afbb0c6974db22e03d2bcc29127ad1fc04f9"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/consultarDespesasAprovadas.defs.ts",
+        "sha256": "sha256:682a433280157c1b5f951af568318f96481d628c0bf96566ec7eab29d504d504"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/consultarMinhasDespesas.defs.ts",
+        "sha256": "sha256:07dc175fe24a4821804392058fca7a2368666d2cfe678513c0ccf8e5eeba0e2e"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/corrigirReenviarDespesa.defs.ts",
+        "sha256": "sha256:c9bb83fb1cd7ba67fb3963c4700cd04c7beedf2ab0334039b55a0b5e5d71162b"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/registrarEnviarDespesa.defs.ts",
+        "sha256": "sha256:5e4ca2fc001abe54d6ab2d6c79a20ec5bf4bca62df821faceab241dbab11de4e"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/registrarPagamentoDespesa.defs.ts",
+        "sha256": "sha256:9aa87f875678ba0e7de1569e0e794cbf52e549fcd6a754f7b2fe593d772033af"
+      },
+      {
+        "path": "l4/reembolsoDespesas/ontology/Colaborador.defs.ts",
+        "sha256": "sha256:e75e2d3d13c464187e56944407c217aae12c16bf556460ce0c0e169d6ac6905f"
+      },
+      {
+        "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+        "sha256": "sha256:e0ff54d64aa9eb60f3263455f7fd7d845cf5f90304c3da98a6339fa848e56e97"
+      },
+      {
+        "path": "l4/reembolsoDespesas/ontology/GestorEquipe.defs.ts",
+        "sha256": "sha256:a4467757d890b42d34677c60b029868150ac9d6bd37742cc4ccdb565aad22a5f"
+      },
+      {
+        "path": "l4/reembolsoDespesas/pool/l1/web/needs.json",
+        "sha256": "sha256:2d9d51e6f3e531e9284b77ff18d13690cce43f57029923f6cbe6f5316668d27c"
+      },
+      {
+        "path": "l4/reembolsoDespesas/rules.defs.ts",
+        "sha256": "sha256:ada573a05887aacd9c75a0607e75bd7251fb54488034bf99a1264f1aff610976"
+      }
+    ],
+    "files": [
+      {
+        "path": "l4/reembolsoDespesas/rules.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/rules.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const reembolsoDespesasRules = {\n  \"schemaVersion\": \"2026-09-16-ns5-rules-v2\",\n  \"moduleName\": \"reembolsoDespesas\",\n  \"rules\": {\n    \"proofRequiredBeforeSubmission\": \"Uma despesa somente pode ser enviada para aprovação quando possuir comprovante.\",\n    \"expenseOwnerOnly\": \"Cada colaborador somente pode consultar, corrigir ou reenviar despesas que tenha registrado.\",\n    \"validExpenseData\": \"Uma despesa deve conter data, categoria, valor e descrição para ser registrada ou enviada para aprovação.\",\n    \"singleResubmission\": \"Uma despesa rejeitada somente pode ser corrigida e reenviada uma vez.\",\n    \"managerTeamExpenseAccess\": \"O gestor da equipe somente pode consultar, aprovar ou rejeitar despesas de colaboradores de sua própria equipe.\",\n    \"rejectionReasonRequired\": \"A rejeição de uma despesa exige o registro de um motivo pelo gestor da equipe.\",\n    \"financeApprovedExpenseAccess\": \"O financeiro somente pode consultar despesas aprovadas.\",\n    \"paymentDateRequired\": \"O registro de pagamento de uma despesa aprovada exige a data de pagamento.\"\n  }\n} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;\n\nexport type ReembolsoDespesasRulesType = typeof reembolsoDespesasRules;\n\nexport default reembolsoDespesasRules;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/integration.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/integration.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5IntegrationArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const reembolsoDespesasIntegration = {\n  \"schemaVersion\": \"2026-09-12-ns5-integration-v2\",\n  \"moduleName\": \"reembolsoDespesas\",\n  \"inbound\": [],\n  \"outbound\": [\n    {\n      \"id\": \"aprovarDespesa\",\n      \"kind\": \"event\",\n      \"to\": \"financeiro\",\n      \"event\": \"aprovarDespesa\",\n      \"on\": \"Despesa.aprovarDespesa\",\n      \"description\": \"Publica a despesa aprovada para que o módulo financeiro possa tratá-la.\",\n      \"entityRefs\": [\n        \"Despesa\"\n      ]\n    }\n  ],\n  \"plugins\": []\n} as const satisfies Ns5Readonly<Ns5IntegrationArtifact>;\n\nexport type ReembolsoDespesasIntegrationType = typeof reembolsoDespesasIntegration;\n\nexport default reembolsoDespesasIntegration;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/access.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/access.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5AccessArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const reembolsoDespesasAccess = {\n  \"schemaVersion\": \"2026-09-12-ns5-access-v3\",\n  \"moduleName\": \"reembolsoDespesas\",\n  \"actors\": [\n    {\n      \"actorId\": \"colaborador\",\n      \"kind\": \"internal\",\n      \"origin\": \"named\",\n      \"title\": \"Colaborador\",\n      \"description\": \"Registra despesas próprias e as envia para aprovação.\",\n      \"personEntity\": \"Colaborador\"\n    },\n    {\n      \"actorId\": \"gestorEquipe\",\n      \"kind\": \"internal\",\n      \"origin\": \"named\",\n      \"title\": \"Gestor da equipe\",\n      \"description\": \"Aprova ou rejeita as despesas da sua equipe, informando o motivo da rejeição.\",\n      \"personEntity\": \"GestorEquipe\"\n    },\n    {\n      \"actorId\": \"financeiro\",\n      \"kind\": \"internal\",\n      \"origin\": \"named\",\n      \"title\": \"Financeiro\",\n      \"description\": \"Consulta as despesas aprovadas e registra a data de pagamento.\",\n      \"personEntity\": \"\"\n    }\n  ],\n  \"grants\": [\n    {\n      \"grantId\": \"colaboradorGerenciaPropriasDespesas\",\n      \"actorRef\": \"colaborador\",\n      \"title\": \"Gerenciar minhas despesas\",\n      \"description\": \"Permite ao colaborador registrar, enviar, consultar, corrigir e reenviar as próprias solicitações de reembolso.\",\n      \"entityRefs\": [\n        \"Despesa\"\n      ],\n      \"dataScope\": {\n        \"mode\": \"own\",\n        \"description\": \"Somente despesas vinculadas ao próprio colaborador autenticado.\",\n        \"anchorEntity\": \"Colaborador\"\n      },\n      \"disclosure\": {\n        \"mode\": \"fullRecord\",\n        \"description\": \"O colaborador pode consultar todos os dados das suas próprias despesas, inclusive situação, motivo de rejeição e data de pagamento.\"\n      }\n    },\n    {\n      \"grantId\": \"gestorAnalisaDespesasDaEquipe\",\n      \"actorRef\": \"gestorEquipe\",\n      \"title\": \"Analisar despesas da equipe\",\n      \"description\": \"Permite ao gestor consultar e decidir as despesas dos colaboradores vinculados à sua equipe.\",\n      \"entityRefs\": [\n        \"Despesa\",\n        \"Colaborador\"\n      ],\n      \"dataScope\": {\n        \"mode\": \"related\",\n        \"description\": \"Somente despesas e registros de colaboradores que possuem vínculo de reporte ao gestor autenticado.\",\n        \"anchorEntity\": \"Colaborador\"\n      },\n      \"disclosure\": {\n        \"mode\": \"fieldsOnly\",\n        \"description\": \"O gestor consulta a identificação e o vínculo do colaborador, além dos dados necessários para analisar, aprovar ou rejeitar despesas da equipe; a data de pagamento não é divulgada.\",\n        \"allowedFields\": [\n          \"Despesa.id\",\n          \"Despesa.colaboradorId\",\n          \"Despesa.status\",\n          \"Despesa.details.dataDespesa\",\n          \"Despesa.details.categoria\",\n          \"Despesa.details.valor\",\n          \"Despesa.details.descricao\",\n          \"Despesa.details.motivoRejeicao\",\n          \"Despesa.details.reenvioRealizado\",\n          \"Colaborador.id\",\n          \"Colaborador.details.identification\",\n          \"Colaborador.details.base\"\n        ]\n      }\n    },\n    {\n      \"grantId\": \"financeiroConsultaEpagaDespesasAprovadas\",\n      \"actorRef\": \"financeiro\",\n      \"title\": \"Consultar e registrar pagamento\",\n      \"description\": \"Permite ao financeiro consultar despesas aprovadas que aguardam pagamento e registrar a respectiva data de pagamento.\",\n      \"entityRefs\": [\n        \"Despesa\"\n      ],\n      \"dataScope\": {\n        \"mode\": \"related\",\n        \"description\": \"Somente despesas vinculadas a colaboradores relacionados à pessoa autenticada no financeiro, incluindo as aprovadas disponíveis para pagamento.\",\n        \"anchorEntity\": \"Colaborador\"\n      },\n      \"disclosure\": {\n        \"mode\": \"fieldsOnly\",\n        \"description\": \"O financeiro consulta os dados necessários para efetuar o pagamento e sua data, sem acesso ao motivo de rejeição nem ao controle de reenvio.\",\n        \"allowedFields\": [\n          \"Despesa.id\",\n          \"Despesa.colaboradorId\",\n          \"Despesa.status\",\n          \"Despesa.details.dataDespesa\",\n          \"Despesa.details.categoria\",\n          \"Despesa.details.valor\",\n          \"Despesa.details.descricao\",\n          \"Despesa.details.dataPagamento\"\n        ]\n      }\n    }\n  ]\n} as const satisfies Ns5Readonly<Ns5AccessArtifact>;\n\nexport type ReembolsoDespesasAccessType = typeof reembolsoDespesasAccess;\n\nexport default reembolsoDespesasAccess;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/pool/l1/web/needs.json",
+        "text": "{\n  \"schemaVersion\": \"2026-09-21-p2-needs-v1\",\n  \"moduleName\": \"reembolsoDespesas\",\n  \"device\": \"web\",\n  \"menuSchema\": \"2026-09-20-p2-menu-v2.2\",\n  \"pages\": [\n    {\n      \"pageId\": \"minhas_despesas\",\n      \"actors\": [\n        \"colaborador\"\n      ],\n      \"reads\": [\n        {\n          \"entity\": \"Despesa\",\n          \"family\": \"tdm\",\n          \"scope\": \"own\",\n          \"derived\": [],\n          \"from\": [\n            \"grant:colaboradorGerenciaPropriasDespesas\",\n            \"journey:consultarMinhasDespesas/consultarDespesa\",\n            \"journey:consultarMinhasDespesas/localizarMinhasDespesas\",\n            \"journey:corrigirReenviarDespesa/consultarMotivoRejeicao\",\n            \"journey:corrigirReenviarDespesa/corrigirDespesa\",\n            \"journey:corrigirReenviarDespesa/localizarDespesaRejeitada\",\n            \"journey:corrigirReenviarDespesa/reenviarDespesa\",\n            \"journey:registrarEnviarDespesa/enviarParaAprovacao\",\n            \"journey:registrarEnviarDespesa/registrarDespesa\"\n          ]\n        }\n      ],\n      \"writes\": [\n        {\n          \"entity\": \"Despesa\",\n          \"operation\": \"create\",\n          \"transitionRef\": \"\",\n          \"from\": [\n            \"journey:registrarEnviarDespesa/registrarDespesa\"\n          ]\n        },\n        {\n          \"entity\": \"Despesa\",\n          \"operation\": \"transition\",\n          \"transitionRef\": \"enviarParaAprovacao\",\n          \"from\": [\n            \"journey:registrarEnviarDespesa/enviarParaAprovacao\"\n          ]\n        },\n        {\n          \"entity\": \"Despesa\",\n          \"operation\": \"transition\",\n          \"transitionRef\": \"reenviarParaAprovacao\",\n          \"from\": [\n            \"journey:corrigirReenviarDespesa/reenviarDespesa\"\n          ]\n        },\n        {\n          \"entity\": \"Despesa\",\n          \"operation\": \"update\",\n          \"transitionRef\": \"\",\n          \"from\": [\n            \"journey:corrigirReenviarDespesa/corrigirDespesa\"\n          ]\n        }\n      ]\n    },\n    {\n      \"pageId\": \"inicio\",\n      \"actors\": [\n        \"gestorEquipe\"\n      ],\n      \"reads\": [],\n      \"writes\": []\n    },\n    {\n      \"pageId\": \"despesas_da_equipe\",\n      \"actors\": [\n        \"gestorEquipe\"\n      ],\n      \"reads\": [\n        {\n          \"entity\": \"Colaborador\",\n          \"family\": \"mdm\",\n          \"scope\": \"related\",\n          \"derived\": [],\n          \"from\": [\n            \"grant:gestorAnalisaDespesasDaEquipe\",\n            \"journey:analisarDecidirDespesa/analisarDespesa\",\n            \"journey:analisarDecidirDespesa/localizarDespesasPendentes\",\n            \"relationship:Despesa/expenseCollaborator\"\n          ]\n        },\n        {\n          \"entity\": \"Despesa\",\n          \"family\": \"tdm\",\n          \"scope\": \"related\",\n          \"derived\": [],\n          \"from\": [\n            \"grant:gestorAnalisaDespesasDaEquipe\",\n            \"journey:analisarDecidirDespesa/analisarDespesa\",\n            \"journey:analisarDecidirDespesa/localizarDespesasPendentes\",\n            \"relationship:Colaborador/expenseCollaborator\",\n            \"relationship:Despesa/expenseCollaborator\"\n          ]\n        }\n      ],\n      \"writes\": [\n        {\n          \"entity\": \"Despesa\",\n          \"operation\": \"transition\",\n          \"transitionRef\": \"aprovarDespesa\",\n          \"from\": [\n            \"journey:analisarDecidirDespesa/decidirDespesa\"\n          ]\n        },\n        {\n          \"entity\": \"Despesa\",\n          \"operation\": \"transition\",\n          \"transitionRef\": \"rejeitarDespesa\",\n          \"from\": [\n            \"journey:analisarDecidirDespesa/decidirDespesa\"\n          ]\n        }\n      ]\n    },\n    {\n      \"pageId\": \"despesas_aprovadas\",\n      \"actors\": [\n        \"financeiro\"\n      ],\n      \"reads\": [\n        {\n          \"entity\": \"Despesa\",\n          \"family\": \"tdm\",\n          \"scope\": \"related\",\n          \"derived\": [],\n          \"from\": [\n            \"grant:financeiroConsultaEpagaDespesasAprovadas\",\n            \"journey:consultarDespesasAprovadas/consultarDespesaAprovada\",\n            \"journey:consultarDespesasAprovadas/localizarDespesasAprovadas\",\n            \"journey:registrarPagamentoDespesa/localizarDespesaAprovada\",\n            \"journey:registrarPagamentoDespesa/registrarDataPagamento\"\n          ]\n        }\n      ],\n      \"writes\": [\n        {\n          \"entity\": \"Despesa\",\n          \"operation\": \"transition\",\n          \"transitionRef\": \"registrarPagamento\",\n          \"from\": [\n            \"journey:registrarPagamentoDespesa/registrarDataPagamento\"\n          ]\n        }\n      ]\n    }\n  ],\n  \"meta\": {\n    \"sourceMenu\": \"pool/l2/web/menu.json\",\n    \"generatedAt\": \"2026-10-03T17:20:40.812Z\"\n  }\n}\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/ontology/Colaborador.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/ontology/Colaborador.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const reembolsoDespesasEntityColaborador = {\n  \"schemaVersion\": \"2026-09-17-ns5-ontology-v3.1\",\n  \"moduleName\": \"reembolsoDespesas\",\n  \"entityId\": \"Colaborador\",\n  \"title\": \"Colaborador\",\n  \"description\": \"Pessoa colaboradora que registra e acompanha as próprias despesas.\",\n  \"displayField\": \"details.identification.name\",\n  \"relationships\": {\n    \"despesasRegistradas\": {\n      \"relationshipId\": \"expenseCollaborator\",\n      \"to\": \"Despesa\",\n      \"via\": \"Despesa.colaboradorId\",\n      \"cardinality\": \"1:N\",\n      \"title\": \"Despesas registradas\",\n      \"description\": \"Despesas que foram registradas por este colaborador.\",\n      \"mode\": \"fk\",\n      \"direction\": \"to\",\n      \"required\": \"Sempre, para cada despesa registrada por este colaborador.\"\n    },\n    \"gestorResponsavel\": {\n      \"relationshipId\": \"collaboratorReportsToManager\",\n      \"to\": \"GestorEquipe\",\n      \"via\": \"ReportsTo\",\n      \"cardinality\": \"N:1\",\n      \"title\": \"Gestor responsável\",\n      \"description\": \"Gestor de equipe ao qual o colaborador se reporta para fins de aprovação de despesas.\",\n      \"roles\": [\n        \"direct-report\"\n      ],\n      \"required\": \"Enquanto o colaborador estiver ativo neste módulo.\"\n    }\n  },\n  \"capabilities\": {\n    \"read.byId\": \"Consulta um colaborador pelo identificador mestre · usa leitura direta pelo mdmId · usado pelas telas de despesas e de aprovação para apresentar o responsável.\",\n    \"locate.byName\": \"Localiza colaboradores pelo nome · pesquisa o índice de pessoas ativas por texto · usado na manutenção da vinculação do colaborador ao gestor.\",\n    \"locate.byDocument\": \"Localiza uma pessoa pelo documento nacional · consulta o índice de documento antes do vínculo ao módulo · usado para evitar criar colaboradores duplicados.\",\n    \"register.createOrAttach\": \"Cria ou vincula a pessoa existente ao papel de Colaborador · localiza pelo documento e anexa a etiqueta reembolsoDespesas.Colaborador · usado pelo processo interno que habilita a pessoa a registrar despesas.\",\n    \"link\": \"Vincula o colaborador ao gestor responsável · cria o relacionamento versionado ReportsTo com o papel direct-report · usado na definição da equipe responsável pela aprovação.\",\n    \"unlink\": \"Encerra a vinculação do colaborador ao gestor · inativa o relacionamento ReportsTo preservando seu histórico · usado quando há mudança de gestor ou equipe.\",\n    \"listLinks\": \"Lista os vínculos do colaborador · consulta relacionamentos ativos e seu período de validade · usado para verificar o gestor responsável pela equipe.\",\n    \"inactivate\": \"Inativa o cadastro mestre do colaborador · altera a situação do registro sem excluí-lo · usado pela administração quando a pessoa deixa de poder registrar despesas.\",\n    \"statusHistory.read\": \"Consulta o histórico de situação do colaborador · lê as mudanças de status registradas pela plataforma · usado pela administração para acompanhar ativações e inativações.\",\n    \"audit\": \"Consulta as alterações auditadas do colaborador · lê a trilha de auditoria do cadastro mestre · usado pela administração em conferências.\"\n  },\n  \"rules\": [\n    \"rule-foreign-namespace-refused\",\n    \"rule-document-shape-validated\",\n    \"rule-identity-never-in-namespace\",\n    \"rule-person-privacy-consent-required-br-eu\"\n  ],\n  \"kind\": \"role\",\n  \"subtype\": \"Person\",\n  \"roleTag\": \"reembolsoDespesas.Colaborador\",\n  \"source\": \"/_102034_/l4/ontology/mdm.defs.ts\",\n  \"record\": {\n    \"fields\": {\n      \"id\": {\n        \"type\": \"uuid\",\n        \"required\": true,\n        \"indexed\": true,\n        \"derived\": true,\n        \"description\": \"mdmId; stable through promotion and merge.\"\n      },\n      \"version\": {\n        \"type\": \"integer\",\n        \"required\": true,\n        \"derived\": true,\n        \"writePrecondition\": true,\n        \"description\": \"Bumped by the engine on every write; optimistic concurrency.\"\n      },\n      \"details\": {\n        \"type\": \"object\",\n        \"required\": true,\n        \"description\": \"Registro mestre da pessoa colaboradora, com dados da plataforma e o espaço do módulo de reembolso de despesas.\",\n        \"fields\": {\n          \"identification\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {\n              \"subtype\": {\n                \"type\": \"enum\",\n                \"required\": true,\n                \"indexed\": true,\n                \"derived\": true,\n                \"values\": [\n                  {\n                    \"value\": \"Person\",\n                    \"title\": \"Pessoa\",\n                    \"description\": \"Pessoa física.\"\n                  }\n                ],\n                \"description\": \"Indica que este registro mestre é de uma pessoa colaboradora.\",\n                \"title\": \"Tipo de cadastro\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"name\": {\n                \"type\": \"string\",\n                \"required\": true,\n                \"indexed\": true,\n                \"maxLength\": 0,\n                \"description\": \"Nome pelo qual o colaborador é reconhecido nas despesas e nas aprovações.\",\n                \"title\": \"Nome\",\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"status\": {\n                \"type\": \"enum\",\n                \"required\": true,\n                \"indexed\": true,\n                \"derived\": true,\n                \"values\": [\n                  {\n                    \"value\": \"Active\",\n                    \"title\": \"Ativo\",\n                    \"description\": \"Cadastro disponível para uso.\"\n                  },\n                  {\n                    \"value\": \"Inactive\",\n                    \"title\": \"Inativo\",\n                    \"description\": \"Cadastro fora de uso.\"\n                  },\n                  {\n                    \"value\": \"Merged\",\n                    \"title\": \"Mesclado\",\n                    \"description\": \"Cadastro incorporado a outro registro mestre.\"\n                  },\n                  {\n                    \"value\": \"Blocked\",\n                    \"title\": \"Bloqueado\",\n                    \"description\": \"Cadastro bloqueado pela plataforma.\"\n                  }\n                ],\n                \"title\": \"Situação do cadastro\",\n                \"description\": \"Situação de atividade do registro mestre do colaborador.\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"docType\": {\n                \"type\": \"enum\",\n                \"indexed\": true,\n                \"values\": [\n                  {\n                    \"value\": \"SSN\",\n                    \"title\": \"SSN\",\n                    \"description\": \"Número de seguridade social dos Estados Unidos.\"\n                  },\n                  {\n                    \"value\": \"EIN\",\n                    \"title\": \"EIN\",\n                    \"description\": \"Identificador fiscal empresarial dos Estados Unidos.\"\n                  },\n                  {\n                    \"value\": \"Passport\",\n                    \"title\": \"Passaporte\",\n                    \"description\": \"Documento de passaporte.\"\n                  },\n                  {\n                    \"value\": \"DriversLicense\",\n                    \"title\": \"Carteira de motorista\",\n                    \"description\": \"Documento de habilitação.\"\n                  },\n                  {\n                    \"value\": \"NationalId\",\n                    \"title\": \"Documento nacional\",\n                    \"description\": \"Documento nacional de identificação.\"\n                  },\n                  {\n                    \"value\": \"CPF\",\n                    \"title\": \"CPF\",\n                    \"description\": \"Cadastro de Pessoas Físicas.\"\n                  },\n                  {\n                    \"value\": \"CNPJ\",\n                    \"title\": \"CNPJ\",\n                    \"description\": \"Cadastro Nacional da Pessoa Jurídica.\"\n                  },\n                  {\n                    \"value\": \"VAT\",\n                    \"title\": \"VAT\",\n                    \"description\": \"Identificador tributário de valor agregado.\"\n                  },\n                  {\n                    \"value\": \"Other\",\n                    \"title\": \"Outro\",\n                    \"description\": \"Outro documento aceito pela plataforma.\"\n                  }\n                ],\n                \"title\": \"Tipo de documento\",\n                \"description\": \"Tipo do documento nacional usado para identificar e evitar duplicidade no cadastro do colaborador.\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"docId\": {\n                \"type\": \"string\",\n                \"indexed\": true,\n                \"description\": \"Número do documento do colaborador, usado com o tipo para deduplicação.\",\n                \"title\": \"Número do documento\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"countryCode\": {\n                \"type\": \"string\",\n                \"required\": true,\n                \"indexed\": true,\n                \"pattern\": \"^[A-Z]{2}$\",\n                \"maxLength\": 0,\n                \"default\": \"US\",\n                \"description\": \"Código ISO do país aplicável ao documento e às regras legais do colaborador.\",\n                \"title\": \"País\",\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"tags\": {\n                \"type\": \"string\",\n                \"required\": true,\n                \"collection\": true,\n                \"derived\": true,\n                \"description\": \"Etiquetas derivadas pela plataforma, incluindo a função de Colaborador neste módulo.\",\n                \"title\": \"Etiquetas\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              }\n            },\n            \"description\": \"Dados de identificação usados para reconhecer, localizar e manter o colaborador no cadastro mestre.\"\n          },\n          \"base\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {\n              \"relationshipRefs\": {\n                \"type\": \"object\",\n                \"required\": true,\n                \"derived\": true,\n                \"description\": \"Referências derivadas dos relacionamentos ativos do colaborador, incluindo a vinculação ao gestor responsável.\",\n                \"title\": \"Referências de relacionamentos\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              }\n            },\n            \"description\": \"Dados comuns do cadastro mestre usados para consultar os vínculos do colaborador.\"\n          },\n          \"person\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {\n              \"privacyConsent\": {\n                \"type\": \"object\",\n                \"of\": \"PrivacyConsent\",\n                \"description\": \"Consentimento de privacidade da pessoa colaboradora, quando exigido pela legislação aplicável.\",\n                \"title\": \"Consentimento de privacidade\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              }\n            },\n            \"description\": \"Dados da pessoa mantidos pela plataforma para o colaborador.\"\n          },\n          \"general\": {\n            \"type\": \"object\",\n            \"owner\": \"organization\",\n            \"open\": true,\n            \"description\": \"Dados promovidos pela organização para uso compartilhado entre módulos; este módulo apenas os consulta.\"\n          },\n          \"reembolsoDespesas\": {\n            \"type\": \"object\",\n            \"owner\": \"module\",\n            \"fields\": {},\n            \"description\": \"Module namespace; the prompt asked for no data of this module about the record.\"\n          }\n        }\n      }\n    }\n  }\n} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;\n\nexport type ReembolsoDespesasEntityColaboradorType = typeof reembolsoDespesasEntityColaborador;\n\nexport default reembolsoDespesasEntityColaborador;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/ontology/Despesa.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const reembolsoDespesasEntityDespesa = {\n  \"schemaVersion\": \"2026-09-17-ns5-ontology-v3.1\",\n  \"moduleName\": \"reembolsoDespesas\",\n  \"entityId\": \"Despesa\",\n  \"title\": \"Despesa\",\n  \"description\": \"Solicitação de reembolso registrada por um colaborador, submetida à aprovação e posteriormente ao pagamento.\",\n  \"displayField\": \"id\",\n  \"relationships\": {\n    \"colaborador\": {\n      \"relationshipId\": \"expenseCollaborator\",\n      \"to\": \"Colaborador\",\n      \"via\": \"Despesa.colaboradorId\",\n      \"cardinality\": \"N:1\",\n      \"title\": \"Colaborador responsável\",\n      \"description\": \"Cada despesa é registrada por um único colaborador.\",\n      \"mode\": \"fk\",\n      \"required\": \"sempre\",\n      \"role\": \"registrante\"\n    },\n    \"gestorDaEquipe\": {\n      \"relationshipId\": \"managerTeamExpenses\",\n      \"to\": \"GestorEquipe\",\n      \"via\": \"Despesa\",\n      \"cardinality\": \"N:1\",\n      \"title\": \"Gestor da equipe\",\n      \"description\": \"O gestor acessa esta despesa por meio da relação ReportsTo com o colaborador que a registrou.\",\n      \"mode\": \"throughTable\",\n      \"path\": \"GestorEquipe <-[ReportsTo]- Colaborador <-[Despesa.colaboradorId]- Despesa\",\n      \"derived\": true,\n      \"direction\": \"to\",\n      \"required\": \"quando o colaborador estiver vinculado a um gestor por ReportsTo\",\n      \"role\": \"aprovadorDaEquipe\"\n    }\n  },\n  \"capabilities\": {\n    \"read.byId\": \"Consulta uma despesa pelo identificador da linha no repositório da tabela, para colaborador responsável, gestor da equipe ou financeiro conforme o escopo de acesso.\",\n    \"locate.byColumn\": \"Lista despesas por situação e colaborador em colunas indexadas, para o colaborador acompanhar as próprias, o gestor analisar as da equipe e o financeiro consultar as aprovadas.\",\n    \"count\": \"Conta as despesas que atendem aos filtros de situação e escopo de acesso, para os cabeçalhos das listas de colaborador, gestor e financeiro.\",\n    \"listByForeignKey\": \"Lista despesas pelo vínculo indexado com um colaborador, inclusive para vários colaboradores da equipe, para as telas de acompanhamento e aprovação.\",\n    \"create\": \"Cria uma despesa em rascunho com os dados informados pelo colaborador, para o próprio colaborador iniciar uma solicitação de reembolso.\",\n    \"update\": \"Atualiza os dados de uma despesa rejeitada sem alterar seu vínculo de colaborador, para o colaborador corrigi-la antes do único reenvio permitido.\",\n    \"transition\": \"Move a despesa entre as situações do fluxo por atualização da coluna de situação, para colaborador enviar ou reenviar, gestor aprovar ou rejeitar e financeiro registrar o pagamento.\",\n    \"read.mdmRecord\": \"Lê o registro mestre do colaborador apontado pela chave estrangeira, para identificar o responsável pela despesa nas telas autorizadas.\",\n    \"attach.document\": \"Anexa o comprovante à linha da despesa por categoria de documento, para o colaborador apresentar evidência e gestor ou financeiro autorizado consultá-la.\"\n  },\n  \"rules\": [\n    \"expenseOwnerOnly\",\n    \"managerTeamExpenseAccess\",\n    \"financeApprovedExpenseAccess\",\n    \"validExpenseData\",\n    \"proofRequiredBeforeSubmission\",\n    \"rejectionReasonRequired\",\n    \"singleResubmission\",\n    \"paymentDateRequired\"\n  ],\n  \"kind\": \"entity\",\n  \"class\": \"core\",\n  \"storage\": {\n    \"target\": \"moduleDatabase\",\n    \"table\": \"reembolsoDespesas_despesa\",\n    \"kind\": \"relational\"\n  },\n  \"record\": {\n    \"fields\": {\n      \"id\": {\n        \"type\": \"uuid\",\n        \"required\": true,\n        \"derived\": true,\n        \"indexed\": true,\n        \"title\": \"Id\"\n      },\n      \"version\": {\n        \"type\": \"integer\",\n        \"required\": true,\n        \"derived\": true\n      },\n      \"colaboradorId\": {\n        \"type\": \"record\",\n        \"required\": true,\n        \"indexed\": true,\n        \"of\": \"ContactSummary\",\n        \"to\": [\n          \"Colaborador\"\n        ],\n        \"title\": \"Colaborador\",\n        \"description\": \"Colaborador que registrou a solicitação de reembolso.\",\n        \"maxLength\": 0,\n        \"min\": 0,\n        \"max\": 0\n      },\n      \"status\": {\n        \"type\": \"enum\",\n        \"required\": true,\n        \"indexed\": true,\n        \"of\": \"ContactSummary\",\n        \"values\": [\n          {\n            \"value\": \"draft\",\n            \"title\": \"Rascunho\",\n            \"description\": \"Despesa registrada e ainda não enviada para aprovação.\"\n          },\n          {\n            \"value\": \"awaitingApproval\",\n            \"title\": \"Aguardando aprovação\",\n            \"description\": \"Despesa enviada e disponível para decisão do gestor da equipe.\"\n          },\n          {\n            \"value\": \"rejected\",\n            \"title\": \"Rejeitada\",\n            \"description\": \"Despesa recusada pelo gestor, com motivo informado.\"\n          },\n          {\n            \"value\": \"approved\",\n            \"title\": \"Aprovada\",\n            \"description\": \"Despesa aprovada e aguardando o registro do pagamento.\"\n          },\n          {\n            \"value\": \"paid\",\n            \"title\": \"Paga\",\n            \"description\": \"Pagamento da despesa registrado pelo financeiro.\"\n          }\n        ],\n        \"title\": \"Situação\",\n        \"description\": \"Etapa atual da despesa no fluxo de aprovação e pagamento.\",\n        \"maxLength\": 0,\n        \"min\": 0,\n        \"max\": 0\n      },\n      \"details\": {\n        \"type\": \"object\",\n        \"required\": true,\n        \"of\": \"ContactSummary\",\n        \"title\": \"Dados da despesa\",\n        \"description\": \"Informações declaradas para o reembolso, a rejeição e o pagamento da despesa.\",\n        \"maxLength\": 0,\n        \"min\": 0,\n        \"max\": 0,\n        \"fields\": {\n          \"dataDespesa\": {\n            \"type\": \"date\",\n            \"required\": true,\n            \"of\": \"ContactSummary\",\n            \"title\": \"Data da despesa\",\n            \"description\": \"Data em que a despesa foi realizada.\",\n            \"maxLength\": 0,\n            \"min\": 0,\n            \"max\": 0\n          },\n          \"categoria\": {\n            \"type\": \"string\",\n            \"required\": true,\n            \"of\": \"ContactSummary\",\n            \"title\": \"Categoria\",\n            \"description\": \"Categoria informada pelo colaborador para classificar a despesa.\",\n            \"maxLength\": 120,\n            \"min\": 0,\n            \"max\": 0\n          },\n          \"valor\": {\n            \"type\": \"money\",\n            \"required\": true,\n            \"of\": \"ContactSummary\",\n            \"title\": \"Valor\",\n            \"description\": \"Valor solicitado para reembolso.\",\n            \"maxLength\": 0,\n            \"min\": 0.01,\n            \"max\": 0\n          },\n          \"descricao\": {\n            \"type\": \"text\",\n            \"required\": true,\n            \"of\": \"ContactSummary\",\n            \"title\": \"Descrição\",\n            \"description\": \"Descrição da despesa informada pelo colaborador.\",\n            \"maxLength\": 2000,\n            \"min\": 0,\n            \"max\": 0\n          },\n          \"motivoRejeicao\": {\n            \"type\": \"text\",\n            \"of\": \"ContactSummary\",\n            \"title\": \"Motivo da rejeição\",\n            \"description\": \"Justificativa informada pelo gestor ao rejeitar a despesa.\",\n            \"maxLength\": 2000,\n            \"min\": 0,\n            \"max\": 0\n          },\n          \"reenvioRealizado\": {\n            \"type\": \"boolean\",\n            \"required\": true,\n            \"of\": \"ContactSummary\",\n            \"title\": \"Reenvio realizado\",\n            \"description\": \"Indica se a despesa rejeitada já foi corrigida e reenviada para uma nova aprovação.\",\n            \"maxLength\": 0,\n            \"min\": 0,\n            \"max\": 0\n          },\n          \"dataPagamento\": {\n            \"type\": \"date\",\n            \"of\": \"ContactSummary\",\n            \"title\": \"Data de pagamento\",\n            \"description\": \"Data em que o financeiro registrou o pagamento da despesa aprovada.\",\n            \"maxLength\": 0,\n            \"min\": 0,\n            \"max\": 0\n          }\n        }\n      }\n    }\n  },\n  \"lifecycleStates\": [\n    {\n      \"state\": \"draft\",\n      \"reachedBy\": \"actor\"\n    },\n    {\n      \"state\": \"awaitingApproval\",\n      \"reachedBy\": \"actor\"\n    },\n    {\n      \"state\": \"rejected\",\n      \"reachedBy\": \"actor\"\n    },\n    {\n      \"state\": \"approved\",\n      \"reachedBy\": \"actor\"\n    },\n    {\n      \"state\": \"paid\",\n      \"reachedBy\": \"actor\"\n    }\n  ],\n  \"transitions\": [\n    {\n      \"transitionId\": \"enviarParaAprovacao\",\n      \"from\": [\n        \"draft\"\n      ],\n      \"to\": \"awaitingApproval\",\n      \"by\": [\n        \"colaborador\"\n      ],\n      \"description\": \"Envia a despesa registrada para análise do gestor da equipe.\",\n      \"payload\": [],\n      \"ruleRefs\": [\n        \"proofRequiredBeforeSubmission\",\n        \"expenseOwnerOnly\",\n        \"validExpenseData\"\n      ]\n    },\n    {\n      \"transitionId\": \"reenviarParaAprovacao\",\n      \"from\": [\n        \"rejected\"\n      ],\n      \"to\": \"awaitingApproval\",\n      \"by\": [\n        \"colaborador\"\n      ],\n      \"description\": \"Reenvia para análise uma despesa rejeitada que foi corrigida pelo colaborador.\",\n      \"payload\": [],\n      \"ruleRefs\": [\n        \"expenseOwnerOnly\",\n        \"singleResubmission\",\n        \"proofRequiredBeforeSubmission\",\n        \"validExpenseData\"\n      ]\n    },\n    {\n      \"transitionId\": \"aprovarDespesa\",\n      \"from\": [\n        \"awaitingApproval\"\n      ],\n      \"to\": \"approved\",\n      \"by\": [\n        \"gestorEquipe\"\n      ],\n      \"description\": \"Aprova a despesa da equipe para disponibilizá-la ao financeiro.\",\n      \"payload\": [],\n      \"ruleRefs\": [\n        \"managerTeamExpenseAccess\"\n      ]\n    },\n    {\n      \"transitionId\": \"rejeitarDespesa\",\n      \"from\": [\n        \"awaitingApproval\"\n      ],\n      \"to\": \"rejected\",\n      \"by\": [\n        \"gestorEquipe\"\n      ],\n      \"description\": \"Rejeita a despesa da equipe e registra a justificativa da decisão.\",\n      \"payload\": [\n        \"details.motivoRejeicao\"\n      ],\n      \"ruleRefs\": [\n        \"managerTeamExpenseAccess\",\n        \"rejectionReasonRequired\"\n      ]\n    },\n    {\n      \"transitionId\": \"registrarPagamento\",\n      \"from\": [\n        \"approved\"\n      ],\n      \"to\": \"paid\",\n      \"by\": [\n        \"financeiro\"\n      ],\n      \"description\": \"Registra o pagamento da despesa aprovada.\",\n      \"payload\": [\n        \"details.dataPagamento\"\n      ],\n      \"ruleRefs\": [\n        \"financeApprovedExpenseAccess\",\n        \"paymentDateRequired\"\n      ]\n    }\n  ]\n} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;\n\nexport type ReembolsoDespesasEntityDespesaType = typeof reembolsoDespesasEntityDespesa;\n\nexport default reembolsoDespesasEntityDespesa;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/ontology/GestorEquipe.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/ontology/GestorEquipe.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const reembolsoDespesasEntityGestorEquipe = {\n  \"schemaVersion\": \"2026-09-17-ns5-ontology-v3.1\",\n  \"moduleName\": \"reembolsoDespesas\",\n  \"entityId\": \"GestorEquipe\",\n  \"title\": \"Gestor da equipe\",\n  \"description\": \"Pessoa responsável por analisar e decidir as despesas dos colaboradores de sua equipe.\",\n  \"displayField\": \"details.identification.name\",\n  \"relationships\": {\n    \"colaboradores\": {\n      \"relationshipId\": \"collaboratorReportsToManager\",\n      \"to\": \"Colaborador\",\n      \"via\": \"ReportsTo\",\n      \"cardinality\": \"1:N\",\n      \"title\": \"Colaboradores da equipe\",\n      \"description\": \"Colaboradores que se reportam a este gestor por meio do relacionamento mestre ReportsTo, com o papel direct-report.\",\n      \"roles\": [\n        \"direct-report\"\n      ],\n      \"direction\": \"to\",\n      \"required\": \"Não é obrigatória para o gestor; um gestor pode ainda não ter colaboradores vinculados.\"\n    },\n    \"despesasDaEquipe\": {\n      \"relationshipId\": \"managerTeamExpenses\",\n      \"to\": \"Despesa\",\n      \"via\": \"Despesa\",\n      \"cardinality\": \"1:N\",\n      \"title\": \"Despesas da equipe\",\n      \"description\": \"Despesas registradas por colaboradores que se reportam a este gestor, lidas pelo caminho derivado de equipe.\",\n      \"mode\": \"throughTable\",\n      \"path\": \"GestorEquipe <-[ReportsTo]- Colaborador <-[Despesa.colaboradorId]- Despesa\",\n      \"derived\": true,\n      \"required\": \"Não é obrigatória; o gestor pode não ter despesas de equipe registradas.\",\n      \"role\": \"gestor responsável\"\n    }\n  },\n  \"capabilities\": {\n    \"read.byId\": \"Lê um gestor da equipe pelo identificador mestre · usa leitura por mdmId no índice e no documento MDM · usado pelas telas que exibem o responsável pela análise de uma despesa.\",\n    \"locate.byName\": \"Localiza gestores pelo nome · pesquisa o nome indexado entre registros do subtipo Pessoa · usado na manutenção dos responsáveis pelas equipes.\",\n    \"locate.byDocument\": \"Localiza um gestor pelo documento nacional · consulta o documento para deduplicar antes de criar ou anexar o papel · usado por quem cadastra gestores.\",\n    \"register.createOrAttach\": \"Cria a pessoa quando ausente ou anexa o papel de gestor quando ela já existe · deduplica por documento e grava a tag reembolsoDespesas.GestorEquipe · usado por administradores na composição das equipes.\",\n    \"edit.platformFields\": \"Atualiza os dados mestres permitidos do gestor · altera os campos de identificação da pessoa no MDM · usado por administradores que mantêm o cadastro.\",\n    \"inactivate\": \"Inativa ou reativa o gestor sem apagá-lo · altera a situação mestre Active ou Inactive · usado por administradores quando o responsável deixa de atuar.\",\n    \"link\": \"Vincula colaboradores a este gestor · cria o relacionamento versionado ReportsTo com o papel adequado · usado por administradores ao definir a equipe.\",\n    \"unlink\": \"Encerra o vínculo de um colaborador com este gestor · inativa o relacionamento ReportsTo mantendo seu histórico · usado por administradores ao reorganizar a equipe.\",\n    \"listLinks\": \"Lista os colaboradores e demais vínculos do gestor · consulta relacionamentos MDM com validade e papel · usado pelo gestor e por administradores para conferir a equipe.\",\n    \"audit\": \"Consulta as alterações do cadastro e dos vínculos do gestor · lê a auditoria de escritas do MDM · usado por administradores para rastreabilidade.\"\n  },\n  \"rules\": [\n    \"rule-foreign-namespace-refused\",\n    \"rule-document-shape-validated\",\n    \"rule-identity-never-in-namespace\",\n    \"rule-person-ssn-unique-for-us\",\n    \"rule-person-privacy-consent-required-br-eu\"\n  ],\n  \"kind\": \"role\",\n  \"subtype\": \"Person\",\n  \"roleTag\": \"reembolsoDespesas.GestorEquipe\",\n  \"source\": \"/_102034_/l4/ontology/mdm.defs.ts\",\n  \"record\": {\n    \"fields\": {\n      \"id\": {\n        \"type\": \"uuid\",\n        \"required\": true,\n        \"indexed\": true,\n        \"derived\": true,\n        \"description\": \"mdmId; stable through promotion and merge.\"\n      },\n      \"version\": {\n        \"type\": \"integer\",\n        \"required\": true,\n        \"derived\": true,\n        \"writePrecondition\": true,\n        \"description\": \"Bumped by the engine on every write; optimistic concurrency.\"\n      },\n      \"details\": {\n        \"type\": \"object\",\n        \"required\": true,\n        \"description\": \"Dados mestres da pessoa que exerce o papel de gestor da equipe no módulo de reembolso de despesas.\",\n        \"fields\": {\n          \"identification\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {\n              \"subtype\": {\n                \"type\": \"enum\",\n                \"required\": true,\n                \"indexed\": true,\n                \"derived\": true,\n                \"values\": [\n                  {\n                    \"value\": \"Person\",\n                    \"title\": \"Pessoa\",\n                    \"description\": \"Pessoa física cadastrada no MDM.\"\n                  }\n                ],\n                \"description\": \"Identifica este registro mestre como uma pessoa que pode exercer o papel de gestor da equipe.\",\n                \"title\": \"Tipo de cadastro\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"name\": {\n                \"type\": \"string\",\n                \"required\": true,\n                \"indexed\": true,\n                \"maxLength\": 255,\n                \"description\": \"Nome pelo qual o gestor da equipe é identificado nas análises de despesas.\",\n                \"title\": \"Nome\",\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"status\": {\n                \"type\": \"enum\",\n                \"required\": true,\n                \"indexed\": true,\n                \"derived\": true,\n                \"values\": [\n                  {\n                    \"value\": \"Active\",\n                    \"title\": \"Ativo\",\n                    \"description\": \"Cadastro disponível para uso.\"\n                  },\n                  {\n                    \"value\": \"Inactive\",\n                    \"title\": \"Inativo\",\n                    \"description\": \"Cadastro fora de uso.\"\n                  },\n                  {\n                    \"value\": \"Merged\",\n                    \"title\": \"Mesclado\",\n                    \"description\": \"Cadastro incorporado a outro registro mestre.\"\n                  },\n                  {\n                    \"value\": \"Blocked\",\n                    \"title\": \"Bloqueado\",\n                    \"description\": \"Cadastro bloqueado pela plataforma.\"\n                  }\n                ],\n                \"title\": \"Situação do cadastro\",\n                \"description\": \"Situação mestre do gestor, usada para manter ativa ou inativa sua participação no módulo.\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"docType\": {\n                \"type\": \"enum\",\n                \"indexed\": true,\n                \"values\": [\n                  {\n                    \"value\": \"SSN\",\n                    \"title\": \"SSN\",\n                    \"description\": \"Número de seguridade social dos Estados Unidos.\"\n                  },\n                  {\n                    \"value\": \"EIN\",\n                    \"title\": \"EIN\",\n                    \"description\": \"Identificador fiscal empresarial dos Estados Unidos.\"\n                  },\n                  {\n                    \"value\": \"Passport\",\n                    \"title\": \"Passaporte\",\n                    \"description\": \"Documento de passaporte.\"\n                  },\n                  {\n                    \"value\": \"DriversLicense\",\n                    \"title\": \"Carteira de motorista\",\n                    \"description\": \"Documento de habilitação.\"\n                  },\n                  {\n                    \"value\": \"NationalId\",\n                    \"title\": \"Documento nacional\",\n                    \"description\": \"Documento nacional de identificação.\"\n                  },\n                  {\n                    \"value\": \"CPF\",\n                    \"title\": \"CPF\",\n                    \"description\": \"Cadastro de Pessoas Físicas.\"\n                  },\n                  {\n                    \"value\": \"CNPJ\",\n                    \"title\": \"CNPJ\",\n                    \"description\": \"Cadastro Nacional da Pessoa Jurídica.\"\n                  },\n                  {\n                    \"value\": \"VAT\",\n                    \"title\": \"VAT\",\n                    \"description\": \"Identificador fiscal de valor agregado.\"\n                  },\n                  {\n                    \"value\": \"Other\",\n                    \"title\": \"Outro\",\n                    \"description\": \"Outro tipo de documento aceito pela plataforma.\"\n                  }\n                ],\n                \"title\": \"Tipo de documento\",\n                \"description\": \"Tipo do documento nacional usado para localizar ou deduplicar o gestor no MDM.\",\n                \"maxLength\": 0,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"docId\": {\n                \"type\": \"string\",\n                \"indexed\": true,\n                \"description\": \"Número do documento nacional usado para identificar o gestor já existente no MDM.\",\n                \"title\": \"Número do documento\",\n                \"maxLength\": 100,\n                \"min\": 0,\n                \"max\": 0\n              },\n              \"countryCode\": {\n                \"type\": \"string\",\n                \"required\": true,\n                \"indexed\": true,\n                \"pattern\": \"^[A-Z]{2}$\",\n                \"maxLength\": 2,\n                \"default\": \"US\",\n                \"description\": \"Código ISO do país que define as regras aplicáveis ao documento e à pessoa gestora.\",\n                \"title\": \"País\",\n                \"min\": 0,\n                \"max\": 0\n              }\n            },\n            \"description\": \"Dados de identificação da pessoa reconhecida como gestor da equipe.\"\n          },\n          \"base\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {},\n            \"description\": \"Dados base da pessoa mantidos pela plataforma; este papel não utiliza campos adicionais nesta camada.\"\n          },\n          \"person\": {\n            \"type\": \"object\",\n            \"owner\": \"platform\",\n            \"fields\": {},\n            \"description\": \"Dados específicos de pessoa física mantidos pela plataforma; este papel não utiliza campos adicionais nesta camada.\"\n          },\n          \"general\": {\n            \"type\": \"object\",\n            \"owner\": \"organization\",\n            \"open\": true,\n            \"description\": \"Campos promovidos pela organização, lidos pelo módulo quando existentes e não declarados por ele.\"\n          },\n          \"reembolsoDespesas\": {\n            \"type\": \"object\",\n            \"owner\": \"module\",\n            \"fields\": {},\n            \"description\": \"Module namespace; the prompt asked for no data of this module about the record.\"\n          }\n        }\n      }\n    }\n  }\n} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;\n\nexport type ReembolsoDespesasEntityGestorEquipeType = typeof reembolsoDespesasEntityGestorEquipe;\n\nexport default reembolsoDespesasEntityGestorEquipe;\n"
+      },
+      {
+        "path": "/_102034_/l4/ontology/mdm.defs.ts",
+        "text": "/// <mls fileReference=\"_102034_/l4/ontology/mdm.defs.ts\" enhancement=\"_blank\"/>\n/**\n * The level-1 ontology of the platform, in one file, meant to be read from start to finish.\n *\n * A record is `{ id, version, details }`, mirroring `mdm_documents`. `details` is a map of branches, and\n * every record has the same five:\n *\n *   identification  also columns of the index table — that is what makes them filterable and sortable\n *   base            what every record has, whatever its subtype\n *   <subtype>       exactly one per record, keyed by the subtype name with a lowercase first letter:\n *                   \"person\", \"company\", \"assetVehicle\". Its fields come from subtypes.<S>.fields\n *   general         the organization layer: what more than one module needed, so it was promoted\n *   <moduleId>      one key per module — only that module writes it, the others read it by name\n *\n * An example document, which is the target shape:\n *\n *   {\n *     \"identification\": { \"name\": \"Maria\", \"docType\": \"CPF\", \"docId\": \"…\", \"countryCode\": \"BR\",\n *                         \"status\": \"Active\", \"tags\": [\"agendaClinica.Paciente\"] },\n *     \"base\":           { \"aliases\": [], \"addresses\": [ … ], \"contacts\": [ … ], \"relationshipRefs\": { … } },\n *     \"person\":         { \"birthDate\": \"1990-01-01\", \"privacyConsent\": { … } },\n *     \"general\":        { },\n *     \"agendaClinica\":  { \"prontuario\": \"PR-000123\" }\n *   }\n *\n * The engine stores this document FLAT today; the branches are the target. That gap, and every other one\n * between this file and the engine, is in `knownDivergences` at the bottom — listed, not hidden.\n *\n * Reading a field: only what differs from the default is written. Absent means `required: false`,\n * `nullable: false`, title equal to the id, and origin level 1. The layer is not written either, because\n * the branch gives it: `identification` is a column, everything else lives in the document.\n *\n * Everything below the `export const` is ONE JSON literal, double-quoted, with no comments inside it, so\n * that the same extractor the screens and the agents use (`extractNs4ClassicJsonObject` + `JSON.parse`)\n * reads it whole. The ids that cross-reference each other — a capability of a subtype, an `of`, a `to` —\n * are checked by `l1/mdm/defs/mdmOntology.test.ts`, which imports this file.\n */\n\nimport type { MdmOntology } from '/_102034_/l1/mdm/defs/ontologyTypes.js';\n\nexport const mdm = {\n  \"schemaVersion\": \"2026-09-15-mdm-ontology-v2\",\n\n  \"record\": {\n    \"fields\": {\n      \"id\": { \"type\": \"uuid\", \"required\": true, \"derived\": true, \"indexed\": true, \"description\": \"mdmId; stable through promotion and merge.\" },\n      \"version\": { \"type\": \"integer\", \"required\": true, \"derived\": true, \"writePrecondition\": true, \"description\": \"Bumped by the engine on every write; optimistic concurrency.\" },\n      \"details\": { \"type\": \"object\", \"required\": true, \"groups\": [\"identification\", \"base\", \"<subtype>\", \"general\", \"<moduleId>\"], \"description\": \"The JSONB document, as a map of groups (see groups).\" }\n    },\n    \"displayField\": \"identification.name\"\n  },\n\n  \"groups\": {\n    \"identification\": {\n      \"type\": \"object\",\n      \"owner\": \"platform\",\n      \"description\": \"Also columns of the index table; that is what makes them filterable and sortable. A field earns a column only when something has to filter or sort by it.\",\n      \"fields\": {\n        \"subtype\": { \"type\": \"enum\", \"required\": true, \"derived\": true, \"indexed\": true, \"values\": [\"Person\", \"Company\", \"ContactChannel\", \"Animal\", \"Product\", \"Service\", \"Location\", \"BankAccount\", \"Document\", \"AssetGeneric\", \"AssetVehicle\", \"AssetProperty\", \"AssetEquipment\"], \"description\": \"Which subtype this record is; it decides which subtype branch the document carries.\" },\n        \"name\": { \"type\": \"string\", \"required\": true, \"indexed\": true, \"maxLength\": 200, \"description\": \"How a human recognises the record. The only text filter there is.\" },\n        \"status\": { \"type\": \"enum\", \"required\": true, \"derived\": true, \"indexed\": true, \"values\": [\"Active\", \"Inactive\", \"Merged\", \"Blocked\"] },\n        \"docType\": { \"type\": \"enum\", \"indexed\": true, \"values\": [\"SSN\", \"EIN\", \"Passport\", \"DriversLicense\", \"NationalId\", \"CPF\", \"CNPJ\", \"VAT\", \"Other\"] },\n        \"docId\": { \"type\": \"string\", \"indexed\": true, \"description\": \"The document number itself. Unique with docType by design; the unique index does not exist yet, see knownDivergences.\" },\n        \"countryCode\": { \"type\": \"string\", \"required\": true, \"indexed\": true, \"maxLength\": 2, \"pattern\": \"^[A-Z]{2}$\", \"default\": \"US\", \"description\": \"ISO 3166-1 alpha-2. Says which country the document and the legal rules belong to.\" },\n        \"tags\": { \"type\": \"string\", \"collection\": true, \"required\": true, \"derived\": true, \"description\": \"Module roles, as <moduleId>.<Entity>. Written by attachRole; this is how a module says the record is one of its own. A column with no index.\" },\n        \"mergedInto\": { \"type\": \"string\", \"derived\": true, \"description\": \"On the loser of a merge, the mdmId of the winner. A column with no index.\" },\n        \"createdAt\": { \"type\": \"string\", \"required\": true, \"derived\": true, \"indexed\": true },\n        \"updatedAt\": { \"type\": \"string\", \"required\": true, \"derived\": true, \"indexed\": true }\n      }\n    },\n    \"base\": {\n      \"type\": \"object\",\n      \"owner\": \"platform\",\n      \"description\": \"What every record has, whatever its subtype, and which nothing filters by.\",\n      \"fields\": {\n        \"moduleTypes\": { \"type\": \"string\", \"collection\": true, \"derived\": true, \"description\": \"The module roles again, kept for the engine and duplicating tags. Not a field for a reader; read tags.\" },\n        \"aliases\": { \"type\": \"string\", \"collection\": true, \"required\": true, \"description\": \"Other names the same subject answers to: trade name, maiden name, nickname.\" },\n        \"addresses\": { \"type\": \"object\", \"of\": \"Address\", \"collection\": true, \"required\": true },\n        \"contacts\": { \"type\": \"object\", \"of\": \"ContactSummary\", \"collection\": true, \"required\": true, \"derived\": true, \"description\": \"Summary of the ContactChannel records linked by HasContact. A contact is a record, never a string on this one.\" },\n        \"relationshipRefs\": { \"type\": \"object\", \"required\": true, \"derived\": true, \"description\": \"The compact keys the engine recomputes on every link and unlink. The key set is relationships[].compactKeys — it is not repeated here, and it is never written by hand.\" },\n        \"notes\": { \"type\": \"string\", \"maxLength\": 1000 }\n      }\n    },\n    \"general\": {\n      \"type\": \"object\",\n      \"owner\": \"organization\",\n      \"open\": true,\n      \"description\": \"Fields promoted by the organization when more than one module needed them; the schema lives in the project registry, so a module reads this branch and does not declare it.\"\n    },\n    \"<moduleId>\": {\n      \"type\": \"object\",\n      \"owner\": \"module\",\n      \"open\": true,\n      \"description\": \"One key per module id — Record<moduleId, object>. Only that module writes it (MDM_FOREIGN_NAMESPACE otherwise); other modules see the key by name. Never identity, document, contact or login. Example: \\\"agendaClinica\\\": { \\\"prontuario\\\": \\\"PR-000123\\\" } — its schema is the module's own ontology (Paciente.defs.ts).\"\n    }\n  },\n\n  \"types\": {\n    \"Address\": {\n      \"type\": { \"type\": \"enum\", \"required\": true, \"values\": [\"Residential\", \"Commercial\", \"Billing\", \"Delivery\", \"Other\"] },\n      \"label\": { \"type\": \"string\" },\n      \"line1\": { \"type\": \"string\", \"required\": true },\n      \"line2\": { \"type\": \"string\" },\n      \"line3\": { \"type\": \"string\" },\n      \"city\": { \"type\": \"string\" },\n      \"stateOrProvince\": { \"type\": \"string\", \"description\": \"State, province, prefecture or canton. In the US, the 2-letter code.\" },\n      \"postalCode\": { \"type\": \"string\", \"description\": \"ZIP, postcode, CEP, PIN. The format varies by country and the platform does not enforce one.\" },\n      \"countryCode\": { \"type\": \"string\", \"required\": true, \"maxLength\": 2, \"pattern\": \"^[A-Z]{2}$\", \"default\": \"US\", \"description\": \"ISO 3166-1 alpha-2. Drives how the address is formatted on screen.\" },\n      \"formatted\": { \"type\": \"string\", \"derived\": true, \"description\": \"The whole address on one line, as it would appear on an envelope. Built asynchronously.\" },\n      \"geolocation\": { \"type\": \"object\", \"of\": \"GeoPoint\" },\n      \"isPrimary\": { \"type\": \"boolean\", \"required\": true }\n    },\n    \"GeoPoint\": {\n      \"lat\": { \"type\": \"number\", \"required\": true, \"min\": -90, \"max\": 90 },\n      \"lng\": { \"type\": \"number\", \"required\": true, \"min\": -180, \"max\": 180 }\n    },\n    \"PrivacyConsent\": {\n      \"consentedAt\": { \"type\": \"timestamp\", \"required\": true },\n      \"consentVersion\": { \"type\": \"string\", \"required\": true },\n      \"channel\": { \"type\": \"string\", \"required\": true, \"description\": \"Where the consent was given: web form, paper, phone.\" },\n      \"revokedAt\": { \"type\": \"timestamp\" },\n      \"notes\": { \"type\": \"string\" }\n    },\n    \"ContactSummary\": {\n      \"mdmId\": { \"type\": \"uuid\", \"required\": true, \"description\": \"The ContactChannel record itself.\" },\n      \"title\": { \"type\": \"string\", \"required\": true }\n    }\n  },\n\n  \"subtypes\": {\n    \"Person\": {\n      \"description\": \"Natural persons: customers, employees, partners, dependents.\",\n      \"fields\": {\n        \"birthDate\": { \"type\": \"date\" },\n        \"gender\": { \"type\": \"enum\", \"values\": [\"Male\", \"Female\", \"NonBinary\", \"NotDisclosed\"] },\n        \"nationality\": { \"type\": \"string\", \"maxLength\": 2, \"pattern\": \"^[A-Z]{2}$\", \"description\": \"ISO 3166-1 alpha-2 country of nationality.\" },\n        \"occupation\": { \"type\": \"string\", \"maxLength\": 120 },\n        \"photoUrl\": { \"type\": \"string\" },\n        \"privacyConsent\": { \"type\": \"object\", \"of\": \"PrivacyConsent\", \"description\": \"Required for residents of Brazil (LGPD) and the EU (GDPR).\" }\n      },\n      \"capabilities\": [\"locate.byLogin\", \"invite.login\", \"export.personalData\", \"anonymize\"],\n      \"rules\": [\"rule-person-ssn-unique-for-us\", \"rule-person-privacy-consent-required-br-eu\"]\n    },\n    \"Company\": {\n      \"description\": \"Corporations, LLCs, nonprofits, government entities — and the internal structures of any of them.\",\n      \"fields\": {\n        \"companyKind\": { \"type\": \"enum\", \"required\": true, \"values\": [\"LegalEntity\", \"Branch\", \"Franchise\", \"BusinessUnit\", \"Group\", \"Team\", \"Department\", \"InternalOrg\"], \"description\": \"Tells a legal entity apart from an internal structure.\" },\n        \"legalName\": { \"type\": \"string\", \"required\": true, \"description\": \"Official registered name.\" },\n        \"tradeName\": { \"type\": \"string\", \"description\": \"DBA name. Also goes into aliases, so the text filter finds it.\" },\n        \"legalType\": { \"type\": \"enum\", \"values\": [\"Corporation\", \"LLC\", \"SoleProp\", \"Partnership\", \"Nonprofit\", \"Government\", \"Other\"] },\n        \"parentCompanyId\": { \"type\": \"record\", \"to\": [\"Company\"], \"description\": \"Parent in an organizational tree. The link itself is BelongsToGroup, PartOfUnit or SubsidiaryOf.\" },\n        \"externalCode\": { \"type\": \"string\", \"description\": \"ERP, HR or legacy code used by the consuming modules.\" },\n        \"foundingDate\": { \"type\": \"date\" },\n        \"taxRegime\": { \"type\": \"string\", \"description\": \"Country-specific tax class: S-Corp and C-Corp in the US, Simples Nacional in Brazil.\" },\n        \"industryCode\": { \"type\": \"string\", \"description\": \"NAICS in the US, CNAE in Brazil, or the local equivalent.\" },\n        \"website\": { \"type\": \"string\" }\n      },\n      \"rules\": [\"rule-company-ein-unique-for-us\", \"rule-company-legal-name-required\"]\n    },\n    \"ContactChannel\": {\n      \"description\": \"A phone, e-mail or social handle as a record of its own, so it can be traced, verified and shared.\",\n      \"fields\": {\n        \"contactType\": { \"type\": \"enum\", \"required\": true, \"values\": [\"Phone\", \"Email\", \"WhatsApp\", \"Instagram\", \"LinkedIn\", \"X\", \"Other\"] },\n        \"value\": { \"type\": \"string\", \"required\": true, \"description\": \"The contact itself, stored unmasked.\" },\n        \"isVerified\": { \"type\": \"boolean\", \"required\": true },\n        \"verifiedAt\": { \"type\": \"timestamp\" }\n      },\n      \"rules\": [\"rule-contact-value-unique-per-type\"]\n    },\n    \"Animal\": {\n      \"description\": \"Pets, livestock, working animals.\",\n      \"fields\": {\n        \"species\": { \"type\": \"string\" },\n        \"breed\": { \"type\": \"string\" },\n        \"birthDate\": { \"type\": \"date\" },\n        \"sex\": { \"type\": \"enum\", \"values\": [\"Male\", \"Female\", \"Unknown\"] },\n        \"color\": { \"type\": \"string\" },\n        \"microchip\": { \"type\": \"string\" },\n        \"registrationNumber\": { \"type\": \"string\", \"description\": \"Breed registry, USDA tag, or official animal id.\" },\n        \"isNeutered\": { \"type\": \"boolean\" }\n      }\n    },\n    \"Product\": {\n      \"description\": \"An inventory or catalog item that can be bought, stocked, sold or offered by suppliers.\",\n      \"fields\": {\n        \"sku\": { \"type\": \"string\", \"description\": \"Internal stock keeping unit.\" },\n        \"productType\": { \"type\": \"enum\", \"values\": [\"Physical\", \"Digital\", \"Bundle\", \"Consumable\", \"Other\"] },\n        \"category\": { \"type\": \"string\" },\n        \"brand\": { \"type\": \"string\" },\n        \"unitOfMeasure\": { \"type\": \"string\", \"description\": \"unit, box, kg, liter, hour.\" },\n        \"isInventoried\": { \"type\": \"boolean\", \"description\": \"True when stock is tracked by location.\" }\n      }\n    },\n    \"Service\": {\n      \"description\": \"A reusable service or offering that can be sold, scheduled, taught or assigned to a place. Courses are services too.\",\n      \"fields\": {\n        \"serviceCode\": { \"type\": \"string\" },\n        \"serviceKind\": { \"type\": \"enum\", \"values\": [\"Service\", \"Course\", \"Cohort\", \"Subscription\", \"AppointmentType\"], \"description\": \"Cohort is a concrete instance of a course.\" },\n        \"serviceType\": { \"type\": \"enum\", \"values\": [\"Course\", \"Consulting\", \"Maintenance\", \"Appointment\", \"Subscription\", \"Other\"] },\n        \"parentServiceId\": { \"type\": \"record\", \"to\": [\"Service\"], \"description\": \"The base service, when this one is a cohort or a derived offering.\" },\n        \"durationMinutes\": { \"type\": \"number\" },\n        \"deliveryMode\": { \"type\": \"enum\", \"values\": [\"Onsite\", \"Remote\", \"Hybrid\", \"Other\"] }\n      }\n    },\n    \"Location\": {\n      \"description\": \"A physical place used for stock or for delivering a service: room, warehouse, campus, store, branch, shelf.\",\n      \"fields\": {\n        \"locationType\": { \"type\": \"enum\", \"required\": true, \"values\": [\"Room\", \"Warehouse\", \"Building\", \"Campus\", \"Store\", \"Office\", \"Shelf\", \"Other\"] },\n        \"locationCode\": { \"type\": \"string\" },\n        \"parentLocationId\": { \"type\": \"record\", \"to\": [\"Location\"], \"description\": \"The larger place this one belongs to.\" },\n        \"capacity\": { \"type\": \"number\" },\n        \"propertyAddress\": { \"type\": \"object\", \"of\": \"Address\" }\n      }\n    },\n    \"BankAccount\": {\n      \"description\": \"Routing data only. Balances and transactions belong to the finance module, never here.\",\n      \"fields\": {\n        \"bankName\": { \"type\": \"string\" },\n        \"bankRoutingNumber\": { \"type\": \"string\", \"description\": \"ABA routing number in the US; use swift for international.\" },\n        \"accountNumber\": { \"type\": \"string\" },\n        \"accountType\": { \"type\": \"enum\", \"values\": [\"Checking\", \"Savings\", \"MoneyMarket\", \"Payment\", \"Other\"] },\n        \"swift\": { \"type\": \"string\", \"description\": \"BIC/SWIFT, for international transfers.\" },\n        \"iban\": { \"type\": \"string\" },\n        \"pixKey\": { \"type\": \"string\" },\n        \"pixKeyType\": { \"type\": \"enum\", \"values\": [\"CPF\", \"CNPJ\", \"Phone\", \"Email\", \"RandomKey\"] },\n        \"isVerified\": { \"type\": \"boolean\", \"required\": true, \"description\": \"Verified by micro-deposit, open banking or manual review.\" }\n      },\n      \"rules\": [\"rule-bank-account-holder-via-relationship\", \"rule-bank-account-routing-required-for-us\"]\n    },\n    \"Document\": {\n      \"description\": \"An indexed reference to an external file. The file itself never lives in the MDM.\",\n      \"fields\": {\n        \"originModule\": { \"type\": \"string\", \"required\": true, \"description\": \"The module that created this record.\" },\n        \"docCategory\": { \"type\": \"enum\", \"required\": true, \"values\": [\"Contract\", \"Certificate\", \"IdDocument\", \"Invoice\", \"Receipt\", \"Report\", \"Photo\", \"Other\"] },\n        \"storageBucket\": { \"type\": \"string\", \"required\": true, \"description\": \"S3 bucket, or its equivalent, holding the file.\" },\n        \"storagePath\": { \"type\": \"string\", \"required\": true, \"description\": \"Path inside the bucket. Never rewritten after creation.\" },\n        \"fileName\": { \"type\": \"string\", \"required\": true },\n        \"mimeType\": { \"type\": \"string\" },\n        \"fileSizeKb\": { \"type\": \"number\" },\n        \"issuedAt\": { \"type\": \"date\" },\n        \"expiresAt\": { \"type\": \"date\" },\n        \"issuer\": { \"type\": \"string\", \"description\": \"Name of the issuing authority, as free text. Not an mdmId.\" }\n      },\n      \"rules\": [\"rule-document-parties-via-relationships\", \"rule-document-path-immutable\"]\n    },\n    \"AssetGeneric\": {\n      \"description\": \"The fallback asset, for what does not fit vehicle, property or equipment cleanly.\",\n      \"fields\": {\n        \"assetCategory\": { \"type\": \"string\", \"description\": \"furniture, lab-item, signage, toolkit, decor.\" },\n        \"serialNumber\": { \"type\": \"string\" },\n        \"manufacturer\": { \"type\": \"string\" },\n        \"model\": { \"type\": \"string\" }\n      }\n    },\n    \"AssetVehicle\": {\n      \"description\": \"Cars, trucks, motorcycles, boats.\",\n      \"fields\": {\n        \"plate\": { \"type\": \"string\" },\n        \"vin\": { \"type\": \"string\", \"description\": \"Vehicle Identification Number.\" },\n        \"brand\": { \"type\": \"string\" },\n        \"model\": { \"type\": \"string\" },\n        \"year\": { \"type\": \"integer\" },\n        \"color\": { \"type\": \"string\" },\n        \"fuelType\": { \"type\": \"enum\", \"values\": [\"Gasoline\", \"Diesel\", \"Electric\", \"Hybrid\", \"Flex\", \"Other\"] }\n      }\n    },\n    \"AssetProperty\": {\n      \"description\": \"Real estate: residential, commercial, rural or industrial.\",\n      \"fields\": {\n        \"registrationNumber\": { \"type\": \"string\", \"description\": \"Deed number, cadastral reference, or the local equivalent.\" },\n        \"propertyAddress\": { \"type\": \"object\", \"of\": \"Address\" },\n        \"propertyType\": { \"type\": \"enum\", \"values\": [\"Residential\", \"Commercial\", \"Rural\", \"UrbanLot\", \"Industrial\", \"Other\"] },\n        \"areaSqft\": { \"type\": \"number\", \"description\": \"Area in square feet; the primary unit in the US.\" },\n        \"areaM2\": { \"type\": \"number\", \"description\": \"Area in square meters, outside the US.\" },\n        \"taxParcelId\": { \"type\": \"string\", \"description\": \"Tax parcel or assessor id in the US, or the local equivalent.\" }\n      }\n    },\n    \"AssetEquipment\": {\n      \"description\": \"Machinery, devices, infrastructure equipment.\",\n      \"fields\": {\n        \"serialNumber\": { \"type\": \"string\" },\n        \"brand\": { \"type\": \"string\" },\n        \"model\": { \"type\": \"string\" },\n        \"category\": { \"type\": \"string\" },\n        \"acquisitionDate\": { \"type\": \"date\" }\n      }\n    }\n  },\n\n  \"relationships\": [\n    { \"type\": \"Owns\", \"title\": \"Owns\", \"description\": \"A person or a company owns an asset · metadata: since, ownershipPct\", \"from\": [\"Person\", \"Company\"], \"to\": [\"AssetGeneric\", \"AssetVehicle\", \"AssetProperty\", \"AssetEquipment\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"ownedAssets\"], \"to\": [\"owners\"] } },\n    { \"type\": \"Employs\", \"title\": \"Employs\", \"description\": \"A company employs a person · metadata: role, department, startDate\", \"from\": [\"Company\"], \"to\": [\"Person\"], \"bidirectional\": false, \"roles\": [\"employee\", \"contractor\", \"intern\"], \"compactKeys\": { \"from\": [\"employees\"], \"to\": [\"employers\"] } },\n    { \"type\": \"OffersProduct\", \"title\": \"Offers product\", \"description\": \"A company puts a product in its catalog · metadata: since, supplierSku\", \"from\": [\"Company\"], \"to\": [\"Product\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"offeredProducts\"], \"to\": [\"productSuppliers\"] } },\n    { \"type\": \"OffersService\", \"title\": \"Offers service\", \"description\": \"A company or a person offers a service · metadata: since, priceTable\", \"from\": [\"Company\", \"Person\"], \"to\": [\"Service\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"offeredServices\"], \"to\": [\"serviceProviders\"] } },\n    { \"type\": \"StocksAt\", \"title\": \"Stocks at\", \"description\": \"A product or a piece of equipment is stocked at a place · metadata: quantity, unit, minLevel\", \"from\": [\"Product\", \"AssetEquipment\"], \"to\": [\"Location\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"stockLocations\"], \"to\": [\"stockedItems\"] } },\n    { \"type\": \"Teaches\", \"title\": \"Teaches\", \"description\": \"A person teaches a service or a course · metadata: role, since\", \"from\": [\"Person\"], \"to\": [\"Service\"], \"bidirectional\": false, \"roles\": [\"primary-instructor\", \"assistant-instructor\", \"substitute\"], \"compactKeys\": { \"from\": [\"taughtServices\"], \"to\": [\"instructors\"] } },\n    { \"type\": \"HappensAt\", \"title\": \"Happens at\", \"description\": \"A service is delivered at a place · metadata: scheduleLabel, weekday\", \"from\": [\"Service\"], \"to\": [\"Location\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"serviceLocations\"], \"to\": [\"scheduledServices\"] } },\n    { \"type\": \"FranchiseOf\", \"title\": \"Franchise of\", \"description\": \"A company operates as a franchise of another · metadata: contractId, territory\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"franchisors\"], \"to\": [\"franchisees\"] } },\n    { \"type\": \"BelongsToGroup\", \"title\": \"Belongs to group\", \"description\": \"A company belongs to an economic group · metadata: role\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"subsidiary-brand\"], \"compactKeys\": { \"from\": [\"groupParents\"], \"to\": [\"groupMembers\"] } },\n    { \"type\": \"PartOfUnit\", \"title\": \"Part of unit\", \"description\": \"An internal structure belongs to a larger one · metadata: role\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"department\", \"team\", \"branch-unit\"], \"compactKeys\": { \"from\": [\"unitParents\"], \"to\": [\"unitChildren\"] } },\n    { \"type\": \"ManagedBy\", \"title\": \"Managed by\", \"description\": \"A person runs a company or a service · metadata: role\", \"from\": [\"Person\"], \"to\": [\"Company\", \"Service\"], \"bidirectional\": false, \"roles\": [\"manager\", \"coordinator\"], \"compactKeys\": { \"from\": [\"managedOrganizations\"], \"to\": [\"managers\"] } },\n    { \"type\": \"ReportsTo\", \"title\": \"Reports to\", \"description\": \"A person reports to another person · metadata: role\", \"from\": [\"Person\"], \"to\": [\"Person\"], \"bidirectional\": false, \"roles\": [\"direct-report\", \"manager\"], \"compactKeys\": { \"from\": [\"reportManagers\"], \"to\": [\"reports\"] } },\n    { \"type\": \"AssignedTo\", \"title\": \"Assigned to\", \"description\": \"A person is assigned to a company or a service · metadata: role\", \"from\": [\"Person\"], \"to\": [\"Company\", \"Service\"], \"bidirectional\": false, \"roles\": [\"member\", \"assistant\", \"instructor\"], \"compactKeys\": { \"from\": [\"assignments\"], \"to\": [\"assignees\"] } },\n    { \"type\": \"Attends\", \"title\": \"Attends\", \"description\": \"A person attends a service or a course · metadata: attendanceStatus\", \"from\": [\"Person\"], \"to\": [\"Service\"], \"bidirectional\": false, \"roles\": [\"enrolled\", \"completed\"], \"compactKeys\": { \"from\": [\"attendedServices\"], \"to\": [\"attendees\"] } },\n    { \"type\": \"SuppliesProduct\", \"title\": \"Supplies product\", \"description\": \"A company supplies a product · metadata: leadTimeDays, catalogCode\", \"from\": [\"Company\"], \"to\": [\"Product\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"suppliedProducts\"], \"to\": [\"productVendors\"] } },\n    { \"type\": \"PartnersWith\", \"title\": \"Partners with\", \"description\": \"A person is a partner in a company · metadata: equityPct, role\", \"from\": [\"Person\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"managing-partner\", \"silent-partner\"], \"compactKeys\": { \"from\": [\"partners\"], \"to\": [\"partners\"] } },\n    { \"type\": \"Family\", \"title\": \"Family\", \"description\": \"Kinship between two people, read the same way from either side · metadata: degree. An emergency contact is this link with role emergency\", \"from\": [\"Person\"], \"to\": [\"Person\"], \"bidirectional\": true, \"roles\": [\"spouse\", \"child\", \"parent\", \"sibling\", \"emergency\"], \"compactKeys\": { \"from\": [\"family\"], \"to\": [\"family\"] } },\n    { \"type\": \"GuardianOf\", \"title\": \"Guardian of\", \"description\": \"A person answers for another person or for an animal · metadata: since, guardianType\", \"from\": [\"Person\"], \"to\": [\"Person\", \"Animal\"], \"bidirectional\": false, \"roles\": [\"parent\", \"guardian\", \"owner\", \"foster\"], \"compactKeys\": { \"from\": [\"pets\"], \"to\": [\"guardians\"] } },\n    { \"type\": \"CustomerOf\", \"title\": \"Customer of\", \"description\": \"A person or a company buys from a company · metadata: since, segment\", \"from\": [\"Person\", \"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"suppliers\"], \"to\": [\"customers\"] } },\n    { \"type\": \"SupplierOf\", \"title\": \"Supplier of\", \"description\": \"A company supplies another company · metadata: category, contractMdmId\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"customers\"], \"to\": [\"suppliers\"] } },\n    { \"type\": \"MemberOf\", \"title\": \"Member of\", \"description\": \"A person is a member of a company or an association · metadata: role, membershipType\", \"from\": [\"Person\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"board-member\", \"honorary\"], \"compactKeys\": { \"from\": [\"memberships\"], \"to\": [\"members\"] } },\n    { \"type\": \"HoldsAccount\", \"title\": \"Holds account\", \"description\": \"A person or a company holds a bank account · metadata: isPrimary, since\", \"from\": [\"Person\", \"Company\"], \"to\": [\"BankAccount\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"bankAccounts\"], \"to\": [\"accountHolders\"] } },\n    { \"type\": \"SubsidiaryOf\", \"title\": \"Subsidiary of\", \"description\": \"A company is a subsidiary of another · metadata: equityPct, type\", \"from\": [\"Company\"], \"to\": [\"Company\"], \"bidirectional\": false, \"roles\": [\"wholly-owned\", \"affiliate\"], \"compactKeys\": { \"from\": [\"parentCompanies\"], \"to\": [\"subsidiaries\"] } },\n    { \"type\": \"LocatedAt\", \"title\": \"Located at\", \"description\": \"A person or a company sits at a property · metadata: locationType\", \"from\": [\"Person\", \"Company\"], \"to\": [\"AssetProperty\"], \"bidirectional\": false, \"roles\": [\"headquarters\", \"branch\", \"warehouse\"], \"compactKeys\": { \"from\": [\"locations\"], \"to\": [\"locatedEntities\"] } },\n    { \"type\": \"Signed\", \"title\": \"Signed\", \"description\": \"A person or a company signed a document · metadata: role\", \"from\": [\"Person\", \"Company\"], \"to\": [\"Document\"], \"bidirectional\": false, \"roles\": [\"contractor\", \"client\", \"witness\", \"notary\"], \"compactKeys\": { \"from\": [\"documents\"], \"to\": [\"signedBy\"] } },\n    { \"type\": \"HasContact\", \"title\": \"Has contact\", \"description\": \"Any record owns a contact channel; this is what fills base.contacts · metadata: isPrimary\", \"from\": [\"Person\", \"Company\", \"Product\", \"Service\", \"Location\", \"AssetGeneric\", \"AssetVehicle\", \"AssetProperty\", \"AssetEquipment\", \"Animal\", \"BankAccount\", \"Document\", \"ContactChannel\"], \"to\": [\"ContactChannel\"], \"bidirectional\": false, \"roles\": [], \"compactKeys\": { \"from\": [\"contacts\"], \"to\": [\"contactOwners\"] } }\n  ],\n\n  \"capabilities\": {\n    \"read.byId\": \"Reads one record, or a handful at once, when the id is already known · get, getMany and hydrateMany over the index plus the document store, O(1) each · any screen that already holds the mdmId, and every list that has to fill in the records it points at · platform: ready\",\n    \"locate.byName\": \"Finds records whose name contains the typed text, anywhere in the string · listByType narrows by subtype and status in the index table and then matches the name in memory; aliases are not consulted and there is no default page size · anyone looking a record up · platform: partial\",\n    \"locate.byDocument\": \"Finds the single record that holds a national document (CPF, CNPJ, SSN, EIN) · findByDocument loads the index and filters in JS · whoever registers, to deduplicate before creating · platform: partial\",\n    \"locate.byContact\": \"Finds the record that owns a phone, WhatsApp handle or e-mail · findByContact loads every ContactChannel record · whoever answers an inbound call or message · platform: partial\",\n    \"locate.byLogin\": \"Finds the person behind a login e-mail · mdm_tag row with namespace login, partial unique index on (namespace, tag, module) · the session resolver · platform: ready\",\n    \"locate.byTag\": \"Finds every record carrying a given label — which is how a secondary key works here · mdm.tag.findByTag, over the index idx_mdm_tag_lookup on (entityType, tag, module); the `namespace` column keeps one key space apart from another, and the login e-mail of locate.byLogin is nothing but the namespace 'login' · a module that has to find a record by a code of its own, such as a chart or a badge number · platform: ready\",\n    \"locate.semantic\": \"Finds a record through a misspelling, a phonetic match or half a name · would need a trigram or tsvector index, or embeddings; searchVector is TEXT compared literally · reception, when the spelling is uncertain · platform: missing\",\n    \"locate.byDocumentField\": \"Filters or sorts by something that lives only in the document, such as birth month, city or any module field · would need that field promoted to an index column, or a GIN index on details; for a key the module itself controls, locate.byTag already answers without any of that · marketing and reporting · platform: missing\",\n    \"register.createOrAttach\": \"Creates the record when it does not exist and, either way, marks it with the module role · locate.byDocument, create when absent, then attachRole writes details[moduleId], the tag, the audit row and the recomputed compact refs · whoever registers · platform: ready\",\n    \"register.asProspect\": \"Records an interested party who has no document yet, and promotes it later · prospect.create with promotionSource and ttlExpiresAt, then promoteToEntity keeping the same mdmId · reception and the public site · platform: ready\",\n    \"edit.platformFields\": \"Changes the name, document, addresses, consent and the other fields the platform owns · entity.update; touching an identification field also rewrites the index row · whoever maintains the record · platform: partial\",\n    \"edit.moduleNamespace\": \"Changes only details[moduleId], which is what this module knows about the record · attachRole or update carrying the module key; any other module key is refused · the module itself · platform: ready\",\n    \"inactivate\": \"Takes the record out of use without deleting it · status Active to Inactive, and reactivate undoes it · whoever maintains the record · platform: partial\",\n    \"merge\": \"Joins two records that are the same subject, the loser pointing at the winner · mergeEntity sets status Merged and mergedInto, but the facade neither exports nor routes it · an administrator · platform: missing\",\n    \"delete\": \"Removes the record physically, and is refused while an active relationship exists · entity.delete, error MDM_DELETE_BLOCKED_BY_RELATIONSHIPS · an administrator · platform: ready\",\n    \"link\": \"Creates a versioned relationship, with a role, between two permanent records · link(from, to, type, role); the engine recomputes the compact keys on both sides · whoever maintains the record · platform: ready\",\n    \"unlink\": \"Closes a relationship while keeping its history · unlink sets status Inactive; the row is never deleted · whoever maintains the record · platform: ready\",\n    \"link.contact\": \"Adds a phone, WhatsApp handle or e-mail that belongs to this record · create a ContactChannel record and link it with HasContact; the engine fills relationshipRefs.contacts · whoever maintains the record · platform: ready\",\n    \"listLinks\": \"Shows the related records, with their validity and role · relationship.list and relatedOfMany · the record screen · platform: ready\",\n    \"attach.document\": \"Stores a photo, a scan or a signed document against the record, by category · upload to S3 or local disk, a row in mdm_attachment, presigned GET · whoever maintains the record · platform: partial\",\n    \"comment\": \"Leaves a note on the record, with one level of reply and a 15-minute edit window · mdm_comment anchored by entityType, entityId and module · whoever maintains the record · platform: ready\",\n    \"tag\": \"Marks the record with free labels inside the module namespace · mdm_tag, unique on (entityType, entityId, tag, module) · whoever maintains the record · platform: ready\",\n    \"sequence.next\": \"Issues the next number of a counter, such as a record or order number · mdm_number_sequence with SELECT … FOR UPDATE, key {module}.{entityType}.{scope} · the module, on create · platform: ready\",\n    \"config.kv\": \"Keeps a small piece of JSON configuration that more than one module reads · mdm.kv.get and mdm.kv.put over mdm_kv, a shared table keyed by one `key` column — no per-record scope, no history and no module column · a module that needs a setting the others also read · platform: ready\",\n    \"statusHistory.read\": \"Shows when the record changed status and who changed it · mdm_status_history · the record screen · platform: partial\",\n    \"audit\": \"Says who changed what, and when · mdm_audit_log, insert only · an administrator · platform: partial\",\n    \"invite.login\": \"Gives the person a login so they can see their own data · identity.invite writes the mdm_tag login row and calls collab-auth · whoever maintains the record · platform: ready\",\n    \"export.personalData\": \"Hands the subject their own data on request (LGPD art. 18, GDPR art. 15) · would need the document, the links and the attachments in a single export · an administrator · platform: missing\",\n    \"anonymize\": \"Erases the personal data while keeping the record for statistics · would pseudonymize the identification keeping the mdmId · an administrator · platform: missing\"\n  },\n\n  \"rules\": {\n    \"rule-person-ssn-unique-for-us\": \"Two permanent people in the US must not share the same SSN · engine · platform: partial, because the unique index does not exist\",\n    \"rule-person-privacy-consent-required-br-eu\": \"A person living in Brazil or the EU without a valid privacy consent is forced to Inactive · engine · platform: ready\",\n    \"rule-company-ein-unique-for-us\": \"Two permanent companies in the US must not share the same EIN · engine · platform: partial, because the unique index does not exist\",\n    \"rule-company-legal-name-required\": \"A company record is refused without a legalName · engine · platform: ready\",\n    \"rule-contact-value-unique-per-type\": \"Two contact channels must not share the same contactType and value · engine · platform: partial\",\n    \"rule-bank-account-routing-required-for-us\": \"A US bank account is refused without a bankRoutingNumber · engine · platform: ready\",\n    \"rule-bank-account-holder-via-relationship\": \"Who holds a bank account is the HoldsAccount link, never a field of the account · engine · platform: ready\",\n    \"rule-document-parties-via-relationships\": \"Who signed a document is the Signed link, never a field of the document · engine · platform: ready\",\n    \"rule-document-path-immutable\": \"Once stored, the storage key of a document is never rewritten · engine · platform: ready\",\n    \"rule-foreign-namespace-refused\": \"A caller carrying a moduleId may write the platform keys, general and its own key; any other module key is refused with MDM_FOREIGN_NAMESPACE · engine · platform: ready\",\n    \"rule-delete-blocked-by-relationships\": \"A physical delete is refused while an active relationship exists · engine · platform: ready\",\n    \"rule-document-shape-validated\": \"Addresses, consent, general and the module namespace are validated on write against the schema derived from this ontology · engine · platform: missing, nothing validates the document today\",\n    \"rule-identity-never-in-namespace\": \"Identity, document, contact and login are platform layers; a module never redeclares them inside details[moduleId] · engine · platform: partial\"\n  },\n\n  \"statuses\": [\"Active\", \"Inactive\", \"Merged\", \"Blocked\"],\n  \"docTypes\": [\"SSN\", \"EIN\", \"Passport\", \"DriversLicense\", \"NationalId\", \"CPF\", \"CNPJ\", \"VAT\", \"Other\"],\n\n  \"storage\": {\n    \"indexTable\": \"mdm_documents_entities_index\",\n    \"prospectIndexTable\": \"mdm_documents_prospects_index\",\n    \"documentTable\": \"mdm_documents\",\n    \"documentColumn\": \"details\",\n    \"indexedColumns\": [\"subtype\", \"name\", \"status\", \"docType\", \"docId\", \"countryCode\", \"createdAt\", \"updatedAt\"],\n    \"reservedKeys\": [\"identification\", \"base\", \"general\", \"<subtype>\", \"<moduleId>\"]\n  },\n\n  \"knownDivergences\": {\n    \"grouped-document\": \"The branches of this file are the target. The engine writes and reads a FLAT document today, so identification, base and the subtype branch are all one level.\",\n    \"contacts-written-from-input\": \"base.contacts is declared derived from HasContact and the engine still writes it raw from the input, duplicating relationshipRefs.contacts.\",\n    \"module-types-duplicates-tags\": \"base.moduleTypes and identification.tags carry the same module roles. tags is the one with a column; moduleTypes is kept for the engine and should disappear.\",\n    \"doc-unique-missing\": \"UNIQUE(docType, docId) is promised in defs/ontology.ts and absent from persistence.ts, so the two uniqueness rules are only partly enforced.\",\n    \"privacy-consent-value\": \"PrivacyConsent (data) and PrivacyConsentValue (interface) declare different fields; the same is true of Address and ContactSummary.\",\n    \"compact-relationship-refs-count\": \"CompactRelationshipRefs has 22 keys in the data and 48 in the interface; the interface is the real one.\",\n    \"search-vector-type\": \"searchVector is documented as tsvector and created as TEXT, compared literally, which is why locate.semantic is missing.\",\n    \"relationship-documents-table\": \"Table mdm_relationship_documents is cited and does not exist.\",\n    \"service-defs-case\": \"The JSON service definitions use PascalCase where the columns are camelCase.\",\n    \"platform-detail-keys-copy\": \"The list of platform keys exists twice, in mdmFacade.ts and integration.ts, with different contents.\",\n    \"emergency-contact-type\": \"There is no EmergencyContactOf type; a Family link with role emergency carries that meaning.\",\n    \"subtype-enum-narrowed\": \"identification.subtype is declared here with the 13 values; the engine narrows it per subtype, so a Person record only ever carries \\\"Person\\\".\",\n    \"index-only-columns\": \"The index table also has searchVector and dynamoPk, which are engine internals and no field of the document; one of the 9 indexes is on dynamoPk, which is why indexedColumns lists 8.\"\n  }\n} as const satisfies MdmOntology;\n\nexport default mdm;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/analisarDecidirDespesa.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/journeys/analisarDecidirDespesa.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const analisarDecidirDespesaJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"analisarDecidirDespesa\",\n  \"business\": {\n    \"actorRef\": \"gestorEquipe\",\n    \"title\": \"Analisar e decidir despesa\",\n    \"goal\": \"Analisar uma despesa da equipe e aprová-la ou rejeitá-la com o motivo.\",\n    \"entry\": {\n      \"mode\": \"contextOrLookup\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"localizarDespesasPendentes\",\n        \"kind\": \"locate\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Localizar despesas pendentes\",\n        \"description\": \"Localiza as despesas da própria equipe que aguardam aprovação.\"\n      },\n      {\n        \"stepId\": \"analisarDespesa\",\n        \"kind\": \"inspect\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Analisar despesa\",\n        \"description\": \"Consulta os dados e o comprovante da despesa da equipe.\"\n      },\n      {\n        \"stepId\": \"decidirDespesa\",\n        \"kind\": \"decide\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Decidir aprovação\",\n        \"description\": \"Escolhe aprovar a despesa ou rejeitá-la, informando o motivo quando a decisão for rejeitar.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"A despesa é aprovada para pagamento ou rejeitada com um motivo.\",\n      \"evidence\": [\n        \"Situação da despesa indica aprovação ou rejeição.\",\n        \"Motivo de rejeição registrado quando a despesa é rejeitada.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:7d98885cdbe90911f0fc5b1e8d608ef2cb493dae838d4d5f00ac16fa36da7590\"\n} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;\n\nexport type AnalisarDecidirDespesaJourneyType = typeof analisarDecidirDespesaJourney;\n\nexport default analisarDecidirDespesaJourney;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/consultarDespesasAprovadas.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/journeys/consultarDespesasAprovadas.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const consultarDespesasAprovadasJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"consultarDespesasAprovadas\",\n  \"business\": {\n    \"actorRef\": \"financeiro\",\n    \"title\": \"Consultar despesas aprovadas\",\n    \"goal\": \"Consultar todas as despesas aprovadas que aguardam pagamento.\",\n    \"entry\": {\n      \"mode\": \"contextOrLookup\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"localizarDespesasAprovadas\",\n        \"kind\": \"locate\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Localizar despesas aprovadas\",\n        \"description\": \"Localiza todas as despesas aprovadas disponíveis para pagamento.\"\n      },\n      {\n        \"stepId\": \"consultarDespesaAprovada\",\n        \"kind\": \"inspect\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Consultar despesa aprovada\",\n        \"description\": \"Consulta os dados e o comprovante de uma despesa aprovada.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"O financeiro visualiza as despesas aprovadas para pagamento.\",\n      \"evidence\": [\n        \"Lista contendo despesas aprovadas.\",\n        \"Dados e comprovante da despesa aprovada visíveis.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:3aedfc89452190a404e201cd02041f2811d056e95e92c72aec7a19fc63d1fd37\"\n} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;\n\nexport type ConsultarDespesasAprovadasJourneyType = typeof consultarDespesasAprovadasJourney;\n\nexport default consultarDespesasAprovadasJourney;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/consultarMinhasDespesas.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/journeys/consultarMinhasDespesas.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const consultarMinhasDespesasJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"consultarMinhasDespesas\",\n  \"business\": {\n    \"actorRef\": \"colaborador\",\n    \"title\": \"Consultar minhas despesas\",\n    \"goal\": \"Acompanhar as despesas que registrou e suas situações.\",\n    \"entry\": {\n      \"mode\": \"contextOrLookup\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"localizarMinhasDespesas\",\n        \"kind\": \"locate\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Localizar minhas despesas\",\n        \"description\": \"Localiza somente as despesas vinculadas ao próprio colaborador.\"\n      },\n      {\n        \"stepId\": \"consultarDespesa\",\n        \"kind\": \"inspect\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Consultar despesa\",\n        \"description\": \"Consulta os dados, comprovante e situação de uma despesa própria.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"O colaborador visualiza suas despesas e a situação de cada uma.\",\n      \"evidence\": [\n        \"Lista contendo apenas despesas do próprio colaborador.\",\n        \"Dados e situação da despesa selecionada visíveis.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:daffa971697fb75ea0fdca9dc7b5286ee0431bd87f52d78482cc787e2a84352e\"\n} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;\n\nexport type ConsultarMinhasDespesasJourneyType = typeof consultarMinhasDespesasJourney;\n\nexport default consultarMinhasDespesasJourney;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/corrigirReenviarDespesa.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/journeys/corrigirReenviarDespesa.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const corrigirReenviarDespesaJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"corrigirReenviarDespesa\",\n  \"business\": {\n    \"actorRef\": \"colaborador\",\n    \"title\": \"Corrigir e reenviar despesa\",\n    \"goal\": \"Corrigir uma despesa rejeitada e reenviá-la uma única vez para aprovação.\",\n    \"entry\": {\n      \"mode\": \"contextOrLookup\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"localizarDespesaRejeitada\",\n        \"kind\": \"locate\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Localizar despesa rejeitada\",\n        \"description\": \"Localiza uma despesa própria que foi rejeitada e ainda pode ser reenviada.\"\n      },\n      {\n        \"stepId\": \"consultarMotivoRejeicao\",\n        \"kind\": \"inspect\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Consultar motivo da rejeição\",\n        \"description\": \"Consulta o motivo informado pelo gestor para a rejeição da despesa.\"\n      },\n      {\n        \"stepId\": \"corrigirDespesa\",\n        \"kind\": \"act\",\n        \"entity\": \"Despesa\",\n        \"effect\": \"update\",\n        \"title\": \"Corrigir despesa\",\n        \"description\": \"Corrige os dados ou o comprovante da despesa rejeitada.\"\n      },\n      {\n        \"stepId\": \"reenviarDespesa\",\n        \"kind\": \"act\",\n        \"entity\": \"Despesa\",\n        \"effect\": \"transition\",\n        \"transitionRef\": \"reenviarParaAprovacao\",\n        \"title\": \"Reenviar para aprovação\",\n        \"description\": \"Reenvia uma única vez a despesa corrigida para nova análise do gestor.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"A despesa corrigida é reenviada para nova aprovação.\",\n      \"evidence\": [\n        \"Dados ou comprovante corrigidos na despesa.\",\n        \"Situação da despesa indica que foi reenviada para aprovação.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:b598347ecda0506d4018037a1f699fae1f542729c2239940c5c0ec8e16eff345\"\n} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;\n\nexport type CorrigirReenviarDespesaJourneyType = typeof corrigirReenviarDespesaJourney;\n\nexport default corrigirReenviarDespesaJourney;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/registrarEnviarDespesa.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/journeys/registrarEnviarDespesa.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const registrarEnviarDespesaJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"registrarEnviarDespesa\",\n  \"business\": {\n    \"actorRef\": \"colaborador\",\n    \"title\": \"Registrar e enviar despesa\",\n    \"goal\": \"Registrar uma despesa própria com seus dados e comprovante e enviá-la para aprovação.\",\n    \"entry\": {\n      \"mode\": \"coldStart\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"registrarDespesa\",\n        \"kind\": \"act\",\n        \"entity\": \"Despesa\",\n        \"effect\": \"create\",\n        \"title\": \"Registrar despesa\",\n        \"description\": \"Informa data, categoria, valor, descrição e comprovante da despesa própria.\"\n      },\n      {\n        \"stepId\": \"enviarParaAprovacao\",\n        \"kind\": \"act\",\n        \"entity\": \"Despesa\",\n        \"effect\": \"transition\",\n        \"transitionRef\": \"enviarParaAprovacao\",\n        \"title\": \"Enviar para aprovação\",\n        \"description\": \"Envia a despesa registrada para análise do gestor da equipe.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"A despesa própria fica enviada para aprovação do gestor.\",\n      \"evidence\": [\n        \"Despesa registrada com data, categoria, valor, descrição e comprovante.\",\n        \"Situação da despesa indica que está aguardando aprovação.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:a0e3aa2ade68ef1564ad4d885c94f36afad2366deda0d20ff15f031cfb0f24ea\"\n} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;\n\nexport type RegistrarEnviarDespesaJourneyType = typeof registrarEnviarDespesaJourney;\n\nexport default registrarEnviarDespesaJourney;\n"
+      },
+      {
+        "path": "l4/reembolsoDespesas/journeys/registrarPagamentoDespesa.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l4/reembolsoDespesas/journeys/registrarPagamentoDespesa.defs.ts\" enhancement=\"_blank\"/>\n\nimport type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';\n\nexport const registrarPagamentoDespesaJourney = {\n  \"schemaVersion\": \"2026-09-10-ns5-journey-v1\",\n  \"journeyId\": \"registrarPagamentoDespesa\",\n  \"business\": {\n    \"actorRef\": \"financeiro\",\n    \"title\": \"Registrar pagamento de despesa\",\n    \"goal\": \"Registrar a data de pagamento de uma despesa aprovada.\",\n    \"entry\": {\n      \"mode\": \"contextOrLookup\"\n    },\n    \"steps\": [\n      {\n        \"stepId\": \"localizarDespesaAprovada\",\n        \"kind\": \"locate\",\n        \"entity\": \"Despesa\",\n        \"title\": \"Localizar despesa aprovada\",\n        \"description\": \"Localiza uma despesa aprovada que aguarda pagamento.\"\n      },\n      {\n        \"stepId\": \"registrarDataPagamento\",\n        \"kind\": \"act\",\n        \"entity\": \"Despesa\",\n        \"effect\": \"transition\",\n        \"transitionRef\": \"registrarPagamento\",\n        \"title\": \"Registrar pagamento\",\n        \"description\": \"Registra a data em que a despesa aprovada foi paga.\"\n      }\n    ],\n    \"outcome\": {\n      \"statement\": \"O pagamento da despesa aprovada fica registrado.\",\n      \"evidence\": [\n        \"Data de pagamento registrada na despesa.\",\n        \"Situação da despesa indica que foi paga.\"\n      ]\n    }\n  },\n  \"businessHash\": \"sha256:752c4b9fb9b6da1691b082ab5c9dfcabe34e3f1b17e23e880867b4e7b867051e\"\n} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;\n\nexport type RegistrarPagamentoDespesaJourneyType = typeof registrarPagamentoDespesaJourney;\n\nexport default registrarPagamentoDespesaJourney;\n"
+      },
+      {
+        "path": "l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface DespesaLoad {\n  id: string;\n  readonly version: number;\n  colaboradorId: string;\n  status: 'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid';\n  details: {\n    dataDespesa: string;\n    categoria: string;\n    valor: string;\n    dataPagamento: string;\n  };\n}\n\nexport interface DespesaRegisterPayment {\n  id: string;\n  readonly version: number;\n  details: {\n    dataPagamento: string;\n  };\n}\n\nexport interface Despesas_aprovadasContracts {\n  'reembolsoDespesas.despesas_aprovadas.load': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { despesasAprovadas: DespesaLoad[]; pageApprovedExpensesList: number; pageSizeApprovedExpensesList: number; hasMoreApprovedExpensesList: boolean };\n    meta: { output: { despesasAprovadas: { entity: 'Despesa'; many: true } }; lists: { approvedExpensesList: { key: 'despesasAprovadas'; page: 'pageApprovedExpensesList'; pageSize: 'pageSizeApprovedExpensesList'; hasMore: 'hasMoreApprovedExpensesList' } }; params: { colaboradorId: { filters: 'despesasAprovadas'; field: 'colaboradorId' }; page: { pages: 'approvedExpensesList' }; pageSize: { pages: 'approvedExpensesList' } } };\n    rules: ['financeApprovedExpenseAccess'];\n    access: { actors: ['financeiro']; grants: ['financeiroConsultaEpagaDespesasAprovadas']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { despesasAprovadas: DespesaLoad[]; pageApprovedExpensesList: number; pageSizeApprovedExpensesList: number; hasMoreApprovedExpensesList: boolean };\n    meta: { output: { despesasAprovadas: { entity: 'Despesa'; many: true } }; lists: { approvedExpensesList: { key: 'despesasAprovadas'; page: 'pageApprovedExpensesList'; pageSize: 'pageSizeApprovedExpensesList'; hasMore: 'hasMoreApprovedExpensesList' } }; params: { colaboradorId: { filters: 'despesasAprovadas'; field: 'colaboradorId' }; page: { pages: 'approvedExpensesList' }; pageSize: { pages: 'approvedExpensesList' } } };\n    rules: ['financeApprovedExpenseAccess'];\n    access: { actors: ['financeiro']; grants: ['financeiroConsultaEpagaDespesasAprovadas']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_aprovadas.registerPayment': {\n    kind: 'cmd';\n    writes: 'Despesa.registrarPagamento';\n    input: { details: { dataPagamento: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaRegisterPayment };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['financeApprovedExpenseAccess', 'paymentDateRequired'];\n    access: { actors: ['financeiro']; grants: ['financeiroConsultaEpagaDespesasAprovadas']; scope: 'related' };\n  };\n}\n"
+      },
+      {
+        "path": "l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface DespesaLoad {\n  id: string;\n  readonly version: number;\n  colaboradorId: string;\n  status: 'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid';\n  details: {\n    dataDespesa: string;\n    categoria: string;\n    valor: string;\n    reenvioRealizado: boolean;\n    motivoRejeicao: string;\n  };\n}\n\nexport interface ColaboradorLoad {\n  id: string;\n  details: {\n    identification: string;\n  };\n}\n\nexport interface DespesaApproveExpense {\n  id: string;\n  readonly version: number;\n  details: {\n    motivoRejeicao: string;\n  };\n}\n\nexport interface Despesas_da_equipeContracts {\n  'reembolsoDespesas.despesas_da_equipe.load': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { despesasDaEquipe: DespesaLoad[]; colaborador: ColaboradorLoad[]; pagePendingTeamExpenses: number; pageSizePendingTeamExpenses: number; hasMorePendingTeamExpenses: boolean };\n    meta: { output: { despesasDaEquipe: { entity: 'Despesa'; many: true }; colaborador: { entity: 'Colaborador'; many: true } }; lists: { pendingTeamExpenses: { key: 'despesasDaEquipe'; page: 'pagePendingTeamExpenses'; pageSize: 'pageSizePendingTeamExpenses'; hasMore: 'hasMorePendingTeamExpenses' } }; params: { colaboradorId: { filters: 'despesasDaEquipe'; field: 'colaboradorId' }; page: { pages: 'pendingTeamExpenses' }; pageSize: { pages: 'pendingTeamExpenses' } } };\n    rules: ['managerTeamExpenseAccess'];\n    access: { actors: ['gestorEquipe']; grants: ['gestorAnalisaDespesasDaEquipe']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { despesasDaEquipe: DespesaLoad[]; pagePendingTeamExpenses: number; pageSizePendingTeamExpenses: number; hasMorePendingTeamExpenses: boolean };\n    meta: { output: { despesasDaEquipe: { entity: 'Despesa'; many: true } }; lists: { pendingTeamExpenses: { key: 'despesasDaEquipe'; page: 'pagePendingTeamExpenses'; pageSize: 'pageSizePendingTeamExpenses'; hasMore: 'hasMorePendingTeamExpenses' } }; params: { colaboradorId: { filters: 'despesasDaEquipe'; field: 'colaboradorId' }; page: { pages: 'pendingTeamExpenses' }; pageSize: { pages: 'pendingTeamExpenses' } } };\n    rules: ['managerTeamExpenseAccess'];\n    access: { actors: ['gestorEquipe']; grants: ['gestorAnalisaDespesasDaEquipe']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_da_equipe.approveExpense': {\n    kind: 'cmd';\n    writes: 'Despesa.aprovarDespesa';\n    input: { details: { motivoRejeicao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaApproveExpense };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['managerTeamExpenseAccess'];\n    access: { actors: ['gestorEquipe']; grants: ['gestorAnalisaDespesasDaEquipe']; scope: 'related' };\n  };\n  'reembolsoDespesas.despesas_da_equipe.rejectExpense': {\n    kind: 'cmd';\n    writes: 'Despesa.rejeitarDespesa';\n    input: { details: { motivoRejeicao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaApproveExpense };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['managerTeamExpenseAccess', 'rejectionReasonRequired'];\n    access: { actors: ['gestorEquipe']; grants: ['gestorAnalisaDespesasDaEquipe']; scope: 'related' };\n  };\n}\n"
+      },
+      {
+        "path": "l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts",
+        "text": "/// <mls fileReference=\"_102047_/l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts\" enhancement=\"_blank\"/>\n\nexport interface DespesaLoad {\n  id: string;\n  readonly version: number;\n  status: 'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid';\n  details: {\n    dataDespesa: string;\n    categoria: string;\n    valor: string;\n    descricao: string;\n    reenvioRealizado: boolean;\n  };\n}\n\nexport interface DespesaRegistrarDespesa {\n  id: string;\n  readonly version: number;\n  details: {\n    dataDespesa: string;\n    categoria: string;\n    valor: string;\n    descricao: string;\n  };\n}\n\nexport interface Minhas_despesasContracts {\n  'reembolsoDespesas.minhas_despesas.load': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { minhasDespesas: DespesaLoad[]; pageListaMinhasDespesas: number; pageSizeListaMinhasDespesas: number; hasMoreListaMinhasDespesas: boolean };\n    meta: { output: { minhasDespesas: { entity: 'Despesa'; many: true } }; lists: { listaMinhasDespesas: { key: 'minhasDespesas'; page: 'pageListaMinhasDespesas'; pageSize: 'pageSizeListaMinhasDespesas'; hasMore: 'hasMoreListaMinhasDespesas' } }; params: { colaboradorId: { filters: 'minhasDespesas'; field: 'colaboradorId' }; page: { pages: 'listaMinhasDespesas' }; pageSize: { pages: 'listaMinhasDespesas' } } };\n    rules: ['expenseOwnerOnly'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.loadMinhasDespesas': {\n    kind: 'qry';\n    input: { colaboradorId?: string; page?: number; pageSize?: number };\n    output: { minhasDespesas: DespesaLoad[]; pageListaMinhasDespesas: number; pageSizeListaMinhasDespesas: number; hasMoreListaMinhasDespesas: boolean };\n    meta: { output: { minhasDespesas: { entity: 'Despesa'; many: true } }; lists: { listaMinhasDespesas: { key: 'minhasDespesas'; page: 'pageListaMinhasDespesas'; pageSize: 'pageSizeListaMinhasDespesas'; hasMore: 'hasMoreListaMinhasDespesas' } }; params: { colaboradorId: { filters: 'minhasDespesas'; field: 'colaboradorId' }; page: { pages: 'listaMinhasDespesas' }; pageSize: { pages: 'listaMinhasDespesas' } } };\n    rules: ['expenseOwnerOnly'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.registrarDespesa': {\n    kind: 'cmd';\n    writes: 'Despesa.create';\n    input: { details: { dataDespesa: string; categoria: string; valor: string; descricao: string }; colaboradorId: string };\n    output: { despesa: DespesaRegistrarDespesa };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['validExpenseData'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.corrigirDespesa': {\n    kind: 'cmd';\n    writes: 'Despesa.update';\n    input: { details: { dataDespesa: string; categoria: string; valor: string; descricao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaRegistrarDespesa };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['expenseOwnerOnly', 'validExpenseData', 'singleResubmission'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.enviarParaAprovacao': {\n    kind: 'cmd';\n    writes: 'Despesa.enviarParaAprovacao';\n    input: { details: { dataDespesa: string; categoria: string; valor: string; descricao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaRegistrarDespesa };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['expenseOwnerOnly', 'validExpenseData', 'proofRequiredBeforeSubmission'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n  'reembolsoDespesas.minhas_despesas.reenviarParaAprovacao': {\n    kind: 'cmd';\n    writes: 'Despesa.reenviarParaAprovacao';\n    input: { details: { dataDespesa: string; categoria: string; valor: string; descricao: string }; colaboradorId: string; id: string; version: number };\n    output: { despesa: DespesaRegistrarDespesa };\n    meta: { output: { despesa: { entity: 'Despesa'; many: false } }; lists: {}; params: {} };\n    rules: ['expenseOwnerOnly', 'validExpenseData', 'proofRequiredBeforeSubmission', 'singleResubmission'];\n    access: { actors: ['colaborador']; grants: ['colaboradorGerenciaPropriasDespesas']; scope: 'own' };\n  };\n}\n"
+      }
+    ],
+    "plans": [],
+    "llmCalls": 0
+  }
+}
