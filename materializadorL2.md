@@ -31,6 +31,10 @@ Para cada página `<pageId>` de um módulo `<mod>` do projeto cliente, em `l2/<m
 | `desktop/page11/<pageId>.defs.ts` | **page11 v2 desktop**: intenção, sections com `purpose`, organismos em prosa com intents, moléculas sugeridas, template collabux | **existe** (controleEstoque) |
 | `mobile/page11/<pageId>.defs.ts` | page11 v2 mobile, com os mesmos organismos e prosa própria | **existe** (controleEstoque) |
 
+Página sem leitura nem escrita (hub, por exemplo `inicio`; d2_70, 02/10): o shared não tem `load` nem pedido, só funções
+`navigate`, e o contrato é o arquivo vazio `export {};` (o parser devolve zero rotas). O materializador não gera chamada de
+BFF para essa página.
+
 Formatos e exemplos:
 - page11 v2: `todo/gerarApp/l2/doc/plano_d2_page11_v2_2026-09-30.md`;
 - shared v2 e contrato v2: `todo/gerarApp/l2/doc/plano_d2_shared_contrato_2026-09-30.md`.
