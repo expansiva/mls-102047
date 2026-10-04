@@ -1,0 +1,1051 @@
+{
+  "schemaVersion": "2026-09-21-d1-domain-v1",
+  "project": 102047,
+  "moduleName": "comandaRestaurante",
+  "llmCalls": 0,
+  "ok": true,
+  "entities": [
+    {
+      "entityId": "Comanda",
+      "action": "create",
+      "defPath": "l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": "open",
+      "uniqueKeys": [
+        [
+          "number"
+        ]
+      ],
+      "enumerations": [
+        {
+          "path": "status",
+          "values": [
+            "open",
+            "closed"
+          ]
+        },
+        {
+          "path": "details.paymentMethod",
+          "values": [
+            "cash",
+            "debitCard",
+            "creditCard",
+            "pix"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "mesaDisponivelParaAbrirComanda",
+          "owner": "module",
+          "source": "l4/comandaRestaurante/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "umaComandaAbertaPorMesa",
+          "owner": "module",
+          "source": "l4/comandaRestaurante/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "itensSomenteEmComandaAberta",
+          "owner": "module",
+          "source": "l4/comandaRestaurante/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "pagamentoObrigatorioNoFechamento",
+          "owner": "module",
+          "source": "l4/comandaRestaurante/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "descontoNaoExcedeSubtotal",
+          "owner": "module",
+          "source": "l4/comandaRestaurante/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "fechamentoLiberaMesa",
+          "owner": "module",
+          "source": "l4/comandaRestaurante/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Comanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Comanda",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "number",
+              "type": "integer"
+            },
+            {
+              "name": "mesaId",
+              "type": "record",
+              "ref": "Mesa"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.discountAmount",
+              "type": "money"
+            },
+            {
+              "name": "details.paymentMethod",
+              "type": "enum"
+            },
+            {
+              "name": "details.subtotal",
+              "type": "money",
+              "derived": true
+            },
+            {
+              "name": "details.totalComanda",
+              "type": "money",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "open",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "closed",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "fecharComanda",
+                "from": [
+                  "open"
+                ],
+                "to": "closed",
+                "by": [
+                  "caixa"
+                ],
+                "ruleRefs": [
+                  "pagamentoObrigatorioNoFechamento",
+                  "descontoNaoExcedeSubtotal",
+                  "fechamentoLiberaMesa"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "mesaDisponivelParaAbrirComanda",
+            "umaComandaAbertaPorMesa",
+            "itensSomenteEmComandaAberta",
+            "pagamentoObrigatorioNoFechamento",
+            "descontoNaoExcedeSubtotal",
+            "fechamentoLiberaMesa"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "ItemCardapio",
+      "action": "create",
+      "defPath": "l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [],
+      "enumerations": [],
+      "rules": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "ItemCardapio",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "ItemCardapio",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.precoVigente",
+              "type": "money"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "ItemComanda",
+      "action": "create",
+      "defPath": "l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": "launched",
+      "uniqueKeys": [],
+      "enumerations": [
+        {
+          "path": "status",
+          "values": [
+            "launched",
+            "canceled"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+          "owner": "module",
+          "source": "l4/comandaRestaurante/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "ItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "ItemComanda",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "comandaId",
+              "type": "record",
+              "ref": "Comanda"
+            },
+            {
+              "name": "itemCardapioId",
+              "type": "record",
+              "ref": "ItemCardapio"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.quantidade",
+              "type": "integer"
+            },
+            {
+              "name": "details.observacao",
+              "type": "text"
+            },
+            {
+              "name": "details.precoUnitario",
+              "type": "money"
+            },
+            {
+              "name": "details.valorTotal",
+              "type": "money",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "launched",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "canceled",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "cancelarItemComanda",
+                "from": [
+                  "launched"
+                ],
+                "to": "canceled",
+                "by": [
+                  "garcom"
+                ],
+                "ruleRefs": [
+                  "itemComandaOperacaoSomenteComandaAberta"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "itemComandaOperacaoSomenteComandaAberta"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "Mesa",
+      "action": "create",
+      "defPath": "l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [
+        [
+          "code"
+        ]
+      ],
+      "enumerations": [],
+      "rules": [
+        {
+          "ruleId": "mesaDisponivelParaAbrirComanda",
+          "owner": "module",
+          "source": "l4/comandaRestaurante/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Mesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Mesa",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "code",
+              "type": "string"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.disponivel",
+              "type": "boolean",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "mesaDisponivelParaAbrirComanda"
+          ],
+          "imports": []
+        }
+      }
+    }
+  ],
+  "valueObjects": [],
+  "problems": [],
+  "normalizations": [
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.details.discountAmount",
+      "detail": "description,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Comanda.record.fields.details.discountAmount",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.details.paymentMethod",
+      "detail": "description,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Comanda.record.fields.details.paymentMethod",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.details.subtotal",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.details.totalComanda",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.details",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Comanda.record.fields.details",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.mesaId",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Comanda.record.fields.mesaId",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.number",
+      "detail": "description,indexed,max,maxLength,min,required,title,unique"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Comanda.record.fields.number",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.status",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Comanda.record.fields.status",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Comanda.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Comanda.transitions.0",
+      "detail": "description,payload"
+    },
+    {
+      "code": "INITIAL_STATE_DERIVED",
+      "path": "Comanda",
+      "detail": "open"
+    },
+    {
+      "code": "NESTED_KEPT",
+      "path": "comandaRestaurante",
+      "detail": "No nested object is the target of a record reference. Nested fields stay on the entity."
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemCardapio.record.fields.details.precoVigente",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemCardapio.record.fields.details.precoVigente",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemCardapio.record.fields.details",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemCardapio.record.fields.details",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemCardapio.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemCardapio.record.fields.name",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemCardapio.record.fields.name",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemCardapio.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "ItemCardapio",
+      "detail": "no lifecycleStates and no transitions"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.comandaId",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemComanda.record.fields.comandaId",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.details.observacao",
+      "detail": "description,max,maxLength,min,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemComanda.record.fields.details.observacao",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.details.precoUnitario",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemComanda.record.fields.details.precoUnitario",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.details.quantidade",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemComanda.record.fields.details.quantidade",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.details.valorTotal",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.details",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemComanda.record.fields.details",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.itemCardapioId",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemComanda.record.fields.itemCardapioId",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.status",
+      "detail": "description,indexed,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "ItemComanda.record.fields.status",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemComanda.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "ItemComanda.transitions.0",
+      "detail": "description,payload"
+    },
+    {
+      "code": "INITIAL_STATE_DERIVED",
+      "path": "ItemComanda",
+      "detail": "launched"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Mesa.record.fields.code",
+      "detail": "description,indexed,max,maxLength,min,required,title,unique"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Mesa.record.fields.code",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Mesa.record.fields.details.disponivel",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Mesa.record.fields.details",
+      "detail": "description,max,maxLength,min,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Mesa.record.fields.details",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Mesa.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Mesa.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "Mesa",
+      "detail": "no lifecycleStates and no transitions"
+    }
+  ],
+  "preserved": [],
+  "removed": [],
+  "emit": [
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Comanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts"
+        ],
+        "data": {
+          "entityId": "Comanda",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "number",
+              "type": "integer"
+            },
+            {
+              "name": "mesaId",
+              "type": "record",
+              "ref": "Mesa"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.discountAmount",
+              "type": "money"
+            },
+            {
+              "name": "details.paymentMethod",
+              "type": "enum"
+            },
+            {
+              "name": "details.subtotal",
+              "type": "money",
+              "derived": true
+            },
+            {
+              "name": "details.totalComanda",
+              "type": "money",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "open",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "closed",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "fecharComanda",
+                "from": [
+                  "open"
+                ],
+                "to": "closed",
+                "by": [
+                  "caixa"
+                ],
+                "ruleRefs": [
+                  "pagamentoObrigatorioNoFechamento",
+                  "descontoNaoExcedeSubtotal",
+                  "fechamentoLiberaMesa"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "mesaDisponivelParaAbrirComanda",
+            "umaComandaAbertaPorMesa",
+            "itensSomenteEmComandaAberta",
+            "pagamentoObrigatorioNoFechamento",
+            "descontoNaoExcedeSubtotal",
+            "fechamentoLiberaMesa"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/domainEntity/Comanda",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Mesa"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "ItemCardapio",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "ItemCardapio",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.precoVigente",
+              "type": "money"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/domainEntity/ItemCardapio",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "ItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts"
+        ],
+        "data": {
+          "entityId": "ItemComanda",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "comandaId",
+              "type": "record",
+              "ref": "Comanda"
+            },
+            {
+              "name": "itemCardapioId",
+              "type": "record",
+              "ref": "ItemCardapio"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.quantidade",
+              "type": "integer"
+            },
+            {
+              "name": "details.observacao",
+              "type": "text"
+            },
+            {
+              "name": "details.precoUnitario",
+              "type": "money"
+            },
+            {
+              "name": "details.valorTotal",
+              "type": "money",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "launched",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "canceled",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "cancelarItemComanda",
+                "from": [
+                  "launched"
+                ],
+                "to": "canceled",
+                "by": [
+                  "garcom"
+                ],
+                "ruleRefs": [
+                  "itemComandaOperacaoSomenteComandaAberta"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "itemComandaOperacaoSomenteComandaAberta"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/domainEntity/ItemComanda",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Comanda",
+            "102047/comandaRestaurante/domainEntity/ItemCardapio"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Mesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Mesa",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "code",
+              "type": "string"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.disponivel",
+              "type": "boolean",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "mesaDisponivelParaAbrirComanda"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/domainEntity/Mesa",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4782 @@
+{
+  "schemaVersion": "2026-10-01-d1-usecases-v2",
+  "project": 102047,
+  "moduleName": "comandaRestaurante",
+  "llmCalls": 2,
+  "ok": true,
+  "enumerations": [
+    {
+      "entityId": "Comanda",
+      "path": "details.paymentMethod",
+      "values": [
+        "cash",
+        "debitCard",
+        "creditCard",
+        "pix"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Comanda",
+      "path": "status",
+      "values": [
+        "open",
+        "closed"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "ItemComanda",
+      "path": "status",
+      "values": [
+        "launched",
+        "canceled"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    }
+  ],
+  "usecases": [
+    {
+      "usecaseId": "cancelarItemComanda",
+      "entityId": "ItemComanda",
+      "operation": "transition",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/cancelarItemComanda.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.cancelarItem"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "transition",
+          "transitionId": "cancelarItemComanda",
+          "payload": []
+        },
+        {
+          "kind": "port",
+          "call": "transition",
+          "port": "ItemComandaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "cancelarItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "cancelarItemComanda",
+          "entityId": "ItemComanda",
+          "operation": "transition",
+          "ports": [
+            "ItemComandaRepository"
+          ],
+          "rulesApplied": [
+            "itemComandaOperacaoSomenteComandaAberta"
+          ],
+          "functions": [
+            {
+              "functionName": "cancelarItemComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.version"
+                },
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                },
+                {
+                  "name": "details.valorTotal",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.valorTotal"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "transition"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta"
+            },
+            {
+              "kind": "transition",
+              "transitionId": "cancelarItemComanda",
+              "payload": []
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "ItemComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [
+            {
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+              "path": "l4/comandaRestaurante/rules.defs.ts",
+              "symbol": "itemComandaOperacaoSomenteComandaAberta"
+            }
+          ],
+          "rulePlan": [
+            {
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+              "origin": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts#transitions.cancelarItemComanda.ruleRefs",
+              "consumer": "usecase:cancelarItemComanda",
+              "enforcement": "local",
+              "gap": ""
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "transitionRef": "cancelarItemComanda",
+          "lifecycle": {
+            "transitionId": "cancelarItemComanda",
+            "payload": [],
+            "sourcePath": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts",
+            "symbol": "cancelarItemComanda"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "createComanda",
+      "entityId": "Comanda",
+      "operation": "create",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/createComanda.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.abrirComanda"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "create",
+          "port": "ComandaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createComanda",
+          "entityId": "Comanda",
+          "operation": "create",
+          "ports": [
+            "ComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createComanda",
+              "input": [
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Comanda.version"
+                },
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                },
+                {
+                  "name": "details.subtotal",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.subtotal"
+                },
+                {
+                  "name": "details.totalComanda",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.totalComanda"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "ComandaRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "itensSomenteEmComandaAberta",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#itensSomenteEmComandaAberta",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#uniqueKeys",
+              "consumer": "operation:create",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "mesaDisponivelParaAbrirComanda",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#mesaDisponivelParaAbrirComanda",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "umaComandaAbertaPorMesa",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#umaComandaAbertaPorMesa",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "createItemCardapio",
+      "entityId": "ItemCardapio",
+      "operation": "create",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/createItemCardapio.defs.ts",
+      "routes": [
+        "comandaRestaurante.cardapio.cadastrarItemCardapio"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "create",
+          "port": "ItemCardapioRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createItemCardapio",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createItemCardapio",
+          "entityId": "ItemCardapio",
+          "operation": "create",
+          "ports": [
+            "ItemCardapioRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createItemCardapio",
+              "input": [
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemCardapio.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemCardapio.version"
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "ItemCardapioRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "createItemComanda",
+      "entityId": "ItemComanda",
+      "operation": "create",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/createItemComanda.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.lancarItem"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "create",
+          "port": "ItemComandaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createItemComanda",
+          "entityId": "ItemComanda",
+          "operation": "create",
+          "ports": [
+            "ItemComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createItemComanda",
+              "input": [
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.version"
+                },
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                },
+                {
+                  "name": "details.valorTotal",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.valorTotal"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "ItemComandaRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "createMesa",
+      "entityId": "Mesa",
+      "operation": "create",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/createMesa.defs.ts",
+      "routes": [
+        "comandaRestaurante.mesas.createMesa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "create",
+          "port": "MesaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createMesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createMesa",
+          "entityId": "Mesa",
+          "operation": "create",
+          "ports": [
+            "MesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createMesa",
+              "input": [
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Mesa.version"
+                },
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "details.disponivel",
+                  "type": "boolean",
+                  "fieldRef": "Mesa.details.disponivel"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "MesaRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "",
+              "origin": "l4/comandaRestaurante/ontology/Mesa.defs.ts#uniqueKeys",
+              "consumer": "operation:create",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "mesaDisponivelParaAbrirComanda",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#mesaDisponivelParaAbrirComanda",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "fecharComanda",
+      "entityId": "Comanda",
+      "operation": "transition",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/fecharComanda.defs.ts",
+      "routes": [
+        "comandaRestaurante.fechamento.fecharComandaPaga"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "transition",
+          "port": "ComandaRepository"
+        },
+        {
+          "kind": "transition",
+          "transitionId": "fecharComanda",
+          "payload": [
+            "details.discountAmount",
+            "details.paymentMethod"
+          ]
+        },
+        {
+          "kind": "effect",
+          "eventId": "comandaFechada"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "fecharComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/integration.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "fecharComanda",
+          "entityId": "Comanda",
+          "operation": "transition",
+          "ports": [
+            "ComandaRepository"
+          ],
+          "rulesApplied": [
+            "descontoNaoExcedeSubtotal",
+            "fechamentoLiberaMesa",
+            "pagamentoObrigatorioNoFechamento"
+          ],
+          "functions": [
+            {
+              "functionName": "fecharComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Comanda.version"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Comanda.version"
+                },
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                },
+                {
+                  "name": "details.subtotal",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.subtotal"
+                },
+                {
+                  "name": "details.totalComanda",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.totalComanda"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "transition"
+          ],
+          "transactional": false,
+          "effects": [
+            {
+              "eventId": "comandaFechada",
+              "path": "l4/comandaRestaurante/integration.defs.ts",
+              "symbol": "comandaFechada"
+            }
+          ],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "ComandaRepository"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "descontoNaoExcedeSubtotal"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "fechamentoLiberaMesa"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "pagamentoObrigatorioNoFechamento"
+            },
+            {
+              "kind": "transition",
+              "transitionId": "fecharComanda",
+              "payload": [
+                "details.discountAmount",
+                "details.paymentMethod"
+              ]
+            },
+            {
+              "kind": "effect",
+              "eventId": "comandaFechada"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            },
+            {
+              "path": "details.discountAmount",
+              "role": "write",
+              "source": "payload"
+            },
+            {
+              "path": "details.paymentMethod",
+              "role": "write",
+              "source": "payload"
+            }
+          ],
+          "rules": [
+            {
+              "ruleId": "descontoNaoExcedeSubtotal",
+              "path": "l4/comandaRestaurante/rules.defs.ts",
+              "symbol": "descontoNaoExcedeSubtotal"
+            },
+            {
+              "ruleId": "fechamentoLiberaMesa",
+              "path": "l4/comandaRestaurante/rules.defs.ts",
+              "symbol": "fechamentoLiberaMesa"
+            },
+            {
+              "ruleId": "pagamentoObrigatorioNoFechamento",
+              "path": "l4/comandaRestaurante/rules.defs.ts",
+              "symbol": "pagamentoObrigatorioNoFechamento"
+            }
+          ],
+          "rulePlan": [
+            {
+              "ruleId": "descontoNaoExcedeSubtotal",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#transitions.fecharComanda.ruleRefs",
+              "consumer": "usecase:fecharComanda",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "fechamentoLiberaMesa",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#transitions.fecharComanda.ruleRefs",
+              "consumer": "usecase:fecharComanda",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "pagamentoObrigatorioNoFechamento",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#transitions.fecharComanda.ruleRefs",
+              "consumer": "usecase:fecharComanda",
+              "enforcement": "local",
+              "gap": ""
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "transitionRef": "fecharComanda",
+          "lifecycle": {
+            "transitionId": "fecharComanda",
+            "payload": [
+              "details.discountAmount",
+              "details.paymentMethod"
+            ],
+            "sourcePath": "l4/comandaRestaurante/ontology/Comanda.defs.ts",
+            "symbol": "fecharComanda"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "getComanda",
+      "entityId": "Comanda",
+      "operation": "get",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/getComanda.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.cancelarItem",
+        "comandaRestaurante.atendimento.lancarItem",
+        "comandaRestaurante.atendimento.loadComanda",
+        "comandaRestaurante.fechamento.loadComanda"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "get",
+          "port": "ComandaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getComanda",
+          "entityId": "Comanda",
+          "operation": "get",
+          "ports": [
+            "ComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Comanda.version"
+                },
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                },
+                {
+                  "name": "details.subtotal",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.subtotal"
+                },
+                {
+                  "name": "details.totalComanda",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.totalComanda"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "ComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "descontoNaoExcedeSubtotal",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "fechamentoLiberaMesa",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "pagamentoObrigatorioNoFechamento",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "getItemComanda",
+      "entityId": "ItemComanda",
+      "operation": "get",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/getItemComanda.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.abrirComanda",
+        "comandaRestaurante.fechamento.fecharComandaPaga"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "get",
+          "port": "ItemComandaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getItemComanda",
+          "entityId": "ItemComanda",
+          "operation": "get",
+          "ports": [
+            "ItemComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getItemComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.version"
+                },
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                },
+                {
+                  "name": "details.valorTotal",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.valorTotal"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "ItemComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+              "origin": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "getMesa",
+      "entityId": "Mesa",
+      "operation": "get",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/getMesa.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.abrirComanda",
+        "comandaRestaurante.fechamento.fecharComandaPaga"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "get",
+          "port": "MesaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getMesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Mesa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getMesa",
+          "entityId": "Mesa",
+          "operation": "get",
+          "ports": [
+            "MesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getMesa",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Mesa.version"
+                },
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "details.disponivel",
+                  "type": "boolean",
+                  "fieldRef": "Mesa.details.disponivel"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "MesaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listComanda",
+      "entityId": "Comanda",
+      "operation": "list",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/listComanda.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.load",
+        "comandaRestaurante.fechamento.load",
+        "comandaRestaurante.fechamento.loadFechamento",
+        "comandaRestaurante.inicio.load"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "list",
+          "port": "ComandaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listComanda",
+          "entityId": "Comanda",
+          "operation": "list",
+          "ports": [
+            "ComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                },
+                {
+                  "name": "details.subtotal",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.subtotal"
+                },
+                {
+                  "name": "details.totalComanda",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.totalComanda"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "Comanda"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "ComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.subtotal",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.totalComanda",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "descontoNaoExcedeSubtotal",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "fechamentoLiberaMesa",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "pagamentoObrigatorioNoFechamento",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listItemCardapio",
+      "entityId": "ItemCardapio",
+      "operation": "list",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/listItemCardapio.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.load",
+        "comandaRestaurante.cardapio.load",
+        "comandaRestaurante.cardapio.loadCardapio"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "list",
+          "port": "ItemCardapioRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listItemCardapio",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listItemCardapio",
+          "entityId": "ItemCardapio",
+          "operation": "list",
+          "ports": [
+            "ItemCardapioRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listItemCardapio",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemCardapio.id"
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "ItemCardapio"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "ItemCardapioRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listItemComanda",
+      "entityId": "ItemComanda",
+      "operation": "list",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/listItemComanda.defs.ts",
+      "routes": [
+        "comandaRestaurante.inicio.load"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "list",
+          "port": "ItemComandaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listItemComanda",
+          "entityId": "ItemComanda",
+          "operation": "list",
+          "ports": [
+            "ItemComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listItemComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                },
+                {
+                  "name": "details.valorTotal",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.valorTotal"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "ItemComanda"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "ItemComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.valorTotal",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+              "origin": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listMesa",
+      "entityId": "Mesa",
+      "operation": "list",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/listMesa.defs.ts",
+      "routes": [
+        "comandaRestaurante.atendimento.load",
+        "comandaRestaurante.atendimento.loadAtendimento",
+        "comandaRestaurante.fechamento.load",
+        "comandaRestaurante.inicio.load",
+        "comandaRestaurante.mesas.load",
+        "comandaRestaurante.mesas.loadMesas"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "list",
+          "port": "MesaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listMesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Mesa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listMesa",
+          "entityId": "Mesa",
+          "operation": "list",
+          "ports": [
+            "MesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listMesa",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "details.disponivel",
+                  "type": "boolean",
+                  "fieldRef": "Mesa.details.disponivel"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "Mesa"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "MesaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.disponivel",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "updateItemCardapio",
+      "entityId": "ItemCardapio",
+      "operation": "update",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/updateItemCardapio.defs.ts",
+      "routes": [
+        "comandaRestaurante.cardapio.atualizarItemCardapio"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "update",
+          "port": "ItemCardapioRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateItemCardapio",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateItemCardapio",
+          "entityId": "ItemCardapio",
+          "operation": "update",
+          "ports": [
+            "ItemCardapioRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "updateItemCardapio",
+              "input": [
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                },
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemCardapio.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemCardapio.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemCardapio.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemCardapio.version"
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "update"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "update",
+              "port": "ItemCardapioRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "updateMesa",
+      "entityId": "Mesa",
+      "operation": "update",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/updateMesa.defs.ts",
+      "routes": [
+        "comandaRestaurante.mesas.updateMesa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "update",
+          "port": "MesaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateMesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateMesa",
+          "entityId": "Mesa",
+          "operation": "update",
+          "ports": [
+            "MesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "updateMesa",
+              "input": [
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Mesa.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Mesa.version"
+                },
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "details.disponivel",
+                  "type": "boolean",
+                  "fieldRef": "Mesa.details.disponivel"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "update"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "update",
+              "port": "MesaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "",
+              "origin": "l4/comandaRestaurante/ontology/Mesa.defs.ts#uniqueKeys",
+              "consumer": "operation:update",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "mesaDisponivelParaAbrirComanda",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#mesaDisponivelParaAbrirComanda",
+              "consumer": "operation:update",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    }
+  ],
+  "problems": [],
+  "normalizations": [
+    {
+      "code": "DERIVED_SELECTOR",
+      "path": "cancelarItemComanda.id",
+      "detail": "ItemComanda.id is a selector of cancelarItemComanda."
+    },
+    {
+      "code": "DERIVED_CONCURRENCY",
+      "path": "cancelarItemComanda.version",
+      "detail": "ItemComanda.version is a concurrency of cancelarItemComanda."
+    },
+    {
+      "code": "RULE_RESTORED",
+      "path": "cancelarItemComanda",
+      "detail": "itemComandaOperacaoSomenteComandaAberta"
+    },
+    {
+      "code": "ENUMERATIONS_NOT_CONSUMED",
+      "path": "domain30.enumerations",
+      "detail": "3 enum values stay on the domain draft. usecases50 does not copy them."
+    },
+    {
+      "code": "DERIVED_SELECTOR",
+      "path": "fecharComanda.id",
+      "detail": "Comanda.id is a selector of fecharComanda."
+    },
+    {
+      "code": "DERIVED_CONCURRENCY",
+      "path": "fecharComanda.version",
+      "detail": "Comanda.version is a concurrency of fecharComanda."
+    },
+    {
+      "code": "RULE_RESTORED",
+      "path": "fecharComanda",
+      "detail": "descontoNaoExcedeSubtotal"
+    },
+    {
+      "code": "RULE_RESTORED",
+      "path": "fecharComanda",
+      "detail": "fechamentoLiberaMesa"
+    },
+    {
+      "code": "RULE_RESTORED",
+      "path": "fecharComanda",
+      "detail": "pagamentoObrigatorioNoFechamento"
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "getComanda.id",
+      "detail": "Comanda.id is a filter of getComanda."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "getItemComanda.id",
+      "detail": "ItemComanda.id is a filter of getItemComanda."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "getMesa.id",
+      "detail": "Mesa.id is a filter of getMesa."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listComanda.details.subtotal",
+      "detail": "Comanda.details.subtotal is a filter of listComanda."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listComanda.details.totalComanda",
+      "detail": "Comanda.details.totalComanda is a filter of listComanda."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listComanda.id",
+      "detail": "Comanda.id is a filter of listComanda."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listItemCardapio.id",
+      "detail": "ItemCardapio.id is a filter of listItemCardapio."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listItemComanda.details.valorTotal",
+      "detail": "ItemComanda.details.valorTotal is a filter of listItemComanda."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listItemComanda.id",
+      "detail": "ItemComanda.id is a filter of listItemComanda."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listMesa.details.disponivel",
+      "detail": "Mesa.details.disponivel is a filter of listMesa."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listMesa.id",
+      "detail": "Mesa.id is a filter of listMesa."
+    },
+    {
+      "code": "DERIVED_SELECTOR",
+      "path": "updateItemCardapio.id",
+      "detail": "ItemCardapio.id is a selector of updateItemCardapio."
+    },
+    {
+      "code": "DERIVED_CONCURRENCY",
+      "path": "updateItemCardapio.version",
+      "detail": "ItemCardapio.version is a concurrency of updateItemCardapio."
+    },
+    {
+      "code": "DERIVED_SELECTOR",
+      "path": "updateMesa.id",
+      "detail": "Mesa.id is a selector of updateMesa."
+    },
+    {
+      "code": "DERIVED_CONCURRENCY",
+      "path": "updateMesa.version",
+      "detail": "Mesa.version is a concurrency of updateMesa."
+    }
+  ],
+  "emit": [
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "cancelarItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "cancelarItemComanda",
+          "entityId": "ItemComanda",
+          "operation": "transition",
+          "ports": [
+            "ItemComandaRepository"
+          ],
+          "rulesApplied": [
+            "itemComandaOperacaoSomenteComandaAberta"
+          ],
+          "functions": [
+            {
+              "functionName": "cancelarItemComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.version"
+                },
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                },
+                {
+                  "name": "details.valorTotal",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.valorTotal"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "transition"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta"
+            },
+            {
+              "kind": "transition",
+              "transitionId": "cancelarItemComanda",
+              "payload": []
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "ItemComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [
+            {
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+              "path": "l4/comandaRestaurante/rules.defs.ts",
+              "symbol": "itemComandaOperacaoSomenteComandaAberta"
+            }
+          ],
+          "rulePlan": [
+            {
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+              "origin": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts#transitions.cancelarItemComanda.ruleRefs",
+              "consumer": "usecase:cancelarItemComanda",
+              "enforcement": "local",
+              "gap": ""
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "transitionRef": "cancelarItemComanda",
+          "lifecycle": {
+            "transitionId": "cancelarItemComanda",
+            "payload": [],
+            "sourcePath": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts",
+            "symbol": "cancelarItemComanda"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/cancelarItemComanda",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/cancelarItemComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/cancelarItemComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/ItemComanda.defs.ts",
+            "l4/comandaRestaurante/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/ItemComanda",
+            "102047/comandaRestaurante/repositoryPort/ItemComandaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createComanda",
+          "entityId": "Comanda",
+          "operation": "create",
+          "ports": [
+            "ComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createComanda",
+              "input": [
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Comanda.version"
+                },
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                },
+                {
+                  "name": "details.subtotal",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.subtotal"
+                },
+                {
+                  "name": "details.totalComanda",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.totalComanda"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "ComandaRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "itensSomenteEmComandaAberta",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#itensSomenteEmComandaAberta",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#uniqueKeys",
+              "consumer": "operation:create",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "mesaDisponivelParaAbrirComanda",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#mesaDisponivelParaAbrirComanda",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "umaComandaAbertaPorMesa",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#umaComandaAbertaPorMesa",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/createComanda",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/createComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/createComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/Comanda.defs.ts",
+            "l4/comandaRestaurante/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Comanda",
+            "102047/comandaRestaurante/repositoryPort/ComandaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createItemCardapio",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createItemCardapio",
+          "entityId": "ItemCardapio",
+          "operation": "create",
+          "ports": [
+            "ItemCardapioRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createItemCardapio",
+              "input": [
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemCardapio.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemCardapio.version"
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "ItemCardapioRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/createItemCardapio",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/createItemCardapio.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/createItemCardapio.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/ItemCardapio",
+            "102047/comandaRestaurante/repositoryPort/ItemCardapioRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createItemComanda",
+          "entityId": "ItemComanda",
+          "operation": "create",
+          "ports": [
+            "ItemComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createItemComanda",
+              "input": [
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.version"
+                },
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                },
+                {
+                  "name": "details.valorTotal",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.valorTotal"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "ItemComandaRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/createItemComanda",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/createItemComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/createItemComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/ItemComanda",
+            "102047/comandaRestaurante/repositoryPort/ItemComandaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createMesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createMesa",
+          "entityId": "Mesa",
+          "operation": "create",
+          "ports": [
+            "MesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createMesa",
+              "input": [
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Mesa.version"
+                },
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "details.disponivel",
+                  "type": "boolean",
+                  "fieldRef": "Mesa.details.disponivel"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "MesaRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "",
+              "origin": "l4/comandaRestaurante/ontology/Mesa.defs.ts#uniqueKeys",
+              "consumer": "operation:create",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "mesaDisponivelParaAbrirComanda",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#mesaDisponivelParaAbrirComanda",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/createMesa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/createMesa.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/createMesa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/Mesa.defs.ts",
+            "l4/comandaRestaurante/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Mesa",
+            "102047/comandaRestaurante/repositoryPort/MesaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "fecharComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/integration.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "fecharComanda",
+          "entityId": "Comanda",
+          "operation": "transition",
+          "ports": [
+            "ComandaRepository"
+          ],
+          "rulesApplied": [
+            "descontoNaoExcedeSubtotal",
+            "fechamentoLiberaMesa",
+            "pagamentoObrigatorioNoFechamento"
+          ],
+          "functions": [
+            {
+              "functionName": "fecharComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Comanda.version"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Comanda.version"
+                },
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                },
+                {
+                  "name": "details.subtotal",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.subtotal"
+                },
+                {
+                  "name": "details.totalComanda",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.totalComanda"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "transition"
+          ],
+          "transactional": false,
+          "effects": [
+            {
+              "eventId": "comandaFechada",
+              "path": "l4/comandaRestaurante/integration.defs.ts",
+              "symbol": "comandaFechada"
+            }
+          ],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "ComandaRepository"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "descontoNaoExcedeSubtotal"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "fechamentoLiberaMesa"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "pagamentoObrigatorioNoFechamento"
+            },
+            {
+              "kind": "transition",
+              "transitionId": "fecharComanda",
+              "payload": [
+                "details.discountAmount",
+                "details.paymentMethod"
+              ]
+            },
+            {
+              "kind": "effect",
+              "eventId": "comandaFechada"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            },
+            {
+              "path": "details.discountAmount",
+              "role": "write",
+              "source": "payload"
+            },
+            {
+              "path": "details.paymentMethod",
+              "role": "write",
+              "source": "payload"
+            }
+          ],
+          "rules": [
+            {
+              "ruleId": "descontoNaoExcedeSubtotal",
+              "path": "l4/comandaRestaurante/rules.defs.ts",
+              "symbol": "descontoNaoExcedeSubtotal"
+            },
+            {
+              "ruleId": "fechamentoLiberaMesa",
+              "path": "l4/comandaRestaurante/rules.defs.ts",
+              "symbol": "fechamentoLiberaMesa"
+            },
+            {
+              "ruleId": "pagamentoObrigatorioNoFechamento",
+              "path": "l4/comandaRestaurante/rules.defs.ts",
+              "symbol": "pagamentoObrigatorioNoFechamento"
+            }
+          ],
+          "rulePlan": [
+            {
+              "ruleId": "descontoNaoExcedeSubtotal",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#transitions.fecharComanda.ruleRefs",
+              "consumer": "usecase:fecharComanda",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "fechamentoLiberaMesa",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#transitions.fecharComanda.ruleRefs",
+              "consumer": "usecase:fecharComanda",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "pagamentoObrigatorioNoFechamento",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#transitions.fecharComanda.ruleRefs",
+              "consumer": "usecase:fecharComanda",
+              "enforcement": "local",
+              "gap": ""
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "transitionRef": "fecharComanda",
+          "lifecycle": {
+            "transitionId": "fecharComanda",
+            "payload": [
+              "details.discountAmount",
+              "details.paymentMethod"
+            ],
+            "sourcePath": "l4/comandaRestaurante/ontology/Comanda.defs.ts",
+            "symbol": "fecharComanda"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/fecharComanda",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/fecharComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/fecharComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+            "l4/comandaRestaurante/integration.defs.ts",
+            "l4/comandaRestaurante/ontology/Comanda.defs.ts",
+            "l4/comandaRestaurante/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Comanda",
+            "102047/comandaRestaurante/repositoryPort/ComandaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getComanda",
+          "entityId": "Comanda",
+          "operation": "get",
+          "ports": [
+            "ComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Comanda.version"
+                },
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                },
+                {
+                  "name": "details.subtotal",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.subtotal"
+                },
+                {
+                  "name": "details.totalComanda",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.totalComanda"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "ComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "descontoNaoExcedeSubtotal",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "fechamentoLiberaMesa",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "pagamentoObrigatorioNoFechamento",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/getComanda",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/Comanda.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Comanda",
+            "102047/comandaRestaurante/repositoryPort/ComandaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getItemComanda",
+          "entityId": "ItemComanda",
+          "operation": "get",
+          "ports": [
+            "ItemComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getItemComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.version"
+                },
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                },
+                {
+                  "name": "details.valorTotal",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.valorTotal"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "ItemComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+              "origin": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/getItemComanda",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getItemComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getItemComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/ItemComanda",
+            "102047/comandaRestaurante/repositoryPort/ItemComandaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getMesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Mesa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getMesa",
+          "entityId": "Mesa",
+          "operation": "get",
+          "ports": [
+            "MesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getMesa",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Mesa.version"
+                },
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "details.disponivel",
+                  "type": "boolean",
+                  "fieldRef": "Mesa.details.disponivel"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "MesaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/getMesa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getMesa.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getMesa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/Mesa.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Mesa",
+            "102047/comandaRestaurante/repositoryPort/MesaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Comanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listComanda",
+          "entityId": "Comanda",
+          "operation": "list",
+          "ports": [
+            "ComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Comanda.id"
+                },
+                {
+                  "name": "number",
+                  "type": "integer",
+                  "fieldRef": "Comanda.number"
+                },
+                {
+                  "name": "mesaId",
+                  "type": "record",
+                  "fieldRef": "Comanda.mesaId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Comanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Comanda.details"
+                },
+                {
+                  "name": "details.discountAmount",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.discountAmount"
+                },
+                {
+                  "name": "details.paymentMethod",
+                  "type": "enum",
+                  "fieldRef": "Comanda.details.paymentMethod"
+                },
+                {
+                  "name": "details.subtotal",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.subtotal"
+                },
+                {
+                  "name": "details.totalComanda",
+                  "type": "money",
+                  "fieldRef": "Comanda.details.totalComanda"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "Comanda"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "ComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.subtotal",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.totalComanda",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "descontoNaoExcedeSubtotal",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "fechamentoLiberaMesa",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "pagamentoObrigatorioNoFechamento",
+              "origin": "l4/comandaRestaurante/ontology/Comanda.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/listComanda",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/Comanda.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Comanda",
+            "102047/comandaRestaurante/repositoryPort/ComandaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listItemCardapio",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listItemCardapio",
+          "entityId": "ItemCardapio",
+          "operation": "list",
+          "ports": [
+            "ItemCardapioRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listItemCardapio",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemCardapio.id"
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "ItemCardapio"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "ItemCardapioRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/listItemCardapio",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listItemCardapio.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listItemCardapio.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/ItemCardapio",
+            "102047/comandaRestaurante/repositoryPort/ItemCardapioRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listItemComanda",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listItemComanda",
+          "entityId": "ItemComanda",
+          "operation": "list",
+          "ports": [
+            "ItemComandaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listItemComanda",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemComanda.id"
+                },
+                {
+                  "name": "comandaId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.comandaId"
+                },
+                {
+                  "name": "itemCardapioId",
+                  "type": "record",
+                  "fieldRef": "ItemComanda.itemCardapioId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "ItemComanda.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemComanda.details"
+                },
+                {
+                  "name": "details.quantidade",
+                  "type": "integer",
+                  "fieldRef": "ItemComanda.details.quantidade"
+                },
+                {
+                  "name": "details.observacao",
+                  "type": "text",
+                  "fieldRef": "ItemComanda.details.observacao"
+                },
+                {
+                  "name": "details.precoUnitario",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.precoUnitario"
+                },
+                {
+                  "name": "details.valorTotal",
+                  "type": "money",
+                  "fieldRef": "ItemComanda.details.valorTotal"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "ItemComanda"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "ItemComandaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.valorTotal",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
+              "origin": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/listItemComanda",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listItemComanda.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listItemComanda.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/ItemComanda",
+            "102047/comandaRestaurante/repositoryPort/ItemComandaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listMesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Mesa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listMesa",
+          "entityId": "Mesa",
+          "operation": "list",
+          "ports": [
+            "MesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listMesa",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "details.disponivel",
+                  "type": "boolean",
+                  "fieldRef": "Mesa.details.disponivel"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "Mesa"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "MesaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.disponivel",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/listMesa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listMesa.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listMesa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/Mesa.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Mesa",
+            "102047/comandaRestaurante/repositoryPort/MesaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateItemCardapio",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateItemCardapio",
+          "entityId": "ItemCardapio",
+          "operation": "update",
+          "ports": [
+            "ItemCardapioRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "updateItemCardapio",
+              "input": [
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                },
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemCardapio.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemCardapio.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "ItemCardapio.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "ItemCardapio.version"
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "ItemCardapio.details"
+                },
+                {
+                  "name": "details.precoVigente",
+                  "type": "money",
+                  "fieldRef": "ItemCardapio.details.precoVigente"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "update"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "update",
+              "port": "ItemCardapioRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/updateItemCardapio",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/updateItemCardapio.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/updateItemCardapio.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/ItemCardapio",
+            "102047/comandaRestaurante/repositoryPort/ItemCardapioRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateMesa",
+        "moduleName": "comandaRestaurante",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/Mesa.defs.ts",
+          "_102047_/l4/comandaRestaurante/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateMesa",
+          "entityId": "Mesa",
+          "operation": "update",
+          "ports": [
+            "MesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "updateMesa",
+              "input": [
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Mesa.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Mesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Mesa.version"
+                },
+                {
+                  "name": "code",
+                  "type": "string",
+                  "fieldRef": "Mesa.code"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Mesa.details"
+                },
+                {
+                  "name": "details.disponivel",
+                  "type": "boolean",
+                  "fieldRef": "Mesa.details.disponivel"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "update"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "update",
+              "port": "MesaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "",
+              "origin": "l4/comandaRestaurante/ontology/Mesa.defs.ts#uniqueKeys",
+              "consumer": "operation:update",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "mesaDisponivelParaAbrirComanda",
+              "origin": "l4/comandaRestaurante/rules.defs.ts#mesaDisponivelParaAbrirComanda",
+              "consumer": "operation:update",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/comandaRestaurante/usecase/updateMesa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/updateMesa.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/updateMesa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/mesa.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/mesaRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/Mesa.defs.ts",
+            "l4/comandaRestaurante/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/comandaRestaurante/domainEntity/Mesa",
+            "102047/comandaRestaurante/repositoryPort/MesaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    }
+  ]
+}
