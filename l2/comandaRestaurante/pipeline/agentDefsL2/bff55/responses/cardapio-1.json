@@ -1,8 +1,8 @@
 {
   "attempt": "1",
   "model": "openai/gpt-5.6-terra-pro",
-  "promptChars": 11231,
-  "receivedAt": "2026-10-04T20:53:30.370Z",
+  "promptChars": 17653,
+  "receivedAt": "2026-10-04T22:39:58.865Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -11,7 +11,7 @@
         "types": [
           {
             "name": "ItemCardapioResumo",
-            "description": "Dados concisos de um item para apresentação paginada no catálogo do cardápio.",
+            "description": "Dados concisos de um item para apresentação no catálogo do cardápio.",
             "fields": [
               {
                 "name": "id",
@@ -37,7 +37,7 @@
               },
               {
                 "name": "precoVigente",
-                "type": "number",
+                "type": "string",
                 "optional": false,
                 "origin": {
                   "kind": "field",
@@ -50,7 +50,7 @@
           },
           {
             "name": "ItemCardapioEdicao",
-            "description": "Dados completos autorizados para preencher e manter o item selecionado no formulário.",
+            "description": "Dados autorizados para preencher e manter um item do cardápio no formulário.",
             "fields": [
               {
                 "name": "id",
@@ -87,7 +87,7 @@
               },
               {
                 "name": "precoVigente",
-                "type": "number",
+                "type": "string",
                 "optional": false,
                 "origin": {
                   "kind": "field",
@@ -100,7 +100,7 @@
           },
           {
             "name": "PaginaItensCardapio",
-            "description": "Faixa do catálogo ordenada por nome, com sinalização para carregamento da próxima faixa.",
+            "description": "Faixa do catálogo ordenada para leitura contínua, com indicação de próxima faixa.",
             "fields": [
               {
                 "name": "itens",
@@ -153,10 +153,10 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Carrega a primeira faixa do catálogo vigente quando a página é aberta, para o caixa consultar e escolher um item para manutenção.",
-              "input": "Não recebe parâmetros; inicia o catálogo pela primeira faixa.",
-              "processing": "Obtém uma faixa de itens do cardápio ordenada por nome e projeta somente identificador, nome e preço vigente. Calcula hasMore pela existência de itens após a faixa retornada; não calcula nem registra regras de comanda.",
-              "output": "Retorna a página já adequada à lista, com os itens visíveis e a indicação de que há mais itens para leitura contínua."
+              "purpose": "Carrega a primeira faixa do catálogo vigente ao abrir a página, para o caixa conferir e selecionar itens para manutenção.",
+              "input": "Não recebe parâmetros; a consulta começa na primeira faixa do catálogo.",
+              "processing": "Busca uma faixa de itens de cardápio ordenada por nome, com identificador como desempate, e projeta identificador, nome e preço vigente. Calcula hasMore pela existência de registros após a faixa retornada. Não aplica regras de lançamento ou totalização de comanda.",
+              "output": "Retorna a página de itens já no formato da lista, incluindo a indicação de que existe outra faixa para leitura contínua."
             }
           },
           {
@@ -171,9 +171,7 @@
                 "optional": false,
                 "origin": {
                   "kind": "context",
-                  "paths": [
-                    "ItemCardapio.id"
-                  ]
+                  "paths": []
                 }
               }
             ],
@@ -194,10 +192,10 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Carrega a próxima faixa do catálogo para ampliar a lista sem transferir todo o cardápio.",
-              "input": "id é o identificador do último item já apresentado e funciona como cursor da paginação.",
-              "processing": "Localiza os itens posteriores ao cursor na mesma ordenação por nome usada no catálogo, projeta identificador, nome e preço vigente e calcula hasMore pela existência de outra faixa. Não aplica regras de lançamento ou totalização de comandas.",
-              "output": "Retorna somente a próxima página para a interface anexar à lista que o caixa já está consultando."
+              "purpose": "Carrega a próxima faixa do catálogo sem transferir todos os itens cadastrados.",
+              "input": "id é o cursor do último item apresentado na lista.",
+              "processing": "Resolve a posição do cursor e busca a faixa posterior na ordenação estável por nome e identificador. Projeta identificador, nome e preço vigente e calcula hasMore pela existência de uma faixa adicional. Não aplica regras de lançamento ou totalização de comanda.",
+              "output": "Retorna somente a próxima página, para a interface anexá-la aos itens já exibidos."
             }
           },
           {
@@ -236,10 +234,10 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Carrega o item escolhido pelo caixa para edição segura no formulário.",
-              "input": "id identifica o item selecionado na lista.",
-              "processing": "Consulta o item pelo identificador conhecido e compõe identificador, versão, nome e preço vigente autorizados ao caixa. A versão é entregue para controle de concorrência na atualização.",
-              "output": "Retorna o registro selecionado no formato que preenche o formulário de manutenção."
+              "purpose": "Obtém o item selecionado no catálogo para preencher o formulário de manutenção.",
+              "input": "id identifica o item do cardápio escolhido pelo caixa.",
+              "processing": "Consulta o item pelo identificador e compõe os campos autorizados para edição, incluindo a versão usada no controle de concorrência. Não aplica regras de lançamento ou totalização de comanda.",
+              "output": "Retorna o item selecionado no formato que o formulário precisa para exibir e alterar seus dados."
             }
           },
           {
@@ -261,7 +259,7 @@
               },
               {
                 "name": "precoVigente",
-                "type": "number",
+                "type": "string",
                 "optional": false,
                 "origin": {
                   "kind": "field",
@@ -289,10 +287,10 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Cadastra um novo item que poderá ser usado pela operação no lançamento de comandas.",
-              "input": "name é o nome apresentado à equipe; precoVigente é o preço atualmente cobrado pelo item.",
-              "processing": "Cria o ItemCardapio com os campos informados. Não registra preço unitário de ItemComanda nem aplica regras de subtotal, total ou valor de item, pois não há lançamento de comanda nesta ação.",
-              "output": "Retorna o item criado, inclusive identificador e versão gerados, para o formulário exibir imediatamente o estado persistido."
+              "purpose": "Cadastra um item com nome e preço vigente para uso operacional no cardápio.",
+              "input": "name é o nome pelo qual a equipe localiza o item; precoVigente é o preço atualmente cobrado.",
+              "processing": "Cria ItemCardapio com nome e preço vigente informados e retorna os dados persistidos, inclusive identificador e versão gerados. Não registra ItemComanda nem aplica regras de preço de lançamento, subtotal, total ou valor de item.",
+              "output": "Retorna o item criado para o formulário mostrar o estado persistido sem uma consulta adicional."
             }
           },
           {
@@ -336,7 +334,7 @@
               },
               {
                 "name": "precoVigente",
-                "type": "number",
+                "type": "string",
                 "optional": false,
                 "origin": {
                   "kind": "field",
@@ -364,10 +362,10 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Atualiza o nome e/ou o preço vigente do item selecionado, mantendo o catálogo operacional.",
-              "input": "id e version identificam a versão do item a alterar; name e precoVigente trazem os novos valores do formulário.",
-              "processing": "Atualiza parcialmente o ItemCardapio identificado por id, exigindo a version recebida para evitar sobrescrever uma alteração concorrente. Não altera itens de comanda já lançados e não executa regras de preço de lançamento, subtotal, total ou valor de ItemComanda.",
-              "output": "Retorna o registro persistido com a nova versão para redesenhar o formulário sem nova consulta."
+              "purpose": "Atualiza o nome e o preço vigente do item selecionado, mantendo o catálogo usado pela operação.",
+              "input": "id e version identificam a versão a alterar; name e precoVigente contêm os valores informados no formulário.",
+              "processing": "Atualiza o ItemCardapio identificado por id, exigindo a version recebida para recusar sobrescrita concorrente, e compõe a versão persistida. Não altera itens de comanda já lançados nem executa regras de preço de lançamento, subtotal, total ou valor de ItemComanda.",
+              "output": "Retorna o registro atualizado com a nova versão para redesenhar imediatamente o formulário."
             }
           }
         ],
@@ -410,7 +408,7 @@
       }
     },
     "status": "completed",
-    "stepId": 18,
+    "stepId": 17,
     "interaction": null,
     "nextSteps": null
   },

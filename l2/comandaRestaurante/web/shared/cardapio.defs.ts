@@ -2,7 +2,26 @@
 
 export const definition = {
   "entry": {
-    "params": {}
+    "params": {
+      "itemCardapioId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:formularioItemCardapio",
+        "persist": true
+      },
+      "id": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:carregarMaisItensCardapio",
+        "persist": true
+      }
+    }
   },
   "forms": {
     "cadastrarItemCardapio": {
@@ -15,18 +34,25 @@ export const definition = {
     }
   },
   "requests": {
-    "carregarCatalogoCardapio": {
+    "carregarItensCardapio": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "catalogo"
+        "pagina"
       ]
     },
-    "consultarPaginaCardapio": {
+    "carregarMaisItensCardapio": {
       "kind": "qry",
-      "trigger": "consultarPaginaCardapio",
+      "trigger": "carregarMaisItensCardapio",
       "returns": [
-        "catalogo"
+        "pagina"
+      ]
+    },
+    "obterItemCardapio": {
+      "kind": "qry",
+      "trigger": "obterItemCardapio",
+      "returns": [
+        "item"
       ]
     },
     "cadastrarItemCardapio": {
@@ -47,62 +73,56 @@ export const definition = {
     }
   },
   "states": {
-    "catalogoCardapio": {
-      "source": "carregarCatalogoCardapio.catalogo",
-      "description": "listaItensCardapio"
+    "pagina": {
+      "source": "carregarItensCardapio.pagina",
+      "description": "Faixa do catálogo ordenada para leitura contínua, com indicação de próxima faixa."
     },
-    "itemCardapioSelecionado": {
-      "source": "selecionarItemCardapio",
-      "description": "formularioItemCardapio"
+    "item": {
+      "source": "obterItemCardapio.item",
+      "description": "Dados autorizados para preencher e manter um item do cardápio no formulário."
+    },
+    "selectedItemCardapio": {
+      "source": "entry.params.itemCardapioId",
+      "description": "Dados autorizados para preencher e manter um item do cardápio no formulário."
     }
   },
   "functions": {
-    "carregarCatalogoCardapio": {
-      "description": "carregarCatalogoCardapio",
-      "calls": "carregarCatalogoCardapio",
-      "sets": "catalogoCardapio",
-      "updates": [
-        "catalogoCardapio"
-      ]
+    "carregarItensCardapio": {
+      "description": "Carrega a primeira faixa do catálogo vigente ao abrir a página, para o caixa conferir e selecionar itens para manutenção.",
+      "calls": "carregarItensCardapio",
+      "sets": "pagina"
     },
-    "consultarPaginaCardapio": {
-      "description": "consultarPaginaCardapio",
-      "calls": "consultarPaginaCardapio",
-      "sets": "catalogoCardapio",
-      "updates": [
-        "catalogoCardapio"
-      ]
+    "carregarMaisItensCardapio": {
+      "description": "Carrega a próxima faixa do catálogo sem transferir todos os itens cadastrados.",
+      "calls": "carregarMaisItensCardapio"
     },
-    "selecionarItemCardapio": {
-      "description": "selecionarItemCardapio",
-      "sets": "itemCardapioSelecionado",
-      "updates": [
-        "itemCardapioSelecionado"
-      ]
+    "obterItemCardapio": {
+      "description": "Obtém o item selecionado no catálogo para preencher o formulário de manutenção.",
+      "calls": "obterItemCardapio",
+      "sets": "item"
     },
     "cadastrarItemCardapio": {
-      "description": "cadastrarItemCardapio",
+      "description": "Cadastra um item com nome e preço vigente para uso operacional no cardápio.",
       "calls": "cadastrarItemCardapio",
-      "sets": "itemCardapioSelecionado",
+      "sets": "item",
       "updates": [
-        "catalogoCardapio",
-        "itemCardapioSelecionado"
+        "pagina"
       ]
     },
     "atualizarItemCardapio": {
-      "description": "atualizarItemCardapio",
+      "description": "Atualiza o nome e o preço vigente do item selecionado, mantendo o catálogo usado pela operação.",
       "calls": "atualizarItemCardapio",
-      "sets": "itemCardapioSelecionado",
+      "sets": "item",
       "updates": [
-        "catalogoCardapio",
-        "itemCardapioSelecionado"
+        "pagina"
       ]
     }
   },
   "journeys": [],
   "rules": {
-    "carregarCatalogoCardapio": [],
-    "consultarPaginaCardapio": [],
+    "carregarItensCardapio": [],
+    "carregarMaisItensCardapio": [],
+    "obterItemCardapio": [],
     "cadastrarItemCardapio": [],
     "atualizarItemCardapio": []
   },

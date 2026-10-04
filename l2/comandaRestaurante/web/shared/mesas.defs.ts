@@ -2,7 +2,17 @@
 
 export const definition = {
   "entry": {
-    "params": {}
+    "params": {
+      "mesaId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:mesaForm",
+        "persist": true
+      }
+    }
   },
   "forms": {
     "createMesa": {
@@ -19,14 +29,7 @@ export const definition = {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "pagina"
-      ]
-    },
-    "buscarMesas": {
-      "kind": "qry",
-      "trigger": "buscarMesas",
-      "returns": [
-        "pagina"
+        "mesas"
       ]
     },
     "criarMesa": {
@@ -47,62 +50,33 @@ export const definition = {
     }
   },
   "states": {
-    "paginaMesas": {
-      "source": "carregarMesas.pagina",
-      "description": "Página de mesas da casa"
+    "mesas": {
+      "source": "carregarMesas.mesas",
+      "description": "Dados de uma mesa necessários para a lista da casa, para a seleção no formulário e para o redesenho após o cadastro ou a atualização."
     },
-    "mesaSelecionada": {
-      "source": "selecionarMesa",
-      "description": "Mesa selecionada para manutenção"
+    "selectedMesa": {
+      "source": "entry.params.mesaId",
+      "description": "Dados de uma mesa necessários para a lista da casa, para a seleção no formulário e para o redesenho após o cadastro ou a atualização."
     }
   },
   "functions": {
     "carregarMesas": {
-      "description": "Carrega a primeira página de mesas",
+      "description": "Carrega o salão para o caixa consultar as mesas da casa e selecionar uma mesa para manutenção.",
       "calls": "carregarMesas",
-      "sets": "paginaMesas",
-      "updates": [
-        "paginaMesas"
-      ]
+      "sets": "mesas"
     },
-    "buscarMesas": {
-      "description": "Busca mesas por código ou página",
-      "calls": "buscarMesas",
-      "sets": "paginaMesas",
-      "updates": [
-        "paginaMesas"
-      ]
+    "criarMesa": {
+      "description": "Cadastra uma mesa para a operação e devolve o registro completo para a página redesenhar.",
+      "calls": "criarMesa"
     },
-    "selecionarMesa": {
-      "description": "Seleciona uma mesa para manutenção",
-      "sets": "mesaSelecionada",
-      "updates": [
-        "mesaSelecionada"
-      ]
-    },
-    "createMesa": {
-      "description": "Cadastra uma mesa",
-      "calls": "criarMesa",
-      "sets": "mesaSelecionada",
-      "updates": [
-        "paginaMesas",
-        "mesaSelecionada"
-      ]
-    },
-    "updateMesa": {
-      "description": "Atualiza uma mesa",
-      "calls": "atualizarMesa",
-      "sets": "mesaSelecionada",
-      "updates": [
-        "paginaMesas",
-        "mesaSelecionada"
-      ]
+    "atualizarMesa": {
+      "description": "Atualiza o código de uma mesa selecionada e devolve seu estado completo para a página redesenhar a seleção e sua linha.",
+      "calls": "atualizarMesa"
     }
   },
   "journeys": [],
   "rules": {
     "carregarMesas": [],
-    "buscarMesas": [],
     "criarMesa": [],
     "atualizarMesa": []
   },

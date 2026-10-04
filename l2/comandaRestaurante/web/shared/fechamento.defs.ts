@@ -9,7 +9,43 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "select:comandaReview",
+        "effect": "filter:openComandaList",
+        "persist": true
+      },
+      "number": {
+        "type": "number",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:openComandaList",
+        "persist": true
+      },
+      "mesaCode": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:openComandaList",
+        "persist": true
+      },
+      "page": {
+        "type": "number",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:openComandaList",
+        "persist": true
+      },
+      "id": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:comandaReview",
         "persist": true
       }
     }
@@ -29,16 +65,16 @@ export const definition = {
         "selectedComanda"
       ]
     },
-    "localizarComandasAbertas": {
+    "buscarComandasAbertas": {
       "kind": "qry",
-      "trigger": "localizarComandasAbertas",
+      "trigger": "buscarComandasAbertas",
       "returns": [
         "openComandas"
       ]
     },
-    "consultarComandaParaFechamento": {
+    "obterComandaParaFechamento": {
       "kind": "qry",
-      "trigger": "consultarComandaParaFechamento",
+      "trigger": "obterComandaParaFechamento",
       "returns": [
         "comanda"
       ]
@@ -53,55 +89,53 @@ export const definition = {
     }
   },
   "states": {
-    "comandaIdSelecionada": {
-      "source": "entry.params.comandaId",
-      "description": "comandaId"
-    },
-    "comandasAbertas": {
+    "openComandas": {
       "source": "carregarFechamento.openComandas",
-      "description": "openComandas"
+      "description": "Página de comandas abertas, já filtrada para localização pelo caixa."
     },
-    "comandaParaFechamento": {
-      "source": "carregarFechamento.selectedComanda",
-      "description": "selectedComanda"
+    "comanda": {
+      "source": "obterComandaParaFechamento.comanda",
+      "description": "Comanda selecionada com linhas válidas, totais calculados e situação da mesa para conferência ou resultado do fechamento."
+    },
+    "selectedComanda": {
+      "source": "entry.params.comandaId",
+      "description": "Comanda selecionada com linhas válidas, totais calculados e situação da mesa para conferência ou resultado do fechamento."
     }
   },
   "functions": {
-    "carregarFechamentoInicial": {
-      "description": "carregarFechamento",
+    "carregarFechamento": {
+      "description": "Carrega o fechamento com a primeira página de comandas abertas e, quando uma comanda vier no contexto, seus dados completos para conferência.",
       "calls": "carregarFechamento",
-      "sets": "comandasAbertas",
-      "updates": [
-        "comandaParaFechamento"
-      ]
+      "sets": "openComandas"
     },
-    "localizarComandasAbertas": {
-      "description": "localizarComandasAbertas",
-      "calls": "localizarComandasAbertas",
-      "sets": "comandasAbertas"
+    "buscarComandasAbertas": {
+      "description": "Localiza sob demanda as comandas ainda abertas por número ou código da mesa.",
+      "calls": "buscarComandasAbertas"
     },
-    "consultarComandaParaFechamento": {
-      "description": "consultarComandaParaFechamento",
-      "calls": "consultarComandaParaFechamento",
-      "sets": "comandaParaFechamento"
+    "obterComandaParaFechamento": {
+      "description": "Obtém a comanda aberta escolhida pelo caixa, pronta para conferir cobrança e preencher o fechamento.",
+      "calls": "obterComandaParaFechamento",
+      "sets": "comanda"
     },
     "fecharComandaPaga": {
-      "description": "fecharComandaPaga",
+      "description": "Registra o desconto e o pagamento da comanda aberta, conclui seu fechamento e devolve a cobrança fechada com a mesa liberada.",
       "calls": "fecharComandaPaga",
-      "sets": "comandaParaFechamento"
+      "sets": "comanda",
+      "updates": [
+        "openComandas"
+      ]
     }
   },
   "journeys": [
     {
       "step": "fecharComanda/localizarComandaParaFechamento",
       "organisms": [
-        "openComandaList",
-        "comandaReview"
+        "openComandaList"
       ],
       "functions": [
-        "carregarFechamentoInicial",
-        "localizarComandasAbertas",
-        "consultarComandaParaFechamento"
+        "carregarFechamento",
+        "buscarComandasAbertas",
+        "obterComandaParaFechamento"
       ]
     },
     {
@@ -110,13 +144,16 @@ export const definition = {
         "comandaReview",
         "paymentForm"
       ],
-      "functions": []
+      "functions": [
+        "obterComandaParaFechamento"
+      ]
     },
     {
       "step": "fecharComanda/fecharComandaPaga",
       "organisms": [
         "paymentForm",
-        "closeComandaActions"
+        "closeComandaActions",
+        "comandaReview"
       ],
       "functions": [
         "fecharComandaPaga"
@@ -129,10 +166,12 @@ export const definition = {
       "totalComandaCalculado",
       "valorTotalItemComandaCalculado"
     ],
-    "localizarComandasAbertas": [
-      "totalComandaCalculado"
+    "buscarComandasAbertas": [
+      "subtotalComandaCalculado",
+      "totalComandaCalculado",
+      "valorTotalItemComandaCalculado"
     ],
-    "consultarComandaParaFechamento": [
+    "obterComandaParaFechamento": [
       "subtotalComandaCalculado",
       "totalComandaCalculado",
       "valorTotalItemComandaCalculado"
