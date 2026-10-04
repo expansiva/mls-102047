@@ -83,7 +83,19 @@ export const definition = {
     },
     "comandaSelecionada": {
       "source": "entry.params.comandaId",
-      "description": "Comanda selecionada para revisão."
+      "description": "Comanda selecionada para conferência."
+    },
+    "comanda": {
+      "source": "loadComanda.comanda",
+      "description": "Detalhes da comanda selecionada."
+    },
+    "itensComanda": {
+      "source": "comanda",
+      "description": "Itens da comanda selecionada."
+    },
+    "dadosPagamento": {
+      "source": "fecharComandaPaga.input",
+      "description": "Desconto e forma de pagamento informados para o fechamento."
     },
     "mesaId": {
       "source": "entry.params.mesaId",
@@ -91,20 +103,12 @@ export const definition = {
     },
     "page": {
       "source": "entry.params.page",
-      "description": "Página das comandas abertas."
-    },
-    "comanda": {
-      "source": "loadComanda.comanda",
-      "description": "Detalhes da comanda selecionada para fechamento."
-    },
-    "itemComanda": {
-      "source": "comanda",
-      "description": "Itens da comanda selecionada."
+      "description": "Página da lista de comandas abertas."
     }
   },
   "functions": {
     "load": {
-      "description": "Carrega as comandas abertas e as mesas relacionadas.",
+      "description": "Carrega as comandas abertas e as mesas vinculadas.",
       "calls": "load",
       "sets": "fechamento",
       "updates": [
@@ -122,13 +126,13 @@ export const definition = {
       "sets": "fechamento"
     },
     "fecharComandaPaga": {
-      "description": "Registra o pagamento e fecha a comanda.",
+      "description": "Fecha a comanda com o pagamento informado.",
       "calls": "fecharComandaPaga",
       "sets": "comanda",
       "updates": [
         "fechamento",
         "mesa",
-        "itemComanda"
+        "itensComanda"
       ]
     },
     "loadComanda": {
@@ -136,7 +140,7 @@ export const definition = {
       "calls": "loadComanda",
       "sets": "comanda",
       "updates": [
-        "itemComanda"
+        "itensComanda"
       ]
     }
   },
@@ -149,7 +153,8 @@ export const definition = {
       "functions": [
         "load",
         "filterOpenComandaList",
-        "loadMoreOpenComandaList"
+        "loadMoreOpenComandaList",
+        "loadComanda"
       ]
     },
     {
@@ -170,18 +175,22 @@ export const definition = {
       "functions": [
         "fecharComandaPaga"
       ],
-      "continuesIn": "fechamento"
+      "continuesIn": "inicio"
     }
   ],
   "rules": {
     "load": [
-      "umaComandaAbertaPorMesa"
+      "umaComandaAbertaPorMesa",
+      "descontoNaoExcedeSubtotal",
+      "fechamentoLiberaMesa"
     ],
     "loadFechamento": [
-      "umaComandaAbertaPorMesa"
+      "umaComandaAbertaPorMesa",
+      "descontoNaoExcedeSubtotal"
     ],
     "loadComanda": [
       "itensSomenteEmComandaAberta",
+      "pagamentoObrigatorioNoFechamento",
       "descontoNaoExcedeSubtotal"
     ],
     "fecharComandaPaga": [

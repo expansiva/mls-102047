@@ -2,7 +2,7 @@
   "attempt": "1",
   "model": "openai/gpt-5.6-terra-pro",
   "promptChars": 11694,
-  "receivedAt": "2026-10-04T05:10:24.770Z",
+  "receivedAt": "2026-10-04T06:08:02.648Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -17,12 +17,22 @@
           {
             "id": "mesa",
             "source": "load.atendimento",
-            "description": "Mesa vinculada à comanda em fechamento."
+            "description": "Mesas vinculadas às comandas abertas."
           },
           {
             "id": "comandaSelecionada",
             "source": "entry.params.comandaId",
-            "description": "Comanda selecionada para revisão."
+            "description": "Comanda selecionada para conferência."
+          },
+          {
+            "id": "comanda",
+            "source": "loadComanda.comanda",
+            "description": "Detalhes da comanda selecionada."
+          },
+          {
+            "id": "dadosPagamento",
+            "source": "fecharComandaPaga.input",
+            "description": "Desconto e forma de pagamento do fechamento."
           },
           {
             "id": "mesaId",
@@ -33,17 +43,12 @@
             "id": "page",
             "source": "entry.params.page",
             "description": "Página da lista de comandas abertas."
-          },
-          {
-            "id": "comanda",
-            "source": "loadComanda.comanda",
-            "description": "Detalhes da comanda selecionada para fechamento."
           }
         ],
         "functions": [
           {
             "id": "load",
-            "description": "Carrega as comandas abertas e as mesas relacionadas.",
+            "description": "Carrega as comandas abertas e as mesas vinculadas.",
             "calls": "load",
             "sets": "fechamento",
             "updates": [
@@ -70,7 +75,7 @@
           },
           {
             "id": "fecharComandaPaga",
-            "description": "Registra o pagamento e fecha a comanda.",
+            "description": "Fecha a comanda com o pagamento informado.",
             "calls": "fecharComandaPaga",
             "sets": "comanda",
             "updates": [
@@ -88,7 +93,8 @@
             "functions": [
               "load",
               "filterOpenComandaList",
-              "loadMoreOpenComandaList"
+              "loadMoreOpenComandaList",
+              "loadComanda"
             ]
           },
           {
@@ -109,7 +115,7 @@
             "functions": [
               "fecharComandaPaga"
             ],
-            "continuesIn": "fechamento"
+            "continuesIn": "inicio"
           }
         ],
         "commandReturns": [
@@ -125,19 +131,23 @@
           {
             "requestId": "load",
             "rules": [
-              "umaComandaAbertaPorMesa"
+              "umaComandaAbertaPorMesa",
+              "descontoNaoExcedeSubtotal",
+              "fechamentoLiberaMesa"
             ]
           },
           {
             "requestId": "loadFechamento",
             "rules": [
-              "umaComandaAbertaPorMesa"
+              "umaComandaAbertaPorMesa",
+              "descontoNaoExcedeSubtotal"
             ]
           },
           {
             "requestId": "loadComanda",
             "rules": [
               "itensSomenteEmComandaAberta",
+              "pagamentoObrigatorioNoFechamento",
               "descontoNaoExcedeSubtotal"
             ]
           },
@@ -153,7 +163,7 @@
       }
     },
     "status": "completed",
-    "stepId": 15,
+    "stepId": 13,
     "interaction": null,
     "nextSteps": null
   },
