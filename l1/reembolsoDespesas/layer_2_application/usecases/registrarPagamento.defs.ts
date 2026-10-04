@@ -110,16 +110,12 @@ export const definition = {
     "portCalls": [
       "transition"
     ],
-    "transactional": true,
+    "transactional": false,
     "effects": [],
     "sequence": [
       {
         "kind": "context",
         "source": "ctx"
-      },
-      {
-        "kind": "transaction",
-        "boundary": "local"
       },
       {
         "kind": "rule",
@@ -188,7 +184,7 @@ export const definition = {
       }
     ],
     "transaction": {
-      "boundary": "local"
+      "boundary": "none"
     },
     "transitionRef": "registrarPagamento",
     "lifecycle": {
