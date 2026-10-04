@@ -2,26 +2,7 @@
 
 export const definition = {
   "entry": {
-    "params": {
-      "itemCardapioId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:formularioItemCardapio",
-        "persist": true
-      },
-      "page": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:listaItensCardapio",
-        "persist": true
-      }
-    }
+    "params": {}
   },
   "forms": {
     "cadastrarItemCardapio": {
@@ -34,25 +15,25 @@ export const definition = {
     }
   },
   "requests": {
-    "load": {
+    "carregarCatalogoCardapio": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "cardapio"
+        "catalogo"
       ]
     },
-    "loadCardapio": {
+    "consultarPaginaCardapio": {
       "kind": "qry",
-      "trigger": "loadCardapio",
+      "trigger": "consultarPaginaCardapio",
       "returns": [
-        "cardapio"
+        "catalogo"
       ]
     },
     "cadastrarItemCardapio": {
       "kind": "cmd",
       "trigger": "cadastrarItemCardapio",
       "returns": [
-        "itemCardapio"
+        "item"
       ],
       "writes": "ItemCardapio.create"
     },
@@ -60,58 +41,68 @@ export const definition = {
       "kind": "cmd",
       "trigger": "atualizarItemCardapio",
       "returns": [
-        "itemCardapio"
+        "item"
       ],
       "writes": "ItemCardapio.update"
     }
   },
   "states": {
-    "cardapio": {
-      "source": "load.cardapio",
-      "description": "Itens do cardápio carregados."
+    "catalogoCardapio": {
+      "source": "carregarCatalogoCardapio.catalogo",
+      "description": "listaItensCardapio"
     },
-    "itemCardapio": {
-      "source": "entry.params.itemCardapioId",
-      "description": "Item do cardápio selecionado para edição."
+    "itemCardapioSelecionado": {
+      "source": "selecionarItemCardapio",
+      "description": "formularioItemCardapio"
     }
   },
   "functions": {
-    "load": {
-      "description": "Carrega a primeira página de itens do cardápio.",
-      "calls": "load",
-      "sets": "cardapio"
+    "carregarCatalogoCardapio": {
+      "description": "carregarCatalogoCardapio",
+      "calls": "carregarCatalogoCardapio",
+      "sets": "catalogoCardapio",
+      "updates": [
+        "catalogoCardapio"
+      ]
     },
-    "filterListaItensCardapio": {
-      "description": "Recarrega a lista de itens do cardápio a partir da primeira página.",
-      "calls": "loadCardapio",
-      "sets": "cardapio"
+    "consultarPaginaCardapio": {
+      "description": "consultarPaginaCardapio",
+      "calls": "consultarPaginaCardapio",
+      "sets": "catalogoCardapio",
+      "updates": [
+        "catalogoCardapio"
+      ]
     },
-    "loadMoreListaItensCardapio": {
-      "description": "Adiciona a próxima página de itens à lista do cardápio.",
-      "calls": "loadCardapio",
-      "sets": "cardapio"
+    "selecionarItemCardapio": {
+      "description": "selecionarItemCardapio",
+      "sets": "itemCardapioSelecionado",
+      "updates": [
+        "itemCardapioSelecionado"
+      ]
     },
     "cadastrarItemCardapio": {
-      "description": "Cadastra um item do cardápio.",
+      "description": "cadastrarItemCardapio",
       "calls": "cadastrarItemCardapio",
-      "sets": "itemCardapio",
+      "sets": "itemCardapioSelecionado",
       "updates": [
-        "cardapio"
+        "catalogoCardapio",
+        "itemCardapioSelecionado"
       ]
     },
     "atualizarItemCardapio": {
-      "description": "Atualiza o item selecionado do cardápio.",
+      "description": "atualizarItemCardapio",
       "calls": "atualizarItemCardapio",
-      "sets": "itemCardapio",
+      "sets": "itemCardapioSelecionado",
       "updates": [
-        "cardapio"
+        "catalogoCardapio",
+        "itemCardapioSelecionado"
       ]
     }
   },
   "journeys": [],
   "rules": {
-    "load": [],
-    "loadCardapio": [],
+    "carregarCatalogoCardapio": [],
+    "consultarPaginaCardapio": [],
     "cadastrarItemCardapio": [],
     "atualizarItemCardapio": []
   },

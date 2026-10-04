@@ -1,110 +1,110 @@
 {
   "attempt": "1",
   "model": "openai/gpt-5.6-terra-pro",
-  "promptChars": 11694,
-  "receivedAt": "2026-10-04T06:08:02.648Z",
+  "promptChars": 14992,
+  "receivedAt": "2026-10-04T13:19:02.189Z",
   "raw": {
     "type": "flexible",
     "result": {
       "toolName": "submitD2Shared",
       "arguments": {
+        "entry": [
+          {
+            "name": "comandaId",
+            "type": "string",
+            "sources": [
+              "url",
+              "localStorage"
+            ],
+            "effect": "select:comandaReview",
+            "persist": true
+          }
+        ],
+        "forms": [
+          {
+            "submit": "fecharComandaPaga",
+            "organism": "paymentForm"
+          }
+        ],
         "states": [
           {
-            "id": "fechamento",
-            "source": "load.fechamento",
-            "description": "Comandas abertas para fechamento."
-          },
-          {
-            "id": "mesa",
-            "source": "load.atendimento",
-            "description": "Mesas vinculadas às comandas abertas."
-          },
-          {
-            "id": "comandaSelecionada",
+            "id": "comandaIdSelecionada",
             "source": "entry.params.comandaId",
-            "description": "Comanda selecionada para conferência."
+            "description": "comandaId"
           },
           {
-            "id": "comanda",
-            "source": "loadComanda.comanda",
-            "description": "Detalhes da comanda selecionada."
+            "id": "comandasAbertas",
+            "source": "carregarFechamento.openComandas",
+            "description": "openComandas"
           },
           {
-            "id": "dadosPagamento",
-            "source": "fecharComandaPaga.input",
-            "description": "Desconto e forma de pagamento do fechamento."
-          },
-          {
-            "id": "mesaId",
-            "source": "entry.params.mesaId",
-            "description": "Filtro de mesa das comandas abertas."
-          },
-          {
-            "id": "page",
-            "source": "entry.params.page",
-            "description": "Página da lista de comandas abertas."
+            "id": "comandaParaFechamento",
+            "source": "carregarFechamento.selectedComanda",
+            "description": "selectedComanda"
           }
         ],
         "functions": [
           {
-            "id": "load",
-            "description": "Carrega as comandas abertas e as mesas vinculadas.",
-            "calls": "load",
-            "sets": "fechamento",
+            "id": "carregarFechamentoInicial",
+            "description": "carregarFechamento",
+            "calls": "carregarFechamento",
+            "sets": "comandasAbertas",
             "updates": [
-              "mesa"
-            ]
+              "comandaParaFechamento"
+            ],
+            "navigate": "",
+            "carries": []
           },
           {
-            "id": "filterOpenComandaList",
-            "description": "Filtra e recarrega as comandas abertas.",
-            "calls": "loadFechamento",
-            "sets": "fechamento"
+            "id": "localizarComandasAbertas",
+            "description": "localizarComandasAbertas",
+            "calls": "localizarComandasAbertas",
+            "sets": "comandasAbertas",
+            "updates": [],
+            "navigate": "",
+            "carries": []
           },
           {
-            "id": "loadMoreOpenComandaList",
-            "description": "Carrega a próxima página de comandas abertas.",
-            "calls": "loadFechamento",
-            "sets": "fechamento"
-          },
-          {
-            "id": "loadComanda",
-            "description": "Carrega os detalhes da comanda selecionada.",
-            "calls": "loadComanda",
-            "sets": "comanda"
+            "id": "consultarComandaParaFechamento",
+            "description": "consultarComandaParaFechamento",
+            "calls": "consultarComandaParaFechamento",
+            "sets": "comandaParaFechamento",
+            "updates": [],
+            "navigate": "",
+            "carries": []
           },
           {
             "id": "fecharComandaPaga",
-            "description": "Fecha a comanda com o pagamento informado.",
+            "description": "fecharComandaPaga",
             "calls": "fecharComandaPaga",
-            "sets": "comanda",
-            "updates": [
-              "fechamento",
-              "mesa"
-            ]
+            "sets": "comandaParaFechamento",
+            "updates": [],
+            "navigate": "",
+            "carries": []
           }
         ],
         "journeys": [
           {
             "step": "fecharComanda/localizarComandaParaFechamento",
             "organisms": [
-              "openComandaList"
+              "openComandaList",
+              "comandaReview"
             ],
             "functions": [
-              "load",
-              "filterOpenComandaList",
-              "loadMoreOpenComandaList",
-              "loadComanda"
-            ]
+              "carregarFechamentoInicial",
+              "localizarComandasAbertas",
+              "consultarComandaParaFechamento"
+            ],
+            "continuesIn": ""
           },
           {
             "step": "fecharComanda/conferirTotalComanda",
             "organisms": [
-              "comandaReview"
+              "comandaReview",
+              "paymentForm"
             ],
-            "functions": [
-              "loadComanda"
-            ]
+            "functions": [],
+            "continuesIn": ""
           },
           {
             "step": "fecharComanda/fecharComandaPaga",
@@ -115,57 +115,15 @@
             "functions": [
               "fecharComandaPaga"
             ],
-            "continuesIn": "inicio"
-          }
-        ],
-        "commandReturns": [
-          {
-            "requestId": "fecharComandaPaga",
-            "returns": [
-              "comanda",
-              "mesa"
-            ]
-          }
-        ],
-        "requestRules": [
-          {
-            "requestId": "load",
-            "rules": [
-              "umaComandaAbertaPorMesa",
-              "descontoNaoExcedeSubtotal",
-              "fechamentoLiberaMesa"
-            ]
-          },
-          {
-            "requestId": "loadFechamento",
-            "rules": [
-              "umaComandaAbertaPorMesa",
-              "descontoNaoExcedeSubtotal"
-            ]
-          },
-          {
-            "requestId": "loadComanda",
-            "rules": [
-              "itensSomenteEmComandaAberta",
-              "pagamentoObrigatorioNoFechamento",
-              "descontoNaoExcedeSubtotal"
-            ]
-          },
-          {
-            "requestId": "fecharComandaPaga",
-            "rules": [
-              "pagamentoObrigatorioNoFechamento",
-              "descontoNaoExcedeSubtotal",
-              "fechamentoLiberaMesa"
-            ]
+            "continuesIn": ""
           }
         ]
       }
     },
     "status": "completed",
-    "stepId": 13,
+    "stepId": 23,
     "interaction": null,
     "nextSteps": null
   },
-  "verdict": "D2_SHARED_V2_RETURNS_DERIVED: Command fecharComandaPaga writes Comanda, which changes the derived fields of ItemComanda (details.valorTotal). Return itemComanda and update a state that holds ItemComanda."
+  "verdict": "accepted"
 }

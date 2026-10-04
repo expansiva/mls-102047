@@ -11,24 +11,6 @@ export const definition = {
         ],
         "effect": "select:comandaReview",
         "persist": true
-      },
-      "mesaId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:openComandaList",
-        "persist": true
-      },
-      "page": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:openComandaList",
-        "persist": true
       }
     }
   },
@@ -39,24 +21,24 @@ export const definition = {
     }
   },
   "requests": {
-    "load": {
+    "carregarFechamento": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "fechamento",
-        "atendimento"
+        "openComandas",
+        "selectedComanda"
       ]
     },
-    "loadFechamento": {
+    "localizarComandasAbertas": {
       "kind": "qry",
-      "trigger": "loadFechamento",
+      "trigger": "localizarComandasAbertas",
       "returns": [
-        "fechamento"
+        "openComandas"
       ]
     },
-    "loadComanda": {
+    "consultarComandaParaFechamento": {
       "kind": "qry",
-      "trigger": "loadComanda",
+      "trigger": "consultarComandaParaFechamento",
       "returns": [
         "comanda"
       ]
@@ -65,106 +47,70 @@ export const definition = {
       "kind": "cmd",
       "trigger": "fecharComandaPaga",
       "returns": [
-        "comanda",
-        "itemComanda",
-        "mesa"
+        "comanda"
       ],
       "writes": "Comanda.fecharComanda"
     }
   },
   "states": {
-    "fechamento": {
-      "source": "load.fechamento",
-      "description": "Comandas abertas para fechamento."
-    },
-    "mesa": {
-      "source": "load.atendimento",
-      "description": "Mesas vinculadas às comandas abertas."
-    },
-    "comandaSelecionada": {
+    "comandaIdSelecionada": {
       "source": "entry.params.comandaId",
-      "description": "Comanda selecionada para conferência."
+      "description": "comandaId"
     },
-    "comanda": {
-      "source": "loadComanda.comanda",
-      "description": "Detalhes da comanda selecionada."
+    "comandasAbertas": {
+      "source": "carregarFechamento.openComandas",
+      "description": "openComandas"
     },
-    "itensComanda": {
-      "source": "comanda",
-      "description": "Itens da comanda selecionada."
-    },
-    "dadosPagamento": {
-      "source": "fecharComandaPaga.input",
-      "description": "Desconto e forma de pagamento informados para o fechamento."
-    },
-    "mesaId": {
-      "source": "entry.params.mesaId",
-      "description": "Filtro de mesa das comandas abertas."
-    },
-    "page": {
-      "source": "entry.params.page",
-      "description": "Página da lista de comandas abertas."
+    "comandaParaFechamento": {
+      "source": "carregarFechamento.selectedComanda",
+      "description": "selectedComanda"
     }
   },
   "functions": {
-    "load": {
-      "description": "Carrega as comandas abertas e as mesas vinculadas.",
-      "calls": "load",
-      "sets": "fechamento",
+    "carregarFechamentoInicial": {
+      "description": "carregarFechamento",
+      "calls": "carregarFechamento",
+      "sets": "comandasAbertas",
       "updates": [
-        "mesa"
+        "comandaParaFechamento"
       ]
     },
-    "filterOpenComandaList": {
-      "description": "Filtra e recarrega as comandas abertas.",
-      "calls": "loadFechamento",
-      "sets": "fechamento"
+    "localizarComandasAbertas": {
+      "description": "localizarComandasAbertas",
+      "calls": "localizarComandasAbertas",
+      "sets": "comandasAbertas"
     },
-    "loadMoreOpenComandaList": {
-      "description": "Carrega a próxima página de comandas abertas.",
-      "calls": "loadFechamento",
-      "sets": "fechamento"
+    "consultarComandaParaFechamento": {
+      "description": "consultarComandaParaFechamento",
+      "calls": "consultarComandaParaFechamento",
+      "sets": "comandaParaFechamento"
     },
     "fecharComandaPaga": {
-      "description": "Fecha a comanda com o pagamento informado.",
+      "description": "fecharComandaPaga",
       "calls": "fecharComandaPaga",
-      "sets": "comanda",
-      "updates": [
-        "fechamento",
-        "mesa",
-        "itensComanda"
-      ]
-    },
-    "loadComanda": {
-      "description": "Carrega os detalhes da comanda selecionada.",
-      "calls": "loadComanda",
-      "sets": "comanda",
-      "updates": [
-        "itensComanda"
-      ]
+      "sets": "comandaParaFechamento"
     }
   },
   "journeys": [
     {
       "step": "fecharComanda/localizarComandaParaFechamento",
       "organisms": [
-        "openComandaList"
+        "openComandaList",
+        "comandaReview"
       ],
       "functions": [
-        "load",
-        "filterOpenComandaList",
-        "loadMoreOpenComandaList",
-        "loadComanda"
+        "carregarFechamentoInicial",
+        "localizarComandasAbertas",
+        "consultarComandaParaFechamento"
       ]
     },
     {
       "step": "fecharComanda/conferirTotalComanda",
       "organisms": [
-        "comandaReview"
+        "comandaReview",
+        "paymentForm"
       ],
-      "functions": [
-        "loadComanda"
-      ]
+      "functions": []
     },
     {
       "step": "fecharComanda/fecharComandaPaga",
@@ -174,29 +120,30 @@ export const definition = {
       ],
       "functions": [
         "fecharComandaPaga"
-      ],
-      "continuesIn": "inicio"
+      ]
     }
   ],
   "rules": {
-    "load": [
-      "umaComandaAbertaPorMesa",
-      "descontoNaoExcedeSubtotal",
-      "fechamentoLiberaMesa"
+    "carregarFechamento": [
+      "subtotalComandaCalculado",
+      "totalComandaCalculado",
+      "valorTotalItemComandaCalculado"
     ],
-    "loadFechamento": [
-      "umaComandaAbertaPorMesa",
-      "descontoNaoExcedeSubtotal"
+    "localizarComandasAbertas": [
+      "totalComandaCalculado"
     ],
-    "loadComanda": [
-      "itensSomenteEmComandaAberta",
-      "pagamentoObrigatorioNoFechamento",
-      "descontoNaoExcedeSubtotal"
+    "consultarComandaParaFechamento": [
+      "subtotalComandaCalculado",
+      "totalComandaCalculado",
+      "valorTotalItemComandaCalculado"
     ],
     "fecharComandaPaga": [
       "pagamentoObrigatorioNoFechamento",
       "descontoNaoExcedeSubtotal",
-      "fechamentoLiberaMesa"
+      "fechamentoLiberaMesa",
+      "subtotalComandaCalculado",
+      "totalComandaCalculado",
+      "valorTotalItemComandaCalculado"
     ]
   },
   "access": {

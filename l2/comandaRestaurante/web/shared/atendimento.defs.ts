@@ -2,62 +2,40 @@
 
 export const definition = {
   "entry": {
-    "params": {
-      "comandaId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:acoesAtendimento",
-        "persist": true
-      },
-      "page": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:lookupAtendimento",
-        "persist": true
-      },
-      "itemCardapioId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "prefill:formularioLancamento",
-        "persist": false
-      }
-    }
+    "params": {}
   },
   "forms": {
+    "abrirComanda": {
+      "organism": "acoesAtendimento",
+      "submit": "abrirComanda"
+    },
     "lancarItem": {
       "organism": "formularioLancamento",
       "submit": "lancarItem"
+    },
+    "cancelarItem": {
+      "organism": "acoesAtendimento",
+      "submit": "cancelarItem"
     }
   },
   "requests": {
-    "load": {
+    "carregarAtendimento": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "atendimento",
-        "fechamento",
-        "cardapio"
+        "localizacao"
       ]
     },
-    "loadAtendimento": {
+    "buscarLocalizacaoAtendimento": {
       "kind": "qry",
-      "trigger": "loadAtendimento",
+      "trigger": "buscarLocalizacaoAtendimento",
       "returns": [
-        "atendimento"
+        "localizacao"
       ]
     },
-    "loadComanda": {
+    "consultarComandaAtendimento": {
       "kind": "qry",
-      "trigger": "loadComanda",
+      "trigger": "consultarComandaAtendimento",
       "returns": [
         "comanda"
       ]
@@ -66,9 +44,7 @@ export const definition = {
       "kind": "cmd",
       "trigger": "abrirComanda",
       "returns": [
-        "comanda",
-        "itemComanda",
-        "mesa"
+        "comanda"
       ],
       "writes": "Comanda.create"
     },
@@ -76,7 +52,6 @@ export const definition = {
       "kind": "cmd",
       "trigger": "lancarItem",
       "returns": [
-        "itemComanda",
         "comanda"
       ],
       "writes": "ItemComanda.create"
@@ -85,98 +60,84 @@ export const definition = {
       "kind": "cmd",
       "trigger": "cancelarItem",
       "returns": [
-        "itemComanda",
         "comanda"
       ],
       "writes": "ItemComanda.cancelarItemComanda"
     }
   },
   "states": {
-    "atendimento": {
-      "source": "load.atendimento",
-      "description": "Mesas e comandas para atendimento."
-    },
-    "page": {
-      "source": "entry.params.page",
-      "description": "Página atual da lista de atendimento."
-    },
-    "comandaSelecionada": {
-      "source": "entry.params.comandaId",
-      "description": "Comanda selecionada pelo identificador de entrada."
-    },
-    "itemCardapioSelecionado": {
-      "source": "entry.params.itemCardapioId",
-      "description": "Item do cardápio selecionado pelo identificador de entrada."
+    "localizacao": {
+      "source": "carregarAtendimento.localizacao",
+      "description": "localizacaoAtendimento"
     },
     "comanda": {
-      "source": "loadComanda.comanda",
-      "description": "Comanda selecionada com itens e totais."
+      "source": "consultarComandaAtendimento.comanda",
+      "description": "comandaAtendimento"
     },
-    "fechamento": {
-      "source": "load.fechamento",
-      "description": "Dados da comanda para conferência de fechamento."
+    "mesaId": {
+      "source": "abrirComanda.input",
+      "description": "mesaSelecionada"
     },
-    "cardapio": {
-      "source": "load.cardapio",
-      "description": "Itens do cardápio e preços vigentes."
+    "itemCardapioId": {
+      "source": "lancarItem.input",
+      "description": "itemCardapioSelecionado"
     },
-    "itemComanda": {
-      "source": "lancarItem.itemComanda",
-      "description": "Item de comanda lançado ou cancelado."
+    "quantidade": {
+      "source": "lancarItem.input",
+      "description": "quantidadeItem"
+    },
+    "observacao": {
+      "source": "lancarItem.input",
+      "description": "observacaoItem"
+    },
+    "itemComandaId": {
+      "source": "cancelarItem.input",
+      "description": "itemComandaSelecionado"
+    },
+    "versao": {
+      "source": "cancelarItem.input",
+      "description": "versaoItemComanda"
     }
   },
   "functions": {
-    "load": {
-      "description": "Carrega o atendimento inicial, os dados de fechamento e o cardápio.",
-      "calls": "load",
-      "sets": "atendimento",
-      "updates": [
-        "fechamento",
-        "cardapio"
-      ]
+    "carregarAtendimento": {
+      "description": "carregarLocalizacaoAtendimento",
+      "calls": "carregarAtendimento",
+      "sets": "localizacao"
     },
-    "filterLookupAtendimento": {
-      "description": "Recarrega a primeira página das mesas de atendimento conforme os filtros.",
-      "calls": "loadAtendimento",
-      "sets": "atendimento"
+    "buscarLocalizacaoAtendimento": {
+      "description": "buscarLocalizacaoAtendimento",
+      "calls": "buscarLocalizacaoAtendimento",
+      "sets": "localizacao"
     },
-    "loadMoreLookupAtendimento": {
-      "description": "Acrescenta a próxima página das mesas de atendimento.",
-      "calls": "loadAtendimento",
-      "sets": "atendimento"
+    "consultarComandaAtendimento": {
+      "description": "consultarComandaSelecionada",
+      "calls": "consultarComandaAtendimento",
+      "sets": "comanda"
     },
     "abrirComanda": {
-      "description": "Abre uma comanda para a mesa disponível.",
+      "description": "abrirComandaMesaSelecionada",
       "calls": "abrirComanda",
       "sets": "comanda",
       "updates": [
-        "atendimento",
-        "fechamento",
-        "itemComanda"
+        "comanda"
       ]
     },
     "lancarItem": {
-      "description": "Lança o item informado na comanda aberta.",
+      "description": "lancarItemNaComanda",
       "calls": "lancarItem",
-      "sets": "itemComanda",
+      "sets": "comanda",
       "updates": [
-        "comanda",
-        "fechamento"
+        "comanda"
       ]
     },
     "cancelarItem": {
-      "description": "Cancela o item lançado na comanda aberta.",
+      "description": "cancelarItemSelecionado",
       "calls": "cancelarItem",
-      "sets": "itemComanda",
+      "sets": "comanda",
       "updates": [
-        "comanda",
-        "fechamento"
+        "comanda"
       ]
-    },
-    "carregarComanda": {
-      "description": "Carrega os dados da comanda selecionada.",
-      "calls": "loadComanda",
-      "sets": "comanda"
     }
   },
   "journeys": [
@@ -186,16 +147,16 @@ export const definition = {
         "lookupAtendimento"
       ],
       "functions": [
-        "load",
-        "filterLookupAtendimento",
-        "loadMoreLookupAtendimento"
+        "carregarAtendimento",
+        "buscarLocalizacaoAtendimento"
       ],
       "continuesIn": "atendimento"
     },
     {
       "step": "abrirComanda/criarComanda",
       "organisms": [
-        "acoesAtendimento"
+        "acoesAtendimento",
+        "detalheComanda"
       ],
       "functions": [
         "abrirComanda"
@@ -209,7 +170,7 @@ export const definition = {
         "detalheComanda"
       ],
       "functions": [
-        "carregarComanda"
+        "consultarComandaAtendimento"
       ],
       "continuesIn": "atendimento"
     },
@@ -220,15 +181,16 @@ export const definition = {
         "formularioLancamento"
       ],
       "functions": [
-        "load"
+        "buscarLocalizacaoAtendimento"
       ],
-      "continuesIn": "cardapio"
+      "continuesIn": "atendimento"
     },
     {
       "step": "lancarItemComanda/adicionarItemComanda",
       "organisms": [
         "formularioLancamento",
-        "acoesAtendimento"
+        "acoesAtendimento",
+        "detalheComanda"
       ],
       "functions": [
         "lancarItem"
@@ -242,25 +204,23 @@ export const definition = {
         "detalheComanda"
       ],
       "functions": [
-        "carregarComanda"
+        "consultarComandaAtendimento"
       ],
       "continuesIn": "atendimento"
     },
     {
       "step": "cancelarItemComanda/conferirItemLancado",
       "organisms": [
-        "detalheComanda",
-        "acoesAtendimento"
+        "detalheComanda"
       ],
-      "functions": [
-        "carregarComanda"
-      ],
+      "functions": [],
       "continuesIn": "atendimento"
     },
     {
       "step": "cancelarItemComanda/cancelarItemErrado",
       "organisms": [
-        "acoesAtendimento"
+        "acoesAtendimento",
+        "detalheComanda"
       ],
       "functions": [
         "cancelarItem"
@@ -269,25 +229,29 @@ export const definition = {
     }
   ],
   "rules": {
-    "load": [
+    "carregarAtendimento": [
       "mesaDisponivelParaAbrirComanda"
     ],
-    "loadAtendimento": [
+    "buscarLocalizacaoAtendimento": [
       "mesaDisponivelParaAbrirComanda"
     ],
-    "loadComanda": [
-      "itensSomenteEmComandaAberta",
-      "itemComandaOperacaoSomenteComandaAberta"
+    "consultarComandaAtendimento": [
+      "subtotalComandaCalculado"
     ],
     "abrirComanda": [
       "mesaDisponivelParaAbrirComanda",
-      "umaComandaAbertaPorMesa"
+      "umaComandaAbertaPorMesa",
+      "subtotalComandaCalculado"
     ],
     "lancarItem": [
-      "itemComandaOperacaoSomenteComandaAberta"
+      "itensSomenteEmComandaAberta",
+      "precoUnitarioRegistradoNoLancamento",
+      "valorTotalItemComandaCalculado",
+      "subtotalComandaCalculado"
     ],
     "cancelarItem": [
-      "itemComandaOperacaoSomenteComandaAberta"
+      "itemComandaOperacaoSomenteComandaAberta",
+      "subtotalComandaCalculado"
     ]
   },
   "access": {

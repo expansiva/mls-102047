@@ -1,0 +1,255 @@
+{
+  "types": [
+    {
+      "name": "ItemCardapioRegistro",
+      "description": "Dados de um item do cardápio necessários para exibi-lo na lista, selecioná-lo no formulário e aplicar uma atualização com controle de versão.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.version"
+            ]
+          }
+        },
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.name"
+            ]
+          }
+        },
+        {
+          "name": "precoVigente",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.details.precoVigente"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PaginaCardapio",
+      "description": "Página do catálogo de itens, pronta para a lista do cardápio e para a navegação paginada.",
+      "fields": [
+        {
+          "name": "itens",
+          "type": "ItemCardapioRegistro[]"
+        },
+        {
+          "name": "totalItens",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "ItemCardapio.id"
+            ]
+          }
+        },
+        {
+          "name": "pagina",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "tamanhoPagina",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "carregarCatalogoCardapio",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "tamanhoPagina",
+          "type": "number",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "catalogo",
+          "type": "PaginaCardapio"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega a primeira página do cardápio vigente para o caixa conferir os itens e selecionar um deles para manutenção.",
+        "input": "tamanhoPagina é a quantidade máxima de itens exibidos na primeira tela; quando não for informado, o BFF aplica o tamanho padrão da página.",
+        "processing": "Consulta todos os ItemCardapio visíveis ao caixa no escopo da organização, ordena por nome e, como desempate, por id, e devolve a primeira página. Calcula totalItens pela contagem dos mesmos itens da consulta, sem transferir uma lista adicional para a tela.",
+        "output": "Retorna catalogo com os itens já no formato da lista, o total calculado e os metadados da primeira página. Cada item inclui id e version para que a seleção preencha o formulário e uma atualização possa usar controle de concorrência."
+      }
+    },
+    {
+      "id": "consultarPaginaCardapio",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "pagina",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "tamanhoPagina",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "catalogo",
+          "type": "PaginaCardapio"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Busca sob demanda outra página da lista do cardápio quando o caixa navega pelo catálogo.",
+        "input": "pagina identifica a página solicitada pela navegação da lista e tamanhoPagina define quantos itens ela comporta.",
+        "processing": "Consulta todos os ItemCardapio visíveis ao caixa no escopo da organização, ordena por nome e id, aplica a paginação solicitada e calcula totalItens com o mesmo conjunto não paginado.",
+        "output": "Retorna catalogo substituindo a página atualmente mostrada, com itens prontos para seleção, total calculado e os metadados da paginação."
+      }
+    },
+    {
+      "id": "cadastrarItemCardapio",
+      "kind": "cmd",
+      "when": "cadastrarItemCardapio",
+      "writes": "ItemCardapio.create",
+      "input": [
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.name"
+            ]
+          }
+        },
+        {
+          "name": "precoVigente",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.details.precoVigente"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "item",
+          "type": "ItemCardapioRegistro"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Cadastra um novo item no cardápio para que ele possa ser usado pela operação no lançamento de comandas.",
+        "input": "nome é o texto apresentado à equipe para localizar o item; precoVigente é o preço que será cobrado para os próximos lançamentos desse item.",
+        "processing": "Cria ItemCardapio no escopo organizacional com nome e precoVigente informados. Não aplica regras de comanda, pois esta operação somente mantém o catálogo e não lança item em comanda.",
+        "output": "Retorna item recém-criado com id, version, nome e precoVigente, permitindo à página redesenhar a lista e manter o registro selecionável sem nova consulta."
+      }
+    },
+    {
+      "id": "atualizarItemCardapio",
+      "kind": "cmd",
+      "when": "atualizarItemCardapio",
+      "writes": "ItemCardapio.update",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.version"
+            ]
+          }
+        },
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.name"
+            ]
+          }
+        },
+        {
+          "name": "precoVigente",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.details.precoVigente"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "item",
+          "type": "ItemCardapioRegistro"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Atualiza o nome e o preço vigente do item de cardápio selecionado pelo caixa.",
+        "input": "id identifica o ItemCardapio a alterar; version é a versão recebida na leitura e protege contra atualização concorrente; nome e precoVigente são os novos valores gravados no catálogo.",
+        "processing": "Atualiza o ItemCardapio identificado por id somente se version corresponder à versão corrente, gravando nome e precoVigente. Recusa a alteração caso o registro não exista, não esteja no escopo visível do caixa ou tenha sido modificado desde a leitura. Não aplica regras de comanda, pois não há lançamento nem recálculo de comanda nesta operação.",
+        "output": "Retorna item já persistido, com a nova version e os valores atuais, para a página substituir imediatamente o registro redesenhado na lista e no formulário."
+      }
+    }
+  ]
+}

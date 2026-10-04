@@ -6,47 +6,32 @@ export const definition = {
   },
   "forms": {},
   "requests": {
-    "load": {
+    "carregarResumoOperacionalInicio": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "atendimento",
-        "fechamento",
-        "itemComanda"
+        "resumo"
       ]
     }
   },
   "states": {
-    "atendimento": {
-      "source": "load.atendimento",
-      "description": "Mesas e respectivas condições de disponibilidade."
-    },
-    "fechamento": {
-      "source": "load.fechamento",
-      "description": "Comandas e subtotais para acompanhamento operacional."
-    },
-    "itemComanda": {
-      "source": "load.itemComanda",
-      "description": "Itens lançados e valores totais das comandas."
+    "resumoOperacional": {
+      "source": "carregarResumoOperacionalInicio.resumo",
+      "description": "Resumo operacional consolidado da página inicial."
     }
   },
   "functions": {
-    "load": {
-      "description": "Carrega os dados operacionais de mesas, comandas e itens.",
-      "calls": "load",
-      "sets": "atendimento",
-      "updates": [
-        "fechamento",
-        "itemComanda"
-      ]
+    "carregarResumoOperacionalInicio": {
+      "description": "Carrega o resumo operacional inicial.",
+      "calls": "carregarResumoOperacionalInicio",
+      "sets": "resumoOperacional"
     }
   },
   "journeys": [],
   "rules": {
-    "load": [
-      "mesaDisponivelParaAbrirComanda",
-      "umaComandaAbertaPorMesa",
-      "fechamentoLiberaMesa"
+    "carregarResumoOperacionalInicio": [
+      "subtotalComandaCalculado",
+      "valorTotalItemComandaCalculado"
     ]
   },
   "access": {

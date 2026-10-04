@@ -1,114 +1,130 @@
 {
   "attempt": "2",
   "model": "openai/gpt-5.6-terra-pro",
-  "promptChars": 17438,
-  "receivedAt": "2026-10-04T06:08:57.089Z",
+  "promptChars": 22616,
+  "receivedAt": "2026-10-04T13:19:29.673Z",
   "raw": {
     "type": "flexible",
     "result": {
       "toolName": "submitD2Shared",
       "arguments": {
+        "entry": [],
+        "forms": [
+          {
+            "submit": "abrirComanda",
+            "organism": "acoesAtendimento"
+          },
+          {
+            "submit": "lancarItem",
+            "organism": "formularioLancamento"
+          },
+          {
+            "submit": "cancelarItem",
+            "organism": "acoesAtendimento"
+          }
+        ],
         "states": [
           {
-            "id": "atendimento",
-            "source": "load.atendimento",
-            "description": "Mesas e comandas para atendimento."
-          },
-          {
-            "id": "page",
-            "source": "entry.params.page",
-            "description": "Página atual da lista de atendimento."
-          },
-          {
-            "id": "comandaSelecionada",
-            "source": "entry.params.comandaId",
-            "description": "Comanda selecionada pelo identificador de entrada."
-          },
-          {
-            "id": "itemCardapioSelecionado",
-            "source": "entry.params.itemCardapioId",
-            "description": "Item do cardápio selecionado pelo identificador de entrada."
+            "id": "localizacao",
+            "source": "carregarAtendimento.localizacao",
+            "description": "localizacaoAtendimento"
           },
           {
             "id": "comanda",
-            "source": "loadComanda.comanda",
-            "description": "Comanda selecionada com itens e totais."
+            "source": "consultarComandaAtendimento.comanda",
+            "description": "comandaAtendimento"
           },
           {
-            "id": "fechamento",
-            "source": "load.fechamento",
-            "description": "Dados da comanda para conferência de fechamento."
+            "id": "mesaId",
+            "source": "abrirComanda.input",
+            "description": "mesaSelecionada"
           },
           {
-            "id": "cardapio",
-            "source": "load.cardapio",
-            "description": "Itens do cardápio e preços vigentes."
+            "id": "itemCardapioId",
+            "source": "lancarItem.input",
+            "description": "itemCardapioSelecionado"
           },
           {
-            "id": "itemComanda",
-            "source": "lancarItem.itemComanda",
-            "description": "Item de comanda lançado ou cancelado."
+            "id": "quantidade",
+            "source": "lancarItem.input",
+            "description": "quantidadeItem"
+          },
+          {
+            "id": "observacao",
+            "source": "lancarItem.input",
+            "description": "observacaoItem"
+          },
+          {
+            "id": "itemComandaId",
+            "source": "cancelarItem.input",
+            "description": "itemComandaSelecionado"
+          },
+          {
+            "id": "versao",
+            "source": "cancelarItem.input",
+            "description": "versaoItemComanda"
           }
         ],
         "functions": [
           {
-            "id": "load",
-            "description": "Carrega o atendimento inicial, os dados de fechamento e o cardápio.",
-            "calls": "load",
-            "sets": "atendimento",
-            "updates": [
-              "fechamento",
-              "cardapio"
-            ]
+            "id": "carregarAtendimento",
+            "description": "carregarLocalizacaoAtendimento",
+            "calls": "carregarAtendimento",
+            "sets": "localizacao",
+            "updates": [],
+            "navigate": "",
+            "carries": []
           },
           {
-            "id": "filterLookupAtendimento",
-            "description": "Recarrega a primeira página das mesas de atendimento conforme os filtros.",
-            "calls": "loadAtendimento",
-            "sets": "atendimento"
+            "id": "buscarLocalizacaoAtendimento",
+            "description": "buscarLocalizacaoAtendimento",
+            "calls": "buscarLocalizacaoAtendimento",
+            "sets": "localizacao",
+            "updates": [],
+            "navigate": "",
+            "carries": []
           },
           {
-            "id": "loadMoreLookupAtendimento",
-            "description": "Acrescenta a próxima página das mesas de atendimento.",
-            "calls": "loadAtendimento",
-            "sets": "atendimento"
-          },
-          {
-            "id": "carregarComanda",
-            "description": "Carrega os dados da comanda selecionada.",
-            "calls": "loadComanda",
-            "sets": "comanda"
+            "id": "consultarComandaAtendimento",
+            "description": "consultarComandaSelecionada",
+            "calls": "consultarComandaAtendimento",
+            "sets": "comanda",
+            "updates": [],
+            "navigate": "",
+            "carries": []
           },
           {
             "id": "abrirComanda",
-            "description": "Abre uma comanda para a mesa disponível.",
+            "description": "abrirComandaMesaSelecionada",
             "calls": "abrirComanda",
             "sets": "comanda",
             "updates": [
-              "atendimento",
-              "fechamento",
-              "itemComanda"
-            ]
+              "comanda"
+            ],
+            "navigate": "",
+            "carries": []
           },
           {
             "id": "lancarItem",
-            "description": "Lança o item informado na comanda aberta.",
+            "description": "lancarItemNaComanda",
             "calls": "lancarItem",
-            "sets": "itemComanda",
+            "sets": "comanda",
             "updates": [
-              "comanda",
-              "fechamento"
-            ]
+              "comanda"
+            ],
+            "navigate": "",
+            "carries": []
           },
           {
             "id": "cancelarItem",
-            "description": "Cancela o item lançado na comanda aberta.",
+            "description": "cancelarItemSelecionado",
             "calls": "cancelarItem",
-            "sets": "itemComanda",
+            "sets": "comanda",
             "updates": [
-              "comanda",
-              "fechamento"
-            ]
+              "comanda"
+            ],
+            "navigate": "",
+            "carries": []
           }
         ],
         "journeys": [
@@ -118,16 +134,16 @@
               "lookupAtendimento"
             ],
             "functions": [
-              "load",
-              "filterLookupAtendimento",
-              "loadMoreLookupAtendimento"
+              "carregarAtendimento",
+              "buscarLocalizacaoAtendimento"
             ],
             "continuesIn": "atendimento"
           },
           {
             "step": "abrirComanda/criarComanda",
             "organisms": [
-              "acoesAtendimento"
+              "acoesAtendimento",
+              "detalheComanda"
             ],
             "functions": [
               "abrirComanda"
@@ -141,7 +157,7 @@
               "detalheComanda"
             ],
             "functions": [
-              "carregarComanda"
+              "consultarComandaAtendimento"
             ],
             "continuesIn": "atendimento"
           },
@@ -152,15 +168,16 @@
               "formularioLancamento"
             ],
             "functions": [
-              "load"
+              "buscarLocalizacaoAtendimento"
             ],
-            "continuesIn": "cardapio"
+            "continuesIn": "atendimento"
           },
           {
             "step": "lancarItemComanda/adicionarItemComanda",
             "organisms": [
               "formularioLancamento",
-              "acoesAtendimento"
+              "acoesAtendimento",
+              "detalheComanda"
             ],
             "functions": [
               "lancarItem"
@@ -174,100 +191,34 @@
               "detalheComanda"
             ],
             "functions": [
-              "carregarComanda"
+              "consultarComandaAtendimento"
             ],
             "continuesIn": "atendimento"
           },
           {
             "step": "cancelarItemComanda/conferirItemLancado",
             "organisms": [
-              "detalheComanda",
-              "acoesAtendimento"
+              "detalheComanda"
             ],
-            "functions": [
-              "carregarComanda"
-            ],
+            "functions": [],
             "continuesIn": "atendimento"
           },
           {
             "step": "cancelarItemComanda/cancelarItemErrado",
             "organisms": [
-              "acoesAtendimento"
+              "acoesAtendimento",
+              "detalheComanda"
             ],
             "functions": [
               "cancelarItem"
             ],
             "continuesIn": "atendimento"
           }
-        ],
-        "commandReturns": [
-          {
-            "requestId": "abrirComanda",
-            "returns": [
-              "comanda",
-              "itemComanda",
-              "mesa"
-            ]
-          },
-          {
-            "requestId": "lancarItem",
-            "returns": [
-              "itemComanda",
-              "comanda"
-            ]
-          },
-          {
-            "requestId": "cancelarItem",
-            "returns": [
-              "itemComanda",
-              "comanda"
-            ]
-          }
-        ],
-        "requestRules": [
-          {
-            "requestId": "load",
-            "rules": [
-              "mesaDisponivelParaAbrirComanda"
-            ]
-          },
-          {
-            "requestId": "loadAtendimento",
-            "rules": [
-              "mesaDisponivelParaAbrirComanda"
-            ]
-          },
-          {
-            "requestId": "loadComanda",
-            "rules": [
-              "itensSomenteEmComandaAberta",
-              "itemComandaOperacaoSomenteComandaAberta"
-            ]
-          },
-          {
-            "requestId": "abrirComanda",
-            "rules": [
-              "mesaDisponivelParaAbrirComanda",
-              "umaComandaAbertaPorMesa"
-            ]
-          },
-          {
-            "requestId": "lancarItem",
-            "rules": [
-              "itemComandaOperacaoSomenteComandaAberta"
-            ]
-          },
-          {
-            "requestId": "cancelarItem",
-            "rules": [
-              "itemComandaOperacaoSomenteComandaAberta"
-            ]
-          }
         ]
       }
     },
     "status": "completed",
-    "stepId": 13,
+    "stepId": 16,
     "interaction": null,
     "nextSteps": null
   },

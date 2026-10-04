@@ -2,26 +2,7 @@
 
 export const definition = {
   "entry": {
-    "params": {
-      "mesaId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:mesaForm",
-        "persist": true
-      },
-      "page": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:mesasList",
-        "persist": true
-      }
-    }
+    "params": {}
   },
   "forms": {
     "createMesa": {
@@ -34,21 +15,21 @@ export const definition = {
     }
   },
   "requests": {
-    "load": {
+    "carregarMesas": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "mesas"
+        "pagina"
       ]
     },
-    "loadMesas": {
+    "buscarMesas": {
       "kind": "qry",
-      "trigger": "loadMesas",
+      "trigger": "buscarMesas",
       "returns": [
-        "mesas"
+        "pagina"
       ]
     },
-    "createMesa": {
+    "criarMesa": {
       "kind": "cmd",
       "trigger": "createMesa",
       "returns": [
@@ -56,7 +37,7 @@ export const definition = {
       ],
       "writes": "Mesa.create"
     },
-    "updateMesa": {
+    "atualizarMesa": {
       "kind": "cmd",
       "trigger": "updateMesa",
       "returns": [
@@ -66,66 +47,64 @@ export const definition = {
     }
   },
   "states": {
-    "mesas": {
-      "source": "load.mesas",
-      "description": "Mesas carregadas para consulta e seleção."
+    "paginaMesas": {
+      "source": "carregarMesas.pagina",
+      "description": "Página de mesas da casa"
     },
     "mesaSelecionada": {
-      "source": "entry.params.mesaId",
-      "description": "Mesa selecionada para edição no formulário."
-    },
-    "pagina": {
-      "source": "entry.params.page",
-      "description": "Página atual da lista de mesas."
+      "source": "selecionarMesa",
+      "description": "Mesa selecionada para manutenção"
     }
   },
   "functions": {
-    "load": {
-      "description": "Carrega a lista inicial de mesas.",
-      "calls": "load",
-      "sets": "mesas"
+    "carregarMesas": {
+      "description": "Carrega a primeira página de mesas",
+      "calls": "carregarMesas",
+      "sets": "paginaMesas",
+      "updates": [
+        "paginaMesas"
+      ]
     },
-    "filterMesasList": {
-      "description": "Recarrega a lista de mesas conforme os filtros e a página atual.",
-      "calls": "loadMesas",
-      "sets": "mesas"
+    "buscarMesas": {
+      "description": "Busca mesas por código ou página",
+      "calls": "buscarMesas",
+      "sets": "paginaMesas",
+      "updates": [
+        "paginaMesas"
+      ]
     },
-    "loadMoreMesasList": {
-      "description": "Carrega a próxima página da lista de mesas.",
-      "calls": "loadMesas",
-      "sets": "mesas"
-    },
-    "createMesa": {
-      "description": "Cria uma mesa a partir dos dados do formulário.",
-      "calls": "createMesa",
+    "selecionarMesa": {
+      "description": "Seleciona uma mesa para manutenção",
       "sets": "mesaSelecionada",
       "updates": [
-        "mesas"
+        "mesaSelecionada"
+      ]
+    },
+    "createMesa": {
+      "description": "Cadastra uma mesa",
+      "calls": "criarMesa",
+      "sets": "mesaSelecionada",
+      "updates": [
+        "paginaMesas",
+        "mesaSelecionada"
       ]
     },
     "updateMesa": {
-      "description": "Atualiza a mesa selecionada com os dados do formulário.",
-      "calls": "updateMesa",
+      "description": "Atualiza uma mesa",
+      "calls": "atualizarMesa",
       "sets": "mesaSelecionada",
       "updates": [
-        "mesas"
+        "paginaMesas",
+        "mesaSelecionada"
       ]
     }
   },
   "journeys": [],
   "rules": {
-    "load": [
-      "mesaDisponivelParaAbrirComanda"
-    ],
-    "loadMesas": [
-      "mesaDisponivelParaAbrirComanda"
-    ],
-    "createMesa": [
-      "mesaDisponivelParaAbrirComanda"
-    ],
-    "updateMesa": [
-      "mesaDisponivelParaAbrirComanda"
-    ]
+    "carregarMesas": [],
+    "buscarMesas": [],
+    "criarMesa": [],
+    "atualizarMesa": []
   },
   "access": {
     "actors": [
