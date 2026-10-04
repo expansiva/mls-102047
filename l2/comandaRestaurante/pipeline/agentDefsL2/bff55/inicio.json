@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "2026-10-04-agent-defs-l2-bff-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "inicio",
+  "attempt": 2,
+  "diagnostic": "D2_BFF_FORMAT: endpoints.carregarResumoOperacionalInicio.writes: a query writes nothing",
+  "previous": {
+    "types": [
+      {
+        "name": "ResumoOperacionalInicio",
+        "description": "Indicadores operacionais consolidados para a visão geral inicial do restaurante.",
+        "fields": [
+          {
+            "name": "quantidadeMesasDisponiveis",
+            "type": "number",
+            "optional": false,
+            "origin": {
+              "kind": "aggregate",
+              "paths": [
+                "Mesa.details.disponivel"
+              ]
+            }
+          },
+          {
+            "name": "valorComandasAbertas",
+            "type": "number",
+            "optional": false,
+            "origin": {
+              "kind": "aggregate",
+              "paths": [
+                "Comanda.status",
+                "Comanda.details.subtotal",
+                "ItemComanda.status",
+                "ItemComanda.details.valorTotal"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "carregarResumoOperacionalInicio",
+        "kind": "qry",
+        "when": "onLoad",
+        "writes": "none",
+        "input": [],
+        "output": [
+          {
+            "name": "resumo",
+            "type": "ResumoOperacionalInicio",
+            "optional": false,
+            "origin": {
+              "kind": "aggregate",
+              "paths": [
+                "Mesa.details.disponivel",
+                "Comanda.status",
+                "Comanda.details.subtotal",
+                "ItemComanda.status",
+                "ItemComanda.details.valorTotal"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "subtotalComandaCalculado",
+          "valorTotalItemComandaCalculado"
+        ],
+        "jsdoc": {
+          "purpose": "Carrega os indicadores consolidados da página inicial para que caixa e garçom acompanhem imediatamente a disponibilidade das mesas e o valor ainda em atendimento.",
+          "input": "Não recebe parâmetros: a visão geral considera a operação da organização à qual o ator autenticado tem acesso.",
+          "processing": "Conta as mesas cujo indicador derivado Mesa.details.disponivel é verdadeiro. Soma o subtotal das comandas com Comanda.status igual a open para obter o valor em aberto; esse subtotal considera somente itens não cancelados e seus valores totais calculados. Aplica subtotalComandaCalculado para compor o subtotal por comanda e valorTotalItemComandaCalculado para considerar o valor de cada lançamento.",
+          "output": "Retorna um único resumo já no formato dos destaques da página: a quantidade de mesas disponíveis e o valor total das comandas abertas. A página não recebe listas nem precisa recalcular indicadores."
+        }
+      }
+    ]
+  },
+  "inputHash": "sha256:61d712dff286d37d3bca4ada1a31da7d46c82c8c3d70e81e84acc8f2e84ad1d5",
+  "unitInputHash": "sha256:1c3bd6903290c62aad0913988c3664dda542405a078c1006940f01620b9cdabd",
+  "promptHash": "sha256:f0bbbc13620541483a6a99d53ca14907f458f5823ae54c22305c0b27c1c7ba37",
+  "promptChars": 17589,
+  "repairPromptChars": 17589,
+  "designHash": "sha256:5906dac6f1d47324f73acfdbfdf5920fb914d019c0abf3815f69d70ed7df9b00"
+}
