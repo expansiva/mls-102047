@@ -7,57 +7,6 @@ export const solutionRegistry = {
   "level1SchemaVersion": "2026-09-15-mdm-ontology-v2",
   "modules": [
     {
-      "moduleName": "comandaRestaurante",
-      "actors": [
-        {
-          "actorId": "garcom",
-          "kind": "internal"
-        },
-        {
-          "actorId": "caixa",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Product",
-          "roleTag": "comandaRestaurante.ItemCardapio",
-          "namespace": "comandaRestaurante"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Mesa",
-          "kind": "entity",
-          "class": "supporting"
-        },
-        {
-          "entityId": "ItemCardapio",
-          "kind": "role",
-          "mdmSubtype": "Product",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Comanda",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "ItemComanda",
-          "kind": "entity",
-          "class": "supporting"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "fecharComanda",
-          "on": "Comanda.fecharComanda"
-        }
-      ],
-      "updatedAt": "2026-09-18T06:37:29.224Z"
-    },
-    {
       "moduleName": "compras",
       "actors": [
         {
@@ -789,6 +738,50 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-02T15:30:35.579Z"
+    },
+    {
+      "moduleName": "comandaRestaurante",
+      "actors": [
+        {
+          "actorId": "garcom",
+          "kind": "internal"
+        },
+        {
+          "actorId": "caixa",
+          "kind": "internal"
+        }
+      ],
+      "roles": [],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Mesa",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "ItemCardapio",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "Comanda",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "ItemComanda",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "comandaFechada",
+          "on": "Comanda.fecharComanda"
+        }
+      ],
+      "updatedAt": "2026-10-04T05:01:31.016Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

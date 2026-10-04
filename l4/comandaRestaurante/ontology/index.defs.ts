@@ -1,11 +1,11 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "comandaRestaurante",
-  "businessDomain": "Gestão de comandas e atendimento de restaurante",
+  "businessDomain": "Gestão de comandas de restaurante",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "comandaRestaurante",
@@ -19,8 +19,8 @@ export const comandaRestauranteOntologyIndex = {
     },
     {
       "entityId": "ItemCardapio",
-      "kind": "role",
-      "subtype": "Product"
+      "kind": "entity",
+      "class": "supporting"
     },
     {
       "entityId": "Comanda",
@@ -30,7 +30,7 @@ export const comandaRestauranteOntologyIndex = {
     {
       "entityId": "ItemComanda",
       "kind": "entity",
-      "class": "supporting"
+      "class": "event"
     }
   ],
   "relationships": [
@@ -41,7 +41,7 @@ export const comandaRestauranteOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada comanda é aberta para uma mesa, e uma mesa pode receber diversas comandas ao longo do tempo.",
+      "description": "Cada comanda é aberta obrigatoriamente para uma mesa, e uma mesa pode receber várias comandas ao longo do tempo.",
       "field": "Comanda.mesaId"
     },
     {
@@ -51,7 +51,7 @@ export const comandaRestauranteOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada lançamento pertence a uma única comanda, que pode reunir vários itens lançados.",
+      "description": "Cada item lançado pertence obrigatoriamente a uma comanda, que pode conter vários itens.",
       "field": "ItemComanda.comandaId"
     },
     {
@@ -61,11 +61,11 @@ export const comandaRestauranteOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada lançamento registra o item do cardápio solicitado, usando o preço vigente no momento do lançamento.",
+      "description": "Cada lançamento referencia obrigatoriamente o item do cardápio escolhido, que pode ser lançado em várias comandas.",
       "field": "ItemComanda.itemCardapioId"
     }
   ]
-} as const satisfies Ns5OntologyIndexV3;
+} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
 
 export type ComandaRestauranteOntologyIndexType = typeof comandaRestauranteOntologyIndex;
 

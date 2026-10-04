@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/access.defs.ts" enhancement="_blank"/>
 
-import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5AccessArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const comandaRestauranteAccess = {
   "schemaVersion": "2026-09-12-ns5-access-v3",
@@ -11,22 +11,24 @@ export const comandaRestauranteAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Garçom",
-      "description": "Abre comandas para mesas, lança itens com quantidade e observação e cancela lançamentos feitos por engano enquanto a comanda está aberta."
+      "description": "Abre comandas para mesas, lança itens e cancela itens lançados por engano enquanto a comanda está aberta.",
+      "personEntity": ""
     },
     {
       "actorId": "caixa",
       "kind": "internal",
       "origin": "named",
       "title": "Caixa",
-      "description": "Fecha comandas, consulta o total, aplica descontos opcionais, registra a forma de pagamento e libera a mesa."
+      "description": "Fecha comandas, consulta o total, aplica descontos opcionais, registra a forma de pagamento e libera mesas.",
+      "personEntity": ""
     }
   ],
   "grants": [
     {
-      "grantId": "garcomAtendimento",
+      "grantId": "garcomAtendimentoComandas",
       "actorRef": "garcom",
-      "title": "Atendimento de mesas e comandas",
-      "description": "Permite ao garçom consultar mesas e itens do cardápio, abrir comandas e registrar ou cancelar lançamentos durante o atendimento.",
+      "title": "Atendimento de comandas",
+      "description": "Permite ao garçom localizar mesas e itens do cardápio, abrir comandas e lançar ou cancelar itens durante o atendimento.",
       "entityRefs": [
         "Mesa",
         "ItemCardapio",
@@ -35,24 +37,20 @@ export const comandaRestauranteAccess = {
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange as mesas, o cardápio e as comandas do restaurante."
+        "description": "Abrange as mesas, os itens do cardápio e as comandas operados pelo restaurante."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Exibe a identificação e disponibilidade das mesas, a identificação e o preço dos itens do cardápio, os dados operacionais das comandas e os lançamentos necessários ao atendimento.",
+        "description": "O garçom vê a identificação e disponibilidade das mesas, os preços vigentes do cardápio, a situação e o subtotal das comandas e os dados dos itens necessários ao atendimento, sem acesso aos dados de pagamento e desconto.",
         "allowedFields": [
-          "Mesa.id",
-          "Mesa.number",
-          "Mesa.details.identification",
-          "Mesa.details.available",
-          "ItemCardapio.id",
-          "ItemCardapio.details.identification",
-          "ItemCardapio.details.comandaRestaurante",
-          "Comanda.id",
+          "Mesa.code",
+          "Mesa.details.disponivel",
+          "ItemCardapio.name",
+          "ItemCardapio.details.precoVigente",
+          "Comanda.number",
           "Comanda.mesaId",
           "Comanda.status",
-          "Comanda.details.number",
-          "ItemComanda.id",
+          "Comanda.details.subtotal",
           "ItemComanda.comandaId",
           "ItemComanda.itemCardapioId",
           "ItemComanda.status",
@@ -61,35 +59,27 @@ export const comandaRestauranteAccess = {
       }
     },
     {
-      "grantId": "caixaFechamento",
+      "grantId": "caixaFechamentoEcadastroOperacional",
       "actorRef": "caixa",
-      "title": "Fechamento de comandas",
-      "description": "Permite ao caixa localizar comandas abertas, consultar seus totais, registrar desconto e pagamento, fechar o atendimento e liberar a mesa.",
+      "title": "Fechamento e cadastro operacional",
+      "description": "Permite ao caixa consultar e fechar comandas, registrar desconto e pagamento, liberar mesas e manter as mesas e os itens do cardápio usados na operação.",
       "entityRefs": [
         "Mesa",
-        "Comanda"
+        "ItemCardapio",
+        "Comanda",
+        "ItemComanda"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange as mesas e comandas de todo o restaurante para fins de fechamento."
+        "description": "Abrange todos os registros operacionais do restaurante."
       },
       "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Exibe a identificação e disponibilidade da mesa e todos os dados da comanda necessários para conferir o total e registrar o fechamento.",
-        "allowedFields": [
-          "Mesa.id",
-          "Mesa.number",
-          "Mesa.details.identification",
-          "Mesa.details.available",
-          "Comanda.id",
-          "Comanda.mesaId",
-          "Comanda.status",
-          "Comanda.details"
-        ]
+        "mode": "fullRecord",
+        "description": "O caixa vê integralmente as mesas, o cardápio, as comandas e seus itens para conferir valores, registrar o fechamento e manter os cadastros operacionais."
       }
     }
   ]
-} as const satisfies Ns5AccessArtifact;
+} as const satisfies Ns5Readonly<Ns5AccessArtifact>;
 
 export type ComandaRestauranteAccessType = typeof comandaRestauranteAccess;
 

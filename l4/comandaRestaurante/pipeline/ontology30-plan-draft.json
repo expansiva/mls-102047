@@ -1,14 +1,14 @@
 {
   "moduleName": "comandaRestaurante",
-  "businessDomain": "Gestão de comandas e atendimento de restaurante",
+  "businessDomain": "Gestão de comandas de restaurante",
   "entities": [
     {
       "entityId": "Mesa",
       "kind": "entity",
       "family": "tdm",
       "title": "Mesa",
-      "description": "Mesa operada pelo restaurante, disponível ou ocupada conforme as comandas abertas vinculadas a ela.",
-      "displayField": "details.identification.name",
+      "description": "Mesa operada pelo restaurante para receber comandas; sua disponibilidade é calculada pelas comandas abertas vinculadas.",
+      "displayField": "code",
       "writer": "crud",
       "class": "supporting",
       "storage": {
@@ -19,23 +19,26 @@
     },
     {
       "entityId": "ItemCardapio",
-      "kind": "role",
-      "family": "mdm",
+      "kind": "entity",
+      "family": "tdm",
       "title": "Item do cardápio",
-      "description": "Produto disponibilizado no cardápio do restaurante, com preço definido para este módulo.",
-      "displayField": "details.identification.name",
+      "description": "Item disponível no cardápio do restaurante, com nome e preço vigente para lançamento em comandas.",
+      "displayField": "name",
       "writer": "crud",
-      "subtype": "Product",
-      "roleTag": "comandaRestaurante.ItemCardapio",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      "class": "supporting",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "comandaRestaurante_itemcardapio",
+        "kind": "relational"
+      }
     },
     {
       "entityId": "Comanda",
       "kind": "entity",
       "family": "tdm",
       "title": "Comanda",
-      "description": "Registro do atendimento aberto para uma mesa, que reúne os itens consumidos, o desconto e o fechamento com pagamento.",
-      "displayField": "details.number",
+      "description": "Registro do atendimento aberto para uma mesa, reunindo os itens válidos, o desconto e os dados de pagamento no fechamento.",
+      "displayField": "number",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
@@ -48,9 +51,9 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Item da comanda",
-      "description": "Lançamento de um item do cardápio em uma comanda, com quantidade, observação e possibilidade de cancelamento enquanto a comanda estiver aberta.",
-      "displayField": "details.description",
-      "class": "supporting",
+      "description": "Lançamento de um item do cardápio em uma comanda, com quantidade, observação, preço registrado e possibilidade de cancelamento enquanto a comanda está aberta.",
+      "displayField": "id",
+      "class": "event",
       "storage": {
         "target": "moduleDatabase",
         "table": "comandaRestaurante_itemcomanda",
@@ -66,7 +69,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada comanda é aberta para uma mesa, e uma mesa pode receber diversas comandas ao longo do tempo.",
+      "description": "Cada comanda é aberta obrigatoriamente para uma mesa, e uma mesa pode receber várias comandas ao longo do tempo.",
       "field": "Comanda.mesaId"
     },
     {
@@ -76,7 +79,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada lançamento pertence a uma única comanda, que pode reunir vários itens lançados.",
+      "description": "Cada item lançado pertence obrigatoriamente a uma comanda, que pode conter vários itens.",
       "field": "ItemComanda.comandaId"
     },
     {
@@ -86,7 +89,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada lançamento registra o item do cardápio solicitado, usando o preço vigente no momento do lançamento.",
+      "description": "Cada lançamento referencia obrigatoriamente o item do cardápio escolhido, que pode ser lançado em várias comandas.",
       "field": "ItemComanda.itemCardapioId"
     }
   ],
@@ -99,7 +102,7 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "ItemCardapio",
-      "detail": "roleTag comandaRestaurante.ItemCardapio; source /_102034_/l4/ontology/mdm.defs.ts"
+      "detail": "storage.table comandaRestaurante_itemcardapio"
     },
     {
       "kind": "derivedFromPlatform",

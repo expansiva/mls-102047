@@ -6,65 +6,83 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-18T06:32:41.291Z",
+      "updatedAt": "2026-10-04T04:58:26.251Z",
       "artifactPaths": [
         "l4/comandaRestaurante/module.defs.ts"
       ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      },
       "actors": [
         {
           "actorId": "garcom",
           "kind": "internal",
           "origin": "named",
           "title": "Garçom",
-          "description": "Abre comandas para mesas, lança itens com quantidade e observação e cancela lançamentos feitos por engano enquanto a comanda está aberta."
+          "description": "Abre comandas para mesas, lança itens e cancela itens lançados por engano enquanto a comanda está aberta."
         },
         {
           "actorId": "caixa",
           "kind": "internal",
           "origin": "named",
           "title": "Caixa",
-          "description": "Fecha comandas, consulta o total, aplica descontos opcionais, registra a forma de pagamento e libera a mesa."
+          "description": "Fecha comandas, consulta o total, aplica descontos opcionais, registra a forma de pagamento e libera mesas."
+        }
+      ],
+      "normalizations": [
+        {
+          "kind": "ptToPtBR",
+          "detail": "pt→pt-BR"
         }
       ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-18T06:33:08.145Z",
+      "updatedAt": "2026-10-04T04:59:03.977Z",
       "artifactPaths": [
         "l4/comandaRestaurante/journeys/abrirComanda.defs.ts",
-        "l4/comandaRestaurante/journeys/lancarItemNaComanda.defs.ts",
-        "l4/comandaRestaurante/journeys/cancelarItemLancado.defs.ts",
+        "l4/comandaRestaurante/journeys/lancarItemComanda.defs.ts",
+        "l4/comandaRestaurante/journeys/cancelarItemComanda.defs.ts",
         "l4/comandaRestaurante/journeys/fecharComanda.defs.ts",
         "l4/comandaRestaurante/journeys/index.defs.ts"
       ],
       "decideStepCount": 0,
       "droppedActors": [],
+      "compile": {
+        "status": "clean",
+        "files": 5
+      },
       "normalizations": [
         {
           "kind": "dropTransitionRef",
           "journeyId": "abrirComanda",
           "stepId": "criarComanda",
-          "detail": "transitionRef abrirComanda dropped; effect is create."
+          "detail": "transitionRef x dropped; effect is create."
         },
         {
           "kind": "dropTransitionRef",
-          "journeyId": "lancarItemNaComanda",
-          "stepId": "registrarItem",
-          "detail": "transitionRef lancarItem dropped; effect is create."
+          "journeyId": "lancarItemComanda",
+          "stepId": "adicionarItemComanda",
+          "detail": "transitionRef x dropped; effect is create."
         }
       ]
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-09-18T06:33:08.317Z",
+      "updatedAt": "2026-10-04T04:59:04.228Z",
       "artifactPaths": [
         "l4/comandaRestaurante/workflows.defs.ts"
       ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      },
       "noProcessSignal": true
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-18T06:36:17.893Z",
+      "updatedAt": "2026-10-04T05:00:40.698Z",
       "artifactPaths": [
         "l4/comandaRestaurante/ontology/Mesa.defs.ts",
         "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts",
@@ -74,6 +92,10 @@
       ],
       "uncitedEntities": [],
       "liftedAggregateEntities": [],
+      "compile": {
+        "status": "clean",
+        "files": 5
+      },
       "normalizations": [
         {
           "kind": "derivedFromPlatform",
@@ -83,7 +105,7 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "ItemCardapio",
-          "detail": "roleTag comandaRestaurante.ItemCardapio; source /_102034_/l4/ontology/mdm.defs.ts"
+          "detail": "storage.table comandaRestaurante_itemcardapio"
         },
         {
           "kind": "derivedFromPlatform",
@@ -103,17 +125,12 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "Mesa",
-          "detail": "record.fields.details.fields.available.derived (derived[])"
+          "detail": "record.fields.details.fields.disponivel.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "ItemCardapio",
           "detail": "record.fields.id, record.fields.version"
-        },
-        {
-          "kind": "tightened",
-          "entityId": "ItemCardapio",
-          "detail": "ItemCardapio.details.identification.subtype.values"
         },
         {
           "kind": "derivedFromPlatform",
@@ -123,91 +140,105 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "Comanda",
-          "detail": "record.fields.details.fields.total.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "ItemComanda",
-          "detail": "record.fields.id, record.fields.version"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "ItemComanda",
           "detail": "record.fields.details.fields.subtotal.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Comanda",
+          "detail": "record.fields.details.fields.totalComanda.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ItemComanda",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ItemComanda",
+          "detail": "record.fields.details.fields.valorTotal.derived (derived[])"
         }
       ],
       "citedRules": [
         "mesaDisponivelParaAbrirComanda",
-        "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
-        "rule-identity-never-in-namespace",
-        "itemCardapioAtivoParaLancamento",
-        "comandaMesaDisponivel",
         "umaComandaAbertaPorMesa",
-        "formaPagamentoObrigatoriaNoFechamento",
-        "descontoNaoExcedeTotal",
+        "itensSomenteEmComandaAberta",
+        "pagamentoObrigatorioNoFechamento",
+        "descontoNaoExcedeSubtotal",
         "fechamentoLiberaMesa",
-        "itemComandaRequiresOpenComanda",
-        "itemComandaCancellationRequiresOpenComanda"
+        "itemComandaOperacaoSomenteComandaAberta"
       ],
       "citedCapabilities": [
         "read.byId",
         "locate.byColumn",
         "count",
-        "listByForeignKey",
         "create",
         "update",
+        "delete",
         "uniqueKey",
-        "locate.byName",
-        "register.createOrAttach",
-        "edit.platformFields",
-        "edit.moduleNamespace",
-        "inactivate",
-        "listLinks",
-        "statusHistory.read",
-        "audit",
+        "listByForeignKey",
+        "comandaRestaurante.locateAvailableTables",
+        "locate.byText",
         "transition",
-        "sequence.next",
         "transaction",
-        "read.mdmRecord"
+        "sequence.next"
       ]
+    },
+    "judge35": {
+      "status": "approved",
+      "updatedAt": "2026-10-04T05:00:40.870Z",
+      "artifactPaths": [
+        "l4/comandaRestaurante/pipeline/judge35-draft.json"
+      ],
+      "noJudgeSignal": true
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-18T06:37:07.333Z",
+      "updatedAt": "2026-10-04T05:01:08.650Z",
       "artifactPaths": [
         "l4/comandaRestaurante/rules.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-18T06:37:07.520Z",
+      "updatedAt": "2026-10-04T05:01:14.186Z",
       "artifactPaths": [
         "l4/comandaRestaurante/access.defs.ts"
       ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      },
       "normalizations": [
         {
           "kind": "dropAnchorEntity",
-          "grantId": "garcomAtendimento",
+          "grantId": "garcomAtendimentoComandas",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         },
         {
           "kind": "dropAnchorEntity",
-          "grantId": "caixaFechamento",
+          "grantId": "caixaFechamentoEcadastroOperacional",
           "detail": "anchorEntity removed; organization is not own/assigned/related."
         }
       ]
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-18T06:37:29.035Z",
+      "updatedAt": "2026-10-04T05:01:30.819Z",
       "artifactPaths": [
         "l4/comandaRestaurante/integration.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-18T06:37:29.224Z",
+      "updatedAt": "2026-10-04T05:01:31.031Z",
       "artifactPaths": [
         "l4/comandaRestaurante/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -222,9 +253,12 @@
     "module": "comandaRestaurante",
     "rebuildAll": true
   },
-  "updatedAt": "2026-10-02T16:04:03.514Z",
+  "updatedAt": "2026-10-04T05:01:31.031Z",
   "rebuildAll": {
     "deleted": [
+      "l1/comandaRestaurante/pipeline/pipeline.json",
+      "l2/comandaRestaurante/pipeline/menu20-draft.json",
+      "l2/comandaRestaurante/pipeline/pipeline.json",
       "l4/comandaRestaurante/access.defs.ts",
       "l4/comandaRestaurante/integration.defs.ts",
       "l4/comandaRestaurante/journeys/abrirComanda.defs.ts",
@@ -243,16 +277,27 @@
       "l4/comandaRestaurante/pipeline/integration70-draft.json",
       "l4/comandaRestaurante/pipeline/journeys20-draft.json",
       "l4/comandaRestaurante/pipeline/module10-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-Comanda-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-ItemCardapio-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-ItemComanda-draft.json",
-      "l4/comandaRestaurante/pipeline/ontology30-Mesa-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-entity-Comanda-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-entity-ItemCardapio-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-entity-ItemComanda-draft.json",
+      "l4/comandaRestaurante/pipeline/ontology30-entity-Mesa-draft.json",
       "l4/comandaRestaurante/pipeline/ontology30-plan-draft.json",
       "l4/comandaRestaurante/pipeline/pipeline.json",
       "l4/comandaRestaurante/pipeline/rules40-draft.json",
       "l4/comandaRestaurante/pipeline/run01_newsolution5.json",
       "l4/comandaRestaurante/pipeline/workflows50-draft.json",
+      "l4/comandaRestaurante/pool/l1/pipeline.json",
+      "l4/comandaRestaurante/pool/l1/web/l4diff.json",
+      "l4/comandaRestaurante/pool/l1/web/needs.json",
+      "l4/comandaRestaurante/pool/l2/effort40-draft.json",
+      "l4/comandaRestaurante/pool/l2/menu20-draft.json",
+      "l4/comandaRestaurante/pool/l2/needs30-draft.json",
+      "l4/comandaRestaurante/pool/l2/pipeline.json",
+      "l4/comandaRestaurante/pool/l2/web/backend.json",
+      "l4/comandaRestaurante/pool/l2/web/effort.json",
+      "l4/comandaRestaurante/pool/l2/web/l4diff.json",
+      "l4/comandaRestaurante/pool/l2/web/menu.json",
       "l4/comandaRestaurante/rules.defs.ts",
       "l4/comandaRestaurante/workflows.defs.ts"
     ],
@@ -261,205 +306,6 @@
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-09-18T06:32:41.281Z"
-  },
-  "pool": [
-    {
-      "at": "2026-09-19T08:55:35.529Z",
-      "file": "l4/comandaRestaurante/pool/l2/20260919085535_comandaRestaurante-20260919085535_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "comandaRestaurante-20260919085535",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-19T08:55:35.529Z",
-      "file": "l4/comandaRestaurante/pool/l1/20260919085535_comandaRestaurante-20260919085535_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "comandaRestaurante-20260919085535",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:34:05.617Z",
-      "file": "l4/comandaRestaurante/pool/l1/20260919085535_comandaRestaurante-20260919085535_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "comandaRestaurante-20260919085535",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T17:34:05.617Z",
-      "file": "l4/comandaRestaurante/pool/l2/20260919085535_comandaRestaurante-20260919085535_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "comandaRestaurante-20260919085535",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T17:34:05.960Z",
-      "file": "l4/comandaRestaurante/pool/l2/20260921173405_comandaRestaurante-20260921173405_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:34:05.960Z",
-      "file": "l4/comandaRestaurante/pool/l1/20260921173405_comandaRestaurante-20260921173405_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:38:05.918Z",
-      "file": "l4/comandaRestaurante/pool/l1/20260921173805_comandaRestaurante-20260921173405_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:38:06.470Z",
-      "file": "l4/comandaRestaurante/pool/l2/20260921173806_comandaRestaurante-20260921173405_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:03:34.357Z",
-      "file": "l4/comandaRestaurante/pool/l1/20260921173405_comandaRestaurante-20260921173405_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:03:34.357Z",
-      "file": "l4/comandaRestaurante/pool/l1/20260921173805_comandaRestaurante-20260921173405_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:03:34.357Z",
-      "file": "l4/comandaRestaurante/pool/l2/20260921173405_comandaRestaurante-20260921173405_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:03:34.357Z",
-      "file": "l4/comandaRestaurante/pool/l2/20260921173806_comandaRestaurante-20260921173405_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:03:34.357Z",
-      "file": "l4/comandaRestaurante/pool/l4/20260921173806_comandaRestaurante-20260921173405_1.json",
-      "from": "l2",
-      "to": "l4",
-      "thread": "comandaRestaurante-20260921173405",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:03:34.740Z",
-      "file": "l4/comandaRestaurante/pool/l2/20261002160334_comandaRestaurante-20261002160334_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "comandaRestaurante-20261002160334",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:04:02.351Z",
-      "file": "l4/comandaRestaurante/pool/l1/20261002160402_comandaRestaurante-20261002160334_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "comandaRestaurante-20261002160334",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:04:02.952Z",
-      "file": "l4/comandaRestaurante/pool/l2/20261002160402_comandaRestaurante-20261002160334_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "comandaRestaurante-20261002160334",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:04:03.490Z",
-      "file": "l4/comandaRestaurante/pool/l4/20261002160403_comandaRestaurante-20261002160334_1.json",
-      "from": "l2",
-      "to": "l4",
-      "thread": "comandaRestaurante-20261002160334",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "processed"
-    }
-  ],
-  "poolWiped": [
-    "l4/comandaRestaurante/pool/l1/20260921173405_comandaRestaurante-20260921173405_1.json",
-    "l4/comandaRestaurante/pool/l1/20260921173805_comandaRestaurante-20260921173405_1.json",
-    "l4/comandaRestaurante/pool/l1/web/l4diff.json",
-    "l4/comandaRestaurante/pool/l1/web/needs.json",
-    "l4/comandaRestaurante/pool/l2/20260921173405_comandaRestaurante-20260921173405_1.json",
-    "l4/comandaRestaurante/pool/l2/20260921173806_comandaRestaurante-20260921173405_1.json",
-    "l4/comandaRestaurante/pool/l2/web/l4diff.json",
-    "l4/comandaRestaurante/pool/l2/web/menu.json",
-    "l4/comandaRestaurante/pool/l2/web/backend.json",
-    "l4/comandaRestaurante/pool/l2/web/effort.json",
-    "l4/comandaRestaurante/pool/l4/20260921173806_comandaRestaurante-20260921173405_1.json"
-  ],
-  "plOrchestration": [
-    {
-      "round": 1,
-      "l2": "done",
-      "l1": "done",
-      "effort": "done"
-    },
-    {
-      "round": 2,
-      "l2": "skipped",
-      "l1": "skipped",
-      "effort": "skipped"
-    }
-  ]
+    "at": "2026-10-04T04:58:26.025Z"
+  }
 }

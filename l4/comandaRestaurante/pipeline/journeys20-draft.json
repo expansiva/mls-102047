@@ -5,45 +5,45 @@
       "journeyId": "abrirComanda",
       "business": {
         "actorRef": "garcom",
-        "title": "Abrir comanda para uma mesa",
-        "goal": "Iniciar o atendimento de uma mesa ocupada com uma comanda aberta.",
+        "title": "Abrir comanda para mesa",
+        "goal": "Abrir uma comanda para uma mesa disponível e iniciar o atendimento.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "localizarMesa",
+            "stepId": "localizarMesaDisponivel",
             "kind": "locate",
             "entity": "Mesa",
-            "title": "Localizar mesa",
-            "description": "Localiza a mesa que receberá a comanda e confirma que ela está disponível."
+            "title": "Localizar mesa disponível",
+            "description": "O garçom localiza a mesa disponível que receberá a comanda."
           },
           {
             "stepId": "criarComanda",
             "kind": "act",
             "entity": "Comanda",
             "effect": "create",
-            "title": "Abrir comanda",
-            "description": "Abre uma comanda vinculada à mesa selecionada, deixando-a disponível para o lançamento de itens."
+            "title": "Abrir nova comanda",
+            "description": "O garçom abre a comanda para a mesa selecionada, deixando-a ocupada."
           }
         ],
         "outcome": {
-          "statement": "Uma comanda aberta fica associada à mesa para registrar o consumo.",
+          "statement": "A comanda fica aberta e vinculada à mesa selecionada.",
           "evidence": [
-            "A comanda aberta está identificada para a mesa selecionada.",
-            "A mesa passa a estar ocupada pela comanda."
+            "Número da comanda exibido para a mesa.",
+            "Mesa indicada como ocupada."
           ]
         }
       },
-      "businessHash": "sha256:11342c75532e708c14dfc42502689718e156c9e987285dd0c03ba28120a096ad"
+      "businessHash": "sha256:70449b6121b60e0fd8427f44c3cfbe2e6b4082ddd4d322a70ce84cd0c4d17223"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "lancarItemNaComanda",
+      "journeyId": "lancarItemComanda",
       "business": {
         "actorRef": "garcom",
         "title": "Lançar item na comanda",
-        "goal": "Registrar o consumo solicitado em uma comanda aberta.",
+        "goal": "Adicionar um item do cardápio à comanda aberta com quantidade e observação quando necessário.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -53,78 +53,78 @@
             "kind": "locate",
             "entity": "Comanda",
             "title": "Localizar comanda aberta",
-            "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa."
+            "description": "O garçom usa a comanda em contexto ou localiza a comanda aberta da mesa."
           },
           {
-            "stepId": "consultarCardapio",
+            "stepId": "consultarItemCardapio",
             "kind": "inspect",
             "entity": "ItemCardapio",
             "title": "Consultar item do cardápio",
-            "description": "Consulta o item e o preço vigente no cardápio para atender ao pedido."
+            "description": "O garçom consulta o item e o preço vigente no cardápio."
           },
           {
-            "stepId": "registrarItem",
+            "stepId": "adicionarItemComanda",
             "kind": "act",
             "entity": "ItemComanda",
             "effect": "create",
-            "title": "Lançar item",
-            "description": "Registra na comanda aberta o item solicitado, sua quantidade e eventual observação."
+            "title": "Adicionar item pedido",
+            "description": "O garçom lança o item escolhido na comanda, informando a quantidade e a observação quando houver."
           }
         ],
         "outcome": {
-          "statement": "O item solicitado é incluído no consumo da comanda aberta.",
+          "statement": "O item solicitado é incluído na comanda aberta.",
           "evidence": [
-            "A comanda apresenta o lançamento com item, quantidade e observação informada.",
-            "O total da comanda considera o lançamento realizado."
+            "Item, quantidade e observação aparecem na comanda.",
+            "Total da comanda é atualizado."
           ]
         }
       },
-      "businessHash": "sha256:29368bcb11f4ba43a834e8eb6362681b2526df4dcc4a40252116970dd46c3169"
+      "businessHash": "sha256:f3080160af8d92e774e8a6f3aec2b783132adf9ffd0f15bc4886f68a5b10531f"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "cancelarItemLancado",
+      "journeyId": "cancelarItemComanda",
       "business": {
         "actorRef": "garcom",
-        "title": "Cancelar item lançado por engano",
-        "goal": "Retirar um lançamento incorreto de uma comanda que ainda está aberta.",
+        "title": "Cancelar item lançado",
+        "goal": "Cancelar um item lançado por engano em uma comanda que ainda está aberta.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarComandaParaCancelamento",
+            "stepId": "localizarComandaParaCorrecao",
             "kind": "locate",
             "entity": "Comanda",
             "title": "Localizar comanda aberta",
-            "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa."
+            "description": "O garçom usa a comanda em contexto ou localiza a comanda aberta da mesa."
           },
           {
-            "stepId": "inspecionarLancamento",
+            "stepId": "conferirItemLancado",
             "kind": "inspect",
             "entity": "ItemComanda",
-            "title": "Inspecionar lançamento",
-            "description": "Confere o lançamento que foi registrado por engano antes de cancelá-lo."
+            "title": "Conferir item lançado",
+            "description": "O garçom confere o item lançado que precisa ser corrigido."
           },
           {
-            "stepId": "cancelarLancamento",
+            "stepId": "cancelarItemErrado",
             "kind": "act",
             "entity": "ItemComanda",
             "effect": "transition",
-            "transitionRef": "cancelarItem",
-            "title": "Cancelar item",
-            "description": "Cancela o item lançado por engano enquanto a comanda permanece aberta."
+            "transitionRef": "cancelarItemComanda",
+            "title": "Cancelar item errado",
+            "description": "O garçom cancela o item lançado por engano enquanto a comanda permanece aberta."
           }
         ],
         "outcome": {
-          "statement": "O lançamento incorreto deixa de compor o consumo da comanda.",
+          "statement": "O item incorreto deixa de compor a cobrança da comanda.",
           "evidence": [
-            "O item consta como cancelado na comanda.",
-            "O total da comanda é recalculado sem o item cancelado."
+            "Item exibido como cancelado na comanda.",
+            "Total da comanda é recalculado."
           ]
         }
       },
-      "businessHash": "sha256:52c2163f74e0f4b849c6fdf39370c707b2c657b62b0dfafdef8ee81e4157d70d"
+      "businessHash": "sha256:17b94229c4958e856978d9212f49f6fe4c42ee2603f66b2924ca4e9778e66326"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -132,7 +132,7 @@
       "business": {
         "actorRef": "caixa",
         "title": "Fechar comanda e liberar mesa",
-        "goal": "Registrar o pagamento de uma comanda, aplicar eventual desconto e concluir o atendimento da mesa.",
+        "goal": "Conferir a cobrança, registrar o pagamento e encerrar a comanda para liberar a mesa.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -142,34 +142,35 @@
             "kind": "locate",
             "entity": "Comanda",
             "title": "Localizar comanda aberta",
-            "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa para fechamento."
+            "description": "O caixa usa a comanda em contexto ou localiza a comanda aberta da mesa."
           },
           {
-            "stepId": "consultarTotal",
+            "stepId": "conferirTotalComanda",
             "kind": "inspect",
             "entity": "Comanda",
-            "title": "Consultar total",
-            "description": "Confere o total calculado a partir dos itens válidos lançados na comanda."
+            "title": "Conferir total da comanda",
+            "description": "O caixa consulta os itens válidos e o total calculado da comanda."
           },
           {
-            "stepId": "concluirFechamento",
+            "stepId": "fecharComandaPaga",
             "kind": "act",
             "entity": "Comanda",
             "effect": "transition",
             "transitionRef": "fecharComanda",
-            "title": "Fechar comanda",
-            "description": "Aplica um desconto, quando houver, registra a forma de pagamento e fecha a comanda, liberando a mesa."
+            "title": "Registrar pagamento e fechar",
+            "description": "O caixa aplica desconto opcional, registra a forma de pagamento, fecha a comanda e libera a mesa."
           }
         ],
         "outcome": {
           "statement": "A comanda é encerrada com o pagamento registrado e a mesa fica disponível.",
           "evidence": [
-            "A comanda fechada apresenta o total final, o desconto aplicado quando existente e a forma de pagamento.",
-            "A mesa vinculada à comanda está livre para novo atendimento."
+            "Comanda exibida como fechada.",
+            "Forma de pagamento e desconto aplicado, se houver, ficam registrados.",
+            "Mesa indicada como disponível."
           ]
         }
       },
-      "businessHash": "sha256:523a96944308896534532d4f3f50e3a97e502b77bb03f9bc1ae37b83b6b91486"
+      "businessHash": "sha256:c330f8cd291e0b959531f52135ab3eddc86c458d4b345cfefe63b5c8ae647a91"
     }
   ],
   "systemDecisions": [],
@@ -180,13 +181,13 @@
       "kind": "dropTransitionRef",
       "journeyId": "abrirComanda",
       "stepId": "criarComanda",
-      "detail": "transitionRef abrirComanda dropped; effect is create."
+      "detail": "transitionRef x dropped; effect is create."
     },
     {
       "kind": "dropTransitionRef",
-      "journeyId": "lancarItemNaComanda",
-      "stepId": "registrarItem",
-      "detail": "transitionRef lancarItem dropped; effect is create."
+      "journeyId": "lancarItemComanda",
+      "stepId": "adicionarItemComanda",
+      "detail": "transitionRef x dropped; effect is create."
     }
   ]
 }

@@ -4,8 +4,8 @@
     "moduleName": "comandaRestaurante",
     "entityId": "Comanda",
     "title": "Comanda",
-    "description": "Registro do atendimento aberto para uma mesa, que reúne os itens consumidos, o desconto e o fechamento com pagamento.",
-    "displayField": "details.number",
+    "description": "Registro do atendimento aberto para uma mesa, reunindo os itens válidos, o desconto e os dados de pagamento no fechamento.",
+    "displayField": "number",
     "relationships": {
       "mesa": {
         "relationshipId": "comandaMesa",
@@ -13,10 +13,10 @@
         "via": "Comanda.mesaId",
         "cardinality": "N:1",
         "title": "Mesa da comanda",
-        "description": "Mesa para a qual a comanda foi aberta; uma mesa pode ter comandas em atendimentos diferentes ao longo do tempo.",
+        "description": "Cada comanda é aberta obrigatoriamente para uma mesa, e uma mesa pode receber várias comandas ao longo do tempo.",
         "mode": "fk",
-        "required": "sempre",
-        "role": "mesa"
+        "required": "Sempre, ao abrir uma comanda.",
+        "role": "mesa atendida"
       },
       "itens": {
         "relationshipId": "itemComandaComanda",
@@ -24,28 +24,30 @@
         "via": "ItemComanda.comandaId",
         "cardinality": "1:N",
         "title": "Itens lançados",
-        "description": "Lançamentos de itens que pertencem a esta comanda.",
+        "description": "Uma comanda pode reunir vários itens lançados; cada item pertence obrigatoriamente a uma única comanda.",
         "mode": "fk",
         "direction": "to",
-        "required": "quando houver itens lançados",
-        "role": "comanda"
+        "required": "Quando houver itens lançados na comanda.",
+        "role": "itens da comanda"
       }
     },
     "capabilities": {
-      "read.byId": "Lê uma comanda pelo identificador da linha para o garçom ou caixa que já a tenha em contexto.",
-      "locate.byColumn": "Lista comandas por mesa e situação indexadas, para o garçom localizar a comanda aberta ou o caixa localizar a comanda a fechar.",
-      "count": "Conta comandas conforme mesa ou situação para apoiar as listas de atendimento do garçom e do caixa.",
-      "listByForeignKey": "Lista as comandas vinculadas a uma mesa pela chave estrangeira mesaId para consultar os atendimentos dessa mesa.",
-      "create": "Cria uma comanda aberta vinculada à mesa selecionada para o garçom iniciar o atendimento.",
-      "transition": "Move a comanda de aberta para fechada no fechamento realizado pelo caixa, registrando pagamento, desconto eventual e a liberação da mesa.",
-      "sequence.next": "Emite o próximo número sequencial da comanda no momento em que o garçom abre o atendimento.",
-      "transaction": "Executa atomicamente a abertura ou o fechamento da comanda e a atualização correspondente da disponibilidade da mesa para o garçom ou caixa."
+      "read.byId": "Lê uma comanda pelo identificador da linha no repositório, para o garçom ou caixa que já a tem em contexto.",
+      "locate.byColumn": "Lista comandas por mesa ou situação indexada, com ordenação e paginação, para o garçom localizar uma comanda aberta e o caixa localizar a comanda a fechar.",
+      "count": "Conta as comandas que correspondem aos filtros de mesa ou situação, para as telas de atendimento e fechamento exibirem seus totais.",
+      "listByForeignKey": "Lista as comandas vinculadas a uma mesa pelo campo de mesa, para consultar os atendimentos daquela mesa.",
+      "create": "Cria uma comanda aberta para a mesa disponível selecionada, para o garçom iniciar o atendimento.",
+      "transition": "Move a comanda de aberta para fechada com as regras de pagamento e desconto, para o caixa concluir a cobrança.",
+      "uniqueKey": "Recusa uma segunda comanda com o mesmo número sequencial pela chave única da tabela, para preservar a identificação da cobrança.",
+      "transaction": "Grava de forma atômica a abertura ou o fechamento da comanda e a atualização da disponibilidade da mesa, para o garçom e o caixa não deixarem atendimento e mesa inconsistentes.",
+      "sequence.next": "Emite o próximo número sequencial da comanda pela sequência da plataforma, para identificar a comanda criada pelo garçom."
     },
     "rules": [
-      "comandaMesaDisponivel",
+      "mesaDisponivelParaAbrirComanda",
       "umaComandaAbertaPorMesa",
-      "formaPagamentoObrigatoriaNoFechamento",
-      "descontoNaoExcedeTotal",
+      "itensSomenteEmComandaAberta",
+      "pagamentoObrigatorioNoFechamento",
+      "descontoNaoExcedeSubtotal",
       "fechamentoLiberaMesa"
     ],
     "kind": "entity",
@@ -69,16 +71,28 @@
           "required": true,
           "derived": true
         },
+        "number": {
+          "type": "integer",
+          "required": true,
+          "unique": true,
+          "indexed": true,
+          "of": "ContactSummary",
+          "title": "Número da comanda",
+          "description": "Número sequencial usado pelo garçom e pelo caixa para identificar a comanda.",
+          "maxLength": 0,
+          "min": 1,
+          "max": 0
+        },
         "mesaId": {
           "type": "record",
           "required": true,
           "indexed": true,
-          "of": "Address",
+          "of": "ContactSummary",
           "to": [
             "Mesa"
           ],
           "title": "Mesa",
-          "description": "Mesa para a qual esta comanda foi aberta.",
+          "description": "Mesa para a qual a comanda foi aberta.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -87,21 +101,21 @@
           "type": "enum",
           "required": true,
           "indexed": true,
-          "of": "Address",
+          "of": "ContactSummary",
           "values": [
             {
               "value": "open",
               "title": "Aberta",
-              "description": "Comanda em atendimento, disponível para lançamento e cancelamento de itens."
+              "description": "A comanda aceita lançamento e cancelamento de itens pelo garçom."
             },
             {
               "value": "closed",
               "title": "Fechada",
-              "description": "Comanda paga e concluída, com a mesa liberada."
+              "description": "A cobrança e a forma de pagamento foram registradas pelo caixa."
             }
           ],
           "title": "Situação",
-          "description": "Situação do atendimento da mesa: aberta enquanto recebe lançamentos ou fechada após o pagamento.",
+          "description": "Indica se a comanda ainda está em atendimento ou se já foi fechada.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -109,40 +123,30 @@
         "details": {
           "type": "object",
           "required": true,
-          "of": "Address",
+          "of": "ContactSummary",
           "title": "Dados da comanda",
-          "description": "Dados do atendimento, do fechamento e do pagamento que não precisam de índice.",
+          "description": "Dados informados no fechamento da comanda que não precisam de busca ou ordenação.",
           "maxLength": 0,
           "min": 0,
           "max": 0,
           "fields": {
-            "number": {
-              "type": "integer",
-              "required": true,
-              "of": "Address",
-              "title": "Número da comanda",
-              "description": "Número sequencial emitido para identificar a comanda no atendimento.",
-              "maxLength": 0,
-              "min": 1,
-              "max": 0
-            },
-            "discount": {
+            "discountAmount": {
               "type": "money",
-              "of": "Address",
+              "of": "ContactSummary",
               "title": "Desconto",
-              "description": "Valor de desconto aplicado pelo caixa no fechamento, quando houver.",
+              "description": "Valor do desconto opcional aplicado pelo caixa ao fechar a comanda.",
               "maxLength": 0,
               "min": 0,
               "max": 0
             },
             "paymentMethod": {
               "type": "enum",
-              "of": "Address",
+              "of": "ContactSummary",
               "values": [
                 {
                   "value": "cash",
                   "title": "Dinheiro",
-                  "description": "Pagamento realizado em dinheiro."
+                  "description": "Pagamento recebido em dinheiro."
                 },
                 {
                   "value": "debitCard",
@@ -161,21 +165,32 @@
                 }
               ],
               "title": "Forma de pagamento",
-              "description": "Forma de pagamento registrada pelo caixa ao fechar a comanda.",
+              "description": "Forma de pagamento registrada pelo caixa no fechamento da comanda.",
               "maxLength": 0,
               "min": 0,
               "max": 0
             },
-            "total": {
+            "subtotal": {
+              "type": "money",
+              "derived": true,
+              "title": "Subtotal dos itens",
+              "description": "Soma dos valores dos itens válidos lançados nesta comanda, considerando a quantidade e o preço registrado em cada item."
+            },
+            "totalComanda": {
               "type": "money",
               "derived": true,
               "title": "Total da comanda",
-              "description": "Soma dos valores dos itens válidos lançados na comanda, menos o desconto aplicado quando houver."
+              "description": "Valor a cobrar, calculado pelos itens válidos da comanda menos o desconto aplicado pelo caixa."
             }
           }
         }
       }
     },
+    "uniqueKeys": [
+      [
+        "number"
+      ]
+    ],
     "lifecycleStates": [
       {
         "state": "open",
@@ -196,10 +211,14 @@
         "by": [
           "caixa"
         ],
-        "description": "Fecha a comanda após registrar a forma de pagamento e o eventual desconto, liberando a mesa para novo atendimento.",
+        "description": "O caixa registra o desconto opcional e a forma de pagamento, fecha a comanda e libera a mesa para novo atendimento.",
+        "payload": [
+          "details.discountAmount",
+          "details.paymentMethod"
+        ],
         "ruleRefs": [
-          "formaPagamentoObrigatoriaNoFechamento",
-          "descontoNaoExcedeTotal",
+          "pagamentoObrigatorioNoFechamento",
+          "descontoNaoExcedeSubtotal",
           "fechamentoLiberaMesa"
         ]
       }
@@ -214,7 +233,12 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Comanda",
-      "detail": "record.fields.details.fields.total.derived (derived[])"
+      "detail": "record.fields.details.fields.subtotal.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Comanda",
+      "detail": "record.fields.details.fields.totalComanda.derived (derived[])"
     }
   ]
 }

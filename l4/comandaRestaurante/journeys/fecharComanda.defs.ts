@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/comandaRestaurante/journeys/fecharComanda.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const fecharComandaJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -8,7 +8,7 @@ export const fecharComandaJourney = {
   "business": {
     "actorRef": "caixa",
     "title": "Fechar comanda e liberar mesa",
-    "goal": "Registrar o pagamento de uma comanda, aplicar eventual desconto e concluir o atendimento da mesa.",
+    "goal": "Conferir a cobrança, registrar o pagamento e encerrar a comanda para liberar a mesa.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,35 +18,36 @@ export const fecharComandaJourney = {
         "kind": "locate",
         "entity": "Comanda",
         "title": "Localizar comanda aberta",
-        "description": "Usa a comanda em contexto ou localiza a comanda aberta da mesa para fechamento."
+        "description": "O caixa usa a comanda em contexto ou localiza a comanda aberta da mesa."
       },
       {
-        "stepId": "consultarTotal",
+        "stepId": "conferirTotalComanda",
         "kind": "inspect",
         "entity": "Comanda",
-        "title": "Consultar total",
-        "description": "Confere o total calculado a partir dos itens válidos lançados na comanda."
+        "title": "Conferir total da comanda",
+        "description": "O caixa consulta os itens válidos e o total calculado da comanda."
       },
       {
-        "stepId": "concluirFechamento",
+        "stepId": "fecharComandaPaga",
         "kind": "act",
         "entity": "Comanda",
         "effect": "transition",
         "transitionRef": "fecharComanda",
-        "title": "Fechar comanda",
-        "description": "Aplica um desconto, quando houver, registra a forma de pagamento e fecha a comanda, liberando a mesa."
+        "title": "Registrar pagamento e fechar",
+        "description": "O caixa aplica desconto opcional, registra a forma de pagamento, fecha a comanda e libera a mesa."
       }
     ],
     "outcome": {
       "statement": "A comanda é encerrada com o pagamento registrado e a mesa fica disponível.",
       "evidence": [
-        "A comanda fechada apresenta o total final, o desconto aplicado quando existente e a forma de pagamento.",
-        "A mesa vinculada à comanda está livre para novo atendimento."
+        "Comanda exibida como fechada.",
+        "Forma de pagamento e desconto aplicado, se houver, ficam registrados.",
+        "Mesa indicada como disponível."
       ]
     }
   },
-  "businessHash": "sha256:523a96944308896534532d4f3f50e3a97e502b77bb03f9bc1ae37b83b6b91486"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:c330f8cd291e0b959531f52135ab3eddc86c458d4b345cfefe63b5c8ae647a91"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type FecharComandaJourneyType = typeof fecharComandaJourney;
 
