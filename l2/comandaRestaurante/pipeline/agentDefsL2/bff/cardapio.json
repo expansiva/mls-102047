@@ -1,8 +1,8 @@
 {
   "types": [
     {
-      "name": "ItemCardapioLista",
-      "description": "Dados de um item apresentados na lista do cardápio vigente.",
+      "name": "ItemCardapioResumo",
+      "description": "Dados concisos de um item para apresentação paginada no catálogo do cardápio.",
       "fields": [
         {
           "name": "id",
@@ -37,36 +37,8 @@
       ]
     },
     {
-      "name": "CatalogoPaginado",
-      "description": "Página do catálogo vigente, pronta para a lista exibir e continuar carregando quando houver mais itens.",
-      "fields": [
-        {
-          "name": "itens",
-          "type": "ItemCardapioLista[]"
-        },
-        {
-          "name": "pagina",
-          "type": "number",
-          "origin": {
-            "kind": "context",
-            "paths": []
-          }
-        },
-        {
-          "name": "temProximaPagina",
-          "type": "boolean",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "ItemCardapio.id"
-            ]
-          }
-        }
-      ]
-    },
-    {
       "name": "ItemCardapioEdicao",
-      "description": "Dados completos de um item para preencher e redesenhar o formulário de manutenção.",
+      "description": "Dados completos autorizados para preencher e manter o item selecionado no formulário.",
       "fields": [
         {
           "name": "id",
@@ -109,58 +81,50 @@
           }
         }
       ]
+    },
+    {
+      "name": "PaginaItensCardapio",
+      "description": "Faixa do catálogo ordenada por nome, com sinalização para carregamento da próxima faixa.",
+      "fields": [
+        {
+          "name": "itens",
+          "type": "ItemCardapioResumo[]"
+        },
+        {
+          "name": "hasMore",
+          "type": "boolean",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "ItemCardapio.id"
+            ]
+          }
+        }
+      ]
     }
   ],
   "endpoints": [
     {
-      "id": "carregarCardapio",
+      "id": "carregarItensCardapio",
       "kind": "qry",
       "when": "onLoad",
       "input": [],
       "output": [
         {
-          "name": "catalogo",
-          "type": "CatalogoPaginado"
-        }
-      ],
-      "rules": [],
-      "jsdoc": {
-        "purpose": "Carrega a primeira página do cardápio vigente para o caixa conferir os itens disponíveis ao abrir a página.",
-        "input": "Não recebe parâmetros; inicia a consulta na primeira página.",
-        "processing": "Consulta os itens de ItemCardapio autorizados para a organização do caixa, ordenados por nome, limita o resultado a uma página de tamanho adequado à tela e calcula temProximaPagina pela existência de itens além desse limite.",
-        "output": "Retorna a página já formatada para a lista, com id, nome, preço vigente e a indicação calculada de continuidade."
-      }
-    },
-    {
-      "id": "carregarPaginaCardapio",
-      "kind": "qry",
-      "when": "interaction",
-      "input": [
-        {
           "name": "pagina",
-          "type": "number",
-          "origin": {
-            "kind": "context",
-            "paths": []
-          }
-        }
-      ],
-      "output": [
-        {
-          "name": "catalogo",
-          "type": "CatalogoPaginado"
+          "type": "PaginaItensCardapio"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Busca sob demanda outra página do cardápio quando o caixa continua a leitura da lista.",
-        "input": "pagina identifica a página solicitada pela navegação da lista.",
-        "processing": "Consulta a página solicitada de ItemCardapio no escopo organizacional autorizado, ordenada por nome, com o mesmo tamanho da carga inicial, e calcula temProximaPagina pela existência de registros posteriores.",
-        "output": "Retorna somente a página solicitada, pronta para substituir ou acrescentar itens na lista sem recarregar o formulário."
+        "purpose": "Carrega a primeira faixa do catálogo vigente quando a página é aberta, para o caixa consultar e escolher um item para manutenção.",
+        "input": "Não recebe parâmetros; inicia o catálogo pela primeira faixa.",
+        "processing": "Obtém uma faixa de itens do cardápio ordenada por nome e projeta somente identificador, nome e preço vigente. Calcula hasMore pela existência de itens após a faixa retornada; não calcula nem registra regras de comanda.",
+        "output": "Retorna a página já adequada à lista, com os itens visíveis e a indicação de que há mais itens para leitura contínua."
       }
     },
     {
-      "id": "obterItemCardapioParaEdicao",
+      "id": "carregarMaisItensCardapio",
       "kind": "qry",
       "when": "interaction",
       "input": [
@@ -175,16 +139,46 @@
       ],
       "output": [
         {
+          "name": "pagina",
+          "type": "PaginaItensCardapio"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega a próxima faixa do catálogo para ampliar a lista sem transferir todo o cardápio.",
+        "input": "id é o identificador do último item já apresentado e funciona como cursor da paginação.",
+        "processing": "Localiza os itens posteriores ao cursor na mesma ordenação por nome usada no catálogo, projeta identificador, nome e preço vigente e calcula hasMore pela existência de outra faixa. Não aplica regras de lançamento ou totalização de comandas.",
+        "output": "Retorna somente a próxima página para a interface anexar à lista que o caixa já está consultando."
+      }
+    },
+    {
+      "id": "obterItemCardapio",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.id"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
           "name": "item",
           "type": "ItemCardapioEdicao"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Carrega o item que o caixa selecionou para preencher o formulário de atualização.",
-        "input": "id é o identificador do item escolhido na lista.",
-        "processing": "Localiza um ItemCardapio pelo id dentro do escopo organizacional autorizado e compõe os campos editáveis com sua versão atual para controle de concorrência.",
-        "output": "Retorna o item completo para edição, incluindo version, necessária para a atualização segura."
+        "purpose": "Carrega o item escolhido pelo caixa para edição segura no formulário.",
+        "input": "id identifica o item selecionado na lista.",
+        "processing": "Consulta o item pelo identificador conhecido e compõe identificador, versão, nome e preço vigente autorizados ao caixa. A versão é entregue para controle de concorrência na atualização.",
+        "output": "Retorna o registro selecionado no formato que preenche o formulário de manutenção."
       }
     },
     {
@@ -222,10 +216,10 @@
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Cadastra um novo item com o nome e o preço vigente que o caixa informou.",
-        "input": "name preenche o nome apresentado no cardápio; precoVigente preenche o preço atualmente cobrado pelo item.",
-        "processing": "Valida os campos obrigatórios do cadastro e cria ItemCardapio no escopo organizacional autorizado. Não aplica regras de cálculo de comanda, pois elas tratam do lançamento de ItemComanda, não da manutenção do cardápio.",
-        "output": "Retorna o item recém-criado com id e version, além dos dados gravados, para o formulário já refletir o registro criado."
+        "purpose": "Cadastra um novo item que poderá ser usado pela operação no lançamento de comandas.",
+        "input": "name é o nome apresentado à equipe; precoVigente é o preço atualmente cobrado pelo item.",
+        "processing": "Cria o ItemCardapio com os campos informados. Não registra preço unitário de ItemComanda nem aplica regras de subtotal, total ou valor de item, pois não há lançamento de comanda nesta ação.",
+        "output": "Retorna o item criado, inclusive identificador e versão gerados, para o formulário exibir imediatamente o estado persistido."
       }
     },
     {
@@ -283,10 +277,10 @@
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Atualiza o nome e/ou o preço vigente do item selecionado pelo caixa.",
-        "input": "id identifica o item; version protege contra edição concorrente; name e precoVigente são os valores que serão gravados.",
-        "processing": "Localiza ItemCardapio autorizado pelo id, confere a version recebida e atualiza parcialmente nome e preço vigente. Recusa versão desatualizada. Não registra preço em ItemComanda nem recalcula comandas, pois as regras de lançamento e totalização não se aplicam a esta alteração cadastral.",
-        "output": "Retorna o registro atualizado, com a nova version, para o formulário redesenhar imediatamente o estado persistido."
+        "purpose": "Atualiza o nome e/ou o preço vigente do item selecionado, mantendo o catálogo operacional.",
+        "input": "id e version identificam a versão do item a alterar; name e precoVigente trazem os novos valores do formulário.",
+        "processing": "Atualiza parcialmente o ItemCardapio identificado por id, exigindo a version recebida para evitar sobrescrever uma alteração concorrente. Não altera itens de comanda já lançados e não executa regras de preço de lançamento, subtotal, total ou valor de ItemComanda.",
+        "output": "Retorna o registro persistido com a nova versão para redesenhar o formulário sem nova consulta."
       }
     }
   ],
@@ -294,24 +288,24 @@
     "organisms": [
       {
         "organism": "listaItensCardapio",
-        "reads": "carregarCardapio.catalogo"
+        "reads": "carregarItensCardapio.pagina"
       },
       {
         "organism": "formularioItemCardapio",
-        "reads": "obterItemCardapioParaEdicao.item"
+        "reads": "obterItemCardapio.item"
       }
     ],
     "commands": [
       {
         "endpoint": "cadastrarItemCardapio",
         "refreshes": [
-          "carregarCardapio"
+          "carregarItensCardapio"
         ]
       },
       {
         "endpoint": "atualizarItemCardapio",
         "refreshes": [
-          "carregarCardapio"
+          "carregarItensCardapio"
         ]
       }
     ],
@@ -319,7 +313,7 @@
       {
         "organism": "listaItensCardapio",
         "via": {
-          "query": "obterItemCardapioParaEdicao"
+          "query": "obterItemCardapio"
         }
       }
     ],

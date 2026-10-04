@@ -6,32 +6,31 @@ export const definition = {
   },
   "forms": {},
   "requests": {
-    "carregarResumoOperacionalInicio": {
+    "carregarResumoOperacional": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "resumo"
+        "resumoOperacional"
       ]
     }
   },
   "states": {
     "resumoOperacional": {
-      "source": "carregarResumoOperacionalInicio.resumo",
-      "description": "Resumo operacional consolidado da página inicial."
+      "source": "carregarResumoOperacional.resumoOperacional",
+      "description": "Indicadores consolidados da operação do restaurante para a visão geral."
     }
   },
   "functions": {
-    "carregarResumoOperacionalInicio": {
-      "description": "Carrega o resumo operacional inicial.",
-      "calls": "carregarResumoOperacionalInicio",
+    "carregarResumoOperacional": {
+      "description": "Carrega os indicadores consolidados que caixa e garçom usam para consultar rapidamente a disponibilidade das mesas e o valor ainda em atendimento.",
+      "calls": "carregarResumoOperacional",
       "sets": "resumoOperacional"
     }
   },
   "journeys": [],
   "rules": {
-    "carregarResumoOperacionalInicio": [
-      "subtotalComandaCalculado",
-      "valorTotalItemComandaCalculado"
+    "carregarResumoOperacional": [
+      "subtotalComandaCalculado"
     ]
   },
   "access": {

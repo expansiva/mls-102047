@@ -1,8 +1,8 @@
 {
   "types": [
     {
-      "name": "MesaListaItem",
-      "description": "Mesa apresentada na lista e usada como registro selecionável para manutenção.",
+      "name": "MesaResumo",
+      "description": "Dados de uma mesa necessários para a lista da casa, para a seleção no formulário e para o redesenho após o cadastro ou a atualização.",
       "fields": [
         {
           "name": "id",
@@ -52,48 +52,19 @@
       "id": "carregarMesas",
       "kind": "qry",
       "when": "onLoad",
-      "input": [
-        {
-          "name": "offset",
-          "type": "number",
-          "optional": true,
-          "origin": {
-            "kind": "context",
-            "paths": []
-          }
-        },
-        {
-          "name": "limite",
-          "type": "number",
-          "optional": true,
-          "origin": {
-            "kind": "context",
-            "paths": []
-          }
-        }
-      ],
+      "input": [],
       "output": [
         {
           "name": "mesas",
-          "type": "MesaListaItem[]"
-        },
-        {
-          "name": "total",
-          "type": "number",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Mesa.id"
-            ]
-          }
+          "type": "MesaResumo[]"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Carrega a página de mesas para o caixa localizar o salão, verificar a disponibilidade e selecionar uma mesa para manutenção.",
-        "input": "offset informa a posição inicial da página e limite informa a quantidade máxima de mesas a retornar; ambos são contextuais e opcionais.",
-        "processing": "Lista as mesas da organização em ordem estável pelo código, aplicando a paginação solicitada. Para cada mesa, compõe id, version, code e o campo derivado disponivel. Calcula total pela contagem de Mesa.id que pertence ao conjunto listado, sem transferir registros para a interface somar.",
-        "output": "Retorna a página mesas, já no formato exibido e selecionável pela lista, e total para a paginação da interface."
+        "purpose": "Carrega o salão para o caixa consultar todas as mesas da casa e iniciar a seleção de uma mesa para manutenção.",
+        "input": "Não recebe parâmetros; a página sempre apresenta as mesas da casa no escopo autorizado do caixa.",
+        "processing": "Obtém as mesas visíveis ao caixa, ordenadas pelo código da mesa. Compõe cada registro com identificador, versão, código e disponibilidade; a disponibilidade é um campo derivado e é calculada a partir da existência de comanda aberta vinculada, sem ser gravada por esta consulta. A lista não é paginada porque representa o conjunto físico de mesas da casa, mostrado integralmente nesta página.",
+        "output": "Retorna mesas já no formato usado pela lista e pela seleção do formulário. A versão acompanha cada mesa para permitir uma atualização concorrente segura."
       }
     },
     {
@@ -116,15 +87,15 @@
       "output": [
         {
           "name": "mesa",
-          "type": "MesaListaItem"
+          "type": "MesaResumo"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Cadastra uma mesa para a operação do restaurante e devolve o registro pronto para o formulário redesenhar.",
-        "input": "code é o código obrigatório da nova mesa e preenche Mesa.code.",
-        "processing": "Cria Mesa com o código informado, respeitando a unicidade do código mantida pelo repositório. Após a gravação, compõe o registro com identificador, versão e disponibilidade derivada; a disponibilidade não é gravada por este comando.",
-        "output": "Retorna mesa com id, version, code e disponivel para atualizar o formulário sem uma consulta adicional do registro criado."
+        "purpose": "Cadastra uma mesa para a operação e devolve o registro completo que a página precisa redesenhar.",
+        "input": "code é o código informado pelo caixa para identificar a nova mesa.",
+        "processing": "Cria a mesa com o código recebido, aplicando as validações de criação e a unicidade do código no repositório. Depois compõe a mesa criada com id, versão, código e disponibilidade derivada. A disponibilidade é calculada e não é gravada pelo comando.",
+        "output": "Retorna a mesa criada no mesmo formato da lista, para o formulário exibir o resultado e a lista inserir o novo registro sem uma segunda chamada."
       }
     },
     {
@@ -167,15 +138,15 @@
       "output": [
         {
           "name": "mesa",
-          "type": "MesaListaItem"
+          "type": "MesaResumo"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Atualiza o código de uma mesa selecionada e devolve sua versão atual para o formulário redesenhar.",
-        "input": "id identifica a Mesa a alterar, version protege a atualização contra edição concorrente e code é o novo código que preenche Mesa.code.",
-        "processing": "Atualiza somente os dados próprios editáveis da mesa identificada por id e version, respeitando a unicidade do código mantida pelo repositório. Recompõe a disponibilidade derivada após a gravação; o comando não a armazena nem altera comandas.",
-        "output": "Retorna mesa atualizada, com nova version e disponivel calculado, para redesenhar o formulário sem buscar novamente o registro."
+        "purpose": "Atualiza o código de uma mesa selecionada e devolve seu estado completo para a página redesenhar a seleção e sua linha.",
+        "input": "id identifica a mesa selecionada, version protege a atualização contra alteração concorrente e code é o novo código informado pelo caixa.",
+        "processing": "Localiza a mesa por id, confere a versão recebida e atualiza seu código, aplicando as validações de manutenção e a unicidade do código. Em seguida compõe id, nova versão, código e disponibilidade derivada; disponibilidade não é armazenada por este comando.",
+        "output": "Retorna a mesa atualizada no formato da lista, permitindo substituir a linha e manter o formulário com a versão corrente sem nova consulta."
       }
     }
   ],
@@ -193,15 +164,11 @@
     "commands": [
       {
         "endpoint": "criarMesa",
-        "refreshes": [
-          "carregarMesas"
-        ]
+        "refreshes": []
       },
       {
         "endpoint": "atualizarMesa",
-        "refreshes": [
-          "carregarMesas"
-        ]
+        "refreshes": []
       }
     ],
     "selections": [
