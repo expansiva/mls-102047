@@ -94,8 +94,13 @@ exatamente, porque as páginas e os testes dependem deles.
   - `filter<List>` chama `load<Key>` desde o início e substitui a lista; `loadMore<List>` chama a próxima
     página e acrescenta. Nenhum dos dois chama `load`, então os outros objetos da página não são recarregados.
 - **Forms.** O menu separa o organismo de campos (`form`) do organismo de botão (`actions`). O shared
-  os une em `forms: { <form>: { organism, submit } }`. O form é um state, e a função de envio lê esse
-  state. A página renderiza os dois organismos ligados ao mesmo state.
+  os une em `forms: { <submit>: { organism, submit } }` (uma entrada por submit desde 02/10). O form é um state, e a
+  função de envio lê esse state. A página renderiza os dois organismos ligados ao mesmo state.
+  - **Botão de ação sem form** (d2_72, 04/10): uma escrita que não pede nada para digitar não está em `forms`. Exemplos:
+    abrir comanda, cujos ids vêm da seleção; transição sem payload, como aprovar ou cancelar item. O botão chama a
+    função do comando direto, e o input do contrato é só o contexto (`mesaId`) ou a identidade (`id`, `version`).
+  - O input de cada comando é **a entrada da escrita**, não o form inteiro. Dois submits no mesmo form, como aprovar e
+    rejeitar, mandam cada um só o que o seu contrato pede.
 - **Parâmetros de entrada (toda página).** Wagner: *"Toda página tem que ter uma leitura de campos
   opcionais que podem vir na URL ou estar no local storage, a navegação é importante"*.
   - `entry.params` lista os parâmetros. Todos são opcionais.
