@@ -1,11 +1,11 @@
 {
   "types": [
     {
-      "name": "ResumoOperacionalInicio",
-      "description": "Indicadores operacionais consolidados para a visão geral inicial do restaurante.",
+      "name": "ResumoOperacional",
+      "description": "Indicadores consolidados da operação do restaurante para a visão geral.",
       "fields": [
         {
-          "name": "quantidadeMesasDisponiveis",
+          "name": "mesasDisponiveis",
           "type": "number",
           "origin": {
             "kind": "aggregate",
@@ -22,7 +22,6 @@
             "paths": [
               "Comanda.status",
               "Comanda.details.subtotal",
-              "ItemComanda.status",
               "ItemComanda.details.valorTotal"
             ]
           }
@@ -32,26 +31,36 @@
   ],
   "endpoints": [
     {
-      "id": "carregarResumoOperacionalInicio",
+      "id": "carregarResumoOperacional",
       "kind": "qry",
       "when": "onLoad",
       "input": [],
       "output": [
         {
-          "name": "resumo",
-          "type": "ResumoOperacionalInicio"
+          "name": "resumoOperacional",
+          "type": "ResumoOperacional"
         }
       ],
       "rules": [
-        "subtotalComandaCalculado",
-        "valorTotalItemComandaCalculado"
+        "subtotalComandaCalculado"
       ],
       "jsdoc": {
-        "purpose": "Carrega os indicadores consolidados da página inicial para que caixa e garçom acompanhem imediatamente a disponibilidade das mesas e o valor ainda em atendimento.",
-        "input": "Não recebe parâmetros: a visão geral considera a operação da organização à qual o ator autenticado tem acesso.",
-        "processing": "Conta as mesas cujo indicador derivado Mesa.details.disponivel é verdadeiro. Soma o subtotal das comandas com Comanda.status igual a open para obter o valor em aberto; esse subtotal considera somente itens não cancelados e seus valores totais calculados. Aplica subtotalComandaCalculado para compor o subtotal por comanda e valorTotalItemComandaCalculado para considerar o valor de cada lançamento.",
-        "output": "Retorna um único resumo já no formato dos destaques da página: a quantidade de mesas disponíveis e o valor total das comandas abertas. A página não recebe listas nem precisa recalcular indicadores."
+        "purpose": "Carrega os indicadores consolidados que caixa e garçom usam para consultar rapidamente a disponibilidade das mesas e o valor ainda em atendimento.",
+        "input": "Não recebe parâmetros: o resumo considera toda a operação da organização acessível ao ator.",
+        "processing": "Conta as mesas cuja disponibilidade calculada é verdadeira. Filtra as comandas com situação aberta e calcula o valor das comandas em aberto pela soma de seus subtotais; cada subtotal é derivado apenas dos valores totais dos itens não cancelados, conforme a regra subtotalComandaCalculado. Retorna somente os indicadores, sem transferir listas de mesas, comandas ou itens.",
+        "output": "Retorna o resumo operacional já agregado para renderização direta dos destaques da página, com a quantidade de mesas disponíveis e o valor total das comandas abertas."
       }
     }
-  ]
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "resumoOperacional",
+        "reads": "carregarResumoOperacional.resumoOperacional"
+      }
+    ],
+    "commands": [],
+    "selections": [],
+    "journeys": []
+  }
 }

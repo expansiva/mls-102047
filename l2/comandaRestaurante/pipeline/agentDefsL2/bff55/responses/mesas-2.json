@@ -1,8 +1,8 @@
 {
   "attempt": "2",
   "model": "openai/gpt-5.6-terra-pro",
-  "promptChars": 15092,
-  "receivedAt": "2026-10-04T09:12:18.917Z",
+  "promptChars": 14854,
+  "receivedAt": "2026-10-04T15:48:03.138Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -10,8 +10,8 @@
       "arguments": {
         "types": [
           {
-            "name": "MesaRecord",
-            "description": "Dados de uma mesa apresentados na lista e reutilizados no formulário de manutenção.",
+            "name": "MesaListaItem",
+            "description": "Mesa apresentada na lista e usada como registro selecionável para manutenção.",
             "fields": [
               {
                 "name": "id",
@@ -58,17 +58,41 @@
                 }
               }
             ]
-          },
+          }
+        ],
+        "endpoints": [
           {
-            "name": "MesaPage",
-            "description": "Faixa ordenada de mesas e informações de continuação para leitura progressiva da lista.",
-            "fields": [
+            "id": "carregarMesas",
+            "kind": "qry",
+            "when": "onLoad",
+            "writes": "",
+            "input": [
+              {
+                "name": "offset",
+                "type": "number",
+                "optional": true,
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              },
+              {
+                "name": "limite",
+                "type": "number",
+                "optional": true,
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              }
+            ],
+            "output": [
               {
                 "name": "mesas",
-                "type": "MesaRecord[]",
+                "type": "MesaListaItem[]",
                 "optional": false,
                 "origin": {
-                  "kind": "aggregate",
+                  "kind": "field",
                   "paths": [
                     "Mesa.id",
                     "Mesa.version",
@@ -78,19 +102,8 @@
                 }
               },
               {
-                "name": "proximoCodigo",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Mesa.code"
-                  ]
-                }
-              },
-              {
-                "name": "temMais",
-                "type": "boolean",
+                "name": "total",
+                "type": "number",
                 "optional": false,
                 "origin": {
                   "kind": "aggregate",
@@ -99,80 +112,13 @@
                   ]
                 }
               }
-            ]
-          }
-        ],
-        "endpoints": [
-          {
-            "id": "listarMesas",
-            "kind": "qry",
-            "when": "onLoad",
-            "writes": "Mesa.create",
-            "input": [],
-            "output": [
-              {
-                "name": "pagina",
-                "type": "MesaPage",
-                "optional": false,
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Mesa.id",
-                    "Mesa.version",
-                    "Mesa.code",
-                    "Mesa.details.disponivel"
-                  ]
-                }
-              }
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Carrega a primeira faixa das mesas da casa para o caixa reconhecer o salão, consultar o código e conferir a disponibilidade de cada mesa.",
-              "input": "Não recebe parâmetros; inicia a lista ordenada pelo código da mesa.",
-              "processing": "Localiza mesas da organização em ordem de código e monta uma faixa adequada à tela. Para cada mesa fornece identificador, versão, código e disponibilidade derivada das comandas abertas vinculadas; também calcula a continuação da lista.",
-              "output": "Retorna uma página pronta para a lista, com as mesas exibíveis, a versão necessária para futura atualização e os dados de continuação."
-            }
-          },
-          {
-            "id": "listarMaisMesas",
-            "kind": "qry",
-            "when": "interaction",
-            "writes": "Mesa.create",
-            "input": [
-              {
-                "name": "aposCodigo",
-                "type": "string",
-                "optional": false,
-                "origin": {
-                  "kind": "context",
-                  "paths": [
-                    "Mesa.code"
-                  ]
-                }
-              }
-            ],
-            "output": [
-              {
-                "name": "pagina",
-                "type": "MesaPage",
-                "optional": false,
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Mesa.id",
-                    "Mesa.version",
-                    "Mesa.code",
-                    "Mesa.details.disponivel"
-                  ]
-                }
-              }
-            ],
-            "rules": [],
-            "jsdoc": {
-              "purpose": "Busca sob demanda a próxima faixa de mesas quando o caixa continua percorrendo a lista da casa.",
-              "input": "aposCodigo é o código da última mesa já mostrada, usado pela lista como cursor de continuação.",
-              "processing": "Localiza somente as mesas posteriores ao cursor na ordenação por código e limita o retorno a uma faixa de tela. Compõe os dados de cada mesa, calcula a disponibilidade derivada e informa se existe outra faixa.",
-              "output": "Retorna a próxima página pronta para anexação à lista, com cursor seguinte e indicação de continuação."
+              "purpose": "Carrega a página de mesas para o caixa localizar o salão, verificar a disponibilidade e selecionar uma mesa para manutenção.",
+              "input": "offset informa a posição inicial da página e limite informa a quantidade máxima de mesas a retornar; ambos são contextuais e opcionais.",
+              "processing": "Lista as mesas da organização em ordem estável pelo código, aplicando a paginação solicitada. Para cada mesa, compõe id, version, code e o campo derivado disponivel. Calcula total pela contagem de Mesa.id que pertence ao conjunto listado, sem transferir registros para a interface somar.",
+              "output": "Retorna a página mesas, já no formato exibido e selecionável pela lista, e total para a paginação da interface."
             }
           },
           {
@@ -196,10 +142,10 @@
             "output": [
               {
                 "name": "mesa",
-                "type": "MesaRecord",
+                "type": "MesaListaItem",
                 "optional": false,
                 "origin": {
-                  "kind": "aggregate",
+                  "kind": "field",
                   "paths": [
                     "Mesa.id",
                     "Mesa.version",
@@ -211,10 +157,10 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Cadastra uma nova mesa operacional pelo formulário e devolve seu estado pronto para a tela atualizar.",
-              "input": "code é o código informado pelo caixa para identificar a mesa nova.",
-              "processing": "Valida o código obrigatório e cria a mesa na organização, respeitando a unicidade do código. A disponibilidade não é recebida nem gravada: ela é derivada da inexistência de comanda aberta vinculada.",
-              "output": "Retorna a mesa criada com identificador, versão, código e disponibilidade derivada, evitando uma segunda consulta para redesenhar a linha e o formulário."
+              "purpose": "Cadastra uma mesa para a operação do restaurante e devolve o registro pronto para o formulário redesenhar.",
+              "input": "code é o código obrigatório da nova mesa e preenche Mesa.code.",
+              "processing": "Cria Mesa com o código informado, respeitando a unicidade do código mantida pelo repositório. Após a gravação, compõe o registro com identificador, versão e disponibilidade derivada; a disponibilidade não é gravada por este comando.",
+              "output": "Retorna mesa com id, version, code e disponivel para atualizar o formulário sem uma consulta adicional do registro criado."
             }
           },
           {
@@ -260,10 +206,10 @@
             "output": [
               {
                 "name": "mesa",
-                "type": "MesaRecord",
+                "type": "MesaListaItem",
                 "optional": false,
                 "origin": {
-                  "kind": "aggregate",
+                  "kind": "field",
                   "paths": [
                     "Mesa.id",
                     "Mesa.version",
@@ -275,13 +221,49 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Atualiza o código de uma mesa da operação e devolve seu estado atual para redesenhar a lista e o formulário.",
-              "input": "id identifica a mesa, version protege contra atualização concorrente e code é o novo código informado pelo caixa.",
-              "processing": "Localiza a mesa pelo identificador, confere a versão e atualiza apenas seu código, respeitando a unicidade. Recalcula a disponibilidade a partir das comandas vinculadas antes de compor a resposta.",
-              "output": "Retorna o registro atualizado com nova versão, código e disponibilidade derivada, para a página substituir a linha e sincronizar o formulário sem recarregar a lista."
+              "purpose": "Atualiza o código de uma mesa selecionada e devolve sua versão atual para o formulário redesenhar.",
+              "input": "id identifica a Mesa a alterar, version protege a atualização contra edição concorrente e code é o novo código que preenche Mesa.code.",
+              "processing": "Atualiza somente os dados próprios editáveis da mesa identificada por id e version, respeitando a unicidade do código mantida pelo repositório. Recompõe a disponibilidade derivada após a gravação; o comando não a armazena nem altera comandas.",
+              "output": "Retorna mesa atualizada, com nova version e disponivel calculado, para redesenhar o formulário sem buscar novamente o registro."
             }
           }
-        ]
+        ],
+        "bindings": {
+          "organisms": [
+            {
+              "organism": "mesasList",
+              "reads": "carregarMesas.mesas"
+            },
+            {
+              "organism": "mesaForm",
+              "reads": "carregarMesas.mesas"
+            }
+          ],
+          "commands": [
+            {
+              "endpoint": "criarMesa",
+              "refreshes": [
+                "carregarMesas"
+              ]
+            },
+            {
+              "endpoint": "atualizarMesa",
+              "refreshes": [
+                "carregarMesas"
+              ]
+            }
+          ],
+          "selections": [
+            {
+              "organism": "mesasList",
+              "via": {
+                "kind": "list",
+                "ref": "carregarMesas.mesas"
+              }
+            }
+          ],
+          "journeys": []
+        }
       }
     },
     "status": "completed",
@@ -289,5 +271,5 @@
     "interaction": null,
     "nextSteps": null
   },
-  "verdict": "D2_BFF_FORMAT: endpoints.listarMesas.writes: a query writes nothing"
+  "verdict": "accepted"
 }

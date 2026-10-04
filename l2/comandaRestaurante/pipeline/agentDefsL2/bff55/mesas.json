@@ -1,13 +1,272 @@
 {
-  "schemaVersion": "2026-10-04-agent-defs-l2-bff-v1",
+  "schemaVersion": "2026-10-04-agent-defs-l2-bff-v2",
   "project": 102047,
   "module": "comandaRestaurante",
   "pageId": "mesas",
-  "attempt": 1,
+  "attempt": 2,
+  "diagnostic": "D2_BFF_BINDING_SELECTION: bindings.selections.mesasList: organism mesasList selects and has no row in bindings.selections.",
+  "previous": {
+    "types": [
+      {
+        "name": "MesaListaItem",
+        "description": "Mesa apresentada na lista e usada como registro selecionável para manutenção.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.version"
+              ]
+            }
+          },
+          {
+            "name": "code",
+            "type": "string",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.code"
+              ]
+            }
+          },
+          {
+            "name": "disponivel",
+            "type": "boolean",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.details.disponivel"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "carregarMesas",
+        "kind": "qry",
+        "when": "onLoad",
+        "writes": "",
+        "input": [
+          {
+            "name": "offset",
+            "type": "number",
+            "optional": true,
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          },
+          {
+            "name": "limite",
+            "type": "number",
+            "optional": true,
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "mesas",
+            "type": "MesaListaItem[]",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.id",
+                "Mesa.version",
+                "Mesa.code",
+                "Mesa.details.disponivel"
+              ]
+            }
+          },
+          {
+            "name": "total",
+            "type": "number",
+            "optional": false,
+            "origin": {
+              "kind": "aggregate",
+              "paths": [
+                "Mesa.id"
+              ]
+            }
+          }
+        ],
+        "rules": [],
+        "jsdoc": {
+          "purpose": "Carrega a página de mesas para o caixa localizar o salão, verificar a disponibilidade e selecionar uma mesa para manutenção.",
+          "input": "offset informa a posição inicial da página e limite informa a quantidade máxima de mesas a retornar; ambos são contextuais e opcionais.",
+          "processing": "Lista as mesas da organização em ordem estável pelo código, aplicando a paginação solicitada. Para cada mesa, compõe id, version, code e o campo derivado disponivel. Calcula total pela contagem de Mesa.id que pertence ao conjunto listado, sem transferir registros para a interface somar.",
+          "output": "Retorna a página mesas, já no formato exibido e selecionável pela lista, e total para a paginação da interface."
+        }
+      },
+      {
+        "id": "criarMesa",
+        "kind": "cmd",
+        "when": "createMesa",
+        "writes": "Mesa.create",
+        "input": [
+          {
+            "name": "code",
+            "type": "string",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.code"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "mesa",
+            "type": "MesaListaItem",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.id",
+                "Mesa.version",
+                "Mesa.code",
+                "Mesa.details.disponivel"
+              ]
+            }
+          }
+        ],
+        "rules": [],
+        "jsdoc": {
+          "purpose": "Cadastra uma mesa para a operação do restaurante e devolve o registro pronto para o formulário redesenhar.",
+          "input": "code é o código obrigatório da nova mesa e preenche Mesa.code.",
+          "processing": "Cria Mesa com o código informado, respeitando a unicidade do código mantida pelo repositório. Após a gravação, compõe o registro com identificador, versão e disponibilidade derivada; a disponibilidade não é gravada por este comando.",
+          "output": "Retorna mesa com id, version, code e disponivel para atualizar o formulário sem uma consulta adicional do registro criado."
+        }
+      },
+      {
+        "id": "atualizarMesa",
+        "kind": "cmd",
+        "when": "updateMesa",
+        "writes": "Mesa.update",
+        "input": [
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.version"
+              ]
+            }
+          },
+          {
+            "name": "code",
+            "type": "string",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.code"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "mesa",
+            "type": "MesaListaItem",
+            "optional": false,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Mesa.id",
+                "Mesa.version",
+                "Mesa.code",
+                "Mesa.details.disponivel"
+              ]
+            }
+          }
+        ],
+        "rules": [],
+        "jsdoc": {
+          "purpose": "Atualiza o código de uma mesa selecionada e devolve sua versão atual para o formulário redesenhar.",
+          "input": "id identifica a Mesa a alterar, version protege a atualização contra edição concorrente e code é o novo código que preenche Mesa.code.",
+          "processing": "Atualiza somente os dados próprios editáveis da mesa identificada por id e version, respeitando a unicidade do código mantida pelo repositório. Recompõe a disponibilidade derivada após a gravação; o comando não a armazena nem altera comandas.",
+          "output": "Retorna mesa atualizada, com nova version e disponivel calculado, para redesenhar o formulário sem buscar novamente o registro."
+        }
+      }
+    ],
+    "bindings": {
+      "organisms": [
+        {
+          "organism": "mesasList",
+          "reads": "carregarMesas.mesas"
+        },
+        {
+          "organism": "mesaForm",
+          "reads": "carregarMesas.mesas"
+        }
+      ],
+      "commands": [
+        {
+          "endpoint": "criarMesa",
+          "refreshes": [
+            "carregarMesas"
+          ]
+        },
+        {
+          "endpoint": "atualizarMesa",
+          "refreshes": [
+            "carregarMesas"
+          ]
+        }
+      ],
+      "selections": [
+        {
+          "organism": "mesaForm",
+          "via": {
+            "kind": "list",
+            "ref": "carregarMesas.mesas"
+          }
+        }
+      ],
+      "journeys": []
+    }
+  },
   "inputHash": "sha256:61d712dff286d37d3bca4ada1a31da7d46c82c8c3d70e81e84acc8f2e84ad1d5",
-  "unitInputHash": "sha256:022e37c7965c1af868cba316f41d1d3d6f9379439ecc4d081a15fdf34f9aa6b9",
-  "promptHash": "sha256:f0bbbc13620541483a6a99d53ca14907f458f5823ae54c22305c0b27c1c7ba37",
-  "promptChars": 9143,
-  "repairPromptChars": 0,
-  "designHash": "sha256:0aa7a5682554f8e80e3301e0ca9fa334af6203600341d4bb77464b09e294d9bb"
+  "unitInputHash": "sha256:14c101a5971fd18604d9ef70ed89fbf31bcb73024f6f30b5bdb670e26210f384",
+  "promptHash": "sha256:872382252d94791ae13b2e6bd2db29722c739d336912f5420e2d7cb562d87790",
+  "promptChars": 14854,
+  "repairPromptChars": 14854,
+  "designHash": "sha256:234c50691f4c990551fa81b63a5693acd6a582c31979bdb11334aa242bdbaa4f"
 }
