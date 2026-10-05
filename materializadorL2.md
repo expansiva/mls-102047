@@ -5,6 +5,16 @@
 > com as frases do Wagner. O que ainda não existe está marcado como **pendente**. Na dúvida, a fonte
 > de verdade são os arquivos citados, não este resumo.
 
+## Princípio: o defs tem a intenção e os compromissos, não o script
+
+> **Wagner, 05/10/2026:** *"O defs deve ter a intenção, não o script para o materializador"*. Teste para qualquer campo: ele diz **o que** tem de ser, ou **como** fazer?
+
+| entra no defs | exemplo | por quê |
+|---|---|---|
+| **intenção** | JSDoc da rota (finalidade, processamento), intenção da página, texto do organismo, regras com o texto | é o que a LLM precisa para decidir bem |
+| **compromisso** (cruza fronteira, não pode variar) | rota, tipos de entrada e saída, `access`, `rules` por rota, que entidades e usecases existem, autoridade de cada rota | se variar, quebra o outro lado ou a segurança |
+| **script (não entra; onde ainda existe, é pista)** | `uses`, `params`, árvore de saída, `sequence` do usecase, listas de entrada e saída copiadas do l4, ligações decididas por regra mecânica | a LLM com o l4 decide melhor, e cada campo desses pede um gate |
+
 ## 1. Onde isto se encaixa
 
 A cadeia de geração de um módulo (mapa completo em `todo/gerarApp/cadeia.md`):
