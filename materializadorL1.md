@@ -4,6 +4,16 @@
 > decisões. É o par do `materializadorL2.md`. O que está aqui é **desenho decidido**, com as frases do Wagner. O que ainda não existe está marcado
 > como **pendente**. Na dúvida, a fonte de verdade são os arquivos citados, não este resumo.
 
+## Princípio: o defs tem a intenção e os compromissos, não o script
+
+> **Wagner, 05/10/2026:** *"O defs deve ter a intenção, não o script para o materializador"*. Teste para qualquer campo: ele diz **o que** tem de ser, ou **como** fazer?
+
+| entra no defs | exemplo | por quê |
+|---|---|---|
+| **intenção** | JSDoc da rota (finalidade, processamento), intenção da página, texto do organismo, regras com o texto | é o que a LLM precisa para decidir bem |
+| **compromisso** (cruza fronteira, não pode variar) | rota, tipos de entrada e saída, `access`, `rules` por rota, que entidades e usecases existem, autoridade de cada rota | se variar, quebra o outro lado ou a segurança |
+| **script (não entra; onde ainda existe, é pista)** | `uses`, `params`, árvore de saída, `sequence` do usecase, listas de entrada e saída copiadas do l4, ligações decididas por regra mecânica | a LLM com o l4 decide melhor, e cada campo desses pede um gate |
+
 ## 1. Onde isto se encaixa
 
 A cadeia de um módulo (mapa completo em `todo/gerarApp/cadeia.md`):
@@ -36,6 +46,26 @@ Para um módulo `<mod>` do projeto cliente, em `l1/<mod>/`. A tabela usa o coman
 | `layer_1_external/auth/` | `authorityMap` | o mapa de autoridades |
 
 E a fonte que manda em tudo isso: o **contrato da página**, `l2/<mod>/web/contracts/<pageId>.defs.ts` (§3).
+
+### 2.1 Como ler os defs: o que é fonte e o que é pista (Wagner, 05/10)
+*"fazer o básico no defs e deixar a LLM definir com o l4, para evitar definir um monte de campos com um monte de gates"*.
+- **Fonte:**
+  - o **contrato** da página: tipos, JSDoc (`doc`), `rules` e `access` de cada rota;
+  - o **l4** do módulo (`l4/<mod>/`): ontologia, regras com o texto, jornadas e access;
+  - o **inventário** do def, isto é, que entidades, portas, usecases (entidade + operação), serviços de pedido e controllers existem, e a autoridade de
+    cada rota.
+- **Pista** (ajuda, não manda): os campos de implementação do def, ou seja, os `uses` e os `params` do serviço de pedido, a árvore `output`, as regras
+  por usecase (`rules`/`rulesApplied`/`rulePlan`), as listas de `input`/`output` do usecase e a `sequence`. **Onde a pista diverge do contrato ou do l4,
+  vale o contrato e o l4.** Campo vazio ou `unresolved` não quer dizer "não existe": quer dizer "decida pelo contrato e pelo l4".
+- Exemplos reais (comandaRestaurante, bancada `c0f25ee`), todos casos de "vale o l4":
+  1. entradas do contrato sem `params` (o `doc` diz o que cada uma filtra);
+  2. `uses` faltando para um nó de saída (por exemplo, os itens da comanda nos comandos `lancarItem`/`cancelarItem`; o indicador do `inicio` com
+     `uses: []`);
+  3. a `mesa` do fechamento como `unresolved` (é `Mesa.code` + `Mesa.details.disponivel`);
+  4. `details` do cardápio sem abrir (abrir o tipo do contrato até a folha);
+  5. regra no usecase errado: vale a regra da rota e o texto da regra (por exemplo, `itensSomenteEmComandaAberta` é do lançamento de item);
+  6. create aceitando o que o sistema define: o estado nasce no inicial, o número vem da sequência, o desconto e o pagamento são do fechamento, e o
+     `precoUnitario` é copiado do cardápio, como diz a regra.
 
 ## 3. O contrato: o que a página precisa, não de onde vem
 
@@ -99,8 +129,8 @@ Decisões de 04/10, registradas em `todo/gerarApp/l4/docs/como-deve-ser-o-l2.md`
 
 ## 7. Pendências que afetam o materializador (05/10)
 
-- **Os defs L1 do comandaRestaurante na bancada são do contrato antigo** (`c6fe294`, com `meta`). Serão regerados sobre o contrato novo
-  (`todo/gerarApp/l4/tasks/backlog/p4_30_publicar_comandaRestaurante_l2_l1.md`). **Pendente.**
+- **Os defs L1 do comandaRestaurante estão regerados sobre o contrato final** (bancada `c0f25ee`, D1 `complete`, 46 defs). As divergências conhecidas
+  entre pista e l4 estão em §2.1 e **não serão corrigidas no gerador agora**: o def será enxugado até o básico depois que o materializador estiver pronto.
 - **D1 sem `meta`** (fila `todo/gerarApp/l1/tasks/backlog/00_l1_contrato_sem_meta.md`, em andamento):
   - o D1 deriva a rota pelos tipos;
   - o que o código não resolve vira **lacuna declarada** (`unresolved`) no def, e o D1 fecha `complete`. O materializador resolve a lacuna ou recusa
