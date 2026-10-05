@@ -6,50 +6,35 @@ export const definition = {
   "artifactId": "inicio",
   "moduleName": "comandaRestaurante",
   "status": "pending",
-  "dependencies": [
-    "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listComanda.defs.ts",
-    "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listItemComanda.defs.ts",
-    "_102047_/l1/comandaRestaurante/layer_2_application/usecases/listMesa.defs.ts"
-  ],
+  "dependencies": [],
   "data": {
     "pageId": "inicio",
     "requests": [
       {
-        "route": "comandaRestaurante.inicio.load",
+        "route": "comandaRestaurante.inicio.carregarResumoOperacional",
         "kind": "qry",
-        "uses": [
-          "listMesa",
-          "listComanda",
-          "listItemComanda"
-        ],
+        "uses": [],
         "transaction": "none",
-        "outputs": [
+        "output": [
           {
-            "key": "atendimento",
-            "entity": "Mesa",
-            "fields": [
-              "id",
-              "details.disponivel"
-            ]
-          },
-          {
-            "key": "fechamento",
-            "entity": "Comanda",
-            "fields": [
-              "id",
-              "details.subtotal"
-            ]
-          },
-          {
-            "key": "itemComanda",
-            "entity": "ItemComanda",
-            "fields": [
-              "id",
-              "details.valorTotal"
+            "kind": "computed",
+            "path": "resumoOperacional",
+            "rules": [
+              "subtotalComandaCalculado"
             ]
           }
         ],
-        "params": []
+        "params": [],
+        "rules": [
+          "subtotalComandaCalculado"
+        ],
+        "doc": {
+          "raw": "Finalidade: Carrega os indicadores consolidados que caixa e garçom usam para consultar rapidamente a disponibilidade das mesas e o valor ainda em atendimento.\nEntrada: Não recebe parâmetros: o resumo considera toda a operação da organização acessível ao ator.\nProcessamento: Conta as mesas cuja disponibilidade calculada é verdadeira. Filtra as comandas com situação aberta e calcula o valor das comandas em aberto pela soma de seus subtotais; cada subtotal é derivado apenas dos valores totais dos itens não cancelados, conforme a regra subtotalComandaCalculado. Retorna somente os indicadores, sem transferir listas de mesas, comandas ou itens.\nSaída: Retorna o resumo operacional já agregado para renderização direta dos destaques da página, com a quantidade de mesas disponíveis e o valor total das comandas abertas.",
+          "purpose": "Carrega os indicadores consolidados que caixa e garçom usam para consultar rapidamente a disponibilidade das mesas e o valor ainda em atendimento.",
+          "input": "Não recebe parâmetros: o resumo considera toda a operação da organização acessível ao ator.",
+          "processing": "Conta as mesas cuja disponibilidade calculada é verdadeira. Filtra as comandas com situação aberta e calcula o valor das comandas em aberto pela soma de seus subtotais; cada subtotal é derivado apenas dos valores totais dos itens não cancelados, conforme a regra subtotalComandaCalculado. Retorna somente os indicadores, sem transferir listas de mesas, comandas ou itens.",
+          "output": "Retorna o resumo operacional já agregado para renderização direta dos destaques da página, com a quantidade de mesas disponíveis e o valor total das comandas abertas."
+        }
       }
     ]
   }

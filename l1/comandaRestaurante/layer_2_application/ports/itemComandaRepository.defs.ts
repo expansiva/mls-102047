@@ -28,13 +28,6 @@ export const definition = {
         "returns": "ItemComanda[]"
       },
       {
-        "name": "get",
-        "params": [
-          "id"
-        ],
-        "returns": "ItemComanda"
-      },
-      {
         "name": "transition",
         "params": [
           "ItemComanda",

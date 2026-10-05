@@ -15,42 +15,32 @@ export const definition = {
     "pageId": "mesas",
     "handlers": [
       {
-        "route": "comandaRestaurante.mesas.createMesa",
+        "route": "comandaRestaurante.mesas.atualizarMesa",
         "kind": "command",
         "grantIds": [
           "caixaFechamentoEcadastroOperacional"
         ],
-        "serviceFunction": "comandaRestaurante.mesas.createMesa",
+        "serviceFunction": "comandaRestaurante.mesas.atualizarMesa",
         "contractPath": "l2/comandaRestaurante/web/contracts/mesas.defs.ts",
         "contractInterface": "MesasContracts"
       },
       {
-        "route": "comandaRestaurante.mesas.load",
+        "route": "comandaRestaurante.mesas.carregarMesas",
         "kind": "query",
         "grantIds": [
           "caixaFechamentoEcadastroOperacional"
         ],
-        "serviceFunction": "comandaRestaurante.mesas.load",
+        "serviceFunction": "comandaRestaurante.mesas.carregarMesas",
         "contractPath": "l2/comandaRestaurante/web/contracts/mesas.defs.ts",
         "contractInterface": "MesasContracts"
       },
       {
-        "route": "comandaRestaurante.mesas.loadMesas",
-        "kind": "query",
-        "grantIds": [
-          "caixaFechamentoEcadastroOperacional"
-        ],
-        "serviceFunction": "comandaRestaurante.mesas.loadMesas",
-        "contractPath": "l2/comandaRestaurante/web/contracts/mesas.defs.ts",
-        "contractInterface": "MesasContracts"
-      },
-      {
-        "route": "comandaRestaurante.mesas.updateMesa",
+        "route": "comandaRestaurante.mesas.criarMesa",
         "kind": "command",
         "grantIds": [
           "caixaFechamentoEcadastroOperacional"
         ],
-        "serviceFunction": "comandaRestaurante.mesas.updateMesa",
+        "serviceFunction": "comandaRestaurante.mesas.criarMesa",
         "contractPath": "l2/comandaRestaurante/web/contracts/mesas.defs.ts",
         "contractInterface": "MesasContracts"
       }

@@ -15,13 +15,13 @@ export const definition = {
     "pageId": "inicio",
     "handlers": [
       {
-        "route": "comandaRestaurante.inicio.load",
+        "route": "comandaRestaurante.inicio.carregarResumoOperacional",
         "kind": "query",
         "grantIds": [
           "garcomAtendimentoComandas",
           "caixaFechamentoEcadastroOperacional"
         ],
-        "serviceFunction": "comandaRestaurante.inicio.load",
+        "serviceFunction": "comandaRestaurante.inicio.carregarResumoOperacional",
         "contractPath": "l2/comandaRestaurante/web/contracts/inicio.defs.ts",
         "contractInterface": "InicioContracts"
       }

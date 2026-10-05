@@ -25,12 +25,32 @@ export const definition = {
         "contractInterface": "AtendimentoContracts"
       },
       {
+        "route": "comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento",
+        "kind": "query",
+        "grantIds": [
+          "garcomAtendimentoComandas"
+        ],
+        "serviceFunction": "comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento",
+        "contractPath": "l2/comandaRestaurante/web/contracts/atendimento.defs.ts",
+        "contractInterface": "AtendimentoContracts"
+      },
+      {
         "route": "comandaRestaurante.atendimento.cancelarItem",
         "kind": "command",
         "grantIds": [
           "garcomAtendimentoComandas"
         ],
         "serviceFunction": "comandaRestaurante.atendimento.cancelarItem",
+        "contractPath": "l2/comandaRestaurante/web/contracts/atendimento.defs.ts",
+        "contractInterface": "AtendimentoContracts"
+      },
+      {
+        "route": "comandaRestaurante.atendimento.carregarAtendimento",
+        "kind": "query",
+        "grantIds": [
+          "garcomAtendimentoComandas"
+        ],
+        "serviceFunction": "comandaRestaurante.atendimento.carregarAtendimento",
         "contractPath": "l2/comandaRestaurante/web/contracts/atendimento.defs.ts",
         "contractInterface": "AtendimentoContracts"
       },
@@ -45,32 +65,12 @@ export const definition = {
         "contractInterface": "AtendimentoContracts"
       },
       {
-        "route": "comandaRestaurante.atendimento.load",
+        "route": "comandaRestaurante.atendimento.obterComandaAtendimento",
         "kind": "query",
         "grantIds": [
           "garcomAtendimentoComandas"
         ],
-        "serviceFunction": "comandaRestaurante.atendimento.load",
-        "contractPath": "l2/comandaRestaurante/web/contracts/atendimento.defs.ts",
-        "contractInterface": "AtendimentoContracts"
-      },
-      {
-        "route": "comandaRestaurante.atendimento.loadAtendimento",
-        "kind": "query",
-        "grantIds": [
-          "garcomAtendimentoComandas"
-        ],
-        "serviceFunction": "comandaRestaurante.atendimento.loadAtendimento",
-        "contractPath": "l2/comandaRestaurante/web/contracts/atendimento.defs.ts",
-        "contractInterface": "AtendimentoContracts"
-      },
-      {
-        "route": "comandaRestaurante.atendimento.loadComanda",
-        "kind": "query",
-        "grantIds": [
-          "garcomAtendimentoComandas"
-        ],
-        "serviceFunction": "comandaRestaurante.atendimento.loadComanda",
+        "serviceFunction": "comandaRestaurante.atendimento.obterComandaAtendimento",
         "contractPath": "l2/comandaRestaurante/web/contracts/atendimento.defs.ts",
         "contractInterface": "AtendimentoContracts"
       }

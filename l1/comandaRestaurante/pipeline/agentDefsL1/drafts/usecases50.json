@@ -692,7 +692,7 @@
       "operation": "create",
       "defPath": "l1/comandaRestaurante/layer_2_application/usecases/createMesa.defs.ts",
       "routes": [
-        "comandaRestaurante.mesas.createMesa"
+        "comandaRestaurante.mesas.criarMesa"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -829,17 +829,17 @@
           "source": "ctx"
         },
         {
-          "kind": "port",
-          "call": "transition",
-          "port": "ComandaRepository"
-        },
-        {
           "kind": "transition",
           "transitionId": "fecharComanda",
           "payload": [
             "details.discountAmount",
             "details.paymentMethod"
           ]
+        },
+        {
+          "kind": "port",
+          "call": "transition",
+          "port": "ComandaRepository"
         },
         {
           "kind": "effect",
@@ -967,11 +967,6 @@
               "source": "ctx"
             },
             {
-              "kind": "port",
-              "call": "transition",
-              "port": "ComandaRepository"
-            },
-            {
               "kind": "rule",
               "ruleId": "descontoNaoExcedeSubtotal"
             },
@@ -990,6 +985,11 @@
                 "details.discountAmount",
                 "details.paymentMethod"
               ]
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "ComandaRepository"
             },
             {
               "kind": "effect",
@@ -1082,8 +1082,9 @@
       "routes": [
         "comandaRestaurante.atendimento.cancelarItem",
         "comandaRestaurante.atendimento.lancarItem",
-        "comandaRestaurante.atendimento.loadComanda",
-        "comandaRestaurante.fechamento.loadComanda"
+        "comandaRestaurante.atendimento.obterComandaAtendimento",
+        "comandaRestaurante.fechamento.carregarFechamento",
+        "comandaRestaurante.fechamento.obterComandaParaFechamento"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -1236,13 +1237,19 @@
       }
     },
     {
-      "usecaseId": "getItemComanda",
-      "entityId": "ItemComanda",
+      "usecaseId": "getItemCardapio",
+      "entityId": "ItemCardapio",
       "operation": "get",
-      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/getItemComanda.defs.ts",
+      "defPath": "l1/comandaRestaurante/layer_2_application/usecases/getItemCardapio.defs.ts",
       "routes": [
         "comandaRestaurante.atendimento.abrirComanda",
-        "comandaRestaurante.fechamento.fecharComandaPaga"
+        "comandaRestaurante.atendimento.cancelarItem",
+        "comandaRestaurante.atendimento.lancarItem",
+        "comandaRestaurante.atendimento.obterComandaAtendimento",
+        "comandaRestaurante.cardapio.obterItemCardapio",
+        "comandaRestaurante.fechamento.carregarFechamento",
+        "comandaRestaurante.fechamento.fecharComandaPaga",
+        "comandaRestaurante.fechamento.obterComandaParaFechamento"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -1255,88 +1262,63 @@
         {
           "kind": "port",
           "call": "get",
-          "port": "ItemComandaRepository"
+          "port": "ItemCardapioRepository"
         }
       ],
       "definition": {
         "schemaVersion": "2026-09-24-d1-definition-v2",
         "artifactType": "usecase",
-        "artifactId": "getItemComanda",
+        "artifactId": "getItemCardapio",
         "moduleName": "comandaRestaurante",
         "status": "pending",
         "dependencies": [
-          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
-          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
-          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
         ],
         "data": {
-          "usecaseId": "getItemComanda",
-          "entityId": "ItemComanda",
+          "usecaseId": "getItemCardapio",
+          "entityId": "ItemCardapio",
           "operation": "get",
           "ports": [
-            "ItemComandaRepository"
+            "ItemCardapioRepository"
           ],
           "rulesApplied": [],
           "functions": [
             {
-              "functionName": "getItemComanda",
+              "functionName": "getItemCardapio",
               "input": [
                 {
                   "name": "id",
                   "type": "uuid",
-                  "fieldRef": "ItemComanda.id"
+                  "fieldRef": "ItemCardapio.id"
                 }
               ],
               "output": [
                 {
                   "name": "id",
                   "type": "uuid",
-                  "fieldRef": "ItemComanda.id"
+                  "fieldRef": "ItemCardapio.id"
                 },
                 {
                   "name": "version",
                   "type": "integer",
-                  "fieldRef": "ItemComanda.version"
+                  "fieldRef": "ItemCardapio.version"
                 },
                 {
-                  "name": "comandaId",
-                  "type": "record",
-                  "fieldRef": "ItemComanda.comandaId"
-                },
-                {
-                  "name": "itemCardapioId",
-                  "type": "record",
-                  "fieldRef": "ItemComanda.itemCardapioId"
-                },
-                {
-                  "name": "status",
-                  "type": "enum",
-                  "fieldRef": "ItemComanda.status"
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
                 },
                 {
                   "name": "details",
                   "type": "object",
-                  "fieldRef": "ItemComanda.details"
+                  "fieldRef": "ItemCardapio.details"
                 },
                 {
-                  "name": "details.quantidade",
-                  "type": "integer",
-                  "fieldRef": "ItemComanda.details.quantidade"
-                },
-                {
-                  "name": "details.observacao",
-                  "type": "text",
-                  "fieldRef": "ItemComanda.details.observacao"
-                },
-                {
-                  "name": "details.precoUnitario",
+                  "name": "details.precoVigente",
                   "type": "money",
-                  "fieldRef": "ItemComanda.details.precoUnitario"
-                },
-                {
-                  "name": "details.valorTotal",
-                  "type": "money",
-                  "fieldRef": "ItemComanda.details.valorTotal"
+                  "fieldRef": "ItemCardapio.details.precoVigente"
                 }
               ]
             }
@@ -1354,7 +1336,7 @@
             {
               "kind": "port",
               "call": "get",
-              "port": "ItemComandaRepository"
+              "port": "ItemCardapioRepository"
             }
           ],
           "uses": [
@@ -1365,15 +1347,7 @@
             }
           ],
           "rules": [],
-          "rulePlan": [
-            {
-              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
-              "origin": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts#rules",
-              "consumer": "operation:get",
-              "enforcement": "pending",
-              "gap": "APPLICABILITY_UNDECLARED"
-            }
-          ],
+          "rulePlan": [],
           "transaction": {
             "boundary": "none"
           }
@@ -1387,7 +1361,14 @@
       "defPath": "l1/comandaRestaurante/layer_2_application/usecases/getMesa.defs.ts",
       "routes": [
         "comandaRestaurante.atendimento.abrirComanda",
-        "comandaRestaurante.fechamento.fecharComandaPaga"
+        "comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento",
+        "comandaRestaurante.atendimento.cancelarItem",
+        "comandaRestaurante.atendimento.carregarAtendimento",
+        "comandaRestaurante.atendimento.lancarItem",
+        "comandaRestaurante.atendimento.obterComandaAtendimento",
+        "comandaRestaurante.fechamento.buscarComandasAbertas",
+        "comandaRestaurante.fechamento.carregarFechamento",
+        "comandaRestaurante.fechamento.carregarMaisComandasAbertas"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -1498,10 +1479,11 @@
       "operation": "list",
       "defPath": "l1/comandaRestaurante/layer_2_application/usecases/listComanda.defs.ts",
       "routes": [
-        "comandaRestaurante.atendimento.load",
-        "comandaRestaurante.fechamento.load",
-        "comandaRestaurante.fechamento.loadFechamento",
-        "comandaRestaurante.inicio.load"
+        "comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento",
+        "comandaRestaurante.atendimento.carregarAtendimento",
+        "comandaRestaurante.fechamento.buscarComandasAbertas",
+        "comandaRestaurante.fechamento.carregarFechamento",
+        "comandaRestaurante.fechamento.carregarMaisComandasAbertas"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -1675,9 +1657,10 @@
       "operation": "list",
       "defPath": "l1/comandaRestaurante/layer_2_application/usecases/listItemCardapio.defs.ts",
       "routes": [
-        "comandaRestaurante.atendimento.load",
-        "comandaRestaurante.cardapio.load",
-        "comandaRestaurante.cardapio.loadCardapio"
+        "comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento",
+        "comandaRestaurante.atendimento.carregarAtendimento",
+        "comandaRestaurante.cardapio.carregarItensCardapio",
+        "comandaRestaurante.cardapio.carregarMaisItensCardapio"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -1794,7 +1777,11 @@
       "operation": "list",
       "defPath": "l1/comandaRestaurante/layer_2_application/usecases/listItemComanda.defs.ts",
       "routes": [
-        "comandaRestaurante.inicio.load"
+        "comandaRestaurante.atendimento.abrirComanda",
+        "comandaRestaurante.atendimento.obterComandaAtendimento",
+        "comandaRestaurante.fechamento.carregarFechamento",
+        "comandaRestaurante.fechamento.fecharComandaPaga",
+        "comandaRestaurante.fechamento.obterComandaParaFechamento"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -1949,12 +1936,9 @@
       "operation": "list",
       "defPath": "l1/comandaRestaurante/layer_2_application/usecases/listMesa.defs.ts",
       "routes": [
-        "comandaRestaurante.atendimento.load",
-        "comandaRestaurante.atendimento.loadAtendimento",
-        "comandaRestaurante.fechamento.load",
-        "comandaRestaurante.inicio.load",
-        "comandaRestaurante.mesas.load",
-        "comandaRestaurante.mesas.loadMesas"
+        "comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento",
+        "comandaRestaurante.atendimento.carregarAtendimento",
+        "comandaRestaurante.mesas.carregarMesas"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -2212,7 +2196,7 @@
       "operation": "update",
       "defPath": "l1/comandaRestaurante/layer_2_application/usecases/updateMesa.defs.ts",
       "routes": [
-        "comandaRestaurante.mesas.updateMesa"
+        "comandaRestaurante.mesas.atualizarMesa"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -2408,8 +2392,8 @@
     },
     {
       "code": "DERIVED_FILTER",
-      "path": "getItemComanda.id",
-      "detail": "ItemComanda.id is a filter of getItemComanda."
+      "path": "getItemCardapio.id",
+      "detail": "ItemCardapio.id is a filter of getItemCardapio."
     },
     {
       "code": "DERIVED_FILTER",
@@ -3373,11 +3357,6 @@
               "source": "ctx"
             },
             {
-              "kind": "port",
-              "call": "transition",
-              "port": "ComandaRepository"
-            },
-            {
               "kind": "rule",
               "ruleId": "descontoNaoExcedeSubtotal"
             },
@@ -3396,6 +3375,11 @@
                 "details.discountAmount",
                 "details.paymentMethod"
               ]
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "ComandaRepository"
             },
             {
               "kind": "effect",
@@ -3667,82 +3651,57 @@
       "definition": {
         "schemaVersion": "2026-09-24-d1-definition-v2",
         "artifactType": "usecase",
-        "artifactId": "getItemComanda",
+        "artifactId": "getItemCardapio",
         "moduleName": "comandaRestaurante",
         "status": "pending",
         "dependencies": [
-          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
-          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
-          "_102047_/l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+          "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+          "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+          "_102047_/l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
         ],
         "data": {
-          "usecaseId": "getItemComanda",
-          "entityId": "ItemComanda",
+          "usecaseId": "getItemCardapio",
+          "entityId": "ItemCardapio",
           "operation": "get",
           "ports": [
-            "ItemComandaRepository"
+            "ItemCardapioRepository"
           ],
           "rulesApplied": [],
           "functions": [
             {
-              "functionName": "getItemComanda",
+              "functionName": "getItemCardapio",
               "input": [
                 {
                   "name": "id",
                   "type": "uuid",
-                  "fieldRef": "ItemComanda.id"
+                  "fieldRef": "ItemCardapio.id"
                 }
               ],
               "output": [
                 {
                   "name": "id",
                   "type": "uuid",
-                  "fieldRef": "ItemComanda.id"
+                  "fieldRef": "ItemCardapio.id"
                 },
                 {
                   "name": "version",
                   "type": "integer",
-                  "fieldRef": "ItemComanda.version"
+                  "fieldRef": "ItemCardapio.version"
                 },
                 {
-                  "name": "comandaId",
-                  "type": "record",
-                  "fieldRef": "ItemComanda.comandaId"
-                },
-                {
-                  "name": "itemCardapioId",
-                  "type": "record",
-                  "fieldRef": "ItemComanda.itemCardapioId"
-                },
-                {
-                  "name": "status",
-                  "type": "enum",
-                  "fieldRef": "ItemComanda.status"
+                  "name": "name",
+                  "type": "string",
+                  "fieldRef": "ItemCardapio.name"
                 },
                 {
                   "name": "details",
                   "type": "object",
-                  "fieldRef": "ItemComanda.details"
+                  "fieldRef": "ItemCardapio.details"
                 },
                 {
-                  "name": "details.quantidade",
-                  "type": "integer",
-                  "fieldRef": "ItemComanda.details.quantidade"
-                },
-                {
-                  "name": "details.observacao",
-                  "type": "text",
-                  "fieldRef": "ItemComanda.details.observacao"
-                },
-                {
-                  "name": "details.precoUnitario",
+                  "name": "details.precoVigente",
                   "type": "money",
-                  "fieldRef": "ItemComanda.details.precoUnitario"
-                },
-                {
-                  "name": "details.valorTotal",
-                  "type": "money",
-                  "fieldRef": "ItemComanda.details.valorTotal"
+                  "fieldRef": "ItemCardapio.details.precoVigente"
                 }
               ]
             }
@@ -3760,7 +3719,7 @@
             {
               "kind": "port",
               "call": "get",
-              "port": "ItemComandaRepository"
+              "port": "ItemCardapioRepository"
             }
           ],
           "uses": [
@@ -3771,15 +3730,7 @@
             }
           ],
           "rules": [],
-          "rulePlan": [
-            {
-              "ruleId": "itemComandaOperacaoSomenteComandaAberta",
-              "origin": "l4/comandaRestaurante/ontology/ItemComanda.defs.ts#rules",
-              "consumer": "operation:get",
-              "enforcement": "pending",
-              "gap": "APPLICABILITY_UNDECLARED"
-            }
-          ],
+          "rulePlan": [],
           "transaction": {
             "boundary": "none"
           }
@@ -3787,19 +3738,19 @@
       },
       "pipeline": [
         {
-          "id": "102047/comandaRestaurante/usecase/getItemComanda",
+          "id": "102047/comandaRestaurante/usecase/getItemCardapio",
           "type": "usecase",
-          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getItemComanda.defs.ts",
-          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getItemComanda.ts",
+          "defPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getItemCardapio.defs.ts",
+          "outputPath": "_102047_/l1/comandaRestaurante/layer_2_application/usecases/getItemCardapio.ts",
           "outputAvailability": "future",
           "dependsFiles": [
-            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.defs.ts",
-            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.defs.ts",
-            "l4/comandaRestaurante/ontology/ItemComanda.defs.ts"
+            "_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemCardapio.defs.ts",
+            "_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.defs.ts",
+            "l4/comandaRestaurante/ontology/ItemCardapio.defs.ts"
           ],
           "dependsOn": [
-            "102047/comandaRestaurante/domainEntity/ItemComanda",
-            "102047/comandaRestaurante/repositoryPort/ItemComandaRepository"
+            "102047/comandaRestaurante/domainEntity/ItemCardapio",
+            "102047/comandaRestaurante/repositoryPort/ItemCardapioRepository"
           ],
           "skills": [
             "_102021_/l2/agentDefsL1/skills/architecture.md",

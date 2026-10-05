@@ -15,6 +15,36 @@ export const definition = {
     "pageId": "fechamento",
     "handlers": [
       {
+        "route": "comandaRestaurante.fechamento.buscarComandasAbertas",
+        "kind": "query",
+        "grantIds": [
+          "caixaFechamentoEcadastroOperacional"
+        ],
+        "serviceFunction": "comandaRestaurante.fechamento.buscarComandasAbertas",
+        "contractPath": "l2/comandaRestaurante/web/contracts/fechamento.defs.ts",
+        "contractInterface": "FechamentoContracts"
+      },
+      {
+        "route": "comandaRestaurante.fechamento.carregarFechamento",
+        "kind": "query",
+        "grantIds": [
+          "caixaFechamentoEcadastroOperacional"
+        ],
+        "serviceFunction": "comandaRestaurante.fechamento.carregarFechamento",
+        "contractPath": "l2/comandaRestaurante/web/contracts/fechamento.defs.ts",
+        "contractInterface": "FechamentoContracts"
+      },
+      {
+        "route": "comandaRestaurante.fechamento.carregarMaisComandasAbertas",
+        "kind": "query",
+        "grantIds": [
+          "caixaFechamentoEcadastroOperacional"
+        ],
+        "serviceFunction": "comandaRestaurante.fechamento.carregarMaisComandasAbertas",
+        "contractPath": "l2/comandaRestaurante/web/contracts/fechamento.defs.ts",
+        "contractInterface": "FechamentoContracts"
+      },
+      {
         "route": "comandaRestaurante.fechamento.fecharComandaPaga",
         "kind": "command",
         "grantIds": [
@@ -25,32 +55,12 @@ export const definition = {
         "contractInterface": "FechamentoContracts"
       },
       {
-        "route": "comandaRestaurante.fechamento.load",
+        "route": "comandaRestaurante.fechamento.obterComandaParaFechamento",
         "kind": "query",
         "grantIds": [
           "caixaFechamentoEcadastroOperacional"
         ],
-        "serviceFunction": "comandaRestaurante.fechamento.load",
-        "contractPath": "l2/comandaRestaurante/web/contracts/fechamento.defs.ts",
-        "contractInterface": "FechamentoContracts"
-      },
-      {
-        "route": "comandaRestaurante.fechamento.loadComanda",
-        "kind": "query",
-        "grantIds": [
-          "caixaFechamentoEcadastroOperacional"
-        ],
-        "serviceFunction": "comandaRestaurante.fechamento.loadComanda",
-        "contractPath": "l2/comandaRestaurante/web/contracts/fechamento.defs.ts",
-        "contractInterface": "FechamentoContracts"
-      },
-      {
-        "route": "comandaRestaurante.fechamento.loadFechamento",
-        "kind": "query",
-        "grantIds": [
-          "caixaFechamentoEcadastroOperacional"
-        ],
-        "serviceFunction": "comandaRestaurante.fechamento.loadFechamento",
+        "serviceFunction": "comandaRestaurante.fechamento.obterComandaParaFechamento",
         "contractPath": "l2/comandaRestaurante/web/contracts/fechamento.defs.ts",
         "contractInterface": "FechamentoContracts"
       }

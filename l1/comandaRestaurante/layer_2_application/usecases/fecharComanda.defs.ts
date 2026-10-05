@@ -121,11 +121,6 @@ export const definition = {
         "source": "ctx"
       },
       {
-        "kind": "port",
-        "call": "transition",
-        "port": "ComandaRepository"
-      },
-      {
         "kind": "rule",
         "ruleId": "descontoNaoExcedeSubtotal"
       },
@@ -144,6 +139,11 @@ export const definition = {
           "details.discountAmount",
           "details.paymentMethod"
         ]
+      },
+      {
+        "kind": "port",
+        "call": "transition",
+        "port": "ComandaRepository"
       },
       {
         "kind": "effect",

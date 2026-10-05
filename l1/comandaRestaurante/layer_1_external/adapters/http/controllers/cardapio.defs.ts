@@ -35,22 +35,32 @@ export const definition = {
         "contractInterface": "CardapioContracts"
       },
       {
-        "route": "comandaRestaurante.cardapio.load",
+        "route": "comandaRestaurante.cardapio.carregarItensCardapio",
         "kind": "query",
         "grantIds": [
           "caixaFechamentoEcadastroOperacional"
         ],
-        "serviceFunction": "comandaRestaurante.cardapio.load",
+        "serviceFunction": "comandaRestaurante.cardapio.carregarItensCardapio",
         "contractPath": "l2/comandaRestaurante/web/contracts/cardapio.defs.ts",
         "contractInterface": "CardapioContracts"
       },
       {
-        "route": "comandaRestaurante.cardapio.loadCardapio",
+        "route": "comandaRestaurante.cardapio.carregarMaisItensCardapio",
         "kind": "query",
         "grantIds": [
           "caixaFechamentoEcadastroOperacional"
         ],
-        "serviceFunction": "comandaRestaurante.cardapio.loadCardapio",
+        "serviceFunction": "comandaRestaurante.cardapio.carregarMaisItensCardapio",
+        "contractPath": "l2/comandaRestaurante/web/contracts/cardapio.defs.ts",
+        "contractInterface": "CardapioContracts"
+      },
+      {
+        "route": "comandaRestaurante.cardapio.obterItemCardapio",
+        "kind": "query",
+        "grantIds": [
+          "caixaFechamentoEcadastroOperacional"
+        ],
+        "serviceFunction": "comandaRestaurante.cardapio.obterItemCardapio",
         "contractPath": "l2/comandaRestaurante/web/contracts/cardapio.defs.ts",
         "contractInterface": "CardapioContracts"
       }

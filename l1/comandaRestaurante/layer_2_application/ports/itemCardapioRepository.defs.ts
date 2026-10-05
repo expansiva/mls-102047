@@ -28,6 +28,13 @@ export const definition = {
         "returns": "ItemCardapio[]"
       },
       {
+        "name": "get",
+        "params": [
+          "id"
+        ],
+        "returns": "ItemCardapio"
+      },
+      {
         "name": "update",
         "params": [
           "ItemCardapio"
