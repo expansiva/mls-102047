@@ -3,25 +3,7 @@
 export const definition = {
   "entry": {
     "params": {
-      "mesasPage": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:lookupAtendimento",
-        "persist": true
-      },
-      "comandasPage": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:lookupAtendimento",
-        "persist": true
-      },
-      "itensPage": {
+      "page": {
         "type": "number",
         "sources": [
           "url",
@@ -133,35 +115,35 @@ export const definition = {
   "states": {
     "contextoAtendimento": {
       "source": "carregarAtendimento.contextoAtendimento",
-      "description": "Listas independentes para localizar mesa, comanda aberta e item do cardápio."
+      "description": "Coleções independentes usadas para localizar a mesa, a comanda aberta e o item do pedido."
     },
     "comanda": {
       "source": "obterComandaAtendimento.comanda",
-      "description": "Comanda escolhida com a mesa, todas as linhas e subtotal calculado para o atendimento."
+      "description": "Comanda selecionada, sua mesa, todos os itens e o subtotal calculado para o atendimento."
     },
     "selectedComanda": {
       "source": "entry.params.comandaId",
-      "description": "Comanda escolhida com a mesa, todas as linhas e subtotal calculado para o atendimento."
+      "description": "Comanda selecionada, sua mesa, todos os itens e o subtotal calculado para o atendimento."
     }
   },
   "functions": {
     "carregarAtendimento": {
-      "description": "Carrega o contexto inicial de localização do atendimento para o garçom encontrar mesa, comanda aberta ou item do cardápio.",
+      "description": "Carrega de uma vez o contexto inicial para o garçom localizar uma mesa disponível, uma comanda aberta ou um item do cardápio.",
       "calls": "carregarAtendimento",
       "sets": "contextoAtendimento"
     },
     "atualizarLocalizacaoAtendimento": {
-      "description": "Pesquisa ou troca a página das listas de localização sem carregar detalhes de uma comanda.",
+      "description": "Atualiza a localização do atendimento quando o garçom pesquisa ou navega nas listas de mesa, comanda e cardápio.",
       "calls": "atualizarLocalizacaoAtendimento",
       "sets": "contextoAtendimento"
     },
     "obterComandaAtendimento": {
-      "description": "Obtém a comanda selecionada com linhas e subtotal para conferência e ações imediatas do garçom.",
+      "description": "Carrega a comanda escolhida com a mesa, todas as linhas e o subtotal necessários para conferir e operar o atendimento.",
       "calls": "obterComandaAtendimento",
       "sets": "comanda"
     },
     "abrirComanda": {
-      "description": "Abre uma comanda para a mesa disponível selecionada e devolve o atendimento pronto para receber pedidos. (comanda: upsert)",
+      "description": "Abre a comanda da mesa disponível escolhida e devolve o atendimento pronto para registrar pedidos. (comanda: upsert)",
       "calls": "abrirComanda",
       "updates": [
         "comanda",
@@ -169,7 +151,7 @@ export const definition = {
       ]
     },
     "lancarItem": {
-      "description": "Registra o pedido na comanda aberta e devolve a conferência integral já atualizada. (comanda: upsert)",
+      "description": "Inclui o pedido informado na comanda aberta e devolve a conferência integral já atualizada. (comanda: upsert)",
       "calls": "lancarItem",
       "updates": [
         "comanda"

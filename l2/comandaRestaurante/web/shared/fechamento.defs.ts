@@ -72,6 +72,13 @@ export const definition = {
         "openComandas"
       ]
     },
+    "carregarMaisComandasAbertas": {
+      "kind": "qry",
+      "trigger": "carregarMaisComandasAbertas",
+      "returns": [
+        "openComandas"
+      ]
+    },
     "obterComandaParaFechamento": {
       "kind": "qry",
       "trigger": "obterComandaParaFechamento",
@@ -91,20 +98,20 @@ export const definition = {
   "states": {
     "openComandas": {
       "source": "carregarFechamento.openComandas",
-      "description": "Página paginada de comandas abertas já filtrada para a localização no fechamento."
+      "description": "Resumo de uma comanda ainda aberta para localização e seleção no fechamento."
     },
     "comanda": {
       "source": "obterComandaParaFechamento.comanda",
-      "description": "Comanda selecionada, com itens válidos, valores calculados e situação da mesa, para conferência ou confirmação do fechamento."
+      "description": "Comanda selecionada com linhas válidas, totais calculados, dados de pagamento e indicador da mesa para conferência e fechamento."
     },
     "selectedComanda": {
       "source": "entry.params.comandaId",
-      "description": "Comanda selecionada, com itens válidos, valores calculados e situação da mesa, para conferência ou confirmação do fechamento."
+      "description": "Comanda selecionada com linhas válidas, totais calculados, dados de pagamento e indicador da mesa para conferência e fechamento."
     }
   },
   "functions": {
     "carregarFechamento": {
-      "description": "Carrega a tela de fechamento com uma página de comandas abertas e, se houver uma comanda no contexto, sua cobrança completa.",
+      "description": "Carrega o fechamento com as comandas abertas para localização e, quando houver contexto, a cobrança completa que o caixa irá conferir.",
       "calls": "carregarFechamento",
       "sets": "openComandas",
       "updates": [
@@ -112,21 +119,27 @@ export const definition = {
       ]
     },
     "buscarComandasAbertas": {
-      "description": "Pesquisa sob demanda as comandas que ainda podem ser fechadas.",
+      "description": "Substitui a lista de localização pelas comandas abertas que correspondem ao número ou à mesa procurados pelo caixa.",
       "calls": "buscarComandasAbertas",
       "sets": "openComandas"
     },
+    "carregarMaisComandasAbertas": {
+      "description": "Busca a próxima janela das comandas abertas da localização atual sem recarregar os resumos já exibidos. (openComandas.items: append)",
+      "calls": "carregarMaisComandasAbertas",
+      "updates": [
+        "openComandas"
+      ]
+    },
     "obterComandaParaFechamento": {
-      "description": "Obtém a comanda aberta escolhida pelo caixa, pronta para conferir e fechar.",
+      "description": "Obtém a comanda aberta selecionada pelo caixa, já composta para conferência, recebimento e fechamento.",
       "calls": "obterComandaParaFechamento",
       "sets": "comanda"
     },
     "fecharComandaPaga": {
-      "description": "Registra desconto e pagamento, fecha a comanda aberta e confirma a liberação da mesa. (comanda: upsert)",
+      "description": "Registra o desconto e o pagamento, fecha a comanda e confirma que sua mesa foi liberada. (comanda: upsert)",
       "calls": "fecharComandaPaga",
       "updates": [
-        "comanda",
-        "openComandas"
+        "comanda"
       ]
     }
   },
@@ -139,6 +152,7 @@ export const definition = {
       "functions": [
         "carregarFechamento",
         "buscarComandasAbertas",
+        "carregarMaisComandasAbertas",
         "obterComandaParaFechamento"
       ]
     },
@@ -160,7 +174,8 @@ export const definition = {
         "comandaReview"
       ],
       "functions": [
-        "fecharComandaPaga"
+        "fecharComandaPaga",
+        "buscarComandasAbertas"
       ]
     }
   ],
@@ -171,6 +186,11 @@ export const definition = {
       "valorTotalItemComandaCalculado"
     ],
     "buscarComandasAbertas": [
+      "subtotalComandaCalculado",
+      "totalComandaCalculado",
+      "valorTotalItemComandaCalculado"
+    ],
+    "carregarMaisComandasAbertas": [
       "subtotalComandaCalculado",
       "totalComandaCalculado",
       "valorTotalItemComandaCalculado"

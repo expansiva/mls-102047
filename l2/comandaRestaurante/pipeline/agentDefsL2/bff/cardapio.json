@@ -1,6 +1,22 @@
 {
   "types": [
     {
+      "name": "DetalhesItemCardapio",
+      "description": "Detalhes comerciais do item do cardápio exibidos e editados na página.",
+      "fields": [
+        {
+          "name": "details.precoVigente",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemCardapio.details.precoVigente"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "ItemCardapioResumo",
       "description": "Dados de um item exibidos no catálogo do cardápio.",
       "fields": [
@@ -25,20 +41,14 @@
           }
         },
         {
-          "name": "precoVigente",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "ItemCardapio.details.precoVigente"
-            ]
-          }
+          "name": "details",
+          "type": "DetalhesItemCardapio"
         }
       ]
     },
     {
       "name": "ItemCardapioEdicao",
-      "description": "Dados autorizados para preencher e manter o item selecionado no formulário.",
+      "description": "Dados persistidos do item selecionado para preenchimento e manutenção do formulário.",
       "fields": [
         {
           "name": "id",
@@ -71,34 +81,8 @@
           }
         },
         {
-          "name": "precoVigente",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "ItemCardapio.details.precoVigente"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PaginaItensCardapio",
-      "description": "Faixa ordenada do catálogo para leitura contínua, com indicação de mais resultados.",
-      "fields": [
-        {
-          "name": "itens",
-          "type": "ItemCardapioResumo[]"
-        },
-        {
-          "name": "hasMore",
-          "type": "boolean",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "ItemCardapio.id"
-            ]
-          }
+          "name": "details",
+          "type": "DetalhesItemCardapio"
         }
       ]
     }
@@ -108,29 +92,18 @@
       "id": "carregarItensCardapio",
       "kind": "qry",
       "when": "onLoad",
-      "input": [],
-      "output": [
-        {
-          "name": "pagina",
-          "type": "PaginaItensCardapio"
-        }
-      ],
-      "rules": [],
-      "jsdoc": {
-        "purpose": "Carrega a primeira faixa do catálogo ao abrir a página, para o caixa conferir e selecionar itens para manutenção.",
-        "input": "Não recebe parâmetros; inicia na primeira faixa do catálogo.",
-        "processing": "Busca uma faixa limitada de ItemCardapio ordenada por nome e, como desempate estável, por identificador. Compõe identificador, nome e preço vigente e calcula hasMore pela existência de registros após a faixa retornada. Nenhuma regra de lançamento ou totalização de comanda é aplicável.",
-        "output": "Retorna a página de itens no formato da lista, com a indicação de que há outra faixa disponível."
-      }
-    },
-    {
-      "id": "carregarMaisItensCardapio",
-      "kind": "qry",
-      "when": "interaction",
       "input": [
         {
-          "name": "id",
-          "type": "string",
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
           "origin": {
             "kind": "context",
             "paths": []
@@ -140,15 +113,53 @@
       "output": [
         {
           "name": "pagina",
-          "type": "PaginaItensCardapio"
+          "type": "ItemCardapioResumo[]",
+          "paginated": true
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Carrega a próxima faixa do catálogo sem transferir todos os itens cadastrados.",
-        "input": "id é o identificador do último item atualmente apresentado e atua como cursor da ordenação estável.",
-        "processing": "Localiza a posição do cursor na ordenação por nome e identificador, busca a faixa posterior, projeta identificador, nome e preço vigente e calcula hasMore pela existência de registros adicionais. Nenhuma regra de lançamento ou totalização de comanda é aplicável.",
-        "output": "Retorna somente a próxima página para ser anexada aos itens já mostrados."
+        "purpose": "Carrega a primeira página do catálogo ao abrir a página para o caixa conferir os itens disponíveis e selecionar um para manutenção.",
+        "input": "page informa a página solicitada, assumindo a primeira quando omitida; pageSize limita quantos itens cabem na faixa exibida.",
+        "processing": "Lista ItemCardapio em ordem de nome e identificador como desempate estável, aplica a paginação solicitada e compõe id, name e details.precoVigente. Calcula hasMore pela existência de itens depois da página retornada. Nenhuma regra de lançamento ou totalização de comanda se aplica.",
+        "output": "Retorna a página já no formato da lista, com itens, página, tamanho da página e indicação de resultados adicionais."
+      }
+    },
+    {
+      "id": "carregarMaisItensCardapio",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "pagina",
+          "type": "ItemCardapioResumo[]",
+          "paginated": true
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Busca a próxima página do catálogo quando o caixa continua a leitura, sem transferir todos os itens cadastrados.",
+        "input": "page identifica a próxima página a carregar; pageSize informa a quantidade de itens de cada página.",
+        "processing": "Lista a página solicitada de ItemCardapio usando a mesma ordenação estável por nome e identificador, projeta id, name e details.precoVigente e calcula hasMore. Nenhuma regra de lançamento ou totalização de comanda se aplica.",
+        "output": "Retorna somente a página solicitada para que seus itens sejam anexados ao catálogo já exibido."
       }
     },
     {
@@ -176,9 +187,9 @@
       "rules": [],
       "jsdoc": {
         "purpose": "Obtém o item escolhido no catálogo para preencher o formulário de manutenção.",
-        "input": "id identifica o ItemCardapio selecionado pelo caixa.",
-        "processing": "Consulta o item pelo identificador e compõe os campos autorizados para edição, incluindo a versão para controle de concorrência. Nenhuma regra de lançamento ou totalização de comanda é aplicável.",
-        "output": "Retorna o item selecionado no formato necessário para o formulário exibir e alterar seus dados."
+        "input": "id é o identificador do ItemCardapio selecionado pelo caixa.",
+        "processing": "Consulta o item pelo identificador e compõe id, version, name e details.precoVigente para edição autorizada. A version é retornada para controle de concorrência. Nenhuma regra de lançamento ou totalização de comanda se aplica.",
+        "output": "Retorna o item selecionado no formato que o formulário usa para mostrar e alterar os dados persistidos."
       }
     },
     {
@@ -198,14 +209,8 @@
           }
         },
         {
-          "name": "precoVigente",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "ItemCardapio.details.precoVigente"
-            ]
-          }
+          "name": "details",
+          "type": "DetalhesItemCardapio"
         }
       ],
       "output": [
@@ -217,9 +222,9 @@
       "rules": [],
       "jsdoc": {
         "purpose": "Cadastra um item com nome e preço vigente para uso operacional no cardápio.",
-        "input": "name é o nome pelo qual a equipe localiza o item; precoVigente é o preço atualmente cobrado.",
-        "processing": "Cria ItemCardapio com nome e preço vigente informados e compõe os dados persistidos, incluindo identificador e versão gerados. Não cria ItemComanda nem registra preço de lançamento ou executa regras de subtotal, total ou valor de item.",
-        "output": "Retorna o item criado para redesenhar o formulário com o estado persistido, sem consulta adicional."
+        "input": "name é o nome pelo qual a equipe localiza o item; details.precoVigente é o preço atualmente cobrado.",
+        "processing": "Cria ItemCardapio com o nome e o preço vigente recebidos e compõe o registro persistido, incluindo id e version gerados. Não cria ItemComanda, nem registra preço de lançamento ou executa regras de subtotal, total ou valor de item.",
+        "output": "Retorna o item criado e persistido para redesenhar imediatamente o formulário; o catálogo é recarregado para refletir a inclusão."
       }
     },
     {
@@ -259,14 +264,8 @@
           }
         },
         {
-          "name": "precoVigente",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "ItemCardapio.details.precoVigente"
-            ]
-          }
+          "name": "details",
+          "type": "DetalhesItemCardapio"
         }
       ],
       "output": [
@@ -277,10 +276,10 @@
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Atualiza o nome e o preço vigente do item selecionado, mantendo o catálogo usado pela operação.",
-        "input": "id e version identificam a versão a alterar; name e precoVigente contêm os valores informados no formulário.",
-        "processing": "Atualiza o ItemCardapio identificado por id, exigindo a version recebida para recusar sobrescrita concorrente, e compõe os dados da versão persistida. Não altera itens de comanda já lançados nem aplica regras de preço de lançamento, subtotal, total ou valor de ItemComanda.",
-        "output": "Retorna o registro atualizado, com a nova versão, para redesenhar imediatamente o formulário."
+        "purpose": "Atualiza o nome e o preço vigente do item selecionado para manter o catálogo usado pela operação.",
+        "input": "id e version identificam a versão persistida a alterar; name e details.precoVigente são os valores informados pelo caixa.",
+        "processing": "Atualiza o ItemCardapio por id somente se a version recebida corresponder à versão atual, recusando sobrescrita concorrente, e compõe a nova versão persistida. Não altera ItemComanda já lançado nem aplica regras de preço de lançamento, subtotal, total ou valor de ItemComanda.",
+        "output": "Retorna o registro atualizado, incluindo a nova version, para redesenhar o formulário sem nova consulta; o catálogo é recarregado para refletir a alteração."
       }
     }
   ],

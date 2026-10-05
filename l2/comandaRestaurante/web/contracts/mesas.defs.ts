@@ -5,7 +5,9 @@ export interface MesaResumo {
   id: string;
   version: number;
   code: string;
-  readonly disponivel: boolean;
+  details: {
+    readonly disponivel: boolean;
+  };
 }
 
 export interface MesasContracts {

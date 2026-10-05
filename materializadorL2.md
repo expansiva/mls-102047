@@ -1,6 +1,6 @@
 # Materializador L2 novo — briefing para quem vai construir
 
-> Escrito em 30/09/2026 (atualizado em 02/10) pelo planner L2 a pedido do Wagner, para quem vai construir o novo
+> Escrito em 30/09/2026 (reescrito em 05/10, depois do BFF por página: d2_73…d2_78, merge `mls-102020` `1318b948`) pelo planner L2 a pedido do Wagner, para quem vai construir o novo
 > materializador do frontend e não acompanhou as decisões. O que está aqui é **desenho decidido**,
 > com as frases do Wagner. O que ainda não existe está marcado como **pendente**. Na dúvida, a fonte
 > de verdade são os arquivos citados, não este resumo.
@@ -24,24 +24,25 @@ Estamos em alpha, então tudo é regerado e nada é migrado.
 
 Para cada página `<pageId>` de um módulo `<mod>` do projeto cliente, em `l2/<mod>/web/`:
 
-| arquivo | o que é | estado em 30/09 |
+| arquivo | o que é | quem escreve |
 |---|---|---|
-| `contracts/<pageId>.defs.ts` | **contrato BFF v2**: os pedidos da página, com tipos literais de input/output, `meta`, `rules` e `access` | **existe** (controleEstoque, 01/10) |
-| `shared/<pageId>.defs.ts` | **shared v2**: states, funções, pedidos, forms, parâmetros de entrada, jornadas, rules e access, comuns aos dois devices | **existe** (controleEstoque, 01/10) |
-| `desktop/page11/<pageId>.defs.ts` | **page11 v2 desktop**: intenção, sections com `purpose`, organismos em prosa com intents, moléculas sugeridas, template collabux | **existe** (controleEstoque) |
-| `mobile/page11/<pageId>.defs.ts` | page11 v2 mobile, com os mesmos organismos e prosa própria | **existe** (controleEstoque) |
+| `desktop/page11/<pageId>.defs.ts` | **page11 v2 desktop**: intenção, sections com `purpose`, organismos em prosa com intents, moléculas sugeridas, template collabux | LLM (`pages50`) |
+| `mobile/page11/<pageId>.defs.ts` | page11 v2 mobile, com os mesmos organismos e configuração própria (P5) | LLM (`pages50`) |
+| `contracts/<pageId>.defs.ts` | **contrato BFF**: os endpoints da página, cada um com **JSDoc** (Finalidade, Entrada, Processamento, Saída), tipos literais de entrada e saída, tipos nomeados, `rules` e `access`. **Sem `meta`**. | código, a partir do desenho do BFF |
+| `shared/<pageId>.defs.ts` | **shared v2**: o motor da página (P9). Traz `entry.params`, `forms`, `requests`, `states`, `functions`, `journeys`, `rules` e `access` | código, transcrevendo o desenho do BFF |
 
-Página sem leitura nem escrita (hub, por exemplo `inicio`; d2_70, 02/10): o shared não tem `load` nem pedido, só funções
-`navigate`, e o contrato é o arquivo vazio `export {};` (o parser devolve zero rotas). O materializador não gera chamada de
-BFF para essa página.
+Exemplo real e atual: `mls-102047/l2/comandaRestaurante/web/` (bancada `83b4de0`, 5 páginas, 19 rotas). O desenho de cada
+página está em `l2/<mod>/pipeline/agentDefsL2/bff/<pageId>.json` e é só contexto, porque o materializador lê os defs.
 
-Formatos e exemplos:
-- page11 v2: `todo/gerarApp/l2/doc/plano_d2_page11_v2_2026-09-30.md`;
-- shared v2 e contrato v2: `todo/gerarApp/l2/doc/plano_d2_shared_contrato_2026-09-30.md`.
-
-Exemplos reais: `mls-102047/l2/controleEstoque/web/{contracts,shared,desktop/page11,mobile/page11}/produtos.defs.ts`.
-O controleEstoque foi regerado em 02/10 com a d2_62 e a d2_63a (`mls-102047` `7eded58`), e já tem `load<Key>` e o
-retorno do comando (seção 5).
+Princípios, com as frases do Wagner: `todo/gerarApp/l4/docs/como-deve-ser-o-l2.md` (P1–P11). Os que mudam o seu trabalho:
+- **P1, BFF por página.** Os endpoints são da página, e não de um organismo ou de uma entidade. A página tem poucas
+  chamadas: carregar ao abrir, consultas de interação (buscar, paginar, selecionar) e uma ação por intenção de gravar.
+- **P2 e P7, endpoint é função.** O JSDoc de cada rota foi escrito **para a LLM** que materializa: leia a Finalidade para
+  ligar a tela e a Saída para saber o que redesenhar. Nenhum código precisa interpretar o JSDoc. O parser
+  (`/_102020_/l2/helpers/contractV2/`) o expõe em `route.jsdoc`.
+- **P10, a LLM estruturou e o código gerou.** O shared e o contrato são consequência mecânica do desenho. Não "corrija" o
+  shared: se algo faltar, é defeito do gerador, e deve ser avisado ao planner L2.
+- **P11, o contrato diz o que a página precisa, não de onde vem.** Não existe `meta`, entidade de origem nem tabela.
 
 Também servem de contexto:
 - o template collabux referenciado em `page11.template`, em `_102020_/l4/collabux/templates/<categoria>/<page>.md`. Nas palavras do próprio template: *"the defs wins on DATA and this skill wins on BEHAVIOR"*;
@@ -52,74 +53,72 @@ Também servem de contexto:
 
 > “o materializador deve primeiro gerar o contracts, depois o shared e depois os pagexx, porque um
 > depende do outro para contexto”
->
-> “a LLM que for materializar deverá ler o .d.ts do shared e o .defs.ts também, um custo a mais”
 
-1. **Contrato.** O `.defs.ts` já é TypeScript de tipos. O que o materializador precisa gerar a partir
-   dele, se é um cliente tipado ou apenas o uso direto, está **pendente de desenho**. Ponto de partida:
-   o transporte de hoje é `execBff` de `/_102029_/l2/bffClient.js`.
-2. **Shared** `shared/<pageId>.ts`: a classe com os states e as funções, que chama os pedidos do
-   contrato. Gera também o `.d.ts` do shared (hoje salvo como `<pageId>Dts.txt`), que é o contexto da etapa 3.
-3. **Páginas** `desktop/page11/<pageId>.ts` + `.less` e o mesmo em `mobile/`: a LLM lê o `.d.ts` do
-   shared e o `page11.defs.ts` do device. A página **só renderiza e chama funções do shared**; não tem
-   estado de negócio nem chamada BFF própria.
+1. **Contrato.** O `.defs.ts` já é TypeScript de tipos. Ainda está **pendente de desenho** o que gerar a partir dele: um
+   cliente tipado ou o uso direto. O transporte de hoje é `execBff` de `/_102029_/l2/bffClient.js`, e a rota é
+   `<mod>.<pageId>.<endpointId>`.
+2. **Shared** `shared/<pageId>.ts`: a classe com os states e as funções, que chama os endpoints do contrato. Ela também
+   produz o `.d.ts` do shared, que é o contexto da etapa 3.
+3. **Páginas** `desktop/page11/<pageId>.ts` + `.less` e o mesmo em `mobile/`. A LLM lê o `.d.ts` do shared e o
+   `page11.defs.ts` do device. A página **só renderiza e chama funções do shared**: não tem estado de negócio nem
+   chamada de BFF própria.
 
-Os ids de state e de função do shared são **estáveis** entre gerações. O materializador deve mantê-los
-exatamente, porque as páginas e os testes dependem deles.
+Os ids de state e de função são **estáveis** entre gerações, e a função tem o mesmo id do endpoint que ela chama. Mantenha
+esses ids exatamente.
 
-## 4. O modelo BFF: o que o contrato promete
+## 4. O que o contrato promete
+- **Pedido da tela, não usecase.** Wagner: *"Se na tela tenho uma função exemplo 'aprovaUsuario' isto é um serviço, que
+  pode gerar vários usecases, alterar várias tabelas, de preferência ou tudo ou nada (atômico)"*.
+- **A saída já vem no formato da tela.** Exemplos:
+  - a comanda já vem **com** os itens e o subtotal;
+  - os indicadores já vêm **calculados**, porque o cálculo é do L1 (P4);
+  - a lista já vem **filtrada** pela situação que a intenção pede.
 
-- **Pedido da tela, não usecase do backend.** Wagner: *"Se na tela tenho uma função exemplo
-  'aprovaUsuario' isto é um serviço, que pode gerar vários usecases, alterar várias tabelas, de
-  preferência ou tudo ou nada (atômico)"*. A rota é `<mod>.<pageId>.<requestId>`, e o frontend nunca
-  sabe quais usecases ou tabelas existem.
-- **Poucas chamadas por página.** Há uma carga `load` com vários objetos (ex. `{ movimentacoes,
-  produtos }`) e **um comando atômico por ação** do usuário. O detalhe usa o item já carregado quando
-  basta; quando precisa de coleção relacionada, há `load<Entity>(id)`.
-- **"Sem mais e sem menos".** O output traz exatamente os campos que os organismos leem, mais `id`.
-  `version` vem quando a página altera o registro, porque é a precondição de escrita MDM e deve ser
-  reenviada. Campos derivados (ex. saldo) vêm `readonly`, são calculados pelo backend e nunca editados.
-- **O comando devolve** os objetos que a página precisa para atualizar seus states. Usar esse retorno
-  para atualizar a tela; não chamar `load` de novo.
-- **`rules` e `access`** vêm por pedido. O frontend pode validar antes de enviar (ex. quantidade ≥ 0),
-  mas quem garante é o backend. `access` diz o ator e o grant, e não substitui a sessão.
+  Não some no navegador, não filtre em memória nem junte duas chamadas.
+- **O comando devolve o que a tela redesenha.** Use esse retorno, e não chame a carga de novo, a não ser que o shared
+  mande recarregar (seção 5).
+- **Campos `readonly`** são calculados pelo backend e nunca são editados. `version` vem quando a página altera o registro, e
+  deve ser reenviado.
+- **`rules` e `access` por rota.** As `rules` são as da **ação**. O frontend pode pré-validar, mas quem garante é o backend.
+  O `access` não substitui a sessão.
+- **Forma dos campos e das listas (d2_79, `mls-102020` `6aba3764`, 05/10):**
+  - a folha de campo mantém o caminho da ontologia: `details: { subtotal }`, e `mesa: { code }` quando o campo vem de
+    outra entidade. O parser expõe as folhas aninhadas pelo caminho com ponto (`details.subtotal`);
+  - a lista paginada tem uma forma só: `{ items, page, pageSize, hasMore }`, com entrada `page`/`pageSize`. "Carregar mais"
+    acrescenta em `items`. Uma lista não paginada é `T[]`.
+
+  A bancada (`mls-102047` `83b4de0`) ainda está na forma antiga, com nomes achatados e quatro formas de paginação, até a
+  regeração da p4_30.
 
 ## 5. O que o shared manda o código fazer
-
-- **Paginação e filtro.** Wagner: *"o shared deve ter condições de comandar isto, ler mais dados e
-  atualizar os states"*.
-  - A carga inicial `load` já traz a 1ª página de cada lista, com as chaves de paginação no output.
-  - Cada lista com busca ou paginação tem um pedido próprio, `load<Key>` (Key = chave da lista no output), que
-    devolve **só** aquela lista e as chaves de paginação. Ele usa a mesma projeção e o mesmo `meta` do `load`.
-  - `filter<List>` chama `load<Key>` desde o início e substitui a lista; `loadMore<List>` chama a próxima
-    página e acrescenta. Nenhum dos dois chama `load`, então os outros objetos da página não são recarregados.
-- **Forms.** O menu separa o organismo de campos (`form`) do organismo de botão (`actions`). O shared
-  os une em `forms: { <submit>: { organism, submit } }` (uma entrada por submit desde 02/10). O form é um state, e a
-  função de envio lê esse state. A página renderiza os dois organismos ligados ao mesmo state.
-  - **Botão de ação sem form** (d2_72, 04/10): uma escrita que não pede nada para digitar não está em `forms`. Exemplos:
-    abrir comanda, cujos ids vêm da seleção; transição sem payload, como aprovar ou cancelar item. O botão chama a
-    função do comando direto, e o input do contrato é só o contexto (`mesaId`) ou a identidade (`id`, `version`).
-  - O input de cada comando é **a entrada da escrita**, não o form inteiro. Dois submits no mesmo form, como aprovar e
-    rejeitar, mandam cada um só o que o seu contrato pede.
-- **Parâmetros de entrada (toda página).** Wagner: *"Toda página tem que ter uma leitura de campos
-  opcionais que podem vir na URL ou estar no local storage, a navegação é importante"*.
-  - `entry.params` lista os parâmetros. Todos são opcionais.
-  - Cada parâmetro é lido da URL; se estiver ausente, do localStorage, com chave `<mod>.<pageId>.<param>`.
-    A URL vence.
-  - O efeito é declarado: selecionar, filtrar ou pré-preencher.
-  - Os parâmetros com `persist` são gravados no localStorage ao mudar.
-  - O tipo vem do contrato; converter de verdade (number/boolean) em vez de fazer cast.
-- **Comando.** Todo state em `updates` de um comando é alimentado por uma chave do retorno dele. Exemplo:
-  `registrarMovimentacao` devolve `{ movimentacaoEstoque, produto }`, porque o saldo do produto muda. O código
-  atualiza os states com esse retorno.
-- **Navegação.** As funções `navigate` levam `carries` (ex. `produtoId: produtoSelecionado.id`) para os
-  `entry.params` da página de destino. Só `navigate` tem `carries`, e `navigate` não tem `sets`.
-- **Seleção.** Um parâmetro com efeito `select:<organism>` guarda o id na URL. O state é sempre o **item**,
-  resolvido pelo id na lista carregada, e nunca o id solto.
-- **Rules por pedido.** Cada pedido traz só as regras pertinentes a ele, e todo comando mantém pelo menos uma
-  regra da entidade que escreve.
-- **Jornadas.** `journeys` diz qual passo de negócio cada organismo e função atende, e em qual página o
-  passo continua (`continuesIn`). Use para textos, foco e ordem de interação, e depois para os casos de teste.
+- **States.** Cada state tem `source` em `<endpoint>.<chave>`, em `entry.params.<param>` ou em `<cmd>.input` (form). Nenhum
+  state tem uma função como fonte.
+- **Functions.** Há uma por endpoint, com `calls` igual a ele.
+  - Uma consulta põe (`sets`) a sua saída num state.
+  - Um comando atualiza (`updates`) os states que a saída dele redesenha.
+  - O **modo** vem no fim da descrição, entre parênteses (`(comanda: upsert)`, `(pagina: append)`):
+    - `replace`: trocar a lista;
+    - `append`: acrescentar a próxima página;
+    - `upsert`: inserir ou atualizar o item pelo id na lista ou no item;
+    - `remove`: tirar o item.
+  - **Recarga:** quando o desenho declarou que um comando recarrega consultas, a função as chama depois, com os parâmetros
+    atuais.
+- **Forms.** `forms: { <submit>: { organism, submit } }` liga o organismo que edita a entrada da escrita ao seu comando. O
+  input do comando é **só a entrada da escrita**. Um botão de ação sem nada a digitar (abrir, aprovar, cancelar) **não está
+  em `forms`** e chama a função direto, com o contexto e a identidade.
+- **Parâmetros de entrada (toda página).** Wagner: *"Toda página tem que ter uma leitura de campos opcionais que podem vir na
+  URL ou estar no local storage, a navegação é importante"*.
+  - Lê da URL; se estiver ausente, do localStorage, com chave `<mod>.<pageId>.<param>`. A URL vence. Todos são opcionais.
+  - O efeito vem declarado: `select:<organism>`, `filter:<organism>` ou pré-preencher. A seleção vence o filtro.
+  - `persist` grava no localStorage ao mudar.
+  - Converta o tipo de verdade (number/boolean), sem cast.
+- **Seleção.** O parâmetro `select:` guarda o id. O state selecionado é o **item**:
+  - vem da consulta de detalhe que o desenho declarou, quando existe;
+  - se não existe, é resolvido pelo id na lista carregada.
+- **Navegação.** As funções `navigate` levam `carries` para os `entry.params` da página de destino.
+- **Jornadas.** `journeys` diz qual passo de negócio cada organismo e função atende, e onde ele continua (`continuesIn`).
+  Use para textos, foco e ordem, e depois para os casos de teste.
+- **Página sem leitura nem escrita** (hub): o shared tem só navegação, o contrato não tem rotas, e não há chamada de BFF.
 
 ## 6. Regras do ambiente que já custaram caro
 
@@ -146,14 +145,13 @@ exatamente, porque as páginas e os testes dependem deles.
   (`/_102029_/l2/bffClient.js`), `collabState.js` e `interactionRuntime.js` (`runBlockingUiAction`).
 
 ## 7. Pendências que afetam o materializador
-
-- **Defs L2 completos só no controleEstoque** (seção 2). A validação geral com vários
-  módulos é do Wagner.
-- **Backend v2.** Wagner liberou o L1 em 01/10. O L1 passou a ler as rotas do contrato v2 e a compor os
-  pedidos em usecases; o backend v2 do controleEstoque foi gerado (`mls-102047` `bc647be`). Fila e estado:
-  `todo/gerarApp/l1/tasks/backlog/00_l1_contrato_v2.md`.
-- **O que se gera a partir do contrato** (item 3.1) e **como o `.d.ts` do shared é produzido e salvo**
-  estão por desenhar.
+- **Regeração do comandaRestaurante com a d2_79** (p4_30, supervisor l4). Até lá, o exemplo real está na forma antiga.
+- **Backend.** O L1 está passando a planejar pelos tipos, pelo JSDoc e pelo L4, sem `meta`
+  (`todo/gerarApp/l1/tasks/backlog/00_l1_contrato_sem_meta.md`). O endpoint composto, filtrado e agregado do contrato
+  depende de o L1 escrever o request service pela LLM (T6, em `como-deve-ser-o-l2.md`).
+- **Paginação, ordenação e filtros pela molécula:** ficam para depois (Wagner, 04/10).
+- **Ainda por desenhar:** o que se gera a partir do contrato (seção 3, item 1) e como o `.d.ts` do shared é produzido e
+  salvo.
 - **Página × workflow** (tela anexada a uma task) ainda não foi definido e não aparece nos defs.
 
 ## 8. Quem procurar

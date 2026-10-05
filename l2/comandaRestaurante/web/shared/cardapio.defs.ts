@@ -3,8 +3,8 @@
 export const definition = {
   "entry": {
     "params": {
-      "id": {
-        "type": "string",
+      "page": {
+        "type": "number",
         "sources": [
           "url",
           "localStorage"
@@ -75,25 +75,25 @@ export const definition = {
   "states": {
     "pagina": {
       "source": "carregarItensCardapio.pagina",
-      "description": "Faixa ordenada do catálogo para leitura contínua, com indicação de mais resultados."
+      "description": "Dados de um item exibidos no catálogo do cardápio."
     },
     "item": {
       "source": "obterItemCardapio.item",
-      "description": "Dados autorizados para preencher e manter o item selecionado no formulário."
+      "description": "Dados persistidos do item selecionado para preenchimento e manutenção do formulário."
     },
     "selectedItemCardapio": {
       "source": "entry.params.itemCardapioId",
-      "description": "Dados autorizados para preencher e manter o item selecionado no formulário."
+      "description": "Dados persistidos do item selecionado para preenchimento e manutenção do formulário."
     }
   },
   "functions": {
     "carregarItensCardapio": {
-      "description": "Carrega a primeira faixa do catálogo ao abrir a página, para o caixa conferir e selecionar itens para manutenção.",
+      "description": "Carrega a primeira página do catálogo ao abrir a página para o caixa conferir os itens disponíveis e selecionar um para manutenção.",
       "calls": "carregarItensCardapio",
       "sets": "pagina"
     },
     "carregarMaisItensCardapio": {
-      "description": "Carrega a próxima faixa do catálogo sem transferir todos os itens cadastrados. (pagina: append)",
+      "description": "Busca a próxima página do catálogo quando o caixa continua a leitura, sem transferir todos os itens cadastrados. (pagina.items: append)",
       "calls": "carregarMaisItensCardapio",
       "updates": [
         "pagina"
@@ -113,7 +113,7 @@ export const definition = {
       ]
     },
     "atualizarItemCardapio": {
-      "description": "Atualiza o nome e o preço vigente do item selecionado, mantendo o catálogo usado pela operação.",
+      "description": "Atualiza o nome e o preço vigente do item selecionado para manter o catálogo usado pela operação.",
       "calls": "atualizarItemCardapio",
       "sets": "item",
       "updates": [

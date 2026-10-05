@@ -1,118 +1,114 @@
 /// <mls fileReference="_102047_/l2/comandaRestaurante/web/contracts/atendimento.defs.ts" enhancement="_blank"/>
 
-/** Mesa disponível para início de atendimento e seleção pelo garçom. */
+/** Mesa disponível para início do atendimento, apresentada para seleção do garçom. */
 export interface MesaDisponivel {
   id: string;
   code: string;
-  readonly disponivel: boolean;
+  details: {
+    readonly disponivel: boolean;
+  };
 }
 
-/** Comanda aberta apresentada na localização do atendimento. */
+/** Identificação da mesa vinculada à comanda exibida no atendimento. */
+export interface MesaReferencia {
+  id: string;
+  code: string;
+}
+
+/** Comanda aberta disponível para localização e seleção pelo garçom. */
 export interface ComandaResumo {
   id: string;
   version: number;
   number: number;
   mesaId: string;
   status: 'open' | 'closed';
-  code: string;
+  mesa: MesaReferencia;
 }
 
-/** Item do cardápio selecionável para informar um pedido. */
+/** Item do cardápio apresentado para busca e escolha no lançamento. */
 export interface ItemCardapioResumo {
   id: string;
   name: string;
-  precoVigente: string;
+  details: {
+    precoVigente: string;
+  };
 }
 
-/** Trecho paginado de mesas sem comanda aberta. */
-export interface PaginaMesasDisponiveis {
-  items: MesaDisponivel[];
-  readonly total: number;
-  page: number;
-  pageSize: number;
-}
-
-/** Trecho paginado de comandas abertas para localização. */
-export interface PaginaComandasAbertas {
-  items: ComandaResumo[];
-  readonly total: number;
-  page: number;
-  pageSize: number;
-}
-
-/** Trecho paginado de itens de cardápio para pesquisa e escolha. */
-export interface PaginaItensCardapio {
-  items: ItemCardapioResumo[];
-  readonly total: number;
-  page: number;
-  pageSize: number;
-}
-
-/** Listas independentes para localizar mesa, comanda aberta e item do cardápio. */
+/** Coleções independentes usadas para localizar a mesa, a comanda aberta e o item do pedido. */
 export interface ContextoAtendimento {
-  mesasDisponiveis: PaginaMesasDisponiveis;
-  comandasAbertas: PaginaComandasAbertas;
-  itensCardapio: PaginaItensCardapio;
+  mesasDisponiveis: { items: MesaDisponivel[]; page: number; pageSize: number; hasMore: boolean };
+  comandasAbertas: { items: ComandaResumo[]; page: number; pageSize: number; hasMore: boolean };
+  itensCardapio: { items: ItemCardapioResumo[]; page: number; pageSize: number; hasMore: boolean };
 }
 
-/** Linha da comanda, inclusive linha cancelada, para conferência e eventual cancelamento. */
+/** Referência do cardápio da linha lançada, com o nome necessário para a conferência. */
+export interface ItemCardapioDaComanda {
+  id: string;
+  name: string;
+}
+
+/** Linha da comanda, inclusive as canceladas, para conferência e correção. */
 export interface ItemComandaAtendimento {
   id: string;
   version: number;
   comandaId: string;
   itemCardapioId: string;
   status: 'launched' | 'canceled';
-  quantidade: number;
-  observacao?: string;
-  precoUnitario: string;
-  readonly valorTotal: string;
-  name: string;
+  details: {
+    quantidade: number;
+    observacao?: string;
+    precoUnitario: string;
+    readonly valorTotal: string;
+  };
+  itemCardapio: ItemCardapioDaComanda;
 }
 
-/** Comanda escolhida com a mesa, todas as linhas e subtotal calculado para o atendimento. */
+/** Comanda selecionada, sua mesa, todos os itens e o subtotal calculado para o atendimento. */
 export interface ComandaAtendimento {
   id: string;
   version: number;
   number: number;
   mesaId: string;
   status: 'open' | 'closed';
-  code: string;
-  readonly subtotal: string;
+  mesa: MesaReferencia;
+  details: {
+    readonly subtotal: string;
+  };
   itens: ItemComandaAtendimento[];
 }
 
 export interface AtendimentoContracts {
   /**
-   * Finalidade: Carrega o contexto inicial de localização do atendimento para o garçom encontrar mesa, comanda aberta ou item do cardápio.
-   * Entrada: mesasPage, comandasPage e itensPage indicam opcionalmente a página inicial de cada lista independente.
-   * Processamento: Lista apenas mesas cuja disponibilidade calculada é verdadeira, apenas comandas em situação open e itens de cardápio ordenados por nome. Calcula o total de cada resultado antes de paginar, sem alterar registros.
-   * Saída: Devolve as três listas já filtradas, paginadas e no formato usado pela localização e pelo formulário.
+   * Finalidade: Carrega de uma vez o contexto inicial para o garçom localizar uma mesa disponível, uma comanda aberta ou um item do cardápio.
+   * Entrada: Os pares mesasPage e mesasPageSize, comandasPage e comandasPageSize, itensPage e itensPageSize definem opcionalmente o trecho inicial de cada lista; na ausência deles, aplica os tamanhos padrão da página.
+   * Processamento: Consulta somente mesas com disponibilidade calculada verdadeira, somente comandas em situação open e itens do cardápio ordenados por nome. Cada coleção é ordenada e paginada de forma independente, retornando hasMore sem transferir itens fora da tela. Não altera registros.
+   * Saída: Retorna as três coleções já filtradas e no formato de localização, para abastecer a busca e a escolha inicial do contexto de atendimento.
    */
   'comandaRestaurante.atendimento.carregarAtendimento': {
     kind: 'qry';
-    input: { mesasPage?: number; comandasPage?: number; itensPage?: number };
+    input: { page: number; pageSize: number };
     output: { contextoAtendimento: ContextoAtendimento };
     rules: [];
     access: { actors: ['garcom']; grants: ['garcomAtendimentoComandas']; scope: 'organization' };
   };
   /**
-   * Finalidade: Pesquisa ou troca a página das listas de localização sem carregar detalhes de uma comanda.
-   * Entrada: mesaTermo filtra o código de mesas disponíveis, comandaNumero restringe pelo número de uma comanda aberta, itemTermo busca trecho do nome do cardápio e os campos Page determinam o trecho retornado.
-   * Processamento: Preserva os filtros de situação da página: mesas disponíveis e comandas open. Aplica os termos informados, ordena os resultados, calcula o total de cada coleção e só então pagina cada uma.
-   * Saída: Devolve o novo contexto de localização para substituir as listas exibidas após pesquisa ou navegação.
+   * Finalidade: Atualiza a localização do atendimento quando o garçom pesquisa ou navega nas listas de mesa, comanda e cardápio.
+   * Entrada: mesaTermo filtra o código de mesas disponíveis; comandaNumero restringe uma comanda aberta pelo número; itemTermo pesquisa um trecho do nome do item. Cada par de página define o trecho da respectiva lista.
+   * Processamento: Mantém os filtros próprios do atendimento: mesa disponível e comanda open. Aplica os termos informados, ordena cada resultado, calcula hasMore para a página solicitada e não grava dados.
+   * Saída: Retorna o contexto de localização substituto, com as listas filtradas e paginadas que a página deve redesenhar.
    */
   'comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento': {
     kind: 'qry';
-    input: { mesaTermo?: string; comandaNumero?: number; itemTermo?: string; mesasPage?: number; comandasPage?: number; itensPage?: number };
+    input: { mesaTermo?: string; comandaNumero?: number; itemTermo?: string; page: number; pageSize: number };
     output: { contextoAtendimento: ContextoAtendimento };
     rules: [];
     access: { actors: ['garcom']; grants: ['garcomAtendimentoComandas']; scope: 'organization' };
   };
   /**
-   * Finalidade: Obtém a comanda selecionada com linhas e subtotal para conferência e ações imediatas do garçom.
-   * Entrada: comandaId é o identificador da comanda escolhido na lista de atendimento.
-   * Processamento: Lê a comanda, sua mesa e todas as linhas, incluindo canceladas, com o nome do item do cardápio. Calcula valorTotal de cada linha conforme valorTotalItemComandaCalculado e subtotal apenas com linhas não canceladas conforme subtotalComandaCalculado; não grava campos derivados.
-   * Saída: Devolve a comanda completa para redesenhar a conferência, contextualizar o formulário e permitir selecionar a linha a cancelar.
+   * Finalidade: Carrega a comanda escolhida com a mesa, todas as linhas e o subtotal necessários para conferir e operar o atendimento.
+   * Entrada: comandaId é o identificador da comanda selecionada pelo garçom na localização.
+   * Processamento: Lê a comanda, a mesa vinculada e todas as linhas, inclusive canceladas, com o nome do item de cardápio. Calcula valorTotal de cada linha conforme valorTotalItemComandaCalculado e subtotal apenas com linhas não canceladas conforme subtotalComandaCalculado; esses valores derivados não são gravados por esta consulta.
+   * Saída: Retorna a comanda completa para redesenhar a conferência, identificar a comanda ativa no formulário e disponibilizar a linha selecionada para cancelamento.
    */
   'comandaRestaurante.atendimento.obterComandaAtendimento': {
     kind: 'qry';
@@ -122,10 +118,10 @@ export interface AtendimentoContracts {
     access: { actors: ['garcom']; grants: ['garcomAtendimentoComandas']; scope: 'organization' };
   };
   /**
-   * Finalidade: Abre uma comanda para a mesa disponível selecionada e devolve o atendimento pronto para receber pedidos.
-   * Entrada: mesaId preenche o vínculo obrigatório da nova Comanda com a mesa escolhida.
-   * Processamento: Em transação, verifica a disponibilidade da mesa conforme mesaDisponivelParaAbrirComanda e impede outra comanda open para ela conforme umaComandaAbertaPorMesa. Gera o número sequencial, cria a comanda open e calcula seu subtotal vazio conforme subtotalComandaCalculado.
-   * Saída: Devolve a nova comanda, com mesa, número, situação, linhas vazias e subtotal, para a página redesenhar a conferência sem nova consulta.
+   * Finalidade: Abre a comanda da mesa disponível escolhida e devolve o atendimento pronto para registrar pedidos.
+   * Entrada: mesaId preenche o vínculo obrigatório da nova comanda com a mesa selecionada.
+   * Processamento: Em transação, verifica que a mesa está disponível conforme mesaDisponivelParaAbrirComanda e recusa outra comanda open para a mesma mesa conforme umaComandaAbertaPorMesa. Gera o número sequencial, cria a comanda em situação open e calcula o subtotal vazio conforme subtotalComandaCalculado.
+   * Saída: Retorna a nova comanda com mesa, número, situação, linhas vazias e subtotal, permitindo redesenhar a conferência imediatamente.
    */
   'comandaRestaurante.atendimento.abrirComanda': {
     kind: 'cmd';
@@ -136,24 +132,24 @@ export interface AtendimentoContracts {
     access: { actors: ['garcom']; grants: ['garcomAtendimentoComandas']; scope: 'organization' };
   };
   /**
-   * Finalidade: Registra o pedido na comanda aberta e devolve a conferência integral já atualizada.
-   * Entrada: comandaId vincula a linha à comanda, itemCardapioId identifica o pedido, quantidade informa o volume e observacao registra a orientação opcional de preparo.
-   * Processamento: Recusa o lançamento se a comanda não estiver open conforme itensSomenteEmComandaAberta. Obtém e registra o preço vigente conforme precoUnitarioRegistradoNoLancamento, calcula valorTotal conforme valorTotalItemComandaCalculado e recalcula o subtotal conforme subtotalComandaCalculado.
-   * Saída: Devolve a comanda com a nova linha, preço registrado, valores calculados e subtotal atualizado, dispensando uma segunda chamada.
+   * Finalidade: Inclui o pedido informado na comanda aberta e devolve a conferência integral já atualizada.
+   * Entrada: comandaId vincula a nova linha à comanda; itemCardapioId identifica o item escolhido; quantidade registra o volume pedido; observacao registra a orientação opcional de preparo.
+   * Processamento: Recusa o lançamento em comanda diferente de open conforme itensSomenteEmComandaAberta. Obtém o preço vigente e o registra na linha conforme precoUnitarioRegistradoNoLancamento, calcula valorTotal conforme valorTotalItemComandaCalculado e recalcula o subtotal da comanda conforme subtotalComandaCalculado.
+   * Saída: Retorna a comanda com a nova linha, nome do item, preço registrado, valor calculado e subtotal atualizado, sem exigir nova consulta.
    */
   'comandaRestaurante.atendimento.lancarItem': {
     kind: 'cmd';
     writes: 'ItemComanda.create';
-    input: { comandaId: string; itemCardapioId: string; quantidade: number; observacao?: string };
+    input: { comandaId: string; itemCardapioId: string; details: { quantidade: number; observacao?: string } };
     output: { comanda: ComandaAtendimento };
     rules: ['itensSomenteEmComandaAberta', 'precoUnitarioRegistradoNoLancamento', 'valorTotalItemComandaCalculado', 'subtotalComandaCalculado'];
     access: { actors: ['garcom']; grants: ['garcomAtendimentoComandas']; scope: 'organization' };
   };
   /**
    * Finalidade: Cancela a linha escolhida por engano e devolve a comanda com a cobrança recalculada.
-   * Entrada: id identifica o item da comanda e version protege a transição contra alteração concorrente.
-   * Processamento: Executa cancelarItemComanda somente sobre item launched de uma comanda open, conforme itemComandaOperacaoSomenteComandaAberta. Conserva a linha no histórico como canceled, apresenta seu valor calculado conforme valorTotalItemComandaCalculado e recalcula o subtotal sem a linha conforme subtotalComandaCalculado.
-   * Saída: Devolve a comanda completa com a linha marcada como canceled e subtotal atualizado para conferência imediata.
+   * Entrada: id identifica o item da comanda a transicionar e version protege a operação contra alteração concorrente.
+   * Processamento: Executa cancelarItemComanda somente para uma linha launched cuja comanda está open, conforme itemComandaOperacaoSomenteComandaAberta. Mantém a linha no histórico como canceled, calcula seu valor conforme valorTotalItemComandaCalculado e recalcula o subtotal desconsiderando-a conforme subtotalComandaCalculado.
+   * Saída: Retorna a comanda completa com a linha marcada como canceled e o subtotal atualizado para conferência imediata.
    */
   'comandaRestaurante.atendimento.cancelarItem': {
     kind: 'cmd';

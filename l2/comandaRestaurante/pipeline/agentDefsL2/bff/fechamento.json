@@ -1,8 +1,24 @@
 {
   "types": [
     {
-      "name": "OpenComanda",
-      "description": "Resumo de uma comanda aberta para o caixa localizá-la e selecioná-la no fechamento.",
+      "name": "MesaResumo",
+      "description": "Dados da mesa vinculada à comanda, apresentados para o caixa localizar a cobrança.",
+      "fields": [
+        {
+          "name": "code",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Mesa.code"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ComandaAbertaResumo",
+      "description": "Resumo de uma comanda ainda aberta para localização e seleção no fechamento.",
       "fields": [
         {
           "name": "id",
@@ -45,6 +61,20 @@
           }
         },
         {
+          "name": "details",
+          "type": "ComandaResumoDetails"
+        },
+        {
+          "name": "mesa",
+          "type": "MesaResumo"
+        }
+      ]
+    },
+    {
+      "name": "ComandaResumoDetails",
+      "description": "Valores calculados exibidos no resumo de uma comanda aberta.",
+      "fields": [
+        {
           "name": "totalComanda",
           "type": "string",
           "origin": {
@@ -59,59 +89,77 @@
               "ItemComanda.details.precoUnitario"
             ]
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "ItemCardapioNaComanda",
+      "description": "Identificação do item de cardápio associada a uma linha da comanda.",
+      "fields": [
         {
-          "name": "code",
+          "name": "name",
           "type": "string",
           "origin": {
             "kind": "field",
             "paths": [
-              "Mesa.code"
+              "ItemCardapio.name"
             ]
           }
         }
       ]
     },
     {
-      "name": "OpenComandaPage",
-      "description": "Página paginada de comandas abertas já filtrada para a localização no fechamento.",
+      "name": "ItemComandaDetailsParaFechamento",
+      "description": "Dados de quantidade, observação, preço registrado e total calculado da linha conferida pelo caixa.",
       "fields": [
         {
-          "name": "items",
-          "type": "OpenComanda[]"
-        },
-        {
-          "name": "page",
+          "name": "details.quantidade",
           "type": "number",
           "origin": {
-            "kind": "context",
-            "paths": []
+            "kind": "field",
+            "paths": [
+              "ItemComanda.details.quantidade"
+            ]
           }
         },
         {
-          "name": "pageSize",
-          "type": "number",
+          "name": "details.observacao",
+          "type": "string",
+          "optional": true,
           "origin": {
-            "kind": "context",
-            "paths": []
+            "kind": "field",
+            "paths": [
+              "ItemComanda.details.observacao"
+            ]
           }
         },
         {
-          "name": "totalItems",
-          "type": "number",
+          "name": "details.precoUnitario",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ItemComanda.details.precoUnitario"
+            ]
+          }
+        },
+        {
+          "name": "valorTotal",
+          "type": "string",
           "origin": {
             "kind": "aggregate",
             "paths": [
-              "Comanda.id",
-              "Comanda.status"
+              "ItemComanda.details.valorTotal",
+              "ItemComanda.details.quantidade",
+              "ItemComanda.details.precoUnitario"
             ]
           }
         }
       ]
     },
     {
-      "name": "ComandaClosingItem",
-      "description": "Linha válida da comanda apresentada na conferência da cobrança.",
+      "name": "ItemComandaParaFechamento",
+      "description": "Linha válida da comanda que compõe a cobrança a conferir.",
       "fields": [
         {
           "name": "status",
@@ -134,42 +182,49 @@
           }
         },
         {
-          "name": "quantidade",
-          "type": "number",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "ItemComanda.details.quantidade"
-            ]
-          }
+          "name": "details",
+          "type": "ItemComandaDetailsParaFechamento"
         },
         {
-          "name": "observacao",
+          "name": "itemCardapio",
+          "type": "ItemCardapioNaComanda"
+        }
+      ]
+    },
+    {
+      "name": "ComandaDetailsParaFechamento",
+      "description": "Desconto, pagamento e totais da comanda mostrados e informados no fechamento.",
+      "fields": [
+        {
+          "name": "details.discountAmount",
           "type": "string",
           "optional": true,
           "origin": {
             "kind": "field",
             "paths": [
-              "ItemComanda.details.observacao"
+              "Comanda.details.discountAmount"
             ]
           }
         },
         {
-          "name": "precoUnitario",
-          "type": "string",
+          "name": "details.paymentMethod",
+          "type": "'cash' | 'debitCard' | 'creditCard' | 'pix'",
+          "optional": true,
           "origin": {
             "kind": "field",
             "paths": [
-              "ItemComanda.details.precoUnitario"
+              "Comanda.details.paymentMethod"
             ]
           }
         },
         {
-          "name": "valorTotal",
+          "name": "subtotal",
           "type": "string",
           "origin": {
             "kind": "aggregate",
             "paths": [
+              "Comanda.details.subtotal",
+              "ItemComanda.status",
               "ItemComanda.details.valorTotal",
               "ItemComanda.details.quantidade",
               "ItemComanda.details.precoUnitario"
@@ -177,20 +232,45 @@
           }
         },
         {
-          "name": "name",
+          "name": "totalComanda",
           "type": "string",
           "origin": {
-            "kind": "field",
+            "kind": "aggregate",
             "paths": [
-              "ItemCardapio.name"
+              "Comanda.details.totalComanda",
+              "Comanda.details.subtotal",
+              "Comanda.details.discountAmount",
+              "ItemComanda.status",
+              "ItemComanda.details.valorTotal",
+              "ItemComanda.details.quantidade",
+              "ItemComanda.details.precoUnitario"
             ]
           }
         }
       ]
     },
     {
-      "name": "ComandaForClosing",
-      "description": "Comanda selecionada, com itens válidos, valores calculados e situação da mesa, para conferência ou confirmação do fechamento.",
+      "name": "MesaNoFechamento",
+      "description": "Indicador de disponibilidade da mesa vinculada após a situação atual da comanda.",
+      "fields": [
+        {
+          "name": "disponivel",
+          "type": "boolean",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Mesa.details.disponivel",
+              "Mesa.id",
+              "Comanda.mesaId",
+              "Comanda.status"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ComandaParaFechamento",
+      "description": "Comanda selecionada com linhas válidas, totais calculados, dados de pagamento e indicador da mesa para conferência e fechamento.",
       "fields": [
         {
           "name": "id",
@@ -233,73 +313,16 @@
           }
         },
         {
-          "name": "discountAmount",
-          "type": "string",
-          "optional": true,
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Comanda.details.discountAmount"
-            ]
-          }
-        },
-        {
-          "name": "paymentMethod",
-          "type": "'cash' | 'debitCard' | 'creditCard' | 'pix'",
-          "optional": true,
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Comanda.details.paymentMethod"
-            ]
-          }
+          "name": "details",
+          "type": "ComandaDetailsParaFechamento"
         },
         {
           "name": "items",
-          "type": "ComandaClosingItem[]"
+          "type": "ItemComandaParaFechamento[]"
         },
         {
-          "name": "subtotal",
-          "type": "string",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Comanda.details.subtotal",
-              "ItemComanda.status",
-              "ItemComanda.details.valorTotal",
-              "ItemComanda.details.quantidade",
-              "ItemComanda.details.precoUnitario"
-            ]
-          }
-        },
-        {
-          "name": "totalComanda",
-          "type": "string",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Comanda.details.totalComanda",
-              "Comanda.details.subtotal",
-              "Comanda.details.discountAmount",
-              "ItemComanda.status",
-              "ItemComanda.details.valorTotal",
-              "ItemComanda.details.quantidade",
-              "ItemComanda.details.precoUnitario"
-            ]
-          }
-        },
-        {
-          "name": "mesaDisponivel",
-          "type": "boolean",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Mesa.details.disponivel",
-              "Mesa.id",
-              "Comanda.mesaId",
-              "Comanda.status"
-            ]
-          }
+          "name": "mesa",
+          "type": "MesaNoFechamento"
         }
       ]
     }
@@ -340,7 +363,6 @@
         {
           "name": "page",
           "type": "number",
-          "optional": true,
           "origin": {
             "kind": "context",
             "paths": []
@@ -349,7 +371,6 @@
         {
           "name": "pageSize",
           "type": "number",
-          "optional": true,
           "origin": {
             "kind": "context",
             "paths": []
@@ -359,11 +380,12 @@
       "output": [
         {
           "name": "openComandas",
-          "type": "OpenComandaPage"
+          "type": "ComandaAbertaResumo[]",
+          "paginated": true
         },
         {
           "name": "selectedComanda",
-          "type": "ComandaForClosing",
+          "type": "ComandaParaFechamento",
           "optional": true
         }
       ],
@@ -373,10 +395,10 @@
         "valorTotalItemComandaCalculado"
       ],
       "jsdoc": {
-        "purpose": "Carrega a tela de fechamento com uma página de comandas abertas e, se houver uma comanda no contexto, sua cobrança completa.",
-        "input": "comandaId identifica a comanda vinda do contexto. number e mesaCode restringem a localização inicial. page e pageSize definem a janela da lista.",
-        "processing": "Lista exclusivamente comandas em situação open, aplica os filtros recebidos, ordena de forma estável e pagina. Compõe o código da mesa e calcula os valores de itens, subtotal e total conforme valorTotalItemComandaCalculado, subtotalComandaCalculado e totalComandaCalculado. Se comandaId apontar para uma comanda aberta, compõe também suas linhas launched, dados de pagamento e disponibilidade calculada da mesa.",
-        "output": "Devolve a lista enxuta já pronta para localização, com a quantidade total calculada, e opcionalmente a comanda contextual pronta para revisão e pagamento."
+        "purpose": "Carrega o fechamento com as comandas abertas para localização e, quando houver contexto, a cobrança completa que o caixa irá conferir.",
+        "input": "comandaId identifica a comanda recebida no contexto. number e mesaCode restringem a localização inicial. page e pageSize definem a janela da lista de comandas abertas.",
+        "processing": "Filtra a lista obrigatoriamente por situação open, aplica número e código de mesa quando informados, ordena de forma estável e entrega a janela paginada. Compõe o código da mesa e calcula o total de cada resumo conforme valorTotalItemComandaCalculado, subtotalComandaCalculado e totalComandaCalculado. Se comandaId identificar uma comanda aberta, compõe suas linhas launched, nomes do cardápio, pagamento, totais calculados e disponibilidade calculada da mesa; campos derivados são apenas calculados.",
+        "output": "Retorna uma lista paginada e enxuta pronta para localizar a conta e, opcionalmente, a comanda contextual completa para preencher revisão, pagamento e ação de fechamento."
       }
     },
     {
@@ -422,7 +444,8 @@
       "output": [
         {
           "name": "openComandas",
-          "type": "OpenComandaPage"
+          "type": "ComandaAbertaResumo[]",
+          "paginated": true
         }
       ],
       "rules": [
@@ -431,10 +454,69 @@
         "valorTotalItemComandaCalculado"
       ],
       "jsdoc": {
-        "purpose": "Pesquisa sob demanda as comandas que ainda podem ser fechadas.",
-        "input": "number filtra pelo número da comanda; mesaCode filtra pelo código da mesa; page e pageSize definem a página solicitada.",
-        "processing": "Restringe obrigatoriamente o resultado a comandas open, combina os filtros informados, ordena de modo estável e pagina antes de compor cada resumo. Calcula o total de cada comanda pelas regras valorTotalItemComandaCalculado, subtotalComandaCalculado e totalComandaCalculado; totalItems é uma contagem calculada no servidor.",
-        "output": "Retorna uma página leve de comandas abertas, incluindo mesa, situação, total calculado e quantidade de resultados para substituir ou ampliar a lista."
+        "purpose": "Substitui a lista de localização pelas comandas abertas que correspondem ao número ou à mesa procurados pelo caixa.",
+        "input": "number filtra pelo número da comanda e mesaCode pelo código da mesa. page e pageSize definem a primeira janela resultante da busca ou troca de filtros.",
+        "processing": "Restringe o resultado a comandas open, combina os filtros informados e ordena antes de paginar. Para cada resumo, compõe a mesa e calcula totalComanda pelas regras valorTotalItemComandaCalculado, subtotalComandaCalculado e totalComandaCalculado, sem registrar valores derivados.",
+        "output": "Retorna a janela paginada de resumos para substituir a lista que o caixa está pesquisando."
+      }
+    },
+    {
+      "id": "carregarMaisComandasAbertas",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "number",
+          "type": "number",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "mesaCode",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "openComandas",
+          "type": "ComandaAbertaResumo[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "subtotalComandaCalculado",
+        "totalComandaCalculado",
+        "valorTotalItemComandaCalculado"
+      ],
+      "jsdoc": {
+        "purpose": "Busca a próxima janela das comandas abertas da localização atual sem recarregar os resumos já exibidos.",
+        "input": "number e mesaCode repetem os filtros ativos. page e pageSize identificam a próxima janela solicitada.",
+        "processing": "Aplica os mesmos filtros obrigatórios de situação open, número e mesa, ordena de forma estável e pagina a próxima janela. Compõe mesa e total calculado conforme valorTotalItemComandaCalculado, subtotalComandaCalculado e totalComandaCalculado.",
+        "output": "Retorna uma página adicional de resumos para ser anexada à lista de comandas abertas."
       }
     },
     {
@@ -454,7 +536,7 @@
       "output": [
         {
           "name": "comanda",
-          "type": "ComandaForClosing"
+          "type": "ComandaParaFechamento"
         }
       ],
       "rules": [
@@ -463,10 +545,10 @@
         "valorTotalItemComandaCalculado"
       ],
       "jsdoc": {
-        "purpose": "Obtém a comanda aberta escolhida pelo caixa, pronta para conferir e fechar.",
-        "input": "id é o identificador da comanda selecionada na lista ou recebido pelo contexto da página.",
-        "processing": "Lê a comanda aberta autorizada, compõe a mesa e o nome de cada item do cardápio e inclui somente linhas launched, que são os itens válidos para cobrança. Calcula valorTotal, subtotal e totalComanda pelas regras valorTotalItemComandaCalculado, subtotalComandaCalculado e totalComandaCalculado, sem gravar campos derivados.",
-        "output": "Retorna versão, itens válidos, desconto, forma de pagamento, totais calculados e disponibilidade da mesa para a revisão, o formulário e a ação de fechamento."
+        "purpose": "Obtém a comanda aberta selecionada pelo caixa, já composta para conferência, recebimento e fechamento.",
+        "input": "id é o identificador da comanda escolhida na lista de comandas abertas.",
+        "processing": "Lê a comanda aberta autorizada, inclui somente itens launched, associa o nome de cada ItemCardapio e calcula valorTotal, subtotal e totalComanda segundo valorTotalItemComandaCalculado, subtotalComandaCalculado e totalComandaCalculado. Também calcula o indicador de disponibilidade da mesa, sem gravar nenhum campo derivado.",
+        "output": "Retorna versão, situação, linhas válidas, desconto, forma de pagamento, totais e indicador da mesa para os organismos de revisão, pagamento e fechamento."
       }
     },
     {
@@ -496,7 +578,7 @@
           }
         },
         {
-          "name": "discountAmount",
+          "name": "details.discountAmount",
           "type": "string",
           "optional": true,
           "origin": {
@@ -507,7 +589,7 @@
           }
         },
         {
-          "name": "paymentMethod",
+          "name": "details.paymentMethod",
           "type": "'cash' | 'debitCard' | 'creditCard' | 'pix'",
           "origin": {
             "kind": "field",
@@ -520,7 +602,7 @@
       "output": [
         {
           "name": "comanda",
-          "type": "ComandaForClosing"
+          "type": "ComandaParaFechamento"
         }
       ],
       "rules": [
@@ -532,10 +614,10 @@
         "valorTotalItemComandaCalculado"
       ],
       "jsdoc": {
-        "purpose": "Registra desconto e pagamento, fecha a comanda aberta e confirma a liberação da mesa.",
-        "input": "id e version identificam a comanda e evitam fechamento concorrente. discountAmount é o desconto opcional. paymentMethod é a forma de pagamento obrigatória.",
-        "processing": "Em transação, recalcula valores das linhas launched, subtotal e total. Recusa a ausência de paymentMethod pela regra pagamentoObrigatorioNoFechamento e desconto acima do subtotal por descontoNaoExcedeSubtotal. Com versão válida, grava o payload de fecharComanda, altera a situação para closed e libera a mesa conforme fechamentoLiberaMesa.",
-        "output": "Retorna a comanda fechada com linhas, totais recalculados, desconto e pagamento registrados e mesaDisponivel verdadeiro, para redesenhar a conferência sem nova consulta."
+        "purpose": "Registra o desconto e o pagamento, fecha a comanda e confirma que sua mesa foi liberada.",
+        "input": "id e version identificam a comanda aberta e protegem contra fechamento concorrente. discountAmount é o desconto opcional. paymentMethod é a forma de pagamento obrigatória do fechamento.",
+        "processing": "Em transação, recompõe os itens launched e recalcula valorTotal, subtotal e total pelas regras valorTotalItemComandaCalculado, subtotalComandaCalculado e totalComandaCalculado. Recusa pagamento ausente por pagamentoObrigatorioNoFechamento e desconto superior ao subtotal por descontoNaoExcedeSubtotal. Com a versão válida, grava o payload da transição fecharComanda, muda a situação para closed e libera a mesa segundo fechamentoLiberaMesa.",
+        "output": "Retorna a comanda fechada, com linhas, desconto, pagamento, totais recalculados e indicador de mesa disponível, para redesenhar imediatamente a confirmação."
       }
     }
   ],
@@ -562,7 +644,7 @@
       {
         "endpoint": "fecharComandaPaga",
         "refreshes": [
-          "carregarFechamento"
+          "buscarComandasAbertas"
         ]
       }
     ],
@@ -583,6 +665,7 @@
         "endpoints": [
           "carregarFechamento",
           "buscarComandasAbertas",
+          "carregarMaisComandasAbertas",
           "obterComandaParaFechamento"
         ]
       },
@@ -604,7 +687,8 @@
           "comandaReview"
         ],
         "endpoints": [
-          "fecharComandaPaga"
+          "fecharComandaPaga",
+          "buscarComandasAbertas"
         ]
       }
     ],
@@ -623,6 +707,11 @@
         "endpoint": "buscarComandasAbertas",
         "state": "carregarFechamento.openComandas",
         "mode": "replace"
+      },
+      {
+        "endpoint": "carregarMaisComandasAbertas",
+        "state": "carregarFechamento.openComandas",
+        "mode": "append"
       },
       {
         "endpoint": "obterComandaParaFechamento",

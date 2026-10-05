@@ -1,58 +1,59 @@
 /// <mls fileReference="_102047_/l2/comandaRestaurante/web/contracts/cardapio.defs.ts" enhancement="_blank"/>
 
+/** Detalhes comerciais do item do cardápio exibidos e editados na página. */
+export interface DetalhesItemCardapio {
+  details: {
+    precoVigente: string;
+  };
+}
+
 /** Dados de um item exibidos no catálogo do cardápio. */
 export interface ItemCardapioResumo {
   id: string;
   name: string;
-  precoVigente: string;
+  details: DetalhesItemCardapio;
 }
 
-/** Dados autorizados para preencher e manter o item selecionado no formulário. */
+/** Dados persistidos do item selecionado para preenchimento e manutenção do formulário. */
 export interface ItemCardapioEdicao {
   id: string;
   version: number;
   name: string;
-  precoVigente: string;
-}
-
-/** Faixa ordenada do catálogo para leitura contínua, com indicação de mais resultados. */
-export interface PaginaItensCardapio {
-  itens: ItemCardapioResumo[];
-  readonly hasMore: boolean;
+  details: DetalhesItemCardapio;
 }
 
 export interface CardapioContracts {
   /**
-   * Finalidade: Carrega a primeira faixa do catálogo ao abrir a página, para o caixa conferir e selecionar itens para manutenção.
-   * Entrada: Não recebe parâmetros; inicia na primeira faixa do catálogo.
-   * Processamento: Busca uma faixa limitada de ItemCardapio ordenada por nome e, como desempate estável, por identificador. Compõe identificador, nome e preço vigente e calcula hasMore pela existência de registros após a faixa retornada. Nenhuma regra de lançamento ou totalização de comanda é aplicável.
-   * Saída: Retorna a página de itens no formato da lista, com a indicação de que há outra faixa disponível.
+   * Finalidade: Carrega a primeira página do catálogo ao abrir a página para o caixa conferir os itens disponíveis e selecionar um para manutenção.
+   * Entrada: page informa a página solicitada, assumindo a primeira quando omitida; pageSize limita quantos itens cabem na faixa exibida.
+   * Processamento: Lista ItemCardapio em ordem de nome e identificador como desempate estável, aplica a paginação solicitada e compõe id, name e details.precoVigente. Calcula hasMore pela existência de itens depois da página retornada. Nenhuma regra de lançamento ou totalização de comanda se aplica.
+   * Saída: Retorna a página já no formato da lista, com itens, página, tamanho da página e indicação de resultados adicionais.
    */
   'comandaRestaurante.cardapio.carregarItensCardapio': {
     kind: 'qry';
-    input: {};
-    output: { pagina: PaginaItensCardapio };
+    input: { page: number; pageSize: number };
+    output: { pagina: { items: ItemCardapioResumo[]; page: number; pageSize: number; hasMore: boolean } };
     rules: [];
     access: { actors: ['caixa']; grants: ['caixaFechamentoEcadastroOperacional']; scope: 'organization' };
   };
   /**
-   * Finalidade: Carrega a próxima faixa do catálogo sem transferir todos os itens cadastrados.
-   * Entrada: id é o identificador do último item atualmente apresentado e atua como cursor da ordenação estável.
-   * Processamento: Localiza a posição do cursor na ordenação por nome e identificador, busca a faixa posterior, projeta identificador, nome e preço vigente e calcula hasMore pela existência de registros adicionais. Nenhuma regra de lançamento ou totalização de comanda é aplicável.
-   * Saída: Retorna somente a próxima página para ser anexada aos itens já mostrados.
+   * Finalidade: Busca a próxima página do catálogo quando o caixa continua a leitura, sem transferir todos os itens cadastrados.
+   * Entrada: page identifica a próxima página a carregar; pageSize informa a quantidade de itens de cada página.
+   * Processamento: Lista a página solicitada de ItemCardapio usando a mesma ordenação estável por nome e identificador, projeta id, name e details.precoVigente e calcula hasMore. Nenhuma regra de lançamento ou totalização de comanda se aplica.
+   * Saída: Retorna somente a página solicitada para que seus itens sejam anexados ao catálogo já exibido.
    */
   'comandaRestaurante.cardapio.carregarMaisItensCardapio': {
     kind: 'qry';
-    input: { id: string };
-    output: { pagina: PaginaItensCardapio };
+    input: { page: number; pageSize: number };
+    output: { pagina: { items: ItemCardapioResumo[]; page: number; pageSize: number; hasMore: boolean } };
     rules: [];
     access: { actors: ['caixa']; grants: ['caixaFechamentoEcadastroOperacional']; scope: 'organization' };
   };
   /**
    * Finalidade: Obtém o item escolhido no catálogo para preencher o formulário de manutenção.
-   * Entrada: id identifica o ItemCardapio selecionado pelo caixa.
-   * Processamento: Consulta o item pelo identificador e compõe os campos autorizados para edição, incluindo a versão para controle de concorrência. Nenhuma regra de lançamento ou totalização de comanda é aplicável.
-   * Saída: Retorna o item selecionado no formato necessário para o formulário exibir e alterar seus dados.
+   * Entrada: id é o identificador do ItemCardapio selecionado pelo caixa.
+   * Processamento: Consulta o item pelo identificador e compõe id, version, name e details.precoVigente para edição autorizada. A version é retornada para controle de concorrência. Nenhuma regra de lançamento ou totalização de comanda se aplica.
+   * Saída: Retorna o item selecionado no formato que o formulário usa para mostrar e alterar os dados persistidos.
    */
   'comandaRestaurante.cardapio.obterItemCardapio': {
     kind: 'qry';
@@ -63,28 +64,28 @@ export interface CardapioContracts {
   };
   /**
    * Finalidade: Cadastra um item com nome e preço vigente para uso operacional no cardápio.
-   * Entrada: name é o nome pelo qual a equipe localiza o item; precoVigente é o preço atualmente cobrado.
-   * Processamento: Cria ItemCardapio com nome e preço vigente informados e compõe os dados persistidos, incluindo identificador e versão gerados. Não cria ItemComanda nem registra preço de lançamento ou executa regras de subtotal, total ou valor de item.
-   * Saída: Retorna o item criado para redesenhar o formulário com o estado persistido, sem consulta adicional.
+   * Entrada: name é o nome pelo qual a equipe localiza o item; details.precoVigente é o preço atualmente cobrado.
+   * Processamento: Cria ItemCardapio com o nome e o preço vigente recebidos e compõe o registro persistido, incluindo id e version gerados. Não cria ItemComanda, nem registra preço de lançamento ou executa regras de subtotal, total ou valor de item.
+   * Saída: Retorna o item criado e persistido para redesenhar imediatamente o formulário; o catálogo é recarregado para refletir a inclusão.
    */
   'comandaRestaurante.cardapio.cadastrarItemCardapio': {
     kind: 'cmd';
     writes: 'ItemCardapio.create';
-    input: { name: string; precoVigente: string };
+    input: { name: string; details: DetalhesItemCardapio };
     output: { item: ItemCardapioEdicao };
     rules: [];
     access: { actors: ['caixa']; grants: ['caixaFechamentoEcadastroOperacional']; scope: 'organization' };
   };
   /**
-   * Finalidade: Atualiza o nome e o preço vigente do item selecionado, mantendo o catálogo usado pela operação.
-   * Entrada: id e version identificam a versão a alterar; name e precoVigente contêm os valores informados no formulário.
-   * Processamento: Atualiza o ItemCardapio identificado por id, exigindo a version recebida para recusar sobrescrita concorrente, e compõe os dados da versão persistida. Não altera itens de comanda já lançados nem aplica regras de preço de lançamento, subtotal, total ou valor de ItemComanda.
-   * Saída: Retorna o registro atualizado, com a nova versão, para redesenhar imediatamente o formulário.
+   * Finalidade: Atualiza o nome e o preço vigente do item selecionado para manter o catálogo usado pela operação.
+   * Entrada: id e version identificam a versão persistida a alterar; name e details.precoVigente são os valores informados pelo caixa.
+   * Processamento: Atualiza o ItemCardapio por id somente se a version recebida corresponder à versão atual, recusando sobrescrita concorrente, e compõe a nova versão persistida. Não altera ItemComanda já lançado nem aplica regras de preço de lançamento, subtotal, total ou valor de ItemComanda.
+   * Saída: Retorna o registro atualizado, incluindo a nova version, para redesenhar o formulário sem nova consulta; o catálogo é recarregado para refletir a alteração.
    */
   'comandaRestaurante.cardapio.atualizarItemCardapio': {
     kind: 'cmd';
     writes: 'ItemCardapio.update';
-    input: { id: string; version: number; name: string; precoVigente: string };
+    input: { id: string; version: number; name: string; details: DetalhesItemCardapio };
     output: { item: ItemCardapioEdicao };
     rules: [];
     access: { actors: ['caixa']; grants: ['caixaFechamentoEcadastroOperacional']; scope: 'organization' };
