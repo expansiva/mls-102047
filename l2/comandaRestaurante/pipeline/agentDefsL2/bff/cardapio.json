@@ -2,7 +2,7 @@
   "types": [
     {
       "name": "ItemCardapioResumo",
-      "description": "Dados concisos de um item para apresentação no catálogo do cardápio.",
+      "description": "Dados de um item exibidos no catálogo do cardápio.",
       "fields": [
         {
           "name": "id",
@@ -38,7 +38,7 @@
     },
     {
       "name": "ItemCardapioEdicao",
-      "description": "Dados autorizados para preencher e manter um item do cardápio no formulário.",
+      "description": "Dados autorizados para preencher e manter o item selecionado no formulário.",
       "fields": [
         {
           "name": "id",
@@ -84,7 +84,7 @@
     },
     {
       "name": "PaginaItensCardapio",
-      "description": "Faixa do catálogo ordenada para leitura contínua, com indicação de próxima faixa.",
+      "description": "Faixa ordenada do catálogo para leitura contínua, com indicação de mais resultados.",
       "fields": [
         {
           "name": "itens",
@@ -117,10 +117,10 @@
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Carrega a primeira faixa do catálogo vigente ao abrir a página, para o caixa conferir e selecionar itens para manutenção.",
-        "input": "Não recebe parâmetros; a consulta começa na primeira faixa do catálogo.",
-        "processing": "Busca uma faixa de itens de cardápio ordenada por nome, com identificador como desempate, e projeta identificador, nome e preço vigente. Calcula hasMore pela existência de registros após a faixa retornada. Não aplica regras de lançamento ou totalização de comanda.",
-        "output": "Retorna a página de itens já no formato da lista, incluindo a indicação de que existe outra faixa para leitura contínua."
+        "purpose": "Carrega a primeira faixa do catálogo ao abrir a página, para o caixa conferir e selecionar itens para manutenção.",
+        "input": "Não recebe parâmetros; inicia na primeira faixa do catálogo.",
+        "processing": "Busca uma faixa limitada de ItemCardapio ordenada por nome e, como desempate estável, por identificador. Compõe identificador, nome e preço vigente e calcula hasMore pela existência de registros após a faixa retornada. Nenhuma regra de lançamento ou totalização de comanda é aplicável.",
+        "output": "Retorna a página de itens no formato da lista, com a indicação de que há outra faixa disponível."
       }
     },
     {
@@ -146,9 +146,9 @@
       "rules": [],
       "jsdoc": {
         "purpose": "Carrega a próxima faixa do catálogo sem transferir todos os itens cadastrados.",
-        "input": "id é o cursor do último item apresentado na lista.",
-        "processing": "Resolve a posição do cursor e busca a faixa posterior na ordenação estável por nome e identificador. Projeta identificador, nome e preço vigente e calcula hasMore pela existência de uma faixa adicional. Não aplica regras de lançamento ou totalização de comanda.",
-        "output": "Retorna somente a próxima página, para a interface anexá-la aos itens já exibidos."
+        "input": "id é o identificador do último item atualmente apresentado e atua como cursor da ordenação estável.",
+        "processing": "Localiza a posição do cursor na ordenação por nome e identificador, busca a faixa posterior, projeta identificador, nome e preço vigente e calcula hasMore pela existência de registros adicionais. Nenhuma regra de lançamento ou totalização de comanda é aplicável.",
+        "output": "Retorna somente a próxima página para ser anexada aos itens já mostrados."
       }
     },
     {
@@ -175,10 +175,10 @@
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Obtém o item selecionado no catálogo para preencher o formulário de manutenção.",
-        "input": "id identifica o item do cardápio escolhido pelo caixa.",
-        "processing": "Consulta o item pelo identificador e compõe os campos autorizados para edição, incluindo a versão usada no controle de concorrência. Não aplica regras de lançamento ou totalização de comanda.",
-        "output": "Retorna o item selecionado no formato que o formulário precisa para exibir e alterar seus dados."
+        "purpose": "Obtém o item escolhido no catálogo para preencher o formulário de manutenção.",
+        "input": "id identifica o ItemCardapio selecionado pelo caixa.",
+        "processing": "Consulta o item pelo identificador e compõe os campos autorizados para edição, incluindo a versão para controle de concorrência. Nenhuma regra de lançamento ou totalização de comanda é aplicável.",
+        "output": "Retorna o item selecionado no formato necessário para o formulário exibir e alterar seus dados."
       }
     },
     {
@@ -218,8 +218,8 @@
       "jsdoc": {
         "purpose": "Cadastra um item com nome e preço vigente para uso operacional no cardápio.",
         "input": "name é o nome pelo qual a equipe localiza o item; precoVigente é o preço atualmente cobrado.",
-        "processing": "Cria ItemCardapio com nome e preço vigente informados e retorna os dados persistidos, inclusive identificador e versão gerados. Não registra ItemComanda nem aplica regras de preço de lançamento, subtotal, total ou valor de item.",
-        "output": "Retorna o item criado para o formulário mostrar o estado persistido sem uma consulta adicional."
+        "processing": "Cria ItemCardapio com nome e preço vigente informados e compõe os dados persistidos, incluindo identificador e versão gerados. Não cria ItemComanda nem registra preço de lançamento ou executa regras de subtotal, total ou valor de item.",
+        "output": "Retorna o item criado para redesenhar o formulário com o estado persistido, sem consulta adicional."
       }
     },
     {
@@ -279,8 +279,8 @@
       "jsdoc": {
         "purpose": "Atualiza o nome e o preço vigente do item selecionado, mantendo o catálogo usado pela operação.",
         "input": "id e version identificam a versão a alterar; name e precoVigente contêm os valores informados no formulário.",
-        "processing": "Atualiza o ItemCardapio identificado por id, exigindo a version recebida para recusar sobrescrita concorrente, e compõe a versão persistida. Não altera itens de comanda já lançados nem executa regras de preço de lançamento, subtotal, total ou valor de ItemComanda.",
-        "output": "Retorna o registro atualizado com a nova versão para redesenhar imediatamente o formulário."
+        "processing": "Atualiza o ItemCardapio identificado por id, exigindo a version recebida para recusar sobrescrita concorrente, e compõe os dados da versão persistida. Não altera itens de comanda já lançados nem aplica regras de preço de lançamento, subtotal, total ou valor de ItemComanda.",
+        "output": "Retorna o registro atualizado, com a nova versão, para redesenhar imediatamente o formulário."
       }
     }
   ],
@@ -317,6 +317,33 @@
         }
       }
     ],
-    "journeys": []
+    "journeys": [],
+    "updates": [
+      {
+        "endpoint": "carregarItensCardapio",
+        "state": "carregarItensCardapio.pagina",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "carregarMaisItensCardapio",
+        "state": "carregarItensCardapio.pagina",
+        "mode": "append"
+      },
+      {
+        "endpoint": "obterItemCardapio",
+        "state": "obterItemCardapio.item",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cadastrarItemCardapio",
+        "state": "obterItemCardapio.item",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "atualizarItemCardapio",
+        "state": "obterItemCardapio.item",
+        "mode": "replace"
+      }
+    ]
   }
 }

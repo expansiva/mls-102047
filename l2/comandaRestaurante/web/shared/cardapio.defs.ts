@@ -3,6 +3,15 @@
 export const definition = {
   "entry": {
     "params": {
+      "id": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:listaItensCardapio",
+        "persist": true
+      },
       "itemCardapioId": {
         "type": "string",
         "sources": [
@@ -10,15 +19,6 @@ export const definition = {
           "localStorage"
         ],
         "effect": "select:formularioItemCardapio",
-        "persist": true
-      },
-      "id": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:carregarMaisItensCardapio",
         "persist": true
       }
     }
@@ -75,29 +75,32 @@ export const definition = {
   "states": {
     "pagina": {
       "source": "carregarItensCardapio.pagina",
-      "description": "Faixa do catálogo ordenada para leitura contínua, com indicação de próxima faixa."
+      "description": "Faixa ordenada do catálogo para leitura contínua, com indicação de mais resultados."
     },
     "item": {
       "source": "obterItemCardapio.item",
-      "description": "Dados autorizados para preencher e manter um item do cardápio no formulário."
+      "description": "Dados autorizados para preencher e manter o item selecionado no formulário."
     },
     "selectedItemCardapio": {
       "source": "entry.params.itemCardapioId",
-      "description": "Dados autorizados para preencher e manter um item do cardápio no formulário."
+      "description": "Dados autorizados para preencher e manter o item selecionado no formulário."
     }
   },
   "functions": {
     "carregarItensCardapio": {
-      "description": "Carrega a primeira faixa do catálogo vigente ao abrir a página, para o caixa conferir e selecionar itens para manutenção.",
+      "description": "Carrega a primeira faixa do catálogo ao abrir a página, para o caixa conferir e selecionar itens para manutenção.",
       "calls": "carregarItensCardapio",
       "sets": "pagina"
     },
     "carregarMaisItensCardapio": {
-      "description": "Carrega a próxima faixa do catálogo sem transferir todos os itens cadastrados.",
-      "calls": "carregarMaisItensCardapio"
+      "description": "Carrega a próxima faixa do catálogo sem transferir todos os itens cadastrados. (pagina: append)",
+      "calls": "carregarMaisItensCardapio",
+      "updates": [
+        "pagina"
+      ]
     },
     "obterItemCardapio": {
-      "description": "Obtém o item selecionado no catálogo para preencher o formulário de manutenção.",
+      "description": "Obtém o item escolhido no catálogo para preencher o formulário de manutenção.",
       "calls": "obterItemCardapio",
       "sets": "item"
     },

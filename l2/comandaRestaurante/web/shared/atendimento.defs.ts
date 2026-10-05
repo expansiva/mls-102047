@@ -3,15 +3,6 @@
 export const definition = {
   "entry": {
     "params": {
-      "comandaId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:detalheComanda",
-        "persist": true
-      },
       "mesasPage": {
         "type": "number",
         "sources": [
@@ -45,7 +36,7 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "filter:atualizarLocalizacaoAtendimento",
+        "effect": "filter:lookupAtendimento",
         "persist": true
       },
       "comandaNumero": {
@@ -54,7 +45,7 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "filter:atualizarLocalizacaoAtendimento",
+        "effect": "filter:lookupAtendimento",
         "persist": true
       },
       "itemTermo": {
@@ -63,7 +54,16 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "filter:atualizarLocalizacaoAtendimento",
+        "effect": "filter:lookupAtendimento",
+        "persist": true
+      },
+      "comandaId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:detalheComanda",
         "persist": true
       },
       "itemCardapioId": {
@@ -133,49 +133,54 @@ export const definition = {
   "states": {
     "contextoAtendimento": {
       "source": "carregarAtendimento.contextoAtendimento",
-      "description": "Conjunto paginado de listas para localizar a mesa, a comanda aberta ou o item de cardápio no atendimento."
+      "description": "Listas independentes para localizar mesa, comanda aberta e item do cardápio."
     },
     "comanda": {
       "source": "obterComandaAtendimento.comanda",
-      "description": "Comanda completa para conferência do atendimento, incluindo as linhas e o subtotal calculado."
+      "description": "Comanda escolhida com a mesa, todas as linhas e subtotal calculado para o atendimento."
     },
     "selectedComanda": {
       "source": "entry.params.comandaId",
-      "description": "Comanda completa para conferência do atendimento, incluindo as linhas e o subtotal calculado."
+      "description": "Comanda escolhida com a mesa, todas as linhas e subtotal calculado para o atendimento."
     }
   },
   "functions": {
     "carregarAtendimento": {
-      "description": "Carrega o contexto inicial para o garçom localizar uma mesa disponível, uma comanda aberta ou um item do cardápio.",
+      "description": "Carrega o contexto inicial de localização do atendimento para o garçom encontrar mesa, comanda aberta ou item do cardápio.",
       "calls": "carregarAtendimento",
       "sets": "contextoAtendimento"
     },
     "atualizarLocalizacaoAtendimento": {
-      "description": "Atualiza sob demanda as listas de localização sem carregar detalhes de uma comanda.",
-      "calls": "atualizarLocalizacaoAtendimento"
+      "description": "Pesquisa ou troca a página das listas de localização sem carregar detalhes de uma comanda.",
+      "calls": "atualizarLocalizacaoAtendimento",
+      "sets": "contextoAtendimento"
     },
     "obterComandaAtendimento": {
-      "description": "Carrega a comanda escolhida com todas as linhas necessárias para o garçom conferir, lançar ou cancelar um item.",
+      "description": "Obtém a comanda selecionada com linhas e subtotal para conferência e ações imediatas do garçom.",
       "calls": "obterComandaAtendimento",
       "sets": "comanda"
     },
     "abrirComanda": {
-      "description": "Abre uma nova comanda para a mesa disponível selecionada e devolve imediatamente seu estado de atendimento.",
+      "description": "Abre uma comanda para a mesa disponível selecionada e devolve o atendimento pronto para receber pedidos. (comanda: upsert)",
       "calls": "abrirComanda",
-      "sets": "comanda",
       "updates": [
+        "comanda",
         "contextoAtendimento"
       ]
     },
     "lancarItem": {
-      "description": "Registra o pedido informado na comanda aberta e retorna a comanda integralmente atualizada.",
+      "description": "Registra o pedido na comanda aberta e devolve a conferência integral já atualizada. (comanda: upsert)",
       "calls": "lancarItem",
-      "sets": "comanda"
+      "updates": [
+        "comanda"
+      ]
     },
     "cancelarItem": {
-      "description": "Cancela o item lançado por engano e devolve a comanda com o novo subtotal para conferência imediata.",
+      "description": "Cancela a linha escolhida por engano e devolve a comanda com a cobrança recalculada. (comanda: upsert)",
       "calls": "cancelarItem",
-      "sets": "comanda"
+      "updates": [
+        "comanda"
+      ]
     }
   },
   "journeys": [
@@ -288,6 +293,7 @@ export const definition = {
     ],
     "cancelarItem": [
       "itemComandaOperacaoSomenteComandaAberta",
+      "valorTotalItemComandaCalculado",
       "subtotalComandaCalculado"
     ]
   },

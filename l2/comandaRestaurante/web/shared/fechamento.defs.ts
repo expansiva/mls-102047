@@ -9,7 +9,7 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "filter:openComandaList",
+        "effect": "select:comandaReview",
         "persist": true
       },
       "number": {
@@ -91,37 +91,41 @@ export const definition = {
   "states": {
     "openComandas": {
       "source": "carregarFechamento.openComandas",
-      "description": "Página de comandas abertas, já filtrada para localização pelo caixa."
+      "description": "Página paginada de comandas abertas já filtrada para a localização no fechamento."
     },
     "comanda": {
       "source": "obterComandaParaFechamento.comanda",
-      "description": "Comanda selecionada com linhas válidas, totais calculados e situação da mesa para conferência ou resultado do fechamento."
+      "description": "Comanda selecionada, com itens válidos, valores calculados e situação da mesa, para conferência ou confirmação do fechamento."
     },
     "selectedComanda": {
       "source": "entry.params.comandaId",
-      "description": "Comanda selecionada com linhas válidas, totais calculados e situação da mesa para conferência ou resultado do fechamento."
+      "description": "Comanda selecionada, com itens válidos, valores calculados e situação da mesa, para conferência ou confirmação do fechamento."
     }
   },
   "functions": {
     "carregarFechamento": {
-      "description": "Carrega o fechamento com a primeira página de comandas abertas e, quando uma comanda vier no contexto, seus dados completos para conferência.",
+      "description": "Carrega a tela de fechamento com uma página de comandas abertas e, se houver uma comanda no contexto, sua cobrança completa.",
       "calls": "carregarFechamento",
-      "sets": "openComandas"
+      "sets": "openComandas",
+      "updates": [
+        "comanda"
+      ]
     },
     "buscarComandasAbertas": {
-      "description": "Localiza sob demanda as comandas ainda abertas por número ou código da mesa.",
-      "calls": "buscarComandasAbertas"
+      "description": "Pesquisa sob demanda as comandas que ainda podem ser fechadas.",
+      "calls": "buscarComandasAbertas",
+      "sets": "openComandas"
     },
     "obterComandaParaFechamento": {
-      "description": "Obtém a comanda aberta escolhida pelo caixa, pronta para conferir cobrança e preencher o fechamento.",
+      "description": "Obtém a comanda aberta escolhida pelo caixa, pronta para conferir e fechar.",
       "calls": "obterComandaParaFechamento",
       "sets": "comanda"
     },
     "fecharComandaPaga": {
-      "description": "Registra o desconto e o pagamento da comanda aberta, conclui seu fechamento e devolve a cobrança fechada com a mesa liberada.",
+      "description": "Registra desconto e pagamento, fecha a comanda aberta e confirma a liberação da mesa. (comanda: upsert)",
       "calls": "fecharComandaPaga",
-      "sets": "comanda",
       "updates": [
+        "comanda",
         "openComandas"
       ]
     }

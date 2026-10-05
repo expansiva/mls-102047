@@ -17,7 +17,6 @@ export interface InicioContracts {
     kind: 'qry';
     input: {};
     output: { resumoOperacional: ResumoOperacional };
-    meta: { output: {}; lists: {}; params: {} };
     rules: ['subtotalComandaCalculado'];
     access: { actors: ['caixa', 'garcom']; grants: ['garcomAtendimentoComandas', 'caixaFechamentoEcadastroOperacional']; scope: 'organization' };
   };

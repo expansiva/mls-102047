@@ -52,26 +52,32 @@ export const definition = {
   "states": {
     "mesas": {
       "source": "carregarMesas.mesas",
-      "description": "Dados de uma mesa necessários para a lista da casa, para a seleção no formulário e para o redesenho após o cadastro ou a atualização."
+      "description": "Dados completos de uma mesa necessários para exibir a lista da casa, preencher a seleção no formulário e redesenhar a página após manutenção."
     },
     "selectedMesa": {
       "source": "entry.params.mesaId",
-      "description": "Dados de uma mesa necessários para a lista da casa, para a seleção no formulário e para o redesenho após o cadastro ou a atualização."
+      "description": "Dados completos de uma mesa necessários para exibir a lista da casa, preencher a seleção no formulário e redesenhar a página após manutenção."
     }
   },
   "functions": {
     "carregarMesas": {
-      "description": "Carrega o salão para o caixa consultar as mesas da casa e selecionar uma mesa para manutenção.",
+      "description": "Carrega as mesas da casa para o caixa consultar seus códigos, conferir a disponibilidade e selecionar uma mesa para manutenção.",
       "calls": "carregarMesas",
       "sets": "mesas"
     },
     "criarMesa": {
-      "description": "Cadastra uma mesa para a operação e devolve o registro completo para a página redesenhar.",
-      "calls": "criarMesa"
+      "description": "Cadastra uma mesa para a operação do restaurante e devolve seu estado completo para redesenhar a página. (mesas: upsert)",
+      "calls": "criarMesa",
+      "updates": [
+        "mesas"
+      ]
     },
     "atualizarMesa": {
-      "description": "Atualiza o código de uma mesa selecionada e devolve seu estado completo para a página redesenhar a seleção e sua linha.",
-      "calls": "atualizarMesa"
+      "description": "Atualiza o código da mesa selecionada e devolve seu estado completo e corrente para redesenhar a página. (mesas: upsert)",
+      "calls": "atualizarMesa",
+      "updates": [
+        "mesas"
+      ]
     }
   },
   "journeys": [],
