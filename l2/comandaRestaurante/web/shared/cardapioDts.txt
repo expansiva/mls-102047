@@ -1,0 +1,87 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { CardapioContracts, ItemCardapioEdicao } from '/_102047_/l2/comandaRestaurante/web/contracts/cardapio.defs.js';
+export type { CardapioContracts, DetalhesItemCardapio, ItemCardapioResumo, ItemCardapioEdicao } from '/_102047_/l2/comandaRestaurante/web/contracts/cardapio.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type CadastrarItemCardapioDraft = {
+    name: string | null;
+    details: {
+        precoVigente: string | null;
+    };
+};
+export type AtualizarItemCardapioDraft = {
+    id: string | null;
+    version: number | null;
+    name: string | null;
+    details: {
+        precoVigente: string | null;
+    };
+};
+type Output<R extends keyof CardapioContracts> = CardapioContracts[R]['output'];
+export declare class ComandaRestauranteCardapioShared extends StateLitElement {
+    /** state pagina — Dados de um item exibidos no catálogo do cardápio; source carregarItensCardapio.pagina; organism listaItensCardapio */
+    pagina: Output<'comandaRestaurante.cardapio.carregarItensCardapio'>['pagina'] | null;
+    /** state item — Dados persistidos do item selecionado para preenchimento e manutenção do formulário; source obterItemCardapio.item; organism formularioItemCardapio */
+    item: ItemCardapioEdicao | null;
+    /** state selectedItemCardapio — Dados persistidos do item selecionado para preenchimento e manutenção do formulário; source entry.params.itemCardapioId; organism formularioItemCardapio; persisted */
+    selectedItemCardapio: string | null;
+    /** state page — The requested catalog page; source entry.params.page; organism listaItensCardapio; persisted */
+    page: number | null;
+    /** state cadastrarItemCardapioDraft — The draft submitted to create a catalog item; source cadastrarItemCardapio.input; organism formularioItemCardapio */
+    cadastrarItemCardapioDraft: CadastrarItemCardapioDraft;
+    /** state atualizarItemCardapioDraft — The draft submitted to update a catalog item; source atualizarItemCardapio.input; organism formularioItemCardapio */
+    atualizarItemCardapioDraft: AtualizarItemCardapioDraft;
+    /** state pageStatus — The overall loading state of the page; source pageStatus */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state carregarItensCardapioStatus — The status of the initial catalog query; source carregarItensCardapio.status */
+    carregarItensCardapioStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarItensCardapioError — The error of the initial catalog query; source carregarItensCardapio.error */
+    carregarItensCardapioError: ErrorState;
+    /** state carregarMaisItensCardapioStatus — The status of the next catalog page query; source carregarMaisItensCardapio.status */
+    carregarMaisItensCardapioStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarMaisItensCardapioError — The error of the next catalog page query; source carregarMaisItensCardapio.error */
+    carregarMaisItensCardapioError: ErrorState;
+    /** state obterItemCardapioStatus — The status of the selected item query; source obterItemCardapio.status */
+    obterItemCardapioStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state obterItemCardapioError — The error of the selected item query; source obterItemCardapio.error */
+    obterItemCardapioError: ErrorState;
+    /** state cadastrarItemCardapioStatus — The status of the create command; source cadastrarItemCardapio.status */
+    cadastrarItemCardapioStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state cadastrarItemCardapioError — The error of the create command; source cadastrarItemCardapio.error */
+    cadastrarItemCardapioError: ErrorState;
+    /** state atualizarItemCardapioStatus — The status of the update command; source atualizarItemCardapio.status */
+    atualizarItemCardapioStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state atualizarItemCardapioError — The error of the update command; source atualizarItemCardapio.error */
+    atualizarItemCardapioError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private publish;
+    private assignState;
+    private error;
+    private queryInitial;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private applyEntryParams;
+    /** function carregarItensCardapio — Loads the first catalog page when the page opens; redraws pagina by replacement; no arguments */
+    carregarItensCardapio(): Promise<void>;
+    /** function carregarMaisItensCardapio — Loads the next catalog page; redraws pagina by appending its items and retaining pagination; no arguments */
+    carregarMaisItensCardapio(): Promise<void>;
+    /** function obterItemCardapio — Obtains the selected item for the maintenance form; redraws item by replacement; id is the selected item identifier */
+    obterItemCardapio(id: string): Promise<void>;
+    /** select — Selects an item id or clears the current selection, then obtains its persisted record */
+    selectItemCardapio(id: string | null): void;
+    /** draft — Replaces the create-item form draft */
+    setCadastrarItemCardapioDraft(value: CadastrarItemCardapioDraft): void;
+    /** draft — Replaces the update-item form draft */
+    setAtualizarItemCardapioDraft(value: AtualizarItemCardapioDraft): void;
+    /** function cadastrarItemCardapio — Creates a catalog item; redraws item by replacement and reloads pagina */
+    cadastrarItemCardapio(): Promise<void>;
+    /** function atualizarItemCardapio — Updates the selected catalog item with optimistic form context; redraws item by replacement and reloads pagina */
+    atualizarItemCardapio(): Promise<void>;
+    /** Sets the visible page scene */
+    setScenario(value: string): void;
+}

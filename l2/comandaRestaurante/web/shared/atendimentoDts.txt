@@ -1,0 +1,89 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { ContextoAtendimento, ComandaAtendimento } from '/_102047_/l2/comandaRestaurante/web/contracts/atendimento.defs.js';
+export type { AtendimentoContracts, ContextoAtendimento, ComandaAtendimento } from '/_102047_/l2/comandaRestaurante/web/contracts/atendimento.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type LancarItemDraft = {
+    itemCardapioId: string | null;
+    details: {
+        quantidade: number | null;
+        observacao: string | null;
+    };
+};
+export declare class ComandaRestauranteAtendimentoShared extends StateLitElement {
+    /** state contextoAtendimento — independent collections for locating the mesa, open comanda, and menu item; source carregarAtendimento.contextoAtendimento; organism lookupAtendimento */
+    contextoAtendimento: ContextoAtendimento | null;
+    /** state comanda — the selected comanda with its mesa, lines, and calculated subtotal; source obterComandaAtendimento.comanda; organism detalheComanda */
+    comanda: ComandaAtendimento | null;
+    /** state selectedComanda — the selected comanda identifier; source entry.params.comandaId; organism detalheComanda; persisted */
+    selectedComanda: string | null;
+    /** state page — the current lookup page; source entry.params.page; organism lookupAtendimento; persisted */
+    page: number | null;
+    /** state mesaTermo — the mesa code filter; source entry.params.mesaTermo; organism lookupAtendimento; persisted */
+    mesaTermo: string | null;
+    /** state comandaNumero — the open comanda number filter; source entry.params.comandaNumero; organism lookupAtendimento; persisted */
+    comandaNumero: number | null;
+    /** state itemTermo — the menu item name filter; source entry.params.itemTermo; organism lookupAtendimento; persisted */
+    itemTermo: string | null;
+    /** state formularioLancamento — the menu item launch draft; source lancarItem.input; organism formularioLancamento */
+    formularioLancamento: LancarItemDraft;
+    /** state pageStatus — the overall load status of the page; source page lifecycle */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state carregarAtendimentoStatus — the initial lookup request status; source carregarAtendimento.status */
+    carregarAtendimentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarAtendimentoError — the initial lookup request error; source carregarAtendimento.error */
+    carregarAtendimentoError: ErrorState;
+    /** state atualizarLocalizacaoAtendimentoStatus — the filtered lookup request status; source atualizarLocalizacaoAtendimento.status */
+    atualizarLocalizacaoAtendimentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state atualizarLocalizacaoAtendimentoError — the filtered lookup request error; source atualizarLocalizacaoAtendimento.error */
+    atualizarLocalizacaoAtendimentoError: ErrorState;
+    /** state obterComandaAtendimentoStatus — the selected comanda request status; source obterComandaAtendimento.status */
+    obterComandaAtendimentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state obterComandaAtendimentoError — the selected comanda request error; source obterComandaAtendimento.error */
+    obterComandaAtendimentoError: ErrorState;
+    /** state abrirComandaStatus — the open comanda command status; source abrirComanda.status */
+    abrirComandaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state abrirComandaError — the open comanda command error; source abrirComanda.error */
+    abrirComandaError: ErrorState;
+    /** state lancarItemStatus — the item launch command status; source lancarItem.status */
+    lancarItemStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state lancarItemError — the item launch command error; source lancarItem.error */
+    lancarItemError: ErrorState;
+    /** state cancelarItemStatus — the item cancellation command status; source cancelarItem.status */
+    cancelarItemStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state cancelarItemError — the item cancellation request error; source cancelarItem.error */
+    cancelarItemError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private emptyLancarItemDraft;
+    private publish;
+    private assignState;
+    private errorFrom;
+    private requiredError;
+    private loadInitial;
+    /** function carregarAtendimento — loads the initial independent lookup collections; redraws contextoAtendimento by replacement; no arguments */
+    carregarAtendimento(): void;
+    /** function atualizarLocalizacaoAtendimento — updates the independently filtered lookup collections; redraws contextoAtendimento by replacement; arguments are the mesa code, comanda number, item name, and page */
+    atualizarLocalizacaoAtendimento(mesaTermo?: string | null, comandaNumero?: number | null, itemTermo?: string | null, page?: number): Promise<void>;
+    /** function obterComandaAtendimento — loads the selected comanda with its mesa, lines, and subtotal; redraws comanda by replacement; argument is the comanda identifier */
+    obterComandaAtendimento(comandaId?: string): Promise<void>;
+    /** function abrirComanda — opens a comanda for the selected available mesa; redraws comanda by upsert and declares contextoAtendimento updated; argument is the mesa identifier */
+    abrirComanda(mesaId: string | null): Promise<void>;
+    /** function lancarItem — adds the drafted menu item to the open comanda; redraws comanda by upsert; arguments are supplied only by the launch form */
+    lancarItem(): Promise<void>;
+    /** function cancelarItem — cancels the selected launched line; redraws comanda by upsert; arguments are the line identifier and its concurrency version */
+    cancelarItem(id: string | null, version: number | null): Promise<void>;
+    /** draft — sets the launch form draft used by lancarItem */
+    setFormularioLancamento(value: LancarItemDraft): void;
+    /** select — selects a comanda identifier, clears the detail when null, and loads the selected comanda when present */
+    selectComanda(value: string | null): void;
+    /** sets the visible page scene */
+    setScenario(value: string): void;
+    connectedCallback(): void;
+    private applyEntryParams;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+}
