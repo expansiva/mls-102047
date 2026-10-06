@@ -10,9 +10,8 @@ export const routes: ControllerRoute[] = [
 ];
 
 async function handleCarregarResumoOperacional(input: IRequestEnvelope): Promise<BffResponse<InicioContracts['comandaRestaurante.inicio.carregarResumoOperacional']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['garcomAtendimentoComandas', 'caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['garcomAtendimentoComandas', 'caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, [], [], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['garcomAtendimentoComandas', 'caixaFechamentoEcadastroOperacional']) as InicioContracts['comandaRestaurante.inicio.carregarResumoOperacional']['input'];
@@ -36,9 +35,12 @@ function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string
 function authorize(request: BffRequest, grantIds: readonly string[]): AppError | null {
   const source = request.meta?.source ?? 'http';
   const authorities = request.meta?.verifiedAuthorities ?? [];
-  if (source === 'http' && authorities.length === 0) {
-    return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
-  }
+  // TODO(login): o login ainda não está implementado, então nenhuma chamada traz verifiedAuthorities.
+  // Reativar quando o login emitir as autoridades.
+  // if (source === 'http' && authorities.length === 0) {
+  //   return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
+  // }
+  void source;
   for (const grantId of grantIds) {
     const resolved = resolveGrant(grantId);
     if (!('grantId' in resolved)) return new AppError(resolved.code, resolved.detail, 403);

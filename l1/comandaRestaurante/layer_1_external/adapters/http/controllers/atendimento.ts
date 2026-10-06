@@ -15,9 +15,8 @@ export const routes: ControllerRoute[] = [
 ];
 
 async function handleAbrirComanda(input: IRequestEnvelope): Promise<BffResponse<AtendimentoContracts['comandaRestaurante.atendimento.abrirComanda']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['garcomAtendimentoComandas']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['garcomAtendimentoComandas']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['mesaId'], ['mesaId'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['garcomAtendimentoComandas']) as AtendimentoContracts['comandaRestaurante.atendimento.abrirComanda']['input'];
@@ -26,9 +25,8 @@ async function handleAbrirComanda(input: IRequestEnvelope): Promise<BffResponse<
 }
 
 async function handleAtualizarLocalizacaoAtendimento(input: IRequestEnvelope): Promise<BffResponse<AtendimentoContracts['comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['garcomAtendimentoComandas']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['garcomAtendimentoComandas']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['page', 'pageSize'], ['mesaTermo', 'comandaNumero', 'itemTermo', 'page', 'pageSize'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['garcomAtendimentoComandas']) as AtendimentoContracts['comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento']['input'];
@@ -37,9 +35,8 @@ async function handleAtualizarLocalizacaoAtendimento(input: IRequestEnvelope): P
 }
 
 async function handleCancelarItem(input: IRequestEnvelope): Promise<BffResponse<AtendimentoContracts['comandaRestaurante.atendimento.cancelarItem']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['garcomAtendimentoComandas']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['garcomAtendimentoComandas']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id', 'version'], ['id', 'version'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['garcomAtendimentoComandas']) as AtendimentoContracts['comandaRestaurante.atendimento.cancelarItem']['input'];
@@ -48,9 +45,8 @@ async function handleCancelarItem(input: IRequestEnvelope): Promise<BffResponse<
 }
 
 async function handleCarregarAtendimento(input: IRequestEnvelope): Promise<BffResponse<AtendimentoContracts['comandaRestaurante.atendimento.carregarAtendimento']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['garcomAtendimentoComandas']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['garcomAtendimentoComandas']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['page', 'pageSize'], ['page', 'pageSize'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['garcomAtendimentoComandas']) as AtendimentoContracts['comandaRestaurante.atendimento.carregarAtendimento']['input'];
@@ -59,9 +55,8 @@ async function handleCarregarAtendimento(input: IRequestEnvelope): Promise<BffRe
 }
 
 async function handleLancarItem(input: IRequestEnvelope): Promise<BffResponse<AtendimentoContracts['comandaRestaurante.atendimento.lancarItem']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['garcomAtendimentoComandas']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['garcomAtendimentoComandas']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['comandaId', 'itemCardapioId', 'details', 'details.quantidade'], ['comandaId', 'itemCardapioId', 'details', 'details.quantidade', 'details.observacao'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['garcomAtendimentoComandas']) as AtendimentoContracts['comandaRestaurante.atendimento.lancarItem']['input'];
@@ -70,9 +65,8 @@ async function handleLancarItem(input: IRequestEnvelope): Promise<BffResponse<At
 }
 
 async function handleObterComandaAtendimento(input: IRequestEnvelope): Promise<BffResponse<AtendimentoContracts['comandaRestaurante.atendimento.obterComandaAtendimento']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['garcomAtendimentoComandas']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['garcomAtendimentoComandas']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['comandaId'], ['comandaId'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['garcomAtendimentoComandas']) as AtendimentoContracts['comandaRestaurante.atendimento.obterComandaAtendimento']['input'];
@@ -96,9 +90,12 @@ function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string
 function authorize(request: BffRequest, grantIds: readonly string[]): AppError | null {
   const source = request.meta?.source ?? 'http';
   const authorities = request.meta?.verifiedAuthorities ?? [];
-  if (source === 'http' && authorities.length === 0) {
-    return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
-  }
+  // TODO(login): o login ainda não está implementado, então nenhuma chamada traz verifiedAuthorities.
+  // Reativar quando o login emitir as autoridades.
+  // if (source === 'http' && authorities.length === 0) {
+  //   return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
+  // }
+  void source;
   for (const grantId of grantIds) {
     const resolved = resolveGrant(grantId);
     if (!('grantId' in resolved)) return new AppError(resolved.code, resolved.detail, 403);

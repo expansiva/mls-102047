@@ -4,6 +4,7 @@ import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/con
 import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
 import type { Comanda } from '/_102047_/l1/comandaRestaurante/layer_3_domain/entities/comanda.js';
 import type { ComandaRepository } from '/_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.js';
+import type { ItemComandaRepository } from '/_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.js';
 
 export interface FecharComandaInput extends Record<string, unknown> {
   id: string;
@@ -28,17 +29,6 @@ export interface FecharComandaOutput extends Record<string, unknown> {
   };
 }
 
-interface ItemComandaRecord {
-  comandaId?: string;
-  status?: string;
-  quantity?: number;
-  unitPrice?: string;
-}
-
-interface ItemComandaRepository {
-  list(filter: Record<string, unknown>): Promise<ItemComandaRecord[]>;
-}
-
 export async function fecharComanda(input: FecharComandaInput, ctx: RequestContext): Promise<FecharComandaOutput> {
   const comandaRepository = resolveRepository<ComandaRepository>(ctx, 'ComandaRepository');
   const itemRepository = resolveRepository<ItemComandaRepository>(ctx, 'ItemComandaRepository');
@@ -49,7 +39,7 @@ export async function fecharComanda(input: FecharComandaInput, ctx: RequestConte
     throw new AppError('VALIDATION_ERROR', 'A valid comanda id and version are required.', 400, { ruleId: 'fecharComanda' });
   }
 
-  const current = await comandaRepository.get(id) as unknown as Comanda | null | undefined;
+  const current: Comanda | null | undefined = await comandaRepository.get(id);
   if (!current) {
     throw new AppError('NOT_FOUND', 'Comanda was not found.', 404);
   }
@@ -60,7 +50,7 @@ export async function fecharComanda(input: FecharComandaInput, ctx: RequestConte
     throw new AppError('STATE_CONFLICT', 'Only an open comanda can be closed.', 409, { ruleId: 'fecharComanda' });
   }
 
-  const detailsInput = input.details as unknown as Record<string, unknown>;
+  const detailsInput: Record<string, unknown> = input.details;
   const paymentMethod = detailsInput.paymentMethod === undefined ? undefined : String(detailsInput.paymentMethod);
   if (!paymentMethod || !['cash', 'debitCard', 'creditCard', 'pix'].includes(paymentMethod)) {
     throw new AppError('VALIDATION_ERROR', 'A payment method is required to close the comanda.', 400, { ruleId: 'pagamentoObrigatorioNoFechamento' });
@@ -75,10 +65,11 @@ export async function fecharComanda(input: FecharComandaInput, ctx: RequestConte
 
   const items = await itemRepository.list({ comandaId: current.id });
   let subtotalValue = 0;
+  // subtotalComandaCalculado: the sum of quantity times registered unit price of the items not canceled.
   for (const item of items) {
-    if (item.status === 'cancelled') continue;
-    const quantity = Number(item.quantity);
-    const unitPrice = Number(item.unitPrice);
+    if (item.status === 'canceled') continue;
+    const quantity = Number(item.details.quantidade);
+    const unitPrice = Number(item.details.precoUnitario);
     if (!Number.isFinite(quantity) || !Number.isFinite(unitPrice)) {
       throw new AppError('VALIDATION_ERROR', 'Every valid item must have a quantity and a registered unit price.', 400, { ruleId: 'subtotalComandaCalculado' });
     }
@@ -94,7 +85,8 @@ export async function fecharComanda(input: FecharComandaInput, ctx: RequestConte
   const next: Comanda = {
     ...current,
     status: 'closed',
-    version: current.version + 1,
+    // The repository compares this version with the stored row and increments it.
+    version: current.version,
     details: {
       ...current.details,
       discountAmount,
@@ -104,8 +96,7 @@ export async function fecharComanda(input: FecharComandaInput, ctx: RequestConte
     },
   };
 
-  const closed = await comandaRepository.transition(next, 'fecharComanda');
-  const result = closed as unknown as Comanda;
+  const result: Comanda = await comandaRepository.transition(next, 'fecharComanda');
   if (result.status !== 'closed') {
     throw new AppError('STATE_CONFLICT', 'Closing the comanda did not release the mesa and complete the transition.', 409, { ruleId: 'fechamentoLiberaMesa' });
   }

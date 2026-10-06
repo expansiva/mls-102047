@@ -14,10 +14,9 @@ export const routes: ControllerRoute[] = [
 ];
 
 async function handleAtualizarItemCardapio(input: IRequestEnvelope): Promise<BffResponse<CardapioContracts['comandaRestaurante.cardapio.atualizarItemCardapio']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
-  const invalid = validateInput(input.request.params, ['id', 'version', 'name', 'details'], ['id', 'version', 'name', 'details'], []);
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
+  const invalid = validateInput(input.request.params, ['id', 'version', 'name', 'details', 'details.details', 'details.details.precoVigente'], ['id', 'version', 'name', 'details', 'details.details', 'details.details.precoVigente'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as CardapioContracts['comandaRestaurante.cardapio.atualizarItemCardapio']['input'];
   const data = await requests["comandaRestaurante.cardapio.atualizarItemCardapio"](params as Record<string, unknown>, input.ctx);
@@ -25,10 +24,9 @@ async function handleAtualizarItemCardapio(input: IRequestEnvelope): Promise<Bff
 }
 
 async function handleCadastrarItemCardapio(input: IRequestEnvelope): Promise<BffResponse<CardapioContracts['comandaRestaurante.cardapio.cadastrarItemCardapio']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
-  const invalid = validateInput(input.request.params, ['name', 'details'], ['name', 'details'], []);
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
+  const invalid = validateInput(input.request.params, ['name', 'details', 'details.details', 'details.details.precoVigente'], ['name', 'details', 'details.details', 'details.details.precoVigente'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as CardapioContracts['comandaRestaurante.cardapio.cadastrarItemCardapio']['input'];
   const data = await requests["comandaRestaurante.cardapio.cadastrarItemCardapio"](params as Record<string, unknown>, input.ctx);
@@ -36,9 +34,8 @@ async function handleCadastrarItemCardapio(input: IRequestEnvelope): Promise<Bff
 }
 
 async function handleCarregarItensCardapio(input: IRequestEnvelope): Promise<BffResponse<CardapioContracts['comandaRestaurante.cardapio.carregarItensCardapio']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['page', 'pageSize'], ['page', 'pageSize'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as CardapioContracts['comandaRestaurante.cardapio.carregarItensCardapio']['input'];
@@ -47,9 +44,8 @@ async function handleCarregarItensCardapio(input: IRequestEnvelope): Promise<Bff
 }
 
 async function handleCarregarMaisItensCardapio(input: IRequestEnvelope): Promise<BffResponse<CardapioContracts['comandaRestaurante.cardapio.carregarMaisItensCardapio']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['page', 'pageSize'], ['page', 'pageSize'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as CardapioContracts['comandaRestaurante.cardapio.carregarMaisItensCardapio']['input'];
@@ -58,9 +54,8 @@ async function handleCarregarMaisItensCardapio(input: IRequestEnvelope): Promise
 }
 
 async function handleObterItemCardapio(input: IRequestEnvelope): Promise<BffResponse<CardapioContracts['comandaRestaurante.cardapio.obterItemCardapio']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id'], ['id'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as CardapioContracts['comandaRestaurante.cardapio.obterItemCardapio']['input'];
@@ -84,9 +79,12 @@ function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string
 function authorize(request: BffRequest, grantIds: readonly string[]): AppError | null {
   const source = request.meta?.source ?? 'http';
   const authorities = request.meta?.verifiedAuthorities ?? [];
-  if (source === 'http' && authorities.length === 0) {
-    return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
-  }
+  // TODO(login): o login ainda não está implementado, então nenhuma chamada traz verifiedAuthorities.
+  // Reativar quando o login emitir as autoridades.
+  // if (source === 'http' && authorities.length === 0) {
+  //   return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
+  // }
+  void source;
   for (const grantId of grantIds) {
     const resolved = resolveGrant(grantId);
     if (!('grantId' in resolved)) return new AppError(resolved.code, resolved.detail, 403);

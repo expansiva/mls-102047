@@ -4,6 +4,8 @@ import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/con
 import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
 import type { ItemComanda } from '/_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.js';
 import type { ItemComandaRepository } from '/_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.js';
+import type { ComandaRepository } from '/_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.js';
+import type { ItemCardapioRepository } from '/_102047_/l1/comandaRestaurante/layer_2_application/ports/itemCardapioRepository.js';
 export interface CreateItemComandaInput extends Record<string, unknown> {
 comandaId: string;
 itemCardapioId: string;
@@ -28,27 +30,10 @@ valorTotal?: string;
 };
 }
 
-type RecordRepository = {
-list(filter: Record<string, unknown>): Promise<unknown[]>;
-};
-
-function recordDetails(record: Record<string, unknown>): Record<string, unknown> {
-const details = record.details;
-return details !== null && typeof details === 'object'
-? details as Record<string, unknown>
-: {};
-}
-
-function currentMenuPrice(record: Record<string, unknown>): string | undefined {
-const details = recordDetails(record);
-const value = details.precoUnitario ?? details.preco ?? record.precoUnitario ?? record.preco;
-return value === undefined || value === null ? undefined : String(value);
-}
-
 export async function createItemComanda(input: CreateItemComandaInput, ctx: RequestContext): Promise<CreateItemComandaOutput> {
 const comandaId = String(input.comandaId);
 const itemCardapioId = String(input.itemCardapioId);
-const inputDetails = input.details as unknown as Record<string, unknown>;
+const inputDetails: Record<string, unknown> = input.details;
 const quantidade = Number(inputDetails.quantidade);
 const observacao = inputDetails.observacao === undefined ? undefined : String(inputDetails.observacao);
 
@@ -56,23 +41,23 @@ if (!comandaId || !itemCardapioId || !Number.isInteger(quantidade) || quantidade
 throw new AppError('INVALID_ITEM_COMANDA', 'The comanda, menu item, and quantity are required and valid.', 400);
 }
 
-const comandaRepository = resolveRepository<RecordRepository>(ctx, 'ComandaRepository');
+const comandaRepository = resolveRepository<ComandaRepository>(ctx, 'ComandaRepository');
 const comandas = await comandaRepository.list({ id: comandaId });
 if (comandas.length === 0) {
 throw new AppError('NOT_FOUND', 'The comanda does not exist.', 404);
 }
-const comanda = comandas[0] as Record<string, unknown>;
-const comandaStatus = comanda.status ?? comanda.state;
-if (comandaStatus !== 'open' && comandaStatus !== 'opened') {
+if (comandas[0].status !== 'open') {
 throw new AppError('ITEMS_ONLY_IN_OPEN_COMANDA', 'An item can only be launched in an open comanda.', 409, { ruleId: 'itensSomenteEmComandaAberta' });
 }
 
-const menuRepository = resolveRepository<RecordRepository>(ctx, 'ItemCardapioRepository');
+const menuRepository = resolveRepository<ItemCardapioRepository>(ctx, 'ItemCardapioRepository');
 const menuItems = await menuRepository.list({ id: itemCardapioId });
 if (menuItems.length === 0) {
 throw new AppError('NOT_FOUND', 'The menu item does not exist.', 404);
 }
-const vigente = currentMenuPrice(menuItems[0] as Record<string, unknown>);
+// precoUnitarioRegistradoNoLancamento: the unit price is the menu item's current price at launch.
+const precoVigente = menuItems[0].details.precoVigente;
+const vigente = precoVigente === undefined || precoVigente === null ? undefined : String(precoVigente);
 if (vigente === undefined) {
 throw new AppError('INVALID_MENU_ITEM_PRICE', 'The current menu item price is unavailable.', 400, { ruleId: 'precoUnitarioRegistradoNoLancamento' });
 }

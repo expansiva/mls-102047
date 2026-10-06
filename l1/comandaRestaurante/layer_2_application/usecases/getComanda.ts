@@ -26,5 +26,5 @@ const found = await comandaRepository.get(id);
 if (!found) {
 throw new AppError('NOT_FOUND', 'Comanda was not found.', 404);
 }
-return found as unknown as GetComandaOutput;
+return { id: found.id, version: found.version, number: found.number, mesaId: found.mesaId, status: found.status, details: { ...found.details } };
 }

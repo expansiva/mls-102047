@@ -14,9 +14,8 @@ export const routes: ControllerRoute[] = [
 ];
 
 async function handleBuscarComandasAbertas(input: IRequestEnvelope): Promise<BffResponse<FechamentoContracts['comandaRestaurante.fechamento.buscarComandasAbertas']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['page', 'pageSize'], ['number', 'mesaCode', 'page', 'pageSize'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as FechamentoContracts['comandaRestaurante.fechamento.buscarComandasAbertas']['input'];
@@ -25,9 +24,8 @@ async function handleBuscarComandasAbertas(input: IRequestEnvelope): Promise<Bff
 }
 
 async function handleCarregarFechamento(input: IRequestEnvelope): Promise<BffResponse<FechamentoContracts['comandaRestaurante.fechamento.carregarFechamento']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['page', 'pageSize'], ['comandaId', 'number', 'mesaCode', 'page', 'pageSize'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as FechamentoContracts['comandaRestaurante.fechamento.carregarFechamento']['input'];
@@ -36,9 +34,8 @@ async function handleCarregarFechamento(input: IRequestEnvelope): Promise<BffRes
 }
 
 async function handleCarregarMaisComandasAbertas(input: IRequestEnvelope): Promise<BffResponse<FechamentoContracts['comandaRestaurante.fechamento.carregarMaisComandasAbertas']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['page', 'pageSize'], ['number', 'mesaCode', 'page', 'pageSize'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as FechamentoContracts['comandaRestaurante.fechamento.carregarMaisComandasAbertas']['input'];
@@ -47,9 +44,8 @@ async function handleCarregarMaisComandasAbertas(input: IRequestEnvelope): Promi
 }
 
 async function handleFecharComandaPaga(input: IRequestEnvelope): Promise<BffResponse<FechamentoContracts['comandaRestaurante.fechamento.fecharComandaPaga']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id', 'version', 'details', 'details.paymentMethod'], ['id', 'version', 'details', 'details.discountAmount', 'details.paymentMethod'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as FechamentoContracts['comandaRestaurante.fechamento.fecharComandaPaga']['input'];
@@ -58,9 +54,8 @@ async function handleFecharComandaPaga(input: IRequestEnvelope): Promise<BffResp
 }
 
 async function handleObterComandaParaFechamento(input: IRequestEnvelope): Promise<BffResponse<FechamentoContracts['comandaRestaurante.fechamento.obterComandaParaFechamento']['output']>> {
-  // LOCAL TEST (06/10/2026): authority check ignored — the VM has no login, verifiedAuthorities is empty.
-  // const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
-  // if (denied) throw denied;
+  const denied = authorize(input.request, ['caixaFechamentoEcadastroOperacional']);
+  if (denied) throw denied;
   const invalid = validateInput(input.request.params, ['id'], ['id'], []);
   if (invalid) throw invalid;
   const params = scopeParams(input.request.params, input.ctx, ['caixaFechamentoEcadastroOperacional']) as FechamentoContracts['comandaRestaurante.fechamento.obterComandaParaFechamento']['input'];
@@ -84,9 +79,12 @@ function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string
 function authorize(request: BffRequest, grantIds: readonly string[]): AppError | null {
   const source = request.meta?.source ?? 'http';
   const authorities = request.meta?.verifiedAuthorities ?? [];
-  if (source === 'http' && authorities.length === 0) {
-    return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
-  }
+  // TODO(login): o login ainda não está implementado, então nenhuma chamada traz verifiedAuthorities.
+  // Reativar quando o login emitir as autoridades.
+  // if (source === 'http' && authorities.length === 0) {
+  //   return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
+  // }
+  void source;
   for (const grantId of grantIds) {
     const resolved = resolveGrant(grantId);
     if (!('grantId' in resolved)) return new AppError(resolved.code, resolved.detail, 403);

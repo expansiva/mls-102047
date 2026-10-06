@@ -4,6 +4,7 @@ import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/con
 import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
 import type { ItemComanda } from '/_102047_/l1/comandaRestaurante/layer_3_domain/entities/itemComanda.js';
 import type { ItemComandaRepository } from '/_102047_/l1/comandaRestaurante/layer_2_application/ports/itemComandaRepository.js';
+import type { ComandaRepository } from '/_102047_/l1/comandaRestaurante/layer_2_application/ports/comandaRepository.js';
 
 export interface CancelarItemComandaInput extends Record<string, unknown> {
   id: string;
@@ -22,15 +23,6 @@ export interface CancelarItemComandaOutput extends Record<string, unknown> {
     precoUnitario: string;
     valorTotal?: string;
   };
-}
-
-interface ComandaRecord {
-  id: string;
-  status: string;
-}
-
-interface ComandaRepository {
-  list(filter: Record<string, unknown>): Promise<ComandaRecord[]>;
 }
 
 export async function cancelarItemComanda(input: CancelarItemComandaInput, ctx: RequestContext): Promise<CancelarItemComandaOutput> {
@@ -57,7 +49,7 @@ export async function cancelarItemComanda(input: CancelarItemComandaInput, ctx: 
   if (!comanda) {
     throw new AppError('NOT_FOUND', 'The comanda of the item was not found.', 404);
   }
-  if (String(comanda.status) !== 'open') {
+  if (comanda.status !== 'open') {
     throw new AppError(
       'STATE_CONFLICT',
       'An item can only be canceled while its comanda is open.',
@@ -73,7 +65,8 @@ export async function cancelarItemComanda(input: CancelarItemComandaInput, ctx: 
   const next: ItemComanda = {
     ...current,
     status: 'canceled',
-    version: current.version + 1,
+    // The repository compares this version with the stored row and increments it.
+    version: current.version,
     details: {
       ...current.details,
       valorTotal: String(Number(current.details.quantidade) * Number(current.details.precoUnitario)),
