@@ -3,6 +3,7 @@ import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { ComandaRestauranteAtendimentoShared } from '/_102047_/l2/comandaRestaurante/web/shared/atendimento.js';
 
+
 import '/_102040_/l2/molecules/groupenternumber/ml-number-stepper.js';
 import '/_102040_/l2/molecules/groupentertext/ml-multiline-text.js';
 import '/_102040_/l2/molecules/groupnavigatesection/ml-navigate-pills.js';
