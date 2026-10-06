@@ -1,0 +1,152 @@
+/// <mls fileReference="_102047_/l1/comandaRestaurante/layer_2_application/requests/atendimento.ts" enhancement="_blank"/>
+import type { RequestContext, AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { AtendimentoContracts } from '/_102047_/l2/comandaRestaurante/web/contracts/atendimento.defs.js';
+import { cancelarItemComanda } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/cancelarItemComanda.js';
+import { createComanda } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/createComanda.js';
+import { createItemComanda } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/createItemComanda.js';
+import { getComanda } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/getComanda.js';
+import { getItemCardapio } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/getItemCardapio.js';
+import { getMesa } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/getMesa.js';
+import { listComanda } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/listComanda.js';
+import { listItemCardapio } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/listItemCardapio.js';
+import { listItemComanda } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/listItemComanda.js';
+import { listMesa } from '/_102047_/l1/comandaRestaurante/layer_2_application/usecases/listMesa.js';
+import { AppError as RuntimeAppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+
+type AnyRecord = Record<string, any>;
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 200;
+
+type Page = { page: number; pageSize: number };
+function paging(input: Record<string, unknown>, pageKey = 'page', sizeKey = 'pageSize'): Page {
+  const page = input[pageKey] === undefined ? 1 : Number(input[pageKey]);
+  const pageSize = input[sizeKey] === undefined ? DEFAULT_PAGE_SIZE : Number(input[sizeKey]);
+  return {
+    page: Number.isFinite(page) ? Math.max(1, Math.trunc(page)) : 1,
+    pageSize: Number.isFinite(pageSize) ? Math.min(MAX_PAGE_SIZE, Math.max(1, Math.trunc(pageSize))) : DEFAULT_PAGE_SIZE
+  };
+}
+function slice<T>(items: T[], page: number, pageSize: number) {
+  const start = (page - 1) * pageSize;
+  return { items: items.slice(start, start + pageSize), page, pageSize, hasMore: start + pageSize < items.length };
+}
+async function all<T extends AnyRecord>(load: (page: number, pageSize: number) => Promise<{ items: T[]; hasMore: boolean }>): Promise<T[]> {
+  const result: T[] = [];
+  let page = 1;
+  for (;;) {
+    const part = await load(page, MAX_PAGE_SIZE);
+    result.push(...part.items);
+    if (!part.hasMore) return result;
+    page += 1;
+  }
+}
+function cents(value: string): bigint {
+  const text = String(value).trim();
+  const negative = text.startsWith('-');
+  const unsigned = negative ? text.slice(1) : text;
+  const [whole, fraction = ''] = unsigned.split('.');
+  const valueInCents = BigInt((whole || '0') + (fraction + '00').slice(0, 2));
+  return negative ? -valueInCents : valueInCents;
+}
+function money(value: bigint): string {
+  const negative = value < 0n;
+  const absolute = negative ? -value : value;
+  return `${negative ? '-' : ''}${absolute / 100n}.${(absolute % 100n).toString().padStart(2, '0')}`;
+}
+// valorTotalItemComandaCalculado: quantidade multiplicada pelo preço unitário registrado.
+function lineTotal(item: AnyRecord): string {
+  return money(cents(String(item.details.precoUnitario)) * BigInt(Number(item.details.quantidade)));
+}
+// subtotalComandaCalculado: soma somente os valores dos itens não cancelados.
+function subtotal(items: AnyRecord[]): string {
+  return money(items.filter((item) => item.status !== 'canceled').reduce((sum, item) => sum + cents(lineTotal(item)), 0n));
+}
+function mesaReference(mesa: AnyRecord) { return { id: String(mesa.id), code: String(mesa.code) }; }
+function mapItem(item: AnyRecord, cardapio: AnyRecord): AnyRecord {
+  return {
+    id: String(item.id), version: Number(item.version), comandaId: String(item.comandaId), itemCardapioId: String(item.itemCardapioId),
+    status: item.status as 'launched' | 'canceled',
+    details: {
+      quantidade: Number(item.details.quantidade),
+      ...(item.details.observacao === undefined ? {} : { observacao: String(item.details.observacao) }),
+      precoUnitario: String(item.details.precoUnitario),
+      // valorTotalItemComandaCalculado is applied to canceled lines as well for display.
+      valorTotal: lineTotal(item)
+    },
+    itemCardapio: { id: String(cardapio.id), name: String(cardapio.name) }
+  };
+}
+async function compose(comanda: AnyRecord, ctx: RequestContext, suppliedItems?: AnyRecord[]): Promise<AnyRecord> {
+  const mesa = await getMesa({ id: String(comanda.mesaId) }, ctx);
+  const rawItems = suppliedItems ?? await all((page, pageSize) => listItemComanda({ comandaId: String(comanda.id), page, pageSize } as Parameters<typeof listItemComanda>[0], ctx));
+  const items = await Promise.all(rawItems.map(async (item) => mapItem(item, await getItemCardapio({ id: String(item.itemCardapioId) }, ctx))));
+  return {
+    id: String(comanda.id), version: Number(comanda.version), number: Number(comanda.number), mesaId: String(comanda.mesaId),
+    status: comanda.status as 'open' | 'closed', mesa: mesaReference(mesa), details: { subtotal: subtotal(rawItems) }, itens: items
+  };
+}
+async function contexto(ctx: RequestContext, input: Record<string, unknown>): Promise<AnyRecord> {
+  const mesas = await all((page, pageSize) => listMesa({ page, pageSize } as Parameters<typeof listMesa>[0], ctx));
+  const comandas = await all((page, pageSize) => listComanda({ status: 'open', page, pageSize } as Parameters<typeof listComanda>[0], ctx));
+  const itens = await all((page, pageSize) => listItemCardapio({ page, pageSize } as Parameters<typeof listItemCardapio>[0], ctx));
+  const openMesaIds = new Set(comandas.map((c) => String(c.mesaId)));
+  const available = mesas.filter((mesa) => !openMesaIds.has(String(mesa.id))).sort((a, b) => String(a.code).localeCompare(String(b.code)));
+  const open = await Promise.all(comandas.map(async (c) => ({ ...c, mesa: mesaReference(await getMesa({ id: String(c.mesaId) }, ctx)) })));
+  open.sort((a, b) => Number(a.number) - Number(b.number));
+  itens.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  const mesaTermo = input.mesaTermo === undefined ? undefined : String(input.mesaTermo).toLowerCase();
+  const numero = input.comandaNumero === undefined ? undefined : Number(input.comandaNumero);
+  const itemTermo = input.itemTermo === undefined ? undefined : String(input.itemTermo).toLowerCase();
+  const p = paging(input);
+  const filteredMesas = mesaTermo === undefined ? available : available.filter((m) => String(m.code).toLowerCase().includes(mesaTermo));
+  const filteredComandas = numero === undefined ? open : open.filter((c) => Number(c.number) === numero);
+  const filteredItens = itemTermo === undefined ? itens : itens.filter((i) => String(i.name).toLowerCase().includes(itemTermo));
+  return {
+    mesasDisponiveis: slice( filteredMesas.map((m) => ({ id: String(m.id), code: String(m.code), details: { disponivel: true } })), p.page, p.pageSize),
+    comandasAbertas: slice(filteredComandas.map((c) => ({ id: String(c.id), version: Number(c.version), number: Number(c.number), mesaId: String(c.mesaId), status: 'open' as const, mesa: c.mesa })), p.page, p.pageSize),
+    itensCardapio: slice(filteredItens.map((i) => ({ id: String(i.id), name: String(i.name), details: { precoVigente: String(i.details.precoVigente) } })), p.page, p.pageSize)
+  };
+}
+
+export const requests: Record<string, (input: Record<string, unknown>, ctx: RequestContext) => Promise<Record<string, unknown>>> = {
+  'comandaRestaurante.atendimento.carregarAtendimento': async function (input, ctx) {
+    return { contextoAtendimento: await contexto(ctx, input) } as unknown as AtendimentoContracts['comandaRestaurante.atendimento.carregarAtendimento']['output'];
+  },
+  'comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento': async function (input, ctx) {
+    return { contextoAtendimento: await contexto(ctx, input) } as unknown as AtendimentoContracts['comandaRestaurante.atendimento.atualizarLocalizacaoAtendimento']['output'];
+  },
+  'comandaRestaurante.atendimento.obterComandaAtendimento': async function (input, ctx) {
+    return { comanda: await compose(await getComanda({ id: String(input.comandaId) }, ctx), ctx) } as unknown as AtendimentoContracts['comandaRestaurante.atendimento.obterComandaAtendimento']['output'];
+  },
+  'comandaRestaurante.atendimento.abrirComanda': async function (input, ctx) {
+    return ctx.data.moduleData.runInTransaction(async (tx) => {
+      const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
+      // mesaDisponivelParaAbrirComanda and umaComandaAbertaPorMesa are enforced by createComanda.
+      const created = await createComanda({ mesaId: String(input.mesaId) }, bound);
+      return { comanda: await compose(created, bound, []) } as unknown as AtendimentoContracts['comandaRestaurante.atendimento.abrirComanda']['output'];
+    });
+  },
+  'comandaRestaurante.atendimento.lancarItem': async function (input, ctx) {
+    return ctx.data.moduleData.runInTransaction(async (tx) => {
+      const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
+      const comanda = await getComanda({ id: String(input.comandaId) }, bound);
+      if (comanda.status !== 'open') throw new RuntimeAppError('RULE_VIOLATION', 'A comanda deve estar aberta para lançar um item.', 409, { ruleId: 'itensSomenteEmComandaAberta' });
+      const details = input.details as Record<string, unknown>;
+      const cardapio = await getItemCardapio({ id: String(input.itemCardapioId) }, bound);
+      // precoUnitarioRegistradoNoLancamento: capture the current catalog price.
+      await createItemComanda({ comandaId: String(input.comandaId), itemCardapioId: String(input.itemCardapioId), status: 'launched', details: { quantidade: Number(details.quantidade), ...(details.observacao === undefined ? {} : { observacao: String(details.observacao) }), precoUnitario: String(cardapio.details.precoVigente) } }, bound);
+      // valorTotalItemComandaCalculado and subtotalComandaCalculado are calculated by compose.
+      return { comanda: await compose(comanda, bound) } as unknown as AtendimentoContracts['comandaRestaurante.atendimento.lancarItem']['output'];
+    });
+  },
+  'comandaRestaurante.atendimento.cancelarItem': async function (input, ctx) {
+    return ctx.data.moduleData.runInTransaction(async (tx) => {
+      const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
+      // itemComandaOperacaoSomenteComandaAberta is enforced by cancelarItemComanda.
+      const canceled = await cancelarItemComanda({ id: String(input.id), version: Number(input.version) }, bound);
+      const comanda = await getComanda({ id: String(canceled.comandaId) }, bound);
+      // valorTotalItemComandaCalculado and subtotalComandaCalculado are calculated by compose.
+      return { comanda: await compose(comanda, bound) } as unknown as AtendimentoContracts['comandaRestaurante.atendimento.cancelarItem']['output'];
+    });
+  }
+};
