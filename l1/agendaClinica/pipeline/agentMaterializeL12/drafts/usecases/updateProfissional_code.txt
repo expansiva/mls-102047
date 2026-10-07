@@ -1,0 +1,130 @@
+/// <mls fileReference="_102047_/l1/agendaClinica/layer_2_application/usecases/updateProfissional.ts" enhancement="_blank"/>
+import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+export interface UpdateProfissionalInput extends Record<string, unknown> {
+details: {
+identification: {
+name: string;
+docType?: string;
+docId?: string;
+countryCode: string;
+};
+base?: Record<string, unknown>;
+person?: {
+privacyConsent?: Record<string, unknown>;
+};
+general?: Record<string, unknown>;
+agendaClinica: {
+professionalType: string;
+};
+};
+id: string;
+version: number;
+}
+export interface UpdateProfissionalOutput extends Record<string, unknown> {
+id: string;
+version: number;
+details: {
+identification: {
+subtype: string;
+name: string;
+status: string;
+docType?: string;
+docId?: string;
+countryCode: string;
+};
+base?: Record<string, unknown>;
+person?: {
+privacyConsent?: Record<string, unknown>;
+};
+general?: Record<string, unknown>;
+agendaClinica: {
+professionalType: string;
+};
+};
+}
+
+interface MdmDetails extends Record<string, unknown> {
+subtype?: unknown;
+name?: unknown;
+status?: unknown;
+docType?: unknown;
+docId?: unknown;
+countryCode?: unknown;
+privacyConsent?: unknown;
+general?: unknown;
+agendaClinica?: unknown;
+}
+
+interface MdmResult {
+mdmId: string;
+version: number;
+details: MdmDetails;
+}
+
+function recordValue(value: unknown): Record<string, unknown> | undefined {
+if (value === null || typeof value !== 'object' || Array.isArray(value)) return undefined;
+return value as Record<string, unknown>;
+}
+
+function grouped(result: MdmResult): UpdateProfissionalOutput {
+const flat = result.details;
+const identification: UpdateProfissionalOutput['details']['identification'] = {
+subtype: String(flat.subtype ?? ''),
+name: String(flat.name ?? ''),
+status: String(flat.status ?? ''),
+countryCode: String(flat.countryCode ?? '')
+};
+if (flat.docType != null) identification.docType = String(flat.docType);
+if (flat.docId != null) identification.docId = String(flat.docId);
+
+const details: UpdateProfissionalOutput['details'] = {
+identification,
+agendaClinica: { professionalType: '' }
+};
+const personConsent = recordValue(flat.privacyConsent);
+if (personConsent !== undefined) details.person = { privacyConsent: personConsent };
+const general = recordValue(flat.general);
+if (general !== undefined) details.general = general;
+const moduleDetails = recordValue(flat.agendaClinica);
+if (moduleDetails !== undefined) {
+const professionalType = moduleDetails.professionalType;
+if (professionalType != null) details.agendaClinica.professionalType = String(professionalType);
+}
+return { id: String(result.mdmId), version: Number(result.version), details };
+}
+
+export async function updateProfissional(input: UpdateProfissionalInput, ctx: RequestContext): Promise<UpdateProfissionalOutput> {
+const id = String(input.id);
+const expectedVersion = Number(input.version);
+const existing = await ctx.mdm.entity.get({ mdmId: id }) as MdmResult;
+if (!existing || existing.mdmId == null) {
+throw new AppError('NOT_FOUND', 'Professional was not found.', 404);
+}
+if (Number(existing.version) !== expectedVersion) {
+throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored record.', 409);
+}
+
+const identification = input.details?.identification;
+const patch: Record<string, unknown> = {
+name: String(identification?.name),
+countryCode: String(identification?.countryCode)
+};
+const docType = identification?.docType;
+if (docType !== undefined) patch.docType = String(docType);
+const docId = identification?.docId;
+if (docId !== undefined) patch.docId = String(docId);
+const privacyConsent = input.details?.person?.privacyConsent;
+if (privacyConsent !== undefined) patch.privacyConsent = privacyConsent;
+const professionalType = input.details?.agendaClinica?.professionalType;
+if (professionalType !== undefined) {
+patch.agendaClinica = { professionalType: String(professionalType) };
+}
+
+const saved = await ctx.mdm.entity.update({
+mdmId: id,
+expectedVersion,
+patch
+}) as MdmResult;
+return grouped(saved);
+}
