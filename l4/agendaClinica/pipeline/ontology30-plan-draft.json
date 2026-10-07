@@ -1,13 +1,13 @@
 {
   "moduleName": "agendaClinica",
-  "businessDomain": "Agenda clínica para cadastro de pacientes, agendamento e realização de consultas.",
+  "businessDomain": "Agenda clínica",
   "entities": [
     {
       "entityId": "Paciente",
       "kind": "role",
       "family": "mdm",
       "title": "Paciente",
-      "description": "Pessoa atendida pela clínica, registrada no cadastro mestre da organização.",
+      "description": "Pessoa atendida pela clínica e identificada para receber consultas.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "agendaClinica.Paciente",
@@ -18,7 +18,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Profissional",
-      "description": "Médico ou terapeuta que realiza consultas na clínica.",
+      "description": "Pessoa profissional da clínica, médica ou terapeuta, responsável por sua própria agenda e atendimentos.",
       "displayField": "details.identification.name",
       "writer": "crud",
       "subtype": "Person",
@@ -26,34 +26,11 @@
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "Recepcionista",
-      "kind": "role",
-      "family": "mdm",
-      "title": "Recepcionista",
-      "description": "Pessoa da clínica que cadastra pacientes e opera os agendamentos.",
-      "displayField": "details.identification.name",
-      "writer": "crud",
-      "subtype": "Person",
-      "roleTag": "agendaClinica.Recepcionista",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "entityId": "ContatoPaciente",
-      "kind": "role",
-      "family": "mdm",
-      "title": "Contato do paciente",
-      "description": "Canal de contato mestre do paciente, consultado pela recepção para confirmação telefônica.",
-      "displayField": "details.identification.name",
-      "subtype": "ContactChannel",
-      "roleTag": "agendaClinica.ContatoPaciente",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
       "entityId": "Consulta",
       "kind": "entity",
       "family": "tdm",
       "title": "Consulta",
-      "description": "Agendamento de atendimento de um paciente com um profissional em data e horário definidos.",
+      "description": "Agendamento clínico de um paciente com um profissional em data e horário, incluindo confirmação, falta ou atendimento realizado.",
       "displayField": "scheduledAt",
       "class": "event",
       "storage": {
@@ -71,7 +48,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é marcada para um paciente.",
+      "description": "Cada consulta é agendada para um paciente, e um paciente pode ter várias consultas.",
       "field": "Consulta.pacienteId"
     },
     {
@@ -81,18 +58,8 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é realizada por um profissional.",
+      "description": "Cada consulta é atribuída a um profissional, e um profissional pode ter várias consultas em sua agenda.",
       "field": "Consulta.profissionalId"
-    },
-    {
-      "relationshipId": "pacienteHasContact",
-      "from": "Paciente",
-      "to": "ContatoPaciente",
-      "type": "oneToMany",
-      "required": false,
-      "mode": "mdmRelationship",
-      "description": "O paciente pode possuir canais de contato mestre usados pela recepção para confirmação.",
-      "catalogType": "HasContact"
     }
   ],
   "normalizations": [
@@ -105,16 +72,6 @@
       "kind": "derivedFromPlatform",
       "entityId": "Profissional",
       "detail": "roleTag agendaClinica.Profissional; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "Recepcionista",
-      "detail": "roleTag agendaClinica.Recepcionista; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "ContatoPaciente",
-      "detail": "roleTag agendaClinica.ContatoPaciente; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",

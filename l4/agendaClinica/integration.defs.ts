@@ -13,7 +13,7 @@ export const agendaClinicaIntegration = {
       "to": "any",
       "event": "confirmarConsulta",
       "on": "Consulta.confirmarConsulta",
-      "description": "Publica a confirmação da consulta para módulos que precisem acompanhar a agenda clínica.",
+      "description": "Publica a confirmação da consulta para módulos interessados.",
       "entityRefs": [
         "Consulta"
       ]
@@ -24,9 +24,10 @@ export const agendaClinicaIntegration = {
       "to": "any",
       "event": "registrarFalta",
       "on": "Consulta.registrarFalta",
-      "description": "Publica o registro de falta do paciente para módulos que precisem acompanhar a agenda clínica.",
+      "description": "Publica o registro de falta do paciente na consulta para módulos interessados.",
       "entityRefs": [
-        "Consulta"
+        "Consulta",
+        "Paciente"
       ]
     },
     {
@@ -35,9 +36,11 @@ export const agendaClinicaIntegration = {
       "to": "any",
       "event": "registrarAtendimento",
       "on": "Consulta.registrarAtendimento",
-      "description": "Publica o registro de atendimento concluído para módulos que precisem acompanhar a agenda clínica.",
+      "description": "Publica o registro de atendimento concluído, incluindo a anotação do profissional, para módulos interessados.",
       "entityRefs": [
-        "Consulta"
+        "Consulta",
+        "Paciente",
+        "Profissional"
       ]
     }
   ],

@@ -8,35 +8,35 @@ export const consultarAgendaDiariaJourney = {
   "business": {
     "actorRef": "profissional",
     "title": "Consultar agenda diária",
-    "goal": "Visualizar somente as consultas próprias previstas para o dia.",
+    "goal": "Ver apenas as consultas próprias previstas para o dia.",
     "entry": {
-      "mode": "coldStart"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
         "stepId": "localizarAgendaDoDia",
         "kind": "locate",
         "entity": "Consulta",
-        "title": "Localizar agenda do dia",
-        "description": "O profissional visualiza as consultas do dia vinculadas à sua própria agenda."
+        "title": "Localizar agenda diária",
+        "description": "O profissional localiza as consultas da própria agenda para o dia."
       },
       {
-        "stepId": "consultarDetalhesConsulta",
+        "stepId": "consultarConsultasDoDia",
         "kind": "inspect",
         "entity": "Consulta",
-        "title": "Consultar detalhes da consulta",
-        "description": "O profissional consulta os dados necessários de uma consulta da sua agenda diária."
+        "title": "Consultar consultas diárias",
+        "description": "O profissional consulta os horários e pacientes das consultas que lhe pertencem no dia."
       }
     ],
     "outcome": {
-      "statement": "O profissional visualiza sua agenda diária e os detalhes das próprias consultas.",
+      "statement": "O profissional visualiza sua agenda diária.",
       "evidence": [
-        "A lista apresenta apenas consultas vinculadas ao profissional que acessou o módulo.",
-        "Cada consulta da agenda exibe seu horário e paciente."
+        "São exibidas apenas consultas vinculadas ao próprio profissional.",
+        "As consultas exibidas correspondem ao dia consultado."
       ]
     }
   },
-  "businessHash": "sha256:829a4a1e5d301c858b7f841216f408fac011de2e533d756c9a98ec989d14c760"
+  "businessHash": "sha256:67c0f4a0ad8954cc17592aa106e26ab285f040b968f145b0bd3113816866deab"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConsultarAgendaDiariaJourneyType = typeof consultarAgendaDiariaJourney;

@@ -10,7 +10,7 @@ export const agendarConsultaJourney = {
     "title": "Agendar consulta",
     "goal": "Marcar uma consulta para um paciente com um profissional em data e horário disponíveis.",
     "entry": {
-      "mode": "coldStart"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
@@ -21,37 +21,23 @@ export const agendarConsultaJourney = {
         "description": "A recepcionista localiza o paciente que receberá a consulta."
       },
       {
-        "stepId": "localizarProfissional",
-        "kind": "locate",
-        "entity": "Profissional",
-        "title": "Localizar profissional",
-        "description": "A recepcionista localiza o profissional que realizará o atendimento."
-      },
-      {
-        "stepId": "verificarHorarioDisponivel",
-        "kind": "inspect",
-        "entity": "Consulta",
-        "title": "Verificar horário disponível",
-        "description": "A recepcionista consulta a agenda do profissional para escolher uma data e horário sem outra consulta marcada."
-      },
-      {
-        "stepId": "registrarAgendamento",
+        "stepId": "registrarConsulta",
         "kind": "act",
         "entity": "Consulta",
         "effect": "create",
-        "title": "Registrar agendamento",
-        "description": "A recepcionista cria a consulta do paciente com o profissional, na data e horário selecionados."
+        "title": "Agendar consulta",
+        "description": "A recepcionista agenda a consulta para um profissional, informando a data e o horário, desde que o horário esteja disponível."
       }
     ],
     "outcome": {
-      "statement": "A consulta fica agendada para o paciente e o profissional.",
+      "statement": "A consulta fica agendada para o paciente, profissional, data e horário informados.",
       "evidence": [
-        "A consulta aparece na agenda do profissional na data e horário marcados.",
-        "Não há outra consulta do mesmo profissional no mesmo horário."
+        "A consulta aparece na agenda do profissional na data marcada.",
+        "Não existe outra consulta do mesmo profissional no mesmo horário."
       ]
     }
   },
-  "businessHash": "sha256:53699b58fdde7bef9defa7a02a363bbbd9a05da3fff27a8c12c77ab1519f201e"
+  "businessHash": "sha256:3df2238ac25de6ef20dcc5ee52a59b0d62f42dbf4149a2c47ea27233fad6b1f4"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AgendarConsultaJourneyType = typeof agendarConsultaJourney;

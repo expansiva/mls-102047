@@ -602,88 +602,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-28T17:36:36.016Z"
     },
     {
-      "moduleName": "agendaClinica",
-      "actors": [
-        {
-          "actorId": "recepcionista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "profissional",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "agendaClinica.Paciente",
-          "namespace": "agendaClinica"
-        },
-        {
-          "subtype": "Person",
-          "roleTag": "agendaClinica.Profissional",
-          "namespace": "agendaClinica"
-        },
-        {
-          "subtype": "Person",
-          "roleTag": "agendaClinica.Recepcionista",
-          "namespace": "agendaClinica"
-        },
-        {
-          "subtype": "ContactChannel",
-          "roleTag": "agendaClinica.ContatoPaciente",
-          "namespace": "agendaClinica"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Paciente",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Profissional",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Recepcionista",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "ContatoPaciente",
-          "kind": "role",
-          "mdmSubtype": "ContactChannel",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Consulta",
-          "kind": "entity",
-          "class": "event"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "confirmarConsulta",
-          "on": "Consulta.confirmarConsulta"
-        },
-        {
-          "eventId": "registrarFalta",
-          "on": "Consulta.registrarFalta"
-        },
-        {
-          "eventId": "registrarAtendimento",
-          "on": "Consulta.registrarAtendimento"
-        }
-      ],
-      "updatedAt": "2026-10-02T06:20:06.842Z"
-    },
-    {
       "moduleName": "reembolsoDespesas",
       "actors": [
         {
@@ -782,6 +700,66 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-04T05:01:31.016Z"
+    },
+    {
+      "moduleName": "agendaClinica",
+      "actors": [
+        {
+          "actorId": "recepcionista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "profissional",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "agendaClinica.Paciente",
+          "namespace": "agendaClinica"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "agendaClinica.Profissional",
+          "namespace": "agendaClinica"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Paciente",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Profissional",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Consulta",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "confirmarConsulta",
+          "on": "Consulta.confirmarConsulta"
+        },
+        {
+          "eventId": "registrarFalta",
+          "on": "Consulta.registrarFalta"
+        },
+        {
+          "eventId": "registrarAtendimento",
+          "on": "Consulta.registrarAtendimento"
+        }
+      ],
+      "updatedAt": "2026-10-07T07:16:47.918Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;
