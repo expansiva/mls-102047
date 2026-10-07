@@ -1,0 +1,640 @@
+{
+  "types": [
+    {
+      "name": "ProfessionalDirectoryIdentification",
+      "description": "Identificação resumida exibida na lista de profissionais disponíveis.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.status",
+          "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.status"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProfessionalDirectoryAgendaClinica",
+      "description": "Dados resumidos da agenda clínica exibidos na lista.",
+      "fields": [
+        {
+          "name": "details.agendaClinica.professionalType",
+          "type": "'medical' | 'therapist'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.agendaClinica.professionalType"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProfessionalDirectoryDetails",
+      "description": "Agrupa os dados do profissional necessários para localizar um cadastro na lista.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "ProfessionalDirectoryIdentification"
+        },
+        {
+          "name": "agendaClinica",
+          "type": "ProfessionalDirectoryAgendaClinica"
+        }
+      ]
+    },
+    {
+      "name": "ProfessionalDirectoryItem",
+      "description": "Linha paginada do diretório de profissionais disponíveis.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.id"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "ProfessionalDirectoryDetails"
+        }
+      ]
+    },
+    {
+      "name": "ProfessionalIdentification",
+      "description": "Dados de identificação completos usados para conferir e manter o cadastro.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.status",
+          "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.status"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CPF' | 'Passport' | 'NationalId' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.countryCode"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProfessionalAgendaClinica",
+      "description": "Dados da agenda clínica que definem a atuação do profissional.",
+      "fields": [
+        {
+          "name": "details.agendaClinica.professionalType",
+          "type": "'medical' | 'therapist'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.agendaClinica.professionalType"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProfessionalDetails",
+      "description": "Agrupa os dados completos de identificação e atuação do profissional.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "ProfessionalIdentification"
+        },
+        {
+          "name": "agendaClinica",
+          "type": "ProfessionalAgendaClinica"
+        }
+      ]
+    },
+    {
+      "name": "ProfessionalRecord",
+      "description": "Cadastro completo do profissional selecionado ou recém-gravado.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.version"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "ProfessionalDetails"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "loadAvailableProfessionals",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "professionals",
+          "type": "ProfessionalDirectoryItem[]",
+          "paginated": true
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega a primeira página do diretório de profissionais disponíveis quando a página é aberta.",
+        "input": "page e pageSize definem a página inicial e a quantidade de linhas adequadas à tela; são parâmetros de navegação do estado da página.",
+        "processing": "Lista somente profissionais da organização cuja situação do cadastro mestre é Active, pois a página prioriza quem está disponível para o agendamento. Ordena de forma estável pelo nome e projeta apenas identificador, nome, situação e tipo de atuação.",
+        "output": "Retorna professionals no contrato paginado { items, page, pageSize, hasMore }, já filtrado para profissionais ativos, para preencher o diretório sem carregar documentos ou o cadastro completo."
+      }
+    },
+    {
+      "id": "loadMoreAvailableProfessionals",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "professionals",
+          "type": "ProfessionalDirectoryItem[]",
+          "paginated": true
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Obtém a próxima página do diretório de profissionais disponíveis quando a recepcionista solicita mais resultados.",
+        "input": "page é a página seguinte solicitada e pageSize é a quantidade de linhas por página; ambos vêm do estado de paginação da lista.",
+        "processing": "Aplica o mesmo recorte organizacional, situação Active e ordenação estável do carregamento inicial, buscando somente a página solicitada.",
+        "output": "Retorna professionals no contrato paginado para anexar seus items ao diretório já mostrado e informar se ainda há mais resultados."
+      }
+    },
+    {
+      "id": "searchAvailableProfessionals",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "search",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "professionals",
+          "type": "ProfessionalDirectoryItem[]",
+          "paginated": true
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Localiza, sob demanda, profissionais disponíveis pelo nome para a recepcionista escolher o cadastro certo.",
+        "input": "search é o texto de nome informado pela recepcionista; page e pageSize controlam a primeira página da busca.",
+        "processing": "Usa a capacidade de localização por nome no escopo da organização, mantém somente registros Active e aplica correspondência normalizada por nome. Ordena os resultados de forma estável e não expõe documento nesta consulta resumida.",
+        "output": "Retorna professionals no contrato paginado, substituindo a lista corrente pelos resultados da busca já adequados à seleção."
+      }
+    },
+    {
+      "id": "loadMoreProfessionalSearch",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "search",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "professionals",
+          "type": "ProfessionalDirectoryItem[]",
+          "paginated": true
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Busca a próxima página da localização por nome sem reiniciar os resultados já exibidos.",
+        "input": "search preserva o termo de busca ativo; page e pageSize identificam a próxima página a carregar.",
+        "processing": "Repete exatamente o recorte organizacional, a situação Active, a normalização de nome e a ordenação estável da busca inicial, limitando a leitura à página solicitada.",
+        "output": "Retorna professionals no contrato paginado para acrescentar os novos items aos resultados de busca existentes."
+      }
+    },
+    {
+      "id": "getProfessional",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "professional",
+          "type": "ProfessionalRecord"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega o cadastro completo do profissional que a recepcionista selecionou para conferência e edição.",
+        "input": "id é o identificador do profissional selecionado no diretório.",
+        "processing": "Lê o registro pelo identificador dentro do escopo organizacional autorizado e compõe nome, documento, país, situação, tipo de atuação e version para controle otimista. Não carrega dados de privacidade ou dados gerais que a página não usa.",
+        "output": "Retorna professional completo para preencher simultaneamente o detalhe e o formulário de manutenção."
+      }
+    },
+    {
+      "id": "createProfessional",
+      "kind": "cmd",
+      "when": "createProfessional",
+      "writes": "Profissional.create",
+      "input": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CPF' | 'Passport' | 'NationalId' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.agendaClinica.professionalType",
+          "type": "'medical' | 'therapist'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.agendaClinica.professionalType"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "professional",
+          "type": "ProfessionalRecord"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Cria ou reutiliza e vincula o cadastro mestre de uma pessoa como profissional da agenda clínica.",
+        "input": "name, docType, docId e countryCode preenchem a identificação mestre; professionalType grava a atuação medical ou therapist no namespace agendaClinica.",
+        "processing": "Executa register.createOrAttach no escopo autorizado. Valida a combinação de documento e país exigida pela operação e mantém a identificação no cadastro mestre, gravando no namespace agendaClinica somente a atuação permitida.",
+        "output": "Retorna professional com id e version gerados ou resolvidos, situação, identificação e atuação para redesenhar detalhe e formulário e inserir ou atualizar a linha correspondente no diretório."
+      }
+    },
+    {
+      "id": "updateProfessional",
+      "kind": "cmd",
+      "when": "updateProfessional",
+      "writes": "Profissional.update",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.version"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CPF' | 'Passport' | 'NationalId' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.agendaClinica.professionalType",
+          "type": "'medical' | 'therapist'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Profissional.details.agendaClinica.professionalType"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "professional",
+          "type": "ProfessionalRecord"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Atualiza os dados de identificação permitidos e o tipo de atuação do profissional selecionado.",
+        "input": "id identifica o cadastro e version faz a concorrência otimista; os demais campos são as alterações de nome, documento, país e tipo de atuação preenchidas no formulário.",
+        "processing": "Recusa versão desatualizada e aplica edit.platformFields à identificação e edit.moduleNamespace exclusivamente a agendaClinica.professionalType. Não altera situação, consentimento ou dados gerais.",
+        "output": "Retorna professional com a nova version e todos os dados exibidos, permitindo redesenhar detalhe e formulário e atualizar a linha da lista sem nova leitura."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "professionalList",
+        "reads": "loadAvailableProfessionals.professionals"
+      },
+      {
+        "organism": "professionalDetail",
+        "reads": "getProfessional.professional"
+      },
+      {
+        "organism": "professionalForm",
+        "reads": "getProfessional.professional"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "createProfessional",
+        "refreshes": []
+      },
+      {
+        "endpoint": "updateProfessional",
+        "refreshes": []
+      }
+    ],
+    "selections": [
+      {
+        "organism": "professionalList",
+        "via": {
+          "query": "getProfessional"
+        }
+      }
+    ],
+    "journeys": [],
+    "updates": [
+      {
+        "endpoint": "loadAvailableProfessionals",
+        "state": "loadAvailableProfessionals.professionals",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "loadMoreAvailableProfessionals",
+        "state": "loadAvailableProfessionals.professionals",
+        "mode": "append"
+      },
+      {
+        "endpoint": "searchAvailableProfessionals",
+        "state": "loadAvailableProfessionals.professionals",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "loadMoreProfessionalSearch",
+        "state": "loadAvailableProfessionals.professionals",
+        "mode": "append"
+      },
+      {
+        "endpoint": "getProfessional",
+        "state": "getProfessional.professional",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "createProfessional",
+        "state": "getProfessional.professional",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "createProfessional",
+        "state": "loadAvailableProfessionals.professionals",
+        "mode": "upsert"
+      },
+      {
+        "endpoint": "updateProfessional",
+        "state": "getProfessional.professional",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "updateProfessional",
+        "state": "loadAvailableProfessionals.professionals",
+        "mode": "upsert"
+      }
+    ]
+  }
+}

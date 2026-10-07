@@ -1,0 +1,378 @@
+{
+  "attempt": "decision-2",
+  "model": "openai/gpt-5.6-terra-pro",
+  "promptChars": 101095,
+  "receivedAt": "2026-10-07T10:18:32.485Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "masterDataManagement"
+            },
+            "intent": "A recepcionista localiza os profissionais da clínica, confere quem está disponível e mantém o cadastro mestre com nome, documento e tipo de atuação para usar no agendamento.",
+            "sections": [
+              {
+                "id": "professionalsDirectory",
+                "priority": "primary",
+                "purpose": "Mostra os profissionais cadastrados para a recepcionista localizar quem está disponível na clínica e escolher um cadastro.",
+                "organisms": [
+                  "professionalList"
+                ]
+              },
+              {
+                "id": "professionalRecord",
+                "priority": "main",
+                "purpose": "Exibe o cadastro do profissional selecionado e o formulário para incluir ou atualizar os dados usados no agendamento.",
+                "organisms": [
+                  "professionalDetail",
+                  "professionalForm"
+                ]
+              },
+              {
+                "id": "professionalMaintenance",
+                "priority": "secondary",
+                "purpose": "Indica onde a recepcionista mantém o cadastro do profissional pelo formulário de inclusão ou atualização.",
+                "organisms": [
+                  "professionalActions"
+                ]
+              }
+            ],
+            "organisms": {
+              "professionalList": {
+                "kind": "list",
+                "text": "Lista os profissionais da clínica com nome, situação e tipo de atuação para a recepcionista ver quem está disponível e escolher um cadastro.",
+                "intents": []
+              },
+              "professionalDetail": {
+                "kind": "detail",
+                "text": "Mostra o cadastro do profissional selecionado — nome, documento, situação e se atua como médico ou terapeuta — para a recepcionista conferir os dados antes de alterar.",
+                "intents": []
+              },
+              "professionalForm": {
+                "kind": "form",
+                "text": "Permite informar ou atualizar nome, documento e tipo de atuação do profissional, para a recepcionista manter o cadastro usado no agendamento das consultas.",
+                "intents": [
+                  {
+                    "id": "createProfessional",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "updateProfessional",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "professionalActions": {
+                "kind": "actions",
+                "text": "Apresenta o contexto de manutenção do cadastro do profissional, cujas inclusões e alterações são gravadas pelo formulário.",
+                "intents": []
+              }
+            },
+            "molecules": {
+              "professionalList": [
+                {
+                  "role": "collection",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ],
+              "professionalDetail": [
+                {
+                  "role": "profile",
+                  "preferred": "groupviewcard--ml-profile-card",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                }
+              ],
+              "professionalForm": [
+                {
+                  "role": "name",
+                  "preferred": "groupentertext--ml-enter-text",
+                  "alternative": "groupentertext--ml-floating-text-input"
+                },
+                {
+                  "role": "document",
+                  "preferred": "groupentertext--ml-cpf-input",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "feedback",
+                  "preferred": "groupnotifyuser--ml-contextual-feedback",
+                  "alternative": "groupnotifyuser--ml-toast-notification"
+                },
+                {
+                  "role": "submit",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-button-group"
+                }
+              ],
+              "professionalActions": [
+                {
+                  "role": "commands",
+                  "preferred": "grouptriggeraction--ml-button-group",
+                  "alternative": "grouptriggeraction--ml-button-standard"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "professionalList": {
+                "reads": [
+                  "Profissional.id",
+                  "Profissional.details.identification.name",
+                  "Profissional.details.identification.status",
+                  "Profissional.details.agendaClinica.professionalType"
+                ],
+                "edits": [],
+                "selects": "professionalDetail",
+                "submits": []
+              },
+              "professionalDetail": {
+                "reads": [
+                  "Profissional.id",
+                  "Profissional.version",
+                  "Profissional.details.identification.name",
+                  "Profissional.details.identification.status",
+                  "Profissional.details.identification.docType",
+                  "Profissional.details.identification.docId",
+                  "Profissional.details.identification.countryCode",
+                  "Profissional.details.agendaClinica.professionalType"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "professionalForm": {
+                "reads": [
+                  "Profissional.id",
+                  "Profissional.version",
+                  "Profissional.details.identification.name",
+                  "Profissional.details.identification.status",
+                  "Profissional.details.identification.docType",
+                  "Profissional.details.identification.docId",
+                  "Profissional.details.identification.countryCode",
+                  "Profissional.details.agendaClinica.professionalType"
+                ],
+                "edits": [
+                  "Profissional.details.identification.name",
+                  "Profissional.details.identification.docType",
+                  "Profissional.details.identification.docId",
+                  "Profissional.details.identification.countryCode",
+                  "Profissional.details.agendaClinica.professionalType"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "createProfessional",
+                    "write": "Profissional.create"
+                  },
+                  {
+                    "intentId": "updateProfessional",
+                    "write": "Profissional.update"
+                  }
+                ]
+              },
+              "professionalActions": {
+                "reads": [],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "masterDataManagement"
+            },
+            "intent": "Em uma coluna estreita, a recepcionista percorre os profissionais da clínica, confere o cadastro escolhido e mantém nome, documento e tipo de atuação para o agendamento.",
+            "sections": [
+              {
+                "id": "professionalsDirectory",
+                "priority": "primary",
+                "purpose": "Em largura estreita, cerca de 390px e ainda usável em 360px e 430px, apresenta os profissionais em sequência para a recepcionista localizar quem está disponível.",
+                "organisms": [
+                  "professionalList"
+                ]
+              },
+              {
+                "id": "professionalRecord",
+                "priority": "main",
+                "purpose": "Empilha o cadastro conferido e o formulário de manutenção para a recepcionista revisar e atualizar o profissional sem sair do fluxo estreito.",
+                "organisms": [
+                  "professionalDetail",
+                  "professionalForm"
+                ]
+              },
+              {
+                "id": "professionalMaintenance",
+                "priority": "secondary",
+                "purpose": "Explica no final do conteúdo fluido que a manutenção do profissional é concluída pelo formulário de inclusão ou atualização.",
+                "organisms": [
+                  "professionalActions"
+                ]
+              }
+            ],
+            "organisms": {
+              "professionalList": {
+                "kind": "list",
+                "text": "Mostra os profissionais da clínica em uma lista estreita, com nome, situação e tipo de atuação, para a recepcionista ver quem está disponível e escolher um cadastro.",
+                "intents": []
+              },
+              "professionalDetail": {
+                "kind": "detail",
+                "text": "Resume o cadastro do profissional selecionado — nome, documento, situação e atuação — para a recepcionista conferir os dados no espaço estreito antes de alterar.",
+                "intents": []
+              },
+              "professionalForm": {
+                "kind": "form",
+                "text": "Concentra nome, documento e tipo de atuação em campos empilhados para a recepcionista cadastrar ou atualizar o profissional usado no agendamento.",
+                "intents": [
+                  {
+                    "id": "createProfessional",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "updateProfessional",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "professionalActions": {
+                "kind": "actions",
+                "text": "Apresenta, no final do conteúdo estreito, o contexto de manutenção que é gravada pelo formulário do profissional.",
+                "intents": []
+              }
+            },
+            "molecules": {
+              "professionalList": [
+                {
+                  "role": "collection",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewdata--ml-card-grid"
+                }
+              ],
+              "professionalDetail": [
+                {
+                  "role": "profile",
+                  "preferred": "groupviewcard--ml-profile-card",
+                  "alternative": "groupexpandcontent--ml-single-expand-content"
+                }
+              ],
+              "professionalForm": [
+                {
+                  "role": "name",
+                  "preferred": "groupentertext--ml-floating-text-input",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "document",
+                  "preferred": "groupentertext--ml-cpf-input",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "feedback",
+                  "preferred": "groupnotifyuser--ml-contextual-feedback",
+                  "alternative": "groupnotifyuser--ml-toast-notification"
+                },
+                {
+                  "role": "submit",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-button-group"
+                }
+              ],
+              "professionalActions": [
+                {
+                  "role": "commands",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-button-group"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "professionalList": {
+                "reads": [
+                  "Profissional.id",
+                  "Profissional.details.identification.name",
+                  "Profissional.details.identification.status",
+                  "Profissional.details.agendaClinica.professionalType"
+                ],
+                "edits": [],
+                "selects": "professionalDetail",
+                "submits": []
+              },
+              "professionalDetail": {
+                "reads": [
+                  "Profissional.id",
+                  "Profissional.version",
+                  "Profissional.details.identification.name",
+                  "Profissional.details.identification.status",
+                  "Profissional.details.identification.docType",
+                  "Profissional.details.identification.docId",
+                  "Profissional.details.identification.countryCode",
+                  "Profissional.details.agendaClinica.professionalType"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "professionalForm": {
+                "reads": [
+                  "Profissional.id",
+                  "Profissional.version",
+                  "Profissional.details.identification.name",
+                  "Profissional.details.identification.status",
+                  "Profissional.details.identification.docType",
+                  "Profissional.details.identification.docId",
+                  "Profissional.details.identification.countryCode",
+                  "Profissional.details.agendaClinica.professionalType"
+                ],
+                "edits": [
+                  "Profissional.details.identification.name",
+                  "Profissional.details.identification.docType",
+                  "Profissional.details.identification.docId",
+                  "Profissional.details.identification.countryCode",
+                  "Profissional.details.agendaClinica.professionalType"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "createProfessional",
+                    "write": "Profissional.create"
+                  },
+                  {
+                    "intentId": "updateProfessional",
+                    "write": "Profissional.update"
+                  }
+                ]
+              },
+              "professionalActions": {
+                "reads": [],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        },
+        "categoryReason": "A página lista, confere e mantém o cadastro mestre dos profissionais da clínica, dados reutilizados no agendamento, o que corresponde a masterDataManagement."
+      }
+    },
+    "status": "completed",
+    "stepId": 15,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}
