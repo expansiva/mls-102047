@@ -170,7 +170,7 @@ export class ComandaRestauranteDesktopPage11FechamentoPage extends ComandaRestau
       ${commandError ? html`<groupnotifyuser--ml-contextual-feedback class="mt-4" type="error" .visible=${true}><Message>${commandError || this.msg.reviewError}</Message></groupnotifyuser--ml-contextual-feedback>` : ''}
       <div class="mt-5" >
         <groupviewtable--ml-data-table .loading=${this.obterComandaParaFechamentoStatus === 'loading'}>
-          <Caption>${this.msg.reviewTitle}</Caption>
+          <TableCaption>${this.msg.reviewTitle}</TableCaption>
           <TableHeader><TableRow><TableHead key="item">${this.msg.reviewItem}</TableHead><TableHead key="quantity">${this.msg.reviewQuantity}</TableHead><TableHead key="unit">${this.msg.reviewUnit}</TableHead><TableHead key="total">${this.msg.reviewLineTotal}</TableHead></TableRow></TableHeader>
           <TableBody>${command.items.map((item) => html`<TableRow><TableCell><div>${item.itemCardapio.name}</div>${item.details.details.observacao ? html`<div class="text-xs text-[var(--text-muted,currentColor)]">${item.details.details.observacao}</div>` : ''}</TableCell><TableCell>${item.details.details.quantidade}</TableCell><TableCell>${money(item.details.details.precoUnitario)}</TableCell><TableCell>${money(item.details.valorTotal)}</TableCell></TableRow>`)}</TableBody>
           <Empty>${this.msg.emptyItems}</Empty>

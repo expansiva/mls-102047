@@ -172,7 +172,7 @@ return html`
 <div class="rounded-2xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-3">
 <h2 class="mb-2 px-1 text-base font-bold text-[var(--text-strong,currentColor)]">${this.msg['review.items']}</h2>
 <groupviewtable--ml-responsive-table>
-<Caption>${this.msg['review.items']}</Caption><TableHeader><TableRow><TableHead key="item">${this.msg['review.itemHeader']}</TableHead><TableHead key="quantity">${this.msg['review.quantityHeader']}</TableHead><TableHead key="unit">${this.msg['review.unitHeader']}</TableHead><TableHead key="total">${this.msg['review.totalHeader']}</TableHead></TableRow></TableHeader>
+<TableCaption>${this.msg['review.items']}</TableCaption><TableHeader><TableRow><TableHead key="item">${this.msg['review.itemHeader']}</TableHead><TableHead key="quantity">${this.msg['review.quantityHeader']}</TableHead><TableHead key="unit">${this.msg['review.unitHeader']}</TableHead><TableHead key="total">${this.msg['review.totalHeader']}</TableHead></TableRow></TableHeader>
 <TableBody>${command.items.filter((item: ItemComandaParaFechamento) => item.status === 'launched').map((item: ItemComandaParaFechamento) => html`<TableRow><TableCell>${item.itemCardapio.name}</TableCell><TableCell>${item.details.details.quantidade}</TableCell><TableCell>${money(item.details.details.precoUnitario, locale)}</TableCell><TableCell>${money(item.details.valorTotal, locale)}</TableCell></TableRow>`)}</TableBody>
 <Empty>${this.msg['review.empty']}</Empty>
 </groupviewtable--ml-responsive-table>

@@ -76,7 +76,7 @@ this.selectMesa(mesa.id);
 this.setScenario('edit');
 }
 }}>
-<Caption>${this.msg.tableRegion}</Caption>
+<TableCaption>${this.msg.tableRegion}</TableCaption>
 <TableHeader>
 <TableRow>
 <TableHead key="code">${this.msg.codeHeader}</TableHead>

@@ -136,10 +136,11 @@ export const definition = {
       "sets": "comanda"
     },
     "fecharComandaPaga": {
-      "description": "Registra o desconto e o pagamento, fecha a comanda e confirma que sua mesa foi liberada. (comanda: upsert)",
+      "description": "Registra o desconto e o pagamento, fecha a comanda e confirma que sua mesa foi liberada. (comanda: upsert) (openComandas: remove)",
       "calls": "fecharComandaPaga",
       "updates": [
-        "comanda"
+        "comanda",
+        "openComandas"
       ]
     }
   },
