@@ -4,7 +4,7 @@
     "moduleName": "agendaClinica",
     "entityId": "Consulta",
     "title": "Consulta",
-    "description": "Agendamento de atendimento de um paciente com um profissional em data e horário definidos.",
+    "description": "Agendamento clínico de um paciente com um profissional em data e horário, incluindo confirmação, falta ou atendimento realizado.",
     "displayField": "scheduledAt",
     "relationships": {
       "paciente": {
@@ -13,9 +13,10 @@
         "via": "Consulta.pacienteId",
         "cardinality": "N:1",
         "title": "Paciente da consulta",
-        "description": "Cada consulta é marcada para um paciente.",
+        "description": "Cada consulta é agendada para um paciente, que pode ter várias consultas.",
         "mode": "fk",
-        "required": "Ao criar a consulta."
+        "required": "sempre",
+        "role": "paciente"
       },
       "profissional": {
         "relationshipId": "consultaProfissional",
@@ -23,25 +24,27 @@
         "via": "Consulta.profissionalId",
         "cardinality": "N:1",
         "title": "Profissional da consulta",
-        "description": "Cada consulta é realizada por um profissional.",
+        "description": "Cada consulta é atribuída a um profissional, que pode ter várias consultas em sua agenda.",
         "mode": "fk",
-        "required": "Ao criar a consulta."
+        "required": "sempre",
+        "role": "responsável pelo atendimento"
       }
     },
     "capabilities": {
-      "read.byId": "Consulta uma consulta pelo identificador já conhecido, para a recepcionista ou o profissional que a abriu em contexto.",
-      "locate.byColumn": "Lista consultas por paciente, profissional, data e situação, com paginação, para a recepcionista organizar a agenda e o profissional consultar a própria agenda diária.",
-      "count": "Conta as consultas que atendem aos filtros da agenda, para exibir a quantidade de atendimentos do dia.",
-      "listByForeignKey": "Lista as consultas vinculadas a um paciente ou profissional, pela chave estrangeira, para consultar o histórico e a agenda.",
-      "create": "Cria uma consulta com paciente, profissional, data e horário, para a recepcionista realizar o agendamento.",
-      "transition": "Muda a situação da consulta conforme as transições permitidas, para a recepcionista confirmar ou registrar falta e para o profissional concluir o atendimento.",
-      "uniqueKey": "Recusa outra consulta com o mesmo profissional e data e horário, pelo índice único, para impedir sobreposição de agenda.",
-      "read.mdmRecord": "Lê os registros mestres do paciente e do profissional referenciados pela consulta, para mostrar seus dados sem copiá-los para a agenda."
+      "read.byId": "Lê uma consulta pelo identificador da linha · consulta o repositório pelo id · recepcionista e profissional quando já possuem a consulta selecionada.",
+      "locate.byColumn": "Lista consultas por paciente, profissional, data e situação, com ordenação e paginação · filtra as colunas indexadas, em especial profissionalId e scheduledAt · recepcionista para a agenda e profissional apenas para sua própria agenda diária.",
+      "count": "Conta consultas que atendem aos filtros informados · executa a mesma condição de busca sem paginação · recepcionista ao consultar a agenda.",
+      "listByForeignKey": "Lista as consultas vinculadas a um paciente ou profissional · busca pelas chaves estrangeiras pacienteId ou profissionalId · recepcionista na consulta de histórico e profissional na própria agenda.",
+      "create": "Cria uma consulta agendada para paciente, profissional, data e horário · insere a linha com situação Agendada · recepcionista ao marcar a consulta.",
+      "update": "Atualiza dados não relacionados à mudança de situação de uma consulta · aplica alteração parcial na linha · recepcionista ao corrigir um agendamento.",
+      "transition": "Muda a situação da consulta conforme as transições permitidas · atualiza a coluna indexada de situação e valida as regras do módulo · recepcionista para confirmar ou registrar falta e profissional para registrar atendimento.",
+      "uniqueKey": "Impede dois agendamentos no mesmo horário para o mesmo profissional · aplica índice único em profissional e data/hora · sistema ao criar ou alterar uma consulta.",
+      "read.mdmRecord": "Lê os dados mestres do paciente e do profissional vinculados à consulta · resolve pacienteId e profissionalId no MDM · recepcionista e profissional ao visualizar a agenda."
     },
     "rules": [
-      "profissionalHorarioUnico",
-      "transicoesConsultaValidas",
-      "atendimentoExigeAnotacao"
+      "consultaSemConflito",
+      "transicaoConsultaValida",
+      "anotacaoObrigatoriaNoAtendimento"
     ],
     "kind": "entity",
     "class": "event",
@@ -98,7 +101,7 @@
           "indexed": true,
           "of": "ContactSummary",
           "title": "Data e horário",
-          "description": "Data e horário previstos para a consulta.",
+          "description": "Data e horário previstos para a consulta, usados para consultar a agenda diária.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -112,26 +115,26 @@
             {
               "value": "scheduled",
               "title": "Agendada",
-              "description": "Consulta criada e ainda sem confirmação registrada."
+              "description": "Consulta marcada e ainda sem confirmação registrada."
             },
             {
               "value": "confirmed",
               "title": "Confirmada",
-              "description": "Paciente confirmou por telefone que comparecerá."
+              "description": "Paciente confirmou a consulta por telefone."
+            },
+            {
+              "value": "noShow",
+              "title": "Falta",
+              "description": "Paciente não compareceu à consulta."
             },
             {
               "value": "attended",
               "title": "Atendida",
-              "description": "Atendimento realizado pelo profissional."
-            },
-            {
-              "value": "missed",
-              "title": "Faltou",
-              "description": "Paciente não compareceu à consulta."
+              "description": "Profissional realizou o atendimento."
             }
           ],
           "title": "Situação",
-          "description": "Situação atual do agendamento e do atendimento.",
+          "description": "Situação registrada da consulta na agenda clínica.",
           "maxLength": 0,
           "min": 0,
           "max": 0
@@ -140,8 +143,8 @@
           "type": "object",
           "required": true,
           "of": "ContactSummary",
-          "title": "Detalhes da consulta",
-          "description": "Informações do agendamento e do atendimento que não são usadas para busca ou ordenação.",
+          "title": "Dados da consulta",
+          "description": "Informações clínicas registradas para a consulta que não são usadas como filtro ou ordenação.",
           "maxLength": 0,
           "min": 0,
           "max": 0,
@@ -150,7 +153,7 @@
               "type": "text",
               "of": "ContactSummary",
               "title": "Anotação do atendimento",
-              "description": "Anotação registrada pelo profissional sobre a consulta realizada.",
+              "description": "Anotação registrada pelo profissional sobre o atendimento realizado.",
               "maxLength": 0,
               "min": 0,
               "max": 0
@@ -175,11 +178,11 @@
         "reachedBy": "actor"
       },
       {
-        "state": "attended",
+        "state": "noShow",
         "reachedBy": "actor"
       },
       {
-        "state": "missed",
+        "state": "attended",
         "reachedBy": "actor"
       }
     ],
@@ -193,10 +196,10 @@
         "by": [
           "recepcionista"
         ],
-        "description": "Registra que o paciente confirmou por telefone o comparecimento à consulta.",
+        "description": "A recepcionista registra a confirmação telefônica do paciente para a consulta.",
         "payload": [],
         "ruleRefs": [
-          "transicoesConsultaValidas"
+          "transicaoConsultaValida"
         ]
       },
       {
@@ -205,14 +208,14 @@
           "scheduled",
           "confirmed"
         ],
-        "to": "missed",
+        "to": "noShow",
         "by": [
           "recepcionista"
         ],
-        "description": "Registra que o paciente não compareceu à consulta agendada.",
+        "description": "A recepcionista registra que o paciente não compareceu à consulta.",
         "payload": [],
         "ruleRefs": [
-          "transicoesConsultaValidas"
+          "transicaoConsultaValida"
         ]
       },
       {
@@ -225,13 +228,13 @@
         "by": [
           "profissional"
         ],
-        "description": "Conclui a consulta realizada e registra a anotação do atendimento.",
+        "description": "O profissional registra que realizou o atendimento e inclui sua anotação.",
         "payload": [
           "details.attendanceNote"
         ],
         "ruleRefs": [
-          "transicoesConsultaValidas",
-          "atendimentoExigeAnotacao"
+          "transicaoConsultaValida",
+          "anotacaoObrigatoriaNoAtendimento"
         ]
       }
     ]

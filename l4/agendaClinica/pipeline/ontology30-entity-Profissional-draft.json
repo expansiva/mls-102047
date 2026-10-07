@@ -4,7 +4,7 @@
     "moduleName": "agendaClinica",
     "entityId": "Profissional",
     "title": "Profissional",
-    "description": "Médico ou terapeuta que realiza consultas na clínica.",
+    "description": "Pessoa profissional da clínica, médica ou terapeuta, responsável por sua própria agenda e atendimentos.",
     "displayField": "details.identification.name",
     "relationships": {
       "consultas": {
@@ -12,31 +12,29 @@
         "to": "Consulta",
         "via": "Consulta.profissionalId",
         "cardinality": "1:N",
-        "title": "Consultas realizadas",
-        "description": "Consultas da agenda clínica realizadas por este profissional.",
+        "title": "Consultas do profissional",
+        "description": "Consultas atribuídas a este profissional em sua agenda.",
         "mode": "fk",
         "direction": "to",
-        "required": "Sempre que uma consulta for agendada para este profissional.",
-        "role": "profissional"
+        "required": "Sempre que uma consulta for agendada.",
+        "role": "profissional responsável"
       }
     },
     "capabilities": {
-      "read.byId": "Lê o cadastro mestre de um profissional pelo identificador para apresentar seu nome e dados na agenda, para recepcionista e profissional.",
-      "locate.byName": "Localiza profissionais pelo nome para que a recepcionista escolha quem realizará a consulta.",
-      "locate.byDocument": "Localiza um profissional pelo documento nacional para evitar duplicidade no seu cadastro, para a recepcionista.",
-      "register.createOrAttach": "Cria ou vincula ao módulo o registro mestre de uma pessoa como profissional, por documento ou contato, para a recepcionista.",
-      "edit.platformFields": "Atualiza os dados de identificação e a profissão do profissional no cadastro mestre, para a recepcionista.",
-      "edit.moduleNamespace": "Atualiza somente o namespace agendaClinica do profissional quando houver dado exclusivo do módulo, para a recepcionista.",
-      "inactivate": "Inativa ou reativa o profissional no cadastro mestre para retirá-lo ou devolvê-lo ao uso na agenda, para a recepcionista.",
-      "link.contact": "Vincula um canal de contato ao profissional por HasContact, para a recepcionista manter os contatos sem copiá-los no cadastro.",
-      "listLinks": "Lista os relacionamentos e as consultas vinculadas ao profissional para consulta da agenda, para recepcionista e profissional.",
-      "invite.login": "Concede login ao profissional por convite para que ele acesse somente a própria agenda diária, para a recepcionista.",
-      "audit": "Mostra quem alterou o cadastro mestre do profissional e quando, para a recepcionista responsável pela manutenção."
+      "read.byId": "Lê o cadastro mestre de um profissional pelo identificador para exibir seu nome nas consultas e permitir que ele acesse seus próprios dados.",
+      "locate.byName": "Localiza profissionais pelo nome para que a recepcionista selecione o responsável ao agendar uma consulta.",
+      "locate.byDocument": "Localiza um profissional pelo documento para evitar duplicidade ao cadastrá-lo ou vinculá-lo à agenda clínica.",
+      "locate.byTag": "Lista os registros com a função agendaClinica.Profissional para disponibilizar os profissionais da clínica no agendamento.",
+      "register.createOrAttach": "Cria ou reutiliza o registro mestre de uma pessoa e o vincula como profissional da agenda clínica, gravando seu tipo de atuação, para a recepcionista autorizada.",
+      "edit.platformFields": "Atualiza os dados de identificação permitidos do profissional no registro mestre para a recepcionista autorizada.",
+      "edit.moduleNamespace": "Atualiza somente o tipo de atuação em dados da agenda clínica para a recepcionista autorizada.",
+      "inactivate": "Inativa ou reativa o profissional no cadastro mestre para impedir ou restabelecer seu uso pela recepcionista autorizada.",
+      "invite.login": "Concede ao profissional um convite de acesso para que ele entre no sistema e consulte exclusivamente sua própria agenda diária."
     },
     "rules": [
       "rule-foreign-namespace-refused",
-      "rule-identity-never-in-namespace",
       "rule-document-shape-validated",
+      "rule-identity-never-in-namespace",
       "rule-person-privacy-consent-required-br-eu"
     ],
     "writer": "crud",
@@ -63,7 +61,7 @@
         "details": {
           "type": "object",
           "required": true,
-          "description": "Documento mestre da pessoa que exerce atendimento clínico na agenda.",
+          "description": "Documento mestre da pessoa profissional, com dados da plataforma e informações próprias da agenda clínica.",
           "fields": {
             "identification": {
               "type": "object",
@@ -78,11 +76,11 @@
                     {
                       "value": "Person",
                       "title": "Pessoa",
-                      "description": "Pessoa física que atua como profissional."
+                      "description": "Registro de pessoa natural."
                     }
                   ],
-                  "description": "Indica que este cadastro mestre é de uma pessoa.",
-                  "title": "Tipo de cadastro",
+                  "description": "Indica que este registro mestre representa uma pessoa.",
+                  "title": "Tipo de registro",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -92,7 +90,7 @@
                   "required": true,
                   "indexed": true,
                   "maxLength": 0,
-                  "description": "Nome pelo qual o profissional é identificado na agenda e nas consultas.",
+                  "description": "Nome pelo qual o profissional é identificado nas agendas e consultas.",
                   "title": "Nome",
                   "min": 0,
                   "max": 0
@@ -106,26 +104,26 @@
                     {
                       "value": "Active",
                       "title": "Ativo",
-                      "description": "Cadastro disponível para uso."
+                      "description": "Registro disponível para uso."
                     },
                     {
                       "value": "Inactive",
                       "title": "Inativo",
-                      "description": "Cadastro fora de uso."
+                      "description": "Registro fora de uso."
                     },
                     {
                       "value": "Merged",
                       "title": "Mesclado",
-                      "description": "Cadastro incorporado a outro registro mestre."
+                      "description": "Registro incorporado a outro registro mestre."
                     },
                     {
                       "value": "Blocked",
                       "title": "Bloqueado",
-                      "description": "Cadastro bloqueado pela organização."
+                      "description": "Registro bloqueado pela plataforma."
                     }
                   ],
-                  "title": "Situação do cadastro",
-                  "description": "Situação operacional do registro mestre do profissional.",
+                  "title": "Situação no cadastro mestre",
+                  "description": "Situação de atividade do registro mestre do profissional.",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
@@ -152,7 +150,7 @@
                     {
                       "value": "Other",
                       "title": "Outro",
-                      "description": "Outro documento aceito pela organização."
+                      "description": "Outro documento aceito."
                     }
                   ],
                   "title": "Tipo de documento",
@@ -164,7 +162,7 @@
                 "docId": {
                   "type": "string",
                   "indexed": true,
-                  "description": "Número do documento nacional do profissional, usado na deduplicação do cadastro mestre.",
+                  "description": "Número do documento nacional do profissional, quando informado.",
                   "title": "Número do documento",
                   "maxLength": 0,
                   "min": 0,
@@ -177,79 +175,70 @@
                   "pattern": "^[A-Z]{2}$",
                   "maxLength": 2,
                   "default": "US",
-                  "description": "Código ISO do país ao qual se aplicam o documento e as regras do profissional.",
-                  "title": "País do documento",
+                  "description": "Código do país aplicável ao documento e às regras legais do profissional.",
+                  "title": "País",
                   "min": 0,
                   "max": 0
                 }
               },
-              "description": "Dados de identificação do profissional no cadastro mestre."
+              "description": "Dados de identificação da pessoa profissional usados pela clínica."
             },
             "base": {
               "type": "object",
               "owner": "platform",
-              "fields": {
-                "contacts": {
-                  "type": "object",
-                  "required": true,
-                  "collection": true,
-                  "of": "ContactSummary",
-                  "derived": true,
-                  "description": "Referências derivadas aos canais de contato vinculados ao profissional.",
-                  "title": "Contatos vinculados",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
-                },
-                "relationshipRefs": {
-                  "type": "object",
-                  "required": true,
-                  "derived": true,
-                  "description": "Referências compactas de relacionamentos recalculadas pela plataforma.",
-                  "title": "Referências de relacionamentos",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
-                }
-              },
-              "description": "Dados gerais da pessoa mantidos pela plataforma e utilizados para localizar e relacionar o profissional."
+              "fields": {},
+              "description": "Dados básicos compartilhados da plataforma que esta função não utiliza diretamente."
             },
             "person": {
               "type": "object",
               "owner": "platform",
               "fields": {
-                "occupation": {
-                  "type": "string",
-                  "maxLength": 0,
-                  "title": "Profissão",
-                  "description": "Especialidade ou ocupação pela qual a pessoa atua na clínica, como médico ou terapeuta.",
-                  "required": true,
-                  "min": 0,
-                  "max": 0
-                },
                 "privacyConsent": {
                   "type": "object",
                   "of": "PrivacyConsent",
-                  "description": "Consentimento de privacidade aplicável aos dados pessoais do profissional.",
+                  "description": "Consentimento de privacidade do profissional, quando exigido pelas regras aplicáveis.",
                   "title": "Consentimento de privacidade",
                   "maxLength": 0,
                   "min": 0,
                   "max": 0
                 }
               },
-              "description": "Dados próprios de pessoa física relevantes para a atuação clínica."
+              "description": "Dados de pessoa natural aplicáveis ao profissional."
             },
             "general": {
               "type": "object",
               "owner": "organization",
               "open": true,
-              "description": "Campos promovidos pela organização, apenas para leitura neste módulo."
+              "description": "Dados promovidos pela organização e somente lidos pela agenda clínica."
             },
             "agendaClinica": {
               "type": "object",
               "owner": "module",
-              "fields": {},
-              "description": "Module namespace; the prompt asked for no data of this module about the record."
+              "fields": {
+                "professionalType": {
+                  "type": "enum",
+                  "required": true,
+                  "of": "Address",
+                  "values": [
+                    {
+                      "value": "medical",
+                      "title": "Médico(a)",
+                      "description": "Profissional que atua como médico(a)."
+                    },
+                    {
+                      "value": "therapist",
+                      "title": "Terapeuta",
+                      "description": "Profissional que atua como terapeuta."
+                    }
+                  ],
+                  "title": "Tipo de profissional",
+                  "description": "Indica se o profissional atua como médico ou terapeuta na clínica.",
+                  "maxLength": 0,
+                  "min": 0,
+                  "max": 0
+                }
+              },
+              "description": "Informações próprias da agenda clínica sobre a atuação deste profissional."
             }
           }
         }
@@ -271,16 +260,6 @@
       "kind": "tightened",
       "entityId": "Profissional",
       "detail": "Profissional.details.identification.docType.values"
-    },
-    {
-      "kind": "tightened",
-      "entityId": "Profissional",
-      "detail": "Profissional.details.person.occupation.required"
-    },
-    {
-      "kind": "namespaceEmpty",
-      "entityId": "Profissional",
-      "detail": "details.agendaClinica"
     }
   ]
 }

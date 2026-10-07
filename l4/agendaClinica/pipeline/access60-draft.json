@@ -7,202 +7,122 @@
       "kind": "internal",
       "origin": "named",
       "title": "Recepcionista",
-      "description": "Cadastra pacientes, agenda consultas, confirma consultas por telefone e registra faltas.",
-      "personEntity": "Recepcionista"
+      "description": "Cadastra pacientes, agenda consultas, confirma por telefone e registra faltas.",
+      "personEntity": ""
     },
     {
       "actorId": "profissional",
       "kind": "internal",
       "origin": "named",
       "title": "Profissional",
-      "description": "Visualiza a própria agenda diária e registra consultas atendidas com uma anotação.",
+      "description": "Consulta a própria agenda diária e registra o atendimento com uma anotação.",
       "personEntity": "Profissional"
     }
   ],
   "grants": [
     {
-      "grantId": "cadastrarPacientes",
+      "grantId": "recepcionistaGerenciarPacientesEconsultas",
       "actorRef": "recepcionista",
-      "title": "Cadastrar e consultar pacientes",
-      "description": "Permite à recepcionista registrar ou vincular pacientes e consultar os dados cadastrais e referências de contato necessários para os atendimentos.",
+      "title": "Gerenciar pacientes e consultas",
+      "description": "Permite à recepcionista cadastrar e localizar pacientes, agendar consultas, registrar confirmações telefônicas e marcar faltas em toda a clínica.",
       "entityRefs": [
-        "Paciente"
+        "Paciente",
+        "Consulta"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os pacientes cadastrados pela clínica."
+        "description": "Abrange os pacientes e as consultas da organização."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Disponibiliza os dados cadastrais, contatos vinculados e consentimento de privacidade necessários ao cadastro do paciente.",
+        "description": "Disponibiliza os dados de identificação e contato do paciente e os dados operacionais da consulta, sem a anotação de atendimento.",
         "allowedFields": [
           "Paciente.id",
           "Paciente.version",
           "Paciente.details.identification",
           "Paciente.details.base",
-          "Paciente.details.person"
-        ]
-      }
-    },
-    {
-      "grantId": "consultarCanaisDosPacientes",
-      "actorRef": "recepcionista",
-      "title": "Consultar canais de contato dos pacientes",
-      "description": "Permite à recepcionista consultar os telefones dos pacientes para realizar confirmações de consulta.",
-      "entityRefs": [
-        "ContatoPaciente"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Abrange os canais de contato mestre vinculados aos pacientes da clínica."
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Disponibiliza a identificação, o tipo, o número e a verificação do canal de contato.",
-        "allowedFields": [
-          "ContatoPaciente.id",
-          "ContatoPaciente.version",
-          "ContatoPaciente.details.identification",
-          "ContatoPaciente.details.contactChannel"
-        ]
-      }
-    },
-    {
-      "grantId": "organizarAgenda",
-      "actorRef": "recepcionista",
-      "title": "Organizar agenda de consultas",
-      "description": "Permite à recepcionista consultar, agendar, confirmar e registrar faltas nas consultas da clínica.",
-      "entityRefs": [
-        "Consulta"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Abrange todas as consultas da clínica."
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Disponibiliza os dados de agendamento e situação da consulta, sem acesso à anotação clínica do atendimento.",
-        "allowedFields": [
           "Consulta.id",
           "Consulta.version",
           "Consulta.pacienteId",
           "Consulta.profissionalId",
           "Consulta.scheduledAt",
           "Consulta.status"
-        ],
-        "deniedFields": [
-          "Consulta.details.attendanceNote"
         ]
       }
     },
     {
-      "grantId": "consultarProfissionaisParaAgenda",
+      "grantId": "recepcionistaConsultarProfissionais",
       "actorRef": "recepcionista",
-      "title": "Consultar profissionais para agendamento",
-      "description": "Permite à recepcionista localizar os profissionais e identificar sua ocupação ao marcar consultas.",
+      "title": "Consultar profissionais da clínica",
+      "description": "Permite à recepcionista identificar os profissionais disponíveis da clínica para registrar consultas e manter seus cadastros profissionais.",
       "entityRefs": [
         "Profissional"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os profissionais cadastrados pela clínica."
+        "description": "Abrange os profissionais cadastrados na organização."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Disponibiliza a identificação, situação, ocupação e consentimento de privacidade do profissional necessários ao seu cadastro e à organização da agenda.",
+        "description": "Disponibiliza a identificação, a situação e o tipo de atuação profissional necessários para o agendamento.",
         "allowedFields": [
           "Profissional.id",
           "Profissional.version",
           "Profissional.details.identification",
-          "Profissional.details.person"
+          "Profissional.details.agendaClinica"
         ]
       }
     },
     {
-      "grantId": "consultarProprioCadastroRecepcao",
-      "actorRef": "recepcionista",
-      "title": "Consultar próprio cadastro de recepção",
-      "description": "Permite à recepcionista consultar e manter o seu próprio registro de atuação na clínica.",
-      "entityRefs": [
-        "Recepcionista"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Abrange somente o registro de recepcionista correspondente à pessoa da sessão.",
-        "anchorEntity": "Recepcionista"
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Disponibiliza os dados de identificação e privacidade do próprio cadastro de recepção.",
-        "allowedFields": [
-          "Recepcionista.id",
-          "Recepcionista.version",
-          "Recepcionista.details.identification",
-          "Recepcionista.details.person"
-        ]
-      }
-    },
-    {
-      "grantId": "consultarPropriaAgenda",
+      "grantId": "profissionalConsultarEregistrarPropriaAgenda",
       "actorRef": "profissional",
-      "title": "Consultar própria agenda e registrar atendimento",
-      "description": "Permite ao profissional visualizar somente as suas consultas e registrar o atendimento realizado com anotação.",
+      "title": "Consultar e registrar a própria agenda",
+      "description": "Permite ao profissional consultar somente as consultas vinculadas à sua própria agenda e registrar o atendimento com anotação.",
       "entityRefs": [
+        "Profissional",
         "Consulta"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Abrange somente as consultas vinculadas ao profissional correspondente à pessoa da sessão.",
+        "description": "Abrange o próprio cadastro profissional e as consultas que chegam ao profissional autenticado.",
         "anchorEntity": "Profissional"
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "Disponibiliza todos os dados da consulta própria, inclusive a anotação do atendimento."
+        "mode": "fieldsOnly",
+        "description": "Disponibiliza a identificação e o tipo do próprio profissional, além dos dados da consulta e da anotação de atendimento.",
+        "allowedFields": [
+          "Profissional.id",
+          "Profissional.details.identification",
+          "Profissional.details.agendaClinica",
+          "Consulta.id",
+          "Consulta.version",
+          "Consulta.pacienteId",
+          "Consulta.profissionalId",
+          "Consulta.scheduledAt",
+          "Consulta.status",
+          "Consulta.details.attendanceNote"
+        ]
       }
     },
     {
-      "grantId": "consultarPacientesDaPropriaAgenda",
+      "grantId": "profissionalIdentificarPacientesDaPropriaAgenda",
       "actorRef": "profissional",
-      "title": "Consultar pacientes da própria agenda",
-      "description": "Permite ao profissional identificar os pacientes que possuem consulta vinculada à sua própria agenda.",
+      "title": "Identificar pacientes da própria agenda",
+      "description": "Permite ao profissional identificar os pacientes que possuem consulta vinculada à sua agenda, para visualizá-los nos horários de atendimento.",
       "entityRefs": [
         "Paciente"
       ],
       "dataScope": {
         "mode": "related",
-        "description": "Abrange somente pacientes relacionados ao profissional da sessão pela agenda clínica.",
+        "description": "Abrange os pacientes relacionados ao profissional autenticado pelas consultas de sua própria agenda.",
         "anchorEntity": "Paciente"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Disponibiliza somente a identificação e a situação cadastral do paciente.",
+        "description": "Disponibiliza somente a identificação do paciente necessária para a agenda do profissional.",
         "allowedFields": [
           "Paciente.id",
           "Paciente.details.identification"
-        ]
-      }
-    },
-    {
-      "grantId": "consultarProprioCadastroProfissional",
-      "actorRef": "profissional",
-      "title": "Consultar próprio cadastro profissional",
-      "description": "Permite ao profissional consultar e manter o seu próprio registro de atuação na clínica.",
-      "entityRefs": [
-        "Profissional"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Abrange somente o registro profissional correspondente à pessoa da sessão.",
-        "anchorEntity": "Profissional"
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Disponibiliza os dados de identificação, ocupação e privacidade do próprio cadastro profissional.",
-        "allowedFields": [
-          "Profissional.id",
-          "Profissional.version",
-          "Profissional.details.identification",
-          "Profissional.details.person"
         ]
       }
     }
@@ -210,22 +130,12 @@
   "normalizations": [
     {
       "kind": "dropAnchorEntity",
-      "grantId": "cadastrarPacientes",
+      "grantId": "recepcionistaGerenciarPacientesEconsultas",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
       "kind": "dropAnchorEntity",
-      "grantId": "consultarCanaisDosPacientes",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
-    },
-    {
-      "kind": "dropAnchorEntity",
-      "grantId": "organizarAgenda",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
-    },
-    {
-      "kind": "dropAnchorEntity",
-      "grantId": "consultarProfissionaisParaAgenda",
+      "grantId": "recepcionistaConsultarProfissionais",
       "detail": "anchorEntity removed; organization is not own/assigned/related."
     }
   ]

@@ -21,8 +21,8 @@ export const definition = {
       "ConsultaRepository"
     ],
     "rulesApplied": [
-      "atendimentoExigeAnotacao",
-      "transicoesConsultaValidas"
+      "anotacaoObrigatoriaNoAtendimento",
+      "transicaoConsultaValida"
     ],
     "functions": [
       {
@@ -106,11 +106,11 @@ export const definition = {
       },
       {
         "kind": "rule",
-        "ruleId": "atendimentoExigeAnotacao"
+        "ruleId": "anotacaoObrigatoriaNoAtendimento"
       },
       {
         "kind": "rule",
-        "ruleId": "transicoesConsultaValidas"
+        "ruleId": "transicaoConsultaValida"
       },
       {
         "kind": "transition",
@@ -148,26 +148,26 @@ export const definition = {
     ],
     "rules": [
       {
-        "ruleId": "atendimentoExigeAnotacao",
+        "ruleId": "anotacaoObrigatoriaNoAtendimento",
         "path": "l4/agendaClinica/rules.defs.ts",
-        "symbol": "atendimentoExigeAnotacao"
+        "symbol": "anotacaoObrigatoriaNoAtendimento"
       },
       {
-        "ruleId": "transicoesConsultaValidas",
+        "ruleId": "transicaoConsultaValida",
         "path": "l4/agendaClinica/rules.defs.ts",
-        "symbol": "transicoesConsultaValidas"
+        "symbol": "transicaoConsultaValida"
       }
     ],
     "rulePlan": [
       {
-        "ruleId": "atendimentoExigeAnotacao",
+        "ruleId": "anotacaoObrigatoriaNoAtendimento",
         "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#transitions.registrarAtendimento.ruleRefs",
         "consumer": "usecase:registrarAtendimento",
         "enforcement": "local",
         "gap": ""
       },
       {
-        "ruleId": "transicoesConsultaValidas",
+        "ruleId": "transicaoConsultaValida",
         "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#transitions.registrarAtendimento.ruleRefs",
         "consumer": "usecase:registrarAtendimento",
         "enforcement": "local",

@@ -5,64 +5,65 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/customerManagement/page21.md",
     "experience": "directoryProfile"
   },
-  "intent": "Em uma coluna estreita em torno de 390px, também usável em 360px e 430px, permite à recepcionista buscar um paciente, ver o telefone para confirmação e cadastrar um novo registro sem sair do fluxo de recepção.",
+  "intent": "A recepcionista localiza o paciente pelo nome, confere a identificação e cadastra quem ainda não está na clínica, para poder marcar consultas.",
   "sections": [
     {
-      "id": "patientDirectory",
+      "id": "locatePatients",
       "priority": "primary",
-      "purpose": "Empilha uma lista pesquisável e fluida dos pacientes para localizar a pessoa em uma tela estreita de telefone.",
+      "purpose": "Em coluna fluida em torno de 390px, também usável em 360px e 430px, a busca e a lista ficam no topo para localizar o paciente pelo nome sem grade fixa.",
       "organisms": [
         "patientList"
       ]
     },
     {
-      "id": "patientRecord",
+      "id": "registerPatient",
       "priority": "main",
-      "purpose": "Mostra o contato do paciente selecionado e as ações para cadastrar ou ir às consultas, em sequência vertical fácil de alcançar.",
+      "purpose": "No mesmo fluxo estreito, o cadastro e sua conclusão vêm em seguida para registrar um paciente novo com o polegar.",
       "organisms": [
-        "patientDetail",
+        "patientForm",
         "patientActions"
       ]
     },
     {
-      "id": "patientRegistration",
+      "id": "reviewPatient",
       "priority": "secondary",
-      "purpose": "Oferece o formulário fluido de identificação e consentimento para cadastrar um novo paciente abaixo da ficha.",
+      "purpose": "Os dados de identificação do paciente selecionado aparecem abaixo, em conteúdo empilhado na largura fluida da tela.",
       "organisms": [
-        "patientForm"
+        "patientDetail"
       ]
     }
   ],
   "organisms": {
     "patientList": {
       "kind": "list",
-      "text": "Lista compacta dos pacientes cadastrados com nome, documento e situação para a recepcionista localizar quem precisa de agendamento ou confirmação.",
+      "text": "Lista os pacientes encontrados pelo nome para a recepcionista escolher quem receberá a consulta.",
       "intents": []
     },
     "patientDetail": {
       "kind": "detail",
-      "text": "Mostra identificação e telefone do paciente selecionado para a recepcionista conferir o cadastro e ligar na confirmação a partir do aparelho.",
-      "intents": []
+      "text": "Apresenta nome, documento e situação do paciente selecionado para confirmar a identificação antes de agendar.",
+      "intents": [
+        {
+          "id": "goToAppointment",
+          "kind": "navigate",
+          "to": "consultas"
+        }
+      ]
     },
     "patientForm": {
       "kind": "form",
-      "text": "Coleta nome, documento, país e consentimento de privacidade em campos empilhados para cadastrar um novo paciente.",
-      "intents": []
+      "text": "Reúne os dados de identificação de um paciente novo para cadastrá-lo e permitir o agendamento.",
+      "intents": [
+        {
+          "id": "savePatient",
+          "kind": "submit"
+        }
+      ]
     },
     "patientActions": {
       "kind": "actions",
-      "text": "Oferece cadastrar o novo paciente e seguir para as consultas, onde a recepcionista agenda ou registra a confirmação telefônica.",
-      "intents": [
-        {
-          "id": "submitPatientCreate",
-          "kind": "submit"
-        },
-        {
-          "id": "openConsultas",
-          "kind": "navigate",
-          "to": "consultas_recepcao"
-        }
-      ]
+      "text": "Orienta a recepcionista a concluir o cadastro pelo formulário, sem repetir a gravação do paciente.",
+      "intents": []
     }
   },
   "molecules": {
@@ -70,17 +71,17 @@ export const definition = {
       {
         "role": "search",
         "preferred": "groupsearchcontent--ml-search-bar",
-        "alternative": "groupsearchcontent--ml-search-history"
+        "alternative": "groupsearchcontent--ml-search-filters"
       },
       {
-        "role": "records",
+        "role": "results",
         "preferred": "groupviewdata--ml-vertical-record-list",
         "alternative": "groupviewdata--ml-card-grid"
       }
     ],
     "patientDetail": [
       {
-        "role": "summary",
+        "role": "profile",
         "preferred": "groupviewcard--ml-profile-card",
         "alternative": "groupviewcard--ml-view-card-horizontal"
       }
@@ -95,23 +96,6 @@ export const definition = {
         "role": "document",
         "preferred": "groupentertext--ml-cpf-input",
         "alternative": "groupentertext--ml-enter-text"
-      },
-      {
-        "role": "documentType",
-        "preferred": "groupselectone--ml-select",
-        "alternative": "groupselectone--ml-radio-group"
-      },
-      {
-        "role": "feedback",
-        "preferred": "groupnotifyuser--ml-contextual-feedback",
-        "alternative": "groupnotifyuser--ml-toast-notification"
-      }
-    ],
-    "patientActions": [
-      {
-        "role": "commands",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-button-group"
       }
     ]
   }

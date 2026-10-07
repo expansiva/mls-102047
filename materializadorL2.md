@@ -101,18 +101,28 @@ esses ids exatamente.
   regeração da p4_30.
 
 ## 5. O que o shared manda o código fazer
-- **States.** Cada state tem `source` em `<endpoint>.<chave>`, em `entry.params.<param>` ou em `<cmd>.input` (form). Nenhum
-  state tem uma função como fonte.
+- **States.** Cada state tem `source` em `<endpoint>.<chave>` ou em `entry.params.<param>`. Nenhum state tem uma função
+  como fonte. Os valores que o usuário digita num form não são state do shared: o form está em `forms` (abaixo).
+- **Quem cada state alimenta** (d2_80, 05/10). `states.<id>.organisms` lista os organismos que o state alimenta. Um
+  organismo pode aparecer em vários states quando mostra mais de uma fonte (por exemplo, mesas e comandas abertas na
+  mesma busca). Ligue a tela por esse mapa, nunca pelo nome do state. O state de seleção lista quem seleciona e quem
+  mostra o item.
 - **Functions.** Há uma por endpoint, com `calls` igual a ele.
   - Uma consulta põe (`sets`) a sua saída num state.
-  - Um comando atualiza (`updates`) os states que a saída dele redesenha.
+  - Um comando lista em `updates` **todos** os states que mudam depois dele, em dois grupos:
+    - os que a saída dele redesenha;
+    - os que precisam ser recarregados.
+  - O modo de cada state diz qual grupo vale.
   - O **modo** vem no fim da descrição, entre parênteses (`(comanda: upsert)`, `(pagina: append)`):
     - `replace`: trocar a lista;
     - `append`: acrescentar a próxima página;
     - `upsert`: inserir ou atualizar o item pelo id na lista ou no item;
     - `remove`: tirar o item.
-  - **Recarga:** quando o desenho declarou que um comando recarrega consultas, a função as chama depois, com os parâmetros
-    atuais.
+  - **Recarga:** para cada state do `updates` que a saída do comando não traz, a função chama de novo, depois do comando, a
+    consulta que é fonte desse state, com os parâmetros atuais.
+    - Exemplo: `abrirComanda` tem `updates: ['comanda', 'contextoAtendimento']`.
+    - `comanda` vem da saída do comando (`upsert`).
+    - `contextoAtendimento` é recarregado pela consulta dele.
 - **Forms.** `forms: { <submit>: { organism, submit } }` liga o organismo que edita a entrada da escrita ao seu comando. O
   input do comando é **só a entrada da escrita**. Um botão de ação sem nada a digitar (abrir, aprovar, cancelar) **não está
   em `forms`** e chama a função direto, com o contexto e a identidade.

@@ -62,11 +62,6 @@ export const definition = {
             "fieldRef": "Profissional.details.person"
           },
           {
-            "name": "details.person.occupation",
-            "type": "string",
-            "fieldRef": "Profissional.details.person.occupation"
-          },
-          {
             "name": "details.person.privacyConsent",
             "type": "object",
             "fieldRef": "Profissional.details.person.privacyConsent"
@@ -80,6 +75,11 @@ export const definition = {
             "name": "details.agendaClinica",
             "type": "object",
             "fieldRef": "Profissional.details.agendaClinica"
+          },
+          {
+            "name": "details.agendaClinica.professionalType",
+            "type": "enum",
+            "fieldRef": "Profissional.details.agendaClinica.professionalType"
           }
         ],
         "output": [
@@ -139,24 +139,9 @@ export const definition = {
             "fieldRef": "Profissional.details.base"
           },
           {
-            "name": "details.base.contacts",
-            "type": "object",
-            "fieldRef": "Profissional.details.base.contacts"
-          },
-          {
-            "name": "details.base.relationshipRefs",
-            "type": "object",
-            "fieldRef": "Profissional.details.base.relationshipRefs"
-          },
-          {
             "name": "details.person",
             "type": "object",
             "fieldRef": "Profissional.details.person"
-          },
-          {
-            "name": "details.person.occupation",
-            "type": "string",
-            "fieldRef": "Profissional.details.person.occupation"
           },
           {
             "name": "details.person.privacyConsent",
@@ -172,6 +157,11 @@ export const definition = {
             "name": "details.agendaClinica",
             "type": "object",
             "fieldRef": "Profissional.details.agendaClinica"
+          },
+          {
+            "name": "details.agendaClinica.professionalType",
+            "type": "enum",
+            "fieldRef": "Profissional.details.agendaClinica.professionalType"
           }
         ]
       }
@@ -350,16 +340,6 @@ export const definition = {
               },
               "capability": "register.createOrAttach",
               "path": "details.identification.name"
-            },
-            {
-              "name": "occupation",
-              "role": "patch",
-              "origin": {
-                "kind": "contract",
-                "path": "details.person.occupation"
-              },
-              "capability": "register.createOrAttach",
-              "path": "details.person.occupation"
             },
             {
               "name": "privacyConsent",

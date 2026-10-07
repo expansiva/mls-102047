@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const agendaClinicaOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "agendaClinica",
-  "businessDomain": "Agenda clínica para cadastro de pacientes, agendamento e realização de consultas.",
+  "businessDomain": "Agenda clínica",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "agendaClinica",
@@ -23,16 +23,6 @@ export const agendaClinicaOntologyIndex = {
       "subtype": "Person"
     },
     {
-      "entityId": "Recepcionista",
-      "kind": "role",
-      "subtype": "Person"
-    },
-    {
-      "entityId": "ContatoPaciente",
-      "kind": "role",
-      "subtype": "ContactChannel"
-    },
-    {
       "entityId": "Consulta",
       "kind": "entity",
       "class": "event"
@@ -46,7 +36,7 @@ export const agendaClinicaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é marcada para um paciente.",
+      "description": "Cada consulta é agendada para um paciente, e um paciente pode ter várias consultas.",
       "field": "Consulta.pacienteId"
     },
     {
@@ -56,18 +46,8 @@ export const agendaClinicaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada consulta é realizada por um profissional.",
+      "description": "Cada consulta é atribuída a um profissional, e um profissional pode ter várias consultas em sua agenda.",
       "field": "Consulta.profissionalId"
-    },
-    {
-      "relationshipId": "pacienteHasContact",
-      "from": "Paciente",
-      "to": "ContatoPaciente",
-      "type": "oneToMany",
-      "required": false,
-      "mode": "mdmRelationship",
-      "description": "O paciente pode possuir canais de contato mestre usados pela recepção para confirmação.",
-      "catalogType": "HasContact"
     }
   ]
 } as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;

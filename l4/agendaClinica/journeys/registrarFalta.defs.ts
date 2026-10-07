@@ -14,38 +14,31 @@ export const registrarFaltaJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarConsultaDoPaciente",
+        "stepId": "localizarConsultaAusente",
         "kind": "locate",
         "entity": "Consulta",
-        "title": "Localizar consulta do paciente",
-        "description": "A recepcionista abre a consulta em contexto ou a localiza na agenda."
+        "title": "Localizar consulta",
+        "description": "A recepcionista localiza a consulta cujo paciente não compareceu."
       },
       {
-        "stepId": "conferirConsultaAgendada",
-        "kind": "inspect",
-        "entity": "Consulta",
-        "title": "Conferir consulta agendada",
-        "description": "A recepcionista confere o paciente, o profissional e o horário da consulta."
-      },
-      {
-        "stepId": "marcarFaltaPaciente",
+        "stepId": "marcarFalta",
         "kind": "act",
         "entity": "Consulta",
         "effect": "transition",
         "transitionRef": "registrarFalta",
-        "title": "Marcar falta do paciente",
-        "description": "A recepcionista registra que o paciente não compareceu ao atendimento."
+        "title": "Registrar falta",
+        "description": "A recepcionista marca a consulta como falta do paciente."
       }
     ],
     "outcome": {
-      "statement": "A consulta fica registrada como falta do paciente.",
+      "statement": "A consulta fica registrada como falta.",
       "evidence": [
-        "O status da consulta indica falta.",
-        "A consulta permanece visível no histórico de atendimentos do paciente."
+        "A situação da consulta indica falta do paciente.",
+        "A consulta não permanece pendente de atendimento."
       ]
     }
   },
-  "businessHash": "sha256:3f3671fbde1fea60867cd9c4a752f83e871e0d114abded767478a7bfcb84077a"
+  "businessHash": "sha256:21441774896dd23441d25cc6959c5cb63fd9451f305ef6c2a905d9da2c4bd0fe"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarFaltaJourneyType = typeof registrarFaltaJourney;

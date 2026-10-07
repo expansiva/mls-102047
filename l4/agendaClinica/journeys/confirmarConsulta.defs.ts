@@ -14,38 +14,38 @@ export const confirmarConsultaJourney = {
     },
     "steps": [
       {
-        "stepId": "localizarConsultaParaConfirmacao",
+        "stepId": "localizarConsulta",
         "kind": "locate",
         "entity": "Consulta",
-        "title": "Localizar consulta agendada",
-        "description": "A recepcionista abre a consulta em contexto ou a localiza entre os agendamentos."
+        "title": "Localizar consulta",
+        "description": "A recepcionista localiza a consulta agendada que foi confirmada por telefone."
       },
       {
-        "stepId": "consultarContatoPaciente",
+        "stepId": "conferirDadosConsulta",
         "kind": "inspect",
-        "entity": "Paciente",
-        "title": "Consultar contato do paciente",
-        "description": "A recepcionista consulta o contato do paciente para realizar a confirmação telefônica."
+        "entity": "Consulta",
+        "title": "Conferir dados consulta",
+        "description": "A recepcionista confere os dados da consulta antes de registrar a confirmação telefônica."
       },
       {
-        "stepId": "registrarConfirmacao",
+        "stepId": "confirmarAgendamento",
         "kind": "act",
         "entity": "Consulta",
         "effect": "transition",
         "transitionRef": "confirmarConsulta",
-        "title": "Registrar confirmação telefônica",
+        "title": "Confirmar consulta",
         "description": "A recepcionista registra que o paciente confirmou a consulta por telefone."
       }
     ],
     "outcome": {
-      "statement": "A consulta fica registrada como confirmada.",
+      "statement": "A consulta passa a constar como confirmada.",
       "evidence": [
-        "O status da consulta indica confirmação.",
-        "A confirmação pode ser consultada pela recepcionista."
+        "A consulta exibe a confirmação registrada.",
+        "A confirmação fica visível na agenda da consulta."
       ]
     }
   },
-  "businessHash": "sha256:04879968a3228fd919657496671af914ac4a1a58cb69b263d53792675d69245b"
+  "businessHash": "sha256:677e6a84744bb17086d04d4f2ad1dc3d395f596c8a36341570af276ba7a79a4e"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConfirmarConsultaJourneyType = typeof confirmarConsultaJourney;

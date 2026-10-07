@@ -6,9 +6,9 @@ export const agendaClinicaRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "agendaClinica",
   "rules": {
-    "transicoesConsultaValidas": "Uma consulta só pode ser confirmada quando estiver agendada, e só pode ser marcada como faltante ou atendida quando estiver agendada ou confirmada.",
-    "atendimentoExigeAnotacao": "Uma consulta só pode ser marcada como atendida com uma anotação do atendimento registrada.",
-    "profissionalHorarioUnico": "Não pode haver duas consultas para o mesmo profissional na mesma data e horário."
+    "transicaoConsultaValida": "A consulta só pode transitar de agendada para confirmada, de agendada ou confirmada para falta, ou de agendada ou confirmada para atendida.",
+    "anotacaoObrigatoriaNoAtendimento": "O registro de uma consulta como atendida exige uma anotação do atendimento.",
+    "consultaSemConflito": "Não podem existir duas consultas para o mesmo profissional na mesma data e horário."
   }
 } as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 

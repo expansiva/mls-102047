@@ -21,7 +21,7 @@ export const definition = {
       "ConsultaRepository"
     ],
     "rulesApplied": [
-      "transicoesConsultaValidas"
+      "transicaoConsultaValida"
     ],
     "functions": [
       {
@@ -100,7 +100,7 @@ export const definition = {
       },
       {
         "kind": "rule",
-        "ruleId": "transicoesConsultaValidas"
+        "ruleId": "transicaoConsultaValida"
       },
       {
         "kind": "transition",
@@ -131,14 +131,14 @@ export const definition = {
     ],
     "rules": [
       {
-        "ruleId": "transicoesConsultaValidas",
+        "ruleId": "transicaoConsultaValida",
         "path": "l4/agendaClinica/rules.defs.ts",
-        "symbol": "transicoesConsultaValidas"
+        "symbol": "transicaoConsultaValida"
       }
     ],
     "rulePlan": [
       {
-        "ruleId": "transicoesConsultaValidas",
+        "ruleId": "transicaoConsultaValida",
         "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#transitions.confirmarConsulta.ruleRefs",
         "consumer": "usecase:confirmarConsulta",
         "enforcement": "local",

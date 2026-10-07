@@ -3,24 +3,6 @@
 export const definition = {
   "entry": {
     "params": {
-      "pacienteId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:patientDetail",
-        "persist": true
-      },
-      "search": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:patientList",
-        "persist": true
-      },
       "page": {
         "type": "number",
         "sources": [
@@ -28,6 +10,33 @@ export const definition = {
           "localStorage"
         ],
         "effect": "filter:patientList",
+        "persist": true
+      },
+      "nameSearch": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:patientList",
+        "persist": true
+      },
+      "patientId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:patientDetail",
+        "persist": true
+      },
+      "pacienteId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:patientDetail",
         "persist": true
       },
       "docId": {
@@ -42,213 +51,147 @@ export const definition = {
     }
   },
   "forms": {
-    "submitPatientCreate": {
+    "savePatient": {
       "organism": "patientForm",
-      "submit": "submitPatientCreate"
+      "submit": "savePatient"
     }
   },
   "requests": {
-    "load": {
+    "loadPatients": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "pacientes"
+        "patients"
       ]
     },
-    "loadPacientes": {
+    "searchPatients": {
       "kind": "qry",
-      "trigger": "loadPacientes",
+      "trigger": "searchPatients",
       "returns": [
-        "pacientes"
+        "patients"
       ]
     },
-    "loadPaciente": {
+    "loadPatientDetail": {
       "kind": "qry",
-      "trigger": "loadPaciente",
+      "trigger": "loadPatientDetail",
       "returns": [
-        "paciente"
+        "patient"
       ]
     },
-    "submitPatientCreate": {
+    "savePatient": {
       "kind": "cmd",
-      "trigger": "submitPatientCreate",
+      "trigger": "savePatient",
       "returns": [
-        "paciente"
+        "patient",
+        "patientListItem"
       ],
       "writes": "Paciente.create"
     }
   },
   "states": {
-    "patientList": {
-      "source": "load.pacientes",
-      "description": "Loaded patient list."
+    "patients": {
+      "source": "loadPatients.patients",
+      "description": "Paciente em formato compacto para a lista de localização.",
+      "organisms": [
+        "patientList"
+      ]
     },
-    "patientSelection": {
-      "source": "entry.params.pacienteId",
-      "description": "Selected patient resolved from the loaded patient list."
-    },
-    "patientDetail": {
-      "source": "loadPaciente.paciente",
-      "description": "Loaded selected patient detail."
-    },
-    "patientSearch": {
-      "source": "entry.params.search",
-      "description": "Patient list search filter."
-    },
-    "patientPage": {
-      "source": "entry.params.page",
-      "description": "Patient list page filter."
-    },
-    "patientDocumentPrefill": {
-      "source": "entry.params.docId",
-      "description": "Patient document identifier prefill."
-    },
-    "patientFormDraft": {
-      "source": "submitPatientCreate.input",
-      "description": "Patient creation input."
-    },
-    "createdPatient": {
-      "source": "submitPatientCreate.paciente",
-      "description": "Created patient."
-    }
-  },
-  "functions": {
-    "load": {
-      "description": "Loads the patient list.",
-      "calls": "load",
-      "sets": "patientList"
-    },
-    "filterPatientList": {
-      "description": "Reloads the patient list from the first page using the search and page filters.",
-      "calls": "loadPacientes",
-      "sets": "patientList"
-    },
-    "loadMorePatientList": {
-      "description": "Appends the next patient list page.",
-      "calls": "loadPacientes",
-      "sets": "patientList"
-    },
-    "submitPatientCreate": {
-      "description": "Creates a patient.",
-      "calls": "submitPatientCreate",
-      "sets": "createdPatient",
-      "updates": [
-        "patientList",
+    "patient": {
+      "source": "loadPatientDetail.patient",
+      "description": "Paciente selecionado, pronto para conferência e continuidade no agendamento.",
+      "organisms": [
         "patientDetail"
       ]
     },
-    "loadPaciente": {
-      "description": "Loads the selected patient detail.",
-      "calls": "loadPaciente",
-      "sets": "patientDetail"
+    "selectedPaciente": {
+      "source": "entry.params.pacienteId",
+      "description": "Paciente selecionado, pronto para conferência e continuidade no agendamento.",
+      "organisms": [
+        "patientDetail",
+        "patientList"
+      ]
+    }
+  },
+  "functions": {
+    "loadPatients": {
+      "description": "Inicializa a área de localização de pacientes sem trazer cadastros antes de a recepcionista informar um nome.",
+      "calls": "loadPatients",
+      "sets": "patients"
     },
-    "openConsultas": {
-      "description": "Navigates to consultation scheduling for the selected patient.",
-      "navigate": "consultas_recepcao",
+    "searchPatients": {
+      "description": "Localiza pacientes pelo nome para a recepcionista escolher quem seguirá para o agendamento. (patients.items: append)",
+      "calls": "searchPatients",
+      "sets": "patients"
+    },
+    "loadPatientDetail": {
+      "description": "Carrega a ficha do paciente que a recepcionista selecionou para confirmar sua identificação antes de ir ao agendamento.",
+      "calls": "loadPatientDetail",
+      "sets": "patient"
+    },
+    "savePatient": {
+      "description": "Cadastra ou associa o novo paciente informado pela recepcionista e o deixa imediatamente disponível para conferência e agendamento. (patients.items: upsert)",
+      "calls": "savePatient",
+      "sets": "patient",
+      "updates": [
+        "patients"
+      ]
+    },
+    "goToAppointment": {
+      "description": "Apresenta nome, documento e situação do paciente selecionado para confirmar a identificação antes de agendar.",
+      "navigate": "consultas",
       "carries": {
-        "pacienteId": "patientSelection.id"
+        "pacienteId": "selectedPaciente.id"
       }
     }
   },
   "journeys": [
     {
-      "step": "cadastrarPaciente/informarDadosPaciente",
-      "organisms": [
-        "patientForm",
-        "patientActions"
-      ],
-      "functions": [
-        "submitPatientCreate"
-      ]
-    },
-    {
       "step": "agendarConsulta/localizarPaciente",
       "organisms": [
         "patientList",
-        "patientDetail",
-        "patientActions"
+        "patientDetail"
       ],
       "functions": [
-        "loadPaciente",
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
+        "loadPatients",
+        "searchPatients",
+        "loadPatientDetail"
+      ]
     },
     {
-      "step": "agendarConsulta/localizarProfissional",
+      "step": "agendarConsulta/registrarConsulta",
       "organisms": [
-        "patientActions"
+        "patientDetail"
       ],
       "functions": [
-        "openConsultas"
+        "loadPatientDetail"
       ],
-      "continuesIn": "consultas_recepcao"
+      "continuesIn": "consultas"
     },
     {
-      "step": "agendarConsulta/registrarAgendamento",
+      "step": "cadastrarPaciente/registrarPaciente",
       "organisms": [
-        "patientActions"
+        "patientForm",
+        "patientActions",
+        "patientList",
+        "patientDetail"
       ],
       "functions": [
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
-    },
-    {
-      "step": "agendarConsulta/verificarHorarioDisponivel",
-      "organisms": [
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
-    },
-    {
-      "step": "confirmarConsulta/consultarContatoPaciente",
-      "organisms": [
-        "patientDetail",
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
-    },
-    {
-      "step": "confirmarConsulta/localizarConsultaParaConfirmacao",
-      "organisms": [
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
-    },
-    {
-      "step": "confirmarConsulta/registrarConfirmacao",
-      "organisms": [
-        "patientActions"
-      ],
-      "functions": [
-        "openConsultas"
-      ],
-      "continuesIn": "consultas_recepcao"
+        "savePatient"
+      ]
     }
   ],
   "rules": {
-    "load": [],
-    "loadPacientes": [],
-    "loadPaciente": [],
-    "submitPatientCreate": []
+    "loadPatients": [],
+    "searchPatients": [],
+    "loadPatientDetail": [],
+    "savePatient": []
   },
   "access": {
     "actors": [
       "recepcionista"
     ],
     "grants": [
-      "cadastrarPacientes",
-      "consultarCanaisDosPacientes"
+      "recepcionistaGerenciarPacientesEconsultas"
     ]
   }
 } as const;

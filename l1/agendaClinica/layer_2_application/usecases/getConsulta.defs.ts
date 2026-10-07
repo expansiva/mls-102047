@@ -99,14 +99,14 @@ export const definition = {
     "rules": [],
     "rulePlan": [
       {
-        "ruleId": "atendimentoExigeAnotacao",
+        "ruleId": "anotacaoObrigatoriaNoAtendimento",
         "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#rules",
         "consumer": "operation:get",
         "enforcement": "pending",
         "gap": "APPLICABILITY_UNDECLARED"
       },
       {
-        "ruleId": "transicoesConsultaValidas",
+        "ruleId": "transicaoConsultaValida",
         "origin": "l4/agendaClinica/ontology/Consulta.defs.ts#rules",
         "consumer": "operation:get",
         "enforcement": "pending",

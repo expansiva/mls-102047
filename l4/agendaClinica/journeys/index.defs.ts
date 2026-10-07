@@ -32,9 +32,9 @@ export const agendaClinicaJourneyIndex = {
       "title": "Consultar agenda diária"
     },
     {
-      "journeyId": "registrarConsultaAtendida",
+      "journeyId": "registrarAtendimento",
       "actorRef": "profissional",
-      "title": "Registrar consulta atendida"
+      "title": "Registrar atendimento"
     }
   ],
   "systemDecisions": []

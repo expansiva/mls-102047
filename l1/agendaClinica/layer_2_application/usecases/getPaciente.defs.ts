@@ -74,11 +74,6 @@ export const definition = {
             "fieldRef": "Paciente.details.identification.docId"
           },
           {
-            "name": "details.identification.countryCode",
-            "type": "string",
-            "fieldRef": "Paciente.details.identification.countryCode"
-          },
-          {
             "name": "details.base",
             "type": "object",
             "fieldRef": "Paciente.details.base"
@@ -87,11 +82,6 @@ export const definition = {
             "name": "details.base.contacts",
             "type": "object",
             "fieldRef": "Paciente.details.base.contacts"
-          },
-          {
-            "name": "details.base.relationshipRefs",
-            "type": "object",
-            "fieldRef": "Paciente.details.base.relationshipRefs"
           },
           {
             "name": "details.person",
@@ -130,13 +120,6 @@ export const definition = {
         "call": "get",
         "entity": "Paciente",
         "capability": "read.byId"
-      },
-      {
-        "kind": "mdm",
-        "namespace": "agendaClinica",
-        "call": "relatedOfMany",
-        "entity": "Paciente",
-        "capability": "listLinks"
       }
     ],
     "uses": [
@@ -183,7 +166,7 @@ export const definition = {
     "mdm": {
       "namespace": "agendaClinica",
       "role": "agendaClinica.Paciente",
-      "atomic": false,
+      "atomic": true,
       "calls": [
         {
           "id": "get",
@@ -210,34 +193,6 @@ export const definition = {
             "mdmId",
             "version",
             "details"
-          ]
-        },
-        {
-          "id": "listLinks",
-          "method": "relatedOfMany",
-          "target": "collection",
-          "shape": "collection",
-          "capabilities": [
-            "listLinks"
-          ],
-          "alternative": false,
-          "when": [],
-          "arguments": [
-            {
-              "name": "mdmIds",
-              "role": "selector",
-              "origin": {
-                "kind": "contract",
-                "path": "id"
-              },
-              "path": "id"
-            }
-          ],
-          "result": [
-            "mdmId",
-            "relationshipId",
-            "type",
-            "direction"
           ]
         }
       ]
