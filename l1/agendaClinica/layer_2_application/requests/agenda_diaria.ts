@@ -27,9 +27,10 @@ type ConsultaRecord = {
 type TodayBounds = { start: number; end: number };
 
 function authenticatedProfessionalId(ctx: RequestContext): string {
-  // LOCAL TEST (07/10/2026): the VM has no login, so there is no actorId. LOCAL_TEST_ACTOR_ID (the id of a registered
-  // professional) stands in for the logged-in professional. Remove together with the commented authority checks.
-  const id = ctx.sessionContext.actorId || process.env.LOCAL_TEST_ACTOR_ID;
+  // LOCAL TEST (07/10/2026): the VM session is a platform user, not a professional (actorId is the verified user
+  // id, with no module authorities). LOCAL_TEST_ACTOR_ID (the id of a registered professional) takes its place.
+  // Remove together with the commented authority checks.
+  const id = process.env.LOCAL_TEST_ACTOR_ID || ctx.sessionContext.actorId;
   if (id == null || id.length === 0) {
     throw new AppError('UNAUTHENTICATED', 'O profissional autenticado não foi identificado.', 401);
   }
