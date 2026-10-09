@@ -55,7 +55,6 @@ ${tag} .aura-header-subtitle {
       </div>
       <div class="aura-header-side app-header-right">
         ${this.renderActions()}
-        ${this.renderUserAvatar()}
       </div>
     `;
   }
