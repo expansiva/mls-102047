@@ -6,8 +6,7 @@ import type { ConsultaAgenda, ConsultaDetalhe, PacienteResumo, ProfissionalResum
 import '/_102040_/l2/molecules/groupenterdatetime/ml-datetime-picker.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
 import '/_102040_/l2/molecules/groupsearchcontent/ml-search-bar.js';
-import '/_102040_/l2/molecules/groupselectone/ml-select-one-autocomplete.js';
-import '/_102040_/l2/molecules/groupselectone/ml-select.js';
+import '/_102040_/l2/molecules/groupselectone/ml-combobox.js';
 import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
 import '/_102040_/l2/molecules/groupviewcard/ml-vertical-card.js';
 import '/_102040_/l2/molecules/groupviewdata/ml-calendar-view.js';
@@ -149,25 +148,26 @@ const draft = this.agendarConsultaDraft;
 return html`
 <section data-organism-id="formularioConsulta" class="space-y-4">
 <h2 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg.scheduleRegion}</h2>
-<groupselectone--ml-select-one-autocomplete
+<groupselectone--ml-combobox
 .value=${draft.pacienteId}
 .loading=${this.localizarPacientesParaAgendamentoStatus === 'loading'}
 placeholder=${this.msg.choosePatient}
 @change=${(e: CustomEvent<{ value: string | null }>) => { this.pacienteId = e.detail.value; this.setAgendarConsultaDraft({ ...this.agendarConsultaDraft, pacienteId: e.detail.value }); }}
-@input=${(e: CustomEvent<{ value: string }>) => { this.termo = e.detail.value; void this.localizarPacientesParaAgendamento(); }}>
+@input=${(e: CustomEvent<{ value: string }>) => { const termo = e.detail.value.trim(); this.termo = termo || null; if (termo) void this.localizarPacientesParaAgendamento(); }}>
 <Label>${this.msg.patientLabel}</Label>
 ${patients.map(patient => html`<Item value=${patient.id}>${this.patientName(patient)}</Item>`)}
 <Empty>${this.msg.noPatients}</Empty>
-</groupselectone--ml-select-one-autocomplete>
-<groupselectone--ml-select
+</groupselectone--ml-combobox>
+<groupselectone--ml-combobox
 .value=${draft.profissionalId}
 .loading=${this.localizarProfissionaisParaAgendamentoStatus === 'loading'}
 placeholder=${this.msg.chooseProfessional}
-@change=${(e: CustomEvent<{ value: string | null }>) => { this.profissionalId = e.detail.value; this.setAgendarConsultaDraft({ ...this.agendarConsultaDraft, profissionalId: e.detail.value }); }}>
+@change=${(e: CustomEvent<{ value: string | null }>) => { this.profissionalId = e.detail.value; this.setAgendarConsultaDraft({ ...this.agendarConsultaDraft, profissionalId: e.detail.value }); }}
+@input=${(e: CustomEvent<{ value: string }>) => { const termo = e.detail.value.trim(); this.termo = termo || null; if (termo) void this.localizarProfissionaisParaAgendamento(); }}>
 <Label>${this.msg.professionalLabel}</Label>
 ${professionals.map(professional => html`<Item value=${professional.id}>${this.professionalName(professional)}</Item>`)}
 <Empty>${this.msg.noProfessionals}</Empty>
-</groupselectone--ml-select>
+</groupselectone--ml-combobox>
 <groupenterdatetime--ml-datetime-picker
 .value=${draft.scheduledAt}
 locale="pt-BR"
