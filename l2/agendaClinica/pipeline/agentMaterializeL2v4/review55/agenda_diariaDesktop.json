@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "agendaClinica",
+  "pageId": "agenda_diaria",
+  "device": "desktop",
+  "contextHash": "sha256:aaaad42369cfa153f607103dedbfdbcc1383f11ac548a41831caf10d12ec5a3b",
+  "pagePath": "l2/agendaClinica/web/desktop/page11/agenda_diaria.ts",
+  "summary": "A página atende o fluxo principal de localizar uma consulta de hoje, abrir seus detalhes e registrar a anotação mantendo a agenda visível ao lado. Porém, ela materializa a experiência como uma tabela/lista cronológica e não como o grid espacial exigido pelo template, além de deixar estados de seleção, erro de consulta e paginação incompletos.",
+  "findings": [
+    {
+      "severity": "blocker",
+      "area": "template/intent",
+      "message": "A superfície principal é um calendário renderizado como linhas ordenadas com colunas de horário, paciente e situação, sem grade temporal nem slots espaciais; isso transforma a agenda em uma lista cronológica, exatamente o padrão proibido para esta experiência.",
+      "basis": "Template Forbidden: “Rendering the schedule as a chronological list of items with inline actions — that is the `agendaTimeline` experience, not this one; here the grid is the page.”",
+      "where": "`<groupviewdata--ml-calendar-view>` contém `<Columns>` e cada consulta é um `<Row>` com `<Cell>`; não há grade de dia/horário ou slots livres.",
+      "fix": "Usar a capacidade de grid do calendar-view, com eixo temporal e blocos posicionados por `scheduledAt`, mantendo a identidade e a situação legíveis no próprio bloco."
+    },
+    {
+      "severity": "major",
+      "area": "hierarchy",
+      "message": "O cabeçalho mostra apenas “Hoje” e não oferece uma âncora temporal suficientemente explícita para a agenda, enquanto a seção repete “Agenda do dia” como título e caption equivalente; a hierarquia também não apresenta a data concreta do dia.",
+      "basis": "Template Attention hierarchy: “The grid, with today/now visibly anchored”; Disciplines: “The page title appears once ... day/column headers are dates.”",
+      "where": "Header: `<time>${this.msg.today}</time>`; seção: `<h2>Agenda do dia</h2>` seguida de `<span>Hoje</span>`; não existe data formatada nem headers de dia/data.",
+      "fix": "Exibir a data atual formatada como âncora do grid e remover o caption redundante ou substituí-lo por um controle de navegação temporal real, se previsto pelo contrato."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "O erro ao carregar a consulta selecionada não é renderizado: `carregarConsultaSelecionadaError` é ignorado e, após uma falha, o painel pode continuar mostrando a mensagem genérica de seleção ou um estado inconsistente, sem retry no próprio painel.",
+      "basis": "Template Feedback & feedforward: “A failed command reports inside the panel ... with retry”; page intent requires opening the selected time to identify the patient.",
+      "where": "`renderSummary()` só trata `carregarConsultaSelecionadaStatus === 'loading'` e `!consultation`; `carregarConsultaSelecionadaError` nunca é usado.",
+      "fix": "Renderizar o erro dentro do painel, próximo ao conteúdo afetado, com mensagem orientada ao resultado e ação “Tentar novamente” que reabra `selectedConsulta`."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "O sucesso do registro não recebe o feedback local esperado: a mensagem “Atendimento registrado.” permanece no formulário, mas o bloco da agenda não recebe destaque/atualização perceptível nem o painel fecha ou retorna ao resumo após o comando.",
+      "basis": "Template Feedback & feedforward: “Success is local: the block appears/moves in place with a brief settle emphasis; no page banner, no redirect.”",
+      "where": "`renderAttendance()` exibe apenas `<p>` de sucesso; não há tratamento de sucesso para mudar a cena ou destacar a consulta atualizada em `renderCalendar()`.",
+      "fix": "Após sucesso, retornar ao resumo ou fechar o painel conforme o fluxo definido e aplicar destaque breve ao bloco atualizado, mantendo a situação “Atendida” visível no grid."
+    },
+    {
+      "severity": "major",
+      "area": "states/journey",
+      "message": "A seleção não é claramente indicada na superfície principal quando a consulta é aberta: o código passa `?selected` por id, mas o callback usa índice e o componente não recebe uma seleção explícita; isso pode deixar o bloco/linha sem estado visual, embora o painel tenha sido aberto.",
+      "basis": "Template Attention hierarchy: “The blocks — identity readable at grid scale, state readable at a glance”; page intent: “abrir o horário escolhido”.",
+      "where": "`<Row ... ?selected=${consultation.id === this.selectedConsulta}>` e o clique chama `selectConsultaId(...)`/`setScenario(...)`, mas não há propriedade de índice/seleção no calendar-view.",
+      "fix": "Ligar a seleção persistida ao mecanismo de seleção visual do calendar-view e preservar o destaque enquanto o painel de detalhes estiver aberto."
+    },
+    {
+      "severity": "major",
+      "area": "pagination",
+      "message": "O comando “Carregar mais consultas” aparece sempre, inclusive quando não há mais resultados, e seu erro nunca é informado; além disso, a paginação fica fora da superfície da coleção, apesar de o template exigir que a paginação pertença à própria coleção.",
+      "basis": "Template Disciplines: “Pagination ... belongs to the collection surface itself”; shared declaration exposes `carregarMaisConsultasDoDiaError` for this state.",
+      "where": "Botão após `renderCalendar()` sempre é renderizado; `carregarMaisConsultasDoDiaError` não é lido nem exibido.",
+      "fix": "Colocar o paging no mecanismo da coleção, ou ocultar/desabilitar o comando quando não houver próxima página, e exibir erro com retry junto à borda inferior do calendário."
+    },
+    {
+      "severity": "minor",
+      "area": "text",
+      "message": "A data e o horário do resumo são apresentados como `formatDateTime` duas vezes (no CardDescription e no campo “Horário”), criando repetição desnecessária; o campo de negócio é “Data e horário”, não apenas “Horário”.",
+      "basis": "L4: `scheduledAt` tem o título “Data e horário”; template disciplina a repetição de títulos e rótulos.",
+      "where": "CardDescription mostra `formatDateTime(consultation.scheduledAt)` e o `<dt>` rotula `time` com o mesmo valor completo.",
+      "fix": "Manter a data/horário em um único local ou usar no `<dt>` o título empresarial “Data e horário” e reservar o card para a identificação do paciente/situação."
+    }
+  ]
+}

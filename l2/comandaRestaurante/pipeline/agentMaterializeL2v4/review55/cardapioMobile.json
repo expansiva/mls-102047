@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "cardapio",
+  "device": "mobile",
+  "contextHash": "sha256:468e6830f51292b6f25bdc876fe7852c234625ad70e051822decf6af855b1cd4",
+  "pagePath": "l2/comandaRestaurante/web/mobile/page11/cardapio.ts",
+  "summary": "A página atende ao fluxo básico de listar, consultar, cadastrar e editar itens em cenas sequenciais, e a coluna única é adequada ao celular. Porém, ela contraria pontos centrais do template: a lista é apresentada por uma molécula de lista vertical com colunas/cabeçalhos (potencialmente uma tabela no mobile), e os comandos de salvar não retornam automaticamente à leitura do item nem tornam explícita a confirmação do resultado no modo de leitura.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "mobile",
+      "message": "O catálogo usa `Columns`/`Rows` com cabeçalhos, em vez de uma linha de item sem tabela; isso não segue a forma mobile exigida e pode causar tratamento de tabela ou rolagem horizontal em 360px.",
+      "basis": "Template On mobile: “The list is the home view: one item per row... No table, no horizontal scroll.”",
+      "where": "`groupviewdata--ml-vertical-record-list` dentro de `renderCatalog()`, com `<Columns>` e `<Rows>`",
+      "fix": "Renderize cada item como uma linha/card vertical de uma coluna, mantendo o nome primeiro e o preço alinhado à direita, sem cabeçalhos de tabela nem dependência de hover."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Após cadastrar ou atualizar, o código mantém o usuário na cena de formulário; o feedback de sucesso aparece dentro do próprio formulário. Assim, o fluxo não mostra automaticamente o item salvo em modo de leitura nem prova a atualização da linha no catálogo conforme o loop principal.",
+      "basis": "Template: “After Save the item returns to read mode showing the saved values” e, na criação, “the new item opens in read mode and becomes the selection.”",
+      "where": "`renderForm()`: `commandSuccess` apenas chama `this.feedback(...)`; não há transição para `item` após sucesso",
+      "fix": "Quando o comando concluir com sucesso, selecionar o item retornado, recarregar/atualizar a lista e mudar para a cena `item`; para criação, abrir o novo registro em leitura."
+    },
+    {
+      "severity": "major",
+      "area": "validation",
+      "message": "No estado de validação no campo é apresentado para nome ou preço; o botão apenas fica desabilitado quando o valor é vazio ou inválido. Isso deixa o caixa sem explicação textual antes ou no momento da tentativa de gravação.",
+      "basis": "Template Feedback & feedforward: “Required fields are visibly required... validation speaks at the field, at commit time, in words — never a toast.”",
+      "where": "`renderForm()`: `.required=${true}` nos campos e `.disabled=${commandLoading || name.trim() === '' || price === null}` no botão",
+      "fix": "Exiba mensagens junto aos respectivos campos para nome ausente e preço ausente/inválido, inclusive quando o usuário sair do campo ou tentar salvar."
+    },
+    {
+      "severity": "minor",
+      "area": "states",
+      "message": "Falhas ao carregar mais itens não têm mensagem nem ação de retry; quando `carregarMaisItensCardapioStatus` é `error`, a interface simplesmente volta a mostrar “Carregar mais itens”, sem informar que a tentativa falhou.",
+      "basis": "Template Feedback & feedforward: falha de comando deve renderizar erro no contexto com retry; a definição declara `carregarMaisItensCardapioError` e seu status.",
+      "where": "`renderCatalog()`: somente o estado `loading` de `carregarMaisItensCardapioStatus` é tratado",
+      "fix": "Renderize uma mensagem contextual para o erro da próxima página e um botão para tentar novamente, mantendo os itens já carregados."
+    }
+  ]
+}

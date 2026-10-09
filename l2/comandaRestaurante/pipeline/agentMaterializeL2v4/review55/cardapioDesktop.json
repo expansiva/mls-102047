@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "cardapio",
+  "device": "desktop",
+  "contextHash": "sha256:fb3bea091ff147e4e401c77c9a4903a83da8574a32c3781e52cd58c38073e23b",
+  "pagePath": "l2/comandaRestaurante/web/desktop/page11/cardapio.ts",
+  "summary": "A página atende bem à intenção de manter o cardápio em uma bancada master-detail: a lista permanece visível, a seleção abre leitura no painel e cadastro/edição ficam no mesmo contexto. Porém, a implementação deixa lacunas importantes no fluxo de confirmação e nos estados do item, e a hierarquia do painel repete títulos e disputa atenção com a estrutura pedida pelo template.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "feedback",
+      "message": "Os estados de sucesso `saved` e `created` estão definidos, mas nunca são exibidos; depois do cadastro ou salvamento não há confirmação inline no painel, embora o template exija prova local do resultado.",
+      "basis": "“Success is local: a brief inline confirmation in the panel and the updated row in the list.”",
+      "where": "Catálogo de mensagens (`saved`, `created`) e métodos `renderCreate`/`renderUpdate`, que só renderizam feedback quando há erro.",
+      "fix": "Renderize uma confirmação breve no painel após sucesso, mantendo o item salvo visível em modo de leitura e o novo item selecionado."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "A seleção dispara a troca para `item` imediatamente, mas o painel não apresenta carregamento nem erro enquanto `obterItemCardapio` busca os dados; pode mostrar “Selecione um item” ou um painel vazio durante a consulta, sem indicar progresso ou permitir recuperação.",
+      "basis": "“The detail panel comes from the selected item” e a exigência de estados de loading/error onde podem acontecer.",
+      "where": "`renderRead(selected)` usa apenas `if (!item)` e ignora `obterItemCardapioStatus` e `obterItemCardapioError`.",
+      "fix": "Adicione estado de carregamento do item e erro contextual no painel, com mensagem de negócio e ação de tentar novamente."
+    },
+    {
+      "severity": "major",
+      "area": "hierarchy",
+      "message": "O painel apresenta o título da Scene “Item selecionado” e, logo abaixo, repete uma estrutura de detalhes com o nome do item; além disso, “Detalhes do item” é um caption genérico antes do nome. Isso enfraquece a regra de que o título do painel deve ser o nome do item e cria hierarquia redundante.",
+      "basis": "“The panel's title is the item's name” e “no heading anywhere repeats the label of a button or link near it.”",
+      "where": "`<Scene value=\"item\" title=${this.msg['scene.item']}>` e `renderRead`, que renderiza `${details}` seguido de `item.name`.",
+      "fix": "Faça o título do estado de leitura usar o nome do item quando houver seleção e remova o caption/título redundante; preserve os campos rotulados abaixo."
+    },
+    {
+      "severity": "major",
+      "area": "feedback",
+      "message": "Os erros de cadastro e atualização exibem apenas `error.message`, sem ação de retry, apesar de o template pedir erro dentro do painel “with retry”; o feedback fica sem uma recuperação explícita.",
+      "basis": "“Command failure renders inside the panel, above its button, in normal body color, with retry.”",
+      "where": "Blocos `cadastrarItemCardapioError` e `atualizarItemCardapioError` em `renderCreate` e `renderUpdate`.",
+      "fix": "Inclua uma ação de tentar novamente que repita o comando, mantendo os drafts e a lista utilizáveis."
+    },
+    {
+      "severity": "minor",
+      "area": "validation",
+      "message": "Os textos `requiredName` e `requiredPrice` existem, mas não são usados para validação textual no campo ou no commit; a página depende apenas do atributo `required`, sem garantir as mensagens de negócio previstas.",
+      "basis": "“Required fields are visibly required before any mistake; validation speaks at the field, at commit time, in words.”",
+      "where": "Os dois componentes de entrada em `renderCreate` e `renderUpdate` recebem `required`, mas não recebem nem exibem `requiredName`/`requiredPrice`.",
+      "fix": "Garanta indicação visível de obrigatoriedade e renderize mensagens específicas junto aos respectivos campos quando inválidos."
+    },
+    {
+      "severity": "minor",
+      "area": "hierarchy",
+      "message": "O botão “Novo item” e o formulário de cadastro coexistem com um painel inicial cujo título é “Item selecionado”, embora nenhum item esteja selecionado; isso deixa o estado inicial menos claro e dá ao painel uma denominação de estado em vez de uma orientação útil.",
+      "basis": "“The detail panel comes from the selected item” e “The panel opens in read mode.”",
+      "where": "`scenary || 'item'` sempre abre a Scene `item`, cujo título é `scene.item`, enquanto `renderRead` mostra `selectHint` quando não há item.",
+      "fix": "Use um estado inicial coerente com o catálogo, com orientação neutra no painel, ou selecione explicitamente o primeiro item carregado sem apresentar “Item selecionado” sem seleção."
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "agendaClinica",
+  "pageId": "profissionais",
+  "device": "desktop",
+  "contextHash": "sha256:d91b79660c13ac20ef26a3da11a25bcde99e24a4fbb7ed510d23c5d471ea0370",
+  "pagePath": "l2/agendaClinica/web/desktop/page11/profissionais.ts",
+  "summary": "A página atende parcialmente ao cadastro de profissionais: a tabela e a busca formam uma referência clara, mas a implementação não preserva o fluxo de painel lateral descrito no conceito. No desktop, a cena de diretório renderiza simultaneamente o formulário vazio ou selecionado, enquanto a cena de registro também existe; além disso, há estados e regras de formulário que podem deixar a manutenção incompleta ou silenciosamente inconsistente.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "A página não implementa de forma consistente o loop de selecionar → editar no painel → salvar → voltar à lista: ao selecionar uma linha, `setScenario('record')` troca para a cena de registro, ocultando a tabela, em vez de abrir o cadastro ao lado mantendo o diretório visível. A cena de diretório também contém um formulário persistente, criando dois comportamentos concorrentes para a mesma ação.",
+      "basis": "\"edited through a side panel that opens beside it\"; \"The table stays visible and the selected row stays marked\"; \"No page navigation, ever.\"",
+      "where": "No handler de `rowClick` e no bloco `<Scene value=\"record\">` do `molecules--ml-scenary-102020`.",
+      "fix": "No desktop, mantenha `directory` como cena visível e altere apenas o painel lateral ao selecionar ou criar; use a cena `record` com back apenas para a variante mobile."
+    },
+    {
+      "severity": "major",
+      "area": "hierarchy",
+      "message": "O cadastro aparece aberto desde o primeiro carregamento, ocupando a coluna principal junto à tabela, embora o template diga que o painel só aparece quando aberto. Isso reduz a prioridade visual da tabela e deixa a tela inicial com um formulário de criação sem uma ação explícita que o tenha aberto.",
+      "basis": "\"The side panel, only when open\"; atenção hierarchy: \"1. The table ... 3. The create button. 4. The side panel, only when open\"",
+      "where": "`<Scene value=\"directory\">` sempre renderiza `<div data-organism-id=\"professionalRecord\">` e chama `renderProfessionalForm(isCreating)`, inclusive quando `selected` é nulo.",
+      "fix": "Renderize o painel apenas após selecionar um profissional ou acionar “Cadastrar profissional”; no estado inicial, deixe a área lateral vazia ou não a renderize."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "O estado de carregamento/erro do cadastro selecionado não é apresentado: `getProfessionalStatus` e `getProfessionalError` são disponibilizados, mas a tela pode mostrar o formulário com draft incompleto enquanto o registro é buscado, sem loading nem retry contextual.",
+      "basis": "\"Are loading, empty and error designed where they can happen?\"; \"Command failure renders inside the panel ... with retry\"",
+      "where": "A seleção chama `setSelectedProfissional(item.id)`, mas a renderização só consulta `selected`, `createProfessionalStatus`, `updateProfessionalStatus` e os erros de comando; não consulta `getProfessionalStatus`/`getProfessionalError`.",
+      "fix": "No painel, mostre “Carregando…” durante `getProfessionalStatus === 'loading'` e um erro com “Tentar novamente” quando a busca do cadastro falhar, antes de renderizar o formulário."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "O botão “Voltar à lista” navega silenciosamente mesmo com alterações não salvas, permitindo perda acidental do rascunho. O mesmo risco existe no controle de voltar da cena de registro.",
+      "basis": "\"Closing a panel with unsaved changes asks one plain confirm — never silent loss.\"",
+      "where": "Botão secundário em `professionalActions` chama diretamente `this.setScenario('directory')`; a cena `record` usa `nav=\"back\"` sem qualquer guarda de alterações.",
+      "fix": "Compare o draft com o valor original e, quando houver mudanças, solicite uma confirmação em linguagem simples antes de sair ou limpar o registro."
+    },
+    {
+      "severity": "major",
+      "area": "form",
+      "message": "O número do documento usa sempre a molécula de CPF e fica desabilitado para qualquer tipo diferente de CPF, embora o formulário permita Passaporte, Documento nacional e Outro. Assim, para esses tipos o cadastro não consegue informar o número declarado pelo propósito e pelo contrato.",
+      "basis": "Intent: \"mantém o cadastro mestre com nome, documento e tipo de atuação\"; L4: `details.identification.docId` é o \"Número do documento\" para o tipo escolhido.",
+      "where": "`<groupentertext--ml-cpf-input ... ?disabled=${identification.docType !== 'CPF'}>`.",
+      "fix": "Use um campo de documento genérico para tipos não CPF e aplique a máscara de CPF somente quando `docType === 'CPF'`; mantenha o valor editável enquanto houver tipo selecionado."
+    },
+    {
+      "severity": "minor",
+      "area": "form",
+      "message": "Os campos obrigatórios não têm validação/feedback de campo e o botão de salvar/criar permanece habilitável mesmo com nome, país ou tipo profissional vazios. O `required` nativo nas moléculas não cobre os selects e não fornece as mensagens catalogadas.",
+      "basis": "\"Validation is field-level in the panel, at the field, at commit time\"; catálogo: `requiredName` e `requiredType`.",
+      "where": "`renderProfessionalForm`: selects de documento/tipo sem `required`, ações sem condição baseada nos campos, e `requiredName`/`requiredType` nunca são usados.",
+      "fix": "Valide nome, país e tipo profissional no campo e no commit, mostre as mensagens junto aos controles e desabilite a ação até que os obrigatórios estejam preenchidos."
+    },
+    {
+      "severity": "minor",
+      "area": "titles",
+      "message": "A legenda da tabela repete o título da região “Profissionais da clínica”, contrariando a disciplina de evitar títulos/legendas redundantes quando o contexto já está nomeado.",
+      "basis": "\"The page name appears once ...\" e a exigência de evitar títulos repetidos; o template trata a tabela como a superfície de referência, não como uma segunda região com o mesmo título.",
+      "where": "`<Scene value=\"directory\" title=${this.msg.directoryTitle}>` e `<TableCaption>${this.msg.directoryTitle}</TableCaption>`.",
+      "fix": "Remova a caption repetida ou use uma descrição acessível diferente, sem repetir literalmente o título da cena."
+    }
+  ]
+}

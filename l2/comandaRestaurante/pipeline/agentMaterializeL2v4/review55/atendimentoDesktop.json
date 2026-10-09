@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "atendimento",
+  "device": "desktop",
+  "contextHash": "sha256:58262a43426d4be8433d265712707c18b2fbcc0770d2cef203db2f37ed041196",
+  "pagePath": "l2/comandaRestaurante/web/desktop/page11/atendimento.ts",
+  "summary": "A página entrega o balcão de atendimento em uma única vista desktop, mantendo localização, conferência e operação simultâneas. Porém, ela se afasta de decisões centrais do template: o subtotal não é o total da comanda, a comanda fica à esquerda em vez de no lado do catálogo, e há falhas de confirmação/feedback que deixam ações importantes ambíguas.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "template/intent",
+      "message": "A métrica em destaque mostra apenas “Subtotal dos itens”, embora o template exija que o total/grand total seja o maior número da tela; o contexto de negócio também define “Total da comanda” como o valor a cobrar após descontos.",
+      "basis": "Template: “the cart is ALWAYS visible and its total is the biggest number on the screen” e L4: “Total da comanda: Valor a cobrar, calculado pelos itens válidos da comanda menos o desconto aplicado pelo caixa.”",
+      "where": "organism detalheComanda, groupviewmetric--ml-metric-big-number, label “Subtotal dos itens”, value command.details.subtotal",
+      "fix": "Exibir command.details.totalComanda como métrica principal com o rótulo “Total da comanda” e deixar o subtotal como informação secundária, se necessário."
+    },
+    {
+      "severity": "major",
+      "area": "hierarchy/layout",
+      "message": "A implementação coloca o detalhe da comanda na primeira coluna e o formulário na segunda, enquanto a decisão de design e a experiência counterSplit pedem catálogo/localização de um lado e carrinho/comanda no outro, com a comanda sempre visível como painel de conferência.",
+      "basis": "Template: “item catalog and search on one side, the cart on the other”; definição: conferência é a seção main e localização é primary; design answer: “à esquerda ... localiza ...; à direita, a comanda aberta permanece sempre visível”.",
+      "where": "main grid: ${this.detail(command, busyCommand)} vem antes de ${this.operation(...)}; lookup ocupa toda a largura acima das duas colunas.",
+      "fix": "Estruturar o palco em duas colunas persistentes: lookup/catalogação em uma coluna e detalhe da comanda/carrinho na outra, mantendo o formulário de lançamento junto ao catálogo ou à operação sem deslocar a comanda do painel de conferência."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Abrir uma comanda não apresenta confirmação de sucesso e o feedback de erro de abrir comanda é mostrado com o texto genérico de lançamento; isso torna o resultado da jornada de abertura ambíguo.",
+      "basis": "Intento: “confirmar a abertura, o lançamento ou o cancelamento”; organismo acoesAtendimento: “com retorno imediato”; catálogo: “openError” e “successOpen” são estados previstos.",
+      "where": "lookup: botão “Abrir comanda”; actionFeedback() usa lancarItemError || abrirComandaError, mas sempre renderiza “Não foi possível lançar o item.” e nunca usa successOpen.",
+      "fix": "Renderizar feedback local para abertura com “Não foi possível abrir a comanda.”, retry quando aplicável, e uma confirmação breve de “Comanda aberta com sucesso.” junto à mesa/comanda atualizada."
+    },
+    {
+      "severity": "major",
+      "area": "journey/feedback",
+      "message": "O cancelamento é uma ação destrutiva por linha e não pede confirmação, além de não haver feedback de sucesso; o template exige confirmação para ações destrutivas e retorno local após o comando.",
+      "basis": "Template: “Danger style ... always behind a confirmation that names the record” e “Success is local and brief”; intent: cancelar item lançado por engano com confirmação.",
+      "where": "detalheComanda: botão danger “Cancelar lançamento” chama cancelarItem(item.id, item.version) diretamente; commandFeedback() só mostra erros.",
+      "fix": "Adicionar confirmação simples que nomeie o item antes de cancelar e exibir “Lançamento cancelado.” no painel da comanda após sucesso."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "O estado de erro ao carregar a comanda selecionada é agrupado com erro de cancelamento e recebe sempre a mensagem de cancelamento; também não há retry visível apesar de “retry” existir no catálogo.",
+      "basis": "Template: “A failed command ... reports inside the region it belongs to ... with retry”; catálogo prevê commandError, cancelError e retry separadamente.",
+      "where": "commandFeedback(): const error = obterComandaAtendimentoError || cancelarItemError; título fixo this.msg.cancelError; lookupError() também não oferece botão de retry.",
+      "fix": "Separar os estados de obterComanda e cancelarItem, usar commandError/cancelError corretamente e incluir ação “Tentar novamente” na região que falhou."
+    },
+    {
+      "severity": "minor",
+      "area": "text",
+      "message": "O título do formulário “Lançar item na comanda” repete exatamente o rótulo do botão principal, contrariando a disciplina de não repetir perto da ação; além disso, a tabela usa “Cancelar” como cabeçalho enquanto o comando se chama “Cancelar lançamento”.",
+      "basis": "Template: “no heading anywhere repeats the label of a button or link near it”; L4 title: “Lançar item na comanda”.",
+      "where": "formularioLancamento: h2 ${this.msg.launch} e botão ${this.msg.launch}; detalheComanda: TableHead key=\"action\" ${this.msg.cancel} e botão ${this.msg.cancelItem}.",
+      "fix": "Usar um título descritivo diferente, como “Novo pedido”, e alinhar o cabeçalho da ação ao texto de negócio “Cancelar lançamento”."
+    },
+    {
+      "severity": "minor",
+      "area": "data",
+      "message": "A tabela mostra situação e valor total dos itens cancelados, mas não mostra a observação nem o preço unitário registrado, reduzindo a capacidade de conferir o lançamento antes de corrigi-lo.",
+      "basis": "Organismo detalheComanda: “itens lançados com quantidade e situação ... para conferir”; L4 define Observação, Preço unitário registrado e Valor total do item como dados do ItemComanda.",
+      "where": "groupviewtable--ml-data-table renderiza apenas item, quantity, status, total e action.",
+      "fix": "Incluir observação e preço unitário registrado quando forem relevantes ao atendimento, ou garantir uma visualização acessível desses dados na linha."
+    }
+  ]
+}

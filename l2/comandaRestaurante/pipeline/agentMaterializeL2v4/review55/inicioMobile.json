@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "inicio",
+  "device": "mobile",
+  "contextHash": "sha256:5f51e00eb89d0a53b1cf2cd05fb0cf6746f2085d6243038118f04a393f1c1fc2",
+  "pagePath": "l2/comandaRestaurante/web/mobile/page11/inicio.ts",
+  "summary": "A página atende parcialmente à consulta rápida: apresenta a mensagem de bom estado e os dois indicadores em uma coluna adequada para mobile, com estados de carregamento, erro e vazio. Porém, a hierarquia e o modelo de dados não deixam a triagem tão confiável quanto o template exige, pois o headline “Nada precisa de atenção agora” é exibido sempre que há resumo, sem evidência de uma contagem ou lista de exceções, e o strip é apresentado como uma faixa com aparência de cartão.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "intent",
+      "message": "A mensagem de triagem é derivada apenas da existência de `summary`, não de exceções ou de uma contagem de itens que exigem atenção; assim, a página pode afirmar que nada precisa de atenção mesmo quando houver uma situação operacional relevante.",
+      "basis": "O template exige que o headline seja “computed from the lanes” e que exceções venham de dados sinalizados; a intenção é acompanhar a situação para agir rapidamente no atendimento ou fechamento.",
+      "where": "Seção `aria-live=\"polite\"`: `${summary ? this.msg.attentionNone : ...}`.",
+      "fix": "Disponibilize no contrato os alertas/exceções e derive o headline de sua contagem; renderize lanes acionáveis quando houver problemas, mantendo a frase de bom estado apenas quando a lista estiver realmente vazia."
+    },
+    {
+      "severity": "major",
+      "area": "template",
+      "message": "O resumo operacional é envolvido por uma caixa com borda, fundo e padding, fazendo o health strip parecer um card/conteiner de KPI, além de empilhar dois big numbers como blocos separados. Isso enfraquece a exigência de uma faixa compacta, monocromática e sem cards abaixo da triagem.",
+      "basis": "O template define “Aggregate queries become the health strip: one compact line of small value+label pairs ... no cards” e proíbe KPI tiles no topo; no mobile, o strip deve continuar pequeno e abaixo das lanes.",
+      "where": "`<div class=\"flex flex-col gap-3 rounded-xl border ... p-3\">` contendo dois `ml-metric-big-number`.",
+      "fix": "Remova a borda, o fundo e o tratamento de card do contêiner e use uma composição compacta de pares valor+label, mantendo os indicadores discretos abaixo de eventuais lanes."
+    },
+    {
+      "severity": "minor",
+      "area": "feedback",
+      "message": "O estado de carregamento mostra apenas texto (“Carregando a situação da operação…”) e deixa os dois indicadores sem conteúdo, em vez de reservar visualmente o strip com skeletons ou placeholders estáveis.",
+      "basis": "O template determina “Loading: skeleton lanes in place, strip last”; feedback deve preservar a estrutura enquanto os dados chegam.",
+      "where": "`loading ? html` no headline e os dois big numbers com `.loading=${loading}`.",
+      "fix": "Use skeletons de altura e largura próximas aos valores finais e, se aplicável, um estado de carregamento específico na região do resumo, sem alterar a ordem da interface."
+    }
+  ]
+}

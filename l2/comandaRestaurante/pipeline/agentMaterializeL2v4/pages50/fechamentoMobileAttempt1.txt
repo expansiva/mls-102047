@@ -1,0 +1,249 @@
+/* refused: M4_PAGE_COMPILE:
+line 172:137 - TS2339 - Property 'discountAmount' does not exist on type 'ComandaDetailsParaFechamento'.
+    > <dt class="text-[var(--text-muted,currentColor)]">${this.msg.discount}</dt><dd class="text-right">${money(comanda.details.discountAmount || null)}</dd>
+line 184:70 - TS2339 - Property 'observacao' does not exist on type 'ItemComandaDetailsParaFechamento'.
+    > <TableCell>${item.itemCardapio.name}${item.details.observacao ? html`<small class="block text-xs text-[var(--text-muted,currentColor)]">${item.details.observacao}</small>` : ''}</TableCell>
+line 184:170 - TS2339 - Property 'observacao' does not exist on type 'ItemComandaDetailsParaFechamento'.
+    > <TableCell>${item.itemCardapio.name}${item.details.observacao ? html`<small class="block text-xs text-[var(--text-muted,currentColor)]">${item.details.observacao}</small>` : ''}</TableCell>
+line 185:45 - TS2339 - Property 'quantidade' does not exist on type 'ItemComandaDetailsParaFechamento'.
+    > <TableCell>${item.details.quantidade}</TableCell> */
+
+/// <mls fileReference="_102047_/l2/comandaRestaurante/web/mobile/page11/fechamento.ts" enhancement="_102020_/l2/enhancementAura"/>
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { ComandaRestauranteFechamentoShared } from '/_102047_/l2/comandaRestaurante/web/shared/fechamento.js';
+import type { ComandaAbertaResumo, ComandaParaFechamento } from '/_102047_/l2/comandaRestaurante/web/shared/fechamento.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
+import '/_102040_/l2/molecules/groupentermoney/ml-enter-money-br.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-notify-banner.js';
+import '/_102040_/l2/molecules/groupsearchcontent/ml-search-bar.js';
+import '/_102040_/l2/molecules/groupselectone/ml-radio-group.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
+import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
+import '/_102040_/l2/molecules/groupviewmetric/ml-metric-big-number.js';
+import '/_102040_/l2/molecules/groupviewtable/ml-responsive-table.js';
+
+/// **collab_i18n_start**
+const pageMessage_pt = {
+  pageTitle: 'Fechamento de comanda',
+  locateTitle: 'Localizar comanda',
+  settleTitle: 'Conferir e fechar',
+  locateIntro: 'Encontre a comanda aberta por número ou mesa.',
+  numberLabel: 'Número da comanda',
+  numberPlaceholder: 'Digite o número',
+  mesaLabel: 'Código da mesa',
+  mesaPlaceholder: 'Digite o código da mesa',
+  listNumber: 'Comanda',
+  listMesa: 'Mesa',
+  listSituation: 'Situação',
+  open: 'Em atendimento',
+  noOpenComandas: 'Nenhuma comanda aberta encontrada.',
+  loading: 'Carregando…',
+  searchError: 'Não foi possível localizar as comandas.',
+  reviewIntro: 'Confira os itens lançados antes de receber.',
+  comandaNumber: 'Comanda {number}',
+  totalLabel: 'Total da comanda',
+  subtotal: 'Subtotal dos itens',
+  discount: 'Desconto',
+  items: 'Itens da comanda',
+  itemName: 'Item',
+  quantity: 'Quantidade',
+  unitPrice: 'Preço unitário',
+  itemTotal: 'Valor total',
+  note: 'Observação',
+  payment: 'Forma de pagamento',
+  cash: 'Dinheiro',
+  debitCard: 'Cartão de débito',
+  creditCard: 'Cartão de crédito',
+  pix: 'Pix',
+  discountHelper: 'Opcional. O desconto não pode exceder o subtotal.',
+  close: 'Fechar comanda paga',
+  closeLoading: 'Fechando comanda…',
+  closeSuccessTitle: 'Comanda fechada',
+  closeSuccess: 'Pagamento registrado. A mesa foi liberada para um novo atendimento.',
+  closeError: 'Não foi possível fechar a comanda.',
+  requiredPayment: 'Selecione uma forma de pagamento.',
+  back: 'Voltar para localizar',
+  unavailable: 'A mesa será liberada após o fechamento.'
+};
+type PageMessageType = typeof pageMessage_pt;
+const pageMessages: Record<string, PageMessageType> = { pt: pageMessage_pt };
+/// **collab_i18n_end**
+
+const money = (value: string | number | null | undefined) => {
+  const amount = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(amount)) return '—';
+  return new Intl.NumberFormat(document.documentElement.lang || 'pt-BR', { style: 'currency', currency: 'BRL' }).format(amount);
+};
+const messageWithNumber = (text: string, number: number) => text.replace('{number}', String(number));
+
+@customElement('comanda-restaurante--web--mobile--page11--fechamento-102047')
+export class ComandaRestauranteMobilePage11FechamentoPage extends ComandaRestauranteFechamentoShared {
+  private msg!: PageMessageType;
+
+  render() {
+    this.msg = pageMessages[this.getMessageKey(pageMessages)];
+    return html`
+      <main class="min-h-screen bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] px-4 py-4 pb-8">
+        <div class="mx-auto w-full max-w-[430px]">
+          <p class="mb-4 text-sm font-semibold text-[var(--text-muted,currentColor)]">${this.msg.pageTitle}</p>
+          ${this.renderFeedback()}
+          <molecules--ml-scenary-102020
+            mode="scenary"
+            .value=${this.scenary || 'locate'}
+            backLabel=${this.msg.back}
+            @change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}>
+            <Scene value="locate" title=${this.msg.locateTitle}>
+              ${this.renderLocate()}
+            </Scene>
+            <Scene value="settle" title=${this.msg.settleTitle} nav="back" backTo="locate">
+              ${this.renderSettle()}
+            </Scene>
+          </molecules--ml-scenary-102020>
+        </div>
+      </main>
+    `;
+  }
+
+  private renderFeedback() {
+    const error = this.carregarFechamentoError?.message || this.buscarComandasAbertasError?.message || this.obterComandaParaFechamentoError?.message || this.fecharComandaPagaError?.message;
+    return html`
+      <groupnotifyuser--ml-notify-banner type="error" .visible=${Boolean(error)} dismissible="false" data-class="mb-4">
+        <Message>${error || this.msg.closeError}</Message>
+      </groupnotifyuser--ml-notify-banner>
+      <groupnotifyuser--ml-notify-banner type="success" .visible=${this.fecharComandaPagaStatus === 'success'} dismissible="false" data-class="mb-4">
+        <Title>${this.msg.closeSuccessTitle}</Title><Message>${this.msg.closeSuccess}</Message>
+      </groupnotifyuser--ml-notify-banner>
+    `;
+  }
+
+  private renderLocate() {
+    const loading = this.carregarFechamentoStatus === 'loading' || this.buscarComandasAbertasStatus === 'loading' || this.carregarMaisComandasAbertasStatus === 'loading';
+    const rows = this.openComandas?.items || [];
+    return html`
+      <section data-organism-id="openComandaList" class="space-y-4">
+        <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.locateIntro}</p>
+        <div class="grid gap-3">
+          <groupsearchcontent--ml-search-bar
+            name="number"
+            placeholder=${this.msg.numberPlaceholder}
+            .loading=${loading}
+            @search=${(e: CustomEvent<{ query: string }>) => this.searchNumber(e.detail.query)}
+            @clear=${() => this.buscarComandasAbertas(null, null)}>
+            <Label>${this.msg.numberLabel}</Label>
+          </groupsearchcontent--ml-search-bar>
+          <groupsearchcontent--ml-search-bar
+            name="mesaCode"
+            placeholder=${this.msg.mesaPlaceholder}
+            .loading=${loading}
+            @search=${(e: CustomEvent<{ query: string }>) => this.buscarMesa(e.detail.query)}
+            @clear=${() => this.buscarComandasAbertas(null, null)}>
+            <Label>${this.msg.mesaLabel}</Label>
+          </groupsearchcontent--ml-search-bar>
+        </div>
+        <groupviewdata--ml-vertical-record-list .loading=${loading} hoverable="true" @row-click=${(e: CustomEvent<{ index: number }>) => this.chooseComanda(e.detail.index)}>
+          <Columns>
+            <Column field="number" header=${this.msg.listNumber}></Column>
+            <Column field="mesa" header=${this.msg.listMesa}></Column>
+            <Column field="status" header=${this.msg.listSituation}></Column>
+          </Columns>
+          <Rows>
+            ${rows.map((row: ComandaAbertaResumo) => html`
+              <Row ?selected=${row.id === this.selectedComanda}>
+                <Cell>${row.number}</Cell>
+                <Cell>${row.mesa.code}</Cell>
+                <Cell>${this.msg.open}</Cell>
+              </Row>
+            `)}
+          </Rows>
+          <Loading>${this.msg.loading}</Loading>
+          <Empty>${this.msg.noOpenComandas}</Empty>
+        </groupviewdata--ml-vertical-record-list>
+      </section>
+    `;
+  }
+
+  private renderSettle() {
+    const comanda = this.comanda;
+    const loading = this.obterComandaParaFechamentoStatus === 'loading';
+    if (!comanda) return html`<p class="py-8 text-sm text-[var(--text-muted,currentColor)]">${loading ? this.msg.loading : this.msg.reviewIntro}</p>`;
+    const discount = this.fecharComandaPagaInput.discountAmount;
+    return html`
+      <div class="space-y-5" data-comanda-id=${comanda.id}>
+        <section data-organism-id="comandaReview" class="space-y-4">
+          <p class="text-sm text-[var(--text-muted,currentColor)]">${messageWithNumber(this.msg.comandaNumber, comanda.number)} · ${this.msg.reviewIntro}</p>
+          <groupviewmetric--ml-metric-big-number>
+            <Label>${this.msg.totalLabel}</Label>
+            <Value>${money(comanda.details.totalComanda)}</Value>
+          </groupviewmetric--ml-metric-big-number>
+          <div class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-3">
+            <dl class="grid grid-cols-2 gap-2 text-sm">
+              <dt class="text-[var(--text-muted,currentColor)]">${this.msg.subtotal}</dt><dd class="text-right">${money(comanda.details.subtotal)}</dd>
+              <dt class="text-[var(--text-muted,currentColor)]">${this.msg.discount}</dt><dd class="text-right">${money(comanda.details.discountAmount || null)}</dd>
+            </dl>
+          </div>
+          <h2 class="text-base font-semibold">${this.msg.items}</h2>
+          <groupviewtable--ml-responsive-table>
+            <TableCaption>${this.msg.items}</TableCaption>
+            <TableHeader><TableRow>
+              <TableHead key="item">${this.msg.itemName}</TableHead><TableHead key="quantity">${this.msg.quantity}</TableHead><TableHead key="total">${this.msg.itemTotal}</TableHead>
+            </TableRow></TableHeader>
+            <TableBody>
+              ${comanda.items.filter((item) => item.status === 'launched').map((item) => html`
+                <TableRow>
+                  <TableCell>${item.itemCardapio.name}${item.details.observacao ? html`<small class="block text-xs text-[var(--text-muted,currentColor)]">${item.details.observacao}</small>` : ''}</TableCell>
+                  <TableCell>${item.details.quantidade}</TableCell>
+                  <TableCell>${money(item.details.valorTotal)}</TableCell>
+                </TableRow>
+              `)}
+            </TableBody>
+            <Empty>${this.msg.noOpenComandas}</Empty>
+          </groupviewtable--ml-responsive-table>
+        </section>
+        <section data-organism-id="paymentForm" class="space-y-4 rounded-xl bg-[var(--surface-alt-bg,transparent)] p-4">
+          <groupentermoney--ml-enter-money-br
+            name="discountAmount"
+            currency="BRL" locale="pt-BR" .value=${discount === null ? null : Number(discount)}
+            .max=${Number(comanda.details.subtotal)}
+            @input=${(e: CustomEvent<{ value: number | null }>) => this.setDraftDiscount(e.detail.value)}>
+            <Label>${this.msg.discount}</Label><Helper>${this.msg.discountHelper}</Helper>
+          </groupentermoney--ml-enter-money-br>
+          <groupselectone--ml-radio-group name="paymentMethod" variant="radio" required .value=${this.fecharComandaPagaInput.paymentMethod} @change=${(e: CustomEvent<{ value: string | null }>) => this.setPayment(e.detail.value)}>
+            <Label>${this.msg.payment}</Label>
+            <Item value="cash">${this.msg.cash}</Item><Item value="debitCard">${this.msg.debitCard}</Item><Item value="creditCard">${this.msg.creditCard}</Item><Item value="pix">${this.msg.pix}</Item>
+            <Helper>${this.msg.requiredPayment}</Helper>
+          </groupselectone--ml-radio-group>
+          <div data-organism-id="closeComandaActions">
+            <grouptriggeraction--ml-button-standard
+              data-variant="primary" size="lg" .disabled=${!this.fecharComandaPagaInput.paymentMethod || this.fecharComandaPagaStatus === 'loading'} .loading=${this.fecharComandaPagaStatus === 'loading'} @action=${() => this.fecharComandaPaga()} data-class="w-full">
+              <Label>${this.fecharComandaPagaStatus === 'loading' ? this.msg.closeLoading : this.msg.close}</Label>
+            </grouptriggeraction--ml-button-standard>
+          </div>
+          ${comanda.mesa.disponivel ? html`<p class="text-sm text-[var(--status-success-text,currentColor)]">${this.msg.unavailable}</p>` : ''}
+        </section>
+      </div>
+    `;
+  }
+
+  private searchNumber(query: string) {
+    const value = query.trim();
+    const number = value ? Number(value) : null;
+    this.buscarComandasAbertas(number !== null && Number.isFinite(number) ? number : null, null);
+  }
+
+  private buscarMesa(query: string) { this.buscarComandasAbertas(null, query.trim() || null); }
+
+  private chooseComanda(index: number) {
+    const row = this.openComandas?.items?.[index];
+    if (row) { this.selectComandaReview(row.id); this.setScenario('settle'); }
+  }
+
+  private setDraftDiscount(value: number | null) {
+    this.setFecharComandaPaga({ ...this.fecharComandaPagaInput, discountAmount: value === null ? null : String(value) });
+  }
+
+  private setPayment(value: string | null) {
+    if (value === 'cash' || value === 'debitCard' || value === 'creditCard' || value === 'pix' || value === null) this.setFecharComandaPaga({ ...this.fecharComandaPagaInput, paymentMethod: value });
+  }
+}
+

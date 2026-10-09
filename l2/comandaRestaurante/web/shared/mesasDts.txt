@@ -1,0 +1,55 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { MesaResumo } from '/_102047_/l2/comandaRestaurante/web/contracts/mesas.defs.js';
+export type { MesaResumo, MesasContracts } from '/_102047_/l2/comandaRestaurante/web/contracts/mesas.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type MesaFormDraft = {
+    code: string | null;
+};
+export declare class ComandaRestauranteMesasShared extends StateLitElement {
+    /** state mesas — complete mesa records for the house list and maintenance redraws; source carregarMesas.mesas; organism mesasList */
+    mesas: MesaResumo[];
+    /** state selectedMesa — the selected complete mesa record for the form; source entry.params.mesaId; organism mesaForm; persisted */
+    selectedMesa: MesaResumo | null;
+    /** draft — the mesa code being edited by the create or update form */
+    mesaFormDraft: MesaFormDraft;
+    /** state pageStatus — the overall initial-load status of the page; source pageStatus */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state carregarMesasStatus — the status of the mesa list query; source carregarMesasStatus */
+    carregarMesasStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarMesasError — the error of the mesa list query; source carregarMesasError */
+    carregarMesasError: ErrorState;
+    /** state criarMesaStatus — the status of mesa creation; source criarMesaStatus */
+    criarMesaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state criarMesaError — the error of mesa creation; source criarMesaError */
+    criarMesaError: ErrorState;
+    /** state atualizarMesaStatus — the status of mesa update; source atualizarMesaStatus */
+    atualizarMesaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state atualizarMesaError — the error of mesa update; source atualizarMesaError */
+    atualizarMesaError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private entryMesaId;
+    private emptyMesaFormDraft;
+    private publish;
+    private assignState;
+    private resetVisit;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    /** function setScenario — publishes the visible page scene; redraws scenary by replacement; value is the scene identifier */
+    setScenario(value: string): void;
+    /** draft — sets the mesa code draft used by create and update submissions; redraws mesaFormDraft by replacement; value contains the editable code */
+    setMesaForm(value: MesaFormDraft): void;
+    /** select — selects a mesa by id or clears the selection; redraws selectedMesa by replacement; id is the mesa identifier */
+    selectMesa(id: string | null): void;
+    /** function carregarMesas — loads the house mesas for cashier consultation and maintenance selection; redraws mesas by replacement; takes no arguments */
+    carregarMesas(): Promise<void>;
+    /** function criarMesa — creates a mesa and returns its complete current state; redraws mesas by upsert; takes no arguments and reads the mesaForm draft */
+    criarMesa(): Promise<void>;
+    /** function atualizarMesa — updates the selected mesa code and returns its complete current state; redraws mesas by upsert; takes no arguments and reads the selected mesa and mesaForm draft */
+    atualizarMesa(): Promise<void>;
+}

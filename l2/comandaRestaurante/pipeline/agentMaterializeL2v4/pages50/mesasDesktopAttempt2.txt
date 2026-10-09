@@ -1,0 +1,153 @@
+/* refused: M4_PAGE_GATE:
+M4_PAGE_SCENARY_CUSTOM: The page calls this.setScenario(…) but has no <molecules--ml-scenary-102020>: views switch only through the scene host. Put the views in <Scene> elements inside it. */
+
+/// <mls fileReference="_102047_/l2/comandaRestaurante/web/desktop/page11/mesas.ts" enhancement="_102020_/l2/enhancementAura"/>
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { ComandaRestauranteMesasShared } from '/_102047_/l2/comandaRestaurante/web/shared/mesas.js';
+import type { MesaResumo } from '/_102047_/l2/comandaRestaurante/web/contracts/mesas.defs.js';
+import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
+import '/_102040_/l2/molecules/groupviewtable/ml-data-table.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
+/// **collab_i18n_start
+const pageMessage_pt = {
+pageTitle: 'Mesas',
+pageIntro: 'Consulte a disponibilidade e mantenha as mesas da casa.',
+listTitle: 'Mesas da casa',
+newMesa: 'Cadastrar mesa',
+code: 'Código da mesa',
+availability: 'Disponível',
+available: 'Disponível',
+unavailable: 'Indisponível',
+editTitle: 'Editar mesa',
+newTitle: 'Nova mesa',
+saveNew: 'Cadastrar mesa',
+saveEdit: 'Atualizar mesa',
+cancel: 'Cancelar',
+empty: 'Nenhuma mesa cadastrada.',
+loading: 'Carregando mesas…',
+retry: 'Tentar novamente',
+requiredCode: 'Informe o código da mesa.',
+createError: 'Não foi possível cadastrar a mesa.',
+updateError: 'Não foi possível atualizar a mesa.',
+listError: 'Não foi possível carregar as mesas.',
+saved: 'Mesa salva.',
+back: 'Voltar para mesas',
+editHint: 'Altere o código usado pelo garçom e pelo caixa.',
+};
+type PageMessageType = typeof pageMessage_pt;
+const pageMessages: Record<string, PageMessageType> = { pt: pageMessage_pt };
+/// **collab_i18n_end
+const formatMesaCode = (mesa: MesaResumo) => mesa.code;
+@customElement('comanda-restaurante--web--desktop--page11--mesas-102047')
+export class ComandaRestauranteDesktopPage11MesasPage extends ComandaRestauranteMesasShared {
+private msg!: PageMessageType;
+render() {
+this.msg = pageMessages[this.getMessageKey(pageMessages)];
+const selectedIndex = this.selectedMesa ? this.mesas.findIndex((mesa) => mesa.id === this.selectedMesa?.id) : -1;
+const listError = this.carregarMesasError?.message || this.msg.listError;
+return html`
+<main class="min-h-screen bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] px-10 py-8">
+<header class="mb-8">
+<h1 class="text-3xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
+<p class="mt-2 text-sm text-[var(--text-muted,currentColor)]">${this.msg.pageIntro}</p>
+</header>
+<div class="grid grid-cols-[minmax(0,1fr)_23rem] gap-6 items-start">
+<section data-organism-id="mesasList" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5 shadow-sm">
+<div class="mb-5 flex items-center justify-between gap-4">
+<h2 class="text-lg font-semibold text-[var(--text-strong,currentColor)]">${this.msg.listTitle}</h2>
+<grouptriggeraction--ml-button-standard
+data-variant="primary" size="md"
+@action=${() => { this.selectMesa(null); this.setMesaForm({ code: null }); this.setScenario('form'); }}>
+<Label>${this.msg.newMesa}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>
+${this.carregarMesasStatus === 'error' ? html`
+<div class="mb-4 flex items-center justify-between rounded-lg border border-[var(--status-error-bg,transparent)] bg-[var(--status-error-bg,transparent)] px-4 py-3 text-sm text-[var(--status-error-text,currentColor)]" aria-live="polite">
+<span>${listError}</span>
+<grouptriggeraction--ml-button-standard data-variant="secondary" size="sm" @action=${() => this.carregarMesas()}>
+<Label>${this.msg.retry}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>` : ''}
+<groupviewtable--ml-data-table
+class="block"
+.value=${selectedIndex >= 0 ? String(selectedIndex) : ''}
+.loading=${this.carregarMesasStatus === 'loading' || this.pageStatus === 'loading'}
+.disabled=${this.carregarMesasStatus === 'loading'}
+@rowClick=${(e: CustomEvent<{ index: number }>) => {
+const mesa = this.mesas[e.detail.index];
+if (mesa) { this.selectMesa(mesa.id); this.setMesaForm({ code: mesa.code }); this.setScenario('form'); }
+}}>
+<TableCaption>${this.msg.listTitle}</TableCaption>
+<TableHeader>
+<TableRow>
+<TableHead key="code" sortable>${this.msg.code}</TableHead>
+<TableHead key="availability" sortable>${this.msg.availability}</TableHead>
+</TableRow>
+</TableHeader>
+<TableBody>
+${this.mesas.map((mesa) => html`
+<TableRow key=${mesa.id}>
+<TableCell>${formatMesaCode(mesa)}</TableCell>
+<TableCell>
+<span class="inline-flex rounded-full px-3 py-1 text-xs font-medium ${mesa.details.disponivel ? 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]' : 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]'}">
+${mesa.details.disponivel ? this.msg.available : this.msg.unavailable}
+</span>
+</TableCell>
+</TableRow>`)}
+</TableBody>
+<Empty>${this.msg.empty}</Empty>
+<Loading>${this.msg.loading}</Loading>
+</groupviewtable--ml-data-table>
+</section>
+<molecules--ml-scenary
+class="block min-h-[20rem]"
+mode="scenary"
+.value=${this.scenary || 'list'}
+backLabel=${this.msg.back}
+@change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}>
+<Scene value="list" title="${this.msg.listTitle}">
+<div class="h-full rounded-xl border border-dashed border-[var(--border-subtle,currentColor)] bg-[var(--surface-alt-bg,transparent)] p-6 text-sm text-[var(--text-muted,currentColor)]">
+${this.msg.pageIntro}
+</div>
+</Scene>
+<Scene value="form" title="${this.selectedMesa ? this.msg.editTitle : this.msg.newTitle}" nav="back" backTo="list">
+${this.renderForm()}
+</Scene>
+</molecules--ml-scenary>
+</div>
+</main>`;
+}
+private renderForm() {
+const editing = this.selectedMesa !== null;
+const saving = this.criarMesaStatus === 'loading' || this.atualizarMesaStatus === 'loading';
+const error = this.criarMesaError?.message || this.atualizarMesaError?.message;
+const code = this.mesaFormDraft.code || '';
+return html`
+<section data-organism-id="mesaForm" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 shadow-sm" aria-busy=${saving}>
+<div class="space-y-5">
+<groupentertext--ml-enter-text
+class="block"
+.value=${code}
+name="code"
+required
+?loading=${saving}
+@input=${(e: CustomEvent<{ value: string }>) => this.setMesaForm({ code: e.detail.value })}>
+<Label>${this.msg.code}</Label>
+<Helper>${this.msg.editHint}</Helper>
+</groupentertext--ml-enter-text>
+${error ? html`<p class="rounded-lg bg-[var(--status-error-bg,transparent)] px-3 py-2 text-sm text-[var(--status-error-text,currentColor)]" aria-live="polite">${error}</p>` : ''}
+<div class="flex justify-end gap-3 border-t border-[var(--border-subtle,currentColor)] pt-5">
+<grouptriggeraction--ml-button-standard data-variant="secondary" size="md" ?disabled=${saving} @action=${() => this.setScenario('list')}>
+<Label>${this.msg.cancel}</Label>
+</grouptriggeraction--ml-button-standard>
+<grouptriggeraction--ml-button-standard data-variant="primary" size="md" ?loading=${saving} .disabled=${saving || code.trim().length === 0} @action=${() => editing ? this.atualizarMesa() : this.criarMesa()}>
+<Label>${editing ? this.msg.saveEdit : this.msg.saveNew}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>
+</div>
+</section>`;
+}
+}
+

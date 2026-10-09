@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "agendaClinica",
+  "pageId": "pacientes",
+  "device": "desktop",
+  "contextHash": "sha256:ff6563406d69f3e620cc4d4575562c8097da257c5a47479cd2caa76f57124e25",
+  "pagePath": "l2/agendaClinica/web/desktop/page11/pacientes.ts",
+  "summary": "A página atende bem ao diretório de pacientes em desktop: mantém busca e lista à esquerda e usa o painel direito para conferir ou cadastrar, preservando o contexto. Há, porém, lacunas importantes de feedback e continuidade, especialmente para erros de carregamento e para o sucesso do cadastro, além de o perfil não exibir os contatos previstos no contexto da confirmação.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "Erros da busca e do carregamento inicial não são apresentados: searchPatientsError, loadPatientsError e pageStatus de erro podem deixar a lista vazia sem explicar o problema nem oferecer recuperação.",
+      "basis": "Template: “Command failure renders inside the profile ... with retry; the finder stays untouched” e a disciplina de feedback exige estados claros onde as consultas podem falhar.",
+      "where": "Organismo patientList; o vertical-record-list recebe apenas loading/empty e o search bar não recebe mensagem de erro.",
+      "fix": "Renderizar uma mensagem inline de erro na área da busca/lista, com linguagem de negócio e ação “Tentar novamente”, distinguindo falha de uma busca sem resultados."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Após cadastrar, o feedback diz para conferir a identificação, mas a cena permanece em “Novo paciente” e não há ação visível para voltar à ficha; isso deixa a continuação do cadastro até o agendamento menos direta.",
+      "basis": "Intento: “cadastra quem ainda não está na clínica, para poder marcar consultas”; template: “On success the new customer joins the list and becomes the selection” e “profile returns to read mode”.",
+      "where": "Organismo patientForm, no bloco saveSuccess; savePatientStatus === 'success' apenas renderiza a mensagem.",
+      "fix": "Após sucesso, selecionar o paciente retornado, atualizar a lista, mudar para a cena de identificação e mostrar o botão “Seguir para agendamento” no perfil."
+    },
+    {
+      "severity": "major",
+      "area": "feedback",
+      "message": "O botão de cadastro permanece habilitado quando o nome está vazio ou o formulário não mudou, permitindo uma tentativa inválida; a validação obrigatória aparece apenas como helper genérico.",
+      "basis": "Template: “Required fields visibly required before any mistake; validation at the field ...” e “Save stays disabled until valid and changed”.",
+      "where": "Organismo patientActions; o botão save só usa `?disabled=${saving}`.",
+      "fix": "Derivar validade e alteração do draft, desabilitar “Cadastrar paciente” até o nome ser válido e mostrar validação junto ao campo quando necessário."
+    },
+    {
+      "severity": "major",
+      "area": "intent",
+      "message": "A ficha não mostra os contatos do paciente, embora o contexto diga que Contatos é consultado para confirmação telefônica; isso reduz a utilidade da conferência antes da consulta.",
+      "basis": "L4: `details.base.contacts` é “consultado para a confirmação telefônica da consulta”; a intenção inclui localizar e conferir o paciente para marcar consultas.",
+      "where": "Organismo patientDetail; o `<dl>` renderiza apenas nome, situação, tipo e número do documento.",
+      "fix": "Incluir no perfil um bloco rotulado “Contatos” com os canais efetivamente entregues pelo contrato, sem inventar dados quando estiver vazio."
+    },
+    {
+      "severity": "minor",
+      "area": "hierarchy",
+      "message": "O perfil repete o nome do paciente: ele aparece como título do CardTitle e novamente como valor do campo “Nome”. Isso adiciona redundância no painel de resposta.",
+      "basis": "Template: “The profile's title is the customer's name” e a disciplina contra conteúdo repetido sem necessidade.",
+      "where": "Organismo patientDetail; `<CardTitle>${identification.name}</CardTitle>` seguido do `<dt>Nome</dt><dd>${identification.name}</dd>`.",
+      "fix": "Remover o bloco duplicado de “Nome” do detalhamento, mantendo o nome como título e preservando os demais fatos de identificação."
+    }
+  ]
+}

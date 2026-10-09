@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "agendaClinica",
+  "pageId": "consultas",
+  "device": "desktop",
+  "contextHash": "sha256:bebd67a5aa89dba4dca8437c39acfc4c725a8aff1918f6faf2bc46221323b5f9",
+  "pagePath": "l2/agendaClinica/web/desktop/page11/consultas.ts",
+  "summary": "A página estabelece uma agenda visual com painel lateral e permite selecionar, conferir e iniciar um agendamento. Porém, a navegação temporal essencial não está disponível, a tabela cronológica compete com o grid que deveria ser a superfície principal e as ações de confirmação/falta não dão feedback visível de sucesso ou erro, deixando o fluxo operacional incompleto.",
+  "findings": [
+    {
+      "severity": "blocker",
+      "area": "intent / journey",
+      "message": "Não há controle funcional para trocar a data ou navegar entre semanas/meses: o único botão “Hoje” apenas chama `carregarAgenda()` e não altera o período consultado. Assim, localizar consultas fora do período inicial, parte central da agenda clínica, fica inacessível.",
+      "basis": "A intenção é “localizar consultas”; o template exige “week or month grid” com “range switch, paging, and the one creation entry point” no cabeçalho.",
+      "where": "Cabeçalho de `renderAgenda()`, especialmente o botão `${this.msg.hoje}` com `@action=${() => this.carregarAgenda()}`; não existem controles de range ou paging.",
+      "fix": "Adicionar seletor de semana/mês e navegação anterior/próximo ancorada em Hoje, atualizando `dataAgenda`/os parâmetros da consulta e mantendo o range visível no cabeçalho."
+    },
+    {
+      "severity": "major",
+      "area": "template / hierarchy",
+      "message": "A agenda é renderizada novamente como uma tabela cronológica completa abaixo do calendário, com datas e horários repetidos. Isso dilui a superfície espacial e faz a página operar também como uma lista de itens, em vez de deixar o grid como centro da tarefa.",
+      "basis": "O template define “a week or month grid is the page” e proíbe “Rendering the schedule as a chronological list of items”; a atenção deve priorizar “the grid”.",
+      "where": "Seção `aria-label=${this.msg.tabela}` contendo `groupviewtable--ml-data-table`, imediatamente abaixo de `groupviewdata--ml-calendar-view`.",
+      "fix": "Remover a tabela duplicada ou transformá-la em uma alternativa explicitamente secundária e recolhível, sem duplicar toda a agenda nem competir visualmente com o grid."
+    },
+    {
+      "severity": "major",
+      "area": "template / creation journey",
+      "message": "O novo agendamento só pode começar pelo botão do cabeçalho e abre um formulário com data/horário vazio; clicar em um horário livre do calendário não inicia o formulário nem preenche o slot apontado. Isso quebra o loop espacial de escolher um espaço livre e confirmar seus dados.",
+      "basis": "O template determina “Creating starts on the grid” e que o slot selecionado fornece “the slot's date/time already filled from the gesture”.",
+      "where": "`calendar-view` possui apenas `@row-click` para consultas existentes; não há handler de slot livre, e `renderAgendamento()` usa `d.scheduledAt` sem uma origem no grid.",
+      "fix": "Tratar seleção de slot livre como entrada para `setAgendarConsultaDraft`, preenchendo `scheduledAt` e abrindo a cena `agendamento`; manter o botão Novo como entrada alternativa."
+    },
+    {
+      "severity": "major",
+      "area": "states / feedback",
+      "message": "As operações de confirmar e registrar falta podem falhar ou concluir sem qualquer mensagem renderizada: os estados `confirmarConsultaError`, `registrarFaltaError` e ambos os estados de sucesso são ignorados. O loading aparece no botão, mas o resultado não fica junto das ações.",
+      "basis": "O template exige falha do comando “inside the panel, above its button, with retry” e sucesso local; a intenção inclui confirmar por telefone e registrar falta.",
+      "where": "`renderConsulta()` só exibe `consultarConsultaSelecionadaError`; não usa `confirmarConsultaError`, `registrarFaltaError`, `sucessoConfirmacao` ou `sucessoFalta`.",
+      "fix": "Renderizar o erro específico acima do grupo de ações, preservando retry, e mostrar feedback de sucesso local após a atualização da consulta, com os botões refletindo o novo status."
+    },
+    {
+      "severity": "major",
+      "area": "states / template",
+      "message": "Quando não há consultas, o componente recebe “Nenhuma consulta neste período” como estado vazio, mas não mantém um grid de tempo navegável mostrando os espaços livres. A pessoa perde justamente a representação espacial necessária para escolher um horário.",
+      "basis": "O template determina que um range vazio “still shows the full grid; empty is visible time, not an empty state”.",
+      "where": "`groupviewdata--ml-calendar-view` e `groupviewtable--ml-data-table` recebem `<Empty>${this.msg.vazio}</Empty>`.",
+      "fix": "Manter o frame completo de semana/mês e exibir a ausência de blocos como tempo livre, usando a mensagem apenas como apoio contextual, não como substituição do grid."
+    }
+  ]
+}

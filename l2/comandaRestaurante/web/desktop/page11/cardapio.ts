@@ -1,0 +1,156 @@
+/// <mls fileReference="_102047_/l2/comandaRestaurante/web/desktop/page11/cardapio.ts" enhancement="_102020_/l2/enhancementAura"/>
+
+
+import { html, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { ComandaRestauranteCardapioShared } from '/_102047_/l2/comandaRestaurante/web/shared/cardapio.js';
+import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
+import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
+import '/_102040_/l2/molecules/groupentermoney/ml-enter-money-br.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
+
+/// **collab_i18n_start**
+const pageMessage_pt = {
+pageTitle: 'Cardápio',
+pageIntro: 'Confira os itens disponíveis e mantenha nome e preço atualizados.',
+catalogTitle: 'Itens do cardápio',
+newItem: 'Novo item',
+itemName: 'Nome',
+currentPrice: 'Preço vigente',
+selectHint: 'Selecione um item para consultar seus dados.',
+noItem: 'Nenhum item selecionado.',
+loadingItems: 'Carregando itens do cardápio…',
+emptyItems: 'Nenhum item cadastrado no cardápio.',
+loadMore: 'Carregar mais itens',
+loadingMore: 'Carregando…',
+readItem: 'Item selecionado',
+newItemTitle: 'Cadastrar item',
+editItemTitle: 'Atualizar item',
+edit: 'Editar item',
+cancel: 'Cancelar',
+save: 'Salvar alterações',
+register: 'Cadastrar item',
+requiredName: 'Informe o nome do item.',
+requiredPrice: 'Informe o preço vigente.',
+priceHelper: 'Preço cobrado quando o item é lançado em uma comanda.',
+saved: 'Item atualizado com sucesso.',
+created: 'Item cadastrado com sucesso.',
+catalogError: 'Não foi possível carregar o cardápio.',
+retry: 'Tentar novamente',
+back: 'Voltar para o cardápio',
+details: 'Detalhes do item',
+'scene.back': 'Voltar',
+'scene.item': 'Item selecionado',
+'scene.novo': 'Cadastrar item',
+'scene.editar': 'Atualizar item'
+};
+type PageMessageType = typeof pageMessage_pt;
+const pageMessages: Record<string, PageMessageType> = { pt: pageMessage_pt };
+/// **collab_i18n_end**
+const money = (value: string) => {
+const numberValue = Number(value);
+return Number.isFinite(numberValue)
+? new Intl.NumberFormat(document.documentElement.lang || 'pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue)
+: value;
+};
+@customElement('comanda-restaurante--web--desktop--page11--cardapio-102047')
+export class ComandaRestauranteDesktopPage11CardapioPage extends ComandaRestauranteCardapioShared {
+private msg = pageMessage_pt;
+render() {
+this.msg = pageMessages[this.getMessageKey(pageMessages)];
+const items = this.pagina?.items ?? [];
+const listLoading = this.carregarItensCardapioStatus === 'loading';
+const moreLoading = this.carregarMaisItensCardapioStatus === 'loading';
+const selected = this.formularioItemCardapio;
+return html`
+<main class="min-h-screen bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] px-8 py-7">
+<header class="mb-7 max-w-7xl mx-auto">
+<h1 class="text-3xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
+<p class="mt-2 text-[var(--text-muted,currentColor)]">${this.msg.pageIntro}</p>
+</header>
+<div class="max-w-7xl mx-auto grid grid-cols-[minmax(0,1.05fr)_minmax(420px,.95fr)] gap-6 items-start">
+<section data-organism-id="listaItensCardapio" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5">
+<div class="flex items-center justify-between gap-4 mb-4">
+<h2 class="text-lg font-semibold text-[var(--text-strong,currentColor)]">${this.msg.catalogTitle}</h2>
+<grouptriggeraction--ml-button-standard data-variant="primary" @action=${() => this.setScenario('novo')}>
+<Label>${this.msg.newItem}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>
+<groupviewdata--ml-vertical-record-list .loading=${listLoading} .hoverable=${true}
+@row-click=${(e: CustomEvent<{ index: number }>) => {
+const row = items[e.detail.index];
+if (row) { this.selectItemCardapio(row.id); this.setScenario('item'); }
+}}>
+<Columns>
+<Column field="name" header="${this.msg.itemName}"></Column>
+<Column field="price" header="${this.msg.currentPrice}" align="right"></Column>
+</Columns>
+<Rows>${items.map((row, index) => html`
+<Row ?selected=${row.id === this.selectedItemCardapio}>
+<Cell><span class="font-medium text-[var(--text-strong,currentColor)]">${row.name}</span></Cell>
+<Cell><span class="tabular-nums">${money(row.details.details.precoVigente)}</span></Cell>
+</Row>`)}</Rows>
+<Loading><div class="py-10 text-center text-[var(--text-muted,currentColor)]">${this.msg.loadingItems}</div></Loading>
+<Empty><div class="py-10 text-center text-[var(--text-muted,currentColor)]">${this.msg.emptyItems}</div></Empty>
+</groupviewdata--ml-vertical-record-list>
+<div class="mt-4 flex justify-end">
+<grouptriggeraction--ml-button-standard data-variant="secondary" .loading=${moreLoading} ?disabled=${moreLoading} @action=${() => this.carregarMaisItensCardapio()}>
+<Label>${moreLoading ? this.msg.loadingMore : this.msg.loadMore}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>
+${this.carregarItensCardapioError ? html`<groupnotifyuser--ml-contextual-feedback type="error" visible>
+<Title>${this.msg.catalogError}</Title><Message>${this.carregarItensCardapioError.message}</Message>
+<Action><button type="button" @click=${() => this.carregarItensCardapio()}>${this.msg.retry}</button></Action>
+</groupnotifyuser--ml-contextual-feedback>` : nothing}
+</section>
+<section class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 min-h-[420px]">
+<molecules--ml-scenary-102020 mode="scenary" .value=${this.scenary || 'item'} backLabel=${this.msg['scene.back']}
+@change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}>
+<Scene value="item" title=${this.msg['scene.item']} nav="back">
+${this.renderRead(selected)}
+</Scene>
+<Scene value="novo" title=${this.msg['scene.novo']}>${this.renderCreate()}</Scene>
+<Scene value="editar" title=${this.msg['scene.editar']} nav="back">${this.renderUpdate(selected)}</Scene>
+</molecules--ml-scenary-102020>
+</section>
+</div>
+</main>`;
+}
+private renderRead(item: typeof this.formularioItemCardapio) {
+if (!item) return html`<div class="py-16 text-center text-[var(--text-muted,currentColor)]">${this.msg.selectHint}</div>`;
+return html`<div data-organism-id="formularioItemCardapio">
+<div class="border-b border-[var(--border-subtle,currentColor)] pb-5 mb-6">
+<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.details}</p>
+<p class="mt-2 text-2xl font-semibold text-[var(--text-strong,currentColor)]">${item.name}</p>
+</div>
+<dl class="space-y-5">
+<div><dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.itemName}</dt><dd class="mt-1 font-medium">${item.name}</dd></div>
+<div><dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.currentPrice}</dt><dd class="mt-1 text-xl font-semibold tabular-nums">${money(item.details.details.precoVigente)}</dd></div>
+</dl>
+<div class="mt-10"><grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => this.setScenario('editar')}><Label>${this.msg.edit}</Label></grouptriggeraction--ml-button-standard></div>
+</div>`;
+}
+private renderCreate() {
+const draft = this.cadastrarItemCardapioDraft;
+const busy = this.cadastrarItemCardapioStatus === 'loading';
+return html`<form data-organism-id="formularioItemCardapio" @submit=${(e: SubmitEvent) => { e.preventDefault(); this.cadastrarItemCardapio(); }} class="space-y-5">
+<groupentertext--ml-enter-text name="name" .value=${draft.name ?? ''} required .loading=${busy} @input=${(e: CustomEvent<{ value: string }>) => this.setCadastrarItemCardapioDraft({ ...draft, name: e.detail.value })}><Label>${this.msg.itemName}</Label></groupentertext--ml-enter-text>
+<groupentermoney--ml-enter-money-br name="precoVigente" currency="BRL" locale="pt-BR" required .value=${draft.details.precoVigente === null ? null : Number(draft.details.precoVigente)} .loading=${busy} @input=${(e: CustomEvent<{ value: number | null }>) => this.setCadastrarItemCardapioDraft({ ...draft, details: { precoVigente: e.detail.value === null ? null : String(e.detail.value) } })}><Label>${this.msg.currentPrice}</Label><Helper>${this.msg.priceHelper}</Helper></groupentermoney--ml-enter-money-br>
+${this.cadastrarItemCardapioError ? html`<groupnotifyuser--ml-contextual-feedback type="error" visible><Message>${this.cadastrarItemCardapioError.message}</Message></groupnotifyuser--ml-contextual-feedback>` : nothing}
+<div class="flex gap-3 pt-4"><grouptriggeraction--ml-button-standard data-variant="primary" type="submit" .loading=${busy}><Label>${this.msg.register}</Label></grouptriggeraction--ml-button-standard><grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => this.setScenario('item')}><Label>${this.msg.cancel}</Label></grouptriggeraction--ml-button-standard></div>
+</form>`;
+}
+private renderUpdate(item: typeof this.formularioItemCardapio) {
+const draft = this.atualizarItemCardapioDraft;
+const busy = this.atualizarItemCardapioStatus === 'loading';
+if (!item) return html`<div class="py-16 text-center text-[var(--text-muted,currentColor)]">${this.msg.noItem}</div>`;
+return html`<form data-organism-id="formularioItemCardapio" @submit=${(e: SubmitEvent) => { e.preventDefault(); this.atualizarItemCardapio(); }} class="space-y-5">
+<groupentertext--ml-enter-text name="name" .value=${draft.name ?? item.name} required .loading=${busy} @input=${(e: CustomEvent<{ value: string }>) => this.setAtualizarItemCardapioDraft({ ...draft, name: e.detail.value })}><Label>${this.msg.itemName}</Label></groupentertext--ml-enter-text>
+<groupentermoney--ml-enter-money-br name="precoVigente" currency="BRL" locale="pt-BR" required .value=${draft.details.precoVigente === null ? Number(item.details.details.precoVigente) : Number(draft.details.precoVigente)} .loading=${busy} @input=${(e: CustomEvent<{ value: number | null }>) => this.setAtualizarItemCardapioDraft({ ...draft, details: { precoVigente: e.detail.value === null ? null : String(e.detail.value) } })}><Label>${this.msg.currentPrice}</Label><Helper>${this.msg.priceHelper}</Helper></groupentermoney--ml-enter-money-br>
+${this.atualizarItemCardapioError ? html`<groupnotifyuser--ml-contextual-feedback type="error" visible><Message>${this.atualizarItemCardapioError.message}</Message></groupnotifyuser--ml-contextual-feedback>` : nothing}
+<div class="flex gap-3 pt-4"><grouptriggeraction--ml-button-standard data-variant="primary" type="submit" .loading=${busy}><Label>${this.msg.save}</Label></grouptriggeraction--ml-button-standard><grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => this.setScenario('item')}><Label>${this.msg.cancel}</Label></grouptriggeraction--ml-button-standard></div>
+</form>`;
+}
+}

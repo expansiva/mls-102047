@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "mesas",
+  "device": "mobile",
+  "contextHash": "sha256:8ec62be46e9b0a0e8feaad0117517fbac7f5b313f82944cf6d7ad9b052c3d537",
+  "pagePath": "l2/comandaRestaurante/web/mobile/page11/mesas.ts",
+  "summary": "A página atende ao fluxo básico de consultar, criar e editar mesas em uma coluna móvel, com lista vertical, cena própria para o formulário e estados de carregamento, vazio e erro de carregamento. Porém, o retorno pós-salvamento e a proteção contra perda de alterações não seguem o loop do template, e a cena/formulário repetem títulos e o rótulo da ação, deixando a experiência menos clara.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Após cadastrar ou atualizar, a cena de formulário não retorna à lista nem mostra o sucesso local; o formulário simplesmente permanece aberto, e a mensagem `saved` não é utilizada.",
+      "basis": "On mobile: “After Save, return to the list at the same place, with the row updated and briefly marked.”; Loops: “save → the panel closes and the row updates in place”",
+      "where": "renderForm(): handlers de `criarMesa()` e `atualizarMesa()`; não há reação a status `success`",
+      "fix": "Ao concluir com sucesso, atualizar a lista, limpar a seleção quando apropriado, voltar para `list` e aplicar uma marca breve à linha atualizada."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Voltar da cena de formulário pode descartar alterações silenciosamente; não existe confirmação quando o rascunho diverge do valor salvo.",
+      "basis": "On mobile: “Back with unsaved changes still asks one plain confirmation.”; Feedback & feedforward: “Closing a panel with unsaved changes asks one plain confirm — never silent loss.”",
+      "where": "Scene `form` com `nav=\"back\"` e `backTo=\"list\"`; não há verificação de `mesaFormDraft` antes de `setScenario`",
+      "fix": "Interceptar o retorno quando houver alterações e pedir uma confirmação simples antes de abandonar o formulário."
+    },
+    {
+      "severity": "major",
+      "area": "hierarchy",
+      "message": "O formulário repete o título da cena e, no cadastro, também repete o rótulo do botão primário: a cena já tem título `Cadastrar mesa`, enquanto o conteúdo mostra um parágrafo e um `h1` com o mesmo texto e o botão também diz `Cadastrar mesa`.",
+      "basis": "Disciplines: “The page name appears once, in the header” e “no heading anywhere repeats the label of a button or link near it.”",
+      "where": "`<Scene ... title=${...}>` e `renderForm()` com `<p>${createMesa/editMesa}</p>`, `<h1>...` e botão `saveCreate`/`saveUpdate`",
+      "fix": "Deixar o título da cena como o único heading de contexto e usar no formulário apenas a identidade do registro; no cadastro, não repetir `Cadastrar mesa` como heading próximo ao botão."
+    },
+    {
+      "severity": "major",
+      "area": "hierarchy",
+      "message": "Na lista, `Mesas da casa` aparece como título da cena e novamente como subtítulo imediatamente abaixo de `Mesas`, criando uma duplicação de cabeçalho antes do conteúdo.",
+      "basis": "Disciplines: “The page name appears once, in the header” e o conceito de referência calma com leitura imediata da tabela/lista.",
+      "where": "Scene `list` com `title=${this.msg.listTitle}` e `renderList()` com `<p>${this.msg.listTitle}</p>`",
+      "fix": "Remover o subtítulo duplicado ou substituir por uma informação que não repita o título da cena."
+    },
+    {
+      "severity": "minor",
+      "area": "feedback",
+      "message": "A falha de criação/atualização é exibida acima do botão, mas não há um controle de retry explícito conforme o template; o usuário precisa inferir que deve pressionar novamente a ação primária.",
+      "basis": "Feedback & feedforward: “Command failure renders inside the panel, above its button, in normal body color, with retry.”",
+      "where": "`commandError` em `renderForm()`; o único controle posterior é o mesmo botão de salvar",
+      "fix": "Adicionar uma ação de tentar novamente ou tornar explícito no texto de erro que o botão de salvar pode ser usado novamente."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "agendaClinica",
+  "pageId": "agenda_diaria",
+  "device": "mobile",
+  "contextHash": "sha256:d4bbb933df576dba42b0c4f0f9a8f4a0a433f19442345019156db03d1b1ffd13",
+  "pagePath": "l2/agendaClinica/web/mobile/page11/agenda_diaria.ts",
+  "summary": "A página atende parcialmente ao fluxo de localizar uma consulta e registrar o atendimento em uma faixa estreita: a lista, a cena de detalhe, o formulário obrigatório e os estados locais estão bem alinhados ao uso móvel. Porém, ela contradiz diretamente o template calendarGrid ao transformar a agenda em uma lista cronológica e ainda apresenta a consulta como uma navegação para outra cena, em vez de um painel sobre a grade; isso torna a solução inadequada para a experiência definida, embora o fluxo operacional em si seja alcançável.",
+  "findings": [
+    {
+      "severity": "blocker",
+      "area": "template",
+      "message": "A agenda inteira é renderizada como uma lista vertical cronológica, sem grade, âncora de hoje, navegação de intervalo ou representação espacial dos horários.",
+      "basis": "Template: “Time as a surface: a week or month grid is the page” e Forbidden: “Rendering the schedule as a chronological list of items with inline actions — that is the agendaTimeline experience, not this one.”",
+      "where": "Scene `agenda`, organismo `dayConsultations`, `groupviewdata--ml-vertical-record-list`",
+      "fix": "Usar uma superfície de calendário compatível com a experiência calendarGrid, com intervalo visível, hoje e posições temporais; se a definição realmente exigir apenas agenda diária em lista, alterar explicitamente a experiência do template para agendaTimeline."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Ao tocar uma consulta, a página troca para a Scene `consulta`; a agenda deixa de permanecer visível atrás do detalhe, impedindo a conferência contextual e quebrando o retorno imediato ao mapa previsto pelo template.",
+      "basis": "Template: “Detail as a separate page navigation — the grid must remain behind the panel.”; a definição pede localizar a consulta, conferir paciente/horário e registrar atendimento.",
+      "where": "Handler `@row-click` chama `setScenario('consulta')`; Scene `consulta` tem `nav=\"back\"` e `backTo=\"agenda\"`",
+      "fix": "Abrir o resumo e as ações em um painel sobre a superfície da agenda, preservando o intervalo e a consulta selecionada no fundo; não usar uma cena separada como navegação de detalhe."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "O estado de erro da consulta selecionada é exibido como erro mesmo quando o detalhe ainda não está carregado em estados como idle, e não há distinção visual entre falha de abertura e ausência de registro selecionado.",
+      "basis": "A definição de `consultationSummary` exige mostrar a consulta aberta; o template exige feedback local para falhas de comando e carregamento do grid antes dos blocos.",
+      "where": "Expressão condicional da seção `consultationSummary`: loading, depois `selected`, senão `consultationError`",
+      "fix": "Renderizar estado vazio/aguardando seleção quando não houver consulta selecionada e mostrar `consultationError` somente quando `carregarConsultaSelecionadaStatus === 'error'`, com retry local."
+    },
+    {
+      "severity": "minor",
+      "area": "hierarchy",
+      "message": "O título “Agenda de hoje” aparece no cabeçalho e novamente como título da Scene e como `aria-label` da seção, criando repetição textual e competição desnecessária no topo.",
+      "basis": "Template: “The page title appears once, in the header” e “no heading anywhere repeats the label of a button or link near it.”",
+      "where": "`h1` com `pageTitle`, `Scene title=${agendaScene}` e `section aria-label=${agendaScene}`",
+      "fix": "Manter o título visível uma única vez no cabeçalho e dar à região um nome acessível não redundante, ou omitir o nome acessível se o heading já a rotula."
+    },
+    {
+      "severity": "minor",
+      "area": "text",
+      "message": "Cada linha mostra “Abrir consulta” como texto auxiliar repetido, embora a linha inteira seja a ação; isso aumenta a densidade e não nomeia uma ação distinta.",
+      "basis": "Template: a superfície deve permitir agir diretamente nos blocos e a disciplina de hierarquia evita repetir rótulos de controles próximos.",
+      "where": "Primeira `Cell` de cada `Row`, `<div>...${this.msg.openConsultation}</div>`",
+      "fix": "Remover o texto auxiliar repetido e tornar a identidade/horário da consulta o alvo claramente acionável, com nome acessível por linha se necessário."
+    }
+  ]
+}

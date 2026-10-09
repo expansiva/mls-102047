@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "agendaClinica",
+  "pageId": "pacientes",
+  "device": "mobile",
+  "contextHash": "sha256:f77e5a3163c052f54bf9dc3f147573288bc52a4292fa4e9bf26663d24527233f",
+  "pagePath": "l2/agendaClinica/web/mobile/page11/pacientes.ts",
+  "summary": "A página atende parcialmente à jornada de localizar, conferir e cadastrar pacientes, com uma sequência móvel clara e controles adequados ao toque. Porém, ela abandona o conceito directoryProfile ao esconder completamente o finder enquanto a recepcionista confere o perfil, e não trata de forma visível alguns estados importantes da busca e do cadastro.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "template",
+      "message": "A cena de conferência substitui a busca e a lista, impedindo manter o finder disponível enquanto o perfil é lido; isso transforma a experiência em fluxo de etapas, contrariando o diretório com perfil lado a lado/sempre acessível.",
+      "basis": "“The list is the front door; the profile is the room” e “Collapsing the finder to a mere breadcrumb or hiding it while reading a profile.”",
+      "where": "`<Scene value=\"review\" ...>` é renderizada pelo `ml-scenary` em modo `scenary`, enquanto `renderLocate()` não fica visível.",
+      "fix": "No mobile, mantenha ao menos uma versão compacta da busca/lista acima ou abaixo do perfil, ou use uma composição que permita voltar ao finder sem substituir o perfil."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "O erro da busca é exibido no search bar, mas o erro do carregamento inicial da lista também é misturado a ele e não há uma recuperação clara no organismo de resultados; além disso, a lista pode aparecer vazia sem distinguir ausência de consulta de resultado vazio.",
+      "basis": "“Command failure renders inside the profile ... with retry” e a disciplina de feedback exige estados de loading, empty e error desenhados onde podem acontecer.",
+      "where": "`hasError` combina `searchPatientsStatus` e `loadPatientsStatus`, e o `vertical-record-list` recebe apenas `<Empty>` e `<Loading>`, sem ação de retry ou estado explícito para `idle`/carga inicial.",
+      "fix": "Separe os erros de busca e carregamento da coleção, mostre uma mensagem contextual no local dos resultados e ofereça “Tentar novamente”; mantenha o estado inicial sem resultados diferente de uma busca concluída sem correspondências."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Após cadastrar com sucesso, a tela apenas mostra a confirmação inline e não conduz automaticamente à ficha do paciente recém-cadastrado, embora o contrato diga que o novo paciente fica imediatamente disponível para conferência e agendamento.",
+      "basis": "A jornada “cadastrarPaciente” registra os dados “para permitir o agendamento”, e `savePatient` “deixa imediatamente disponível para conferência e agendamento”; o conceito diz que retorna ao perfil após salvar.",
+      "where": "`renderRegister()` mostra `savedPatient` após `savePatientStatus === 'success'`, mas não há mudança de cena nem botão de continuidade para `review`.",
+      "fix": "Após o sucesso, selecione o paciente retornado, carregue sua ficha e abra a cena de conferência; alternativamente, ofereça uma ação explícita “Conferir paciente” junto da confirmação."
+    },
+    {
+      "severity": "minor",
+      "area": "hierarchy",
+      "message": "O título geral “Pacientes” permanece acima do título da cena (“Localizar paciente”, “Conferir paciente” ou “Cadastrar paciente”), criando dois níveis de título concorrentes no espaço estreito e repetindo o contexto da página.",
+      "basis": "“The page name appears once, in the header” e a orientação de atenção hierárquica do template.",
+      "where": "`<h1>${this.msg.pageTitle}</h1>` aparece junto ao heading que o `ml-scenary` gera a partir de cada `Scene title`.",
+      "fix": "Use o heading da cena como título principal da vista e remova ou reduza o `h1` persistente, preservando “Pacientes” apenas quando não houver título de cena."
+    },
+    {
+      "severity": "minor",
+      "area": "text",
+      "message": "O campo de nome é marcado como obrigatório no componente, mas não há texto visível de obrigatoriedade nem validação textual no campo antes do envio; o catálogo até possui `requiredName`, porém ele não é usado.",
+      "basis": "“Required fields visibly required before any mistake; validation at the field, in words, at commit time.”",
+      "where": "`<groupentertext--ml-enter-text ... required>` e `requiredName` está declarado, mas nunca é renderizado.",
+      "fix": "Indique “obrigatório” no label/helper e conecte a mensagem `requiredName` à validação do campo e ao erro de commit."
+    }
+  ]
+}

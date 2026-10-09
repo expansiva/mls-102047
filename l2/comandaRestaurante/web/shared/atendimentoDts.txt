@@ -1,0 +1,92 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { ContextoAtendimento, ComandaAtendimento } from '/_102047_/l2/comandaRestaurante/web/contracts/atendimento.defs.js';
+export type { AtendimentoContracts, ContextoAtendimento, ComandaAtendimento, MesaDisponivel, MesaReferencia, ComandaResumo, ItemCardapioResumo, ItemCardapioDaComanda, ItemComandaAtendimento } from '/_102047_/l2/comandaRestaurante/web/contracts/atendimento.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type LancarItemDraft = {
+    comandaId: string | null;
+    itemCardapioId: string | null;
+    details: {
+        quantidade: number | null;
+        observacao: string | null;
+    };
+};
+export declare class ComandaRestauranteAtendimentoShared extends StateLitElement {
+    /** state contextoAtendimento — independent collections used to locate the table, open tab and menu item; source carregarAtendimento.contextoAtendimento; organism lookupAtendimento */
+    contextoAtendimento: ContextoAtendimento | null;
+    /** state comanda — the selected tab with its table, all lines and calculated subtotal; source obterComandaAtendimento.comanda; organism detalheComanda */
+    comanda: ComandaAtendimento | null;
+    /** state selectedComanda — the selected tab identifier; source entry.params.comandaId; organism detalheComanda; persisted */
+    selectedComanda: string | null;
+    /** state page — the current lookup page; source entry.params.page; organism lookupAtendimento; persisted */
+    page: number | null;
+    /** state mesaTermo — the table-code lookup term; source entry.params.mesaTermo; organism lookupAtendimento; persisted */
+    mesaTermo: string | null;
+    /** state comandaNumero — the open-tab number lookup value; source entry.params.comandaNumero; organism lookupAtendimento; persisted */
+    comandaNumero: number | null;
+    /** state itemTermo — the menu-item name lookup term; source entry.params.itemTermo; organism lookupAtendimento; persisted */
+    itemTermo: string | null;
+    /** state lancarItemDraft — the menu-item launch form draft; source lancarItem.input; organism formularioLancamento */
+    lancarItemDraft: LancarItemDraft;
+    /** state pageStatus — the overall initial-load status; source pageStatus */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state carregarAtendimentoStatus — the initial lookup request status; source carregarAtendimentoStatus */
+    carregarAtendimentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarAtendimentoError — the initial lookup request error; source carregarAtendimentoError */
+    carregarAtendimentoError: ErrorState;
+    /** state atualizarLocalizacaoAtendimentoStatus — the filtered lookup request status; source atualizarLocalizacaoAtendimentoStatus */
+    atualizarLocalizacaoAtendimentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state atualizarLocalizacaoAtendimentoError — the filtered lookup request error; source atualizarLocalizacaoAtendimentoError */
+    atualizarLocalizacaoAtendimentoError: ErrorState;
+    /** state obterComandaAtendimentoStatus — the selected-tab request status; source obterComandaAtendimentoStatus */
+    obterComandaAtendimentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state obterComandaAtendimentoError — the selected-tab request error; source obterComandaAtendimentoError */
+    obterComandaAtendimentoError: ErrorState;
+    /** state abrirComandaStatus — the open-tab command status; source abrirComandaStatus */
+    abrirComandaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state abrirComandaError — the open-tab command error; source abrirComandaError */
+    abrirComandaError: ErrorState;
+    /** state lancarItemStatus — the launch-item command status; source lancarItemStatus */
+    lancarItemStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state lancarItemError — the launch-item command error; source lancarItemError */
+    lancarItemError: ErrorState;
+    /** state cancelarItemStatus — the cancel-item command status; source cancelarItemStatus */
+    cancelarItemStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state cancelarItemError — the cancel-item request error; source cancelarItemError */
+    cancelarItemError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    /** function carregarAtendimento — loads the initial lookup context for available tables, open tabs and menu items; redraws contextoAtendimento by replacement; takes no arguments */
+    carregarAtendimento(): Promise<void>;
+    /** function atualizarLocalizacaoAtendimento — refreshes the independently filtered and paged lookup context; redraws contextoAtendimento by replacement; takes the table term, tab number, item term, page and page size */
+    atualizarLocalizacaoAtendimento(mesaTermo: string | null, comandaNumero: number | null, itemTermo: string | null, page?: number, pageSize?: number): Promise<void>;
+    /** function obterComandaAtendimento — loads the selected tab with its table, lines and subtotal; redraws comanda by replacement; takes the selected tab identifier */
+    obterComandaAtendimento(comandaId: string): Promise<void>;
+    /** select — selects or clears a tab identifier and loads its complete record when an identifier is supplied */
+    selectComanda(value: string | null): void;
+    /** function abrirComanda — opens a tab for the selected available table; redraws comanda by upsert and declares contextoAtendimento for update; takes the table identifier */
+    abrirComanda(mesaId: string | null): Promise<void>;
+    /** function lancarItem — adds the drafted menu item to the open tab; redraws comanda by upsert; takes no arguments because the form draft supplies the command input */
+    lancarItem(): Promise<void>;
+    /** function cancelarItem — cancels the selected launched line; redraws comanda by upsert; takes the line identifier and concurrency version */
+    cancelarItem(id: string | null, version: number | null): Promise<void>;
+    /** draft — updates the menu-item launch form draft */
+    setLancarItemDraft(value: LancarItemDraft): void;
+    /** state scenary — publishes the visible page scene */
+    setScenario(value: string): void;
+    private emptyDraft;
+    private resetVisit;
+    private applyEntryParams;
+    private readParam;
+    private publish;
+    private assignState;
+    private initialLoad;
+    private query;
+    private command;
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "inicio",
+  "device": "desktop",
+  "contextHash": "sha256:c196fadd3097a04372455215b9e8b1926bdaafd41a2862a55cc589584829c3a3",
+  "pagePath": "l2/comandaRestaurante/web/desktop/page11/inicio.ts",
+  "summary": "A página entrega a consulta rápida dos dois indicadores previstos e mantém uma boa hierarquia básica, com estados de carregamento, sucesso/sem atenção e erro. Porém, para a experiência `exceptionTriage`, ela não evidencia uma triagem real nem trata o conteúdo dos indicadores de forma confiável durante erro; além disso, a faixa usa números grandes e ocupa mais destaque do que o strip quieto recomendado pelo template.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "template/intent",
+      "message": "A página sempre afirma “Nada precisa de atenção agora” quando há um resumo, mas não existe nenhuma lane ou dado de exceção que sustente essa conclusão; isso transforma a headline de triagem em uma mensagem hardcoded, em vez de um estado derivado das exceções disponíveis.",
+      "basis": "“The headline is the triage count: a single sentence above the lanes — ... computed from the lanes.” / “The good-news state ... When no lane has items, the page says so...”",
+      "where": "No bloco condicional antes dos indicadores: `summary ? this.msg.noAttention : ...`",
+      "fix": "Renderize essa frase apenas quando o contrato informar que não há exceções; caso contrário, remova a falsa afirmação ou acrescente a lane de exceções quando ela fizer parte dos dados disponíveis."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "No estado de erro, a faixa de indicadores continua visível com valores vazios quando `summary` é nulo, sem explicar que os indicadores não estão disponíveis; isso pode parecer zero ou conteúdo quebrado e deixa o retry separado da região afetada.",
+      "basis": "“A lane that fails to load reports inside its own region with retry” e “Loading: skeleton lanes in place, strip last.”",
+      "where": "`hasError ? ...` seguido sempre pelo `<div>` dos dois `ml-metric-big-number`",
+      "fix": "Associe o erro à região do resumo e oculte ou marque explicitamente os indicadores como indisponíveis até o retry concluir, mantendo o feedback junto do conteúdo afetado."
+    },
+    {
+      "severity": "minor",
+      "area": "hierarchy",
+      "message": "A faixa de saúde está implementada como dois `ml-metric-big-number`, com largura mínima de 16rem/18rem e tipografia de destaque; isso faz os agregados competirem visualmente com a headline, enquanto o template pede uma linha compacta, pequena e monocromática, sem cards.",
+      "basis": "“Aggregate queries become the health strip ... one compact line of small value+label pairs ... no cards.”",
+      "where": "Organismo `resumoOperacional`, nos elementos `groupviewmetric--ml-metric-big-number` dentro do flex",
+      "fix": "Use uma apresentação de strip mais compacta, com valores e rótulos menores e menos espaço horizontal, preservando a alternativa contratual apenas se ela puder assumir essa densidade."
+    }
+  ]
+}

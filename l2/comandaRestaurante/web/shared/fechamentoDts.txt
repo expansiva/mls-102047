@@ -1,0 +1,82 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { FechamentoContracts, ComandaParaFechamento } from '/_102047_/l2/comandaRestaurante/web/contracts/fechamento.defs.js';
+export type { FechamentoContracts, ComandaAbertaResumo, ComandaParaFechamento } from '/_102047_/l2/comandaRestaurante/web/contracts/fechamento.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type FecharComandaPagaDraft = {
+    discountAmount: string | null;
+    paymentMethod: 'cash' | 'debitCard' | 'creditCard' | 'pix' | null;
+};
+type Output<R extends keyof FechamentoContracts> = FechamentoContracts[R]['output'];
+type OpenComandasPage = Output<'comandaRestaurante.fechamento.carregarFechamento'>['openComandas'];
+export declare class ComandaRestauranteFechamentoShared extends StateLitElement {
+    /** state openComandas — summary of open comandas available for locating and selecting the charge; source carregarFechamento.openComandas; organism openComandaList */
+    openComandas: OpenComandasPage | null;
+    /** state comanda — selected comanda with valid lines, calculated totals, payment data and table availability; source obterComandaParaFechamento.comanda; organism comandaReview */
+    comanda: ComandaParaFechamento | null;
+    /** state selectedComanda — the selected comanda identifier from the page context; source entry.params.comandaId; organism comandaReview; persisted */
+    selectedComanda: string | null;
+    /** state fecharComandaPagaInput — the local payment draft containing the optional discount and required payment method; source fecharComandaPaga.input; organism paymentForm */
+    fecharComandaPagaInput: FecharComandaPagaDraft;
+    /** state pageStatus — overall initial-load status of the page; source pageStatus */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state carregarFechamentoStatus — status of the initial fechamento query; source carregarFechamentoStatus */
+    carregarFechamentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarFechamentoError — error from the initial fechamento query; source carregarFechamentoError */
+    carregarFechamentoError: ErrorState;
+    /** state buscarComandasAbertasStatus — status of the open-comanda search query; source buscarComandasAbertasStatus */
+    buscarComandasAbertasStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state buscarComandasAbertasError — error from the open-comanda search query; source buscarComandasAbertasError */
+    buscarComandasAbertasError: ErrorState;
+    /** state carregarMaisComandasAbertasStatus — status of the additional-page query; source carregarMaisComandasAbertasStatus */
+    carregarMaisComandasAbertasStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarMaisComandasAbertasError — error from the additional-page query; source carregarMaisComandasAbertasError */
+    carregarMaisComandasAbertasError: ErrorState;
+    /** state obterComandaParaFechamentoStatus — status of the selected-comanda query; source obterComandaParaFechamentoStatus */
+    obterComandaParaFechamentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state obterComandaParaFechamentoError — error from the selected-comanda query; source obterComandaParaFechamentoError */
+    obterComandaParaFechamentoError: ErrorState;
+    /** state fecharComandaPagaStatus — status of the close command; source fecharComandaPagaStatus */
+    fecharComandaPagaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state fecharComandaPagaError — error from the close command; source fecharComandaPagaError */
+    fecharComandaPagaError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private numberFilter;
+    private mesaCodeFilter;
+    private detailFilterId;
+    private visitSubscribed;
+    private emptyFecharComandaPagaDraft;
+    private publish;
+    private assignState;
+    private errorFromThrown;
+    private errorFromResponse;
+    private readParam;
+    private applyEntryParams;
+    private pageNumber;
+    private setQueryStatus;
+    private setQueryError;
+    private query;
+    /** function carregarFechamento — loads open comandas and the contextual selected charge; redraws openComandas by replacement and comanda with the returned selected record; no arguments */
+    carregarFechamento(): Promise<void>;
+    /** function buscarComandasAbertas — replaces the location list with open comandas matching number and table filters; redraws openComandas by replacement; arguments are number and mesaCode filter values */
+    buscarComandasAbertas(number?: number | null, mesaCode?: string | null): Promise<void>;
+    /** function carregarMaisComandasAbertas — loads the next open-comanda window without reloading existing summaries; redraws openComandas.items by append; no arguments */
+    carregarMaisComandasAbertas(): Promise<void>;
+    /** function obterComandaParaFechamento — obtains the selected open comanda composed for review and payment; redraws comanda by replacement; argument id is the selected comanda identifier */
+    obterComandaParaFechamento(id: string): Promise<void>;
+    /** draft — updates the payment draft used by the close command */
+    setFecharComandaPaga(value: FecharComandaPagaDraft): void;
+    /** select — selects a comanda identifier and loads its composed review record; argument id is the selected row identifier, or null to clear selection */
+    selectComandaReview(id: string | null): Promise<void>;
+    /** function fecharComandaPaga — records payment, closes the comanda and confirms table release; redraws comanda by upsert and removes the closed row from openComandas; no arguments, using the payment draft and selected record */
+    fecharComandaPaga(): Promise<void>;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    /** Sets the visible scene identifier for the page. */
+    setScenario(value: string): void;
+}

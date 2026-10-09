@@ -1,0 +1,80 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { PacientesContracts, PatientDetail } from '/_102047_/l2/agendaClinica/web/contracts/pacientes.defs.js';
+export type { PacientesContracts, PatientDetail, PatientListItem } from '/_102047_/l2/agendaClinica/web/contracts/pacientes.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type PatientFormDraft = {
+    details: {
+        identification: {
+            name: string | null;
+            docType: PatientFormDraftDocType | null;
+            docId: string | null;
+        };
+    };
+};
+type PatientFormDraftDocType = 'SSN' | 'EIN' | 'Passport' | 'DriversLicense' | 'NationalId' | 'CPF' | 'CNPJ' | 'VAT' | 'Other';
+type Output<R extends keyof PacientesContracts> = PacientesContracts[R]['output'];
+type PatientsPage = Output<'agendaClinica.pacientes.loadPatients'>['patients'];
+export declare class AgendaClinicaPacientesShared extends StateLitElement {
+    /** state patients — Paciente em formato compacto para a lista de localização.; source loadPatients.patients; organism patientList */
+    patients: PatientsPage | null;
+    /** state patient — Paciente selecionado, pronto para conferência e continuidade no agendamento.; source loadPatientDetail.patient; organism patientDetail */
+    patient: PatientDetail | null;
+    /** state selectedPaciente — Paciente selecionado, pronto para conferência e continuidade no agendamento.; source entry.params.pacienteId; organism patientDetail; organism patientList; persisted */
+    selectedPaciente: string | null;
+    /** state page — the requested patient-list page filter; source entry.params.page; organism patientList; persisted */
+    page: number | null;
+    /** state nameSearch — the patient-name search filter; source entry.params.nameSearch; organism patientList; persisted */
+    nameSearch: string | null;
+    /** state patientId — the patient-detail identifier filter; source entry.params.patientId; organism patientDetail; persisted */
+    patientId: string | null;
+    /** state patientForm — the editable patient registration draft; source savePatient.input; organism patientForm */
+    patientForm: PatientFormDraft;
+    /** state pageStatus — the initial page-load status; source pageStatus */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state loadPatientsStatus — the status of the initial patient-list query; source loadPatients.status */
+    loadPatientsStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state loadPatientsError — the error from the initial patient-list query; source loadPatients.error */
+    loadPatientsError: ErrorState;
+    /** state searchPatientsStatus — the status of the patient-name search query; source searchPatients.status */
+    searchPatientsStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state searchPatientsError — the error from the patient-name search query; source searchPatients.error */
+    searchPatientsError: ErrorState;
+    /** state loadPatientDetailStatus — the status of the selected-patient query; source loadPatientDetail.status */
+    loadPatientDetailStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state loadPatientDetailError — the error from the selected-patient query; source loadPatientDetail.error */
+    loadPatientDetailError: ErrorState;
+    /** state savePatientStatus — the status of patient creation or association; source savePatient.status */
+    savePatientStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state savePatientError — the error from patient creation or association; source savePatient.error */
+    savePatientError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    /** function loadPatients — Inicializa a área de localização de pacientes sem trazer cadastros antes de a recepcionista informar um nome.; redraws patients by replacement and updates pageStatus */
+    loadPatients(): Promise<void>;
+    /** function searchPatients — Localiza pacientes pelo nome para a recepcionista escolher quem seguirá para o agendamento.; redraws patients by appending the returned page; nameSearch is the name filter and page is the requested page */
+    searchPatients(nameSearch: string, page?: number): Promise<void>;
+    /** function loadPatientDetail — Carrega a ficha do paciente que a recepcionista selecionou para confirmar sua identificação antes de ir ao agendamento.; redraws patient by replacement; patientId is the selected patient identifier */
+    loadPatientDetail(patientId: string): Promise<void>;
+    /** function savePatient — Cadastra ou associa o novo paciente informado pela recepcionista e o deixa imediatamente disponível para conferência e agendamento.; redraws patient by replacement and patients by upsert */
+    savePatient(): Promise<void>;
+    /** function goToAppointment — Apresenta nome, documento e situação do paciente selecionado para confirmar a identificação antes de agendar.; carries pacienteId as the selected patient identifier */
+    goToAppointment(): void;
+    /** draft — Updates the patient registration draft used by savePatient. */
+    setPatientForm(value: PatientFormDraft): void;
+    /** select — Selects a patient identifier and loads its complete detail. */
+    setSelectedPaciente(value: string | null): void;
+    /** Sets the visible page scene. */
+    setScenario(value: string): void;
+    private publish;
+    private assignState;
+    private hydrateData;
+    private resetVisit;
+    private applyEntryParams;
+}

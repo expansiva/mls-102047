@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "fechamento",
+  "device": "mobile",
+  "contextHash": "sha256:2dee20a5243947402a1880c35267da2e428b3d74f8be282a957370f5fd83dde5",
+  "pagePath": "l2/comandaRestaurante/web/mobile/page11/fechamento.ts",
+  "summary": "A página atende ao fluxo de localizar, conferir e fechar uma comanda, com uma coluna adequada ao celular e bons estados básicos na busca e no fechamento. Porém, ela materializa o fluxo proibido pelo template para mobile: transforma o fechamento em uma cena separada e não mantém uma barra fixa com quantidade de linhas e total enquanto a localização está visível; além disso, há uma mensagem de disponibilidade contraditória e falta o preço unitário previsto no contexto de conferência.",
+  "findings": [
+    {
+      "severity": "blocker",
+      "area": "template",
+      "message": "O fechamento acontece em uma cena separada, após navegar para `settle`, em vez de permanecer no mesmo estágio com a comanda/carrinho disponível e pagamento em-place.",
+      "basis": "Template mobile: “payment as a separate page or a sequence of steps” é proibido; “Payment inputs open in place in this view”.",
+      "where": "`<Scene value=\"settle\" ... nav=\"back\">` e `chooseComanda()` chama `this.setScenario('settle')`.",
+      "fix": "Reestruture o mobile para manter a localização como home e abrir a conferência/pagamento em uma view de carrinho integrada, sem tratar o pagamento como uma etapa separada do fluxo."
+    },
+    {
+      "severity": "major",
+      "area": "hierarchy",
+      "message": "Na cena de localização não existe a barra fixa inferior que mostre quantidade de linhas e o total; portanto o total não fica sempre visível e a tela de localizar não comunica o estado da cobrança selecionada.",
+      "basis": "Template mobile: “The cart never disappears; it becomes a bar” e a hierarquia exige “the total in the bar”.",
+      "where": "`renderLocate()` contém apenas busca e lista; não há barra fixa, contagem de itens ou total.",
+      "fix": "Adicione uma barra fixa inferior na home com o número de itens/linhas e o total da comanda selecionada, abrindo a conferência ao toque."
+    },
+    {
+      "severity": "major",
+      "area": "text",
+      "message": "A mensagem exibida quando a mesa está disponível diz que ela será liberada após o fechamento, mas `disponivel` indica que ela já está disponível; isso contradiz o estado de negócio e pode induzir o caixa ao erro.",
+      "basis": "L4: `details.disponivel` significa que a mesa está disponível quando não possui comanda aberta; regra `fechamentoLiberaMesa` exige que o fechamento a deixe disponível.",
+      "where": "`renderSettle()`: `comanda.mesa.disponivel ? ... this.msg.unavailable ...` com texto `A mesa será liberada após o fechamento.`",
+      "fix": "Exiba a mensagem somente quando a mesa ainda não estiver disponível, ou altere o texto para comunicar corretamente o estado atual; após sucesso, confirme que a mesa foi liberada."
+    },
+    {
+      "severity": "minor",
+      "area": "data",
+      "message": "A conferência não mostra o preço unitário, embora esse seja um dado de lançamento definido no contexto e a intenção seja conferir rapidamente a cobrança; a tradução também declara `unitPrice`, mas a tabela não o usa.",
+      "basis": "L4: `details.precoUnitario` — “Preço unitário registrado”; catálogo da página inclui `unitPrice`; organismo `comandaReview` deve mostrar os itens para conferência.",
+      "where": "`renderSettle()`: cabeçalhos somente `Item`, `Quantidade` e `Valor total`; nenhuma célula usa `item.details.details.precoUnitario`.",
+      "fix": "Inclua a coluna Preço unitário entre Quantidade e Valor total, formatando o valor com `money()`."
+    },
+    {
+      "severity": "minor",
+      "area": "feedback",
+      "message": "O erro de carregar mais comandas nunca é incluído no banner, embora exista um estado e uma operação de paginação no contrato; falhas dessa busca podem ficar silenciosas.",
+      "basis": "Shared declaration: `carregarMaisComandasAbertasError` é o erro da consulta adicional; template exige que falhas de comando/consulta sejam reportadas na região pertencente.",
+      "where": "`renderFeedback()` agrega quatro erros, mas omite `this.carregarMaisComandasAbertasError?.message`.",
+      "fix": "Inclua o erro de carregamento adicional no feedback da lista e mantenha a mensagem junto à região de localização."
+    }
+  ]
+}

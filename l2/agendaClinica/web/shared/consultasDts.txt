@@ -1,0 +1,95 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { ConsultasContracts, AgendaCabecalho, ConsultaDetalhe } from '/_102047_/l2/agendaClinica/web/contracts/consultas.defs.js';
+export type { ConsultasContracts, AgendaCabecalho, ConsultaAgenda, ConsultaDetalhe, PacienteResumo, ProfissionalResumo } from '/_102047_/l2/agendaClinica/web/contracts/consultas.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type AgendarConsultaDraft = {
+    pacienteId: string | null;
+    profissionalId: string | null;
+    scheduledAt: string | null;
+};
+type Output<R extends keyof ConsultasContracts> = ConsultasContracts[R]['output'];
+type AgendaPage = Output<'agendaClinica.consultas.carregarAgenda'>['agenda'];
+type PatientPage = Output<'agendaClinica.consultas.localizarPacientesParaAgendamento'>['pacientes'];
+type ProfessionalPage = Output<'agendaClinica.consultas.localizarProfissionaisParaAgendamento'>['profissionais'];
+export declare class AgendaClinicaConsultasShared extends StateLitElement {
+    /** state cabecalho — Cabeçalho da agenda no dia consultado.; source carregarAgenda.cabecalho; organisms listaAgenda */
+    cabecalho: AgendaCabecalho | null;
+    /** state quantidadePendentes — Devolve o cabeçalho da data, o indicador já calculado e uma página de linhas de agenda prontas para exibição.; source carregarAgenda.quantidadePendentes; organisms listaAgenda */
+    quantidadePendentes: number | null;
+    /** state agenda — Linha pronta para a agenda, com os nomes resolvidos do paciente e do profissional.; source carregarAgenda.agenda; organisms listaAgenda */
+    agenda: AgendaPage | null;
+    /** state consulta — Consulta selecionada, composta com paciente e profissional, para conferência, ações e preenchimento do formulário.; source consultarConsultaSelecionada.consulta; organisms acoesConsulta, detalheConsulta, formularioConsulta */
+    consulta: ConsultaDetalhe | null;
+    /** state pacientes — Paciente identificado em uma linha de agenda ou opção de agendamento.; source localizarPacientesParaAgendamento.pacientes; organisms formularioConsulta */
+    pacientes: PatientPage | null;
+    /** state profissionais — Profissional identificado em uma linha de agenda ou opção de agendamento.; source localizarProfissionaisParaAgendamento.profissionais; organisms formularioConsulta */
+    profissionais: ProfessionalPage | null;
+    /** state selectedConsulta — Consulta selecionada, composta com paciente e profissional, para conferência, ações e preenchimento do formulário.; source entry.params.consultaId; organisms detalheConsulta, listaAgenda */
+    selectedConsulta: string | null;
+    dataAgenda: string | null;
+    status: string | null;
+    page: number | null;
+    id: string;
+    termo: string | null;
+    pacienteId: string | null;
+    consultaId: string | null;
+    profissionalId: string | null;
+    agendarConsultaDraft: AgendarConsultaDraft;
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    scenary: string;
+    carregarAgendaStatus: 'idle' | 'loading' | 'success' | 'error';
+    carregarAgendaError: ErrorState;
+    filtrarAgendaStatus: 'idle' | 'loading' | 'success' | 'error';
+    filtrarAgendaError: ErrorState;
+    carregarMaisAgendaStatus: 'idle' | 'loading' | 'success' | 'error';
+    carregarMaisAgendaError: ErrorState;
+    consultarConsultaSelecionadaStatus: 'idle' | 'loading' | 'success' | 'error';
+    consultarConsultaSelecionadaError: ErrorState;
+    localizarPacientesParaAgendamentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    localizarPacientesParaAgendamentoError: ErrorState;
+    carregarMaisPacientesParaAgendamentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    carregarMaisPacientesParaAgendamentoError: ErrorState;
+    localizarProfissionaisParaAgendamentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    localizarProfissionaisParaAgendamentoError: ErrorState;
+    carregarMaisProfissionaisParaAgendamentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    carregarMaisProfissionaisParaAgendamentoError: ErrorState;
+    agendarConsultaStatus: 'idle' | 'loading' | 'success' | 'error';
+    agendarConsultaError: ErrorState;
+    confirmarConsultaStatus: 'idle' | 'loading' | 'success' | 'error';
+    confirmarConsultaError: ErrorState;
+    registrarFaltaStatus: 'idle' | 'loading' | 'success' | 'error';
+    registrarFaltaError: ErrorState;
+    private publish;
+    private publishDynamic;
+    private assignState;
+    private error;
+    private query;
+    private currentStatus;
+    private agendaInput;
+    private applyAgenda;
+    carregarAgenda(): Promise<void>;
+    filtrarAgenda(): Promise<void>;
+    carregarMaisAgenda(): Promise<void>;
+    consultarConsultaSelecionada(): Promise<void>;
+    localizarPacientesParaAgendamento(): Promise<void>;
+    carregarMaisPacientesParaAgendamento(): Promise<void>;
+    localizarProfissionaisParaAgendamento(): Promise<void>;
+    carregarMaisProfissionaisParaAgendamento(): Promise<void>;
+    setAgendarConsultaDraft(value: AgendarConsultaDraft): void;
+    selectConsulta(value: string | null): Promise<void>;
+    private command;
+    private commandAgenda;
+    agendarConsulta(): Promise<void>;
+    confirmarConsulta(): Promise<void>;
+    registrarFalta(): Promise<void>;
+    setScenario(value: string): void;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    private resetVisit;
+    private applyEntryParams;
+    handleIcaStateChange(key: string, value: any): void;
+}

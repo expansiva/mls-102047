@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "fechamento",
+  "device": "desktop",
+  "contextHash": "sha256:74dcc15812d90fe5741346f15613cbfdbcbd20f0538941652b482d1f4b314c7f",
+  "pagePath": "l2/comandaRestaurante/web/desktop/page11/fechamento.ts",
+  "summary": "A página atende ao fluxo principal de localizar, conferir e fechar uma comanda em um balcão de duas colunas, mantendo revisão e pagamento no mesmo espaço. Porém, há problemas importantes de estado e de informação contextual: a mesa é exibida como disponibilidade em vez de seu código, erros de carregamento da revisão não aparecem, e o total visível não acompanha o desconto que o caixa acabou de informar.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "data",
+      "message": "A identificação da mesa na revisão está incorreta: depois de “Mesa” a tela mostra apenas “Sim” ou “Não”, que é a disponibilidade, e não o código da mesa. Isso impede confirmar se a comanda pertence à mesa esperada.",
+      "basis": "L4: Mesa — Código da mesa: Identificação curta da mesa usada pelo garçom e pelo caixa para localizá-la; a seção comandaReview deve permitir conferir a cobrança da comanda escolhida.",
+      "where": "No parágrafo sob “Conferência da cobrança”: `${this.msg.tableLabel} ${comanda.mesa ? (comanda.mesa.disponivel ? this.msg.yes : this.msg.no) : ''}`.",
+      "fix": "Exiba `comanda.mesa.code` após “Mesa” e, se a disponibilidade for relevante, mostre-a separadamente como um estado secundário."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "Falhas e carregamento da comanda selecionada não têm feedback na região de revisão. Durante uma busca de detalhe, a tela pode mostrar “Selecione uma comanda” ou o conteúdo anterior, e em erro o caixa não recebe a mensagem de que a conferência não pôde ser carregada.",
+      "basis": "A shared declaration expõe `obterComandaParaFechamentoStatus` e `obterComandaParaFechamentoError`; o template exige que uma falha de comando seja reportada dentro da região a que pertence.",
+      "where": "`renderReview()` só testa `if (!comanda)` e nunca usa `obterComandaParaFechamentoStatus` nem `obterComandaParaFechamentoError`.",
+      "fix": "Renderize estado de carregamento e feedback de erro dentro de `comandaReview`, distinguindo-os do estado inicial sem seleção e preservando a seleção enquanto o detalhe é atualizado."
+    },
+    {
+      "severity": "major",
+      "area": "computation",
+      "message": "O caixa pode informar um desconto e continuar vendo o mesmo total da comanda, porque o resumo usa apenas `comanda.details.totalComanda` e não o rascunho de desconto. Isso torna a conferência antes do recebimento enganosa: o valor exibido não corresponde ao valor que será fechado.",
+      "basis": "L4: `totalComanda` é o valor a cobrar, calculado pelos itens válidos menos o desconto; a seção review deve exibir os totais calculados antes de receber.",
+      "where": "O campo `discountAmount` atualiza `fecharComandaPagaInput`, mas o valor destacado e o `<dd>` de “Total” continuam sendo `money(comanda.details.totalComanda)`.",
+      "fix": "Mostre uma prévia calculada pelo backend ou, se a atualização local for permitida pelo contrato, derive subtotal menos o desconto válido e deixe claro que o total será atualizado."
+    },
+    {
+      "severity": "minor",
+      "area": "hierarchy",
+      "message": "A ação principal não informa o valor que será cobrado. O botão diz apenas “Fechar comanda paga”, exigindo que o caixa volte ao resumo para confirmar o montante no momento de concluir.",
+      "basis": "Template: “one dominant button under the total, labeled with the outcome and the amount (‘Charge R$ 47,50’)”.",
+      "where": "`<Label>${closing ? this.msg.closing : this.msg.closeAction}</Label>` dentro de `closeComandaActions`.",
+      "fix": "Inclua o total efetivo no rótulo, por exemplo “Fechar comanda — R$ 47,50”, mantendo o estado “Fechando comanda…” durante o envio."
+    },
+    {
+      "severity": "minor",
+      "area": "states",
+      "message": "O erro da carga inicial e o erro de carregar mais comandas não são exibidos. O usuário pode ficar com uma lista vazia ou sem indicação de falha, embora existam estados e mensagens correspondentes disponíveis.",
+      "basis": "A shared declaration expõe `carregarFechamentoError` e `carregarMaisComandasAbertasError`; o template exige estados de erro onde as consultas podem falhar.",
+      "where": "`renderLocate()` só renderiza `buscarComandasAbertasError`; não há uso de `carregarFechamentoError` ou `carregarMaisComandasAbertasError`.",
+      "fix": "Mostre feedback contextual na lista para cada erro aplicável e ofereça retry da consulta correspondente."
+    }
+  ]
+}

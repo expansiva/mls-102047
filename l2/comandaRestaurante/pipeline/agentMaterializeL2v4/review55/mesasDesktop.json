@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "mesas",
+  "device": "desktop",
+  "contextHash": "sha256:cf6d82d7ac426d2eb5776a292d5494560720febefa98838af9192b120bfee617",
+  "pagePath": "l2/comandaRestaurante/web/desktop/page11/mesas.ts",
+  "summary": "A página atende ao objetivo de consultar e manter mesas, com a tabela como âncora e o formulário em uma coluna lateral no desktop. Porém, a implementação diverge do loop principal do template em pontos importantes: o painel lateral permanece visível mesmo quando não há edição, o salvamento não demonstra fechamento/feedback de sucesso local, e o formulário não desabilita o botão por ausência de alteração.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "hierarchy",
+      "message": "O painel lateral da cena `list` ocupa uma coluna permanente com um cartão vazio que repete a introdução da página; isso adiciona uma superfície sem função e reduz o domínio visual da tabela, contrariando a ideia de painel aberto apenas quando necessário.",
+      "basis": "Conceito: “uma tabela ... editada através de um side panel que opens beside it”; decisão: “a cena list deixa o painel vazio para evitar competição”.",
+      "where": "`<molecules--ml-scenary-102020 ...>` com `<Scene value=\"list\">` renderizando um cartão com `${this.msg.pageIntro}`.",
+      "fix": "Não renderize uma cena/painel vazio no estado de lista, ou faça o host ocupar somente a área lateral quando `form` estiver aberto, mantendo a tabela como superfície dominante."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Após criar ou atualizar, o código apenas expõe estados de loading/erro no formulário; não há evidência na página de que o comando bem-sucedido feche o painel, retorne à lista e marque a linha atualizada como exige o loop.",
+      "basis": "Loop: “save → panel closes and the row updates in place, briefly marked”; Feedback: “Success is quick and local: panel closes, row updates, brief mark.”",
+      "where": "Botões chamam apenas `criarMesa()` ou `atualizarMesa()`; `criarMesaStatus`, `atualizarMesaStatus` e `saved` não são usados para feedback ou transição.",
+      "fix": "Após sucesso, selecione/atualize o registro, chame `setScenario('list')` e forneça uma marcação breve na linha; remova ou use a mensagem `saved` apenas como feedback local apropriado."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "O botão de salvar fica habilitado sempre que o código obrigatório está preenchido, mesmo quando o valor não foi alterado durante uma edição, permitindo uma atualização redundante e contrariando o fluxo deliberado de manutenção.",
+      "basis": "Feedback & feedforward: “The panel's save button stays disabled until required fields are filled and something changed.”",
+      "where": "`?disabled=${saving || code.trim().length === 0}` no botão de salvar do `renderForm()`.",
+      "fix": "Compare o draft normalizado com o código original de `selectedMesa` e desabilite o botão quando não houver mudança; mantenha essa regra também durante a edição."
+    },
+    {
+      "severity": "minor",
+      "area": "titles",
+      "message": "A legenda da tabela repete o título da seção imediatamente acima, criando duplicação visual desnecessária no conteúdo da lista.",
+      "basis": "Disciplines: “The page name appears once ...”; disciplina de hierarquia e clareza do template, que trata a tabela como uma superfície de leitura limpa.",
+      "where": "`<h2>${this.msg.listTitle}</h2>` seguido de `<TableCaption>${this.msg.listTitle}</TableCaption>`.",
+      "fix": "Remova a legenda redundante ou use nela uma descrição acessível diferente, sem repetir “Mesas da casa” visivelmente."
+    },
+    {
+      "severity": "minor",
+      "area": "text",
+      "message": "A ajuda do campo diz “Altere...” também no cadastro de uma mesa nova, embora nesse estado a pessoa ainda não esteja alterando um código existente.",
+      "basis": "Organismo `mesaForm`: “Formulário para informar o código da mesa, cadastrar uma mesa nova ou atualizar...” e a disciplina de texto orientado ao contexto.",
+      "where": "`<Helper>${this.msg.editHint}</Helper>` é renderizado tanto para criação quanto para edição.",
+      "fix": "Use uma mensagem contextual para criação, como “Informe o código usado pelo garçom e pelo caixa”, e mantenha a atual apenas na edição."
+    }
+  ]
+}

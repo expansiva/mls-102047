@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "agendaClinica",
+  "pageId": "profissionais",
+  "device": "mobile",
+  "contextHash": "sha256:f6eef34a5e5c6a64f469dcc8ee86325688a971055b05bcc7d48e85ad8b1f009d",
+  "pagePath": "l2/agendaClinica/web/mobile/page11/profissionais.ts",
+  "summary": "A página segue bem o fluxo mobile de diretório → cena própria de cadastro/edição, com lista em uma coluna, formulário empilhado, estados de carregamento/erro e ações ao alcance do polegar. Porém, a seleção de um profissional pode deixar a pessoa presa em uma tela sem feedback adequado se o carregamento do detalhe falhar, e o formulário não representa integralmente campos obrigatórios do contrato nem o loop de retorno após salvar.",
+  "findings": [
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "Ao tocar em uma linha, a cena de edição é aberta imediatamente; enquanto o detalhe carrega há apenas o texto “Carregando…”, e se getProfessional falhar não há mensagem de erro nem retry no registro. Isso deixa a principal jornada de conferir/manter o cadastro sem uma recuperação visível.",
+      "basis": "Template: “Command failure renders inside the panel, above its button, in normal body color, with retry”; page intent: “confere o cadastro escolhido e mantém nome, documento e tipo de atuação”.",
+      "where": "openProfessional() chama setSelectedProfissional(id) e depois setScenario('edit'); detailView() só trata record ausente como loading.",
+      "fix": "Manter a cena em estado de carregamento até o registro estar disponível e renderizar o erro de getProfessional com mensagem e ação de tentar novamente dentro da cena de edição."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Após cadastrar ou salvar alterações, a implementação não mostra uma transição explícita de volta ao diretório nem feedback de sucesso local. O template exige retorno à lista com a linha atualizada e brevemente marcada; aqui o usuário pode permanecer na cena de formulário sem confirmação de resultado.",
+      "basis": "Template mobile: “After Save, return to the list at the same place, with the row updated and briefly marked.”; page definition: professionalList é o ponto de retorno.",
+      "where": "formView() apenas chama createProfessional() ou updateProfessional() no action do botão; não há tratamento renderizado para created/updated nem mudança de cena após sucesso.",
+      "fix": "Ao sucesso, voltar para directory preservando a posição/seleção, atualizar a linha e mostrar uma marcação breve ou feedback local de sucesso."
+    },
+    {
+      "severity": "major",
+      "area": "intent",
+      "message": "O campo País é exibido e editável, mas não há validação nem indicação de obrigatoriedade, embora countryCode seja obrigatório no contrato. O botão pode habilitar e permitir salvar um cadastro inválido sob a perspectiva do modelo de negócio.",
+      "basis": "L4: “details.identification.countryCode (string, required) — País”; page intent: manter nome, documento e tipo de atuação para o agendamento.",
+      "where": "formView(): countryCode usa floating-text-input sem required/error, e o botão só verifica name e professionalType.",
+      "fix": "Tratar País como obrigatório, com validação junto ao campo e condição correspondente no botão de salvar; se o contrato exigir formato de código, informar e validar esse formato."
+    },
+    {
+      "severity": "minor",
+      "area": "hierarchy",
+      "message": "A cena de criação repete a instrução “Escolha um profissional para conferir o cadastro.”, que pertence ao diretório e é inadequada para um formulário vazio. Ela cria conflito de orientação no momento em que a pessoa está cadastrando, além de ocupar o espaço do resumo.",
+      "basis": "Template: “The page name appears once, in the header”; page definition: professionalRecord deve “Empilhar o cadastro conferido” e o create purpose é cadastrar um profissional vazio.",
+      "where": "createView(): professionalDetail renderiza this.msg.chooseProfessional dentro da cena create.",
+      "fix": "Remover essa instrução da cena de criação ou substituí-la por uma orientação específica de cadastro, sem criar um heading/caption redundante."
+    },
+    {
+      "severity": "minor",
+      "area": "accessibility",
+      "message": "As listas de opções têm o mesmo texto “Selecione o tipo” para documento e profissional, e os selects não têm associação explícita de label/id. Em leitores de tela, a distinção pode depender apenas do contexto estrutural.",
+      "basis": "Template: seleção inputs como pickers; L4 define “Tipo de documento” e “Tipo de profissional” como campos distintos.",
+      "where": "Os dois elementos <select> estão aninhados em <label>, mas sem id/name associado e com placeholders indistinguíveis.",
+      "fix": "Dar nomes/ids distintos aos selects e placeholders específicos, como “Selecione o tipo de documento” e “Selecione o tipo de profissional”."
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+/// <mls fileReference="_102047_/l2/agendaClinica/web/mobile/page11/pacientes.ts" enhancement="_102020_/l2/enhancementAura"/>
+import { html, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { AgendaClinicaPacientesShared } from '/_102047_/l2/agendaClinica/web/shared/pacientes.js';
+import '/_102040_/l2/molecules/groupentertext/ml-cpf-input.js';
+import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
+import '/_102040_/l2/molecules/groupsearchcontent/ml-search-bar.js';
+import '/_102040_/l2/molecules/groupviewcard/ml-profile-card.js';
+import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
+/// **collab_i18n_start**
+const pageMessage_pt = {
+pageTitle: 'Pacientes',
+locateTitle: 'Localizar paciente',
+locateIntro: 'Busque pelo nome para escolher quem receberá a consulta.',
+searchLabel: 'Nome do paciente',
+searchPlaceholder: 'Digite o nome do paciente',
+searchHelper: 'Informe um nome para começar a busca.',
+searchEmpty: 'Nenhum paciente encontrado.',
+searchLoading: 'Buscando pacientes…',
+searchError: 'Não foi possível buscar pacientes. Tente novamente.',
+foundName: 'Nome',
+foundStatus: 'Situação',
+newPatient: 'Cadastrar novo paciente',
+reviewTitle: 'Conferir paciente',
+name: 'Nome',
+document: 'Número do documento',
+status: 'Situação do cadastro',
+noDocument: 'Documento não informado',
+active: 'Ativo',
+inactive: 'Inativo',
+merged: 'Mesclado',
+blocked: 'Bloqueado',
+continueAppointment: 'Continuar para agendamento',
+detailLoading: 'Carregando dados do paciente…',
+detailError: 'Não foi possível carregar os dados. Tente novamente.',
+registerTitle: 'Cadastrar paciente',
+registerIntro: 'Informe os dados necessários para identificar o paciente.',
+namePlaceholder: 'Nome completo',
+cpfLabel: 'CPF',
+cpfPlaceholder: '000.000.000-00',
+requiredName: 'Informe o nome do paciente.',
+savePatient: 'Cadastrar paciente',
+savingPatient: 'Cadastrando paciente…',
+saveError: 'Não foi possível cadastrar o paciente. Revise os dados e tente novamente.',
+savedPatient: 'Paciente cadastrado. Confira os dados para continuar.',
+backToPatients: 'Voltar para pacientes'
+};
+type PageMessageType = typeof pageMessage_pt;
+const pageMessages: Record<string, PageMessageType> = { pt: pageMessage_pt };
+/// **collab_i18n_end**
+const statusMessageKey = (status: 'Active' | 'Inactive' | 'Merged' | 'Blocked') => ({
+Active: 'active', Inactive: 'inactive', Merged: 'merged', Blocked: 'blocked'
+}[status] as 'active' | 'inactive' | 'merged' | 'blocked');
+@customElement('agenda-clinica--web--mobile--page11--pacientes-102047')
+export class AgendaClinicaMobilePage11PacientesPage extends AgendaClinicaPacientesShared {
+private msg = pageMessage_pt;
+render() {
+this.msg = pageMessages[this.getMessageKey(pageMessages)];
+return html`
+<main class="min-h-screen bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] px-4 py-5">
+<header class="mb-5">
+<h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
+</header>
+<molecules--ml-scenary-102020
+mode="scenary"
+.value=${this.scenary || 'locate'}
+backLabel=${this.msg.backToPatients}
+@change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}>
+<Scene value="locate" title=${this.msg.locateTitle}>
+${this.renderLocate()}
+</Scene>
+<Scene value="review" title=${this.msg.reviewTitle} nav="back" backTo="locate">
+${this.renderReview()}
+</Scene>
+<Scene value="register" title=${this.msg.registerTitle} nav="back" backTo="locate">
+${this.renderRegister()}
+</Scene>
+</molecules--ml-scenary-102020>
+</main>
+`;
+}
+private renderLocate() {
+const searching = this.searchPatientsStatus === 'loading' || this.loadPatientsStatus === 'loading';
+const hasError = this.searchPatientsStatus === 'error' || this.loadPatientsStatus === 'error';
+return html`
+<section data-organism-id="patientList" class="space-y-4">
+<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.locateIntro}</p>
+<groupsearchcontent--ml-search-bar
+class="block"
+.value=${this.nameSearch}
+.loading=${searching}
+.error=${hasError ? this.msg.searchError : ''}
+name="nameSearch"
+placeholder=${this.msg.searchPlaceholder}
+@search=${(e: CustomEvent<{ query: string }>) => this.searchPatients(e.detail.query, 1)}
+@change=${(e: CustomEvent<{ value: string | null }>) => this.searchPatients(e.detail.value || '', 1)}
+@clear=${() => this.searchPatients('', 1)}>
+<Label>${this.msg.searchLabel}</Label>
+<Helper>${this.msg.searchHelper}</Helper>
+<Empty>${this.msg.searchEmpty}</Empty>
+</groupsearchcontent--ml-search-bar>
+<groupviewdata--ml-vertical-record-list
+class="block"
+.loading=${searching}
+hoverable
+@row-click=${(e: CustomEvent<{ index: number }>) => {
+const row = this.patients?.items[e.detail.index];
+if (row) { this.setSelectedPaciente(row.id); this.setScenario('review'); }
+}}>
+<Columns>
+<Column field="name" header=${this.msg.foundName}></Column>
+<Column field="status" header=${this.msg.foundStatus}></Column>
+</Columns>
+<Rows>
+${this.patients?.items.map((row) => html`
+<Row ?selected=${row.id === this.selectedPaciente}>
+<Cell><span class="font-medium text-[var(--text-strong,currentColor)]">${row.details.identification.details.identification.name}</span></Cell>
+<Cell>${this.msg[statusMessageKey(row.details.identification.details.identification.status)]}</Cell>
+</Row>
+`) || nothing}
+</Rows>
+<Loading><div class="px-4 py-6 text-sm text-[var(--text-muted,currentColor)]">${this.msg.searchLoading}</div></Loading>
+<Empty><div class="px-4 py-6 text-sm text-[var(--text-muted,currentColor)]">${this.msg.searchEmpty}</div></Empty>
+</groupviewdata--ml-vertical-record-list>
+<button type="button" class="min-h-11 w-full rounded-lg border border-[var(--button-secondary-border,currentColor)] bg-[var(--button-secondary-bg,transparent)] px-4 py-3 text-[var(--button-secondary-text,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.setScenario('register')}>${this.msg.newPatient}</button>
+</section>
+`;
+}
+private renderReview() {
+const patient = this.patient;
+const loading = this.loadPatientDetailStatus === 'loading';
+const detail = patient?.details.identification.details.identification;
+return html`
+<section data-organism-id="patientDetail" class="space-y-4" aria-busy=${loading}>
+${loading ? html`<p class="text-sm text-[var(--text-muted,currentColor)]" aria-live="polite">${this.msg.detailLoading}</p>` : nothing}
+${this.loadPatientDetailStatus === 'error' ? html`<p class="rounded-lg bg-[var(--status-error-bg,transparent)] px-4 py-3 text-sm text-[var(--status-error-text,currentColor)]" aria-live="polite">${this.msg.detailError}</p>` : nothing}
+${detail ? html`
+<groupviewcard--ml-profile-card class="block border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]" data-class="w-full">
+<CardHeader>
+<CardTitle>${detail.name}</CardTitle>
+<CardDescription>${this.msg[statusMessageKey(detail.status)]}</CardDescription>
+</CardHeader>
+<CardContent>
+<dl class="space-y-3 py-2">
+<div><dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.name}</dt><dd class="font-medium">${detail.name}</dd></div>
+<div><dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.document}</dt><dd>${detail.docId || this.msg.noDocument}</dd></div>
+<div><dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.status}</dt><dd>${this.msg[statusMessageKey(detail.status)]}</dd></div>
+</dl>
+</CardContent>
+<CardFooter>
+<button type="button" class="min-h-11 w-full rounded-lg bg-[var(--button-primary-bg,transparent)] px-4 py-3 font-medium text-[var(--button-primary-text,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.goToAppointment()}>${this.msg.continueAppointment}</button>
+</CardFooter>
+</groupviewcard--ml-profile-card>
+` : nothing}
+</section>
+`;
+}
+private renderRegister() {
+const name = this.patientForm.details.identification.name || '';
+const docId = this.patientForm.details.identification.docId || '';
+const saving = this.savePatientStatus === 'loading';
+return html`
+<section class="space-y-5">
+<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.registerIntro}</p>
+<form data-organism-id="patientForm" class="space-y-4" @submit=${(e: Event) => { e.preventDefault(); this.savePatient(); }}>
+<groupentertext--ml-enter-text
+class="block" .value=${name} name="name" placeholder=${this.msg.namePlaceholder} required
+@input=${(e: CustomEvent<{ value: string }>) => this.setPatientForm({ details: { identification: { ...this.patientForm.details.identification, name: e.detail.value, docType: 'CPF' } } })}>
+<Label>${this.msg.name}</Label>
+</groupentertext--ml-enter-text>
+<groupentertext--ml-cpf-input
+class="block" .value=${docId} name="docId" placeholder=${this.msg.cpfPlaceholder}
+@input=${(e: CustomEvent<{ value: string }>) => this.setPatientForm({ details: { identification: { ...this.patientForm.details.identification, docId: e.detail.value, docType: 'CPF' } } })}>
+<Label>${this.msg.cpfLabel}</Label>
+</groupentertext--ml-cpf-input>
+<div data-organism-id="patientActions" class="space-y-3">
+${this.savePatientStatus === 'error' ? html`<p class="rounded-lg bg-[var(--status-error-bg,transparent)] px-4 py-3 text-sm text-[var(--status-error-text,currentColor)]" aria-live="polite">${this.msg.saveError}</p>` : nothing}
+${this.savePatientStatus === 'success' ? html`<p class="rounded-lg bg-[var(--status-success-bg,transparent)] px-4 py-3 text-sm text-[var(--status-success-text,currentColor)]" aria-live="polite">${this.msg.savedPatient}</p>` : nothing}
+<button type="submit" ?disabled=${saving || !name.trim()} aria-busy=${saving} class="min-h-11 w-full rounded-lg bg-[var(--button-primary-bg,transparent)] px-4 py-3 font-medium text-[var(--button-primary-text,currentColor)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${saving ? this.msg.savingPatient : this.msg.savePatient}</button>
+</div>
+</form>
+</section>
+`;
+}
+}

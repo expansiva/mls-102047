@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "comandaRestaurante",
+  "pageId": "atendimento",
+  "device": "mobile",
+  "contextHash": "sha256:71a870f87767f13a85c12ebfc78bf46307ac8daf27f2f9c633cd5a3a22929280",
+  "pagePath": "l2/comandaRestaurante/web/mobile/page11/atendimento.ts",
+  "summary": "A página permite localizar mesas/comandas, abrir uma comanda e lançar ou cancelar itens, mas não atende ao conceito counterSplit no mobile. A comanda não fica sempre visível como carrinho durante o catálogo, a barra inferior mostra apenas subtotal em vez de quantidade de linhas e o fluxo pede quantidade antes de adicionar, contrariando explicitamente o template.",
+  "findings": [
+    {
+      "severity": "blocker",
+      "area": "template",
+      "message": "O catálogo é uma cena separada da comanda e a comanda desaparece enquanto o catálogo está visível; isso transforma o fluxo em navegação entre cenas, em vez de manter o carrinho sempre acessível conforme o comportamento mobile obrigatório.",
+      "basis": "On mobile: “The cart never disappears; it becomes a bar. A bar fixed at the bottom of the screen always shows the number of lines and the grand total.”; Forbidden on mobile: “a cart that has no visible total while the catalog is on screen”",
+      "where": "`render()` alterna entre `Scene value=\"catalogo\"` e `Scene value=\"comanda\"`; a barra inferior só é renderizada dentro de `renderComanda()`.",
+      "fix": "Renderize uma barra fixa global no catálogo e na comanda, com quantidade de linhas e total; ao tocar nela, abra a cena da comanda, mantendo o contexto e o retorno ao catálogo."
+    },
+    {
+      "severity": "major",
+      "area": "template",
+      "message": "A barra inferior exibe apenas o subtotal e não exibe o número de linhas; portanto não cumpre o contrato visual do carrinho no mobile e ainda dá ao subtotal uma proeminência que deveria pertencer ao total da comanda.",
+      "basis": "On mobile: “always shows the number of lines and the grand total, still the biggest number on screen”; L4 define `details.totalComanda` como “Total da comanda: Valor a cobrar”.",
+      "where": "Na barra fixa de `renderComanda()`: `${c ? money(c.details.subtotal) : '—'}`.",
+      "fix": "Use o total calculado entregue pelo backend (`totalComanda`) e mostre também a contagem de lançamentos; não substitua esses dados por subtotal."
+    },
+    {
+      "severity": "major",
+      "area": "template",
+      "message": "O formulário solicita quantidade antes do lançamento, contrariando o loop de uma unidade por toque e a proibição de prompt de quantidade antes de adicionar.",
+      "basis": "Template: “Tapping a tile runs the add-item command: one tap, one unit”; Forbidden: “A quantity prompt before adding an item; add first, adjust on the line.”",
+      "where": "`formularioLancamento` renderiza `ml-number-stepper` antes do botão `Lançar item`, e o fluxo usa `lancarItem()` somente após preencher o formulário.",
+      "fix": "Faça a seleção/toque do item lançar imediatamente uma unidade; depois permita ajustar quantidade na linha com controles +/- se o contrato suportar atualização, ou preserve apenas o lançamento unitário sem prompt prévio."
+    },
+    {
+      "severity": "major",
+      "area": "intent",
+      "message": "O fluxo principal de lançamento fica atrás de duas cenas e de um botão genérico, enquanto o catálogo só oferece busca e um combobox; isso não entrega a operação rápida de localizar e lançar item descrita pelo conceito e pelo template.",
+      "basis": "Intent: “informa item, quantidade e observação, e confirma ... em sequência vertical”; Template: “catalog side ... large touch tiles” e “Everything is one or two taps”.",
+      "where": "`renderLookup()` usa `ml-search-bar` apenas para filtrar e `renderComanda()` usa `ml-combobox` seguido de `Lançar item`; não há tiles de itens nem lançamento por toque.",
+      "fix": "Apresente os itens filtrados como tiles grandes com nome e preço e faça o toque lançar uma unidade; deixe observação e eventuais ajustes no contexto da linha/comanda."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "O estado de carregamento da comanda selecionada não é mostrado na cena comanda, e erros de carregamento podem aparecer como feedback global sem impedir a apresentação vazia ambígua; o garçom não recebe indicação clara de que o detalhe está sendo buscado.",
+      "basis": "Shared declaration: `obterComandaAtendimentoStatus` e `obterComandaAtendimentoError`; template: falha de comando deve ser reportada “inside the region it belongs”.",
+      "where": "`renderComanda()` só testa `c` e mostra `emptyComanda`; `renderFeedback()` não inclui `obterComandaAtendimentoStatus` como loading e mistura erros de lookup, seleção e comandos em uma única região.",
+      "fix": "Inclua loading e erro localizados no organismo `detalheComanda`, com retry/contexto correspondente, e mantenha erros de lançamento/cancelamento junto às ações ou à linha afetada."
+    },
+    {
+      "severity": "minor",
+      "area": "text",
+      "message": "A coluna de preço unitário prevista no contexto de conferência não é exibida, embora o usuário precise verificar o preço registrado do item; a tabela mostra apenas item, quantidade e valor total.",
+      "basis": "L4: `details.precoUnitario` — “Preço unitário registrado”; organismo `detalheComanda`: “itens lançados com quantidade e situação, e o subtotal ... conferir o pedido”.",
+      "where": "`groupviewtable--ml-responsive-table` declara apenas as colunas `item`, `quantity` e `total`.",
+      "fix": "Inclua o preço unitário registrado na linha, desde que caiba no padrão responsivo, ou incorpore-o de forma claramente legível no detalhe do item."
+    },
+    {
+      "severity": "minor",
+      "area": "accessibility",
+      "message": "O botão fixo da barra inferior usa texto alinhado à esquerda e repete o subtotal, mas não comunica que abre a comanda nem informa uma contagem; sua finalidade fica pouco clara para leitor de tela e para quem está no catálogo.",
+      "basis": "On mobile: “Tapping it opens the cart as a view of its own, with back.”",
+      "where": "`<button>` da barra fixa contém somente `Voltar ao catálogo` e o valor monetário.",
+      "fix": "Use um rótulo acessível que nomeie a ação e o estado, por exemplo “Abrir comanda — 3 itens — R$ ...”, e mantenha `Voltar ao catálogo` apenas no controle de retorno da cena."
+    }
+  ]
+}

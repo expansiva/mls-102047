@@ -1,0 +1,190 @@
+/* refused: M4_PAGE_COMPILE:
+line 93:13 - TS7053 - Element implicitly has an 'any' type because expression of type 'number' can't be used to index type '{ items: PatientListItem[]; page: number; pageSize: number; hasMore: boolean; }'. No index signature with a parameter of type 'number' was found on type '{ items: PatientListItem[]; page: number; pageSize: number; hasMore: boolean; }'.
+    > const row = this.patients?.[e.detail.index];
+line 101:31 - TS2339 - Property 'map' does not exist on type '{ items: PatientListItem[]; page: number; pageSize: number; hasMore: boolean; } | never[]'. Property 'map' does not exist on type '{ items: PatientListItem[]; page: number; pageSize: number; hasMore: boolean; }'.
+    > <Rows>${(this.patients ?? []).map((row) => html`
+line 101:36 - TS7006 - Parameter 'row' implicitly has an 'any' type.
+    > <Rows>${(this.patients ?? []).map((row) => html` */
+
+/// <mls fileReference="_102047_/l2/agendaClinica/web/desktop/page11/pacientes.ts" enhancement="_102020_/l2/enhancementAura"/>
+import { html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { AgendaClinicaPacientesShared } from '/_102047_/l2/agendaClinica/web/shared/pacientes.js';
+import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
+import '/_102040_/l2/molecules/groupentertext/ml-cpf-input.js';
+import '/_102040_/l2/molecules/groupsearchcontent/ml-search-bar.js';
+import '/_102040_/l2/molecules/groupviewcard/ml-profile-card.js';
+import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
+/// **collab_i18n_start**
+const pageMessage_pt = {
+pageTitle: 'Pacientes',
+finderTitle: 'Localizar paciente',
+searchLabel: 'Nome do paciente',
+searchPlaceholder: 'Digite o nome para buscar',
+searchHelper: 'Informe um nome para localizar pacientes.',
+resultsName: 'Nome',
+resultsStatus: 'Situação do cadastro',
+resultsDocument: 'Número do documento',
+emptyPatients: 'Nenhum paciente encontrado.',
+loadingPatients: 'Carregando pacientes…',
+noSelection: 'Selecione um paciente para conferir sua identificação.',
+profileTitle: 'Identificação do paciente',
+profileDescription: 'Confirme os dados antes de seguir para o agendamento.',
+name: 'Nome',
+documentType: 'Tipo de documento',
+documentNumber: 'Número do documento',
+status: 'Situação do cadastro',
+appointment: 'Seguir para agendamento',
+newPatient: 'Cadastrar paciente',
+registerTitle: 'Novo paciente',
+registerDescription: 'Informe os dados de identificação para disponibilizar o paciente na clínica.',
+required: 'Obrigatório',
+save: 'Cadastrar paciente',
+saving: 'Cadastrando…',
+cancel: 'Voltar para a identificação',
+saveSuccess: 'Paciente cadastrado. Confira a identificação para continuar.',
+genericError: 'Não foi possível concluir esta operação. Tente novamente.',
+active: 'Ativo',
+inactive: 'Inativo',
+merged: 'Mesclado',
+blocked: 'Bloqueado',
+cpf: 'CPF',
+registerHint: 'O CPF ajuda a evitar cadastros duplicados.',
+'scene.back': 'Voltar',
+'scene.review': 'Identificação',
+'scene.register': 'Novo paciente'
+};
+type PageMessageType = typeof pageMessage_pt;
+const pageMessages: Record<string, PageMessageType> = { pt: pageMessage_pt };
+/// **collab_i18n_end**
+const statusText = (status: 'Active' | 'Inactive' | 'Merged' | 'Blocked', msg: PageMessageType) => {
+if (status === 'Active') return msg.active;
+if (status === 'Inactive') return msg.inactive;
+if (status === 'Merged') return msg.merged;
+return msg.blocked;
+};
+@customElement('agenda-clinica--web--desktop--page11--pacientes-102047')
+export class AgendaClinicaDesktopPage11PacientesPage extends AgendaClinicaPacientesShared {
+private msg!: PageMessageType;
+render() {
+this.msg = pageMessages[this.getMessageKey(pageMessages)];
+const loading = this.pageStatus === 'loading' || this.loadPatientsStatus === 'loading';
+return html`
+<main class="min-h-screen bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] p-8" aria-busy=${loading}>
+<header class="mb-7 flex items-start justify-between gap-6">
+<div>
+<h1 class="text-3xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
+</div>
+<button type="button" class="min-h-11 rounded-lg bg-[var(--button-primary-bg,transparent)] px-5 py-3 font-medium text-[var(--button-primary-text,currentColor)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.setScenario('register')}>
+${this.msg.newPatient}
+</button>
+</header>
+<div class="grid grid-cols-[minmax(360px,0.9fr)_minmax(520px,1.35fr)] gap-6 items-start">
+<section data-organism-id="patientList" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5 shadow-sm">
+<h2 class="mb-4 text-lg font-semibold text-[var(--text-strong,currentColor)]">${this.msg.finderTitle}</h2>
+<groupsearchcontent--ml-search-bar
+.value=${this.nameSearch}
+.loading=${this.searchPatientsStatus === 'loading'}
+name="nameSearch"
+placeholder=${this.msg.searchPlaceholder}
+@search=${(e: CustomEvent<{ query: string }>) => { void this.searchPatients(e.detail.query, 1); }}
+@clear=${() => { void this.searchPatients('', 1); }}>
+<Label>${this.msg.searchLabel}</Label>
+<Helper>${this.msg.searchHelper}</Helper>
+<Empty>${this.msg.emptyPatients}</Empty>
+</groupsearchcontent--ml-search-bar>
+<div class="mt-5">
+<groupviewdata--ml-vertical-record-list
+.loading=${loading}
+@row-click=${(e: CustomEvent<{ index: number }>) => {
+const row = this.patients?.[e.detail.index];
+if (row) this.setSelectedPaciente(row.id);
+}}>
+<Columns>
+<Column field="name" header=${this.msg.resultsName}></Column>
+<Column field="document" header=${this.msg.resultsDocument}></Column>
+<Column field="status" header=${this.msg.resultsStatus}></Column>
+</Columns>
+<Rows>${(this.patients ?? []).map((row) => html`
+<Row ?selected=${row.id === this.selectedPaciente}>
+<Cell><span class="font-medium text-[var(--text-strong,currentColor)]">${row.details.identification.details.identification.name}</span></Cell>
+<Cell>${row.details.identification.details.identification.docId ?? '—'}</Cell>
+<Cell>${statusText(row.details.identification.details.identification.status, this.msg)}</Cell>
+</Row>`)}</Rows>
+<Loading><div class="py-10 text-center text-[var(--text-muted,currentColor)]">${this.msg.loadingPatients}</div></Loading>
+<Empty><div class="py-10 text-center text-[var(--text-muted,currentColor)]">${this.msg.emptyPatients}</div></Empty>
+</groupviewdata--ml-vertical-record-list>
+</div>
+</section>
+<molecules--ml-scenary-102020
+mode="scenary"
+.value=${this.scenary || 'review'}
+backLabel=${this.msg['scene.back']}
+.loading=${this.savePatientStatus === 'loading'}
+@change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}>
+<Scene value="review" title=${this.msg['scene.review']}>
+${this.renderProfile()}
+</Scene>
+<Scene value="register" title=${this.msg['scene.register']} nav="back" backTo="review">
+${this.renderForm()}
+</Scene>
+</molecules--ml-scenary-102020>
+</div>
+</main>`;
+}
+private renderProfile() {
+const patient = this.patient;
+if (!patient) return html`<section data-organism-id="patientDetail" class="rounded-xl border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] p-8"><p class="text-[var(--text-muted,currentColor)]">${this.msg.noSelection}</p></section>`;
+const identification = patient.details.identification.details.identification;
+return html`
+<section data-organism-id="patientDetail" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 shadow-sm">
+<groupviewcard--ml-profile-card data-class="w-full">
+<CardHeader><CardTitle>${identification.name}</CardTitle><CardDescription>${this.msg.profileDescription}</CardDescription></CardHeader>
+<CardContent>
+<dl class="grid grid-cols-2 gap-x-8 gap-y-5 pt-5">
+<div><dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.name}</dt><dd class="mt-1 font-medium">${identification.name}</dd></div>
+<div><dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.status}</dt><dd class="mt-1 font-medium">${statusText(identification.status, this.msg)}</dd></div>
+<div><dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.documentType}</dt><dd class="mt-1">${identification.docType === 'CPF' ? this.msg.cpf : (identification.docType ?? '—')}</dd></div>
+<div><dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.documentNumber}</dt><dd class="mt-1">${identification.docId ?? '—'}</dd></div>
+</dl>
+</CardContent>
+<CardFooter class="pt-7"><button type="button" class="min-h-11 rounded-lg bg-[var(--button-primary-bg,transparent)] px-5 py-3 font-medium text-[var(--button-primary-text,currentColor)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.goToAppointment()}>${this.msg.appointment}</button></CardFooter>
+</groupviewcard--ml-profile-card>
+${this.loadPatientDetailStatus === 'error' ? html`<p class="mt-4 text-[var(--status-error-text,currentColor)]" aria-live="polite">${this.msg.genericError}</p>` : ''}
+</section>`;
+}
+private renderForm() {
+const draft = this.patientForm.details.identification;
+const saving = this.savePatientStatus === 'loading';
+return html`
+<section data-organism-id="patientForm" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 shadow-sm">
+<p class="mb-6 text-[var(--text-muted,currentColor)]">${this.msg.registerDescription}</p>
+<div class="space-y-5">
+<groupentertext--ml-enter-text
+.value=${draft.name ?? ''} name="patientName" required placeholder=${this.msg.name}
+@input=${(e: CustomEvent<{ value: string }>) => this.updateDraft(e.detail.value, draft.docId)}>
+<Label>${this.msg.name}</Label><Helper>${this.msg.required}</Helper>
+</groupentertext--ml-enter-text>
+<groupentertext--ml-cpf-input
+.value=${draft.docId ?? ''} name="patientCpf" placeholder=${this.msg.documentNumber}
+@input=${(e: CustomEvent<{ value: string }>) => this.updateCpf(e.detail.value, draft.name)}>
+<Label>${this.msg.documentNumber}</Label><Helper>${this.msg.registerHint}</Helper>
+</groupentertext--ml-cpf-input>
+</div>
+<div data-organism-id="patientActions" class="mt-7 flex items-center gap-3 border-t border-[var(--border-subtle,currentColor)] pt-5">
+<button type="button" ?disabled=${saving} class="min-h-11 rounded-lg bg-[var(--button-primary-bg,transparent)] px-5 py-3 font-medium text-[var(--button-primary-text,currentColor)] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.savePatient()}>${saving ? this.msg.saving : this.msg.save}</button>
+<button type="button" ?disabled=${saving} class="min-h-11 rounded-lg border border-[var(--button-secondary-border,currentColor)] bg-[var(--button-secondary-bg,transparent)] px-5 py-3 text-[var(--button-secondary-text,currentColor)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.setScenario('review')}>${this.msg.cancel}</button>
+</div>
+${this.savePatientStatus === 'success' ? html`<p class="mt-4 text-[var(--status-success-text,currentColor)]" aria-live="polite">${this.msg.saveSuccess}</p>` : ''}
+${this.savePatientStatus === 'error' ? html`<p class="mt-4 text-[var(--status-error-text,currentColor)]" aria-live="polite">${this.msg.genericError}</p>` : ''}
+</section>`;
+}
+private updateDraft(name: string, docId: string | null | undefined) {
+this.setPatientForm({ details: { identification: { name: name || null, docType: 'CPF', docId: docId || null } } });
+}
+private updateCpf(docId: string, name: string | null) {
+this.setPatientForm({ details: { identification: { name, docType: 'CPF', docId: docId || null } } });
+}
+}
+

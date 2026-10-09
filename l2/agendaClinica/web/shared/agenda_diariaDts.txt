@@ -1,0 +1,80 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { Agenda_diariaContracts, ConsultaDoDia, ConsultaSelecionada } from '/_102047_/l2/agendaClinica/web/contracts/agenda_diaria.defs.js';
+export type { Agenda_diariaContracts, ConsultaDoDia, ConsultaSelecionada } from '/_102047_/l2/agendaClinica/web/contracts/agenda_diaria.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type RegisterAttendanceDraft = {
+    id: string | null;
+    version: number | null;
+    details: {
+        attendanceNote: string | null;
+    } | null;
+};
+type Output<R extends keyof Agenda_diariaContracts> = Agenda_diariaContracts[R]['output'];
+export declare class AgendaClinicaAgenda_diariaShared extends StateLitElement {
+    /** state carregarAgendaDiariaConsultas — Linha resumida da agenda diária do profissional.; source carregarAgendaDiaria.consultas; organism dayConsultations */
+    carregarAgendaDiariaConsultas: Output<'agendaClinica.agenda_diaria.carregarAgendaDiaria'>['consultas'] | null;
+    /** state carregarMaisConsultasDoDiaConsultas — Linha resumida da agenda diária do profissional.; source carregarMaisConsultasDoDia.consultas; organism dayConsultations */
+    carregarMaisConsultasDoDiaConsultas: Output<'agendaClinica.agenda_diaria.carregarMaisConsultasDoDia'>['consultas'] | null;
+    /** state registrarAtendimentoConsulta — Consulta aberta pelo profissional, com paciente, profissional e anotação para conferência e registro.; source registrarAtendimento.consulta; organism attendanceActions */
+    registrarAtendimentoConsulta: ConsultaSelecionada | null;
+    /** state carregarConsultaSelecionadaConsulta — Consulta aberta pelo profissional, com paciente, profissional e anotação para conferência e registro.; source carregarConsultaSelecionada.consulta; organism consultationSummary */
+    carregarConsultaSelecionadaConsulta: ConsultaSelecionada | null;
+    /** state selectedConsulta — Consulta aberta pelo profissional, com paciente, profissional e anotação para conferência e registro.; source entry.params.consultaId; organism consultationSummary; persisted */
+    selectedConsulta: string | null;
+    /** state page — the requested agenda page filter; source entry.params.page; organism dayConsultations; persisted */
+    page: number | null;
+    /** state pageStatus — the overall loading state of the page; source pageStatus */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state carregarAgendaDiariaStatus — the status of the initial agenda query; source carregarAgendaDiariaStatus */
+    carregarAgendaDiariaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarAgendaDiariaError — the error of the initial agenda query; source carregarAgendaDiariaError */
+    carregarAgendaDiariaError: ErrorState;
+    /** state carregarMaisConsultasDoDiaStatus — the status of the next-page agenda query; source carregarMaisConsultasDoDiaStatus */
+    carregarMaisConsultasDoDiaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarMaisConsultasDoDiaError — the error of the next-page agenda query; source carregarMaisConsultasDoDiaError */
+    carregarMaisConsultasDoDiaError: ErrorState;
+    /** state carregarConsultaSelecionadaStatus — the status of the selected consultation query; source carregarConsultaSelecionadaStatus */
+    carregarConsultaSelecionadaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state carregarConsultaSelecionadaError — the error of the selected consultation query; source carregarConsultaSelecionadaError */
+    carregarConsultaSelecionadaError: ErrorState;
+    /** state registrarAtendimentoStatus — the status of the attendance command; source registrarAtendimentoStatus */
+    registrarAtendimentoStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state registrarAtendimentoError — the error of the attendance command; source registrarAtendimentoError */
+    registrarAtendimentoError: ErrorState;
+    /** state registerAttendanceDraft — the attendance command draft; source registrarAtendimento.input; organism attendanceForm */
+    registerAttendanceDraft: RegisterAttendanceDraft;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private publish;
+    private assignState;
+    private errorState;
+    private resetVisit;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private applyEntryParams;
+    private storageValue;
+    private initialLoad;
+    /** function carregarAgendaDiaria — Loads the first page of today's authenticated professional agenda; redraws carregarAgendaDiariaConsultas by replacement. No arguments. */
+    carregarAgendaDiaria(): Promise<void>;
+    /** function carregarMaisConsultasDoDia — Fetches the next page of today's agenda; redraws carregarMaisConsultasDoDiaConsultas by replacement and carregarAgendaDiariaConsultas.items by append. No arguments. */
+    carregarMaisConsultasDoDia(): Promise<void>;
+    /** function carregarConsultaSelecionada — Opens the selected agenda consultation; redraws carregarConsultaSelecionadaConsulta by replacement. consultaId is the selected consultation identifier. */
+    carregarConsultaSelecionada(consultaId: string): Promise<void>;
+    /** function registrarAtendimento — Registers the completed attendance; redraws registrarAtendimentoConsulta and carregarConsultaSelecionadaConsulta by upsert, and carregarAgendaDiariaConsultas.items by upsert. */
+    registrarAtendimento(): Promise<void>;
+    /** draft — Sets the attendance form command draft. value contains the attendance note and command context. */
+    setRegisterAttendance(value: RegisterAttendanceDraft): void;
+    /** select — Selects a consultation id, clears it when null, and loads the selected consultation when an id is supplied. */
+    selectConsultaId(value: string | null): void;
+    /** Sets the visible page scene. */
+    setScenario(value: string): void;
+    /** Returns the selected consultation record for the consultation summary. */
+    get consultationSummary(): ConsultaSelecionada | null;
+    /** Returns the consultation row selected in the loaded agenda list. */
+    get dayConsultationsSelection(): ConsultaDoDia | null;
+}

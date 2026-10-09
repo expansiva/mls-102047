@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-review-v1",
+  "project": 102047,
+  "module": "agendaClinica",
+  "pageId": "consultas",
+  "device": "mobile",
+  "contextHash": "sha256:9af36767bb211c3136004b59bf7a6fd154a39e3edc826956790f628b4680be8a",
+  "pagePath": "l2/agendaClinica/web/mobile/page11/consultas.ts",
+  "summary": "A página cobre o fluxo de localizar, conferir e operar uma consulta em uma coluna contínua, mas não atende ao conceito calendarGrid do template: renderiza uma tabela/lista de registros sem grade temporal, sem âncora de hoje ou navegação de período. Além disso, o agendamento não começa por um slot livre e o detalhe fica como seção persistente abaixo da agenda, tornando a principal jornada parcialmente desalinhada e pouco eficiente no mobile.",
+  "findings": [
+    {
+      "severity": "blocker",
+      "area": "template",
+      "message": "A superfície principal é um `ml-calendar-view` com Columns/Rows e quatro células por registro, o que apresenta consultas como linhas cronológicas em vez de uma semana ou mês em grade espacial; isso contradiz diretamente a experiência calendarGrid e seu comportamento central.",
+      "basis": "\"Time as a surface: a week or month grid is the page\"; \"Forbidden: Rendering the schedule as a chronological list of items with inline actions\".",
+      "where": "Organism `listaAgenda`, no `renderAgenda()`: `<groupviewdata--ml-calendar-view>` contém `<Columns>` e `<Rows>` com cada consulta como uma linha.",
+      "fix": "Usar uma grade semanal ou mensal real, com cada consulta posicionada no horário, períodos navegáveis e espaços livres selecionáveis; não usar Columns/Rows como superfície principal."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Não existe criação a partir de um slot livre: o formulário aparece sempre depois da agenda e exige que a recepcionista informe manualmente a data e o horário. Assim, o loop prescrito de selecionar um horário disponível e abrir o painel já preenchido não é alcançável.",
+      "basis": "\"Creating starts on the grid: selecting a free slot opens the creation panel with the slot's date/time already filled\"; intent: \"informa o agendamento\" em conteúdo estreito.",
+      "where": "Organisms `formularioConsulta` e `acoesConsulta`; o datetime picker é sempre renderizado e só recebe valor do draft.",
+      "fix": "Permitir toque em um slot livre para abrir o formulário/painel com `scheduledAt` preenchido, deixando a seleção de paciente e profissional para completar o agendamento."
+    },
+    {
+      "severity": "major",
+      "area": "hierarchy",
+      "message": "O detalhe não é um painel temporário sobre a grade: é uma seção permanente após a agenda, seguida ainda pelo formulário e pelas ações. Isso alonga o fluxo móvel e faz a consulta selecionada competir com a superfície principal, contrariando a regra de que o detalhe não rouba o palco nem vira conteúdo persistente separado.",
+      "basis": "\"Detail never steals the stage: it opens in a panel over the grid and leaves\"; \"Detail panel opens from a block\".",
+      "where": "`render()` empilha `renderAgenda()`, `renderDetail()`, `renderForm()` e `renderActions()` em `.space-y-8`; `renderDetail()` sempre mostra `<h2>Consulta selecionada</h2>`.",
+      "fix": "Abrir o detalhe e suas ações em um painel/overlay temporário sobre a grade, fechável e mantendo a grade no contexto; abrir o formulário de criação no mesmo padrão."
+    },
+    {
+      "severity": "major",
+      "area": "states",
+      "message": "Erros de carregamento da agenda, de busca e de consulta selecionada não são exibidos ao lado da superfície afetada; apenas o loading e o vazio da agenda aparecem. Uma falha pode deixar a recepcionista sem saber por que não consegue localizar ou conferir a consulta.",
+      "basis": "\"A failed command reports inside the panel...\" e as disciplinas de feedback local; a página também declara estados de erro para carregar, filtrar e consultar.",
+      "where": "`renderAgenda()` usa apenas `carregarAgendaStatus === 'loading'` e `<Empty>`, enquanto `renderDetail()` não consulta `consultarConsultaSelecionadaError` e `renderActions()` só trata erros dos três comandos.",
+      "fix": "Renderizar feedback de erro local junto ao cabeçalho/grade para carregamento e filtro, e no painel de detalhe para falha ao consultar, com mensagem de retry."
+    },
+    {
+      "severity": "major",
+      "area": "journey",
+      "message": "Os comandos Confirmar consulta e Registrar falta ficam habilitados para qualquer consulta selecionada, sem refletir as transições válidas do domínio; por exemplo, uma consulta já confirmada não deveria oferecer confirmação novamente e uma consulta com falta não deveria permitir essas ações.",
+      "basis": "Regra L4 `transicaoConsultaValida`: somente agendada→confirmada, agendada/confirmada→falta ou agendada/confirmada→atendida.",
+      "where": "`renderActions()`: os dois botões usam apenas `.disabled=${busy || !this.consulta}`.",
+      "fix": "Derivar a disponibilidade dos comandos do `status` da consulta e ocultar ou desabilitar ações que não sejam transições válidas."
+    },
+    {
+      "severity": "minor",
+      "area": "template",
+      "message": "A agenda mostra apenas a data consultada e um contador, mas não oferece a âncora “Hoje”, alternância semana/mês nem paginação de intervalo no cabeçalho, que são os controles que permitem explorar a superfície temporal.",
+      "basis": "\"The visible range (week or month) is the page's one big mode switch, in the header next to today's anchor ('Hoje') and range paging.\"",
+      "where": "Cabeçalho de `renderAgenda()`: `<p>${this.msg.agendaRegion}</p>` e a data de `cabecalho.dataAgenda`, sem controles de hoje, faixa ou navegação.",
+      "fix": "Adicionar no cabeçalho a âncora Hoje, o controle de faixa e a navegação de período, mantendo-os como controles de navegação separados das ações."
+    },
+    {
+      "severity": "minor",
+      "area": "feedback",
+      "message": "O sucesso é mostrado como um feedback textual persistente em `acoesConsulta`, e não como a mudança local na grade prevista pelo template; depois de agendar, confirmar ou registrar falta, não há atualização visual garantida do bloco/status no mapa.",
+      "basis": "\"Success is local: the block appears/moves in place with a brief settle emphasis; no page banner\".",
+      "where": "`renderActions()` usa `<groupnotifyuser--ml-contextual-feedback>` quando `pageStatus === 'success'`; a agenda não trata os status de sucesso dos comandos.",
+      "fix": "Atualizar a grade e o bloco afetado imediatamente após o comando, com breve destaque local; manter erro no painel e evitar banner de sucesso persistente."
+    }
+  ]
+}
