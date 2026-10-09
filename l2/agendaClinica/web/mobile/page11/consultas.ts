@@ -39,6 +39,9 @@ noShowButton: 'Registrar falta',
 noSelection: 'Selecione uma consulta na agenda para conferir os dados.',
 noPatients: 'Nenhum paciente encontrado.',
 noProfessionals: 'Nenhum profissional encontrado.',
+moreAppointments: 'Carregar mais consultas',
+morePatients: 'Mais pacientes',
+moreProfessionals: 'Mais profissionais',
 errorTitle: 'Não foi possível concluir',
 successTitle: 'Operação concluída',
 scheduleSuccess: 'Consulta agendada.',
@@ -118,6 +121,7 @@ ${rows.map(row => html`
 <Empty>${this.msg.calendarEmpty}</Empty>
 <Loading>${this.msg.calendarLoading}</Loading>
 </groupviewdata--ml-calendar-view>
+${this.agenda?.hasMore ? html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="md" data-class="w-full mt-3" .loading=${this.carregarMaisAgendaStatus === 'loading'} @action=${() => this.carregarMaisAgenda()}><Label>${this.msg.moreAppointments}</Label></grouptriggeraction--ml-button-standard>` : ''}
 </section>`;
 }
 private renderDetail() {
@@ -158,6 +162,7 @@ placeholder=${this.msg.choosePatient}
 ${patients.map(patient => html`<Item value=${patient.id}>${this.patientName(patient)}</Item>`)}
 <Empty>${this.msg.noPatients}</Empty>
 </groupselectone--ml-combobox>
+${this.pacientes?.hasMore ? html`<grouptriggeraction--ml-button-standard data-variant="ghost" size="md" .loading=${this.carregarMaisPacientesParaAgendamentoStatus === 'loading'} @action=${() => this.carregarMaisPacientesParaAgendamento()}><Label>${this.msg.morePatients}</Label></grouptriggeraction--ml-button-standard>` : ''}
 <groupselectone--ml-combobox
 .value=${draft.profissionalId}
 .loading=${this.localizarProfissionaisParaAgendamentoStatus === 'loading'}
@@ -168,6 +173,7 @@ placeholder=${this.msg.chooseProfessional}
 ${professionals.map(professional => html`<Item value=${professional.id}>${this.professionalName(professional)}</Item>`)}
 <Empty>${this.msg.noProfessionals}</Empty>
 </groupselectone--ml-combobox>
+${this.profissionais?.hasMore ? html`<grouptriggeraction--ml-button-standard data-variant="ghost" size="md" .loading=${this.carregarMaisProfissionaisParaAgendamentoStatus === 'loading'} @action=${() => this.carregarMaisProfissionaisParaAgendamento()}><Label>${this.msg.moreProfessionals}</Label></grouptriggeraction--ml-button-standard>` : ''}
 <groupenterdatetime--ml-datetime-picker
 .value=${draft.scheduledAt}
 locale="pt-BR"

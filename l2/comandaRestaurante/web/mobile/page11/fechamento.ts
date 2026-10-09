@@ -29,6 +29,7 @@ listSituation: 'Situação',
 open: 'Em atendimento',
 noOpenComandas: 'Nenhuma comanda aberta encontrada.',
 loading: 'Carregando…',
+loadMore: 'Carregar mais comandas',
 searchError: 'Não foi possível localizar as comandas.',
 reviewIntro: 'Confira os itens lançados antes de receber.',
 comandaNumber: 'Comanda {number}',
@@ -144,6 +145,7 @@ ${rows.map((row: ComandaAbertaResumo) => html`
 <Loading>${this.msg.loading}</Loading>
 <Empty>${this.msg.noOpenComandas}</Empty>
 </groupviewdata--ml-vertical-record-list>
+${this.openComandas?.hasMore ? html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="md" data-class="w-full" .loading=${this.carregarMaisComandasAbertasStatus === 'loading'} @action=${() => this.carregarMaisComandasAbertas()}><Label>${this.msg.loadMore}</Label></grouptriggeraction--ml-button-standard>` : ''}
 </section>
 `;
 }
