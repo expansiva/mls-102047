@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/inscricaoEvento/access.defs.ts" enhancement="_blank"/>
 
-import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5AccessArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const inscricaoEventoAccess = {
   "schemaVersion": "2026-09-12-ns5-access-v3",
@@ -11,91 +11,136 @@ export const inscricaoEventoAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Organizador",
-      "description": "Cadastra e publica eventos, acompanha inscritos e exporta a lista de inscrições."
+      "description": "Cadastra e publica eventos com título, descrição, data, local e número de vagas; acompanha os inscritos, o total de vagas ocupadas e baixa a lista de inscritos em CSV.",
+      "personEntity": ""
     },
     {
       "actorId": "publico",
       "kind": "external",
       "origin": "named",
       "title": "Público",
-      "description": "Acessa a página pública do evento e realiza sua inscrição."
+      "description": "Qualquer pessoa que acessa a página pública de um evento publicado e se inscreve com nome e e-mail, entrando na lista de espera quando as vagas acabam, e pode cancelar a própria inscrição.",
+      "personEntity": "Participante"
     }
   ],
   "grants": [
     {
-      "grantId": "organizadorGerenciarEventos",
+      "grantId": "organizadorGerenciaEventos",
       "actorRef": "organizador",
       "title": "Gerenciar eventos",
-      "description": "Permite ao organizador cadastrar, publicar e consultar todos os eventos da organização, incluindo capacidade e ocupação.",
+      "description": "O organizador cadastra, revisa, edita e publica os eventos da organização e acompanha a ocupação de vagas e o tamanho da lista de espera.",
       "entityRefs": [
         "Evento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange todos os eventos da organização."
+        "description": "Todos os eventos da organização."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "O organizador visualiza todas as informações do evento necessárias para seu cadastro, publicação e acompanhamento."
+        "description": "Registro completo do evento, incluindo vagas ocupadas, disponíveis e lista de espera."
       }
     },
     {
-      "grantId": "organizadorAcompanharInscricoes",
+      "grantId": "organizadorAcompanhaInscricoes",
       "actorRef": "organizador",
       "title": "Acompanhar inscrições",
-      "description": "Permite ao organizador consultar e exportar as inscrições dos eventos, com o nome e o e-mail dos participantes.",
+      "description": "O organizador vê as inscrições confirmadas, a lista de espera na ordem de chegada e as canceladas de cada evento, e baixa a lista de inscritos em CSV.",
       "entityRefs": [
-        "Inscricao",
+        "Inscricao"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todas as inscrições dos eventos da organização."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Registro completo da inscrição, incluindo situação, datas e posição na lista de espera."
+      }
+    },
+    {
+      "grantId": "organizadorVeParticipantes",
+      "actorRef": "organizador",
+      "title": "Ver nome e e-mail dos inscritos",
+      "description": "O organizador lê o nome e o e-mail dos participantes para identificar os inscritos e montar o CSV.",
+      "entityRefs": [
         "Participante",
         "EmailParticipante"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange todas as inscrições e os dados de participantes vinculados a eventos da organização."
+        "description": "Participantes e e-mails ligados às inscrições da organização."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "O organizador visualiza a situação e a data das inscrições, o nome do participante e o endereço de e-mail informado para contato e exportação.",
+        "description": "Apenas nome, situação e e-mail do participante; consentimento, tags e campos gerais ficam ocultos.",
         "allowedFields": [
-          "Inscricao.id",
-          "Inscricao.eventoId",
-          "Inscricao.participanteId",
-          "Inscricao.emailParticipanteId",
-          "Inscricao.status",
-          "Inscricao.createdAt",
-          "Participante.details.identification",
-          "EmailParticipante.details.contactChannel"
+          "Participante.details.identification.name",
+          "Participante.details.identification.status",
+          "Participante.details.base.contacts",
+          "EmailParticipante.details.identification.name",
+          "EmailParticipante.details.contactChannel.value",
+          "EmailParticipante.details.contactChannel.isVerified"
         ]
       }
     },
     {
-      "grantId": "publicoConsultarPropriaInscricao",
+      "grantId": "publicoMinhasInscricoes",
       "actorRef": "publico",
-      "title": "Consultar e cancelar a própria inscrição",
-      "description": "Permite ao público consultar a situação da própria inscrição e cancelá-la quando necessário.",
+      "title": "Minhas inscrições",
+      "description": "A pessoa se inscreve em um evento publicado, acompanha a situação da própria inscrição (confirmada ou em lista de espera) e pode cancelá-la.",
       "entityRefs": [
-        "Inscricao",
-        "Participante"
+        "Inscricao"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Abrange somente inscrições vinculadas ao participante da sessão.",
+        "description": "Somente as inscrições cujo participante é a própria pessoa.",
         "anchorEntity": "Participante"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "O participante visualiza sua própria identificação e os dados necessários para conferir a situação de sua inscrição.",
+        "description": "Número, evento, situação, datas e posição na lista de espera da própria inscrição.",
         "allowedFields": [
-          "Inscricao.id",
+          "Inscricao.numeroInscricao",
           "Inscricao.eventoId",
           "Inscricao.status",
-          "Inscricao.createdAt",
-          "Participante.details.identification"
+          "Inscricao.inscritoEm",
+          "Inscricao.details.confirmadaEm",
+          "Inscricao.details.promovidaEm",
+          "Inscricao.details.canceladaEm",
+          "Inscricao.details.idioma",
+          "Inscricao.details.posicaoListaEspera"
+        ]
+      }
+    },
+    {
+      "grantId": "publicoMeuCadastro",
+      "actorRef": "publico",
+      "title": "Meu cadastro de participante",
+      "description": "A pessoa informa e consulta o próprio nome e e-mail usados na inscrição.",
+      "entityRefs": [
+        "Participante",
+        "EmailParticipante"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Somente o próprio registro de participante e o e-mail ligado a ele.",
+        "anchorEntity": "Participante"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "Nome, país, consentimento de privacidade e o próprio e-mail; tags, vínculos e campos gerais ficam ocultos.",
+        "allowedFields": [
+          "Participante.details.identification.name",
+          "Participante.details.identification.countryCode",
+          "Participante.details.person.privacyConsent",
+          "EmailParticipante.details.identification.name",
+          "EmailParticipante.details.contactChannel"
         ]
       }
     }
   ]
-} as const satisfies Ns5AccessArtifact;
+} as const satisfies Ns5Readonly<Ns5AccessArtifact>;
 
 export type InscricaoEventoAccessType = typeof inscricaoEventoAccess;
 

@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/inscricaoEvento/integration.defs.ts" enhancement="_blank"/>
 
-import type { Ns5IntegrationArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5IntegrationArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const inscricaoEventoIntegration = {
   "schemaVersion": "2026-09-12-ns5-integration-v2",
@@ -8,41 +8,57 @@ export const inscricaoEventoIntegration = {
   "inbound": [],
   "outbound": [
     {
-      "id": "publicarEvento",
+      "id": "eventoPublicado",
       "kind": "event",
       "to": "any",
-      "event": "publicarEvento",
-      "on": "Evento.publicarEvento",
-      "description": "Publica que um evento foi disponibilizado ao público para inscrição.",
+      "event": "eventoPublicado",
+      "on": "Evento.publicar",
+      "description": "Publicado quando o organizador publica um evento e a página pública fica disponível para inscrições. Os módulos interessados recebem o registro de Evento no momento da publicação (título, descrição, data, local e número de vagas).",
       "entityRefs": [
         "Evento"
       ]
     },
     {
-      "id": "cancelarInscricao",
+      "id": "inscricaoRealizada",
       "kind": "event",
       "to": "any",
-      "event": "cancelarInscricao",
-      "on": "Inscricao.cancelarInscricao",
-      "description": "Publica o cancelamento de uma inscrição em evento.",
+      "event": "inscricaoRealizada",
+      "on": "Inscricao.create",
+      "description": "Publicado quando uma pessoa do público se inscreve em um evento publicado, seja com vaga confirmada ou na lista de espera. Os módulos interessados recebem o registro de Inscricao com a referência ao Evento e ao Participante.",
       "entityRefs": [
-        "Inscricao"
+        "Inscricao",
+        "Evento",
+        "Participante"
       ]
     },
     {
-      "id": "promoverDaListaEspera",
+      "id": "inscricaoCancelada",
       "kind": "event",
       "to": "any",
-      "event": "promoverDaListaEspera",
-      "on": "Inscricao.promoverDaListaEspera",
-      "description": "Publica a promoção de uma inscrição da lista de espera.",
+      "event": "inscricaoCancelada",
+      "on": "Inscricao.cancelar",
+      "description": "Publicado quando uma inscrição é cancelada, liberando a vaga no evento. Os módulos interessados recebem o registro de Inscricao no momento do cancelamento.",
       "entityRefs": [
-        "Inscricao"
+        "Inscricao",
+        "Evento"
+      ]
+    },
+    {
+      "id": "inscricaoPromovida",
+      "kind": "event",
+      "to": "any",
+      "event": "inscricaoPromovida",
+      "on": "Inscricao.promover",
+      "description": "Publicado quando o primeiro da lista de espera é promovido para uma vaga confirmada após um cancelamento. Os módulos interessados recebem o registro de Inscricao no momento da promoção.",
+      "entityRefs": [
+        "Inscricao",
+        "Evento",
+        "Participante"
       ]
     }
   ],
   "plugins": []
-} as const satisfies Ns5IntegrationArtifact;
+} as const satisfies Ns5Readonly<Ns5IntegrationArtifact>;
 
 export type InscricaoEventoIntegrationType = typeof inscricaoEventoIntegration;
 

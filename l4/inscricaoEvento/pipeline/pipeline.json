@@ -6,70 +6,63 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:25:32.186Z",
+      "updatedAt": "2026-10-12T19:28:15.491Z",
       "artifactPaths": [
         "l4/inscricaoEvento/module.defs.ts"
       ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      },
       "actors": [
         {
           "actorId": "organizador",
           "kind": "internal",
           "origin": "named",
           "title": "Organizador",
-          "description": "Cadastra e publica eventos, acompanha inscritos e exporta a lista de inscrições."
+          "description": "Cadastra e publica eventos com título, descrição, data, local e número de vagas; acompanha os inscritos, o total de vagas ocupadas e baixa a lista de inscritos em CSV."
         },
         {
           "actorId": "publico",
           "kind": "external",
           "origin": "named",
           "title": "Público",
-          "description": "Acessa a página pública do evento e realiza sua inscrição."
-        }
-      ],
-      "normalizations": [
-        {
-          "kind": "ptToPtBR",
-          "detail": "pt→pt-BR"
+          "description": "Qualquer pessoa que acessa a página pública de um evento publicado e se inscreve com nome e e-mail, entrando na lista de espera quando as vagas acabam, e pode cancelar a própria inscrição."
         }
       ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:26:04.299Z",
+      "updatedAt": "2026-10-12T19:28:37.576Z",
       "artifactPaths": [
-        "l4/inscricaoEvento/journeys/cadastrarEpublicarEvento.defs.ts",
-        "l4/inscricaoEvento/journeys/inscreverSeEmEvento.defs.ts",
+        "l4/inscricaoEvento/journeys/cadastrarPublicarEvento.defs.ts",
+        "l4/inscricaoEvento/journeys/editarEvento.defs.ts",
+        "l4/inscricaoEvento/journeys/acompanharInscritos.defs.ts",
+        "l4/inscricaoEvento/journeys/inscreverEmEvento.defs.ts",
         "l4/inscricaoEvento/journeys/cancelarInscricao.defs.ts",
-        "l4/inscricaoEvento/journeys/acompanharEexportarInscricoes.defs.ts",
         "l4/inscricaoEvento/journeys/index.defs.ts"
       ],
       "decideStepCount": 0,
       "droppedActors": [],
-      "normalizations": [
-        {
-          "kind": "dropTransitionRef",
-          "journeyId": "cadastrarEpublicarEvento",
-          "stepId": "criarEvento",
-          "detail": "transitionRef criarEvento dropped; effect is create."
-        },
-        {
-          "kind": "dropTransitionRef",
-          "journeyId": "inscreverSeEmEvento",
-          "stepId": "registrarInscricao",
-          "detail": "transitionRef registrarInscricao dropped; effect is create."
-        }
-      ]
+      "compile": {
+        "status": "clean",
+        "files": 6
+      }
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:26:41.676Z",
+      "updatedAt": "2026-10-12T19:28:48.764Z",
       "artifactPaths": [
         "l4/inscricaoEvento/workflows.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:29:18.469Z",
+      "updatedAt": "2026-10-12T19:29:53.912Z",
       "artifactPaths": [
         "l4/inscricaoEvento/ontology/Evento.defs.ts",
         "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
@@ -82,6 +75,10 @@
         "EmailParticipante"
       ],
       "liftedAggregateEntities": [],
+      "compile": {
+        "status": "clean",
+        "files": 5
+      },
       "normalizations": [
         {
           "kind": "derivedFromPlatform",
@@ -120,18 +117,33 @@
         },
         {
           "kind": "derivedFromPlatform",
+          "entityId": "Evento",
+          "detail": "record.fields.details.fields.tamanhoListaEspera.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Evento",
+          "detail": "record.fields.details.fields.lotado.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "Inscricao",
           "detail": "record.fields.id, record.fields.version"
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "Participante",
-          "detail": "record.fields.id, record.fields.version"
+          "entityId": "Inscricao",
+          "detail": "record.fields.details.fields.posicaoListaEspera.derived (derived[])"
         },
         {
-          "kind": "tightened",
+          "kind": "derivedFromPlatform",
+          "entityId": "Inscricao",
+          "detail": "record.fields.details.fields.ocupaVaga.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "Participante",
-          "detail": "Participante.details.identification.subtype.values"
+          "detail": "record.fields.id, record.fields.version"
         },
         {
           "kind": "namespaceEmpty",
@@ -165,19 +177,24 @@
         }
       ],
       "citedRules": [
-        "eventoCompletoParaPublicacao",
-        "inscricoesConfirmadasOcupamVagas",
-        "inscricaoUnicaPorEmailNoEvento",
+        "numeroVagasPositivo",
+        "publicarExigeDadosCompletos",
         "inscricaoSomenteEmEventoPublicado",
-        "confirmarQuandoHouverVaga",
-        "listaEsperaPorOrdemDeChegada",
-        "cancelamentoLiberaVaga",
-        "promoverPrimeiroDaListaEspera",
+        "inscricaoExcedenteVaiParaEspera",
+        "aumentoVagasPromoveListaEspera",
+        "inscricaoEmailUnicoPorEvento",
+        "inscricaoSomenteEventoPublicado",
+        "inscricaoListaEsperaQuandoLotado",
+        "inscricaoPromocaoOrdemChegada",
+        "inscricaoCancelamentoSomentePropria",
+        "inscricaoNumeroSequencial",
         "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
         "rule-person-privacy-consent-required-br-eu",
-        "rule-contact-value-unique-per-type"
+        "rule-delete-blocked-by-relationships",
+        "rule-contact-value-unique-per-type",
+        "umaInscricaoPorEmailPorEvento"
       ],
       "citedCapabilities": [
         "read.byId",
@@ -188,59 +205,70 @@
         "create",
         "update",
         "transition",
-        "inscricaoEvento.exportarInscricoesCsv",
-        "uniqueKey",
         "transaction",
+        "inscricaoEvento.paginaPublica",
+        "inscricaoEvento.ocupacao",
+        "uniqueKey",
         "read.mdmRecord",
+        "sequence.next",
         "inscricaoEvento.exportarCsv",
+        "locate.byName",
         "locate.byContact",
         "register.createOrAttach",
-        "register.asProspect",
         "link.contact",
         "listLinks",
         "edit.platformFields",
         "edit.moduleNamespace",
         "inactivate",
         "audit",
-        "link"
+        "link",
+        "unlink"
       ]
+    },
+    "judge35": {
+      "status": "approved",
+      "updatedAt": "2026-10-12T19:29:54.078Z",
+      "artifactPaths": [
+        "l4/inscricaoEvento/pipeline/judge35-draft.json"
+      ],
+      "noJudgeSignal": true
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:29:51.544Z",
+      "updatedAt": "2026-10-12T19:30:11.617Z",
       "artifactPaths": [
         "l4/inscricaoEvento/rules.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:30:44.770Z",
+      "updatedAt": "2026-10-12T19:30:17.380Z",
       "artifactPaths": [
         "l4/inscricaoEvento/access.defs.ts"
       ],
-      "normalizations": [
-        {
-          "kind": "dropAnchorEntity",
-          "grantId": "organizadorGerenciarEventos",
-          "detail": "anchorEntity removed; organization is not own/assigned/related."
-        },
-        {
-          "kind": "dropAnchorEntity",
-          "grantId": "organizadorAcompanharInscricoes",
-          "detail": "anchorEntity removed; organization is not own/assigned/related."
-        }
-      ]
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:31:00.980Z",
+      "updatedAt": "2026-10-12T19:30:28.519Z",
       "artifactPaths": [
         "l4/inscricaoEvento/integration.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-18T07:31:01.171Z",
+      "updatedAt": "2026-10-12T19:30:28.704Z",
       "artifactPaths": [
         "l4/inscricaoEvento/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -255,17 +283,21 @@
     "module": "inscricaoEvento",
     "rebuildAll": true
   },
-  "updatedAt": "2026-10-02T16:08:22.133Z",
+  "updatedAt": "2026-10-12T19:31:13.690Z",
   "rebuildAll": {
     "deleted": [
+      "l1/inscricaoEvento/pipeline/pipeline.json",
+      "l2/inscricaoEvento/pipeline/menu20-draft.json",
+      "l2/inscricaoEvento/pipeline/pipeline.json",
       "l4/inscricaoEvento/access.defs.ts",
       "l4/inscricaoEvento/integration.defs.ts",
-      "l4/inscricaoEvento/journeys/acompanharInscricoesDoEvento.defs.ts",
+      "l4/inscricaoEvento/journeys/acompanharEexportarInscricoes.defs.ts",
       "l4/inscricaoEvento/journeys/cadastrarEpublicarEvento.defs.ts",
       "l4/inscricaoEvento/journeys/cancelarInscricao.defs.ts",
       "l4/inscricaoEvento/journeys/index.defs.ts",
-      "l4/inscricaoEvento/journeys/realizarInscricaoPublica.defs.ts",
+      "l4/inscricaoEvento/journeys/inscreverSeEmEvento.defs.ts",
       "l4/inscricaoEvento/module.defs.ts",
+      "l4/inscricaoEvento/ontology/EmailParticipante.defs.ts",
       "l4/inscricaoEvento/ontology/Evento.defs.ts",
       "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
       "l4/inscricaoEvento/ontology/Participante.defs.ts",
@@ -275,209 +307,79 @@
       "l4/inscricaoEvento/pipeline/integration70-draft.json",
       "l4/inscricaoEvento/pipeline/journeys20-draft.json",
       "l4/inscricaoEvento/pipeline/module10-draft.json",
-      "l4/inscricaoEvento/pipeline/ontology30-Evento-draft.json",
-      "l4/inscricaoEvento/pipeline/ontology30-Inscricao-draft.json",
-      "l4/inscricaoEvento/pipeline/ontology30-Participante-draft.json",
-      "l4/inscricaoEvento/pipeline/ontology30-bindings-draft.json",
       "l4/inscricaoEvento/pipeline/ontology30-draft.json",
+      "l4/inscricaoEvento/pipeline/ontology30-entity-EmailParticipante-draft.json",
+      "l4/inscricaoEvento/pipeline/ontology30-entity-Evento-draft.json",
+      "l4/inscricaoEvento/pipeline/ontology30-entity-Inscricao-draft.json",
+      "l4/inscricaoEvento/pipeline/ontology30-entity-Participante-draft.json",
       "l4/inscricaoEvento/pipeline/ontology30-plan-draft.json",
       "l4/inscricaoEvento/pipeline/pipeline.json",
       "l4/inscricaoEvento/pipeline/rules40-draft.json",
       "l4/inscricaoEvento/pipeline/run01_newsolution5.json",
       "l4/inscricaoEvento/pipeline/workflows50-draft.json",
+      "l4/inscricaoEvento/pool/l1/pipeline.json",
+      "l4/inscricaoEvento/pool/l1/web/l4diff.json",
+      "l4/inscricaoEvento/pool/l1/web/needs.json",
+      "l4/inscricaoEvento/pool/l2/effort40-draft.json",
+      "l4/inscricaoEvento/pool/l2/menu20-draft.json",
+      "l4/inscricaoEvento/pool/l2/needs30-draft.json",
+      "l4/inscricaoEvento/pool/l2/pipeline.json",
+      "l4/inscricaoEvento/pool/l2/web/backend.json",
+      "l4/inscricaoEvento/pool/l2/web/effort.json",
+      "l4/inscricaoEvento/pool/l2/web/l4diff.json",
+      "l4/inscricaoEvento/pool/l2/web/menu.json",
       "l4/inscricaoEvento/rules.defs.ts",
       "l4/inscricaoEvento/workflows.defs.ts"
     ],
     "edited": [
       "l4/organization/registry.defs.ts",
+      "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-09-18T07:25:32.177Z"
+    "at": "2026-10-12T19:28:15.240Z"
   },
+  "poolWiped": [],
   "pool": [
     {
-      "at": "2026-09-19T09:28:33.456Z",
-      "file": "l4/inscricaoEvento/pool/l2/20260919092833_inscricaoEvento-20260919092833_1.json",
+      "at": "2026-10-12T19:30:49.519Z",
+      "file": "l4/inscricaoEvento/pool/l2/20261012193049_inscricaoEvento-20261012193049_1.json",
       "from": "l4",
       "to": "l2",
-      "thread": "inscricaoEvento-20260919092833",
+      "thread": "inscricaoEvento-20261012193049",
       "round": 1,
-      "mode": "implement",
+      "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-09-19T09:28:33.456Z",
-      "file": "l4/inscricaoEvento/pool/l1/20260919092833_inscricaoEvento-20260919092833_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "inscricaoEvento-20260919092833",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:49:46.429Z",
-      "file": "l4/inscricaoEvento/pool/l1/20260919092833_inscricaoEvento-20260919092833_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "inscricaoEvento-20260919092833",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T17:49:46.429Z",
-      "file": "l4/inscricaoEvento/pool/l2/20260919092833_inscricaoEvento-20260919092833_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "inscricaoEvento-20260919092833",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T17:49:46.776Z",
-      "file": "l4/inscricaoEvento/pool/l2/20260921174946_inscricaoEvento-20260921174946_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "inscricaoEvento-20260921174946",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:49:46.776Z",
-      "file": "l4/inscricaoEvento/pool/l1/20260921174946_inscricaoEvento-20260921174946_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "inscricaoEvento-20260921174946",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:51:39.322Z",
-      "file": "l4/inscricaoEvento/pool/l1/20260921175139_inscricaoEvento-20260921174946_1.json",
+      "at": "2026-10-12T19:31:12.395Z",
+      "file": "l4/inscricaoEvento/pool/l1/20261012193112_inscricaoEvento-20261012193049_1.json",
       "from": "l2",
       "to": "l1",
-      "thread": "inscricaoEvento-20260921174946",
+      "thread": "inscricaoEvento-20261012193049",
       "round": 1,
-      "mode": "implement",
+      "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-09-21T17:51:39.879Z",
-      "file": "l4/inscricaoEvento/pool/l2/20260921175139_inscricaoEvento-20260921174946_1.json",
+      "at": "2026-10-12T19:31:13.058Z",
+      "file": "l4/inscricaoEvento/pool/l2/20261012193112_inscricaoEvento-20261012193049_1.json",
       "from": "l1",
       "to": "l2",
-      "thread": "inscricaoEvento-20260921174946",
+      "thread": "inscricaoEvento-20261012193049",
       "round": 1,
-      "mode": "implement",
+      "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-02T16:07:36.952Z",
-      "file": "l4/inscricaoEvento/pool/l1/20260921174946_inscricaoEvento-20260921174946_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "inscricaoEvento-20260921174946",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:07:36.952Z",
-      "file": "l4/inscricaoEvento/pool/l1/20260921175139_inscricaoEvento-20260921174946_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "inscricaoEvento-20260921174946",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:07:36.952Z",
-      "file": "l4/inscricaoEvento/pool/l2/20260921174946_inscricaoEvento-20260921174946_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "inscricaoEvento-20260921174946",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:07:36.952Z",
-      "file": "l4/inscricaoEvento/pool/l2/20260921175139_inscricaoEvento-20260921174946_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "inscricaoEvento-20260921174946",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:07:36.952Z",
-      "file": "l4/inscricaoEvento/pool/l4/20260921175140_inscricaoEvento-20260921174946_1.json",
+      "at": "2026-10-12T19:31:13.648Z",
+      "file": "l4/inscricaoEvento/pool/l4/20261012193113_inscricaoEvento-20261012193049_1.json",
       "from": "l2",
       "to": "l4",
-      "thread": "inscricaoEvento-20260921174946",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:07:37.316Z",
-      "file": "l4/inscricaoEvento/pool/l2/20261002160737_inscricaoEvento-20261002160737_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "inscricaoEvento-20261002160737",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:08:20.900Z",
-      "file": "l4/inscricaoEvento/pool/l1/20261002160820_inscricaoEvento-20261002160737_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "inscricaoEvento-20261002160737",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:08:21.492Z",
-      "file": "l4/inscricaoEvento/pool/l2/20261002160821_inscricaoEvento-20261002160737_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "inscricaoEvento-20261002160737",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:08:22.093Z",
-      "file": "l4/inscricaoEvento/pool/l4/20261002160821_inscricaoEvento-20261002160737_1.json",
-      "from": "l2",
-      "to": "l4",
-      "thread": "inscricaoEvento-20261002160737",
+      "thread": "inscricaoEvento-20261012193049",
       "round": 1,
       "mode": "estimate",
       "outcome": "processed"
     }
-  ],
-  "poolWiped": [
-    "l4/inscricaoEvento/pool/l1/20260921174946_inscricaoEvento-20260921174946_1.json",
-    "l4/inscricaoEvento/pool/l1/20260921175139_inscricaoEvento-20260921174946_1.json",
-    "l4/inscricaoEvento/pool/l1/web/l4diff.json",
-    "l4/inscricaoEvento/pool/l1/web/needs.json",
-    "l4/inscricaoEvento/pool/l2/20260921174946_inscricaoEvento-20260921174946_1.json",
-    "l4/inscricaoEvento/pool/l2/20260921175139_inscricaoEvento-20260921174946_1.json",
-    "l4/inscricaoEvento/pool/l2/web/l4diff.json",
-    "l4/inscricaoEvento/pool/l2/web/menu.json",
-    "l4/inscricaoEvento/pool/l2/web/backend.json",
-    "l4/inscricaoEvento/pool/l2/web/effort.json",
-    "l4/inscricaoEvento/pool/l4/20260921175140_inscricaoEvento-20260921174946_1.json"
   ],
   "plOrchestration": [
     {

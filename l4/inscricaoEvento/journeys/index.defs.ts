@@ -1,18 +1,28 @@
 /// <mls fileReference="_102047_/l4/inscricaoEvento/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const inscricaoEventoJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "moduleName": "inscricaoEvento",
   "journeys": [
     {
-      "journeyId": "cadastrarEpublicarEvento",
+      "journeyId": "cadastrarPublicarEvento",
       "actorRef": "organizador",
       "title": "Cadastrar e publicar evento"
     },
     {
-      "journeyId": "inscreverSeEmEvento",
+      "journeyId": "editarEvento",
+      "actorRef": "organizador",
+      "title": "Editar evento"
+    },
+    {
+      "journeyId": "acompanharInscritos",
+      "actorRef": "organizador",
+      "title": "Acompanhar inscritos e baixar CSV"
+    },
+    {
+      "journeyId": "inscreverEmEvento",
       "actorRef": "publico",
       "title": "Inscrever-se em evento"
     },
@@ -20,15 +30,10 @@ export const inscricaoEventoJourneyIndex = {
       "journeyId": "cancelarInscricao",
       "actorRef": "publico",
       "title": "Cancelar inscrição"
-    },
-    {
-      "journeyId": "acompanharEexportarInscricoes",
-      "actorRef": "organizador",
-      "title": "Acompanhar e exportar inscrições"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type InscricaoEventoJourneyIndexType = typeof inscricaoEventoJourneyIndex;
 

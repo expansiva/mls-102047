@@ -7,71 +7,6 @@ export const solutionRegistry = {
   "level1SchemaVersion": "2026-09-15-mdm-ontology-v2",
   "modules": [
     {
-      "moduleName": "inscricaoEvento",
-      "actors": [
-        {
-          "actorId": "organizador",
-          "kind": "internal"
-        },
-        {
-          "actorId": "publico",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "inscricaoEvento.Participante",
-          "namespace": "inscricaoEvento"
-        },
-        {
-          "subtype": "ContactChannel",
-          "roleTag": "inscricaoEvento.EmailParticipante",
-          "namespace": "inscricaoEvento"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Evento",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Inscricao",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "Participante",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "EmailParticipante",
-          "kind": "role",
-          "mdmSubtype": "ContactChannel",
-          "class": "mdm"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "publicarEvento",
-          "on": "Evento.publicarEvento"
-        },
-        {
-          "eventId": "cancelarInscricao",
-          "on": "Inscricao.cancelarInscricao"
-        },
-        {
-          "eventId": "promoverDaListaEspera",
-          "on": "Inscricao.promoverDaListaEspera"
-        }
-      ],
-      "updatedAt": "2026-09-18T07:31:01.171Z"
-    },
-    {
       "moduleName": "manutencaoFrota",
       "actors": [
         {
@@ -673,6 +608,75 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-12T19:26:48.918Z"
+    },
+    {
+      "moduleName": "inscricaoEvento",
+      "actors": [
+        {
+          "actorId": "organizador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "publico",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "inscricaoEvento.Participante",
+          "namespace": "inscricaoEvento"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "inscricaoEvento.EmailParticipante",
+          "namespace": "inscricaoEvento"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Evento",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Inscricao",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "Participante",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "EmailParticipante",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "eventoPublicado",
+          "on": "Evento.publicar"
+        },
+        {
+          "eventId": "inscricaoRealizada",
+          "on": "Inscricao.create"
+        },
+        {
+          "eventId": "inscricaoCancelada",
+          "on": "Inscricao.cancelar"
+        },
+        {
+          "eventId": "inscricaoPromovida",
+          "on": "Inscricao.promover"
+        }
+      ],
+      "updatedAt": "2026-10-12T19:30:28.695Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

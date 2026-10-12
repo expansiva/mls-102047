@@ -1,51 +1,55 @@
 /// <mls fileReference="_102047_/l4/inscricaoEvento/workflows.defs.ts" enhancement="_blank"/>
 
-import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5WorkflowsArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const inscricaoEventoWorkflows = {
   "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "inscricaoEvento",
   "processes": [
     {
-      "processId": "promoverListaEsperaAposCancelamento",
-      "title": "Promover lista de espera após cancelamento",
-      "description": "Promove automaticamente o primeiro inscrito da lista de espera quando um cancelamento libera uma vaga.",
+      "processId": "promoverListaEspera",
+      "title": "Promover primeiro da lista de espera",
+      "description": "Quando uma inscrição confirmada é cancelada, a vaga liberada passa automaticamente para a primeira inscrição da lista de espera, por ordem de chegada.",
       "trigger": {
         "kind": "event",
-        "event": "Inscricao.cancelarInscricao"
+        "event": "Inscricao.cancelar"
       },
       "tasks": [
         {
-          "taskId": "promoverPrimeiraInscricaoEmEspera",
+          "taskId": "promoverPrimeiroDaEspera",
           "kind": "mechanical",
           "entityRef": "Inscricao",
           "effect": "transition",
-          "transitionRef": "promoverDaListaEspera",
+          "transitionRef": "promover",
           "next": [],
-          "description": "Quando o cancelamento liberar uma vaga, promove a primeira inscrição da lista de espera pela ordem de chegada."
+          "description": "Se a inscrição cancelada ocupava uma vaga, a primeira inscrição da lista de espera do mesmo evento é promovida para confirmada."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "cadastrarEpublicarEvento",
+      "journeyId": "cadastrarPublicarEvento",
       "inProcess": false
     },
     {
-      "journeyId": "inscreverSeEmEvento",
+      "journeyId": "editarEvento",
+      "inProcess": false
+    },
+    {
+      "journeyId": "acompanharInscritos",
+      "inProcess": false
+    },
+    {
+      "journeyId": "inscreverEmEvento",
       "inProcess": false
     },
     {
       "journeyId": "cancelarInscricao",
       "inProcess": false
-    },
-    {
-      "journeyId": "acompanharEexportarInscricoes",
-      "inProcess": false
     }
   ]
-} as const satisfies Ns5WorkflowsArtifact;
+} as const satisfies Ns5Readonly<Ns5WorkflowsArtifact>;
 
 export type InscricaoEventoWorkflowsType = typeof inscricaoEventoWorkflows;
 
