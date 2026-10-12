@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/financeiro/workflows.defs.ts" enhancement="_blank"/>
 
-import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5WorkflowsArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const financeiroWorkflows = {
   "schemaVersion": "2026-09-17-ns5-workflows-v3",
@@ -12,7 +12,7 @@ export const financeiroWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "estornarRecebimentoNoMesmoDia",
+      "journeyId": "estornarRecebimento",
       "inProcess": false
     },
     {
@@ -20,19 +20,19 @@ export const financeiroWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "emitirExtratoPorPagador",
+      "journeyId": "emitirExtratoPagador",
       "inProcess": false
     },
     {
-      "journeyId": "consultarMeusTitulosErecebimentos",
+      "journeyId": "consultarMeusTitulos",
       "inProcess": false
     },
     {
-      "journeyId": "pagarTituloComCartao",
+      "journeyId": "pagarTituloPortal",
       "inProcess": false
     }
   ]
-} as const satisfies Ns5WorkflowsArtifact;
+} as const satisfies Ns5Readonly<Ns5WorkflowsArtifact>;
 
 export type FinanceiroWorkflowsType = typeof financeiroWorkflows;
 

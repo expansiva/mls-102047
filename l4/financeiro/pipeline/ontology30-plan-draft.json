@@ -1,13 +1,13 @@
 {
   "moduleName": "financeiro",
-  "businessDomain": "Contas a receber e recebimentos financeiros",
+  "businessDomain": "Contas a receber da organização: títulos a receber gerados por outros módulos (restaurante, academia, assistência técnica), recebimentos no caixa e pelo portal do pagador, estornos no mesmo dia e painel de recebíveis.",
   "entities": [
     {
       "entityId": "Pagador",
       "kind": "role",
       "family": "mdm",
       "title": "Pagador",
-      "description": "Pessoa pagadora dos títulos a receber e usuária do portal para consultar e pagar os próprios débitos.",
+      "description": "Pessoa que deve os títulos a receber da organização; acessa o portal para ver e pagar os próprios títulos. Papel do módulo financeiro sobre o registro mestre de pessoa.",
       "displayField": "details.identification.name",
       "writer": "inbound",
       "subtype": "Person",
@@ -15,24 +15,12 @@
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "GerenteFinanceiro",
-      "kind": "role",
-      "family": "mdm",
-      "title": "Gerente financeiro",
-      "description": "Pessoa da organização que exerce o papel de gerente financeiro e é a referência pessoal para o escopo de suas ações no módulo.",
-      "displayField": "details.identification.name",
-      "writer": "crud",
-      "subtype": "Person",
-      "roleTag": "financeiro.GerenteFinanceiro",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
       "entityId": "TituloReceber",
       "kind": "entity",
       "family": "tdm",
       "title": "Título a receber",
-      "description": "Cobrança originada em outro módulo, com pagador, valor, vencimento, origem e saldo a receber.",
-      "displayField": "number",
+      "description": "Cobrança nascida em outro módulo (comanda fechada, mensalidade gerada, ordem de serviço entregue) com pagador, valor, vencimento e origem; o saldo em aberto e a situação de vencido são derivados dos recebimentos.",
+      "displayField": "numero",
       "writer": "inbound",
       "class": "core",
       "storage": {
@@ -46,8 +34,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Recebimento",
-      "description": "Movimentação de recebimento total ou parcial de um título, registrada por dinheiro, Pix ou cartão e passível de estorno no mesmo dia.",
-      "displayField": "number",
+      "description": "Baixa total ou parcial de um título, em dinheiro, pix ou cartão via Stripe, registrada pelo caixa ou paga pelo pagador no portal; pode ser estornada apenas no mesmo dia.",
+      "displayField": "numero",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
@@ -56,75 +44,51 @@
       }
     },
     {
-      "entityId": "ExtratoPagador",
-      "kind": "entity",
-      "family": "tdm",
-      "title": "Extrato do pagador",
-      "description": "Extrato emitido para um pagador, reunindo seus títulos, saldos e recebimentos no período solicitado.",
-      "displayField": "number",
-      "class": "supporting",
-      "storage": {
-        "target": "moduleDatabase",
-        "table": "financeiro_extratopagador",
-        "kind": "relational"
-      }
-    },
-    {
       "entityId": "PainelRecebiveis",
       "kind": "entity",
       "family": "ddm",
       "title": "Painel de recebíveis",
-      "description": "Série consolidada e recalculada de recebíveis por período e origem, incluindo indicadores de títulos vencidos.",
-      "displayField": "period",
+      "description": "Totais a receber, recebidos, em aberto e vencidos agrupados por período e por origem, recalculados a partir dos títulos e recebimentos.",
+      "displayField": "periodo",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
         "table": "financeiro_painelrecebiveis",
-        "kind": "timeSeries"
+        "kind": "relational"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "tituloTemPagador",
+      "relationshipId": "tituloPagador",
       "from": "TituloReceber",
       "to": "Pagador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada título a receber pertence obrigatoriamente a um pagador.",
+      "description": "Cada título a receber é devido por um pagador.",
       "field": "TituloReceber.pagadorId"
     },
     {
-      "relationshipId": "recebimentoDoTitulo",
+      "relationshipId": "recebimentoTitulo",
       "from": "Recebimento",
       "to": "TituloReceber",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento é lançado obrigatoriamente para um título a receber.",
-      "field": "Recebimento.tituloReceberId"
+      "description": "Cada recebimento dá baixa, total ou parcial, em um título a receber.",
+      "field": "Recebimento.tituloId"
     },
     {
-      "relationshipId": "extratoDoPagador",
-      "from": "ExtratoPagador",
-      "to": "Pagador",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada extrato emitido referencia obrigatoriamente o pagador a que se destina.",
-      "field": "ExtratoPagador.pagadorId"
-    },
-    {
-      "relationshipId": "pagadorTemRecebimentos",
+      "relationshipId": "pagadorRecebimentos",
       "from": "Pagador",
       "to": "Recebimento",
       "type": "oneToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Os recebimentos de um pagador são obtidos pelos títulos a receber vinculados a ele.",
-      "through": "Recebimento",
-      "path": "Pagador <- TituloReceber.pagadorId; Recebimento.tituloReceberId -> TituloReceber",
+      "description": "Recebimentos do pagador, obtidos pelos títulos que ele deve, usados no extrato e no portal.",
+      "through": "TituloReceber",
+      "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
       "derived": true
     }
   ],
@@ -136,11 +100,6 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "GerenteFinanceiro",
-      "detail": "roleTag financeiro.GerenteFinanceiro; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "kind": "derivedFromPlatform",
       "entityId": "TituloReceber",
       "detail": "storage.table financeiro_tituloreceber"
     },
@@ -148,11 +107,6 @@
       "kind": "derivedFromPlatform",
       "entityId": "Recebimento",
       "detail": "storage.table financeiro_recebimento"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "ExtratoPagador",
-      "detail": "storage.table financeiro_extratopagador"
     },
     {
       "kind": "derivedFromPlatform",

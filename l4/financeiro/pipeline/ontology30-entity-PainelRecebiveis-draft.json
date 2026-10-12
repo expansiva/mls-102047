@@ -4,23 +4,27 @@
     "moduleName": "financeiro",
     "entityId": "PainelRecebiveis",
     "title": "Painel de recebíveis",
-    "description": "Série consolidada e recalculada de recebíveis por período e origem, incluindo indicadores de títulos vencidos.",
-    "displayField": "period",
+    "description": "Totais a receber, recebidos, em aberto e vencidos agrupados por período e por origem, recalculados a partir dos títulos e recebimentos.",
+    "displayField": "periodo",
     "relationships": {},
     "capabilities": {
-      "aggregate.byWindow": "Consolida os títulos a receber e os recebimentos por janela de tempo e origem, por meio de agregado contínuo declarado na persistência, para o painel usado pelo gerente financeiro.",
-      "store.timeSeries": "Mantém as consolidações por período e origem como série temporal, usando hypertable quando o TimescaleDB estiver disponível, para leitura eficiente do painel pelo gerente financeiro.",
-      "read.window": "Consulta os indicadores de recebíveis por período e origem, filtrando pelas colunas indexadas da série, para o gerente financeiro acompanhar os recebíveis e os vencidos.",
-      "refresh": "Atualiza automaticamente a consolidação à medida que títulos e recebimentos são registrados ou estornados, por política de agregado contínuo, para manter o painel do gerente financeiro atualizado.",
-      "rebuild": "Recria a série consolidada a partir de TituloReceber e Recebimento durante uma publicação ou migração, por meio da reconstrução da definição de agregado, para a organização."
+      "aggregate.byWindow": "Resume os títulos a receber e os recebimentos por dia e por origem num agregado contínuo (time_bucket + GROUP BY) declarado na persistência do módulo; alimenta o painel de recebíveis do gerente financeiro.",
+      "read.window": "Lê os totais do painel para um período e uma origem, pelas colunas indexadas de período e origem; usado pela tela do painel de recebíveis e pela visão de vencidos do gerente financeiro.",
+      "refresh": "Mantém o painel atualizado à medida que títulos são criados e recebimentos e estornos são registrados pelo caixa ou pelo portal do pagador, por política de atualização do agregado; executado pela plataforma, sem ação de pessoa.",
+      "rebuild": "Recalcula todo o painel a partir dos títulos e recebimentos numa migração ou publicação do módulo; executado pela plataforma.",
+      "resample": "Oferece o mesmo painel por mês, agregado sobre a série diária, para o gerente financeiro comparar períodos mais longos."
     },
-    "rules": [],
+    "rules": [
+      "painelRecalculadoDeTitulosERecebimentos",
+      "recebimentoEstornadoNaoContaComoRecebido",
+      "tituloVencidoEmAbertoAposVencimento"
+    ],
     "kind": "entity",
     "class": "supporting",
     "storage": {
       "target": "moduleDatabase",
       "table": "financeiro_painelrecebiveis",
-      "kind": "timeSeries"
+      "kind": "relational"
     },
     "record": {
       "fields": {
@@ -36,93 +40,85 @@
           "required": true,
           "derived": true
         },
-        "period": {
+        "periodo": {
           "type": "timestamp",
           "required": true,
           "indexed": true,
-          "of": "Address",
           "title": "Período",
-          "description": "Início da janela de tempo consolidada do painel de recebíveis.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "description": "Início da janela (dia) que esta linha resume, calculado a partir do vencimento dos títulos a receber e da data dos recebimentos. É a coluna de tempo da série; o gerente financeiro filtra o painel por ela.",
           "derived": true
         },
-        "groupKey": {
+        "origem": {
           "type": "string",
-          "required": true,
           "indexed": true,
-          "of": "Address",
           "title": "Origem",
-          "description": "Chave da origem que gerou os títulos consolidados no período, como restaurante, academia ou assistência técnica.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "description": "Código da origem da cobrança que agrupa a linha — o módulo que gerou o título (comanda do restaurante, mensalidade da academia, ordem de serviço da assistência técnica). Indexado porque o painel é lido por origem.",
+          "maxLength": 80,
           "derived": true
         },
         "details": {
           "type": "object",
           "required": true,
-          "of": "Address",
-          "title": "Indicadores de recebíveis",
-          "description": "Medidas calculadas a partir dos títulos a receber e dos recebimentos da origem no período.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "title": "Medidas",
+          "description": "Totais e contagens do período e da origem, recalculados a partir dos títulos a receber e dos recebimentos. Ninguém digita nenhum destes valores.",
           "fields": {
-            "quantidadeTitulosEmAberto": {
+            "totalEmitido": {
+              "type": "money",
+              "required": true,
+              "title": "Total emitido",
+              "description": "Soma do valor dos títulos a receber com vencimento no período, desta origem.",
+              "derived": true
+            },
+            "totalRecebido": {
+              "type": "money",
+              "required": true,
+              "title": "Total recebido",
+              "description": "Soma dos recebimentos efetivados no período para títulos desta origem, incluindo baixas parciais e descontando os estornados.",
+              "derived": true
+            },
+            "totalEstornado": {
+              "type": "money",
+              "required": true,
+              "title": "Total estornado",
+              "description": "Soma dos recebimentos estornados no período para títulos desta origem.",
+              "derived": true
+            },
+            "totalEmAberto": {
+              "type": "money",
+              "required": true,
+              "title": "Total em aberto",
+              "description": "Saldo ainda não recebido dos títulos desta origem com vencimento no período (valor do título menos o que já foi recebido).",
+              "derived": true
+            },
+            "totalVencido": {
+              "type": "money",
+              "required": true,
+              "title": "Total vencido",
+              "description": "Saldo em aberto dos títulos desta origem cujo vencimento já passou.",
+              "derived": true
+            },
+            "quantidadeTitulos": {
               "type": "integer",
               "required": true,
-              "of": "Address",
-              "title": "Títulos em aberto",
-              "description": "Quantidade de títulos que ainda possuem saldo a receber no período e na origem.",
-              "maxLength": 0,
+              "title": "Quantidade de títulos",
+              "description": "Número de títulos a receber desta origem com vencimento no período.",
               "min": 0,
-              "max": 0,
               "derived": true
             },
-            "valorEmAberto": {
-              "type": "money",
-              "required": true,
-              "of": "Address",
-              "title": "Valor em aberto",
-              "description": "Soma dos saldos ainda a receber dos títulos no período e na origem.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0,
-              "derived": true
-            },
-            "valorRecebido": {
-              "type": "money",
-              "required": true,
-              "of": "Address",
-              "title": "Valor recebido",
-              "description": "Soma dos recebimentos válidos registrados para os títulos no período e na origem.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0,
-              "derived": true
-            },
-            "quantidadeTitulosVencidos": {
+            "quantidadeVencidos": {
               "type": "integer",
               "required": true,
-              "of": "Address",
-              "title": "Títulos vencidos",
-              "description": "Quantidade de títulos em aberto com vencimento anterior à data atual no período e na origem.",
-              "maxLength": 0,
+              "title": "Quantidade de títulos vencidos",
+              "description": "Número de títulos desta origem, com vencimento no período, que estão em aberto e já passaram do vencimento.",
               "min": 0,
-              "max": 0,
               "derived": true
             },
-            "valorVencido": {
-              "type": "money",
+            "quantidadeRecebimentos": {
+              "type": "integer",
               "required": true,
-              "of": "Address",
-              "title": "Valor vencido",
-              "description": "Soma dos saldos em aberto dos títulos com vencimento anterior à data atual no período e na origem.",
-              "maxLength": 0,
+              "title": "Quantidade de recebimentos",
+              "description": "Número de recebimentos efetivados no período para títulos desta origem, sem contar os estornados.",
               "min": 0,
-              "max": 0,
               "derived": true
             }
           },
@@ -133,31 +129,6 @@
   },
   "normalizations": [
     {
-      "kind": "derivedOnDdmIgnored",
-      "entityId": "PainelRecebiveis",
-      "detail": "derived.quantidadeTitulosEmAberto"
-    },
-    {
-      "kind": "derivedOnDdmIgnored",
-      "entityId": "PainelRecebiveis",
-      "detail": "derived.valorEmAberto"
-    },
-    {
-      "kind": "derivedOnDdmIgnored",
-      "entityId": "PainelRecebiveis",
-      "detail": "derived.valorRecebido"
-    },
-    {
-      "kind": "derivedOnDdmIgnored",
-      "entityId": "PainelRecebiveis",
-      "detail": "derived.quantidadeTitulosVencidos"
-    },
-    {
-      "kind": "derivedOnDdmIgnored",
-      "entityId": "PainelRecebiveis",
-      "detail": "derived.valorVencido"
-    },
-    {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
       "detail": "record.fields.id, record.fields.version"
@@ -165,12 +136,12 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.period.derived (ddm)"
+      "detail": "record.fields.periodo.derived (ddm)"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.groupKey.derived (ddm)"
+      "detail": "record.fields.origem.derived (ddm)"
     },
     {
       "kind": "derivedFromPlatform",
@@ -180,27 +151,42 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.quantidadeTitulosEmAberto.derived (ddm)"
+      "detail": "record.fields.details.fields.totalEmitido.derived (ddm)"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.valorEmAberto.derived (ddm)"
+      "detail": "record.fields.details.fields.totalRecebido.derived (ddm)"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.valorRecebido.derived (ddm)"
+      "detail": "record.fields.details.fields.totalEstornado.derived (ddm)"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.quantidadeTitulosVencidos.derived (ddm)"
+      "detail": "record.fields.details.fields.totalEmAberto.derived (ddm)"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.valorVencido.derived (ddm)"
+      "detail": "record.fields.details.fields.totalVencido.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelRecebiveis",
+      "detail": "record.fields.details.fields.quantidadeTitulos.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelRecebiveis",
+      "detail": "record.fields.details.fields.quantidadeVencidos.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelRecebiveis",
+      "detail": "record.fields.details.fields.quantidadeRecebimentos.derived (ddm)"
     }
   ]
 }
