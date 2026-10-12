@@ -1,0 +1,94 @@
+{
+  "organisms": {
+    "listaContratos": {
+      "reads": [
+        "ContratoLocacao.numero",
+        "ContratoLocacao.clienteId",
+        "Cliente.details.identification.name",
+        "ContratoLocacao.status",
+        "ContratoLocacao.dataPrevistaDevolucao",
+        "ContratoLocacao.details.atrasado",
+        "ContratoLocacao.details.diasAtraso"
+      ],
+      "edits": [],
+      "selects": "conferenciaContrato",
+      "submits": []
+    },
+    "novoContrato": {
+      "reads": [
+        "Cliente.details.identification.name",
+        "Cliente.details.identification.docId",
+        "Equipamento.codigo",
+        "Equipamento.descricao",
+        "Equipamento.details.situacaoAtual",
+        "Equipamento.details.valorDiaria"
+      ],
+      "edits": [
+        "ContratoLocacao.clienteId",
+        "ContratoLocacao.dataRetirada",
+        "ContratoLocacao.dataPrevistaDevolucao",
+        "ContratoLocacao.details.observacoes",
+        "ItemContrato.equipamentoId",
+        "ItemContrato.details.valorDiaria",
+        "ItemContrato.details.observacao"
+      ],
+      "selects": "conferenciaContrato",
+      "submits": [
+        {
+          "intentId": "criarContrato",
+          "write": "ContratoLocacao.create"
+        },
+        {
+          "intentId": "adicionarItem",
+          "write": "ItemContrato.create"
+        }
+      ]
+    },
+    "conferenciaContrato": {
+      "reads": [
+        "ContratoLocacao.numero",
+        "ContratoLocacao.status",
+        "ContratoLocacao.clienteId",
+        "Cliente.details.identification.name",
+        "ContratoLocacao.dataRetirada",
+        "ContratoLocacao.dataPrevistaDevolucao",
+        "ContratoLocacao.dataRealDevolucao",
+        "ContratoLocacao.details.diasContratados",
+        "ContratoLocacao.details.valorPrevisto",
+        "ContratoLocacao.details.diasAtraso",
+        "ContratoLocacao.details.valorMulta",
+        "ItemContrato.equipamentoId",
+        "Equipamento.codigo",
+        "Equipamento.descricao",
+        "ItemContrato.details.valorDiaria",
+        "ItemContrato.details.valorPrevisto",
+        "ItemContrato.details.multaAtraso"
+      ],
+      "edits": [],
+      "selects": "",
+      "submits": []
+    },
+    "acoesContrato": {
+      "reads": [
+        "ContratoLocacao.status",
+        "ContratoLocacao.dataRetirada",
+        "ContratoLocacao.dataPrevistaDevolucao"
+      ],
+      "edits": [
+        "ContratoLocacao.dataRealDevolucao",
+        "ContratoLocacao.details.observacoesDevolucao"
+      ],
+      "selects": "",
+      "submits": [
+        {
+          "intentId": "confirmarContrato",
+          "write": "ContratoLocacao.ativarContrato"
+        },
+        {
+          "intentId": "registrarDevolucao",
+          "write": "ContratoLocacao.registrarDevolucao"
+        }
+      ]
+    }
+  }
+}
