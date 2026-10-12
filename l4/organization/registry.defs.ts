@@ -7,78 +7,6 @@ export const solutionRegistry = {
   "level1SchemaVersion": "2026-09-15-mdm-ontology-v2",
   "modules": [
     {
-      "moduleName": "ordenServicio",
-      "actors": [
-        {
-          "actorId": "recepcionista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "tecnico",
-          "kind": "internal"
-        },
-        {
-          "actorId": "cliente",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "ordenServicio.Cliente",
-          "namespace": "ordenServicio"
-        },
-        {
-          "subtype": "AssetEquipment",
-          "roleTag": "ordenServicio.Aparato",
-          "namespace": "ordenServicio"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Cliente",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Aparato",
-          "kind": "role",
-          "mdmSubtype": "AssetEquipment",
-          "class": "mdm"
-        },
-        {
-          "entityId": "OrdenServicio",
-          "kind": "entity",
-          "class": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "emitirPresupuesto",
-          "on": "OrdenServicio.emitirPresupuesto"
-        },
-        {
-          "eventId": "aprobarPresupuesto",
-          "on": "OrdenServicio.aprobarPresupuesto"
-        },
-        {
-          "eventId": "rechazarPresupuesto",
-          "on": "OrdenServicio.rechazarPresupuesto"
-        },
-        {
-          "eventId": "marcarLista",
-          "on": "OrdenServicio.marcarLista"
-        },
-        {
-          "eventId": "entregarYfinalizar",
-          "on": "OrdenServicio.entregarYfinalizar"
-        }
-      ],
-      "updatedAt": "2026-09-18T08:27:38.096Z"
-    },
-    {
       "moduleName": "reembolsoDespesas",
       "actors": [
         {
@@ -669,6 +597,64 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-12T20:25:09.795Z"
+    },
+    {
+      "moduleName": "ordenServicio",
+      "actors": [
+        {
+          "actorId": "recepcionista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "tecnico",
+          "kind": "internal"
+        },
+        {
+          "actorId": "cliente",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "ordenServicio.Cliente",
+          "namespace": "ordenServicio"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Cliente",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "OrdenServicio",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "PiezaOrden",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "presupuestoAprobado",
+          "on": "OrdenServicio.aprobarPresupuesto"
+        },
+        {
+          "eventId": "presupuestoRechazado",
+          "on": "OrdenServicio.rechazarPresupuesto"
+        },
+        {
+          "eventId": "ordenServicioFinalizada",
+          "on": "OrdenServicio.finalizar"
+        }
+      ],
+      "updatedAt": "2026-10-12T20:29:01.147Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

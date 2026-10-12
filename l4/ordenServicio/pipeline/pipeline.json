@@ -6,85 +6,83 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-09-18T08:20:05.531Z",
+      "updatedAt": "2026-10-12T20:26:43.686Z",
       "artifactPaths": [
         "l4/ordenServicio/module.defs.ts"
       ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      },
       "actors": [
         {
           "actorId": "recepcionista",
           "kind": "internal",
           "origin": "named",
           "title": "Recepcionista",
-          "description": "Abre órdenes de servicio, registra la recepción del aparato, entrega el aparato reparado y finaliza la orden."
+          "description": "Recibe el aparato del cliente, abre la orden de servicio con los datos del cliente, el aparato, el defecto informado y fotos, y al final entrega el aparato y finaliza la orden."
         },
         {
           "actorId": "tecnico",
           "kind": "internal",
           "origin": "named",
           "title": "Técnico",
-          "description": "Analiza el aparato, registra el diagnóstico, las piezas y costos internos, prepara el presupuesto y realiza la reparación."
+          "description": "Analiza el aparato, registra el diagnóstico, las piezas necesarias con costo interno y el valor del presupuesto; si el cliente aprueba, realiza la reparación, registra lo que hizo y marca la orden como lista."
         },
         {
           "actorId": "cliente",
           "kind": "external",
           "origin": "named",
           "title": "Cliente",
-          "description": "Consulta sus propias órdenes en el portal y aprueba o rechaza el presupuesto."
+          "description": "Accede al portal, ve solamente sus propias órdenes con estado, diagnóstico y valor del presupuesto, y aprueba o rechaza el presupuesto."
         }
       ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-09-18T08:23:06.895Z",
+      "updatedAt": "2026-10-12T20:27:21.868Z",
       "artifactPaths": [
         "l4/ordenServicio/journeys/abrirOrdenServicio.defs.ts",
-        "l4/ordenServicio/journeys/prepararPresupuesto.defs.ts",
-        "l4/ordenServicio/journeys/aprobarPresupuesto.defs.ts",
-        "l4/ordenServicio/journeys/rechazarPresupuesto.defs.ts",
-        "l4/ordenServicio/journeys/repararYmarcarLista.defs.ts",
-        "l4/ordenServicio/journeys/entregarAparatoYfinalizar.defs.ts",
+        "l4/ordenServicio/journeys/diagnosticarYpresupuestar.defs.ts",
+        "l4/ordenServicio/journeys/responderPresupuesto.defs.ts",
+        "l4/ordenServicio/journeys/realizarReparacion.defs.ts",
+        "l4/ordenServicio/journeys/entregarYfinalizar.defs.ts",
         "l4/ordenServicio/journeys/consultarMisOrdenes.defs.ts",
         "l4/ordenServicio/journeys/index.defs.ts"
       ],
-      "decideStepCount": 2,
+      "decideStepCount": 1,
       "droppedActors": [],
-      "normalizations": [
-        {
-          "kind": "dropTransitionRef",
-          "journeyId": "abrirOrdenServicio",
-          "stepId": "registrarRecepcion",
-          "detail": "transitionRef dummy dropped; effect is create."
-        },
-        {
-          "kind": "dropTransitionRef",
-          "journeyId": "prepararPresupuesto",
-          "stepId": "registrarAnalisis",
-          "detail": "transitionRef bad dropped; effect is update."
-        }
-      ]
+      "compile": {
+        "status": "clean",
+        "files": 7
+      }
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-09-18T08:23:39.158Z",
+      "updatedAt": "2026-10-12T20:27:33.258Z",
       "artifactPaths": [
         "l4/ordenServicio/workflows.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-09-18T08:25:59.804Z",
+      "updatedAt": "2026-10-12T20:28:32.418Z",
       "artifactPaths": [
         "l4/ordenServicio/ontology/Cliente.defs.ts",
-        "l4/ordenServicio/ontology/Aparato.defs.ts",
         "l4/ordenServicio/ontology/OrdenServicio.defs.ts",
+        "l4/ordenServicio/ontology/PiezaOrden.defs.ts",
         "l4/ordenServicio/ontology/index.defs.ts"
       ],
-      "uncitedEntities": [
-        "Cliente",
-        "Aparato"
-      ],
+      "uncitedEntities": [],
       "liftedAggregateEntities": [],
+      "compile": {
+        "status": "clean",
+        "files": 4
+      },
       "normalizations": [
         {
           "kind": "derivedFromPlatform",
@@ -93,13 +91,13 @@
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "Aparato",
-          "detail": "roleTag ordenServicio.Aparato; source /_102034_/l4/ontology/mdm.defs.ts"
+          "entityId": "OrdenServicio",
+          "detail": "storage.table ordenServicio_ordenservicio"
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "OrdenServicio",
-          "detail": "storage.table ordenServicio_ordenservicio"
+          "entityId": "PiezaOrden",
+          "detail": "storage.table ordenServicio_piezaorden"
         },
         {
           "kind": "derivedFromPlatform",
@@ -118,44 +116,48 @@
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "Aparato",
-          "detail": "record.fields.id, record.fields.version"
-        },
-        {
-          "kind": "tightened",
-          "entityId": "Aparato",
-          "detail": "Aparato.details.identification.subtype.values"
-        },
-        {
-          "kind": "namespaceEmpty",
-          "entityId": "Aparato",
-          "detail": "details.ordenServicio"
-        },
-        {
-          "kind": "derivedFromPlatform",
           "entityId": "OrdenServicio",
           "detail": "record.fields.id, record.fields.version"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "OrdenServicio",
-          "detail": "record.fields.details.fields.availableForPickup.derived (derived[])"
+          "detail": "record.fields.details.fields.costoInternoPiezas.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "OrdenServicio",
+          "detail": "record.fields.details.fields.disponibleParaRetiro.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PiezaOrden",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PiezaOrden",
+          "detail": "record.fields.details.fields.costoTotal.derived (derived[])"
         }
       ],
       "citedRules": [
         "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-person-ssn-unique-for-us",
-        "rule-person-privacy-consent-required-br-eu",
+        "rule-document-shape-validated",
         "rule-delete-blocked-by-relationships",
-        "receptionRequiresCustomerDeviceAndDefect",
-        "emitBudgetRequiresAnalysis",
-        "customerCanDecideOwnBudget",
-        "repairRequiresApprovedBudget",
-        "repairCompletionRequiresWorkRecorded",
-        "deliveryRequiresReadyOrder",
-        "customerDisclosureExcludesInternalData"
+        "rule-person-privacy-consent-required-br-eu",
+        "clienteVeSoloSusOrdenes",
+        "clienteNoVeCostoInterno",
+        "numeroOrdenUnico",
+        "costoInternoOcultoAlCliente",
+        "anotacionesTecnicoOcultasAlCliente",
+        "presupuestoRequiereDiagnosticoYValor",
+        "clienteSoloRespondeSusOrdenes",
+        "listaRequiereTrabajoRealizado",
+        "fotosAparatoEnAdjuntos",
+        "costoInternoNoVisibleCliente",
+        "piezasSoloAntesDePresupuesto",
+        "cantidadPositiva"
       ],
       "citedCapabilities": [
         "read.byId",
@@ -165,59 +167,79 @@
         "register.createOrAttach",
         "edit.platformFields",
         "link.contact",
-        "invite.login",
         "listLinks",
+        "invite.login",
+        "locate.byLogin",
         "inactivate",
-        "attach.document",
-        "audit",
+        "comment",
         "statusHistory.read",
+        "audit",
         "locate.byColumn",
+        "locate.byText",
         "count",
         "listByForeignKey",
         "create",
         "update",
         "transition",
         "uniqueKey",
+        "transaction",
         "read.mdmRecord",
-        "sequence.next"
+        "sequence.next",
+        "attach.document",
+        "delete",
+        "ordenServicio.costoInternoOrden"
       ]
+    },
+    "judge35": {
+      "status": "approved",
+      "updatedAt": "2026-10-12T20:28:32.666Z",
+      "artifactPaths": [
+        "l4/ordenServicio/pipeline/judge35-draft.json"
+      ],
+      "noJudgeSignal": true
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-09-18T08:26:49.266Z",
+      "updatedAt": "2026-10-12T20:28:49.763Z",
       "artifactPaths": [
         "l4/ordenServicio/rules.defs.ts"
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      },
+      "normalizations": [
+        {
+          "kind": "citedIdSpellingAdopted",
+          "detail": "presupuestoRequiereDiagnosticoYvalor -> presupuestoRequiereDiagnosticoYValor"
+        }
       ]
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-09-18T08:27:05.776Z",
+      "updatedAt": "2026-10-12T20:28:49.808Z",
       "artifactPaths": [
         "l4/ordenServicio/access.defs.ts"
       ],
-      "normalizations": [
-        {
-          "kind": "dropAnchorEntity",
-          "grantId": "recepcionGestionaOrdenes",
-          "detail": "anchorEntity removed; organization is not own/assigned/related."
-        },
-        {
-          "kind": "dropAnchorEntity",
-          "grantId": "tecnicoGestionaReparaciones",
-          "detail": "anchorEntity removed; organization is not own/assigned/related."
-        }
-      ]
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-09-18T08:27:37.903Z",
+      "updatedAt": "2026-10-12T20:29:00.913Z",
       "artifactPaths": [
         "l4/ordenServicio/integration.defs.ts"
-      ]
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-09-18T08:27:38.096Z",
+      "updatedAt": "2026-10-12T20:29:01.158Z",
       "artifactPaths": [
         "l4/ordenServicio/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -232,18 +254,78 @@
     "module": "ordenServicio",
     "rebuildAll": true
   },
-  "updatedAt": "2026-10-02T16:16:58.458Z",
+  "updatedAt": "2026-10-12T20:29:44.562Z",
   "rebuildAll": {
     "deleted": [
+      "l1/ordenServicio/pipeline/pipeline.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/drafts/inicio_cliente.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/drafts/inicio_recepcionista.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/drafts/inicio_tecnico.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/drafts/ordenes_cliente.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/drafts/ordenes_recepcionista.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/drafts/ordenes_tecnico.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/results/inicio_cliente.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/results/inicio_recepcionista.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/results/inicio_tecnico.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/results/ordenes_cliente.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/results/ordenes_recepcionista.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/contracts30/results/ordenes_tecnico.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/finalize60/ownership.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/finalize60/report.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/input.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/inputReport.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/pages.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/pages50/results/inicio_cliente.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/pages50/results/inicio_recepcionista.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/pages50/results/inicio_tecnico.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/pages50/results/ordenes_cliente.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/pages50/results/ordenes_recepcionista.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/pages50/results/ordenes_tecnico.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/pipeline.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/shared.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/shared40/results/inicio_cliente.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/shared40/results/inicio_recepcionista.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/shared40/results/inicio_tecnico.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/shared40/results/ordenes_cliente.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/shared40/results/ordenes_recepcionista.json",
+      "l2/ordenServicio/pipeline/agentDefsL2/shared40/results/ordenes_tecnico.json",
+      "l2/ordenServicio/pipeline/menu20-draft.json",
+      "l2/ordenServicio/pipeline/pipeline.json",
+      "l2/ordenServicio/web/contracts/inicio_cliente.defs.ts",
+      "l2/ordenServicio/web/contracts/inicio_recepcionista.defs.ts",
+      "l2/ordenServicio/web/contracts/inicio_tecnico.defs.ts",
+      "l2/ordenServicio/web/contracts/ordenes_cliente.defs.ts",
+      "l2/ordenServicio/web/contracts/ordenes_recepcionista.defs.ts",
+      "l2/ordenServicio/web/contracts/ordenes_tecnico.defs.ts",
+      "l2/ordenServicio/web/desktop/page11/inicio_cliente.defs.ts",
+      "l2/ordenServicio/web/desktop/page11/inicio_recepcionista.defs.ts",
+      "l2/ordenServicio/web/desktop/page11/inicio_tecnico.defs.ts",
+      "l2/ordenServicio/web/desktop/page11/ordenes_cliente.defs.ts",
+      "l2/ordenServicio/web/desktop/page11/ordenes_recepcionista.defs.ts",
+      "l2/ordenServicio/web/desktop/page11/ordenes_tecnico.defs.ts",
+      "l2/ordenServicio/web/mobile/page11/inicio_cliente.defs.ts",
+      "l2/ordenServicio/web/mobile/page11/inicio_recepcionista.defs.ts",
+      "l2/ordenServicio/web/mobile/page11/inicio_tecnico.defs.ts",
+      "l2/ordenServicio/web/mobile/page11/ordenes_cliente.defs.ts",
+      "l2/ordenServicio/web/mobile/page11/ordenes_recepcionista.defs.ts",
+      "l2/ordenServicio/web/mobile/page11/ordenes_tecnico.defs.ts",
+      "l2/ordenServicio/web/shared/inicio_cliente.defs.ts",
+      "l2/ordenServicio/web/shared/inicio_recepcionista.defs.ts",
+      "l2/ordenServicio/web/shared/inicio_tecnico.defs.ts",
+      "l2/ordenServicio/web/shared/ordenes_cliente.defs.ts",
+      "l2/ordenServicio/web/shared/ordenes_recepcionista.defs.ts",
+      "l2/ordenServicio/web/shared/ordenes_tecnico.defs.ts",
       "l4/ordenServicio/access.defs.ts",
       "l4/ordenServicio/integration.defs.ts",
       "l4/ordenServicio/journeys/abrirOrdenServicio.defs.ts",
+      "l4/ordenServicio/journeys/aprobarPresupuesto.defs.ts",
       "l4/ordenServicio/journeys/consultarMisOrdenes.defs.ts",
-      "l4/ordenServicio/journeys/diagnosticarYpresupuestar.defs.ts",
-      "l4/ordenServicio/journeys/entregarYfinalizarOrden.defs.ts",
+      "l4/ordenServicio/journeys/entregarAparatoYfinalizar.defs.ts",
       "l4/ordenServicio/journeys/index.defs.ts",
-      "l4/ordenServicio/journeys/repararAparato.defs.ts",
-      "l4/ordenServicio/journeys/responderPresupuesto.defs.ts",
+      "l4/ordenServicio/journeys/prepararPresupuesto.defs.ts",
+      "l4/ordenServicio/journeys/rechazarPresupuesto.defs.ts",
+      "l4/ordenServicio/journeys/repararYmarcarLista.defs.ts",
       "l4/ordenServicio/module.defs.ts",
       "l4/ordenServicio/ontology/Aparato.defs.ts",
       "l4/ordenServicio/ontology/Cliente.defs.ts",
@@ -254,15 +336,26 @@
       "l4/ordenServicio/pipeline/integration70-draft.json",
       "l4/ordenServicio/pipeline/journeys20-draft.json",
       "l4/ordenServicio/pipeline/module10-draft.json",
-      "l4/ordenServicio/pipeline/ontology30-Aparato-draft.json",
-      "l4/ordenServicio/pipeline/ontology30-Cliente-draft.json",
-      "l4/ordenServicio/pipeline/ontology30-OrdenServicio-draft.json",
       "l4/ordenServicio/pipeline/ontology30-draft.json",
+      "l4/ordenServicio/pipeline/ontology30-entity-Aparato-draft.json",
+      "l4/ordenServicio/pipeline/ontology30-entity-Cliente-draft.json",
+      "l4/ordenServicio/pipeline/ontology30-entity-OrdenServicio-draft.json",
       "l4/ordenServicio/pipeline/ontology30-plan-draft.json",
       "l4/ordenServicio/pipeline/pipeline.json",
       "l4/ordenServicio/pipeline/rules40-draft.json",
       "l4/ordenServicio/pipeline/run01_newsolution5.json",
       "l4/ordenServicio/pipeline/workflows50-draft.json",
+      "l4/ordenServicio/pool/l1/pipeline.json",
+      "l4/ordenServicio/pool/l1/web/l4diff.json",
+      "l4/ordenServicio/pool/l1/web/needs.json",
+      "l4/ordenServicio/pool/l2/effort40-draft.json",
+      "l4/ordenServicio/pool/l2/menu20-draft.json",
+      "l4/ordenServicio/pool/l2/needs30-draft.json",
+      "l4/ordenServicio/pool/l2/pipeline.json",
+      "l4/ordenServicio/pool/l2/web/backend.json",
+      "l4/ordenServicio/pool/l2/web/effort.json",
+      "l4/ordenServicio/pool/l2/web/l4diff.json",
+      "l4/ordenServicio/pool/l2/web/menu.json",
       "l4/ordenServicio/rules.defs.ts",
       "l4/ordenServicio/workflows.defs.ts"
     ],
@@ -271,192 +364,50 @@
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-09-18T08:20:05.521Z"
+    "at": "2026-10-12T20:26:43.464Z"
   },
+  "poolWiped": [],
   "pool": [
     {
-      "at": "2026-09-19T09:41:29.497Z",
-      "file": "l4/ordenServicio/pool/l2/20260919094129_ordenServicio-20260919094129_1.json",
+      "at": "2026-10-12T20:29:20.590Z",
+      "file": "l4/ordenServicio/pool/l2/20261012202920_ordenServicio-20261012202920_1.json",
       "from": "l4",
       "to": "l2",
-      "thread": "ordenServicio-20260919094129",
+      "thread": "ordenServicio-20261012202920",
       "round": 1,
-      "mode": "implement",
+      "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-09-19T09:41:29.497Z",
-      "file": "l4/ordenServicio/pool/l1/20260919094129_ordenServicio-20260919094129_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "ordenServicio-20260919094129",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:57:19.486Z",
-      "file": "l4/ordenServicio/pool/l1/20260919094129_ordenServicio-20260919094129_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "ordenServicio-20260919094129",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T17:57:19.486Z",
-      "file": "l4/ordenServicio/pool/l2/20260919094129_ordenServicio-20260919094129_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "ordenServicio-20260919094129",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-09-21T17:57:19.902Z",
-      "file": "l4/ordenServicio/pool/l2/20260921175719_ordenServicio-20260921175719_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "ordenServicio-20260921175719",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T17:57:19.902Z",
-      "file": "l4/ordenServicio/pool/l1/20260921175719_ordenServicio-20260921175719_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "ordenServicio-20260921175719",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-09-21T18:00:37.213Z",
-      "file": "l4/ordenServicio/pool/l1/20260921180037_ordenServicio-20260921175719_1.json",
+      "at": "2026-10-12T20:29:43.298Z",
+      "file": "l4/ordenServicio/pool/l1/20261012202943_ordenServicio-20261012202920_1.json",
       "from": "l2",
       "to": "l1",
-      "thread": "ordenServicio-20260921175719",
+      "thread": "ordenServicio-20261012202920",
       "round": 1,
-      "mode": "implement",
+      "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-09-21T18:00:37.757Z",
-      "file": "l4/ordenServicio/pool/l2/20260921180037_ordenServicio-20260921175719_1.json",
+      "at": "2026-10-12T20:29:43.976Z",
+      "file": "l4/ordenServicio/pool/l2/20261012202943_ordenServicio-20261012202920_1.json",
       "from": "l1",
       "to": "l2",
-      "thread": "ordenServicio-20260921175719",
+      "thread": "ordenServicio-20261012202920",
       "round": 1,
-      "mode": "implement",
+      "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-02T16:14:16.699Z",
-      "file": "l4/ordenServicio/pool/l1/20260921175719_ordenServicio-20260921175719_1.json",
-      "from": "l4",
-      "to": "l1",
-      "thread": "ordenServicio-20260921175719",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:14:16.699Z",
-      "file": "l4/ordenServicio/pool/l1/20260921180037_ordenServicio-20260921175719_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "ordenServicio-20260921175719",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:14:16.699Z",
-      "file": "l4/ordenServicio/pool/l2/20260921175719_ordenServicio-20260921175719_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "ordenServicio-20260921175719",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:14:16.699Z",
-      "file": "l4/ordenServicio/pool/l2/20260921180037_ordenServicio-20260921175719_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "ordenServicio-20260921175719",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:14:16.699Z",
-      "file": "l4/ordenServicio/pool/l4/20260921180038_ordenServicio-20260921175719_1.json",
+      "at": "2026-10-12T20:29:44.521Z",
+      "file": "l4/ordenServicio/pool/l4/20261012202944_ordenServicio-20261012202920_1.json",
       "from": "l2",
       "to": "l4",
-      "thread": "ordenServicio-20260921175719",
-      "round": 1,
-      "mode": "implement",
-      "outcome": "processed"
-    },
-    {
-      "at": "2026-10-02T16:14:17.071Z",
-      "file": "l4/ordenServicio/pool/l2/20261002161417_ordenServicio-20261002161417_1.json",
-      "from": "l4",
-      "to": "l2",
-      "thread": "ordenServicio-20261002161417",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:16:57.224Z",
-      "file": "l4/ordenServicio/pool/l1/20261002161656_ordenServicio-20261002161417_1.json",
-      "from": "l2",
-      "to": "l1",
-      "thread": "ordenServicio-20261002161417",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:16:57.823Z",
-      "file": "l4/ordenServicio/pool/l2/20261002161657_ordenServicio-20261002161417_1.json",
-      "from": "l1",
-      "to": "l2",
-      "thread": "ordenServicio-20261002161417",
-      "round": 1,
-      "mode": "estimate",
-      "outcome": "delivered"
-    },
-    {
-      "at": "2026-10-02T16:16:58.420Z",
-      "file": "l4/ordenServicio/pool/l4/20261002161658_ordenServicio-20261002161417_1.json",
-      "from": "l2",
-      "to": "l4",
-      "thread": "ordenServicio-20261002161417",
+      "thread": "ordenServicio-20261012202920",
       "round": 1,
       "mode": "estimate",
       "outcome": "processed"
     }
-  ],
-  "poolWiped": [
-    "l4/ordenServicio/pool/l1/20260921175719_ordenServicio-20260921175719_1.json",
-    "l4/ordenServicio/pool/l1/20260921180037_ordenServicio-20260921175719_1.json",
-    "l4/ordenServicio/pool/l1/web/l4diff.json",
-    "l4/ordenServicio/pool/l1/web/needs.json",
-    "l4/ordenServicio/pool/l2/20260921175719_ordenServicio-20260921175719_1.json",
-    "l4/ordenServicio/pool/l2/20260921180037_ordenServicio-20260921175719_1.json",
-    "l4/ordenServicio/pool/l2/web/l4diff.json",
-    "l4/ordenServicio/pool/l2/web/menu.json",
-    "l4/ordenServicio/pool/l2/web/backend.json",
-    "l4/ordenServicio/pool/l2/web/effort.json",
-    "l4/ordenServicio/pool/l4/20260921180038_ordenServicio-20260921175719_1.json"
   ],
   "plOrchestration": [
     {

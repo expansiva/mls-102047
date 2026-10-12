@@ -1,27 +1,16 @@
 {
   "moduleName": "ordenServicio",
-  "businessDomain": "Servicio técnico de electrónica",
+  "businessDomain": "Servicio técnico de electrónica: recepción de aparatos, diagnóstico, presupuesto con aprobación del cliente en el portal, reparación y entrega.",
   "entities": [
     {
       "entityId": "Cliente",
       "kind": "role",
       "family": "mdm",
       "title": "Cliente",
-      "description": "Persona que entrega un aparato al servicio técnico, consulta sus propias órdenes y decide sobre el presupuesto desde el portal.",
+      "description": "Persona que trae un aparato al servicio técnico, es dueña de sus órdenes de servicio y accede al portal para ver sus propias órdenes y aprobar o rechazar el presupuesto. Se registra (o se reutiliza) al abrir la orden.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "ordenServicio.Cliente",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "entityId": "Aparato",
-      "kind": "role",
-      "family": "mdm",
-      "title": "Aparato",
-      "description": "Equipo electrónico recibido para diagnóstico, presupuesto, reparación y posterior entrega.",
-      "displayField": "details.identification.name",
-      "subtype": "AssetEquipment",
-      "roleTag": "ordenServicio.Aparato",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
@@ -29,36 +18,50 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Orden de servicio",
-      "description": "Atención técnica de un aparato desde su recepción, análisis y presupuesto hasta su rechazo, reparación y entrega final.",
-      "displayField": "serviceOrderNumber",
+      "description": "Orden abierta por el recepcionista con el cliente, los datos del aparato, el defecto informado y las fotos (adjuntos de la plataforma); recibe el diagnóstico y las anotaciones internas del técnico, el valor del presupuesto, la respuesta del cliente y lo realizado en la reparación. Ciclo: abierta, presupuestada, aprobada o rechazada, lista, finalizada.",
+      "displayField": "numero",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
         "table": "ordenServicio_ordenservicio",
         "kind": "relational"
       }
+    },
+    {
+      "entityId": "PiezaOrden",
+      "kind": "entity",
+      "family": "tdm",
+      "title": "Pieza de la orden",
+      "description": "Pieza necesaria para la reparación registrada por el técnico en una orden, con su cantidad y costo interno; nunca visible para el cliente.",
+      "displayField": "descripcion",
+      "class": "supporting",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "ordenServicio_piezaorden",
+        "kind": "relational"
+      }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "serviceOrderCustomer",
+      "relationshipId": "ordenCliente",
       "from": "OrdenServicio",
       "to": "Cliente",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada orden de servicio corresponde al cliente que entregó el aparato y que puede consultar y decidir sobre su presupuesto.",
-      "field": "OrdenServicio.customerId"
+      "description": "Cada orden de servicio pertenece a un cliente, que solo ve en el portal sus propias órdenes.",
+      "field": "OrdenServicio.clienteId"
     },
     {
-      "relationshipId": "serviceOrderDevice",
-      "from": "OrdenServicio",
-      "to": "Aparato",
+      "relationshipId": "piezaOrden",
+      "from": "PiezaOrden",
+      "to": "OrdenServicio",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada orden de servicio registra el aparato recibido para su diagnóstico, reparación o retiro.",
-      "field": "OrdenServicio.deviceId"
+      "description": "Cada pieza registrada por el técnico pertenece a una orden de servicio.",
+      "field": "PiezaOrden.ordenServicioId"
     }
   ],
   "normalizations": [
@@ -69,13 +72,13 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Aparato",
-      "detail": "roleTag ordenServicio.Aparato; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "OrdenServicio",
+      "detail": "storage.table ordenServicio_ordenservicio"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "OrdenServicio",
-      "detail": "storage.table ordenServicio_ordenservicio"
+      "entityId": "PiezaOrden",
+      "detail": "storage.table ordenServicio_piezaorden"
     }
   ]
 }

@@ -1,45 +1,60 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/journeys/abrirOrdenServicio.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const abrirOrdenServicioJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "journeyId": "abrirOrdenServicio",
   "business": {
     "actorRef": "recepcionista",
-    "title": "Abrir una orden al recibir un aparato",
-    "goal": "Registrar la recepción del aparato del cliente y dejar una orden lista para análisis técnico.",
+    "title": "Abrir orden de servicio",
+    "goal": "Registrar la entrada del aparato del cliente abriendo una orden de servicio con el defecto informado y fotos.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "registrarRecepcion",
+        "stepId": "buscarCliente",
+        "kind": "locate",
+        "entity": "Cliente",
+        "title": "Buscar cliente",
+        "description": "El recepcionista busca al cliente por documento o nombre para saber si ya está registrado."
+      },
+      {
+        "stepId": "registrarCliente",
+        "kind": "act",
+        "entity": "Cliente",
+        "effect": "create",
+        "title": "Registrar datos del cliente",
+        "description": "Si el cliente no existe, el recepcionista registra sus datos; si ya existe, se reutiliza el mismo registro."
+      },
+      {
+        "stepId": "crearOrden",
         "kind": "act",
         "entity": "OrdenServicio",
         "effect": "create",
-        "title": "Registrar la recepción",
-        "description": "Abre la orden con el cliente, el aparato recibido, el defecto informado y las fotos de recepción."
+        "title": "Abrir orden de servicio",
+        "description": "El recepcionista abre la orden con el cliente, los datos del aparato, el defecto informado y las fotos del aparato."
       },
       {
-        "stepId": "enviarAanalisis",
+        "stepId": "pasarAtecnico",
         "kind": "handoff",
         "entity": "OrdenServicio",
-        "title": "Derivar a análisis técnico",
-        "description": "Deriva la orden recién abierta al técnico para su análisis.",
+        "title": "Enviar a análisis técnico",
+        "description": "La orden abierta queda disponible para que el técnico la analice.",
         "handoffTo": "tecnico"
       }
     ],
     "outcome": {
-      "statement": "La orden queda registrada con el aparato y la información de recepción para que el técnico pueda analizarla.",
+      "statement": "La orden de servicio queda abierta y vinculada al cliente y al aparato, a la espera de análisis.",
       "evidence": [
-        "Existe una OrdenServicio nueva con el defecto informado y las fotos de recepción.",
-        "La orden queda disponible para el Técnico."
+        "La orden aparece con estado abierta y un número de orden",
+        "La orden muestra el cliente, el aparato, el defecto informado y las fotos"
       ]
     }
   },
-  "businessHash": "sha256:d9e65132b851e81906eab669fe3c0248dc9d536255505c36f25a90a3b45e94e3"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:0d39488a1f916f3ba18a929a152d41cb979660eb3667de9ce42480a68d217e10"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AbrirOrdenServicioJourneyType = typeof abrirOrdenServicioJourney;
 

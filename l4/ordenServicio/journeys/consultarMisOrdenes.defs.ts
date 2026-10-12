@@ -1,43 +1,43 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/journeys/consultarMisOrdenes.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const consultarMisOrdenesJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "journeyId": "consultarMisOrdenes",
   "business": {
     "actorRef": "cliente",
-    "title": "Consultar mis órdenes de servicio",
-    "goal": "Conocer el avance y el presupuesto de sus propias órdenes desde el portal.",
+    "title": "Consultar mis órdenes",
+    "goal": "Ver en el portal el estado, el diagnóstico y el valor del presupuesto de sus propias órdenes.",
     "entry": {
-      "mode": "contextOrLookup"
+      "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarMisOrdenes",
+        "stepId": "listarMisOrdenes",
         "kind": "locate",
         "entity": "OrdenServicio",
-        "title": "Localizar mis órdenes",
-        "description": "Localiza únicamente sus propias órdenes de servicio en el portal."
+        "title": "Ver mis órdenes",
+        "description": "El cliente ve en el portal solamente sus propias órdenes de servicio."
       },
       {
-        "stepId": "consultarDetalleDeOrden",
+        "stepId": "verDetalleOrden",
         "kind": "inspect",
         "entity": "OrdenServicio",
-        "title": "Consultar el detalle de la orden",
-        "description": "Consulta el estado, el diagnóstico y el valor del presupuesto de una de sus órdenes, sin ver costos internos de piezas ni anotaciones del técnico."
+        "title": "Ver detalle de la orden",
+        "description": "El cliente ve el estado, el aparato, el diagnóstico y el valor del presupuesto, nunca el costo interno de las piezas ni las anotaciones del técnico."
       }
     ],
     "outcome": {
-      "statement": "El cliente conoce el estado, diagnóstico y presupuesto de sus propias órdenes.",
+      "statement": "El cliente conoce la situación de sus órdenes sin acceder a información interna del taller.",
       "evidence": [
-        "El portal muestra al Cliente únicamente sus OrdenServicio.",
-        "El detalle visible incluye estado, diagnóstico y valor del presupuesto, sin costos internos ni anotaciones técnicas."
+        "La lista muestra solo órdenes del cliente conectado",
+        "El detalle muestra estado, diagnóstico y valor del presupuesto sin costos internos ni anotaciones"
       ]
     }
   },
-  "businessHash": "sha256:82025fa7fc5f1d9ee3ed774253b05b06b4edc19d9ecbfdbbcff779f35cc147e4"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:1feb0bd1f83f353a35335757af21998f72c6df1e5ac66eefc53e678ad2d73195"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConsultarMisOrdenesJourneyType = typeof consultarMisOrdenesJourney;
 

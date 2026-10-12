@@ -5,64 +5,94 @@
       "journeyId": "abrirOrdenServicio",
       "business": {
         "actorRef": "recepcionista",
-        "title": "Abrir una orden al recibir un aparato",
-        "goal": "Registrar la recepción del aparato del cliente y dejar una orden lista para análisis técnico.",
+        "title": "Abrir orden de servicio",
+        "goal": "Registrar la entrada del aparato del cliente abriendo una orden de servicio con el defecto informado y fotos.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "registrarRecepcion",
+            "stepId": "buscarCliente",
+            "kind": "locate",
+            "entity": "Cliente",
+            "title": "Buscar cliente",
+            "description": "El recepcionista busca al cliente por documento o nombre para saber si ya está registrado."
+          },
+          {
+            "stepId": "registrarCliente",
+            "kind": "act",
+            "entity": "Cliente",
+            "effect": "create",
+            "title": "Registrar datos del cliente",
+            "description": "Si el cliente no existe, el recepcionista registra sus datos; si ya existe, se reutiliza el mismo registro."
+          },
+          {
+            "stepId": "crearOrden",
             "kind": "act",
             "entity": "OrdenServicio",
             "effect": "create",
-            "title": "Registrar la recepción",
-            "description": "Abre la orden con el cliente, el aparato recibido, el defecto informado y las fotos de recepción."
+            "title": "Abrir orden de servicio",
+            "description": "El recepcionista abre la orden con el cliente, los datos del aparato, el defecto informado y las fotos del aparato."
           },
           {
-            "stepId": "enviarAanalisis",
+            "stepId": "pasarAtecnico",
             "kind": "handoff",
             "entity": "OrdenServicio",
-            "title": "Derivar a análisis técnico",
-            "description": "Deriva la orden recién abierta al técnico para su análisis.",
+            "title": "Enviar a análisis técnico",
+            "description": "La orden abierta queda disponible para que el técnico la analice.",
             "handoffTo": "tecnico"
           }
         ],
         "outcome": {
-          "statement": "La orden queda registrada con el aparato y la información de recepción para que el técnico pueda analizarla.",
+          "statement": "La orden de servicio queda abierta y vinculada al cliente y al aparato, a la espera de análisis.",
           "evidence": [
-            "Existe una OrdenServicio nueva con el defecto informado y las fotos de recepción.",
-            "La orden queda disponible para el Técnico."
+            "La orden aparece con estado abierta y un número de orden",
+            "La orden muestra el cliente, el aparato, el defecto informado y las fotos"
           ]
         }
       },
-      "businessHash": "sha256:d9e65132b851e81906eab669fe3c0248dc9d536255505c36f25a90a3b45e94e3"
+      "businessHash": "sha256:0d39488a1f916f3ba18a929a152d41cb979660eb3667de9ce42480a68d217e10"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "prepararPresupuesto",
+      "journeyId": "diagnosticarYpresupuestar",
       "business": {
         "actorRef": "tecnico",
-        "title": "Analizar el aparato y preparar el presupuesto",
-        "goal": "Diagnosticar la falla, registrar las piezas requeridas y enviar al cliente un presupuesto para decidir.",
+        "title": "Diagnosticar y presupuestar",
+        "goal": "Analizar el aparato, registrar el diagnóstico, las piezas con costo interno y el valor del presupuesto para el cliente.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarOrdenPendiente",
+            "stepId": "buscarOrdenAbierta",
             "kind": "locate",
             "entity": "OrdenServicio",
-            "title": "Localizar la orden pendiente",
-            "description": "Localiza la orden recibida para análisis técnico."
+            "title": "Buscar órdenes por analizar",
+            "description": "El técnico localiza las órdenes abiertas pendientes de análisis."
           },
           {
-            "stepId": "registrarAnalisis",
+            "stepId": "revisarOrden",
+            "kind": "inspect",
+            "entity": "OrdenServicio",
+            "title": "Revisar defecto y fotos",
+            "description": "El técnico revisa el aparato, el defecto informado y las fotos de la orden."
+          },
+          {
+            "stepId": "registrarDiagnostico",
             "kind": "act",
             "entity": "OrdenServicio",
             "effect": "update",
-            "title": "Registrar el análisis",
-            "description": "Analiza la información de recepción y registra el diagnóstico, las piezas necesarias con su costo interno y el valor del presupuesto propuesto."
+            "title": "Registrar diagnóstico",
+            "description": "El técnico registra el diagnóstico y sus anotaciones internas."
+          },
+          {
+            "stepId": "registrarPiezas",
+            "kind": "act",
+            "entity": "PiezaOrden",
+            "effect": "create",
+            "title": "Agregar piezas necesarias",
+            "description": "El técnico agrega cada pieza necesaria con su cantidad y costo interno."
           },
           {
             "stepId": "emitirPresupuesto",
@@ -70,276 +100,234 @@
             "entity": "OrdenServicio",
             "effect": "transition",
             "transitionRef": "emitirPresupuesto",
-            "title": "Emitir el presupuesto",
-            "description": "Emite el presupuesto para que el cliente pueda revisarlo y decidir."
+            "title": "Emitir presupuesto",
+            "description": "El técnico define el valor del presupuesto para el cliente y lo emite, dejando la orden a la espera de aprobación."
           },
           {
-            "stepId": "enviarPresupuestoAlCliente",
+            "stepId": "pasarAcliente",
             "kind": "handoff",
             "entity": "OrdenServicio",
-            "title": "Poner el presupuesto a disposición",
-            "description": "Pone el presupuesto a disposición del cliente en el portal para su decisión.",
+            "title": "Enviar presupuesto al cliente",
+            "description": "El presupuesto queda disponible en el portal para que el cliente lo apruebe o lo rechace.",
             "handoffTo": "cliente"
           }
         ],
         "outcome": {
-          "statement": "El cliente tiene un presupuesto con el diagnóstico y el valor a aprobar o rechazar.",
+          "statement": "La orden tiene diagnóstico, piezas con costo interno y un presupuesto emitido esperando la respuesta del cliente.",
           "evidence": [
-            "La OrdenServicio registra el diagnóstico y el valor del presupuesto.",
-            "El presupuesto está disponible para la decisión del Cliente."
+            "La orden muestra estado presupuesto enviado",
+            "El diagnóstico, las piezas y el valor del presupuesto quedan registrados en la orden"
           ]
         }
       },
-      "businessHash": "sha256:cc916c061a76ea04993a0d4535a980600a1e0beeddc4a3e35c7e7855b755674b"
+      "businessHash": "sha256:2cce635ded1b3f2785191cccef99bbe275014689cc159506c085a13081ecffb0"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "aprobarPresupuesto",
+      "journeyId": "responderPresupuesto",
       "business": {
         "actorRef": "cliente",
-        "title": "Aprobar un presupuesto",
-        "goal": "Autorizar la reparación de una de sus órdenes desde el portal.",
+        "title": "Responder presupuesto",
+        "goal": "Aprobar o rechazar desde el portal el presupuesto de su orden de servicio.",
         "entry": {
           "mode": "fromNotification"
         },
         "steps": [
           {
-            "stepId": "revisarPresupuestoRecibido",
+            "stepId": "abrirOrdenPresupuestada",
             "kind": "inspect",
             "entity": "OrdenServicio",
-            "title": "Revisar el presupuesto",
-            "description": "Consulta su orden y revisa su estado, el diagnóstico y el valor del presupuesto, sin acceso a costos internos ni anotaciones técnicas."
+            "title": "Ver presupuesto",
+            "description": "El cliente abre su orden y ve el estado, el diagnóstico y el valor del presupuesto, sin costos internos ni anotaciones del técnico."
           },
           {
-            "stepId": "decidirAprobacion",
+            "stepId": "decidirPresupuesto",
             "kind": "decide",
             "entity": "OrdenServicio",
-            "title": "Decidir la aprobación",
-            "description": "Decide aprobar el presupuesto recibido para autorizar la reparación."
+            "title": "Aprobar o rechazar",
+            "description": "El cliente elige entre aprobar o rechazar el presupuesto."
           },
           {
-            "stepId": "confirmarAprobacion",
+            "stepId": "aprobarPresupuesto",
             "kind": "act",
             "entity": "OrdenServicio",
             "effect": "transition",
             "transitionRef": "aprobarPresupuesto",
-            "title": "Confirmar la aprobación",
-            "description": "Registra la aprobación del presupuesto por parte del cliente."
+            "title": "Aprobar presupuesto",
+            "description": "Si el cliente aprueba, la orden pasa a aprobada y queda lista para la reparación."
           },
           {
-            "stepId": "derivarReparacion",
-            "kind": "handoff",
-            "entity": "OrdenServicio",
-            "title": "Derivar a reparación",
-            "description": "Deriva la orden aprobada al técnico para realizar la reparación.",
-            "handoffTo": "tecnico"
-          }
-        ],
-        "outcome": {
-          "statement": "La reparación queda autorizada por el cliente.",
-          "evidence": [
-            "La OrdenServicio muestra que el presupuesto fue aprobado.",
-            "La orden queda disponible para reparación por el Técnico."
-          ]
-        }
-      },
-      "businessHash": "sha256:e7b149a864b5d444a924ea25148e334d2066c445cac541e98336c1e3241bc1d1"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "rechazarPresupuesto",
-      "business": {
-        "actorRef": "cliente",
-        "title": "Rechazar un presupuesto",
-        "goal": "Rechazar el presupuesto de una de sus órdenes desde el portal.",
-        "entry": {
-          "mode": "fromNotification"
-        },
-        "steps": [
-          {
-            "stepId": "revisarPresupuestoParaRechazo",
-            "kind": "inspect",
-            "entity": "OrdenServicio",
-            "title": "Revisar el presupuesto",
-            "description": "Consulta su orden y revisa su estado, el diagnóstico y el valor del presupuesto, sin acceso a costos internos ni anotaciones técnicas."
-          },
-          {
-            "stepId": "decidirRechazo",
-            "kind": "decide",
-            "entity": "OrdenServicio",
-            "title": "Decidir el rechazo",
-            "description": "Decide rechazar el presupuesto recibido."
-          },
-          {
-            "stepId": "confirmarRechazo",
+            "stepId": "rechazarPresupuesto",
             "kind": "act",
             "entity": "OrdenServicio",
             "effect": "transition",
             "transitionRef": "rechazarPresupuesto",
-            "title": "Confirmar el rechazo",
-            "description": "Registra el rechazo del presupuesto, cierra la orden como rechazada y deja el aparato disponible para retiro."
+            "title": "Rechazar presupuesto",
+            "description": "Si el cliente rechaza, la orden se cierra como rechazada y el aparato queda disponible para retiro."
+          },
+          {
+            "stepId": "pasarAtecnicoReparacion",
+            "kind": "handoff",
+            "entity": "OrdenServicio",
+            "title": "Avisar al técnico",
+            "description": "Cuando el presupuesto es aprobado, la orden pasa al técnico para la reparación.",
+            "handoffTo": "tecnico"
           }
         ],
         "outcome": {
-          "statement": "La orden queda cerrada como rechazada y el aparato queda disponible para retiro.",
+          "statement": "El presupuesto queda aprobado y la orden pasa a reparación, o queda rechazado y la orden se cierra con el aparato disponible para retiro.",
           "evidence": [
-            "La OrdenServicio muestra el estado de rechazo.",
-            "La orden indica que el aparato está disponible para retiro."
+            "La orden muestra estado aprobada o rechazada en el portal",
+            "Una orden rechazada indica que el aparato está disponible para retiro"
           ]
         }
       },
-      "businessHash": "sha256:be412654440fd6e03a11943d2090f21bed5ac053c992841ebfd76f4e1b9e776e"
+      "businessHash": "sha256:b93f7a794c363dc1e3292b9f4794925513d0d30bbb48311c3c8f4fffbcc44cfc"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "repararYmarcarLista",
+      "journeyId": "realizarReparacion",
       "business": {
         "actorRef": "tecnico",
-        "title": "Reparar el aparato y marcar la orden como lista",
-        "goal": "Realizar la reparación autorizada y dejar constancia del trabajo efectuado para su entrega.",
+        "title": "Realizar reparación",
+        "goal": "Reparar el aparato de una orden aprobada, registrar lo realizado y marcarla como lista.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarOrdenAprobada",
+            "stepId": "buscarOrdenAprobada",
             "kind": "locate",
             "entity": "OrdenServicio",
-            "title": "Localizar la orden aprobada",
-            "description": "Localiza la orden cuyo presupuesto fue aprobado y está pendiente de reparación."
+            "title": "Buscar órdenes aprobadas",
+            "description": "El técnico localiza las órdenes con presupuesto aprobado."
           },
           {
-            "stepId": "revisarDiagnosticoAprobado",
+            "stepId": "revisarOrdenAprobada",
             "kind": "inspect",
             "entity": "OrdenServicio",
-            "title": "Revisar la reparación autorizada",
-            "description": "Revisa el diagnóstico, las piezas previstas y la autorización del cliente antes de reparar."
+            "title": "Revisar diagnóstico y piezas",
+            "description": "El técnico revisa el diagnóstico y las piezas previstas antes de reparar."
           },
           {
-            "stepId": "registrarReparacionTerminada",
+            "stepId": "registrarTrabajo",
+            "kind": "act",
+            "entity": "OrdenServicio",
+            "effect": "update",
+            "title": "Registrar trabajo realizado",
+            "description": "El técnico registra la descripción de lo que hizo en la reparación."
+          },
+          {
+            "stepId": "marcarLista",
             "kind": "act",
             "entity": "OrdenServicio",
             "effect": "transition",
             "transitionRef": "marcarLista",
-            "title": "Registrar la reparación terminada",
-            "description": "Realiza la reparación, registra lo efectuado y marca la orden como lista para entrega."
+            "title": "Marcar como lista",
+            "description": "El técnico marca la orden como lista para entrega."
           },
           {
-            "stepId": "derivarEntrega",
+            "stepId": "pasarArecepcion",
             "kind": "handoff",
             "entity": "OrdenServicio",
-            "title": "Derivar a entrega",
-            "description": "Deriva la orden lista al recepcionista para entregar el aparato.",
+            "title": "Enviar a entrega",
+            "description": "La orden lista queda disponible para que el recepcionista entregue el aparato.",
             "handoffTo": "recepcionista"
           }
         ],
         "outcome": {
-          "statement": "La reparación queda registrada y la orden está lista para entregar el aparato.",
+          "statement": "La reparación queda registrada y la orden está lista para entrega.",
           "evidence": [
-            "La OrdenServicio muestra que está lista para entrega.",
-            "La orden contiene el registro del trabajo de reparación realizado."
+            "La orden muestra estado lista",
+            "El trabajo realizado queda registrado en la orden"
           ]
         }
       },
-      "businessHash": "sha256:77c4d636f785d73ecb59d6696e68ba1a7621ff3915fbc25ca99ae5e9339805be"
+      "businessHash": "sha256:972d1cba62cdc5f914fbfb6151ad51448162efe5a0021acc321b2b413047fe46"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "entregarAparatoYfinalizar",
+      "journeyId": "entregarYfinalizar",
       "business": {
         "actorRef": "recepcionista",
-        "title": "Entregar el aparato reparado y finalizar la orden",
-        "goal": "Entregar al cliente su aparato reparado y cerrar la atención.",
+        "title": "Entregar y finalizar orden",
+        "goal": "Entregar al cliente el aparato reparado y finalizar la orden de servicio.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "localizarOrdenLista",
+            "stepId": "buscarOrdenLista",
             "kind": "locate",
             "entity": "OrdenServicio",
-            "title": "Localizar la orden lista",
-            "description": "Localiza la orden marcada como lista para entrega."
+            "title": "Buscar órdenes listas",
+            "description": "El recepcionista localiza la orden lista del cliente que viene a retirar el aparato."
           },
           {
-            "stepId": "verificarOrdenParaEntrega",
+            "stepId": "revisarOrdenLista",
             "kind": "inspect",
             "entity": "OrdenServicio",
-            "title": "Verificar la orden para entrega",
-            "description": "Verifica el cliente, el aparato y que la reparación está registrada antes de entregarlo."
+            "title": "Verificar orden y aparato",
+            "description": "El recepcionista confirma el cliente, el aparato y el valor del presupuesto aprobado."
           },
           {
-            "stepId": "finalizarEntrega",
+            "stepId": "finalizarOrden",
             "kind": "act",
             "entity": "OrdenServicio",
             "effect": "transition",
-            "transitionRef": "entregarYfinalizar",
-            "title": "Finalizar la entrega",
-            "description": "Entrega el aparato reparado al cliente y finaliza la orden de servicio."
+            "transitionRef": "finalizar",
+            "title": "Entregar y finalizar",
+            "description": "El recepcionista entrega el aparato al cliente y finaliza la orden."
           }
         ],
         "outcome": {
-          "statement": "El aparato reparado fue entregado y la orden quedó finalizada.",
+          "statement": "El aparato fue entregado y la orden de servicio quedó finalizada.",
           "evidence": [
-            "La OrdenServicio muestra que fue finalizada.",
-            "La orden registra la entrega del aparato al cliente."
+            "La orden muestra estado finalizada",
+            "La fecha de entrega queda registrada en la orden"
           ]
         }
       },
-      "businessHash": "sha256:850a02de6f8177b35860734fd004d9f857064a0d54bdb1457deaed7534ffc35e"
+      "businessHash": "sha256:59b4955630ec98732c8783762344f0f536f287bc12ab028c1db7a4d7df8b6d54"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
       "journeyId": "consultarMisOrdenes",
       "business": {
         "actorRef": "cliente",
-        "title": "Consultar mis órdenes de servicio",
-        "goal": "Conocer el avance y el presupuesto de sus propias órdenes desde el portal.",
+        "title": "Consultar mis órdenes",
+        "goal": "Ver en el portal el estado, el diagnóstico y el valor del presupuesto de sus propias órdenes.",
         "entry": {
-          "mode": "contextOrLookup"
+          "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "localizarMisOrdenes",
+            "stepId": "listarMisOrdenes",
             "kind": "locate",
             "entity": "OrdenServicio",
-            "title": "Localizar mis órdenes",
-            "description": "Localiza únicamente sus propias órdenes de servicio en el portal."
+            "title": "Ver mis órdenes",
+            "description": "El cliente ve en el portal solamente sus propias órdenes de servicio."
           },
           {
-            "stepId": "consultarDetalleDeOrden",
+            "stepId": "verDetalleOrden",
             "kind": "inspect",
             "entity": "OrdenServicio",
-            "title": "Consultar el detalle de la orden",
-            "description": "Consulta el estado, el diagnóstico y el valor del presupuesto de una de sus órdenes, sin ver costos internos de piezas ni anotaciones del técnico."
+            "title": "Ver detalle de la orden",
+            "description": "El cliente ve el estado, el aparato, el diagnóstico y el valor del presupuesto, nunca el costo interno de las piezas ni las anotaciones del técnico."
           }
         ],
         "outcome": {
-          "statement": "El cliente conoce el estado, diagnóstico y presupuesto de sus propias órdenes.",
+          "statement": "El cliente conoce la situación de sus órdenes sin acceder a información interna del taller.",
           "evidence": [
-            "El portal muestra al Cliente únicamente sus OrdenServicio.",
-            "El detalle visible incluye estado, diagnóstico y valor del presupuesto, sin costos internos ni anotaciones técnicas."
+            "La lista muestra solo órdenes del cliente conectado",
+            "El detalle muestra estado, diagnóstico y valor del presupuesto sin costos internos ni anotaciones"
           ]
         }
       },
-      "businessHash": "sha256:82025fa7fc5f1d9ee3ed774253b05b06b4edc19d9ecbfdbbcff779f35cc147e4"
+      "businessHash": "sha256:1feb0bd1f83f353a35335757af21998f72c6df1e5ac66eefc53e678ad2d73195"
     }
   ],
   "systemDecisions": [],
   "droppedActors": [],
-  "removedOrphans": [],
-  "normalizations": [
-    {
-      "kind": "dropTransitionRef",
-      "journeyId": "abrirOrdenServicio",
-      "stepId": "registrarRecepcion",
-      "detail": "transitionRef dummy dropped; effect is create."
-    },
-    {
-      "kind": "dropTransitionRef",
-      "journeyId": "prepararPresupuesto",
-      "stepId": "registrarAnalisis",
-      "detail": "transitionRef bad dropped; effect is update."
-    }
-  ]
+  "removedOrphans": []
 }
