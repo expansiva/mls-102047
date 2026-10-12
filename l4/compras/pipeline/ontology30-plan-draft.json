@@ -1,0 +1,132 @@
+{
+  "moduleName": "compras",
+  "businessDomain": "Compras corporativas junto a fornecedores: cadastro de ofertas com preço combinado, pedidos de compra com aprovação e recebimento com entrada no estoque.",
+  "entities": [
+    {
+      "entityId": "Fornecedor",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Fornecedor",
+      "description": "Empresa da qual a organização compra, identificada por CNPJ e razão social, com contato comercial.",
+      "displayField": "details.identification.name",
+      "subtype": "Company",
+      "roleTag": "compras.Fornecedor",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "entityId": "OfertaFornecedor",
+      "kind": "entity",
+      "family": "tdm",
+      "title": "Oferta do fornecedor",
+      "description": "Produto que o fornecedor entrega à organização e o preço combinado para compra.",
+      "displayField": "details.agreedPrice",
+      "class": "supporting",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "compras_ofertafornecedor",
+        "kind": "relational"
+      }
+    },
+    {
+      "entityId": "PedidoCompra",
+      "kind": "entity",
+      "family": "tdm",
+      "title": "Pedido de compra",
+      "description": "Pedido aberto para um fornecedor com um ou mais produtos, quantidades e preços, enviado para aprovação e atendimento.",
+      "displayField": "number",
+      "class": "core",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "compras_pedidocompra",
+        "kind": "relational"
+      }
+    },
+    {
+      "entityId": "Recebimento",
+      "kind": "entity",
+      "family": "tdm",
+      "title": "Recebimento",
+      "description": "Registro do recebimento total ou parcial da mercadoria de um pedido de compra, que dá entrada no estoque dos produtos recebidos.",
+      "displayField": "number",
+      "class": "event",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "compras_recebimento",
+        "kind": "relational"
+      }
+    },
+    {
+      "entityId": "PainelCompras",
+      "kind": "entity",
+      "family": "ddm",
+      "title": "Painel de compras",
+      "description": "Visão consolidada dos pedidos em aberto, dos pedidos atrasados e do total comprado por fornecedor no mês.",
+      "displayField": "referenceMonth",
+      "class": "supporting",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "compras_painelcompras",
+        "kind": "relational"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "fornecedorDaOferta",
+      "from": "OfertaFornecedor",
+      "to": "Fornecedor",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Fornecedor que oferece o produto pelo preço combinado.",
+      "field": "OfertaFornecedor.fornecedorId"
+    },
+    {
+      "relationshipId": "fornecedorDoPedido",
+      "from": "PedidoCompra",
+      "to": "Fornecedor",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Fornecedor para o qual o pedido de compra é emitido.",
+      "field": "PedidoCompra.fornecedorId"
+    },
+    {
+      "relationshipId": "pedidoDoRecebimento",
+      "from": "Recebimento",
+      "to": "PedidoCompra",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Pedido de compra cuja mercadoria está sendo recebida, no todo ou em parte.",
+      "field": "Recebimento.pedidoCompraId"
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Fornecedor",
+      "detail": "roleTag compras.Fornecedor; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "OfertaFornecedor",
+      "detail": "storage.table compras_ofertafornecedor"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PedidoCompra",
+      "detail": "storage.table compras_pedidocompra"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "storage.table compras_recebimento"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "storage.table compras_painelcompras"
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "compras",
+    "entityId": "Fornecedor",
+    "title": "Fornecedor",
+    "description": "Empresa da qual a organização compra, identificada por CNPJ e razão social, com contato comercial.",
+    "displayField": "details.identification.name",
+    "relationships": {
+      "ofertas": {
+        "relationshipId": "fornecedorDaOferta",
+        "to": "OfertaFornecedor",
+        "via": "OfertaFornecedor.fornecedorId",
+        "cardinality": "1:N",
+        "title": "Produtos fornecidos",
+        "description": "Ofertas de produto com o preço combinado que este fornecedor pratica.",
+        "mode": "fk",
+        "direction": "to",
+        "required": true
+      },
+      "pedidos": {
+        "relationshipId": "fornecedorDoPedido",
+        "to": "PedidoCompra",
+        "via": "PedidoCompra.fornecedorId",
+        "cardinality": "1:N",
+        "title": "Pedidos de compra",
+        "description": "Pedidos de compra emitidos para este fornecedor.",
+        "mode": "fk",
+        "direction": "to",
+        "required": true
+      }
+    },
+    "capabilities": {
+      "read.byId": "Lê o fornecedor pelo identificador já conhecido · get e hydrate no índice MDM · o comprador ao conferir o cadastro e qualquer tela que preenche o fornecedor de uma oferta ou pedido.",
+      "locate.byName": "Encontra fornecedores cujo nome contém o texto digitado · listByType no subtipo Company com o papel compras.Fornecedor · o comprador ao localizar o fornecedor para cadastrar produtos ou abrir um pedido.",
+      "locate.byDocument": "Encontra o único fornecedor que possui aquele CNPJ · findByDocument no índice · o comprador no cadastro, para reutilizar a empresa em vez de duplicá-la.",
+      "locate.byContact": "Encontra o fornecedor pelo telefone, WhatsApp ou e-mail comercial · findByContact nos canais ligados por HasContact · o comprador quando o que tem em mãos é o contato, não o CNPJ.",
+      "register.createOrAttach": "Cria a empresa quando ainda não existe e, de qualquer modo, anexa o papel de fornecedor do módulo · localiza pelo CNPJ, cria se ausente e faz attachRole · o comprador na jornada de cadastrar fornecedor.",
+      "edit.platformFields": "Atualiza nome, CNPJ, razão social e demais campos de plataforma do fornecedor · entity.update, reescrevendo o índice quando a identificação muda · o comprador que mantém o cadastro.",
+      "inactivate": "Tira o fornecedor de uso sem apagar o registro · situação Active para Inactive, com reativação posterior · o comprador ou o gerente de compras quando a empresa deixa de fornecer.",
+      "link.contact": "Inclui telefone, WhatsApp ou e-mail comercial do fornecedor · cria um ContactChannel e liga com HasContact · o comprador no cadastro e na manutenção do contato.",
+      "link": "Cria um vínculo versionado entre o fornecedor e outro registro mestre · link com tipo e papel · o comprador ao associar canais de contato.",
+      "unlink": "Encerra um vínculo do fornecedor mantendo o histórico · unlink marca o elo inativo · o comprador ao substituir um contato.",
+      "listLinks": "Mostra ofertas, pedidos e contatos ligados ao fornecedor, com validade e papel · relationship.list · a ficha do fornecedor usada pelo comprador e pelo gerente de compras.",
+      "attach.document": "Anexa cartão CNPJ, contrato ou outro arquivo ao cadastro do fornecedor · mdm_attachment com armazenamento e download prescrito · o comprador na manutenção do cadastro.",
+      "comment": "Deixa uma nota no cadastro do fornecedor, com resposta em um nível · mdm_comment ancorado no registro e no módulo · o comprador e o gerente de compras.",
+      "tag": "Marca o fornecedor com etiquetas livres no espaço do módulo · mdm_tag · o comprador para classificar fornecedores.",
+      "statusHistory.read": "Mostra quando o fornecedor mudou de situação e quem mudou · mdm_status_history · a ficha do fornecedor.",
+      "audit": "Mostra quem alterou o cadastro do fornecedor e quando · mdm_audit_log somente inclusão · o gerente de compras na conferência do cadastro."
+    },
+    "rules": [
+      "rule-foreign-namespace-refused",
+      "rule-identity-never-in-namespace",
+      "rule-company-legal-name-required",
+      "rule-document-shape-validated",
+      "rule-delete-blocked-by-relationships"
+    ],
+    "kind": "role",
+    "subtype": "Company",
+    "roleTag": "compras.Fornecedor",
+    "source": "/_102034_/l4/ontology/mdm.defs.ts",
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "indexed": true,
+          "derived": true,
+          "description": "mdmId; stable through promotion and merge."
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true,
+          "writePrecondition": true,
+          "description": "Bumped by the engine on every write; optimistic concurrency."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "description": "Documento mestre da empresa fornecedora, com identificação, base, dados de empresa e o espaço do módulo compras.",
+          "fields": {
+            "identification": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "subtype": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    {
+                      "value": "Company",
+                      "title": "Empresa"
+                    }
+                  ],
+                  "description": "Subtipo do registro mestre; neste papel é sempre empresa.",
+                  "title": "Tipo"
+                },
+                "name": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "maxLength": 200,
+                  "description": "Nome pelo qual o comprador reconhece o fornecedor na busca e nas listas.",
+                  "title": "Nome"
+                },
+                "status": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    {
+                      "value": "Active",
+                      "title": "Ativo"
+                    },
+                    {
+                      "value": "Inactive",
+                      "title": "Inativo"
+                    },
+                    {
+                      "value": "Merged",
+                      "title": "Mesclado"
+                    },
+                    {
+                      "value": "Blocked",
+                      "title": "Bloqueado"
+                    }
+                  ],
+                  "title": "Situação",
+                  "description": "Se o fornecedor está ativo, inativo, mesclado ou bloqueado no cadastro mestre."
+                },
+                "docType": {
+                  "type": "enum",
+                  "indexed": true,
+                  "values": [
+                    {
+                      "value": "CNPJ",
+                      "title": "CNPJ"
+                    }
+                  ],
+                  "title": "Tipo de documento",
+                  "description": "Documento nacional da empresa; neste módulo é o CNPJ.",
+                  "required": true
+                },
+                "docId": {
+                  "type": "string",
+                  "indexed": true,
+                  "description": "Número do CNPJ da empresa fornecedora, usado para localizar o cadastro e evitar duplicidade.",
+                  "title": "CNPJ",
+                  "required": true,
+                  "pattern": "^\\d{2}\\.?\\d{3}\\.?\\d{3}\\/?\\d{4}-?\\d{2}$",
+                  "maxLength": 18
+                },
+                "countryCode": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "pattern": "^[A-Z]{2}$",
+                  "maxLength": 2,
+                  "default": "US",
+                  "description": "País do documento e das regras legais da empresa, em código ISO 3166-1 alpha-2.",
+                  "title": "País"
+                }
+              },
+              "description": "Dados que identificam a empresa fornecedora na organização e permitem localizá-la por nome ou CNPJ."
+            },
+            "base": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "contacts": {
+                  "type": "object",
+                  "required": true,
+                  "collection": true,
+                  "of": "ContactSummary",
+                  "derived": true,
+                  "description": "Resumo dos canais de contato (telefone, WhatsApp ou e-mail) ligados ao fornecedor; o contato em si é um registro ContactChannel, nunca um campo solto neste cadastro.",
+                  "title": "Contatos"
+                }
+              },
+              "description": "Dados comuns a qualquer registro mestre, inclusive o resumo dos contatos comerciais do fornecedor."
+            },
+            "company": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "legalName": {
+                  "type": "string",
+                  "required": true,
+                  "description": "Nome oficial registrado da empresa fornecedora.",
+                  "title": "Razão social"
+                }
+              },
+              "description": "Dados societários da empresa da qual a organização compra."
+            },
+            "general": {
+              "type": "object",
+              "owner": "organization",
+              "open": true,
+              "description": "Campos promovidos pela organização quando mais de um módulo precisou deles; este módulo apenas lê, não declara."
+            },
+            "compras": {
+              "type": "object",
+              "owner": "module",
+              "fields": {},
+              "description": "Module namespace; the prompt asked for no data of this module about the record."
+            }
+          }
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Fornecedor",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.docType.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.docType.required"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.docId.required"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.docId.pattern"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Fornecedor",
+      "detail": "details.compras"
+    }
+  ]
+}

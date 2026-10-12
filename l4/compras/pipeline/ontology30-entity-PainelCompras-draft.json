@@ -1,0 +1,131 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "compras",
+    "entityId": "PainelCompras",
+    "title": "Painel de compras",
+    "description": "Visão consolidada dos pedidos em aberto, dos pedidos atrasados e do total comprado por fornecedor no mês.",
+    "displayField": "referenceMonth",
+    "relationships": {},
+    "capabilities": {
+      "aggregate.byWindow": "Consolida os pedidos de compra por mês e por fornecedor, calculando a quantidade em aberto, a quantidade atrasada e o total comprado, por agregação na janela mensal, para o painel que o gerente de compras acompanha.",
+      "read.window": "Lê as linhas do painel de um mês e, se informado, de um fornecedor, pelos índices da janela e da chave de agrupamento, na tela em que o gerente de compras vê pedidos em aberto, atrasados e o total comprado por fornecedor.",
+      "refresh": "Mantém o painel atualizado quando pedidos de compra são enviados, aprovados, rejeitados ou recebidos, por recálculo da plataforma, sem ação de um ator.",
+      "rebuild": "Recomputa o painel inteiro a partir dos pedidos de compra na publicação ou na migração do módulo.",
+      "read.mdmRecord": "Lê o cadastro mestre do fornecedor de cada linha do painel para exibir razão social e CNPJ ao gerente de compras."
+    },
+    "rules": [],
+    "kind": "entity",
+    "class": "supporting",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "compras_painelcompras",
+      "kind": "relational"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "referenceMonth": {
+          "type": "date",
+          "required": true,
+          "indexed": true,
+          "title": "Mês de referência",
+          "description": "Primeiro dia do mês que esta linha resume. É a janela de tempo do painel: toda leitura filtra e ordena por este mês, recalculado a partir dos pedidos de compra.",
+          "derived": true
+        },
+        "fornecedorId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "Fornecedor"
+          ],
+          "title": "Fornecedor",
+          "description": "Fornecedor pelo qual os pedidos em aberto, os atrasados e o total comprado são agrupados neste mês. Identifica a linha do painel junto com o mês de referência.",
+          "derived": true
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "title": "Indicadores do mês",
+          "description": "Medidas recalculadas a partir dos pedidos de compra deste fornecedor na janela do mês: ninguém as grava; o painel as recompute.",
+          "fields": {
+            "pedidosEmAberto": {
+              "type": "integer",
+              "required": true,
+              "title": "Pedidos em aberto",
+              "description": "Quantidade de pedidos de compra deste fornecedor ainda em aberto neste mês — enviados ou aprovados cujo recebimento ainda não foi concluído.",
+              "min": 0,
+              "derived": true
+            },
+            "pedidosAtrasados": {
+              "type": "integer",
+              "required": true,
+              "title": "Pedidos atrasados",
+              "description": "Quantidade de pedidos de compra deste fornecedor em atraso neste mês — em aberto e com data prevista de entrega anterior a hoje.",
+              "min": 0,
+              "derived": true
+            },
+            "totalComprado": {
+              "type": "money",
+              "required": true,
+              "title": "Total comprado",
+              "description": "Soma dos valores dos pedidos de compra feitos a este fornecedor no mês de referência.",
+              "min": 0,
+              "derived": true
+            }
+          },
+          "derived": true
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.referenceMonth.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.fornecedorId.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.fields.pedidosEmAberto.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.fields.pedidosAtrasados.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.fields.totalComprado.derived (ddm)"
+    }
+  ]
+}
