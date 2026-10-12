@@ -18,10 +18,10 @@ export const acompanharRecebiveisJourney = {
         "kind": "inspect",
         "entity": "TituloReceber",
         "title": "Ver painel de recebíveis",
-        "description": "O gerente vê os totais a receber, recebidos e em aberto agrupados por período e por origem (restaurante, academia, assistência técnica)."
+        "description": "O gerente vê os totais a receber e recebidos por período e por origem (restaurante, academia, assistência técnica)."
       },
       {
-        "stepId": "listarVencidos",
+        "stepId": "localizarVencidos",
         "kind": "locate",
         "entity": "TituloReceber",
         "title": "Listar títulos vencidos",
@@ -32,18 +32,18 @@ export const acompanharRecebiveisJourney = {
         "kind": "inspect",
         "entity": "TituloReceber",
         "title": "Detalhar título vencido",
-        "description": "O gerente consulta pagador, origem, valor, vencimento e recebimentos do título vencido."
+        "description": "O gerente abre um título vencido para ver pagador, valor, saldo, origem e recebimentos já feitos."
       }
     ],
     "outcome": {
       "statement": "O gerente conhece a posição dos recebíveis por período e origem e quais títulos estão vencidos.",
       "evidence": [
-        "Totais por período e por origem exibidos",
-        "Lista de títulos vencidos com pagador, valor e dias de atraso"
+        "Totais por período e por origem exibidos no painel",
+        "Lista de títulos vencidos com saldo em aberto"
       ]
     }
   },
-  "businessHash": "sha256:7fe9674142b70defc4f37f316f09b2f0e8578bd906500cacdc2de23088f8331e"
+  "businessHash": "sha256:15dd7c4c205658291f338f288cf0da571987f49528bf275b94b86598f4a1af64"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharRecebiveisJourneyType = typeof acompanharRecebiveisJourney;

@@ -16,7 +16,7 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "create",
-      "description": "Quando a comanda é fechada no restaurante (Comanda.fecharComanda), cria um título a receber com origem 'comanda', valor total da comanda, vencimento no próprio dia e o pagador informado no fechamento (criando o Pagador se ainda não existir).",
+      "description": "Quando a comanda é fechada no restaurante (Comanda.fecharComanda), cria um título a receber com origem 'comanda', valor igual ao total da comanda, vencimento na data do fechamento e o cliente da comanda como pagador (localiza ou cria o Pagador).",
       "entityRefs": []
     },
     {
@@ -29,36 +29,24 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "create",
-      "description": "Quando a academia gera uma mensalidade (Mensalidade.create), cria um título a receber com origem 'mensalidade', valor e vencimento da mensalidade e o aluno como pagador (criando o Pagador se ainda não existir).",
+      "description": "Quando uma mensalidade é gerada na academia (Mensalidade.create), cria um título a receber com origem 'mensalidade', valor e vencimento da mensalidade e o aluno como pagador (localiza ou cria o Pagador).",
       "entityRefs": []
     },
     {
-      "id": "entregarYfinalizar",
+      "id": "ordenServicioFinalizada",
       "kind": "event",
       "from": "ordenServicio",
-      "event": "entregarYfinalizar",
+      "event": "ordenServicioFinalizada",
       "writes": [
         "TituloReceber",
         "Pagador"
       ],
       "effect": "create",
-      "description": "Quando a ordem de serviço é entregue e finalizada na assistência técnica (OrdenServicio.entregarYfinalizar), cria um título a receber com origem 'ordem de serviço', valor do orçamento aprovado, vencimento na entrega e o cliente como pagador (criando o Pagador se ainda não existir).",
+      "description": "Quando a ordem de serviço é finalizada/entregue na assistência técnica (OrdenServicio.finalizar), cria um título a receber com origem 'ordem de serviço', valor do orçamento aprovado, vencimento na entrega e o cliente da ordem como pagador (localiza ou cria o Pagador).",
       "entityRefs": []
     },
     {
-      "id": "mdmCreated",
-      "kind": "event",
-      "from": "organization",
-      "event": "mdmCreated",
-      "writes": [
-        "Pagador"
-      ],
-      "effect": "create",
-      "description": "Quando uma pessoa ou empresa é cadastrada no catálogo da organização e é referenciada como pagador de um título, registra o Pagador vinculado ao cadastro mestre.",
-      "entityRefs": []
-    },
-    {
-      "id": "mdmUpdated",
+      "id": "pessoaAtualizada",
       "kind": "event",
       "from": "organization",
       "event": "mdmUpdated",
@@ -66,7 +54,7 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "update",
-      "description": "Atualiza nome, documento e contatos do Pagador quando o cadastro mestre da pessoa ou empresa é alterado.",
+      "description": "Quando os dados cadastrais da pessoa são atualizados no catálogo da organização, atualiza nome e documento do Pagador correspondente.",
       "entityRefs": []
     }
   ],
@@ -77,7 +65,7 @@ export const financeiroIntegration = {
       "to": "any",
       "event": "recebimentoRegistrado",
       "on": "Recebimento.create",
-      "description": "Publicado quando um recebimento (total ou parcial) é registrado em um título, para que o módulo de origem (comanda, mensalidade, ordem de serviço) marque a cobrança como paga ou parcialmente paga.",
+      "description": "Publicado quando um recebimento (total ou parcial) é registrado para um título, para que o módulo de origem (comanda, mensalidade ou ordem de serviço) saiba que a cobrança foi paga.",
       "entityRefs": [
         "Recebimento",
         "TituloReceber",
@@ -90,7 +78,7 @@ export const financeiroIntegration = {
       "to": "any",
       "event": "recebimentoEstornado",
       "on": "Recebimento.estornar",
-      "description": "Publicado quando um recebimento é estornado no mesmo dia, para que o módulo de origem reabra a cobrança correspondente.",
+      "description": "Publicado quando um recebimento é estornado no mesmo dia, para que o módulo de origem volte a considerar a cobrança em aberto.",
       "entityRefs": [
         "Recebimento",
         "TituloReceber",
@@ -101,10 +89,10 @@ export const financeiroIntegration = {
   "plugins": [
     {
       "pluginId": "stripe",
-      "description": "Processa o pagamento com cartão via Stripe, tanto no recebimento feito pelo caixa quanto no pagamento feito pelo pagador no portal; os dados do cartão ficam com o Stripe.",
+      "description": "Processa o pagamento com cartão via Stripe, tanto no caixa ao receber um título quanto no portal quando o pagador paga um título em aberto. Os dados do cartão ficam no Stripe.",
       "usedBy": [
         "receberTitulo.registrarRecebimento",
-        "pagarTituloPortal.pagarCartao"
+        "pagarTituloCartao.pagarCartao"
       ]
     }
   ]

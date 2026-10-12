@@ -28,7 +28,7 @@ export const financeiroWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "pagarTituloPortal",
+      "journeyId": "pagarTituloCartao",
       "inProcess": false
     }
   ]

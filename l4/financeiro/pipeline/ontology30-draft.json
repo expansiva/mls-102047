@@ -1,14 +1,14 @@
 {
   "plan": {
     "moduleName": "financeiro",
-    "businessDomain": "Contas a receber da organização: títulos a receber gerados por outros módulos (restaurante, academia, assistência técnica), recebimentos no caixa e pelo portal do pagador, estornos no mesmo dia e painel de recebíveis.",
+    "businessDomain": "Contas a receber da organização: títulos a receber que chegam de outros módulos (comanda do restaurante, mensalidade da academia, ordem de serviço da assistência técnica), recebimentos no caixa ou pelo portal com baixa parcial e estorno no mesmo dia, painel de recebíveis e extrato por pagador.",
     "entities": [
       {
         "entityId": "Pagador",
         "kind": "role",
         "family": "mdm",
         "title": "Pagador",
-        "description": "Pessoa que deve os títulos a receber da organização; acessa o portal para ver e pagar os próprios títulos. Papel do módulo financeiro sobre o registro mestre de pessoa.",
+        "description": "Pessoa responsável por pagar os títulos a receber. É o mesmo cadastro mestre do cliente, aluno ou consumidor de outros módulos; acessa o portal para ver só os próprios títulos e recebimentos.",
         "displayField": "details.identification.name",
         "writer": "inbound",
         "subtype": "Person",
@@ -20,7 +20,7 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Título a receber",
-        "description": "Cobrança nascida em outro módulo (comanda fechada, mensalidade gerada, ordem de serviço entregue) com pagador, valor, vencimento e origem; o saldo em aberto e a situação de vencido são derivados dos recebimentos.",
+        "description": "Cobrança nascida em outro módulo (comanda fechada, mensalidade gerada, ordem de serviço entregue) com pagador, valor, vencimento e origem. O saldo em aberto, a quitação e o vencimento são derivados dos recebimentos.",
         "displayField": "numero",
         "writer": "inbound",
         "class": "core",
@@ -35,7 +35,7 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Recebimento",
-        "description": "Baixa total ou parcial de um título, em dinheiro, pix ou cartão via Stripe, registrada pelo caixa ou paga pelo pagador no portal; pode ser estornada apenas no mesmo dia.",
+        "description": "Pagamento total ou parcial de um título em dinheiro, pix ou cartão via Stripe, registrado pelo caixa ou pelo pagador no portal; pode ser estornado apenas no mesmo dia.",
         "displayField": "numero",
         "class": "event",
         "storage": {
@@ -49,7 +49,7 @@
         "kind": "entity",
         "family": "ddm",
         "title": "Painel de recebíveis",
-        "description": "Totais a receber, recebidos, em aberto e vencidos agrupados por período e por origem, recalculados a partir dos títulos e recebimentos.",
+        "description": "Totais a receber, recebidos, estornados e vencidos por período e por origem (restaurante, academia, assistência técnica), recalculados a partir dos títulos e recebimentos.",
         "displayField": "periodo",
         "class": "supporting",
         "storage": {
@@ -67,7 +67,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada título a receber é devido por um pagador.",
+        "description": "Cada título a receber pertence a um pagador; é o caminho do escopo 'próprios títulos' no portal.",
         "field": "TituloReceber.pagadorId"
       },
       {
@@ -77,17 +77,17 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada recebimento dá baixa, total ou parcial, em um título a receber.",
+        "description": "Cada recebimento baixa o saldo de um título a receber; um título pode ter vários recebimentos parciais.",
         "field": "Recebimento.tituloId"
       },
       {
-        "relationshipId": "pagadorRecebimentos",
+        "relationshipId": "recebimentosPagador",
         "from": "Pagador",
         "to": "Recebimento",
         "type": "oneToMany",
         "required": false,
         "mode": "throughTable",
-        "description": "Recebimentos do pagador, obtidos pelos títulos que ele deve, usados no extrato e no portal.",
+        "description": "Recebimentos de um pagador, obtidos pelos títulos dele; usado no extrato e no portal.",
         "through": "TituloReceber",
         "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
         "derived": true
@@ -122,7 +122,7 @@
       "moduleName": "financeiro",
       "entityId": "Pagador",
       "title": "Pagador",
-      "description": "Pessoa que deve os títulos a receber da organização; acessa o portal para ver e pagar os próprios títulos. Papel do módulo financeiro sobre o registro mestre de pessoa.",
+      "description": "Pessoa responsável por pagar os títulos a receber. É o mesmo cadastro mestre do cliente, aluno ou consumidor de outros módulos; acessa o portal para ver só os próprios títulos e recebimentos.",
       "displayField": "details.identification.name",
       "relationships": {
         "titulos": {
@@ -131,13 +131,13 @@
           "via": "TituloReceber.pagadorId",
           "cardinality": "1:N",
           "title": "Títulos a receber do pagador",
-          "description": "Títulos a receber devidos por este pagador, vindos da comanda, da mensalidade ou da ordem de serviço.",
+          "description": "Títulos que o pagador deve; caminho do escopo 'próprios títulos' no portal e base do extrato.",
           "mode": "fk",
           "direction": "to",
           "required": true
         },
         "recebimentos": {
-          "relationshipId": "pagadorRecebimentos",
+          "relationshipId": "recebimentosPagador",
           "to": "Recebimento",
           "via": "TituloReceber",
           "cardinality": "1:N",
@@ -149,29 +149,26 @@
         }
       },
       "capabilities": {
-        "read.byId": "Lê o pagador pelo identificador para exibir seu nome em títulos, recebimentos, no extrato e no portal; usado por caixa, gerente financeiro e pelo próprio pagador.",
-        "locate.byName": "Localiza o pagador pelo nome digitado; usado pelo gerente financeiro ao emitir o extrato e pelo caixa ao procurar os títulos de alguém no balcão.",
-        "locate.byDocument": "Localiza o pagador pelo CPF ou outro documento; usado pelo gerente financeiro no extrato e pela entrada de títulos para não duplicar a pessoa.",
-        "register.createOrAttach": "Ao chegar um título de outro módulo, encontra a pessoa pelo documento, cria-a se não existir e marca o papel financeiro.Pagador; feito pela entrada automática de títulos.",
-        "edit.platformFields": "Corrige nome, documento ou endereço do pagador no cadastro mestre quando o extrato revela dado errado; usado pelo gerente financeiro.",
-        "edit.moduleNamespace": "Grava o namespace financeiro do pagador, hoje vazio; reservado ao próprio módulo.",
-        "inactivate": "Inativa o papel de pagador sem apagar o histórico de títulos e recebimentos, podendo reativá-lo; usado pelo gerente financeiro.",
-        "link.contact": "Vincula telefone, WhatsApp ou e-mail ao pagador como canal de contato para cobrança; usado pelo gerente financeiro.",
-        "listLinks": "Mostra os vínculos do pagador, como canais de contato e responsáveis, na ficha consultada pelo gerente financeiro.",
-        "invite.login": "Dá ao pagador um login para acessar o portal e ver apenas os próprios títulos e recebimentos; acionado pela plataforma ao registrar o pagador.",
-        "locate.byLogin": "Resolve o pagador da sessão a partir do e-mail de login, limitando o portal aos próprios títulos e recebimentos; usado pelo resolvedor de sessão.",
-        "comment": "Registra observações sobre o pagador, como acordos de pagamento combinados; usado pelo gerente financeiro e pelo caixa.",
-        "statusHistory.read": "Mostra quando o pagador foi ativado ou inativado e por quem; consultado pelo gerente financeiro.",
-        "audit": "Informa quem alterou o cadastro do pagador e quando, pelo módulo de auditoria da plataforma; consultado pelo gerente financeiro.",
-        "financeiro.extratoPagador": "Emite o extrato do pagador no período escolhido, com títulos, recebimentos, estornos e saldo em aberto, lendo os títulos pelo pagador e os recebimentos pelos títulos; usado pelo gerente financeiro."
+        "read.byId": "Lê o pagador pelo mdmId para preencher títulos, recebimentos e o cabeçalho do extrato; usado por todas as telas do financeiro.",
+        "locate.byName": "Localiza o pagador pelo nome digitado; usado pelo gerente financeiro ao emitir o extrato e pelo caixa ao receber.",
+        "locate.byDocument": "Localiza o pagador pelo CPF ou outro documento; usado pelo gerente financeiro no extrato e pelo cadastro de origem para evitar duplicidade.",
+        "register.createOrAttach": "Cria ou anexa o papel financeiro.Pagador ao cadastro mestre quando um título chega de outro módulo (comanda, mensalidade, ordem de serviço); feito pela integração, não por uma pessoa.",
+        "locate.byLogin": "Resolve o pagador da sessão pelo e-mail de login, para que o portal mostre só os próprios títulos e recebimentos.",
+        "invite.login": "Dá ao pagador um login para acessar o portal e pagar com cartão os títulos em aberto; acionado pela organização.",
+        "listLinks": "Mostra os vínculos do pagador no cadastro mestre, como contatos e responsáveis; usado pelo gerente financeiro ao conferir o extrato.",
+        "comment": "Registra observações de cobrança sobre o pagador; usado pelo caixa e pelo gerente financeiro.",
+        "tag": "Marca o pagador com rótulos do financeiro, como acordo de pagamento; usado pelo gerente financeiro.",
+        "statusHistory.read": "Mostra quando o cadastro do pagador foi ativado ou inativado e por quem; usado pelo gerente financeiro.",
+        "audit": "Informa quem alterou o cadastro do pagador e quando; consultado pelo administrador.",
+        "financeiro.extratoPagador": "Emite o extrato do pagador no período, com títulos, recebimentos, estornos e saldo, para imprimir ou baixar; usado pelo gerente financeiro."
       },
       "rules": [
         "rule-foreign-namespace-refused",
-        "rule-delete-blocked-by-relationships",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
         "rule-person-privacy-consent-required-br-eu",
-        "pagadorVeApenasProprios"
+        "rule-delete-blocked-by-relationships",
+        "pagadorVeSomenteProprios"
       ],
       "writer": "inbound",
       "kind": "role",
@@ -197,7 +194,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Registro mestre da pessoa que deve títulos a receber da organização, visto pelo módulo financeiro.",
+            "description": "Cadastro mestre da pessoa que paga os títulos a receber, como a plataforma o guarda e devolve.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -214,7 +211,7 @@
                         "title": "Pessoa"
                       }
                     ],
-                    "description": "Sempre pessoa: o pagador é uma pessoa física do cadastro mestre.",
+                    "description": "Sempre pessoa física neste papel.",
                     "title": "Subtipo"
                   },
                   "name": {
@@ -222,7 +219,7 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 200,
-                    "description": "Nome pelo qual o caixa e o gerente financeiro reconhecem o pagador; usado para localizá-lo e no cabeçalho do extrato.",
+                    "description": "Nome pelo qual o gerente localiza o pagador e que aparece nos títulos e no extrato.",
                     "title": "Nome do pagador"
                   },
                   "status": {
@@ -248,30 +245,45 @@
                         "title": "Bloqueado"
                       }
                     ],
-                    "title": "Situação no cadastro",
-                    "description": "Situação do registro mestre (ativo, inativo, mesclado, bloqueado), mantida pela plataforma."
+                    "title": "Situação do cadastro",
+                    "description": "Situação do cadastro mestre; um pagador inativo continua com seu histórico de títulos."
                   },
                   "docType": {
                     "type": "enum",
                     "indexed": true,
                     "values": [
-                      "SSN",
-                      "EIN",
-                      "Passport",
-                      "DriversLicense",
-                      "NationalId",
-                      "CPF",
-                      "CNPJ",
-                      "VAT",
-                      "Other"
+                      {
+                        "value": "CPF",
+                        "title": "CPF"
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte"
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento nacional"
+                      },
+                      {
+                        "value": "SSN",
+                        "title": "SSN"
+                      },
+                      {
+                        "value": "DriversLicense",
+                        "title": "Carteira de motorista"
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro"
+                      }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional do pagador, usado para localizá-lo e evitar duplicidade quando o título chega de outro módulo."
+                    "description": "Tipo do documento nacional usado para localizar o pagador e emitir o extrato."
                   },
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do documento do pagador (por exemplo, CPF), usado pelo gerente para localizar o pagador ao emitir o extrato.",
+                    "description": "Número do documento do pagador; impresso no extrato e usado para localizá-lo e evitar duplicidade.",
                     "title": "Número do documento"
                   },
                   "countryCode": {
@@ -281,7 +293,7 @@
                     "pattern": "^[A-Z]{2}$",
                     "maxLength": 2,
                     "default": "US",
-                    "description": "País ao qual pertencem o documento e as regras legais do pagador.",
+                    "description": "País do documento e das regras de privacidade aplicáveis ao pagador.",
                     "title": "País"
                   },
                   "tags": {
@@ -289,23 +301,30 @@
                     "required": true,
                     "collection": true,
                     "derived": true,
-                    "description": "Papéis de módulo do registro; contém financeiro.Pagador quando a pessoa deve títulos a receber.",
+                    "description": "Papéis do cadastro nos módulos; aqui contém financeiro.Pagador.",
                     "title": "Papéis"
                   }
                 },
-                "description": "Dados de identificação da pessoa mantidos pela plataforma; usados para localizar o pagador e exibir seu nome em títulos, recebimentos e extratos."
+                "description": "Chaves de índice da plataforma usadas para localizar o pagador."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Apelidos ou nomes alternativos que ajudam o gerente a reconhecer o pagador.",
+                    "title": "Outros nomes"
+                  },
                   "addresses": {
                     "type": "object",
                     "required": true,
                     "collection": true,
                     "of": "Address",
                     "title": "Endereços",
-                    "description": "Endereços do pagador, exibidos no extrato emitido pelo gerente financeiro."
+                    "description": "Endereço do pagador impresso no cabeçalho do extrato."
                   },
                   "contacts": {
                     "type": "object",
@@ -313,18 +332,11 @@
                     "collection": true,
                     "of": "ContactSummary",
                     "derived": true,
-                    "description": "Resumo dos canais de contato do pagador, derivado dos vínculos com canais de contato; usado para falar com o pagador sobre títulos em aberto.",
+                    "description": "Resumo dos canais de contato vinculados ao pagador, exibido no extrato e usado no convite ao portal.",
                     "title": "Contatos"
-                  },
-                  "relationshipRefs": {
-                    "type": "object",
-                    "required": true,
-                    "derived": true,
-                    "description": "Chaves compactas dos vínculos do pagador, recalculadas pela plataforma.",
-                    "title": "Vínculos"
                   }
                 },
-                "description": "Dados comuns do registro mestre lidos pelo financeiro para o extrato e para contato com o pagador."
+                "description": "Dados comuns do cadastro mestre que o extrato exibe."
               },
               "person": {
                 "type": "object",
@@ -333,11 +345,11 @@
                   "privacyConsent": {
                     "type": "object",
                     "of": "PrivacyConsent",
-                    "description": "Consentimento LGPD do pagador, exigido para que ele permaneça ativo e acesse o portal.",
+                    "description": "Consentimento LGPD do pagador, exigido para manter o cadastro ativo e o acesso ao portal.",
                     "title": "Consentimento de privacidade"
                   }
                 },
-                "description": "Dados de pessoa física mantidos pela plataforma."
+                "description": "Ramo de pessoa física do cadastro mestre."
               },
               "general": {
                 "type": "object",
@@ -353,16 +365,16 @@
                     "type": "money",
                     "derived": true,
                     "title": "Saldo em aberto",
-                    "description": "Soma do que falta receber em todos os títulos do pagador que não estão cancelados nem quitados: valor do título menos os recebimentos válidos, desconsiderando os estornados."
+                    "description": "Soma do que falta receber nos títulos ainda em aberto do pagador, descontados os recebimentos e considerados os estornos."
                   },
-                  "possuiTitulosVencidos": {
-                    "type": "boolean",
+                  "quantidadeTitulosVencidos": {
+                    "type": "integer",
                     "derived": true,
-                    "title": "Possui títulos vencidos",
-                    "description": "Verdadeiro quando o pagador tem ao menos um título em aberto com vencimento anterior a hoje."
+                    "title": "Títulos vencidos",
+                    "description": "Quantidade de títulos do pagador em aberto e com vencimento anterior a hoje."
                   }
                 },
-                "description": "Namespace do módulo financeiro sobre o pagador; vazio, pois títulos e recebimentos ficam nas entidades próprias do módulo."
+                "description": "Namespace do módulo financeiro; nada específico do pagador foi pedido, os títulos e recebimentos ficam nas tabelas do módulo."
               }
             }
           }
@@ -374,7 +386,7 @@
       "moduleName": "financeiro",
       "entityId": "TituloReceber",
       "title": "Título a receber",
-      "description": "Cobrança nascida em outro módulo (comanda fechada, mensalidade gerada, ordem de serviço entregue) com pagador, valor, vencimento e origem; o saldo em aberto e a situação de vencido são derivados dos recebimentos.",
+      "description": "Cobrança nascida em outro módulo (comanda fechada, mensalidade gerada, ordem de serviço entregue) com pagador, valor, vencimento e origem. O saldo em aberto, a quitação e o vencimento são derivados dos recebimentos.",
       "displayField": "numero",
       "relationships": {
         "pagador": {
@@ -383,7 +395,7 @@
           "via": "TituloReceber.pagadorId",
           "cardinality": "N:1",
           "title": "Pagador do título",
-          "description": "Cada título a receber é devido por um pagador.",
+          "description": "Cada título pertence a um pagador; o portal mostra ao pagador apenas os títulos ligados a ele.",
           "mode": "fk",
           "required": true
         },
@@ -393,37 +405,35 @@
           "via": "Recebimento.tituloId",
           "cardinality": "1:N",
           "title": "Recebimentos do título",
-          "description": "Recebimentos, totais ou parciais, e estornos que dão baixa neste título.",
+          "description": "Recebimentos totais ou parciais (e seus estornos) que baixam o saldo do título.",
           "mode": "fk",
           "direction": "to",
           "required": true
         }
       },
       "capabilities": {
-        "create": "Registra o título quando a comanda é fechada, a mensalidade é gerada ou a ordem de serviço é entregue no módulo de origem, por upsert na chave origem + identificador na origem.",
-        "uniqueKey": "Recusa um segundo título com a mesma origem e o mesmo identificador na origem, e um número repetido, pelos índices únicos da tabela.",
-        "sequence.next": "Emite o número do título na chegada, pela sequência financeiro.TituloReceber da plataforma.",
-        "read.byId": "Abre o título pelo id para o caixa conferir, o gerente detalhar um vencido e o pagador ver seu título no portal.",
-        "locate.byColumn": "Lista títulos filtrados por pagador, origem, emissão ou vencimento, ordenados por vencimento, para o caixa localizar o título, o gerente listar vencidos e o pagador ver os seus no portal.",
-        "locate.byText": "Procura o título pelo número digitado na caixa de busca do caixa e do gerente.",
-        "count": "Conta os títulos de um filtro, como os vencidos do período, para o cabeçalho das listas do gerente.",
-        "listByForeignKey": "Lista todos os títulos de um pagador pelo pagadorId, para o extrato do gerente e para o portal do pagador.",
-        "read.mdmRecord": "Lê no cadastro mestre o nome e o documento do pagador apontado pelo título, hidratando a lista inteira de uma vez nas telas do caixa e do gerente.",
-        "transaction": "Grava o recebimento junto com a leitura do saldo do título, tudo ou nada, quando o caixa ou o pagador registra um pagamento.",
-        "comment": "Permite ao caixa e ao gerente deixar uma nota no título, por exemplo uma negociação com o pagador.",
-        "attach.document": "Anexa ao título um comprovante ou documento da cobrança, mantido pelo caixa ou pelo gerente.",
-        "audit": "Mostraria ao gerente quem alterou o título e quando; hoje a escrita em tabela do módulo não gera trilha.",
-        "financeiro.extratoPagador": "Monta o extrato de um pagador no período escolhido, com títulos, recebimentos, estornos e saldo em aberto, para o gerente financeiro.",
-        "financeiro.listarVencidos": "Lista os títulos com vencimento anterior a hoje e saldo em aberto, por origem, para o gerente financeiro."
+        "create": "Registra o título quando a comanda fechada, a mensalidade gerada ou a ordem de serviço entregue chega do módulo de origem (entrada automática, upsert pela origem e referência).",
+        "sequence.next": "Emite o número do título na entrada, pela sequência financeiro.TituloReceber da plataforma, para o caixa, o gerente e o pagador citarem.",
+        "uniqueKey": "Recusa um segundo título com o mesmo número e uma segunda entrada da mesma cobrança (origem + referência na origem).",
+        "read.byId": "Abre o título para o caixa conferir antes de receber, para o gerente detalhar um vencido e para o pagador conferir antes de pagar.",
+        "locate.byColumn": "Lista títulos filtrados por pagador, origem, emissão e vencimento, ordenados por vencimento; usado pelo caixa, pelo gerente na busca de vencidos e pelo pagador no portal (escopo próprio pelo pagador).",
+        "locate.byText": "Encontra o título pelo número digitado na busca do caixa.",
+        "count": "Conta os títulos do filtro para o cabeçalho das listas e o indicador de vencidos do gerente.",
+        "listByForeignKey": "Lista os títulos de um pagador para o extrato do gerente e o portal do pagador, e os recebimentos de cada título de uma vez.",
+        "read.mdmRecord": "Lê o nome e o documento do pagador no cadastro mestre para exibir na lista do caixa, no extrato e no detalhe do título.",
+        "update": "Atualiza descrição, vencimento ou observações quando o módulo de origem reenvia a cobrança antes de qualquer recebimento.",
+        "comment": "Permite ao caixa e ao gerente deixar notas de cobrança no título.",
+        "financeiro.extratoPagador": "Monta o extrato de um pagador no período, com títulos, recebimentos, estornos e saldo, para o gerente financeiro ver, imprimir ou baixar.",
+        "financeiro.titulosVencidos": "Lista os títulos com saldo em aberto e vencimento anterior a hoje para o gerente financeiro acompanhar."
       },
       "rules": [
         "tituloOrigemUnica",
         "tituloValorPositivo",
-        "tituloPagadorObrigatorio",
+        "tituloNumeroPorSequencia",
+        "pagadorVeSoPropriosTitulos",
         "recebimentoNaoExcedeSaldo",
-        "estornoSomenteMesmoDia",
-        "pagadorVeApenasProprios",
-        "portalPagaApenasTituloAberto"
+        "tituloQuitadoNaoRecebe",
+        "tituloComRecebimentoNaoAltera"
       ],
       "writer": "inbound",
       "kind": "entity",
@@ -453,8 +463,8 @@
             "unique": true,
             "indexed": true,
             "title": "Número do título",
-            "description": "Número que o caixa, o gerente e o pagador citam, emitido por sequência da plataforma quando o título chega ao financeiro.",
-            "maxLength": 30
+            "description": "Número que o caixa, o gerente e o pagador citam para localizar o título; emitido pela sequência da plataforma na entrada do título.",
+            "maxLength": 20
           },
           "pagadorId": {
             "type": "record",
@@ -464,7 +474,7 @@
               "Pagador"
             ],
             "title": "Pagador",
-            "description": "Pessoa que deve o título; o nome e o documento são lidos do cadastro mestre. Também é o caminho que limita o portal aos títulos do próprio pagador."
+            "description": "Pessoa que deve o título; caminho do escopo 'próprios títulos' no portal e chave do extrato por pagador."
           },
           "origem": {
             "type": "enum",
@@ -485,135 +495,108 @@
               }
             ],
             "title": "Origem",
-            "description": "Módulo onde a cobrança nasceu; usada para filtrar e agrupar os recebíveis no painel."
+            "description": "Módulo onde a cobrança nasceu; usada para filtrar e agrupar o painel de recebíveis por origem."
           },
-          "origemId": {
+          "origemReferenciaId": {
             "type": "string",
             "required": true,
             "indexed": true,
-            "title": "Identificador na origem",
+            "title": "Referência na origem",
             "description": "Identificador da comanda, mensalidade ou ordem de serviço no módulo de origem; junto com a origem impede que a mesma cobrança entre duas vezes.",
-            "maxLength": 64
+            "maxLength": 80
           },
           "emissao": {
             "type": "date",
             "required": true,
             "indexed": true,
             "title": "Data de emissão",
-            "description": "Data em que a cobrança foi gerada na origem; usada para o recorte por período do painel e do extrato."
+            "description": "Data em que a cobrança chegou ao financeiro; usada para recortar o painel e o extrato por período."
           },
           "vencimento": {
             "type": "date",
             "required": true,
             "indexed": true,
             "title": "Vencimento",
-            "description": "Data até a qual o título deve ser pago; usada para localizar títulos e listar os vencidos."
+            "description": "Data limite de pagamento; filtrada para localizar títulos vencidos e ordenar a fila do caixa."
           },
           "details": {
             "type": "object",
             "required": true,
             "title": "Detalhes",
-            "description": "Dados do título que são apenas exibidos.",
+            "description": "Dados do título que são exibidos mas não filtrados.",
             "fields": {
+              "valor": {
+                "type": "money",
+                "required": true,
+                "title": "Valor do título",
+                "description": "Valor total cobrado, como informado pelo módulo de origem.",
+                "min": 0.01
+              },
               "descricao": {
                 "type": "string",
                 "required": true,
                 "title": "Descrição",
-                "description": "Texto que identifica a cobrança para o pagador, por exemplo 'Mensalidade outubro/2026' ou 'Comanda 1532'.",
+                "description": "Texto da cobrança exibido ao caixa, no extrato e no portal, por exemplo 'Mensalidade outubro/2026' ou 'Comanda mesa 12'.",
                 "maxLength": 200
               },
-              "valorOriginal": {
-                "type": "money",
-                "required": true,
-                "title": "Valor original",
-                "description": "Valor cobrado pela origem, antes de qualquer recebimento.",
-                "min": 0.01
-              },
-              "documentoOrigem": {
-                "type": "object",
-                "title": "Documento de origem",
-                "description": "Referência legível do documento que gerou a cobrança.",
-                "fields": {
-                  "tipo": {
-                    "type": "string",
-                    "title": "Tipo do documento",
-                    "description": "Comanda, mensalidade ou ordem de serviço, como a origem chama.",
-                    "maxLength": 60
-                  },
-                  "numero": {
-                    "type": "string",
-                    "title": "Número na origem",
-                    "description": "Número do documento como aparece no módulo de origem.",
-                    "maxLength": 40
-                  },
-                  "dataFato": {
-                    "type": "date",
-                    "title": "Data do fato",
-                    "description": "Data do fechamento da comanda, da geração da mensalidade ou da entrega da ordem de serviço."
-                  }
-                }
+              "rotuloOrigem": {
+                "type": "string",
+                "title": "Rótulo da origem",
+                "description": "Número legível do documento de origem (número da comanda, da OS ou da mensalidade) para conferência pelo caixa e pelo pagador.",
+                "maxLength": 80
               },
               "observacoes": {
                 "type": "text",
                 "title": "Observações",
-                "description": "Informações adicionais enviadas pela origem sobre a cobrança."
+                "description": "Informações adicionais enviadas pelo módulo de origem sobre a cobrança."
               },
-              "totalRecebido": {
+              "valorRecebido": {
                 "type": "money",
                 "derived": true,
-                "title": "Total recebido",
-                "description": "Soma dos recebimentos deste título, descontados os recebimentos estornados."
+                "title": "Valor recebido",
+                "description": "Soma dos recebimentos deste título que não foram estornados."
               },
               "saldoAberto": {
                 "type": "money",
                 "derived": true,
                 "title": "Saldo em aberto",
-                "description": "Valor original do título menos o total recebido, já considerando as baixas parciais e os estornos."
+                "description": "Valor do título menos a soma dos recebimentos não estornados deste título."
               },
               "quitado": {
                 "type": "boolean",
                 "derived": true,
                 "title": "Quitado",
-                "description": "Verdadeiro quando o total recebido cobre o valor original e não resta saldo em aberto."
+                "description": "Verdadeiro quando os recebimentos não estornados somam o valor do título, deixando o saldo em zero."
               },
-              "parcialmenteRecebido": {
+              "recebidoParcialmente": {
                 "type": "boolean",
                 "derived": true,
-                "title": "Baixa parcial",
-                "description": "Há ao menos um recebimento válido, mas ainda resta saldo em aberto."
+                "title": "Recebido parcialmente",
+                "description": "Há ao menos um recebimento não estornado, mas o saldo em aberto ainda é maior que zero."
               },
               "vencido": {
                 "type": "boolean",
                 "derived": true,
                 "title": "Vencido",
-                "description": "Com saldo em aberto e vencimento anterior a hoje."
+                "description": "Ainda tem saldo em aberto e o vencimento é anterior a hoje."
               },
-              "diasAtraso": {
+              "diasEmAtraso": {
                 "type": "integer",
                 "derived": true,
-                "title": "Dias de atraso",
+                "title": "Dias em atraso",
                 "description": "Quantidade de dias entre o vencimento e hoje, quando o título está vencido; zero nos demais casos."
               }
             }
           }
         }
-      },
-      "uniqueKeys": [
-        [
-          "origem",
-          "origemId"
-        ],
-        [
-          "numero"
-        ]
-      ]
+      }
     },
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "financeiro",
       "entityId": "Recebimento",
       "title": "Recebimento",
-      "description": "Baixa total ou parcial de um título, em dinheiro, pix ou cartão via Stripe, registrada pelo caixa ou paga pelo pagador no portal; pode ser estornada apenas no mesmo dia.",
+      "description": "Pagamento total ou parcial de um título em dinheiro, pix ou cartão via Stripe, registrado pelo caixa ou pelo pagador no portal; pode ser estornado apenas no mesmo dia.",
       "displayField": "numero",
       "relationships": {
         "titulo": {
@@ -622,17 +605,17 @@
           "via": "Recebimento.tituloId",
           "cardinality": "N:1",
           "title": "Título baixado",
-          "description": "Cada recebimento dá baixa, total ou parcial, em um título a receber.",
+          "description": "Cada recebimento baixa o saldo de um título; um título pode ter vários recebimentos.",
           "mode": "fk",
           "required": true
         },
         "pagador": {
-          "relationshipId": "pagadorRecebimentos",
+          "relationshipId": "recebimentosPagador",
           "to": "Pagador",
           "via": "TituloReceber",
           "cardinality": "N:1",
           "title": "Pagador do recebimento",
-          "description": "Pagador obtido pelo título baixado; usado no extrato e no portal.",
+          "description": "Pagador alcançado pelo título deste recebimento; usado no portal e no extrato.",
           "mode": "throughTable",
           "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
           "derived": true,
@@ -640,29 +623,27 @@
         }
       },
       "capabilities": {
-        "read.byId": "Abre um recebimento pelo id para o caixa conferir valor, forma, título e data, e para o pagador ver o detalhe no portal.",
-        "locate.byColumn": "Lista recebimentos por data, forma de pagamento, situação ou título, ordenados por data; o caixa localiza os de hoje para estornar.",
-        "count": "Conta os recebimentos de um filtro, como os registrados hoje no caixa, para totalizar a lista.",
-        "listByForeignKey": "Lista os recebimentos de um título ou de vários títulos de um pagador, alimentando o extrato do gerente financeiro e o portal do pagador.",
-        "create": "Registra o recebimento total ou parcial feito pelo caixa ou o pagamento com cartão feito pelo pagador no portal.",
+        "read.byId": "Abre um recebimento pelo id para o caixa conferir valor, forma, data e título, e para o pagador ver o detalhe no portal.",
+        "locate.byColumn": "Lista recebimentos por título, situação, forma de pagamento e data de recebimento, ordenados pela data; o caixa usa para achar os recebimentos de hoje.",
+        "listByForeignKey": "Lista os recebimentos de um título (ou de vários títulos de uma vez) para a tela do título, o portal do pagador e o extrato do gerente financeiro.",
+        "count": "Conta os recebimentos de um filtro para o cabeçalho das listas do caixa e do gerente financeiro.",
+        "create": "Registra um novo recebimento total ou parcial, pelo caixa no balcão ou pelo pagador ao pagar com cartão no portal.",
         "transition": "Move o recebimento de registrado para estornado quando o caixa estorna no mesmo dia.",
-        "uniqueKey": "Garante que o número do recebimento não se repete.",
-        "transaction": "Grava o recebimento e atualiza o saldo do título juntos, tudo ou nada, tanto na baixa quanto no estorno.",
-        "read.mdmRecord": "Lê pelo título o registro mestre do pagador para mostrar o nome no recebimento e no extrato.",
-        "sequence.next": "Emite o número do recebimento na criação, pela chave financeiro.Recebimento.",
-        "attach.document": "Anexa ao recebimento o comprovante do pix ou do cartão quando o caixa precisa guardá-lo.",
-        "comment": "Permite ao caixa e ao gerente financeiro deixar notas sobre um recebimento ou seu estorno.",
-        "financeiro.pagarComStripe": "Cobra o cartão via Stripe, no caixa ou no portal do pagador, e só registra o recebimento após a confirmação do pagamento.",
-        "financeiro.estornarStripe": "Ao estornar um recebimento em cartão, solicita o reembolso ao Stripe pelo identificador do pagamento."
+        "uniqueKey": "Impede dois recebimentos com o mesmo número ou com o mesmo pagamento Stripe, protegendo contra confirmação duplicada.",
+        "transaction": "Grava o recebimento (ou o estorno) e a atualização do saldo do título juntos, tudo ou nada.",
+        "read.mdmRecord": "Lê o registro mestre do pagador do título para mostrar o nome no recebimento e no extrato.",
+        "sequence.next": "Emite o número sequencial do recebimento na criação, citado como comprovante pelo caixa e pelo pagador.",
+        "comment": "Permite ao caixa e ao gerente financeiro deixar notas sobre um recebimento, como a conferência de um estorno.",
+        "financeiro.pagarCartaoStripe": "Cobra o cartão via Stripe, no caixa ou no portal do pagador, e só registra o recebimento quando o Stripe confirma o pagamento."
       },
       "rules": [
-        "numeroRecebimentoUnico",
-        "valorRecebidoAteSaldo",
-        "tituloEmAbertoParaReceber",
+        "valorRecebidoNaoExcedeSaldo",
+        "tituloQuitadoQuandoSaldoZero",
         "estornoSomenteMesmoDia",
-        "pagadorPagaSomenteComCartao",
-        "pagadorVeSomentePropriosRecebimentos",
-        "cartaoExigeConfirmacaoStripe"
+        "estornoDevolveSaldoTitulo",
+        "cartaoSomenteViaStripe",
+        "pagadorPagaSomenteTituloProprioEmAberto",
+        "pagadorVeSomenteProprioRecebimento"
       ],
       "kind": "entity",
       "class": "event",
@@ -691,8 +672,8 @@
             "unique": true,
             "indexed": true,
             "title": "Número do recebimento",
-            "description": "Número que o caixa e o pagador citam para identificar o recebimento, emitido pela sequência da plataforma na criação.",
-            "maxLength": 20
+            "description": "Número sequencial que o caixa e o pagador citam como comprovante do recebimento, emitido pela sequência da plataforma na criação.",
+            "maxLength": 30
           },
           "tituloId": {
             "type": "record",
@@ -702,7 +683,7 @@
               "TituloReceber"
             ],
             "title": "Título",
-            "description": "Título a receber ao qual este recebimento dá baixa total ou parcial; por ele se chega ao pagador e à origem."
+            "description": "Título a receber cujo saldo este recebimento baixa; um título pode ter vários recebimentos parciais."
           },
           "status": {
             "type": "enum",
@@ -711,24 +692,22 @@
             "values": [
               {
                 "value": "registrado",
-                "title": "Registrado",
-                "description": "Recebimento válido, abatendo o saldo do título."
+                "title": "Registrado"
               },
               {
                 "value": "estornado",
-                "title": "Estornado",
-                "description": "Recebimento desfeito no mesmo dia; não abate mais o saldo do título."
+                "title": "Estornado"
               }
             ],
             "title": "Situação",
-            "description": "Situação do recebimento: registrado ou estornado."
+            "description": "Situação do recebimento: registrado e válido, ou estornado no mesmo dia."
           },
-          "dataRecebimento": {
-            "type": "date",
+          "recebidoEm": {
+            "type": "timestamp",
             "required": true,
             "indexed": true,
-            "title": "Data do recebimento",
-            "description": "Dia em que o valor foi recebido; usada para localizar os recebimentos de hoje, permitir o estorno no mesmo dia e compor o extrato por período."
+            "title": "Recebido em",
+            "description": "Data e hora em que o recebimento foi registrado; usada para localizar os recebimentos de hoje e para permitir o estorno só no mesmo dia."
           },
           "formaPagamento": {
             "type": "enum",
@@ -749,19 +728,27 @@
               }
             ],
             "title": "Forma de pagamento",
-            "description": "Meio pelo qual o valor foi recebido; filtra o fechamento do caixa e o extrato."
+            "description": "Meio pelo qual o valor foi recebido."
+          },
+          "stripePaymentIntentId": {
+            "type": "string",
+            "unique": true,
+            "indexed": true,
+            "title": "Pagamento Stripe",
+            "description": "Identificador do pagamento no Stripe quando a forma é cartão; evita registrar duas vezes o mesmo pagamento confirmado.",
+            "maxLength": 255
           },
           "details": {
             "type": "object",
             "required": true,
             "title": "Detalhes",
-            "description": "Dados do recebimento que são apenas exibidos.",
+            "description": "Dados do recebimento que apenas são exibidos.",
             "fields": {
               "valor": {
                 "type": "money",
                 "required": true,
                 "title": "Valor recebido",
-                "description": "Valor abatido do saldo em aberto do título; menor que o saldo caracteriza baixa parcial.",
+                "description": "Valor efetivamente recebido, total ou parcial; não pode exceder o saldo em aberto do título no momento do registro.",
                 "min": 0.01
               },
               "canal": {
@@ -778,26 +765,19 @@
                   }
                 ],
                 "title": "Canal",
-                "description": "Onde o recebimento foi registrado: no caixa ou pelo pagador no portal."
+                "description": "Onde o recebimento foi registrado: no caixa ou pelo próprio pagador no portal."
               },
-              "registradoEm": {
-                "type": "timestamp",
-                "required": true,
-                "title": "Registrado em",
-                "description": "Momento exato em que o recebimento foi registrado."
+              "observacao": {
+                "type": "text",
+                "title": "Observação",
+                "description": "Anotação livre do caixa sobre o recebimento.",
+                "maxLength": 500
               },
-              "stripe": {
+              "cartao": {
                 "type": "object",
-                "title": "Pagamento Stripe",
-                "description": "Referência da cobrança no Stripe quando a forma de pagamento é cartão.",
+                "title": "Dados do cartão",
+                "description": "Resumo do pagamento com cartão devolvido pelo Stripe, quando a forma é cartão.",
                 "fields": {
-                  "paymentIntentId": {
-                    "type": "string",
-                    "required": true,
-                    "title": "Identificador do pagamento",
-                    "description": "Identificador da intenção de pagamento confirmada no Stripe, usado para conciliar e estornar.",
-                    "maxLength": 255
-                  },
                   "bandeira": {
                     "type": "string",
                     "title": "Bandeira",
@@ -807,34 +787,31 @@
                   "ultimosDigitos": {
                     "type": "string",
                     "title": "Últimos dígitos",
-                    "description": "Quatro últimos dígitos do cartão, para conferência no extrato.",
+                    "description": "Quatro últimos dígitos do cartão, para conferência.",
                     "pattern": "^\\d{4}$"
+                  },
+                  "autorizadoEm": {
+                    "type": "timestamp",
+                    "title": "Autorizado em",
+                    "description": "Momento em que o Stripe confirmou a cobrança."
                   }
                 }
-              },
-              "observacao": {
-                "type": "text",
-                "title": "Observação",
-                "description": "Anotação livre do caixa sobre o recebimento.",
-                "maxLength": 500
               },
               "estorno": {
                 "type": "object",
                 "title": "Estorno",
-                "description": "Dados do estorno, preenchidos quando o caixa desfaz o recebimento.",
+                "description": "Informações do estorno, preenchidas quando o caixa estorna o recebimento.",
                 "fields": {
-                  "motivo": {
-                    "type": "text",
-                    "required": true,
-                    "title": "Motivo do estorno",
-                    "description": "Por que o recebimento foi desfeito.",
-                    "maxLength": 500
-                  },
                   "estornadoEm": {
                     "type": "timestamp",
-                    "required": true,
                     "title": "Estornado em",
-                    "description": "Momento em que o estorno foi registrado."
+                    "description": "Data e hora do estorno, sempre no mesmo dia do recebimento."
+                  },
+                  "motivo": {
+                    "type": "text",
+                    "title": "Motivo do estorno",
+                    "description": "Motivo informado pelo caixa ao estornar o recebimento.",
+                    "maxLength": 500
                   }
                 }
               },
@@ -842,13 +819,7 @@
                 "type": "boolean",
                 "derived": true,
                 "title": "Pode ser estornado",
-                "description": "Recebimento registrado cuja data de recebimento é hoje."
-              },
-              "baixaParcial": {
-                "type": "boolean",
-                "derived": true,
-                "title": "Baixa parcial",
-                "description": "Recebimento registrado cujo valor ficou abaixo do saldo em aberto que o título tinha quando ele foi registrado, deixando saldo a receber."
+                "description": "Recebimento ainda registrado e recebido na data de hoje."
               }
             }
           }
@@ -857,6 +828,9 @@
       "uniqueKeys": [
         [
           "numero"
+        ],
+        [
+          "stripePaymentIntentId"
         ]
       ],
       "lifecycleStates": [
@@ -879,12 +853,13 @@
           "by": [
             "caixa"
           ],
-          "description": "O caixa estorna o recebimento no mesmo dia em que foi registrado; o valor volta ao saldo em aberto do título.",
+          "description": "O caixa estorna um recebimento registrado hoje; o valor volta ao saldo em aberto do título.",
           "payload": [
             "details.estorno.motivo"
           ],
           "ruleRefs": [
-            "estornoSomenteMesmoDia"
+            "estornoSomenteMesmoDia",
+            "estornoDevolveSaldoTitulo"
           ]
         }
       ]
@@ -894,20 +869,21 @@
       "moduleName": "financeiro",
       "entityId": "PainelRecebiveis",
       "title": "Painel de recebíveis",
-      "description": "Totais a receber, recebidos, em aberto e vencidos agrupados por período e por origem, recalculados a partir dos títulos e recebimentos.",
+      "description": "Totais a receber, recebidos, estornados e vencidos por período e por origem (restaurante, academia, assistência técnica), recalculados a partir dos títulos e recebimentos.",
       "displayField": "periodo",
       "relationships": {},
       "capabilities": {
-        "aggregate.byWindow": "Resume os títulos a receber e os recebimentos por dia e por origem num agregado contínuo (time_bucket + GROUP BY) declarado na persistência do módulo; alimenta o painel de recebíveis do gerente financeiro.",
-        "read.window": "Lê os totais do painel para um período e uma origem, pelas colunas indexadas de período e origem; usado pela tela do painel de recebíveis e pela visão de vencidos do gerente financeiro.",
-        "refresh": "Mantém o painel atualizado à medida que títulos são criados e recebimentos e estornos são registrados pelo caixa ou pelo portal do pagador, por política de atualização do agregado; executado pela plataforma, sem ação de pessoa.",
+        "aggregate.byWindow": "Resume os títulos a receber e os recebimentos por dia e por origem num agregado contínuo (time_bucket + GROUP BY origem), alimentando o painel de recebíveis do gerente financeiro.",
+        "read.window": "Lê o painel para o período e a origem escolhidos, filtrando pelas colunas indexadas periodo e origem; usado pelo gerente financeiro na tela do painel de recebíveis e dos títulos vencidos.",
+        "refresh": "Mantém os totais atualizados à medida que títulos nascem nos outros módulos e o caixa registra recebimentos, baixas parciais e estornos, por política de atualização do agregado; executado pela plataforma.",
         "rebuild": "Recalcula todo o painel a partir dos títulos e recebimentos numa migração ou publicação do módulo; executado pela plataforma.",
-        "resample": "Oferece o mesmo painel por mês, agregado sobre a série diária, para o gerente financeiro comparar períodos mais longos."
+        "resample": "Oferece o mesmo painel em granularidade mensal, como um segundo agregado sobre o diário, para o gerente financeiro comparar períodos maiores."
       },
       "rules": [
-        "painelRecalculadoDeTitulosERecebimentos",
-        "recebimentoEstornadoNaoContaComoRecebido",
-        "tituloVencidoEmAbertoAposVencimento"
+        "painelRecalculadoDosTitulosERecebimentos",
+        "estornoNaoContaComoRecebido",
+        "tituloVencidoEmAbertoAposVencimento",
+        "painelVisivelSoGerenteFinanceiro"
       ],
       "kind": "entity",
       "class": "supporting",
@@ -935,35 +911,51 @@
             "required": true,
             "indexed": true,
             "title": "Período",
-            "description": "Início da janela (dia) que esta linha resume, calculado a partir do vencimento dos títulos a receber e da data dos recebimentos. É a coluna de tempo da série; o gerente financeiro filtra o painel por ela.",
+            "description": "Início da janela (dia) que esta linha resume; calculado a partir do vencimento dos títulos e da data dos recebimentos. É a coluna de tempo do painel, filtrada pelo gerente financeiro ao escolher o período.",
             "derived": true
           },
           "origem": {
             "type": "string",
             "indexed": true,
             "title": "Origem",
-            "description": "Código da origem da cobrança que agrupa a linha — o módulo que gerou o título (comanda do restaurante, mensalidade da academia, ordem de serviço da assistência técnica). Indexado porque o painel é lido por origem.",
-            "maxLength": 80,
+            "description": "Código do módulo onde a cobrança nasceu (restaurante, academia, assistência técnica), copiado da origem dos títulos a receber. Chave de agrupamento do painel por origem.",
+            "maxLength": 40,
             "derived": true
           },
           "details": {
             "type": "object",
             "required": true,
             "title": "Medidas",
-            "description": "Totais e contagens do período e da origem, recalculados a partir dos títulos a receber e dos recebimentos. Ninguém digita nenhum destes valores.",
+            "description": "Totais recalculados a partir dos títulos a receber e dos recebimentos do período e da origem. Ninguém digita nenhum destes valores.",
             "fields": {
-              "totalEmitido": {
+              "quantidadeTitulos": {
+                "type": "integer",
+                "required": true,
+                "title": "Quantidade de títulos",
+                "description": "Número de títulos a receber com vencimento no período, desta origem.",
+                "min": 0,
+                "derived": true
+              },
+              "totalAReceber": {
                 "type": "money",
                 "required": true,
-                "title": "Total emitido",
-                "description": "Soma do valor dos títulos a receber com vencimento no período, desta origem.",
+                "title": "Total a receber",
+                "description": "Soma dos valores dos títulos a receber com vencimento no período, desta origem.",
+                "derived": true
+              },
+              "quantidadeRecebimentos": {
+                "type": "integer",
+                "required": true,
+                "title": "Quantidade de recebimentos",
+                "description": "Número de recebimentos registrados no período para títulos desta origem, sem contar os estornados.",
+                "min": 0,
                 "derived": true
               },
               "totalRecebido": {
                 "type": "money",
                 "required": true,
                 "title": "Total recebido",
-                "description": "Soma dos recebimentos efetivados no período para títulos desta origem, incluindo baixas parciais e descontando os estornados.",
+                "description": "Soma dos recebimentos (integrais e baixas parciais) registrados no período para títulos desta origem, descontados os estornados.",
                 "derived": true
               },
               "totalEstornado": {
@@ -977,38 +969,22 @@
                 "type": "money",
                 "required": true,
                 "title": "Total em aberto",
-                "description": "Saldo ainda não recebido dos títulos desta origem com vencimento no período (valor do título menos o que já foi recebido).",
-                "derived": true
-              },
-              "totalVencido": {
-                "type": "money",
-                "required": true,
-                "title": "Total vencido",
-                "description": "Saldo em aberto dos títulos desta origem cujo vencimento já passou.",
-                "derived": true
-              },
-              "quantidadeTitulos": {
-                "type": "integer",
-                "required": true,
-                "title": "Quantidade de títulos",
-                "description": "Número de títulos a receber desta origem com vencimento no período.",
-                "min": 0,
+                "description": "Saldo ainda não recebido dos títulos com vencimento no período, desta origem.",
                 "derived": true
               },
               "quantidadeVencidos": {
                 "type": "integer",
                 "required": true,
                 "title": "Quantidade de títulos vencidos",
-                "description": "Número de títulos desta origem, com vencimento no período, que estão em aberto e já passaram do vencimento.",
+                "description": "Número de títulos desta origem, com vencimento no período, que seguem em aberto depois do vencimento.",
                 "min": 0,
                 "derived": true
               },
-              "quantidadeRecebimentos": {
-                "type": "integer",
+              "totalVencido": {
+                "type": "money",
                 "required": true,
-                "title": "Quantidade de recebimentos",
-                "description": "Número de recebimentos efetivados no período para títulos desta origem, sem contar os estornados.",
-                "min": 0,
+                "title": "Total vencido",
+                "description": "Saldo em aberto dos títulos desta origem, com vencimento no período, cujo vencimento já passou.",
                 "derived": true
               }
             },
@@ -1026,7 +1002,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada título a receber é devido por um pagador.",
+      "description": "Cada título a receber pertence a um pagador; é o caminho do escopo 'próprios títulos' no portal.",
       "field": "TituloReceber.pagadorId"
     },
     {
@@ -1036,17 +1012,17 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento dá baixa, total ou parcial, em um título a receber.",
+      "description": "Cada recebimento baixa o saldo de um título a receber; um título pode ter vários recebimentos parciais.",
       "field": "Recebimento.tituloId"
     },
     {
-      "relationshipId": "pagadorRecebimentos",
+      "relationshipId": "recebimentosPagador",
       "from": "Pagador",
       "to": "Recebimento",
       "type": "oneToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Recebimentos do pagador, obtidos pelos títulos que ele deve, usados no extrato e no portal.",
+      "description": "Recebimentos de um pagador, obtidos pelos títulos dele; usado no extrato e no portal.",
       "through": "TituloReceber",
       "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
       "derived": true
@@ -1086,6 +1062,11 @@
       "detail": "Pagador.details.identification.subtype.values"
     },
     {
+      "kind": "tightened",
+      "entityId": "Pagador",
+      "detail": "Pagador.details.identification.docType.values"
+    },
+    {
       "kind": "derivedFromPlatform",
       "entityId": "Pagador",
       "detail": "record.fields.details.financeiro.fields.saldoEmAberto.derived (derived[])"
@@ -1093,7 +1074,7 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Pagador",
-      "detail": "record.fields.details.financeiro.fields.possuiTitulosVencidos.derived (derived[])"
+      "detail": "record.fields.details.financeiro.fields.quantidadeTitulosVencidos.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1103,7 +1084,7 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "TituloReceber",
-      "detail": "record.fields.details.fields.totalRecebido.derived (derived[])"
+      "detail": "record.fields.details.fields.valorRecebido.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1118,7 +1099,7 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "TituloReceber",
-      "detail": "record.fields.details.fields.parcialmenteRecebido.derived (derived[])"
+      "detail": "record.fields.details.fields.recebidoParcialmente.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1128,7 +1109,7 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "TituloReceber",
-      "detail": "record.fields.details.fields.diasAtraso.derived (derived[])"
+      "detail": "record.fields.details.fields.diasEmAtraso.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1139,11 +1120,6 @@
       "kind": "derivedFromPlatform",
       "entityId": "Recebimento",
       "detail": "record.fields.details.fields.estornavel.derived (derived[])"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "Recebimento",
-      "detail": "record.fields.details.fields.baixaParcial.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1168,7 +1144,17 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.totalEmitido.derived (ddm)"
+      "detail": "record.fields.details.fields.quantidadeTitulos.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelRecebiveis",
+      "detail": "record.fields.details.fields.totalAReceber.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelRecebiveis",
+      "detail": "record.fields.details.fields.quantidadeRecebimentos.derived (ddm)"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1188,22 +1174,12 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.totalVencido.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.quantidadeTitulos.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "PainelRecebiveis",
       "detail": "record.fields.details.fields.quantidadeVencidos.derived (ddm)"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "PainelRecebiveis",
-      "detail": "record.fields.details.fields.quantidadeRecebimentos.derived (ddm)"
+      "detail": "record.fields.details.fields.totalVencido.derived (ddm)"
     }
   ]
 }

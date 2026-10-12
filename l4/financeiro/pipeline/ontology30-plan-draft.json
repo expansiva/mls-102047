@@ -1,13 +1,13 @@
 {
   "moduleName": "financeiro",
-  "businessDomain": "Contas a receber da organização: títulos a receber gerados por outros módulos (restaurante, academia, assistência técnica), recebimentos no caixa e pelo portal do pagador, estornos no mesmo dia e painel de recebíveis.",
+  "businessDomain": "Contas a receber da organização: títulos a receber que chegam de outros módulos (comanda do restaurante, mensalidade da academia, ordem de serviço da assistência técnica), recebimentos no caixa ou pelo portal com baixa parcial e estorno no mesmo dia, painel de recebíveis e extrato por pagador.",
   "entities": [
     {
       "entityId": "Pagador",
       "kind": "role",
       "family": "mdm",
       "title": "Pagador",
-      "description": "Pessoa que deve os títulos a receber da organização; acessa o portal para ver e pagar os próprios títulos. Papel do módulo financeiro sobre o registro mestre de pessoa.",
+      "description": "Pessoa responsável por pagar os títulos a receber. É o mesmo cadastro mestre do cliente, aluno ou consumidor de outros módulos; acessa o portal para ver só os próprios títulos e recebimentos.",
       "displayField": "details.identification.name",
       "writer": "inbound",
       "subtype": "Person",
@@ -19,7 +19,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Título a receber",
-      "description": "Cobrança nascida em outro módulo (comanda fechada, mensalidade gerada, ordem de serviço entregue) com pagador, valor, vencimento e origem; o saldo em aberto e a situação de vencido são derivados dos recebimentos.",
+      "description": "Cobrança nascida em outro módulo (comanda fechada, mensalidade gerada, ordem de serviço entregue) com pagador, valor, vencimento e origem. O saldo em aberto, a quitação e o vencimento são derivados dos recebimentos.",
       "displayField": "numero",
       "writer": "inbound",
       "class": "core",
@@ -34,7 +34,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Recebimento",
-      "description": "Baixa total ou parcial de um título, em dinheiro, pix ou cartão via Stripe, registrada pelo caixa ou paga pelo pagador no portal; pode ser estornada apenas no mesmo dia.",
+      "description": "Pagamento total ou parcial de um título em dinheiro, pix ou cartão via Stripe, registrado pelo caixa ou pelo pagador no portal; pode ser estornado apenas no mesmo dia.",
       "displayField": "numero",
       "class": "event",
       "storage": {
@@ -48,7 +48,7 @@
       "kind": "entity",
       "family": "ddm",
       "title": "Painel de recebíveis",
-      "description": "Totais a receber, recebidos, em aberto e vencidos agrupados por período e por origem, recalculados a partir dos títulos e recebimentos.",
+      "description": "Totais a receber, recebidos, estornados e vencidos por período e por origem (restaurante, academia, assistência técnica), recalculados a partir dos títulos e recebimentos.",
       "displayField": "periodo",
       "class": "supporting",
       "storage": {
@@ -66,7 +66,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada título a receber é devido por um pagador.",
+      "description": "Cada título a receber pertence a um pagador; é o caminho do escopo 'próprios títulos' no portal.",
       "field": "TituloReceber.pagadorId"
     },
     {
@@ -76,17 +76,17 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento dá baixa, total ou parcial, em um título a receber.",
+      "description": "Cada recebimento baixa o saldo de um título a receber; um título pode ter vários recebimentos parciais.",
       "field": "Recebimento.tituloId"
     },
     {
-      "relationshipId": "pagadorRecebimentos",
+      "relationshipId": "recebimentosPagador",
       "from": "Pagador",
       "to": "Recebimento",
       "type": "oneToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Recebimentos do pagador, obtidos pelos títulos que ele deve, usados no extrato e no portal.",
+      "description": "Recebimentos de um pagador, obtidos pelos títulos dele; usado no extrato e no portal.",
       "through": "TituloReceber",
       "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
       "derived": true

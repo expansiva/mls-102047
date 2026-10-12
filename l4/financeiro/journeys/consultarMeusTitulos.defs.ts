@@ -8,7 +8,7 @@ export const consultarMeusTitulosJourney = {
   "business": {
     "actorRef": "pagador",
     "title": "Consultar meus títulos",
-    "goal": "Ver os próprios títulos e recebimentos no portal.",
+    "goal": "Ver no portal os próprios títulos e recebimentos.",
     "entry": {
       "mode": "coldStart"
     },
@@ -17,26 +17,26 @@ export const consultarMeusTitulosJourney = {
         "stepId": "listarMeusTitulos",
         "kind": "locate",
         "entity": "TituloReceber",
-        "title": "Listar meus títulos",
-        "description": "O pagador vê no portal apenas os seus títulos, em aberto e quitados."
+        "title": "Ver meus títulos",
+        "description": "O pagador vê no portal apenas os títulos em que ele é o pagador, em aberto e quitados."
       },
       {
-        "stepId": "verMeuTitulo",
+        "stepId": "verRecebimentos",
         "kind": "inspect",
-        "entity": "TituloReceber",
-        "title": "Ver detalhes do título",
-        "description": "O pagador consulta origem, valor, vencimento, saldo e recebimentos do título."
+        "entity": "Recebimento",
+        "title": "Ver meus recebimentos",
+        "description": "O pagador abre um título e vê os recebimentos registrados nele."
       }
     ],
     "outcome": {
-      "statement": "O pagador conhece a situação dos próprios títulos e recebimentos.",
+      "statement": "O pagador conhece a situação dos próprios títulos e pagamentos.",
       "evidence": [
-        "Somente títulos do próprio pagador são exibidos",
-        "Recebimentos de cada título visíveis com data e valor"
+        "Lista apenas com os títulos do pagador",
+        "Recebimentos de cada título exibidos com data, valor e forma"
       ]
     }
   },
-  "businessHash": "sha256:48d1f140263ea6f208b2cb04f04dba89d92e58ef8e5f4eb608eafd02a8fc1ff7"
+  "businessHash": "sha256:8c02b8d4aba3a6c0ae462e896ddbc1faa437010d91b152f66f6b9f51ade0e0cb"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConsultarMeusTitulosJourneyType = typeof consultarMeusTitulosJourney;

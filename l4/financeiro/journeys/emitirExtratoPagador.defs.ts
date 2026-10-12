@@ -8,7 +8,7 @@ export const emitirExtratoPagadorJourney = {
   "business": {
     "actorRef": "gerenteFinanceiro",
     "title": "Emitir extrato por pagador",
-    "goal": "Emitir o extrato de títulos e recebimentos de um pagador.",
+    "goal": "Gerar o extrato de títulos e recebimentos de um pagador.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -25,18 +25,25 @@ export const emitirExtratoPagadorJourney = {
         "kind": "inspect",
         "entity": "TituloReceber",
         "title": "Ver extrato do pagador",
-        "description": "O gerente consulta, no período escolhido, os títulos do pagador com seus recebimentos, estornos e saldo em aberto."
+        "description": "O gerente vê os títulos do pagador no período, com recebimentos, estornos e saldo."
+      },
+      {
+        "stepId": "exportarExtrato",
+        "kind": "inspect",
+        "entity": "TituloReceber",
+        "title": "Emitir extrato",
+        "description": "O gerente imprime ou baixa o extrato do pagador."
       }
     ],
     "outcome": {
-      "statement": "O extrato do pagador é emitido com títulos, recebimentos e saldo.",
+      "statement": "O extrato do pagador foi emitido com seus títulos, recebimentos e saldo.",
       "evidence": [
-        "Extrato lista títulos com origem, vencimento e valor",
-        "Extrato mostra recebimentos e saldo total em aberto do pagador"
+        "Extrato listando títulos, recebimentos e saldo do pagador no período",
+        "Arquivo do extrato disponível para impressão ou download"
       ]
     }
   },
-  "businessHash": "sha256:cb15a75c508b1101b0e5450c162b0ef9e834dd67a418a57f264cc4a76a6823ee"
+  "businessHash": "sha256:770991887ef0ba6214074aeb3238606b50e9f5f0ed2d414111eb207b11bbb27e"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type EmitirExtratoPagadorJourneyType = typeof emitirExtratoPagadorJourney;

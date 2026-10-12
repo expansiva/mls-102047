@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const financeiroOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "financeiro",
-  "businessDomain": "Contas a receber da organização: títulos a receber gerados por outros módulos (restaurante, academia, assistência técnica), recebimentos no caixa e pelo portal do pagador, estornos no mesmo dia e painel de recebíveis.",
+  "businessDomain": "Contas a receber da organização: títulos a receber que chegam de outros módulos (comanda do restaurante, mensalidade da academia, ordem de serviço da assistência técnica), recebimentos no caixa ou pelo portal com baixa parcial e estorno no mesmo dia, painel de recebíveis e extrato por pagador.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "financeiro",
@@ -41,7 +41,7 @@ export const financeiroOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada título a receber é devido por um pagador.",
+      "description": "Cada título a receber pertence a um pagador; é o caminho do escopo 'próprios títulos' no portal.",
       "field": "TituloReceber.pagadorId"
     },
     {
@@ -51,17 +51,17 @@ export const financeiroOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento dá baixa, total ou parcial, em um título a receber.",
+      "description": "Cada recebimento baixa o saldo de um título a receber; um título pode ter vários recebimentos parciais.",
       "field": "Recebimento.tituloId"
     },
     {
-      "relationshipId": "pagadorRecebimentos",
+      "relationshipId": "recebimentosPagador",
       "from": "Pagador",
       "to": "Recebimento",
       "type": "oneToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Recebimentos do pagador, obtidos pelos títulos que ele deve, usados no extrato e no portal.",
+      "description": "Recebimentos de um pagador, obtidos pelos títulos dele; usado no extrato e no portal.",
       "through": "TituloReceber",
       "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
       "derived": true

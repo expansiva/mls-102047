@@ -32,7 +32,7 @@ export const financeiroJourneyIndex = {
       "title": "Consultar meus títulos"
     },
     {
-      "journeyId": "pagarTituloPortal",
+      "journeyId": "pagarTituloCartao",
       "actorRef": "pagador",
       "title": "Pagar título com cartão"
     }
