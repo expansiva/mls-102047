@@ -1,44 +1,54 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/ontology/Cliente.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosEntityCliente = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "locacaoEquipamentos",
   "entityId": "Cliente",
   "title": "Cliente",
-  "description": "Pessoa cadastrada no MDM que celebra contratos de locação de equipamentos.",
+  "description": "Pessoa que aluga equipamentos da locadora; registro mestre compartilhado da organização, localizado por nome ou documento e cadastrado junto com o contrato quando ainda não existe.",
   "displayField": "details.identification.name",
   "relationships": {
-    "contratosLocacao": {
-      "relationshipId": "clienteContratosLocacao",
+    "contratos": {
+      "relationshipId": "contratoCliente",
       "to": "ContratoLocacao",
       "via": "ContratoLocacao.clienteId",
       "cardinality": "1:N",
-      "title": "Contratos de locação do cliente",
-      "description": "Contratos de locação celebrados pelo cliente; cada contrato pertence a um único cliente.",
+      "title": "Contratos de locação",
+      "description": "Contratos de locação feitos pelo cliente.",
       "mode": "fk",
-      "required": "ao criar um contrato de locação",
-      "role": "cliente"
+      "direction": "to",
+      "required": true
+    },
+    "contatos": {
+      "relationshipId": "contatosCliente",
+      "to": "ContactChannel",
+      "via": "HasContact",
+      "cardinality": "1:N",
+      "title": "Canais de contato",
+      "description": "Telefones e e-mails do cliente, vinculados por HasContact."
     }
   },
   "capabilities": {
-    "read.byId": "Lê o cadastro mestre pelo identificador MDM para exibir o cliente do contrato · consulta direta por id no índice e documento MDM · atendente e gerente.",
-    "locate.byName": "Localiza clientes pelo nome informado ao abrir uma locação · busca por nome no índice de pessoas · atendente.",
-    "locate.byDocument": "Localiza um cliente pelo documento nacional para evitar cadastro duplicado · consulta por tipo e número de documento no MDM · atendente.",
-    "register.createOrAttach": "Cria a pessoa no MDM quando ausente ou anexa a função de Cliente quando já existe · deduplicação por documento e inclusão da tag locacaoEquipamentos.Cliente · atendente ao criar contrato.",
-    "edit.platformFields": "Atualiza os dados de identificação do cliente mantidos pela plataforma · atualização do documento mestre e do índice de identificação · atendente.",
-    "inactivate": "Inativa ou reativa o cliente sem apagar seu histórico de contratos · alteração do status MDM · gerente.",
-    "listLinks": "Exibe os contratos de locação vinculados ao cliente · leitura da relação clienteContratosLocacao pelo vínculo de chave estrangeira · atendente e gerente.",
-    "comment": "Registra observações sobre o cadastro do cliente · comentário ancorado no registro MDM do cliente · atendente e gerente.",
-    "audit": "Consulta quem alterou o cadastro mestre do cliente e quando · leitura da trilha de auditoria do MDM · gerente.",
-    "statusHistory.read": "Exibe as mudanças de situação do cadastro do cliente · leitura do histórico de status do MDM · gerente."
+    "read.byId": "Lê o cliente pelo id para exibir seu nome nos contratos de locação e na tela do atendente.",
+    "locate.byName": "O atendente busca o cliente pelo nome ao iniciar um contrato de locação.",
+    "locate.byDocument": "O atendente busca o cliente pelo CPF ou outro documento para evitar cadastro duplicado.",
+    "register.createOrAttach": "Ao criar o contrato, o atendente cadastra o cliente quando ainda não existe, ou vincula o papel de cliente da locadora a uma pessoa já cadastrada.",
+    "edit.platformFields": "O atendente corrige nome, documento, endereço e consentimento do cliente.",
+    "link.contact": "O atendente registra telefone ou e-mail do cliente como canal de contato vinculado.",
+    "listLinks": "Mostra na ficha do cliente seus canais de contato e demais vínculos.",
+    "inactivate": "O gerente inativa o papel de cliente que não deve mais alugar, podendo reativá-lo.",
+    "comment": "O atendente deixa observações sobre o cliente, como restrições ou preferências de retirada.",
+    "attach.document": "O atendente anexa cópia do documento do cliente apresentada na locação.",
+    "audit": "O gerente consulta quem alterou o cadastro do cliente e quando."
   },
   "rules": [
     "rule-foreign-namespace-refused",
-    "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
-    "rule-person-privacy-consent-required-br-eu"
+    "rule-document-shape-validated",
+    "rule-person-privacy-consent-required-br-eu",
+    "rule-delete-blocked-by-relationships"
   ],
   "kind": "role",
   "subtype": "Person",
@@ -57,12 +67,13 @@ export const locacaoEquipamentosEntityCliente = {
         "type": "integer",
         "required": true,
         "derived": true,
+        "writePrecondition": true,
         "description": "Bumped by the engine on every write; optimistic concurrency."
       },
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre da pessoa cliente utilizado pela locadora.",
+        "description": "The JSONB document, as a map of groups (see groups).",
         "fields": {
           "identification": {
             "type": "object",
@@ -76,25 +87,45 @@ export const locacaoEquipamentosEntityCliente = {
                 "values": [
                   {
                     "value": "Person",
-                    "title": "Pessoa",
-                    "description": "Pessoa física cadastrada como cliente."
+                    "title": "Pessoa"
                   }
                 ],
-                "description": "Indica que este registro mestre representa uma pessoa.",
-                "title": "Tipo de cadastro",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "description": "Sempre pessoa: o cliente da locadora é uma pessoa física.",
+                "title": "Subtipo"
               },
               "name": {
                 "type": "string",
                 "required": true,
                 "indexed": true,
-                "maxLength": 0,
-                "description": "Nome pelo qual o cliente é identificado ao localizar e celebrar contratos de locação.",
-                "title": "Nome",
-                "min": 0,
-                "max": 0
+                "maxLength": 200,
+                "description": "Nome do cliente, usado pelo atendente para localizá-lo ao criar o contrato de locação.",
+                "title": "Nome"
+              },
+              "status": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Active",
+                    "title": "Ativo"
+                  },
+                  {
+                    "value": "Inactive",
+                    "title": "Inativo"
+                  },
+                  {
+                    "value": "Merged",
+                    "title": "Mesclado"
+                  },
+                  {
+                    "value": "Blocked",
+                    "title": "Bloqueado"
+                  }
+                ],
+                "title": "Situação do cadastro",
+                "description": "Situação do registro mestre (ativo, inativo, mesclado, bloqueado)."
               },
               "docType": {
                 "type": "enum",
@@ -102,39 +133,33 @@ export const locacaoEquipamentosEntityCliente = {
                 "values": [
                   {
                     "value": "CPF",
-                    "title": "CPF",
-                    "description": "Cadastro de Pessoa Física."
-                  },
-                  {
-                    "value": "NationalId",
-                    "title": "Documento nacional",
-                    "description": "Documento nacional de identificação."
+                    "title": "CPF"
                   },
                   {
                     "value": "Passport",
-                    "title": "Passaporte",
-                    "description": "Documento de viagem do cliente."
+                    "title": "Passaporte"
+                  },
+                  {
+                    "value": "NationalId",
+                    "title": "Documento de identidade"
+                  },
+                  {
+                    "value": "DriversLicense",
+                    "title": "CNH"
                   },
                   {
                     "value": "Other",
-                    "title": "Outro",
-                    "description": "Outro documento de identificação aceito."
+                    "title": "Outro"
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional usado para identificar e evitar duplicidade de cliente.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "description": "Tipo do documento nacional do cliente, usado para evitar cadastro duplicado."
               },
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento nacional do cliente para identificação e deduplicação.",
-                "title": "Número do documento",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "description": "Número do documento do cliente; o atendente busca por ele antes de cadastrar.",
+                "title": "Número do documento"
               },
               "countryCode": {
                 "type": "string",
@@ -143,19 +168,58 @@ export const locacaoEquipamentosEntityCliente = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "Código ISO do país aplicável ao documento e às regras do cliente.",
-                "title": "País",
-                "min": 0,
-                "max": 0
+                "description": "País do documento do cliente (ISO 3166-1 alfa-2), normalmente BR.",
+                "title": "País"
+              },
+              "createdAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Cadastrado em",
+                "description": "Data em que o registro mestre foi criado."
+              },
+              "updatedAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Atualizado em",
+                "description": "Data da última alteração do registro mestre."
               }
             },
-            "description": "Dados de identificação do cliente mantidos pela plataforma MDM."
+            "description": "Chaves de identificação do cliente no cadastro mestre, usadas para localizá-lo ao criar o contrato."
           },
           "base": {
             "type": "object",
             "owner": "platform",
-            "fields": {},
-            "description": "Dados básicos da plataforma MDM que não são necessários nesta locação."
+            "fields": {
+              "addresses": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "Address",
+                "title": "Endereços",
+                "description": "Endereços do cliente, consultados para contato e cobrança da locação."
+              },
+              "contacts": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "ContactSummary",
+                "derived": true,
+                "description": "Resumo dos telefones e e-mails do cliente, vindos dos canais de contato vinculados.",
+                "title": "Contatos"
+              },
+              "relationshipRefs": {
+                "type": "object",
+                "required": true,
+                "derived": true,
+                "description": "Chaves compactas dos vínculos do cliente, recalculadas pela plataforma.",
+                "title": "Vínculos"
+              }
+            },
+            "description": "Dados comuns do registro mestre lidos pela locadora."
           },
           "person": {
             "type": "object",
@@ -164,20 +228,17 @@ export const locacaoEquipamentosEntityCliente = {
               "privacyConsent": {
                 "type": "object",
                 "of": "PrivacyConsent",
-                "description": "Consentimento de privacidade do cliente, aplicado quando exigido pelas regras de proteção de dados.",
-                "title": "Consentimento de privacidade",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "description": "Consentimento de tratamento de dados pessoais do cliente, exigido pela LGPD para residentes no Brasil.",
+                "title": "Consentimento LGPD"
               }
             },
-            "description": "Dados pessoais da plataforma aplicáveis ao cliente."
+            "description": "Dados de pessoa física do cliente."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Dados promovidos pela organização, somente para leitura neste módulo."
+            "description": "Campos promovidos pela organização; a locadora apenas lê."
           },
           "locacaoEquipamentos": {
             "type": "object",
@@ -189,7 +250,7 @@ export const locacaoEquipamentosEntityCliente = {
       }
     }
   }
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type LocacaoEquipamentosEntityClienteType = typeof locacaoEquipamentosEntityCliente;
 

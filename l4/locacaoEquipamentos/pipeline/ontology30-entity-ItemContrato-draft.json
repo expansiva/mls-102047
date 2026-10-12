@@ -1,0 +1,173 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "locacaoEquipamentos",
+    "entityId": "ItemContrato",
+    "title": "Item do contrato",
+    "description": "Equipamento incluído em um contrato de locação, com o valor da diária praticado; o mesmo equipamento não pode estar em dois contratos com períodos sobrepostos.",
+    "displayField": "equipamentoId",
+    "relationships": {
+      "contrato": {
+        "relationshipId": "itemContrato",
+        "to": "ContratoLocacao",
+        "via": "ItemContrato.contratoId",
+        "cardinality": "N:1",
+        "title": "Contrato do item",
+        "description": "Cada item pertence a um contrato; um contrato tem um ou mais itens.",
+        "mode": "fk",
+        "required": true
+      },
+      "equipamento": {
+        "relationshipId": "itemEquipamento",
+        "to": "Equipamento",
+        "via": "ItemContrato.equipamentoId",
+        "cardinality": "N:1",
+        "title": "Equipamento locado",
+        "description": "Cada item aponta para o equipamento locado; um equipamento aparece em vários contratos ao longo do tempo, sem períodos sobrepostos.",
+        "mode": "fk",
+        "required": true
+      }
+    },
+    "capabilities": {
+      "read.byId": "Lê um item do contrato pelo id, quando o atendente abre o item a partir do contrato.",
+      "listByForeignKey": "Lista os itens de um contrato (por contratoId) na tela do contrato, e os contratos em que um equipamento aparece (por equipamentoId) para o gerente e para a checagem de sobreposição; preenche listas de vários contratos de uma vez.",
+      "locate.byColumn": "Filtra itens por contrato ou equipamento, ordenados e paginados, usado pelo atendente e pelo gerente.",
+      "count": "Conta os itens de um contrato para exibir no cabeçalho do contrato.",
+      "create": "O atendente inclui um equipamento no contrato com o valor da diária praticado, após a verificação de período sobreposto.",
+      "update": "O atendente ajusta a observação de um item enquanto o contrato ainda não foi confirmado.",
+      "delete": "O atendente retira um equipamento incluído por engano antes de confirmar o contrato.",
+      "uniqueKey": "O motor recusa o mesmo equipamento duas vezes no mesmo contrato, pela chave única contratoId + equipamentoId.",
+      "transaction": "Grava o contrato e seus itens juntos, tudo ou nada, quando o atendente cria e confirma a locação.",
+      "comment": "O atendente deixa uma nota sobre o equipamento entregue neste item.",
+      "locacaoEquipamentos.verificarSobreposicao": "Antes de incluir o item, busca pelo equipamentoId os itens de outros contratos não encerrados e recusa quando o período de retirada e devolução prevista se sobrepõe; usado pelo atendente ao adicionar itens."
+    },
+    "rules": [
+      "equipamentoSemPeriodoSobreposto",
+      "equipamentoIndisponivelNaoLoca",
+      "valorDiariaDoEquipamento",
+      "multaAtrasoUmEMeio",
+      "itensSomenteAntesDaConfirmacao"
+    ],
+    "kind": "entity",
+    "class": "supporting",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "locacaoEquipamentos_itemcontrato",
+      "kind": "relational"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "contratoId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "ContratoLocacao"
+          ],
+          "title": "Contrato",
+          "description": "Contrato de locação ao qual este item pertence."
+        },
+        "equipamentoId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "Equipamento"
+          ],
+          "title": "Equipamento",
+          "description": "Equipamento locado neste item; usado para conferir se ele já está em outro contrato com período sobreposto."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "title": "Detalhes do item",
+          "description": "Dados do item que não são filtrados.",
+          "fields": {
+            "valorDiaria": {
+              "type": "money",
+              "required": true,
+              "title": "Valor da diária praticado",
+              "description": "Valor da diária do equipamento no momento em que foi incluído no contrato; base do valor previsto e da multa por atraso, mesmo que a diária do equipamento mude depois.",
+              "min": 0
+            },
+            "observacao": {
+              "type": "text",
+              "title": "Observação",
+              "description": "Anotação do atendente sobre o equipamento entregue neste contrato (acessórios, estado na retirada).",
+              "maxLength": 1000
+            },
+            "diasPrevistos": {
+              "type": "integer",
+              "derived": true,
+              "title": "Dias previstos",
+              "description": "Quantidade de dias entre a data de retirada e a data prevista de devolução do contrato deste item."
+            },
+            "valorPrevisto": {
+              "type": "money",
+              "derived": true,
+              "title": "Valor previsto do item",
+              "description": "Valor da diária praticado neste item multiplicado pelos dias previstos do contrato."
+            },
+            "diasAtraso": {
+              "type": "integer",
+              "derived": true,
+              "title": "Dias de atraso",
+              "description": "Dias entre a data prevista de devolução e a data real de devolução registrada no contrato; zero quando devolvido no prazo ou ainda não devolvido."
+            },
+            "multaAtraso": {
+              "type": "money",
+              "derived": true,
+              "title": "Multa por atraso do item",
+              "description": "Valor da diária praticado neste item vezes os dias de atraso vezes 1,5; zero quando não houve atraso."
+            }
+          }
+        }
+      }
+    },
+    "uniqueKeys": [
+      [
+        "contratoId",
+        "equipamentoId"
+      ]
+    ]
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemContrato",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemContrato",
+      "detail": "record.fields.details.fields.diasPrevistos.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemContrato",
+      "detail": "record.fields.details.fields.valorPrevisto.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemContrato",
+      "detail": "record.fields.details.fields.diasAtraso.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemContrato",
+      "detail": "record.fields.details.fields.multaAtraso.derived (derived[])"
+    }
+  ]
+}

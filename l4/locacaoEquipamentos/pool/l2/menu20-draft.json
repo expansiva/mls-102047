@@ -1,51 +1,40 @@
 {
   "tree": [
     {
-      "id": "inicio_atendente",
+      "id": "inicio",
       "kind": "page",
       "label": "Início",
       "organisms": [
         {
           "kind": "highlights",
-          "text": "Vejo as multas por atraso dos contratos e dos itens e a situação operacional dos equipamentos."
+          "text": "Contratos em atraso, com dias de atraso e multa por atraso de cada um"
+        },
+        {
+          "kind": "summary",
+          "text": "Equipamentos por situação atual: disponíveis, locados e em manutenção, com o contrato vigente e a data prevista de devolução dos locados"
         }
       ]
     },
     {
-      "id": "contratos_locacao",
+      "id": "contratos",
       "kind": "page",
       "label": "Contratos de locação",
       "organisms": [
         {
           "kind": "list",
-          "text": "Localizo o cliente para registrar uma nova locação."
-        },
-        {
-          "kind": "list",
-          "text": "Localizo o contrato para acompanhar ou devolver equipamentos."
-        },
-        {
-          "kind": "detail",
-          "text": "Vejo o contrato, os itens locados, as datas e a multa por atraso."
+          "text": "Pesquise os contratos pelo número ou pelo cliente e veja quais estão em atraso"
         },
         {
           "kind": "form",
-          "text": "Crio o contrato de locação escolhendo o cliente, os equipamentos e o período."
+          "text": "Novo contrato: escolha o cliente, informe o período, pesquise os equipamentos pelo código ou descrição, confira a situação e o valor da diária e adicione os itens"
+        },
+        {
+          "kind": "detail",
+          "text": "Confira o contrato: cliente, período, itens, dias contratados, valor previsto, dias de atraso e multa por atraso"
         },
         {
           "kind": "actions",
-          "text": "Registro a data real de devolução e concluo a locação."
-        }
-      ]
-    },
-    {
-      "id": "inicio_gerente",
-      "kind": "page",
-      "label": "Início",
-      "organisms": [
-        {
-          "kind": "highlights",
-          "text": "Vejo quais equipamentos estão disponíveis, locados ou em manutenção."
+          "text": "Confirmar o contrato e registrar a data real de devolução"
         }
       ]
     },
@@ -56,15 +45,19 @@
       "organisms": [
         {
           "kind": "list",
-          "text": "Localizo os equipamentos da organização."
+          "text": "Pesquise os equipamentos pelo código ou descrição e filtre por situação: disponível, locado ou em manutenção"
         },
         {
           "kind": "detail",
-          "text": "Vejo o equipamento, a situação operacional e os períodos de manutenção."
+          "text": "Veja o equipamento: situação atual, valor da diária, contrato vigente e data prevista de devolução"
         },
         {
           "kind": "form",
-          "text": "Cadastro e atualizo equipamentos e seus períodos de manutenção."
+          "text": "Cadastre e altere os dados dos equipamentos"
+        },
+        {
+          "kind": "actions",
+          "text": "Enviar para manutenção um equipamento disponível sem contrato vigente e retornar da manutenção quando o conserto terminar"
         }
       ]
     }
@@ -73,14 +66,15 @@
     {
       "actorRef": "atendente",
       "nodes": [
-        "inicio_atendente",
-        "contratos_locacao"
+        "inicio",
+        "contratos",
+        "equipamentos"
       ]
     },
     {
       "actorRef": "gerente",
       "nodes": [
-        "inicio_gerente",
+        "inicio",
         "equipamentos"
       ]
     }
@@ -90,17 +84,30 @@
       {
         "journeyId": "criarContratoLocacao",
         "pages": [
-          "contratos_locacao"
+          "contratos"
         ]
       },
       {
         "journeyId": "registrarDevolucao",
         "pages": [
-          "contratos_locacao"
+          "contratos"
         ]
       },
       {
-        "journeyId": "consultarSituacaoEquipamentos",
+        "journeyId": "acompanharSituacaoEquipamentos",
+        "pages": [
+          "equipamentos",
+          "inicio"
+        ]
+      },
+      {
+        "journeyId": "enviarEquipamentoManutencao",
+        "pages": [
+          "equipamentos"
+        ]
+      },
+      {
+        "journeyId": "retornarEquipamentoManutencao",
         "pages": [
           "equipamentos"
         ]
@@ -110,12 +117,6 @@
     "records": [
       {
         "entityId": "Equipamento",
-        "pages": [
-          "equipamentos"
-        ]
-      },
-      {
-        "entityId": "ManutencaoEquipamento",
         "pages": [
           "equipamentos"
         ]

@@ -1,11 +1,11 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "locacaoEquipamentos",
-  "businessDomain": "Locação de equipamentos para construção",
+  "businessDomain": "Locação de equipamentos para construção: cadastro de equipamentos com código, descrição, valor da diária e situação; contratos de locação para clientes com um ou mais equipamentos e período, sem sobreposição de períodos para o mesmo equipamento; devolução com data real e multa por atraso (diária × dias de atraso × 1,5); acompanhamento da situação dos equipamentos pelo gerente.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "locacaoEquipamentos",
@@ -28,59 +28,66 @@ export const locacaoEquipamentosOntologyIndex = {
       "class": "event"
     },
     {
-      "entityId": "ItemLocacao",
-      "kind": "entity",
-      "class": "supporting"
-    },
-    {
-      "entityId": "ManutencaoEquipamento",
+      "entityId": "ItemContrato",
       "kind": "entity",
       "class": "supporting"
     }
   ],
   "relationships": [
     {
-      "relationshipId": "clienteContratosLocacao",
-      "from": "Cliente",
-      "to": "ContratoLocacao",
-      "type": "oneToMany",
+      "relationshipId": "contratoCliente",
+      "from": "ContratoLocacao",
+      "to": "Cliente",
+      "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Um cliente pode possuir vários contratos de locação, e cada contrato pertence a um cliente.",
+      "description": "Cada contrato de locação pertence a um cliente; um cliente pode ter vários contratos.",
       "field": "ContratoLocacao.clienteId"
     },
     {
-      "relationshipId": "contratoItensLocacao",
-      "from": "ContratoLocacao",
-      "to": "ItemLocacao",
-      "type": "oneToMany",
+      "relationshipId": "itemContrato",
+      "from": "ItemContrato",
+      "to": "ContratoLocacao",
+      "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Um contrato de locação contém um ou mais itens de equipamentos locados.",
-      "field": "ItemLocacao.contratoLocacaoId"
+      "description": "Cada item pertence a um contrato; um contrato tem um ou mais itens.",
+      "field": "ItemContrato.contratoId"
     },
     {
-      "relationshipId": "itemLocacaoEquipamento",
-      "from": "ItemLocacao",
+      "relationshipId": "itemEquipamento",
+      "from": "ItemContrato",
       "to": "Equipamento",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item de locação referencia exatamente um equipamento, que pode constar em locações diferentes em períodos não sobrepostos.",
-      "field": "ItemLocacao.equipamentoId"
+      "description": "Cada item aponta para o equipamento locado; um equipamento aparece em vários contratos ao longo do tempo, sem períodos sobrepostos.",
+      "field": "ItemContrato.equipamentoId"
     },
     {
-      "relationshipId": "equipamentoManutencoes",
-      "from": "Equipamento",
-      "to": "ManutencaoEquipamento",
+      "relationshipId": "equipamentosDoContrato",
+      "from": "ContratoLocacao",
+      "to": "Equipamento",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "Equipamentos de um contrato e, no sentido inverso, o contrato vigente de um equipamento locado, lidos pelos itens do contrato.",
+      "through": "ItemContrato",
+      "path": "ContratoLocacao.id -> ItemContrato.contratoId -> ItemContrato.equipamentoId -> Equipamento.id",
+      "derived": true
+    },
+    {
+      "relationshipId": "contatosCliente",
+      "from": "Cliente",
+      "to": "ContactChannel",
       "type": "oneToMany",
-      "required": true,
-      "mode": "fk",
-      "description": "Um equipamento pode ter vários períodos de manutenção, cada um associado a um único equipamento.",
-      "field": "ManutencaoEquipamento.equipamentoId"
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "Telefones e e-mails do cliente, mantidos como canais de contato no cadastro mestre.",
+      "catalogType": "HasContact"
     }
   ]
-} as const satisfies Ns5OntologyIndexV3;
+} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
 
 export type LocacaoEquipamentosOntologyIndexType = typeof locacaoEquipamentosOntologyIndex;
 

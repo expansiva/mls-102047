@@ -4,40 +4,52 @@
     "moduleName": "locacaoEquipamentos",
     "entityId": "Equipamento",
     "title": "Equipamento",
-    "description": "Equipamento da locadora identificado por código, com diária definida e situação operacional calculada a partir das locações e manutenções.",
+    "description": "Equipamento para construção operado pela locadora, com código, descrição, valor da diária e situação (disponível, locado ou em manutenção); a condição de locado é lida dos contratos vigentes que apontam para ele.",
     "displayField": "codigo",
     "relationships": {
-      "itensLocacao": {
-        "relationshipId": "itemLocacaoEquipamento",
-        "to": "ItemLocacao",
-        "via": "ItemLocacao.equipamentoId",
+      "itens": {
+        "relationshipId": "itemEquipamento",
+        "to": "ItemContrato",
+        "via": "ItemContrato.equipamentoId",
         "cardinality": "1:N",
-        "title": "Itens de locação",
-        "description": "Itens de locação que referenciam este equipamento em contratos da locadora.",
+        "title": "Itens de contrato",
+        "description": "Itens de contratos que locaram este equipamento ao longo do tempo, sem períodos sobrepostos.",
         "mode": "fk",
         "direction": "to",
-        "required": "Sempre que um item de locação for registrado."
+        "required": true
       },
-      "manutencoes": {
-        "relationshipId": "equipamentoManutencoes",
-        "to": "ManutencaoEquipamento",
-        "via": "ManutencaoEquipamento.equipamentoId",
-        "cardinality": "1:N",
-        "title": "Manutenções",
-        "description": "Períodos de manutenção associados a este equipamento.",
-        "mode": "fk",
-        "required": "Sempre que uma manutenção for registrada."
+      "contratos": {
+        "relationshipId": "equipamentosDoContrato",
+        "to": "ContratoLocacao",
+        "via": "ItemContrato",
+        "cardinality": "N:N",
+        "title": "Contratos",
+        "description": "Contratos de locação em que o equipamento aparece, lidos pelos itens; inclui o contrato vigente quando locado.",
+        "mode": "throughTable",
+        "path": "ContratoLocacao.id -> ItemContrato.contratoId -> ItemContrato.equipamentoId -> Equipamento.id",
+        "derived": true,
+        "direction": "to"
       }
     },
     "capabilities": {
-      "read.byId": "Consulta um equipamento pelo identificador da linha no repositório de equipamentos para as telas que já possuem seu id, usada pelo gerente.",
-      "locate.byColumn": "Localiza equipamentos pelo código indexado, com ordenação e paginação, para o gerente encontrar equipamentos da locadora.",
-      "count": "Conta os equipamentos que atendem aos filtros por colunas indexadas para exibir o total na consulta do gerente.",
-      "locacaoEquipamentos.consultarSituacaoEquipamentos": "Apura e apresenta a situação operacional calculada de cada equipamento a partir das locações e manutenções vigentes, para o gerente acompanhar os disponíveis, locados e em manutenção."
+      "read.byId": "Abre a ficha do equipamento pelo id para o gerente consultar código, descrição, diária, situação e contrato vigente.",
+      "locate.byColumn": "Lista os equipamentos filtrados por situação e ordenados por código, para o gerente acompanhar disponíveis e em manutenção.",
+      "locate.byText": "Pesquisa equipamentos por trecho do código ou da descrição, usada pelo atendente ao incluir itens no contrato.",
+      "count": "Conta os equipamentos por situação para os totais do painel do gerente.",
+      "listByForeignKey": "Lista os itens de contrato que apontam para o equipamento, para mostrar o contrato vigente e o histórico de locações.",
+      "create": "Cadastra um novo equipamento com código, descrição e valor da diária; feito pelo gerente.",
+      "update": "Altera descrição e valor da diária do equipamento; feito pelo gerente.",
+      "transition": "Envia o equipamento para manutenção ou o devolve à operação, atualizando a coluna de situação; feito pelo gerente.",
+      "uniqueKey": "Recusa um segundo equipamento com o mesmo código, por índice único na coluna código.",
+      "attach.document": "Anexa fotos, manuais ou laudos de manutenção ao equipamento; usado pelo gerente.",
+      "comment": "Registra observações sobre o estado do equipamento, como avarias percebidas na devolução; usado por atendente e gerente."
     },
     "rules": [
-      "periodosLocacaoNaoSobrepostos",
-      "situacaoOperacionalEquipamento"
+      "codigoEquipamentoUnico",
+      "valorDiariaPositivo",
+      "equipamentoEmManutencaoNaoLoca",
+      "periodoSemSobreposicao",
+      "equipamentoLocadoNaoVaiManutencao"
     ],
     "writer": "crud",
     "kind": "entity",
@@ -66,48 +78,73 @@
           "required": true,
           "unique": true,
           "indexed": true,
-          "of": "Address",
           "title": "Código",
-          "description": "Código único que identifica o equipamento na locadora e permite sua localização.",
-          "maxLength": 80,
-          "min": 0,
-          "max": 0
+          "description": "Código de identificação do equipamento na locadora; único, usado na busca e exibido nos contratos.",
+          "maxLength": 30
+        },
+        "descricao": {
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "title": "Descrição",
+          "description": "Descrição do equipamento para construção (ex.: betoneira 400 L); pesquisada pelo atendente ao montar o contrato.",
+          "maxLength": 200
+        },
+        "status": {
+          "type": "enum",
+          "required": true,
+          "indexed": true,
+          "values": [
+            {
+              "value": "disponivel",
+              "title": "Disponível",
+              "description": "Apto a ser incluído em contratos de locação."
+            },
+            {
+              "value": "emManutencao",
+              "title": "Em manutenção",
+              "description": "Fora de operação; não pode ser incluído em contratos."
+            }
+          ],
+          "title": "Situação",
+          "description": "Situação operacional registrada: disponível para locação ou em manutenção. A condição de locado não é gravada aqui; é lida dos contratos vigentes."
         },
         "details": {
           "type": "object",
           "required": true,
-          "of": "Address",
           "title": "Detalhes",
-          "description": "Dados descritivos e comerciais do equipamento que não exigem índice próprio.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "description": "Dados do equipamento que não são filtrados.",
           "fields": {
-            "descricao": {
-              "type": "text",
-              "required": true,
-              "of": "Address",
-              "title": "Descrição",
-              "description": "Descrição do equipamento de construção disponibilizado para locação.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0
-            },
             "valorDiaria": {
               "type": "money",
               "required": true,
-              "of": "Address",
               "title": "Valor da diária",
-              "description": "Valor cobrado por uma diária de locação deste equipamento.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0
+              "description": "Valor cobrado por dia de locação; base do cálculo do valor do contrato e da multa por atraso (diária × dias de atraso × 1,5).",
+              "min": 0.01
             },
-            "situacaoOperacional": {
+            "locado": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Locado",
+              "description": "Verdadeiro quando existe um contrato vigente com um item que aponta para este equipamento, ainda sem devolução registrada."
+            },
+            "situacaoAtual": {
               "type": "enum",
               "derived": true,
-              "title": "Situação operacional",
-              "description": "Situação calculada na data da consulta: em manutenção quando há manutenção em andamento; locado quando há item de locação em período vigente; disponível quando não há manutenção em andamento nem locação vigente."
+              "title": "Situação atual",
+              "description": "Situação vista pelo gerente: em manutenção quando assim registrado; locado quando há contrato vigente com este equipamento ainda não devolvido; disponível nos demais casos."
+            },
+            "contratoVigente": {
+              "type": "record",
+              "derived": true,
+              "title": "Contrato vigente",
+              "description": "O contrato de locação vigente que inclui este equipamento e ainda não teve a devolução registrada, quando houver."
+            },
+            "dataPrevistaDevolucao": {
+              "type": "date",
+              "derived": true,
+              "title": "Data prevista de devolução",
+              "description": "Data prevista de devolução do contrato vigente que inclui este equipamento, quando ele está locado."
             }
           }
         }
@@ -117,6 +154,45 @@
       [
         "codigo"
       ]
+    ],
+    "lifecycleStates": [
+      {
+        "state": "disponivel",
+        "reachedBy": "actor"
+      },
+      {
+        "state": "emManutencao",
+        "reachedBy": "actor"
+      }
+    ],
+    "transitions": [
+      {
+        "transitionId": "enviarManutencao",
+        "from": [
+          "disponivel"
+        ],
+        "to": "emManutencao",
+        "by": [
+          "gerente"
+        ],
+        "description": "Retira o equipamento de operação para manutenção; só é permitido quando ele não está em contrato vigente.",
+        "payload": [],
+        "ruleRefs": [
+          "equipamentoLocadoNaoVaiManutencao"
+        ]
+      },
+      {
+        "transitionId": "retornarManutencao",
+        "from": [
+          "emManutencao"
+        ],
+        "to": "disponivel",
+        "by": [
+          "gerente"
+        ],
+        "description": "Devolve o equipamento à operação após a manutenção, liberando-o para novas locações.",
+        "payload": []
+      }
     ]
   },
   "normalizations": [
@@ -128,7 +204,22 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Equipamento",
-      "detail": "record.fields.details.fields.situacaoOperacional.derived (derived[])"
+      "detail": "record.fields.details.fields.locado.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Equipamento",
+      "detail": "record.fields.details.fields.situacaoAtual.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Equipamento",
+      "detail": "record.fields.details.fields.contratoVigente.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Equipamento",
+      "detail": "record.fields.details.fields.dataPrevistaDevolucao.derived (derived[])"
     }
   ]
 }

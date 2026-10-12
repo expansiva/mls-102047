@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -14,16 +14,26 @@ export const locacaoEquipamentosJourneyIndex = {
     {
       "journeyId": "registrarDevolucao",
       "actorRef": "atendente",
-      "title": "Registrar devolução de equipamentos"
+      "title": "Registrar devolução"
     },
     {
-      "journeyId": "consultarSituacaoEquipamentos",
+      "journeyId": "acompanharSituacaoEquipamentos",
       "actorRef": "gerente",
-      "title": "Consultar situação dos equipamentos"
+      "title": "Acompanhar situação dos equipamentos"
+    },
+    {
+      "journeyId": "enviarEquipamentoManutencao",
+      "actorRef": "gerente",
+      "title": "Enviar equipamento para manutenção"
+    },
+    {
+      "journeyId": "retornarEquipamentoManutencao",
+      "actorRef": "gerente",
+      "title": "Retornar equipamento da manutenção"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type LocacaoEquipamentosJourneyIndexType = typeof locacaoEquipamentosJourneyIndex;
 

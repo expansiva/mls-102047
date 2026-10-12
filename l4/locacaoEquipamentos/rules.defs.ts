@@ -1,28 +1,29 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "locacaoEquipamentos",
   "rules": {
-    "devolucaoAposRetirada": "A data real de devolução não pode ser anterior à data de retirada do contrato.",
-    "multaPorAtraso": "A multa total do contrato é zero quando não há atraso e, quando há atraso, corresponde à soma das diárias contratadas dos itens multiplicada pelos dias de atraso e por 1,5.",
-    "ruleForeignNamespaceRefused": "Dados pertencentes a outro domínio não podem ser gravados no espaço de dados deste módulo.",
-    "ruleDocumentShapeValidated": "Os dados documentais do cliente devem respeitar a estrutura exigida para o seu tipo de identificação.",
-    "ruleIdentityNeverInNamespace": "A identidade mestre do cliente não pode ser mantida no espaço de dados deste módulo.",
-    "rulePersonPrivacyConsentRequiredBrEu": "O consentimento de privacidade do cliente deve estar presente quando exigido pelas regras de proteção de dados aplicáveis no Brasil ou na União Europeia.",
-    "periodosLocacaoNaoSobrepostos": "Os períodos de locação de um mesmo equipamento não podem se sobrepor.",
-    "situacaoOperacionalEquipamento": "A situação operacional do equipamento é em manutenção quando houver manutenção em andamento, locado quando houver locação vigente e disponível quando não houver nenhuma dessas condições.",
-    "contratoComPeloMenosUmItem": "Todo contrato de locação deve conter pelo menos um item de locação.",
-    "periodoLocacaoValido": "A data prevista de devolução não pode ser anterior à data de retirada.",
-    "equipamentoSemSobreposicao": "Um equipamento incluído em um contrato não pode estar vinculado a outro contrato com período de locação coincidente.",
-    "itemEquipamentoUnicoNoContrato": "Um equipamento pode constar apenas uma vez entre os itens do mesmo contrato de locação.",
-    "calcularMultaAtraso": "Quando houver atraso, a multa de cada item de locação corresponde à diária contratada multiplicada pelos dias de atraso e por 1,5.",
-    "maintenanceDatesValid": "A data de fim da manutenção não pode ser anterior à sua data de início.",
-    "maintenanceDoesNotOverlapRental": "O período de manutenção de um equipamento não pode se sobrepor a um período de locação desse equipamento."
+    "codigoEquipamentoUnico": "O código do equipamento é único na locadora; não pode haver dois equipamentos com o mesmo código.",
+    "valorDiariaPositivo": "O valor da diária do equipamento deve ser maior que zero.",
+    "numeroContratoSequencial": "Cada contrato de locação recebe, na criação, um número único e sequencial que não pode ser alterado.",
+    "contratoPeriodoValido": "A data prevista de devolução do contrato deve ser posterior à data de retirada.",
+    "contratoExigeItens": "O contrato só pode ser confirmado como vigente se tiver ao menos um equipamento incluído.",
+    "itensSomenteAntesDaConfirmacao": "Equipamentos só podem ser incluídos ou retirados do contrato enquanto ele está em elaboração; depois de vigente ou encerrado, os itens não mudam.",
+    "equipamentoSemSobreposicao": "O mesmo equipamento não pode estar em dois contratos de locação com períodos sobrepostos.",
+    "periodoSemSobreposicao": "Dois contratos têm períodos sobrepostos quando a data de retirada de cada um é anterior ou igual à data prevista de devolução do outro, considerando apenas contratos em elaboração ou vigentes.",
+    "equipamentoSemPeriodoSobreposto": "Ao incluir um equipamento no contrato e novamente ao confirmá-lo, o sistema recusa o equipamento que já esteja em outro contrato com período sobreposto.",
+    "equipamentoEmManutencaoNaoLoca": "Equipamento em manutenção não pode ser incluído em contrato de locação.",
+    "equipamentoIndisponivelNaoLoca": "Somente equipamento na situação disponível pode ser incluído em um contrato de locação; equipamento locado ou em manutenção é recusado.",
+    "equipamentoLocadoNaoVaiManutencao": "Equipamento que faz parte de contrato de locação vigente ainda não devolvido não pode ser enviado para manutenção.",
+    "valorDiariaDoEquipamento": "O valor da diária do item do contrato é o valor da diária do equipamento no momento da inclusão e não muda se a diária do equipamento for alterada depois.",
+    "devolucaoNaoAnteriorRetirada": "A data real de devolução não pode ser anterior à data de retirada do contrato.",
+    "multaPorAtraso": "Há atraso quando a data real de devolução é posterior à data prevista; os dias de atraso são a diferença entre essas datas e, sem atraso, dias de atraso e multa são zero.",
+    "multaAtrasoUmEMeio": "A multa por atraso é a soma das diárias dos equipamentos do contrato multiplicada pelos dias de atraso e por 1,5."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type LocacaoEquipamentosRulesType = typeof locacaoEquipamentosRules;
 

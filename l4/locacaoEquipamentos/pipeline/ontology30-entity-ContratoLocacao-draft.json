@@ -4,50 +4,66 @@
     "moduleName": "locacaoEquipamentos",
     "entityId": "ContratoLocacao",
     "title": "Contrato de locação",
-    "description": "Contrato que registra a locação de um cliente, seu período previsto e a devolução efetiva dos equipamentos.",
-    "displayField": "id",
+    "description": "Contrato de locação de um cliente com período de retirada e devolução prevista; passa a vigente na confirmação e é encerrado na devolução com a data real, os dias de atraso e a multa calculada.",
+    "displayField": "numero",
     "relationships": {
       "cliente": {
-        "relationshipId": "clienteContratosLocacao",
+        "relationshipId": "contratoCliente",
         "to": "Cliente",
         "via": "ContratoLocacao.clienteId",
         "cardinality": "N:1",
         "title": "Cliente do contrato",
-        "description": "Cada contrato de locação pertence a um cliente, que pode possuir vários contratos.",
+        "description": "Cada contrato pertence a um cliente; um cliente pode ter vários contratos.",
+        "mode": "fk",
+        "required": true
+      },
+      "itens": {
+        "relationshipId": "itemContrato",
+        "to": "ItemContrato",
+        "via": "ItemContrato.contratoId",
+        "cardinality": "1:N",
+        "title": "Itens do contrato",
+        "description": "Equipamentos incluídos no contrato; um contrato confirmado tem um ou mais itens.",
         "mode": "fk",
         "direction": "to",
-        "required": "Sempre",
-        "role": "locatário"
+        "required": "ao confirmar o contrato"
       },
-      "itensLocacao": {
-        "relationshipId": "contratoItensLocacao",
-        "to": "ItemLocacao",
-        "via": "ItemLocacao.contratoLocacaoId",
-        "cardinality": "1:N",
-        "title": "Itens da locação",
-        "description": "O contrato contém um ou mais itens que identificam os equipamentos locados.",
-        "mode": "fk",
-        "required": "Sempre",
-        "role": "contrato"
+      "equipamentos": {
+        "relationshipId": "equipamentosDoContrato",
+        "to": "Equipamento",
+        "via": "ItemContrato",
+        "cardinality": "N:N",
+        "title": "Equipamentos do contrato",
+        "description": "Equipamentos locados neste contrato, lidos pelos itens.",
+        "mode": "throughTable",
+        "path": "ContratoLocacao.id -> ItemContrato.contratoId -> ItemContrato.equipamentoId -> Equipamento.id",
+        "derived": true
       }
     },
     "capabilities": {
-      "read.byId": "Lê um contrato pelo identificador da linha com consulta por id; usado pelo atendente ao inspecionar o contrato em contexto.",
-      "locate.byColumn": "Lista contratos por cliente, situação e datas indexadas, com ordenação e paginação; usado pelo atendente para localizar contratos em aberto e pelo gerente para acompanhar locações.",
-      "count": "Conta contratos que atendem aos filtros de cliente, situação e período; usado nas listas do atendente e do gerente.",
-      "listByForeignKey": "Lista os contratos vinculados a um cliente pela chave clienteId; usado ao consultar o histórico de locações do cliente.",
-      "create": "Cria o contrato com cliente, período e situação em aberto; usado pelo atendente ao registrar uma nova locação.",
-      "update": "Altera dados permitidos de um contrato ainda em aberto, como o período previsto, com validação de conflitos; usado pelo atendente antes da devolução.",
-      "transition": "Move o contrato de em aberto para devolvido ao registrar a data real de devolução; usado pelo atendente.",
-      "transaction": "Grava o contrato e seus itens de locação de forma atômica; usado pelo atendente na criação para não deixar um contrato sem equipamentos.",
-      "read.mdmRecord": "Lê o registro mestre apontado por clienteId para exibir os dados do cliente sem copiá-los no contrato; usado nas telas do atendente e do gerente."
+      "read.byId": "Abre o contrato pelo id para o atendente conferir equipamentos, período e multa na devolução.",
+      "locate.byColumn": "Lista contratos por cliente, situação e datas de retirada ou devolução prevista, para o atendente localizar o contrato vigente.",
+      "locate.byText": "Busca o contrato pelo número digitado na caixa de pesquisa da devolução.",
+      "count": "Conta contratos vigentes e em atraso para os totais exibidos ao atendente e ao gerente.",
+      "listByForeignKey": "Lista os contratos de um cliente e, pelos itens, o contrato de um equipamento informado pelo código.",
+      "create": "O atendente cria o contrato para o cliente com a data de retirada e a data prevista de devolução.",
+      "update": "O atendente ajusta período e observações enquanto o contrato está em elaboração.",
+      "transition": "Move o contrato de em elaboração para vigente na confirmação e de vigente para encerrado na devolução, pelo atendente.",
+      "uniqueKey": "Recusa um segundo contrato com o mesmo número.",
+      "transaction": "Grava a confirmação ou a devolução do contrato junto com a mudança de situação dos equipamentos, tudo ou nada.",
+      "read.mdmRecord": "Lê do cadastro mestre o nome e o documento do cliente exibidos no contrato e na lista.",
+      "sequence.next": "Emite o número do contrato na criação, que o cliente informa na devolução.",
+      "attach.document": "Anexa ao contrato o termo assinado pelo cliente ou fotos dos equipamentos na retirada e na devolução.",
+      "comment": "O atendente deixa notas no contrato sobre negociações e ocorrências da locação.",
+      "locacaoEquipamentos.calcularMulta": "Calcula, na devolução, os dias de atraso e a multa (diária × dias de atraso × 1,5) para o atendente informar ao cliente."
     },
     "rules": [
-      "contratoComPeloMenosUmItem",
-      "periodoLocacaoValido",
+      "contratoPeriodoValido",
+      "contratoExigeItens",
       "equipamentoSemSobreposicao",
-      "devolucaoAposRetirada",
-      "multaPorAtraso"
+      "devolucaoNaoAnteriorRetirada",
+      "multaPorAtraso",
+      "numeroContratoSequencial"
     ],
     "kind": "entity",
     "class": "event",
@@ -70,117 +86,172 @@
           "required": true,
           "derived": true
         },
+        "numero": {
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "indexed": true,
+          "title": "Número do contrato",
+          "description": "Número do contrato informado ao cliente e usado na busca da devolução; emitido pela sequência da plataforma na criação.",
+          "maxLength": 30
+        },
         "clienteId": {
           "type": "record",
           "required": true,
           "indexed": true,
-          "of": "ContactSummary",
           "to": [
             "Cliente"
           ],
           "title": "Cliente",
-          "description": "Cliente para quem o contrato de locação foi celebrado.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
-        },
-        "dataRetirada": {
-          "type": "date",
-          "required": true,
-          "indexed": true,
-          "of": "ContactSummary",
-          "title": "Data de retirada",
-          "description": "Data prevista para a retirada dos equipamentos pelo cliente; é usada para verificar conflitos entre períodos de locação.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
-        },
-        "dataPrevistaDevolucao": {
-          "type": "date",
-          "required": true,
-          "indexed": true,
-          "of": "ContactSummary",
-          "title": "Data prevista de devolução",
-          "description": "Data acordada para a devolução dos equipamentos; é usada para verificar conflitos de período e apurar atraso.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "description": "Cliente que loca os equipamentos; nome e documento são lidos do cadastro mestre."
         },
         "status": {
           "type": "enum",
           "required": true,
           "indexed": true,
-          "of": "ContactSummary",
           "values": [
             {
-              "value": "open",
-              "title": "Em aberto",
-              "description": "A locação foi criada e aguarda a devolução dos equipamentos."
+              "value": "rascunho",
+              "title": "Em elaboração",
+              "description": "Contrato criado, recebendo itens, ainda não confirmado."
             },
             {
-              "value": "returned",
-              "title": "Devolvido",
-              "description": "A devolução foi registrada e a locação foi concluída."
+              "value": "vigente",
+              "title": "Vigente",
+              "description": "Contrato confirmado; os equipamentos estão locados."
+            },
+            {
+              "value": "encerrado",
+              "title": "Encerrado",
+              "description": "Equipamentos devolvidos, data real registrada."
             }
           ],
           "title": "Situação do contrato",
-          "description": "Indica se a locação ainda está em aberto ou se os equipamentos já foram devolvidos.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "description": "Etapa do contrato: em elaboração enquanto o atendente inclui os equipamentos, vigente após a confirmação e encerrado na devolução."
+        },
+        "dataRetirada": {
+          "type": "date",
+          "required": true,
+          "indexed": true,
+          "title": "Data de retirada",
+          "description": "Dia em que o cliente retira os equipamentos; início do período usado para verificar sobreposição."
+        },
+        "dataPrevistaDevolucao": {
+          "type": "date",
+          "required": true,
+          "indexed": true,
+          "title": "Data prevista de devolução",
+          "description": "Dia combinado para a devolução; fim do período contratado e base do cálculo de atraso."
+        },
+        "dataRealDevolucao": {
+          "type": "date",
+          "indexed": true,
+          "title": "Data real de devolução",
+          "description": "Dia em que os equipamentos foram efetivamente devolvidos; registrada pelo atendente na devolução."
         },
         "details": {
           "type": "object",
           "required": true,
-          "of": "ContactSummary",
-          "title": "Dados do contrato",
-          "description": "Informações do contrato que não são usadas como critério de filtro, ordenação ou pesquisa.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "title": "Detalhes",
+          "description": "Informações complementares do contrato.",
           "fields": {
-            "dataDevolucaoReal": {
-              "type": "date",
-              "of": "ContactSummary",
-              "title": "Data real de devolução",
-              "description": "Data em que os equipamentos foram efetivamente devolvidos pelo cliente.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0
+            "observacoes": {
+              "type": "text",
+              "title": "Observações",
+              "description": "Anotações do atendente sobre a locação, como condições combinadas na retirada."
             },
-            "multaAtraso": {
+            "observacoesDevolucao": {
+              "type": "text",
+              "title": "Observações da devolução",
+              "description": "Anotações registradas no momento da devolução, como o estado em que os equipamentos voltaram."
+            },
+            "diasContratados": {
+              "type": "integer",
+              "derived": true,
+              "title": "Dias contratados",
+              "description": "Quantidade de diárias entre a data de retirada e a data prevista de devolução."
+            },
+            "valorPrevisto": {
+              "type": "money",
+              "derived": true,
+              "title": "Valor previsto da locação",
+              "description": "Soma, para cada equipamento do contrato, do valor da diária multiplicado pelos dias contratados."
+            },
+            "diasAtraso": {
+              "type": "integer",
+              "derived": true,
+              "title": "Dias de atraso",
+              "description": "Dias entre a data prevista de devolução e a data real de devolução quando a devolução foi posterior à prevista; zero quando devolvido no prazo."
+            },
+            "valorMulta": {
               "type": "money",
               "derived": true,
               "title": "Multa por atraso",
-              "description": "Valor da multa quando a data real de devolução é posterior à data prevista, calculado pela soma das diárias dos equipamentos locados multiplicada pela quantidade de dias de atraso e por 1,5; é zero quando não houver atraso."
+              "description": "Soma das diárias dos equipamentos do contrato multiplicada pelos dias de atraso e por 1,5; zero quando não houve atraso."
+            },
+            "atrasado": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Em atraso",
+              "description": "Contrato vigente cuja data prevista de devolução já passou sem que a devolução tenha sido registrada."
             }
           }
         }
       }
     },
+    "uniqueKeys": [
+      [
+        "numero"
+      ]
+    ],
     "lifecycleStates": [
       {
-        "state": "open",
+        "state": "rascunho",
         "reachedBy": "actor"
       },
       {
-        "state": "returned",
+        "state": "vigente",
+        "reachedBy": "actor"
+      },
+      {
+        "state": "encerrado",
         "reachedBy": "actor"
       }
     ],
     "transitions": [
       {
-        "transitionId": "registrarDevolucao",
+        "transitionId": "ativarContrato",
         "from": [
-          "open"
+          "rascunho"
         ],
-        "to": "returned",
+        "to": "vigente",
         "by": [
           "atendente"
         ],
-        "description": "Registra a data real de devolução e conclui a locação dos equipamentos do contrato.",
+        "description": "O atendente confirma o contrato com ao menos um equipamento; o contrato passa a vigente e os equipamentos passam a locados.",
+        "payload": [],
         "ruleRefs": [
-          "devolucaoAposRetirada",
+          "contratoExigeItens",
+          "equipamentoSemSobreposicao",
+          "contratoPeriodoValido"
+        ]
+      },
+      {
+        "transitionId": "registrarDevolucao",
+        "from": [
+          "vigente"
+        ],
+        "to": "encerrado",
+        "by": [
+          "atendente"
+        ],
+        "description": "O atendente informa a data real de devolução; o sistema calcula os dias de atraso e a multa, e os equipamentos voltam a ficar disponíveis.",
+        "payload": [
+          "dataRealDevolucao",
+          "details.observacoesDevolucao"
+        ],
+        "ruleRefs": [
+          "devolucaoNaoAnteriorRetirada",
           "multaPorAtraso"
         ]
       }
@@ -195,7 +266,27 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "ContratoLocacao",
-      "detail": "record.fields.details.fields.multaAtraso.derived (derived[])"
+      "detail": "record.fields.details.fields.diasContratados.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ContratoLocacao",
+      "detail": "record.fields.details.fields.valorPrevisto.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ContratoLocacao",
+      "detail": "record.fields.details.fields.diasAtraso.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ContratoLocacao",
+      "detail": "record.fields.details.fields.valorMulta.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ContratoLocacao",
+      "detail": "record.fields.details.fields.atrasado.derived (derived[])"
     }
   ]
 }
