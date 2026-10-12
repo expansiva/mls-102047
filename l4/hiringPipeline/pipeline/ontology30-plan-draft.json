@@ -1,46 +1,13 @@
 {
   "moduleName": "hiringPipeline",
-  "businessDomain": "Hiring pipeline management for job positions and candidate applications.",
+  "businessDomain": "Recruitment pipeline: job positions opened by recruiters, candidates registered and their applications moved through screening, interview, offer, hired or rejected, with hiring managers deciding offer and hire on their own positions.",
   "entities": [
-    {
-      "entityId": "Candidate",
-      "kind": "role",
-      "family": "mdm",
-      "title": "Candidate",
-      "description": "A person registered or attached as a candidate for job applications in the hiring pipeline.",
-      "displayField": "details.identification.name",
-      "subtype": "Person",
-      "roleTag": "hiringPipeline.Candidate",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "entityId": "CandidateContact",
-      "kind": "role",
-      "family": "mdm",
-      "title": "Candidate Contact Channel",
-      "description": "A contact channel linked to a candidate, including the email used to identify and communicate with the candidate.",
-      "displayField": "details.contactChannel.value",
-      "subtype": "ContactChannel",
-      "roleTag": "hiringPipeline.CandidateContact",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "entityId": "HiringManager",
-      "kind": "role",
-      "family": "mdm",
-      "title": "Hiring Manager",
-      "description": "A person responsible for a job position and authorized to decide its offers and hiring outcomes.",
-      "displayField": "details.identification.name",
-      "subtype": "Person",
-      "roleTag": "hiringPipeline.HiringManager",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
     {
       "entityId": "JobPosition",
       "kind": "entity",
       "family": "tdm",
       "title": "Job Position",
-      "description": "An approved hiring need opened for applications, with a responsible hiring manager and a defined headcount.",
+      "description": "An open role to fill, with title, department, description, headcount and its hiring manager. It closes automatically when hires reach the headcount; hires so far and applications by stage are derived from its applications.",
       "displayField": "title",
       "class": "core",
       "storage": {
@@ -54,27 +21,50 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Application",
-      "description": "A candidate's application to a job position, progressed through screening, interview, offer, hiring, or rejection.",
-      "displayField": "id",
+      "description": "A candidate applying to a job position. It moves through screening, interview, offer, then hired or rejected; a rejection records its reason.",
+      "displayField": "applicationNumber",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
         "table": "hiringPipeline_application",
         "kind": "relational"
       }
+    },
+    {
+      "entityId": "Candidate",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Candidate",
+      "description": "A person who applies to job positions. Name lives in the master record, the e-mail is a linked contact channel, the resume is a platform attachment; the module namespace keeps only the candidate's source.",
+      "displayField": "details.identification.name",
+      "subtype": "Person",
+      "roleTag": "hiringPipeline.Candidate",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "entityId": "CandidateEmail",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Candidate E-mail",
+      "description": "The candidate's e-mail address as a contact channel record, linked to the candidate by HasContact and used to find duplicates.",
+      "displayField": "details.contactChannel.value",
+      "subtype": "ContactChannel",
+      "roleTag": "hiringPipeline.CandidateEmail",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "entityId": "HiringManager",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Hiring Manager",
+      "description": "The person responsible for a job position who decides offers and hires; the positions and applications they see are scoped to the positions that point at them.",
+      "displayField": "details.identification.name",
+      "subtype": "Person",
+      "roleTag": "hiringPipeline.HiringManager",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
     }
   ],
   "relationships": [
-    {
-      "relationshipId": "candidateHasContact",
-      "from": "Candidate",
-      "to": "CandidateContact",
-      "type": "oneToMany",
-      "required": true,
-      "mode": "mdmRelationship",
-      "description": "A candidate has one or more contact channels, including the email used for identification and communication.",
-      "catalogType": "HasContact"
-    },
     {
       "relationshipId": "jobPositionHiringManager",
       "from": "JobPosition",
@@ -82,18 +72,8 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Each job position is assigned to one responsible hiring manager, who decides offers and hiring outcomes.",
+      "description": "Each job position has one hiring manager who decides offers and hires for it.",
       "field": "JobPosition.hiringManagerId"
-    },
-    {
-      "relationshipId": "applicationCandidate",
-      "from": "Application",
-      "to": "Candidate",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Each application belongs to the candidate who applied for the position.",
-      "field": "Application.candidateId"
     },
     {
       "relationshipId": "applicationJobPosition",
@@ -102,26 +82,43 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Each application is submitted for one job position.",
+      "description": "Each application is made to one job position.",
       "field": "Application.jobPositionId"
+    },
+    {
+      "relationshipId": "applicationCandidate",
+      "from": "Application",
+      "to": "Candidate",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Each application belongs to one candidate.",
+      "field": "Application.candidateId"
+    },
+    {
+      "relationshipId": "candidateEmail",
+      "from": "Candidate",
+      "to": "CandidateEmail",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "The candidate's e-mail addresses are contact channels linked to the candidate.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "jobPositionCandidates",
+      "from": "JobPosition",
+      "to": "Candidate",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "The candidates who applied to a job position, read through its applications.",
+      "through": "Application",
+      "path": "JobPosition.id <- Application.jobPositionId, Application.candidateId -> Candidate.id",
+      "derived": true
     }
   ],
   "normalizations": [
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "Candidate",
-      "detail": "roleTag hiringPipeline.Candidate; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "CandidateContact",
-      "detail": "roleTag hiringPipeline.CandidateContact; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "HiringManager",
-      "detail": "roleTag hiringPipeline.HiringManager; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
     {
       "kind": "derivedFromPlatform",
       "entityId": "JobPosition",
@@ -131,6 +128,21 @@
       "kind": "derivedFromPlatform",
       "entityId": "Application",
       "detail": "storage.table hiringPipeline_application"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Candidate",
+      "detail": "roleTag hiringPipeline.Candidate; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "CandidateEmail",
+      "detail": "roleTag hiringPipeline.CandidateEmail; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "HiringManager",
+      "detail": "roleTag hiringPipeline.HiringManager; source /_102034_/l4/ontology/mdm.defs.ts"
     }
   ]
 }

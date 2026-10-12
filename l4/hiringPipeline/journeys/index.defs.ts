@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const hiringPipelineJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -17,33 +17,38 @@ export const hiringPipelineJourneyIndex = {
       "title": "Register a candidate"
     },
     {
-      "journeyId": "startApplicationScreening",
+      "journeyId": "recordApplication",
       "actorRef": "recruiter",
-      "title": "Start screening an application"
+      "title": "Record an application"
     },
     {
-      "journeyId": "advanceApplicationToInterview",
+      "journeyId": "advanceToInterview",
       "actorRef": "recruiter",
-      "title": "Advance an application to interview"
+      "title": "Move an application to interview"
+    },
+    {
+      "journeyId": "rejectApplication",
+      "actorRef": "recruiter",
+      "title": "Reject an application"
     },
     {
       "journeyId": "decideOffer",
       "actorRef": "hiringManager",
-      "title": "Decide whether to make an offer"
+      "title": "Decide on an offer"
     },
     {
-      "journeyId": "decideHiringOutcome",
+      "journeyId": "confirmHire",
       "actorRef": "hiringManager",
-      "title": "Decide the hiring outcome"
+      "title": "Confirm a hire"
     },
     {
-      "journeyId": "recordApplicationRejection",
-      "actorRef": "recruiter",
-      "title": "Record an application rejection"
+      "journeyId": "reviewMyPipeline",
+      "actorRef": "hiringManager",
+      "title": "Review my positions' pipeline"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type HiringPipelineJourneyIndexType = typeof hiringPipelineJourneyIndex;
 

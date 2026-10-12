@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/journeys/openJobPosition.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const openJobPositionJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -8,29 +8,37 @@ export const openJobPositionJourney = {
   "business": {
     "actorRef": "recruiter",
     "title": "Open a job position",
-    "goal": "Make an approved hiring need available for applications under its responsible hiring manager.",
+    "goal": "Publish a new job position with its hiring manager and headcount so candidates can apply.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "createJobPosition",
+        "stepId": "createPosition",
         "kind": "act",
         "entity": "JobPosition",
         "effect": "create",
-        "title": "x",
-        "description": "Open a job position with its title, department, description, headcount, and responsible hiring manager."
+        "title": "Open job position",
+        "description": "The recruiter enters title, department, description, headcount and the hiring manager of the position, and opens it."
+      },
+      {
+        "stepId": "reviewPosition",
+        "kind": "inspect",
+        "entity": "JobPosition",
+        "title": "Review opened position",
+        "description": "The recruiter checks the position details and confirms it is open with zero hires."
       }
     ],
     "outcome": {
-      "statement": "The job position is open and can receive applications.",
+      "statement": "A job position is open and ready to receive applications.",
       "evidence": [
-        "An open job position shows its title, department, headcount, and responsible hiring manager."
+        "The position appears in the open positions list with its title, department and headcount",
+        "The position shows its hiring manager"
       ]
     }
   },
-  "businessHash": "sha256:7ac9c25de1f7cd87566ebeb5b5b0f0ddce28067ada2e671697289023b1accc97"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:e304868e184cb22c5d71f0481e107e28ca1142df795d4925dfe67f25edccbabc"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type OpenJobPositionJourneyType = typeof openJobPositionJourney;
 

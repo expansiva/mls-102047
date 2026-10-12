@@ -3,62 +3,72 @@
   "moduleName": "hiringPipeline",
   "processes": [
     {
-      "processId": "applicationDecisionProcess",
-      "title": "Application decision process",
-      "description": "Coordinates hiring-manager decisions after an application reaches interview and routes declined applications to the recruiter for closure.",
+      "processId": "applicationPipeline",
+      "title": "Application pipeline",
+      "description": "Takes an application from screening through interview and the hiring manager's offer decision to a hire or a rejection, and closes the position when its headcount is filled.",
       "trigger": {
-        "kind": "event",
-        "event": "Application.moveToInterview"
+        "kind": "manual",
+        "actorRef": "recruiter"
       },
       "tasks": [
+        {
+          "taskId": "recordApplication",
+          "kind": "human",
+          "actorRef": "recruiter",
+          "journeyRef": "recordApplication",
+          "next": [
+            "screenApplication"
+          ],
+          "description": "The recruiter records the candidate's application to an open position, starting in screening."
+        },
+        {
+          "taskId": "screenApplication",
+          "kind": "human",
+          "actorRef": "recruiter",
+          "journeyRef": "advanceToInterview",
+          "next": [
+            "decideOffer",
+            "rejectApplication"
+          ],
+          "description": "The recruiter screens the application and moves it to interview, handing it to the position's hiring manager, or sends it to rejection."
+        },
         {
           "taskId": "decideOffer",
           "kind": "human",
           "actorRef": "hiringManager",
           "journeyRef": "decideOffer",
           "next": [
-            "decideHiringOutcome",
-            "recordApplicationRejection"
+            "confirmHire",
+            "rejectApplication"
           ],
-          "description": "The hiring manager decides whether to make an offer, advancing successful applications or referring declined applications for rejection recording."
+          "description": "The hiring manager decides whether to extend an offer or return the application to the recruiter for rejection."
         },
         {
-          "taskId": "decideHiringOutcome",
+          "taskId": "confirmHire",
           "kind": "human",
           "actorRef": "hiringManager",
-          "journeyRef": "decideHiringOutcome",
+          "journeyRef": "confirmHire",
           "next": [
-            "recordApplicationRejection"
+            "closeFilledPosition"
           ],
-          "description": "The hiring manager decides the outcome of an offered application and refers any declined application for rejection recording."
+          "description": "The hiring manager marks the accepted offer as hired, counting toward the position's headcount."
         },
-        {
-          "taskId": "recordApplicationRejection",
-          "kind": "human",
-          "actorRef": "recruiter",
-          "journeyRef": "recordApplicationRejection",
-          "next": [],
-          "description": "The recruiter records the rejection reason and closes the declined application."
-        }
-      ]
-    },
-    {
-      "processId": "closeFilledPositionProcess",
-      "title": "Close filled job position",
-      "description": "Automatically closes a job position when a hire fills its required headcount.",
-      "trigger": {
-        "kind": "event",
-        "event": "Application.moveToHired"
-      },
-      "tasks": [
         {
           "taskId": "closeFilledPosition",
           "kind": "mechanical",
           "entityRef": "JobPosition",
           "effect": "transition",
-          "transitionRef": "closeFilledPosition",
+          "transitionRef": "closePosition",
           "next": [],
-          "description": "The system closes the related job position when its filled headcount reaches the required headcount."
+          "description": "The position is closed automatically when its hires reach the headcount."
+        },
+        {
+          "taskId": "rejectApplication",
+          "kind": "human",
+          "actorRef": "recruiter",
+          "journeyRef": "rejectApplication",
+          "next": [],
+          "description": "The recruiter rejects the application, recording the reason."
         }
       ]
     }
@@ -73,27 +83,33 @@
       "inProcess": false
     },
     {
-      "journeyId": "startApplicationScreening",
-      "inProcess": false
+      "journeyId": "recordApplication",
+      "inProcess": true,
+      "processId": "applicationPipeline"
     },
     {
-      "journeyId": "advanceApplicationToInterview",
-      "inProcess": false
+      "journeyId": "advanceToInterview",
+      "inProcess": true,
+      "processId": "applicationPipeline"
+    },
+    {
+      "journeyId": "rejectApplication",
+      "inProcess": true,
+      "processId": "applicationPipeline"
     },
     {
       "journeyId": "decideOffer",
       "inProcess": true,
-      "processId": "applicationDecisionProcess"
+      "processId": "applicationPipeline"
     },
     {
-      "journeyId": "decideHiringOutcome",
+      "journeyId": "confirmHire",
       "inProcess": true,
-      "processId": "applicationDecisionProcess"
+      "processId": "applicationPipeline"
     },
     {
-      "journeyId": "recordApplicationRejection",
-      "inProcess": true,
-      "processId": "applicationDecisionProcess"
+      "journeyId": "reviewMyPipeline",
+      "inProcess": false
     }
   ]
 }

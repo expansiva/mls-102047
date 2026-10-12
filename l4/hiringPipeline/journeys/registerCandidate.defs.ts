@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/journeys/registerCandidate.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const registerCandidateJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -8,37 +8,36 @@ export const registerCandidateJourney = {
   "business": {
     "actorRef": "recruiter",
     "title": "Register a candidate",
-    "goal": "Create or attach the candidate's master record so it can be used in hiring applications.",
+    "goal": "Record a candidate with name, email, resume link and source.",
     "entry": {
-      "mode": "contextOrLookup"
+      "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "locateCandidate",
+        "stepId": "searchCandidate",
         "kind": "locate",
         "entity": "Candidate",
-        "title": "x",
-        "description": "Look up the person by available identifying contact information before registration."
+        "title": "Search existing candidates",
+        "description": "The recruiter searches by name or email to avoid registering the same person twice."
       },
       {
-        "stepId": "registerCandidateRecord",
+        "stepId": "createCandidate",
         "kind": "act",
         "entity": "Candidate",
         "effect": "create",
-        "title": "x",
-        "description": "Create or attach the candidate record, record the recruitment source, and associate the candidate's resume through the platform-managed attachment service."
+        "title": "Register candidate",
+        "description": "The recruiter enters the candidate's name, email, resume link and source and saves the record."
       }
     ],
     "outcome": {
-      "statement": "The candidate is available as a single master record for hiring activities.",
+      "statement": "The candidate is registered and available to apply to positions.",
       "evidence": [
-        "A candidate record displays the person's name and email.",
-        "The candidate has a recruitment source and an associated resume attachment."
+        "The candidate appears in the candidate list with email, resume link and source"
       ]
     }
   },
-  "businessHash": "sha256:ac9932e3a53930b0f1f07970077edb9268c8ec95e72ab3380deb27a2fed90bae"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:fb8922e90ff49bf5ff7235dc39c4496810b1a7892ba85620b1a50e77610ede95"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegisterCandidateJourneyType = typeof registerCandidateJourney;
 

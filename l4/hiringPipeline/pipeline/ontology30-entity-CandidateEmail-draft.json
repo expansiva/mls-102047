@@ -1,0 +1,249 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "hiringPipeline",
+    "entityId": "CandidateEmail",
+    "title": "Candidate E-mail",
+    "description": "The candidate's e-mail address as a contact channel record, linked to the candidate by HasContact and used to find duplicates.",
+    "displayField": "details.contactChannel.value",
+    "relationships": {
+      "candidate": {
+        "relationshipId": "candidateEmail",
+        "to": "Candidate",
+        "via": "HasContact",
+        "cardinality": "N:1",
+        "title": "Candidate",
+        "description": "The candidate who owns this e-mail address, linked by HasContact.",
+        "direction": "to",
+        "role": "HasContact"
+      }
+    },
+    "capabilities": {
+      "read.byId": "Reads the candidate's e-mail record by id so the candidate screen and application lists can show the address.",
+      "locate.byContact": "Finds the e-mail record holding a typed address so the recruiter detects an already registered candidate before creating a new one.",
+      "register.createOrAttach": "Creates the e-mail record when the address is new, or attaches the hiringPipeline.CandidateEmail role to the existing one, when the recruiter registers a candidate.",
+      "edit.platformFields": "Lets the recruiter correct a mistyped address or mark it verified.",
+      "inactivate": "Lets the recruiter take an address the candidate no longer uses out of service without deleting it, and reactivate it later.",
+      "link": "Links the e-mail to its candidate through HasContact when the recruiter registers or updates the candidate.",
+      "unlink": "Closes the HasContact link when the recruiter removes an address from a candidate, keeping its history.",
+      "listLinks": "Shows on the e-mail record which candidate it belongs to, for the recruiter and the hiring manager.",
+      "audit": "Shows an administrator who changed a candidate's e-mail and when."
+    },
+    "rules": [
+      "rule-foreign-namespace-refused",
+      "rule-identity-never-in-namespace",
+      "rule-contact-value-unique-per-type",
+      "rule-delete-blocked-by-relationships",
+      "rule-document-shape-validated"
+    ],
+    "kind": "role",
+    "subtype": "ContactChannel",
+    "roleTag": "hiringPipeline.CandidateEmail",
+    "source": "/_102034_/l4/ontology/mdm.defs.ts",
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "indexed": true,
+          "derived": true,
+          "description": "mdmId; stable through promotion and merge."
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true,
+          "writePrecondition": true,
+          "description": "Bumped by the engine on every write; optimistic concurrency."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "description": "The JSONB document, as a map of groups (see groups).",
+          "fields": {
+            "identification": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "subtype": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    {
+                      "value": "ContactChannel",
+                      "title": "Contact channel"
+                    }
+                  ],
+                  "description": "Always ContactChannel for a candidate e-mail.",
+                  "title": "Subtype"
+                },
+                "name": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "maxLength": 200,
+                  "description": "How recruiters recognise this e-mail record in a list, usually the address itself.",
+                  "title": "Name"
+                },
+                "status": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    {
+                      "value": "Active",
+                      "title": "Active"
+                    },
+                    {
+                      "value": "Inactive",
+                      "title": "Inactive"
+                    },
+                    {
+                      "value": "Merged",
+                      "title": "Merged"
+                    },
+                    {
+                      "value": "Blocked",
+                      "title": "Blocked"
+                    }
+                  ],
+                  "title": "Status",
+                  "description": "Whether this e-mail is still in use for the candidate."
+                },
+                "countryCode": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "pattern": "^[A-Z]{2}$",
+                  "maxLength": 2,
+                  "default": "US",
+                  "description": "ISO 3166-1 alpha-2 country the record belongs to.",
+                  "title": "Country"
+                },
+                "tags": {
+                  "type": "string",
+                  "required": true,
+                  "collection": true,
+                  "derived": true,
+                  "description": "Module roles of the record, including hiringPipeline.CandidateEmail.",
+                  "title": "Module roles"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "title": "Created at",
+                  "description": "When the e-mail record was created."
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "title": "Updated at",
+                  "description": "When the e-mail record was last changed."
+                }
+              },
+              "description": "Index columns of the platform for the candidate's e-mail record."
+            },
+            "base": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "relationshipRefs": {
+                  "type": "object",
+                  "required": true,
+                  "derived": true,
+                  "description": "Compact keys recomputed by the engine, including the candidate this e-mail belongs to.",
+                  "title": "Relationship references"
+                }
+              },
+              "description": "What every record has; nothing of it is used by this role beyond the engine-derived references."
+            },
+            "contactChannel": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "contactType": {
+                  "type": "enum",
+                  "required": true,
+                  "values": [
+                    {
+                      "value": "Email",
+                      "title": "E-mail"
+                    }
+                  ],
+                  "title": "Contact type",
+                  "description": "Always Email for a candidate e-mail."
+                },
+                "value": {
+                  "type": "string",
+                  "required": true,
+                  "description": "The candidate's e-mail address, used by recruiters to reach the candidate and to detect duplicate registrations.",
+                  "title": "E-mail address",
+                  "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+                  "maxLength": 254
+                },
+                "isVerified": {
+                  "type": "boolean",
+                  "required": true,
+                  "title": "Verified",
+                  "description": "Whether the address has been confirmed as belonging to the candidate."
+                },
+                "verifiedAt": {
+                  "type": "timestamp",
+                  "title": "Verified at",
+                  "description": "When the address was confirmed."
+                }
+              },
+              "description": "The candidate's e-mail as a contact channel record."
+            },
+            "general": {
+              "type": "object",
+              "owner": "organization",
+              "open": true,
+              "description": "Fields promoted by the organization; read only for this module."
+            },
+            "hiringPipeline": {
+              "type": "object",
+              "owner": "module",
+              "fields": {},
+              "description": "Module namespace; the prompt asked for no data of this module about the record."
+            }
+          }
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "CandidateEmail",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "CandidateEmail",
+      "detail": "CandidateEmail.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "CandidateEmail",
+      "detail": "CandidateEmail.details.contactChannel.contactType.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "CandidateEmail",
+      "detail": "CandidateEmail.details.contactChannel.value.pattern"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "CandidateEmail",
+      "detail": "details.hiringPipeline"
+    }
+  ]
+}

@@ -1,57 +1,63 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/ontology/Application.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const hiringPipelineEntityApplication = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "hiringPipeline",
   "entityId": "Application",
   "title": "Application",
-  "description": "A candidate's application to a job position, progressed through screening, interview, offer, hiring, or rejection.",
-  "displayField": "id",
+  "description": "A candidate applying to a job position. It moves through screening, interview, offer, then hired or rejected; a rejection records its reason.",
+  "displayField": "applicationNumber",
   "relationships": {
-    "candidate": {
-      "relationshipId": "applicationCandidate",
-      "to": "Candidate",
-      "via": "Application.candidateId",
-      "cardinality": "N:1",
-      "title": "Applicant",
-      "description": "The candidate who submitted this application.",
-      "mode": "fk",
-      "required": "Always",
-      "role": "applicant"
-    },
     "jobPosition": {
       "relationshipId": "applicationJobPosition",
       "to": "JobPosition",
       "via": "Application.jobPositionId",
       "cardinality": "N:1",
-      "title": "Applied-for job position",
-      "description": "The job position for which this application was submitted.",
+      "title": "Job position applied to",
+      "description": "Each application is made to one job position.",
       "mode": "fk",
-      "required": "Always",
-      "role": "applied-for position"
+      "required": true
+    },
+    "candidate": {
+      "relationshipId": "applicationCandidate",
+      "to": "Candidate",
+      "via": "Application.candidateId",
+      "cardinality": "N:1",
+      "title": "Applying candidate",
+      "description": "Each application belongs to one candidate.",
+      "mode": "fk",
+      "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Reads one application by its id so recruiters and hiring managers can review its candidate, position, and stage.",
-    "locate.byColumn": "Lists applications by indexed candidate, job position, or stage so recruiters and hiring managers can find the applications they are responsible for.",
-    "count": "Counts applications matching indexed filters so the module can determine how many candidates have been hired for a job position.",
-    "listByForeignKey": "Lists applications for a candidate or job position through its foreign key so the related record screen can show its applications.",
-    "create": "Creates an application in screening for a candidate and an open job position when a recruiter starts screening.",
-    "transition": "Moves an application through screening, interview, offer, hired, or rejected under the transition rules and the authorized actor.",
-    "uniqueKey": "Prevents a candidate from having more than one application for the same job position using the candidate and job-position key.",
-    "transaction": "Atomically records a hire and closes the job position when that hire fills its required headcount.",
-    "read.mdmRecord": "Reads the master candidate record referenced by an application so recruiters and hiring managers can view the candidate's name and available resume."
+    "read.byId": "Opens one application by its id when the recruiter or hiring manager follows a notification or a link from the pipeline.",
+    "locate.byColumn": "Lists applications filtered by position, candidate and stage, ordered by applied date, so the recruiter sees screening lists and the hiring manager sees interview and offer lists of their positions.",
+    "locate.byText": "Finds an application by typing part of its application number in the pipeline search box.",
+    "count": "Counts applications per stage of a position for the pipeline header and counts hires against the headcount.",
+    "listByForeignKey": "Lists all applications of a job position or of a candidate on their record screens, hydrating many at once.",
+    "create": "The recruiter records a new application of a candidate to an open position, starting in screening.",
+    "update": "The recruiter corrects the application details while it is still active.",
+    "transition": "Moves the stage column: the recruiter advances to interview and rejects with a reason, the position's hiring manager extends the offer and confirms the hire.",
+    "uniqueKey": "The engine refuses a second application with the same application number.",
+    "transaction": "Confirming a hire writes the application as hired and closes the job position in one all-or-nothing operation when the headcount is filled.",
+    "read.mdmRecord": "Reads the candidate master record behind each application to show name, e-mail, resume link and source to the recruiter and hiring manager.",
+    "sequence.next": "Issues the application number from the platform sequence hiringPipeline.Application when the recruiter records the application.",
+    "comment": "Recruiter and hiring manager leave notes on the application while discussing interviews and offers.",
+    "statusHistory.read": "Shows when the application changed stage and who moved it, reviewed before advancing, offering or rejecting.",
+    "audit": "Lets an administrator see who changed an application and when."
   },
   "rules": [
-    "applicationUniqueCandidatePosition",
-    "applicationRequiresOpenPosition",
-    "applicationStageOrder",
-    "hiringManagerManagesPosition",
-    "jobPositionHasRemainingHeadcount",
-    "closePositionWhenHeadcountFilled",
-    "rejectionReasonRequired"
+    "applicationNumberFromSequence",
+    "applicationStartsInScreening",
+    "applicationOnlyToOpenPosition",
+    "oneActiveApplicationPerCandidateAndPosition",
+    "recruiterMovesScreeningAndInterview",
+    "onlyPositionHiringManagerDecides",
+    "rejectionRequiresReason",
+    "hireWithinRemainingHeadcount",
+    "positionClosesWhenHeadcountFilled"
   ],
   "kind": "entity",
   "class": "event",
@@ -74,90 +80,148 @@ export const hiringPipelineEntityApplication = {
         "required": true,
         "derived": true
       },
-      "candidateId": {
-        "type": "record",
+      "applicationNumber": {
+        "type": "string",
         "required": true,
+        "unique": true,
         "indexed": true,
-        "of": "ContactSummary",
-        "to": [
-          "Candidate"
-        ],
-        "title": "Candidate",
-        "description": "The candidate submitting this application.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "title": "Application number",
+        "description": "Number people quote for the application, issued by the platform number sequence when the application is recorded.",
+        "maxLength": 30
       },
       "jobPositionId": {
         "type": "record",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
         "to": [
           "JobPosition"
         ],
         "title": "Job position",
-        "description": "The job position to which the candidate is applying.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "description": "The job position the candidate applies to; used to list a position's pipeline."
+      },
+      "candidateId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "to": [
+          "Candidate"
+        ],
+        "title": "Candidate",
+        "description": "The candidate who applies; name, e-mail, resume link and source are read from the candidate record."
       },
       "status": {
         "type": "enum",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
         "values": [
           {
             "value": "screening",
             "title": "Screening",
-            "description": "The recruiter is screening the application."
+            "description": "Recorded and being screened by the recruiter."
           },
           {
             "value": "interview",
             "title": "Interview",
-            "description": "The candidate has advanced to interview."
+            "description": "In interviews; the hiring manager decides on an offer."
           },
           {
             "value": "offer",
             "title": "Offer",
-            "description": "The hiring manager has approved making an offer."
+            "description": "An offer was extended to the candidate."
           },
           {
             "value": "hired",
             "title": "Hired",
-            "description": "The candidate has been hired for the job position."
+            "description": "The candidate was hired; counts towards the position's headcount."
           },
           {
             "value": "rejected",
             "title": "Rejected",
-            "description": "The application has been declined with a recorded reason."
+            "description": "The application was closed with a reason."
           }
         ],
-        "title": "Application stage",
-        "description": "The current stage of the candidate's application.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "title": "Stage",
+        "description": "Current stage of the application in the hiring pipeline."
+      },
+      "appliedAt": {
+        "type": "date",
+        "required": true,
+        "indexed": true,
+        "title": "Applied on",
+        "description": "Date the application was recorded; lists are ordered by it."
       },
       "details": {
         "type": "object",
         "required": true,
-        "of": "ContactSummary",
         "title": "Application details",
-        "description": "Information recorded specifically for this application.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0,
+        "description": "Everything about the application that nobody filters by.",
         "fields": {
-          "rejectionReason": {
-            "type": "text",
-            "of": "ContactSummary",
-            "title": "Rejection reason",
-            "description": "Why the application was rejected.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+          "interviewStartedAt": {
+            "type": "timestamp",
+            "title": "Moved to interview at",
+            "description": "When the recruiter moved the application from screening to interview."
+          },
+          "offerExtendedAt": {
+            "type": "timestamp",
+            "title": "Offer extended at",
+            "description": "When the hiring manager moved the application to offer."
+          },
+          "hiredAt": {
+            "type": "timestamp",
+            "title": "Hired at",
+            "description": "When the hiring manager confirmed the hire."
+          },
+          "rejection": {
+            "type": "object",
+            "title": "Rejection",
+            "description": "Filled when the application is rejected.",
+            "fields": {
+              "reason": {
+                "type": "text",
+                "required": true,
+                "title": "Rejection reason",
+                "description": "Why the application will not move forward; required to reject.",
+                "maxLength": 2000
+              },
+              "rejectedAt": {
+                "type": "timestamp",
+                "required": true,
+                "title": "Rejected at",
+                "description": "When the application was moved to rejected."
+              },
+              "stageAtRejection": {
+                "type": "enum",
+                "required": true,
+                "values": [
+                  {
+                    "value": "screening",
+                    "title": "Screening"
+                  },
+                  {
+                    "value": "interview",
+                    "title": "Interview"
+                  },
+                  {
+                    "value": "offer",
+                    "title": "Offer"
+                  }
+                ],
+                "title": "Stage at rejection",
+                "description": "The stage the application was in when it was rejected."
+              }
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Active",
+            "description": "True while the application is still in screening, interview or offer, that is, not yet hired nor rejected."
+          },
+          "daysInPipeline": {
+            "type": "integer",
+            "derived": true,
+            "title": "Days in pipeline",
+            "description": "Days from the application date until today, or until the day it was hired or rejected."
           }
         }
       }
@@ -165,8 +229,7 @@ export const hiringPipelineEntityApplication = {
   },
   "uniqueKeys": [
     [
-      "candidateId",
-      "jobPositionId"
+      "applicationNumber"
     ]
   ],
   "lifecycleStates": [
@@ -193,7 +256,7 @@ export const hiringPipelineEntityApplication = {
   ],
   "transitions": [
     {
-      "transitionId": "moveToInterview",
+      "transitionId": "advanceToInterview",
       "from": [
         "screening"
       ],
@@ -201,14 +264,14 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "recruiter"
       ],
+      "description": "The recruiter moves a screened application to interview, handing it to the position's hiring manager.",
       "payload": [],
-      "description": "Advance a screened application to interview.",
       "ruleRefs": [
-        "applicationStageOrder"
+        "recruiterMovesScreeningAndInterview"
       ]
     },
     {
-      "transitionId": "moveToOffer",
+      "transitionId": "extendOffer",
       "from": [
         "interview"
       ],
@@ -216,15 +279,14 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "hiringManager"
       ],
+      "description": "The position's hiring manager decides to extend an offer to the interviewed candidate.",
       "payload": [],
-      "description": "Approve an offer for an interviewed candidate in a position managed by the hiring manager.",
       "ruleRefs": [
-        "applicationStageOrder",
-        "hiringManagerManagesPosition"
+        "onlyPositionHiringManagerDecides"
       ]
     },
     {
-      "transitionId": "moveToHired",
+      "transitionId": "hire",
       "from": [
         "offer"
       ],
@@ -232,17 +294,16 @@ export const hiringPipelineEntityApplication = {
       "by": [
         "hiringManager"
       ],
+      "description": "The position's hiring manager confirms the hire; when hires reach the headcount the position closes automatically.",
       "payload": [],
-      "description": "Hire an offered candidate while the job position still has hiring capacity.",
       "ruleRefs": [
-        "applicationStageOrder",
-        "hiringManagerManagesPosition",
-        "jobPositionHasRemainingHeadcount",
-        "closePositionWhenHeadcountFilled"
+        "onlyPositionHiringManagerDecides",
+        "hireWithinRemainingHeadcount",
+        "positionClosesWhenHeadcountFilled"
       ]
     },
     {
-      "transitionId": "rejectApplication",
+      "transitionId": "reject",
       "from": [
         "screening",
         "interview",
@@ -250,18 +311,19 @@ export const hiringPipelineEntityApplication = {
       ],
       "to": "rejected",
       "by": [
-        "recruiter"
+        "recruiter",
+        "hiringManager"
       ],
+      "description": "The application is closed with a reason; normally the recruiter records it, and the hiring manager may decline at interview instead of returning it.",
       "payload": [
-        "details.rejectionReason"
+        "details.rejection.reason"
       ],
-      "description": "Reject an application and record the reason it will not proceed.",
       "ruleRefs": [
-        "rejectionReasonRequired"
+        "rejectionRequiresReason"
       ]
     }
   ]
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type HiringPipelineEntityApplicationType = typeof hiringPipelineEntityApplication;
 

@@ -1,47 +1,14 @@
 {
   "plan": {
     "moduleName": "hiringPipeline",
-    "businessDomain": "Hiring pipeline management for job positions and candidate applications.",
+    "businessDomain": "Recruitment pipeline: job positions opened by recruiters, candidates registered and their applications moved through screening, interview, offer, hired or rejected, with hiring managers deciding offer and hire on their own positions.",
     "entities": [
-      {
-        "entityId": "Candidate",
-        "kind": "role",
-        "family": "mdm",
-        "title": "Candidate",
-        "description": "A person registered or attached as a candidate for job applications in the hiring pipeline.",
-        "displayField": "details.identification.name",
-        "subtype": "Person",
-        "roleTag": "hiringPipeline.Candidate",
-        "source": "/_102034_/l4/ontology/mdm.defs.ts"
-      },
-      {
-        "entityId": "CandidateContact",
-        "kind": "role",
-        "family": "mdm",
-        "title": "Candidate Contact Channel",
-        "description": "A contact channel linked to a candidate, including the email used to identify and communicate with the candidate.",
-        "displayField": "details.contactChannel.value",
-        "subtype": "ContactChannel",
-        "roleTag": "hiringPipeline.CandidateContact",
-        "source": "/_102034_/l4/ontology/mdm.defs.ts"
-      },
-      {
-        "entityId": "HiringManager",
-        "kind": "role",
-        "family": "mdm",
-        "title": "Hiring Manager",
-        "description": "A person responsible for a job position and authorized to decide its offers and hiring outcomes.",
-        "displayField": "details.identification.name",
-        "subtype": "Person",
-        "roleTag": "hiringPipeline.HiringManager",
-        "source": "/_102034_/l4/ontology/mdm.defs.ts"
-      },
       {
         "entityId": "JobPosition",
         "kind": "entity",
         "family": "tdm",
         "title": "Job Position",
-        "description": "An approved hiring need opened for applications, with a responsible hiring manager and a defined headcount.",
+        "description": "An open role to fill, with title, department, description, headcount and its hiring manager. It closes automatically when hires reach the headcount; hires so far and applications by stage are derived from its applications.",
         "displayField": "title",
         "class": "core",
         "storage": {
@@ -55,27 +22,50 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Application",
-        "description": "A candidate's application to a job position, progressed through screening, interview, offer, hiring, or rejection.",
-        "displayField": "id",
+        "description": "A candidate applying to a job position. It moves through screening, interview, offer, then hired or rejected; a rejection records its reason.",
+        "displayField": "applicationNumber",
         "class": "event",
         "storage": {
           "target": "moduleDatabase",
           "table": "hiringPipeline_application",
           "kind": "relational"
         }
+      },
+      {
+        "entityId": "Candidate",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Candidate",
+        "description": "A person who applies to job positions. Name lives in the master record, the e-mail is a linked contact channel, the resume is a platform attachment; the module namespace keeps only the candidate's source.",
+        "displayField": "details.identification.name",
+        "subtype": "Person",
+        "roleTag": "hiringPipeline.Candidate",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "entityId": "CandidateEmail",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Candidate E-mail",
+        "description": "The candidate's e-mail address as a contact channel record, linked to the candidate by HasContact and used to find duplicates.",
+        "displayField": "details.contactChannel.value",
+        "subtype": "ContactChannel",
+        "roleTag": "hiringPipeline.CandidateEmail",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "entityId": "HiringManager",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Hiring Manager",
+        "description": "The person responsible for a job position who decides offers and hires; the positions and applications they see are scoped to the positions that point at them.",
+        "displayField": "details.identification.name",
+        "subtype": "Person",
+        "roleTag": "hiringPipeline.HiringManager",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
       }
     ],
     "relationships": [
-      {
-        "relationshipId": "candidateHasContact",
-        "from": "Candidate",
-        "to": "CandidateContact",
-        "type": "oneToMany",
-        "required": true,
-        "mode": "mdmRelationship",
-        "description": "A candidate has one or more contact channels, including the email used for identification and communication.",
-        "catalogType": "HasContact"
-      },
       {
         "relationshipId": "jobPositionHiringManager",
         "from": "JobPosition",
@@ -83,18 +73,8 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Each job position is assigned to one responsible hiring manager, who decides offers and hiring outcomes.",
+        "description": "Each job position has one hiring manager who decides offers and hires for it.",
         "field": "JobPosition.hiringManagerId"
-      },
-      {
-        "relationshipId": "applicationCandidate",
-        "from": "Application",
-        "to": "Candidate",
-        "type": "manyToOne",
-        "required": true,
-        "mode": "fk",
-        "description": "Each application belongs to the candidate who applied for the position.",
-        "field": "Application.candidateId"
       },
       {
         "relationshipId": "applicationJobPosition",
@@ -103,26 +83,43 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Each application is submitted for one job position.",
+        "description": "Each application is made to one job position.",
         "field": "Application.jobPositionId"
+      },
+      {
+        "relationshipId": "applicationCandidate",
+        "from": "Application",
+        "to": "Candidate",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Each application belongs to one candidate.",
+        "field": "Application.candidateId"
+      },
+      {
+        "relationshipId": "candidateEmail",
+        "from": "Candidate",
+        "to": "CandidateEmail",
+        "type": "oneToMany",
+        "required": false,
+        "mode": "mdmRelationship",
+        "description": "The candidate's e-mail addresses are contact channels linked to the candidate.",
+        "catalogType": "HasContact"
+      },
+      {
+        "relationshipId": "jobPositionCandidates",
+        "from": "JobPosition",
+        "to": "Candidate",
+        "type": "manyToMany",
+        "required": false,
+        "mode": "throughTable",
+        "description": "The candidates who applied to a job position, read through its applications.",
+        "through": "Application",
+        "path": "JobPosition.id <- Application.jobPositionId, Application.candidateId -> Candidate.id",
+        "derived": true
       }
     ],
     "normalizations": [
-      {
-        "kind": "derivedFromPlatform",
-        "entityId": "Candidate",
-        "detail": "roleTag hiringPipeline.Candidate; source /_102034_/l4/ontology/mdm.defs.ts"
-      },
-      {
-        "kind": "derivedFromPlatform",
-        "entityId": "CandidateContact",
-        "detail": "roleTag hiringPipeline.CandidateContact; source /_102034_/l4/ontology/mdm.defs.ts"
-      },
-      {
-        "kind": "derivedFromPlatform",
-        "entityId": "HiringManager",
-        "detail": "roleTag hiringPipeline.HiringManager; source /_102034_/l4/ontology/mdm.defs.ts"
-      },
       {
         "kind": "derivedFromPlatform",
         "entityId": "JobPosition",
@@ -132,6 +129,21 @@
         "kind": "derivedFromPlatform",
         "entityId": "Application",
         "detail": "storage.table hiringPipeline_application"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Candidate",
+        "detail": "roleTag hiringPipeline.Candidate; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "CandidateEmail",
+        "detail": "roleTag hiringPipeline.CandidateEmail; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "HiringManager",
+        "detail": "roleTag hiringPipeline.HiringManager; source /_102034_/l4/ontology/mdm.defs.ts"
       }
     ]
   },
@@ -139,626 +151,9 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "hiringPipeline",
-      "entityId": "Candidate",
-      "title": "Candidate",
-      "description": "A person registered or attached as a candidate for job applications in the hiring pipeline.",
-      "displayField": "details.identification.name",
-      "relationships": {
-        "contactChannels": {
-          "relationshipId": "candidateHasContact",
-          "to": "CandidateContact",
-          "via": "HasContact",
-          "cardinality": "1:N",
-          "title": "Candidate contact channels",
-          "description": "Contact channels linked to the candidate through the platform HasContact relationship, including the email used for identification and communication.",
-          "required": "When the candidate is registered or attached for recruiting",
-          "role": "candidate"
-        },
-        "applications": {
-          "relationshipId": "applicationCandidate",
-          "to": "Application",
-          "via": "Application.candidateId",
-          "cardinality": "1:N",
-          "title": "Candidate applications",
-          "description": "Hiring applications that belong to this candidate.",
-          "mode": "fk",
-          "direction": "to",
-          "required": "When an application is recorded for the candidate",
-          "role": "candidate"
-        }
-      },
-      "capabilities": {
-        "read.byId": "Reads a candidate master record by its MDM identifier through the indexed record lookup for recruiters and hiring managers reviewing an application.",
-        "locate.byName": "Finds candidates by typed name through the Person name index for recruiters registering or selecting a candidate.",
-        "locate.byDocument": "Finds a candidate by national document during create-or-attach deduplication for recruiters.",
-        "locate.byContact": "Finds the candidate owning an email or other contact channel for recruiters before registration and when starting an application.",
-        "register.createOrAttach": "Creates a Person record when absent or attaches the existing person to the Candidate role by document or contact lookup for recruiters registering candidates.",
-        "edit.platformFields": "Updates platform-owned candidate identification data through the master-record update route for recruiters maintaining candidate information.",
-        "edit.moduleNamespace": "Updates the hiringPipeline recruitment source in the candidate module namespace for recruiters maintaining recruitment information.",
-        "inactivate": "Inactivates or reactivates a candidate master record through the platform status action for recruiters when the record should no longer be used.",
-        "link.contact": "Creates or links a ContactChannel through HasContact so the candidate has an email for identification and communication, used by recruiters.",
-        "listLinks": "Lists the candidate's contact-channel and application-related links through the relationship service for recruiters and hiring managers reviewing the candidate.",
-        "attach.document": "Stores and retrieves the candidate's resume as a platform-managed attachment by category for recruiters and hiring managers reviewing qualifications.",
-        "audit": "Shows the platform audit trail of candidate master-data changes for authorized recruiters and hiring managers."
-      },
-      "rules": [
-        "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
-        "rule-identity-never-in-namespace",
-        "rule-person-privacy-consent-required-br-eu",
-        "candidateRequiresEmailContact"
-      ],
-      "kind": "role",
-      "subtype": "Person",
-      "roleTag": "hiringPipeline.Candidate",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts",
-      "record": {
-        "fields": {
-          "id": {
-            "type": "uuid",
-            "required": true,
-            "indexed": true,
-            "derived": true,
-            "description": "mdmId; stable through promotion and merge."
-          },
-          "version": {
-            "type": "integer",
-            "required": true,
-            "derived": true,
-            "description": "Bumped by the engine on every write; optimistic concurrency."
-          },
-          "details": {
-            "type": "object",
-            "required": true,
-            "description": "Master person record used as a candidate in the hiring pipeline.",
-            "fields": {
-              "identification": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {
-                  "subtype": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Person",
-                        "title": "Person",
-                        "description": "A natural person."
-                      }
-                    ],
-                    "description": "Platform subtype identifying this master record as a person.",
-                    "title": "Record subtype",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "name": {
-                    "type": "string",
-                    "required": true,
-                    "indexed": true,
-                    "maxLength": 0,
-                    "description": "Name used by recruiters to identify the candidate.",
-                    "title": "Candidate name",
-                    "min": 0,
-                    "max": 0
-                  },
-                  "status": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Active",
-                        "title": "Active",
-                        "description": "The record is active."
-                      },
-                      {
-                        "value": "Inactive",
-                        "title": "Inactive",
-                        "description": "The record is inactive."
-                      },
-                      {
-                        "value": "Merged",
-                        "title": "Merged",
-                        "description": "The record was merged into another master record."
-                      },
-                      {
-                        "value": "Blocked",
-                        "title": "Blocked",
-                        "description": "The record is blocked by the platform."
-                      }
-                    ],
-                    "title": "Master record status",
-                    "description": "Platform status that determines whether the candidate master record is active.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "docType": {
-                    "type": "enum",
-                    "indexed": true,
-                    "values": [
-                      {
-                        "value": "SSN",
-                        "title": "SSN",
-                        "description": "United States Social Security Number."
-                      },
-                      {
-                        "value": "EIN",
-                        "title": "EIN",
-                        "description": "United States Employer Identification Number."
-                      },
-                      {
-                        "value": "Passport",
-                        "title": "Passport",
-                        "description": "Passport."
-                      },
-                      {
-                        "value": "DriversLicense",
-                        "title": "Driver's license",
-                        "description": "Driver's license."
-                      },
-                      {
-                        "value": "NationalId",
-                        "title": "National ID",
-                        "description": "National identity document."
-                      },
-                      {
-                        "value": "CPF",
-                        "title": "CPF",
-                        "description": "Brazilian individual taxpayer registry."
-                      },
-                      {
-                        "value": "CNPJ",
-                        "title": "CNPJ",
-                        "description": "Brazilian company registry."
-                      },
-                      {
-                        "value": "VAT",
-                        "title": "VAT",
-                        "description": "VAT registration."
-                      },
-                      {
-                        "value": "Other",
-                        "title": "Other",
-                        "description": "Another document type."
-                      }
-                    ],
-                    "title": "Document type",
-                    "description": "National document type, when supplied to deduplicate the candidate.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "docId": {
-                    "type": "string",
-                    "indexed": true,
-                    "description": "National document number, when supplied to deduplicate the candidate.",
-                    "title": "Document number",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "countryCode": {
-                    "type": "string",
-                    "required": true,
-                    "indexed": true,
-                    "pattern": "^[A-Z]{2}$",
-                    "maxLength": 2,
-                    "default": "US",
-                    "description": "Country that governs the candidate's document and applicable privacy rules.",
-                    "title": "Country code",
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Platform identification data used to recognize and maintain the candidate."
-              },
-              "base": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {
-                  "contacts": {
-                    "type": "object",
-                    "required": true,
-                    "collection": true,
-                    "of": "ContactSummary",
-                    "derived": true,
-                    "description": "Platform-derived summaries of contact channels linked to the candidate, including the email used for identification and communication.",
-                    "title": "Contact channels",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Platform-managed base data used by the hiring pipeline."
-              },
-              "person": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {},
-                "description": "Platform person data; the hiring pipeline does not require additional person fields for a candidate."
-              },
-              "general": {
-                "type": "object",
-                "owner": "organization",
-                "open": true,
-                "description": "Organization-promoted data that the hiring pipeline may read but does not define."
-              },
-              "hiringPipeline": {
-                "type": "object",
-                "owner": "module",
-                "fields": {
-                  "source": {
-                    "type": "string",
-                    "required": true,
-                    "of": "Address",
-                    "title": "Recruitment source",
-                    "description": "How the candidate was sourced for recruitment, such as a referral, job board, agency, or careers site.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Hiring-pipeline-specific information about this candidate."
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
-      "moduleName": "hiringPipeline",
-      "entityId": "CandidateContact",
-      "title": "Candidate Contact Channel",
-      "description": "A contact channel linked to a candidate, including the email used to identify and communicate with the candidate.",
-      "displayField": "details.contactChannel.value",
-      "relationships": {
-        "candidate": {
-          "relationshipId": "candidateHasContact",
-          "to": "Candidate",
-          "via": "HasContact",
-          "cardinality": "N:1",
-          "title": "Candidate owner",
-          "description": "The candidate who owns this email contact channel through the platform HasContact relationship.",
-          "direction": "to",
-          "required": "always",
-          "role": "Has contact"
-        }
-      },
-      "capabilities": {
-        "read.byId": "Reads a candidate email contact channel by its master-data id through indexed retrieval for recruiters and hiring managers viewing candidate information.",
-        "locate.byContact": "Finds the contact channel that owns a supplied email through the platform contact lookup so recruiters can avoid registering the same candidate email twice.",
-        "register.createOrAttach": "Creates an email contact channel when absent or attaches the hiringPipeline candidate-contact role when it already exists, using the email value, for recruiters registering candidates.",
-        "edit.platformFields": "Updates the platform-owned name or email contact data for an active candidate contact channel through the master-data update route for recruiters maintaining candidate records.",
-        "inactivate": "Inactivates or reactivates a candidate email contact channel through its platform status for recruiters when the email must no longer be used.",
-        "link": "Links a candidate contact channel to its candidate with the versioned HasContact relationship for recruiters registering or maintaining candidates.",
-        "unlink": "Closes the candidate-to-contact HasContact relationship while preserving its history for recruiters correcting a candidate record.",
-        "listLinks": "Lists the candidate relationship and its validity for a candidate contact channel on candidate record screens used by recruiters and hiring managers.",
-        "audit": "Shows the platform audit trail of changes to a candidate email contact channel for authorized hiring-pipeline administrators."
-      },
-      "rules": [
-        "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
-        "rule-identity-never-in-namespace",
-        "rule-contact-value-unique-per-type"
-      ],
-      "kind": "role",
-      "subtype": "ContactChannel",
-      "roleTag": "hiringPipeline.CandidateContact",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts",
-      "record": {
-        "fields": {
-          "id": {
-            "type": "uuid",
-            "required": true,
-            "indexed": true,
-            "derived": true,
-            "description": "mdmId; stable through promotion and merge."
-          },
-          "version": {
-            "type": "integer",
-            "required": true,
-            "derived": true,
-            "description": "Bumped by the engine on every write; optimistic concurrency."
-          },
-          "details": {
-            "type": "object",
-            "required": true,
-            "description": "Master-data contact channel used to identify and communicate with a candidate in the hiring pipeline.",
-            "fields": {
-              "identification": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {
-                  "subtype": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "ContactChannel",
-                        "title": "Contact channel",
-                        "description": "A platform contact-channel master record."
-                      }
-                    ],
-                    "description": "Platform-derived subtype identifying this master record as a contact channel.",
-                    "title": "Record subtype",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "name": {
-                    "type": "string",
-                    "required": true,
-                    "indexed": true,
-                    "maxLength": 255,
-                    "description": "Human-readable name for the candidate email contact channel.",
-                    "title": "Contact channel name",
-                    "min": 0,
-                    "max": 0
-                  },
-                  "status": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Active",
-                        "title": "Active",
-                        "description": "The contact channel is available for use."
-                      },
-                      {
-                        "value": "Inactive",
-                        "title": "Inactive",
-                        "description": "The contact channel is no longer used."
-                      },
-                      {
-                        "value": "Merged",
-                        "title": "Merged",
-                        "description": "The contact channel was merged into another master record."
-                      },
-                      {
-                        "value": "Blocked",
-                        "title": "Blocked",
-                        "description": "The contact channel is blocked by the platform."
-                      }
-                    ],
-                    "title": "MDM status",
-                    "description": "Platform-managed activity status of the candidate contact channel.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Platform identification data for this contact channel."
-              },
-              "base": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {},
-                "description": "Platform base data; this role does not use additional base fields."
-              },
-              "contactChannel": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {
-                  "contactType": {
-                    "type": "enum",
-                    "required": true,
-                    "values": [
-                      {
-                        "value": "Email",
-                        "title": "Email",
-                        "description": "An email address used to identify and communicate with the candidate."
-                      }
-                    ],
-                    "title": "Contact type",
-                    "description": "The channel type used to communicate with the candidate; this role uses email only.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "value": {
-                    "type": "string",
-                    "required": true,
-                    "description": "Email address used to identify and communicate with the candidate.",
-                    "title": "Candidate email address",
-                    "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
-                    "maxLength": 254,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Platform contact-channel data for the candidate email."
-              },
-              "general": {
-                "type": "object",
-                "owner": "organization",
-                "open": true,
-                "description": "Organization-promoted data read by this module; its schema is managed by the organization."
-              },
-              "hiringPipeline": {
-                "type": "object",
-                "owner": "module",
-                "fields": {},
-                "description": "Module namespace; the prompt asked for no data of this module about the record."
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
-      "moduleName": "hiringPipeline",
-      "entityId": "HiringManager",
-      "title": "Hiring Manager",
-      "description": "A person responsible for a job position and authorized to decide its offers and hiring outcomes.",
-      "displayField": "details.identification.name",
-      "relationships": {
-        "jobPositions": {
-          "relationshipId": "jobPositionHiringManager",
-          "to": "JobPosition",
-          "via": "JobPosition.hiringManagerId",
-          "cardinality": "1:N",
-          "title": "Job positions managed",
-          "description": "Job positions for which this hiring manager is the responsible decision-maker for offers and hiring outcomes.",
-          "mode": "fk",
-          "direction": "to",
-          "required": "Never; a hiring manager may be registered before being assigned to a job position.",
-          "role": "responsible hiring manager"
-        }
-      },
-      "capabilities": {
-        "read.byId": "Reads a hiring manager by known master-record id through the MDM index and document store for recruiters and hiring managers viewing a responsible manager.",
-        "locate.byName": "Finds a hiring manager by typed name through the Person name index for recruiters assigning a manager to a job position.",
-        "locate.byTag": "Lists people carrying the hiringPipeline.HiringManager role tag through the indexed MDM tag lookup for recruiters choosing an eligible hiring manager.",
-        "register.createOrAttach": "Creates a Person when absent or attaches the Hiring Manager role to the existing person through document or contact matching for recruiters setting up position responsibility.",
-        "edit.platformFields": "Updates platform-owned identification data through the MDM person update route for recruiters maintaining a hiring manager record.",
-        "inactivate": "Inactivates or reactivates the hiring-manager master record through the platform status operation for recruiters when the person must no longer be assigned to positions.",
-        "statusHistory.read": "Shows master-record status changes through MDM status history for recruiters reviewing whether a hiring manager is active.",
-        "audit": "Shows who changed the hiring-manager master record and when through the MDM audit log for recruiters investigating record maintenance."
-      },
-      "rules": [
-        "rule-foreign-namespace-refused",
-        "rule-identity-never-in-namespace",
-        "rule-document-shape-validated",
-        "rule-person-privacy-consent-required-br-eu"
-      ],
-      "kind": "role",
-      "subtype": "Person",
-      "roleTag": "hiringPipeline.HiringManager",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts",
-      "record": {
-        "fields": {
-          "id": {
-            "type": "uuid",
-            "required": true,
-            "indexed": true,
-            "derived": true,
-            "description": "mdmId; stable through promotion and merge."
-          },
-          "version": {
-            "type": "integer",
-            "required": true,
-            "derived": true,
-            "description": "Bumped by the engine on every write; optimistic concurrency."
-          },
-          "details": {
-            "type": "object",
-            "required": true,
-            "description": "Platform person record read by the hiring pipeline for a person who manages job positions.",
-            "fields": {
-              "identification": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {
-                  "subtype": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Person",
-                        "title": "Person",
-                        "description": "A natural person."
-                      }
-                    ],
-                    "description": "Platform-derived subtype identifying this master record as a person.",
-                    "title": "Record subtype",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "name": {
-                    "type": "string",
-                    "required": true,
-                    "indexed": true,
-                    "maxLength": 0,
-                    "description": "Name used by recruiters to identify the hiring manager when assigning responsibility for a job position.",
-                    "title": "Name",
-                    "min": 0,
-                    "max": 0
-                  },
-                  "status": {
-                    "type": "enum",
-                    "required": true,
-                    "indexed": true,
-                    "derived": true,
-                    "values": [
-                      {
-                        "value": "Active",
-                        "title": "Active",
-                        "description": "The person is active."
-                      },
-                      {
-                        "value": "Inactive",
-                        "title": "Inactive",
-                        "description": "The person is inactive."
-                      },
-                      {
-                        "value": "Merged",
-                        "title": "Merged",
-                        "description": "The record was merged into another person."
-                      },
-                      {
-                        "value": "Blocked",
-                        "title": "Blocked",
-                        "description": "The person is blocked."
-                      }
-                    ],
-                    "title": "Status",
-                    "description": "Platform-derived master-record status that indicates whether this hiring manager can be used.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                },
-                "description": "Platform identification data used to recognize the hiring manager."
-              },
-              "base": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {},
-                "description": "Platform base data for the person; no base fields are specific to the hiring-manager role."
-              },
-              "person": {
-                "type": "object",
-                "owner": "platform",
-                "fields": {},
-                "description": "Platform natural-person data; no person fields beyond identification are used by this role."
-              },
-              "general": {
-                "type": "object",
-                "owner": "organization",
-                "open": true,
-                "description": "Organization-promoted data read from the platform registry; this module does not declare fields here."
-              },
-              "hiringPipeline": {
-                "type": "object",
-                "owner": "module",
-                "fields": {},
-                "description": "Module namespace; the prompt asked for no data of this module about the record."
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
-      "moduleName": "hiringPipeline",
       "entityId": "JobPosition",
       "title": "Job Position",
-      "description": "An approved hiring need opened for applications, with a responsible hiring manager and a defined headcount.",
+      "description": "An open role to fill, with title, department, description, headcount and its hiring manager. It closes automatically when hires reach the headcount; hires so far and applications by stage are derived from its applications.",
       "displayField": "title",
       "relationships": {
         "hiringManager": {
@@ -766,10 +161,10 @@
           "to": "HiringManager",
           "via": "JobPosition.hiringManagerId",
           "cardinality": "N:1",
-          "title": "Responsible hiring manager",
-          "description": "The hiring manager assigned to this position and authorized to decide offers and hiring outcomes.",
+          "title": "Hiring manager",
+          "description": "Each job position has one hiring manager who decides offers and hires for it.",
           "mode": "fk",
-          "required": "when the job position is opened"
+          "required": true
         },
         "applications": {
           "relationshipId": "applicationJobPosition",
@@ -777,25 +172,41 @@
           "via": "Application.jobPositionId",
           "cardinality": "1:N",
           "title": "Applications",
-          "description": "The applications submitted for this job position.",
+          "description": "Applications made to this position.",
           "mode": "fk",
           "direction": "to",
           "required": true
+        },
+        "candidates": {
+          "relationshipId": "jobPositionCandidates",
+          "to": "Candidate",
+          "via": "Application",
+          "cardinality": "N:N",
+          "title": "Candidates",
+          "description": "Candidates who applied to this position, read through its applications.",
+          "mode": "throughTable",
+          "path": "JobPosition.id <- Application.jobPositionId, Application.candidateId -> Candidate.id",
+          "derived": true
         }
       },
       "capabilities": {
-        "read.byId": "Reads a job position by its row id so recruiters and hiring managers can review its hiring need.",
-        "locate.byColumn": "Lists job positions by indexed status or responsible hiring manager so recruiters find open positions and hiring managers find positions they manage.",
-        "locate.byText": "Finds job positions by text in the indexed title so recruiters can locate a position by name.",
-        "count": "Counts job positions matching a status or responsible hiring manager filter for hiring pipeline lists.",
-        "listByForeignKey": "Lists job positions for a responsible hiring manager through the hiring manager foreign key.",
-        "create": "Creates an open job position with its title, department, description, headcount, and responsible hiring manager when a recruiter opens a hiring need.",
-        "update": "Updates the maintained details of an open job position when a recruiter needs to correct its hiring need information.",
-        "transition": "Moves an open job position to closed through the automatic filled-headcount process.",
-        "read.mdmRecord": "Reads the responsible hiring manager master record from the hiring manager foreign key for position review and decision scope."
+        "read.byId": "Opens one job position by id for the recruiter's review and the hiring manager's position screen.",
+        "locate.byColumn": "Lists positions filtered by status, department or hiring manager and ordered by opening date, so the recruiter picks an open position and the hiring manager sees the ones they manage.",
+        "locate.byText": "Searches positions by title or department from the recruiter's search box when recording an application.",
+        "count": "Counts open or closed positions for list headers seen by recruiters and hiring managers.",
+        "listByForeignKey": "Lists the positions of one hiring manager by hiringManagerId, and fills the position of many applications at once.",
+        "create": "The recruiter opens a new position with title, department, description, headcount and hiring manager, starting open.",
+        "update": "The recruiter corrects title, department, description, headcount or hiring manager of a position.",
+        "transition": "The application pipeline moves the position from open to closed when its headcount is filled; no person does it.",
+        "read.mdmRecord": "Reads the hiring manager's master record behind hiringManagerId to show their name on the position.",
+        "comment": "Recruiters and hiring managers leave notes on a position.",
+        "attach.document": "The recruiter attaches a job description file or approval document to the position."
       },
       "rules": [
-        "closePositionWhenHeadcountFilled"
+        "closePositionWhenHeadcountFilled",
+        "applicationOnlyToOpenPosition",
+        "headcountAtLeastOne",
+        "hiringManagerSeesOwnPositions"
       ],
       "kind": "entity",
       "class": "core",
@@ -822,101 +233,101 @@
             "type": "string",
             "required": true,
             "indexed": true,
-            "of": "Address",
-            "title": "Job title",
-            "description": "The title used to identify the job position in lists and searches.",
-            "maxLength": 200,
-            "min": 0,
-            "max": 0
+            "title": "Title",
+            "description": "Title of the job position, shown in lists and searched by recruiters and hiring managers.",
+            "maxLength": 160
+          },
+          "department": {
+            "type": "string",
+            "required": true,
+            "indexed": true,
+            "title": "Department",
+            "description": "Department the position belongs to; recruiters filter and sort positions by it.",
+            "maxLength": 120
           },
           "hiringManagerId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
             "to": [
               "HiringManager"
             ],
-            "title": "Responsible hiring manager",
-            "description": "The hiring manager responsible for offers and hiring decisions for this position.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Hiring manager",
+            "description": "The hiring manager of this position, who decides offers and hires; hiring managers list their own positions by it."
           },
           "status": {
             "type": "enum",
             "required": true,
             "indexed": true,
-            "of": "Address",
             "values": [
               {
                 "value": "open",
                 "title": "Open",
-                "description": "The position is available for applications."
+                "description": "Accepting applications."
               },
               {
                 "value": "closed",
                 "title": "Closed",
-                "description": "The position is closed after its headcount is filled."
+                "description": "Headcount filled; no new applications."
               }
             ],
-            "title": "Position status",
-            "description": "Whether the job position is open for applications or closed because its headcount has been filled.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Status",
+            "description": "Whether the position is open to applications or closed because its headcount was filled."
+          },
+          "openedAt": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "title": "Opened on",
+            "description": "Date the recruiter opened the position; lists are ordered by it."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
-            "title": "Job position details",
-            "description": "The descriptive information and hiring need for this job position.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Details",
+            "description": "Everything else about the position.",
             "fields": {
-              "department": {
-                "type": "string",
-                "required": true,
-                "of": "Address",
-                "title": "Department",
-                "description": "The department requesting this job position.",
-                "maxLength": 200,
-                "min": 0,
-                "max": 0
-              },
               "description": {
                 "type": "text",
                 "required": true,
-                "of": "Address",
-                "title": "Position description",
-                "description": "The responsibilities and requirements of the job position.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "title": "Description",
+                "description": "Description of the role, its responsibilities and requirements."
               },
               "headcount": {
                 "type": "integer",
                 "required": true,
-                "of": "Address",
                 "title": "Headcount",
-                "description": "The number of candidates to hire for this position.",
-                "maxLength": 0,
-                "min": 1,
-                "max": 0
+                "description": "Number of people to hire for this position; the position closes when hires reach it.",
+                "min": 1
               },
-              "filledHeadcount": {
+              "closedAt": {
+                "type": "timestamp",
+                "title": "Closed at",
+                "description": "When the position was closed automatically because its headcount was filled."
+              },
+              "hiresSoFar": {
                 "type": "integer",
                 "derived": true,
-                "title": "Filled headcount",
-                "description": "The number of applications for this position that are in the hired stage."
+                "title": "Hires so far",
+                "description": "Number of applications to this position that are in the hired stage."
               },
-              "remainingHeadcount": {
+              "remainingOpenings": {
                 "type": "integer",
                 "derived": true,
-                "title": "Remaining headcount",
-                "description": "The job position headcount minus the number of applications for this position that are in the hired stage."
+                "title": "Remaining openings",
+                "description": "Headcount of the position minus the applications already hired, never below zero."
+              },
+              "applicationsByStage": {
+                "type": "object",
+                "derived": true,
+                "title": "Applications by stage",
+                "description": "Count of this position's applications in each stage: screening, interview, offer, hired and rejected."
+              },
+              "isFilled": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Filled",
+                "description": "True when the applications hired for this position reach its headcount."
               }
             }
           }
@@ -934,13 +345,16 @@
       ],
       "transitions": [
         {
-          "transitionId": "closeFilledPosition",
+          "transitionId": "closePosition",
           "from": [
             "open"
           ],
           "to": "closed",
           "by": [],
-          "description": "Close the job position automatically when the required headcount has been hired.",
+          "description": "The application pipeline closes the position automatically when the number of hired applications reaches the headcount.",
+          "payload": [
+            "details.closedAt"
+          ],
           "ruleRefs": [
             "closePositionWhenHeadcountFilled"
           ]
@@ -952,51 +366,57 @@
       "moduleName": "hiringPipeline",
       "entityId": "Application",
       "title": "Application",
-      "description": "A candidate's application to a job position, progressed through screening, interview, offer, hiring, or rejection.",
-      "displayField": "id",
+      "description": "A candidate applying to a job position. It moves through screening, interview, offer, then hired or rejected; a rejection records its reason.",
+      "displayField": "applicationNumber",
       "relationships": {
-        "candidate": {
-          "relationshipId": "applicationCandidate",
-          "to": "Candidate",
-          "via": "Application.candidateId",
-          "cardinality": "N:1",
-          "title": "Applicant",
-          "description": "The candidate who submitted this application.",
-          "mode": "fk",
-          "required": "Always",
-          "role": "applicant"
-        },
         "jobPosition": {
           "relationshipId": "applicationJobPosition",
           "to": "JobPosition",
           "via": "Application.jobPositionId",
           "cardinality": "N:1",
-          "title": "Applied-for job position",
-          "description": "The job position for which this application was submitted.",
+          "title": "Job position applied to",
+          "description": "Each application is made to one job position.",
           "mode": "fk",
-          "required": "Always",
-          "role": "applied-for position"
+          "required": true
+        },
+        "candidate": {
+          "relationshipId": "applicationCandidate",
+          "to": "Candidate",
+          "via": "Application.candidateId",
+          "cardinality": "N:1",
+          "title": "Applying candidate",
+          "description": "Each application belongs to one candidate.",
+          "mode": "fk",
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Reads one application by its id so recruiters and hiring managers can review its candidate, position, and stage.",
-        "locate.byColumn": "Lists applications by indexed candidate, job position, or stage so recruiters and hiring managers can find the applications they are responsible for.",
-        "count": "Counts applications matching indexed filters so the module can determine how many candidates have been hired for a job position.",
-        "listByForeignKey": "Lists applications for a candidate or job position through its foreign key so the related record screen can show its applications.",
-        "create": "Creates an application in screening for a candidate and an open job position when a recruiter starts screening.",
-        "transition": "Moves an application through screening, interview, offer, hired, or rejected under the transition rules and the authorized actor.",
-        "uniqueKey": "Prevents a candidate from having more than one application for the same job position using the candidate and job-position key.",
-        "transaction": "Atomically records a hire and closes the job position when that hire fills its required headcount.",
-        "read.mdmRecord": "Reads the master candidate record referenced by an application so recruiters and hiring managers can view the candidate's name and available resume."
+        "read.byId": "Opens one application by its id when the recruiter or hiring manager follows a notification or a link from the pipeline.",
+        "locate.byColumn": "Lists applications filtered by position, candidate and stage, ordered by applied date, so the recruiter sees screening lists and the hiring manager sees interview and offer lists of their positions.",
+        "locate.byText": "Finds an application by typing part of its application number in the pipeline search box.",
+        "count": "Counts applications per stage of a position for the pipeline header and counts hires against the headcount.",
+        "listByForeignKey": "Lists all applications of a job position or of a candidate on their record screens, hydrating many at once.",
+        "create": "The recruiter records a new application of a candidate to an open position, starting in screening.",
+        "update": "The recruiter corrects the application details while it is still active.",
+        "transition": "Moves the stage column: the recruiter advances to interview and rejects with a reason, the position's hiring manager extends the offer and confirms the hire.",
+        "uniqueKey": "The engine refuses a second application with the same application number.",
+        "transaction": "Confirming a hire writes the application as hired and closes the job position in one all-or-nothing operation when the headcount is filled.",
+        "read.mdmRecord": "Reads the candidate master record behind each application to show name, e-mail, resume link and source to the recruiter and hiring manager.",
+        "sequence.next": "Issues the application number from the platform sequence hiringPipeline.Application when the recruiter records the application.",
+        "comment": "Recruiter and hiring manager leave notes on the application while discussing interviews and offers.",
+        "statusHistory.read": "Shows when the application changed stage and who moved it, reviewed before advancing, offering or rejecting.",
+        "audit": "Lets an administrator see who changed an application and when."
       },
       "rules": [
-        "applicationUniqueCandidatePosition",
-        "applicationRequiresOpenPosition",
-        "applicationStageOrder",
-        "hiringManagerManagesPosition",
-        "jobPositionHasRemainingHeadcount",
-        "closePositionWhenHeadcountFilled",
-        "rejectionReasonRequired"
+        "applicationNumberFromSequence",
+        "applicationStartsInScreening",
+        "applicationOnlyToOpenPosition",
+        "oneActiveApplicationPerCandidateAndPosition",
+        "recruiterMovesScreeningAndInterview",
+        "onlyPositionHiringManagerDecides",
+        "rejectionRequiresReason",
+        "hireWithinRemainingHeadcount",
+        "positionClosesWhenHeadcountFilled"
       ],
       "kind": "entity",
       "class": "event",
@@ -1019,90 +439,148 @@
             "required": true,
             "derived": true
           },
-          "candidateId": {
-            "type": "record",
+          "applicationNumber": {
+            "type": "string",
             "required": true,
+            "unique": true,
             "indexed": true,
-            "of": "ContactSummary",
-            "to": [
-              "Candidate"
-            ],
-            "title": "Candidate",
-            "description": "The candidate submitting this application.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Application number",
+            "description": "Number people quote for the application, issued by the platform number sequence when the application is recorded.",
+            "maxLength": 30
           },
           "jobPositionId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "to": [
               "JobPosition"
             ],
             "title": "Job position",
-            "description": "The job position to which the candidate is applying.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "The job position the candidate applies to; used to list a position's pipeline."
+          },
+          "candidateId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "to": [
+              "Candidate"
+            ],
+            "title": "Candidate",
+            "description": "The candidate who applies; name, e-mail, resume link and source are read from the candidate record."
           },
           "status": {
             "type": "enum",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "values": [
               {
                 "value": "screening",
                 "title": "Screening",
-                "description": "The recruiter is screening the application."
+                "description": "Recorded and being screened by the recruiter."
               },
               {
                 "value": "interview",
                 "title": "Interview",
-                "description": "The candidate has advanced to interview."
+                "description": "In interviews; the hiring manager decides on an offer."
               },
               {
                 "value": "offer",
                 "title": "Offer",
-                "description": "The hiring manager has approved making an offer."
+                "description": "An offer was extended to the candidate."
               },
               {
                 "value": "hired",
                 "title": "Hired",
-                "description": "The candidate has been hired for the job position."
+                "description": "The candidate was hired; counts towards the position's headcount."
               },
               {
                 "value": "rejected",
                 "title": "Rejected",
-                "description": "The application has been declined with a recorded reason."
+                "description": "The application was closed with a reason."
               }
             ],
-            "title": "Application stage",
-            "description": "The current stage of the candidate's application.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Stage",
+            "description": "Current stage of the application in the hiring pipeline."
+          },
+          "appliedAt": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "title": "Applied on",
+            "description": "Date the application was recorded; lists are ordered by it."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
             "title": "Application details",
-            "description": "Information recorded specifically for this application.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "description": "Everything about the application that nobody filters by.",
             "fields": {
-              "rejectionReason": {
-                "type": "text",
-                "of": "ContactSummary",
-                "title": "Rejection reason",
-                "description": "Why the application was rejected.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+              "interviewStartedAt": {
+                "type": "timestamp",
+                "title": "Moved to interview at",
+                "description": "When the recruiter moved the application from screening to interview."
+              },
+              "offerExtendedAt": {
+                "type": "timestamp",
+                "title": "Offer extended at",
+                "description": "When the hiring manager moved the application to offer."
+              },
+              "hiredAt": {
+                "type": "timestamp",
+                "title": "Hired at",
+                "description": "When the hiring manager confirmed the hire."
+              },
+              "rejection": {
+                "type": "object",
+                "title": "Rejection",
+                "description": "Filled when the application is rejected.",
+                "fields": {
+                  "reason": {
+                    "type": "text",
+                    "required": true,
+                    "title": "Rejection reason",
+                    "description": "Why the application will not move forward; required to reject.",
+                    "maxLength": 2000
+                  },
+                  "rejectedAt": {
+                    "type": "timestamp",
+                    "required": true,
+                    "title": "Rejected at",
+                    "description": "When the application was moved to rejected."
+                  },
+                  "stageAtRejection": {
+                    "type": "enum",
+                    "required": true,
+                    "values": [
+                      {
+                        "value": "screening",
+                        "title": "Screening"
+                      },
+                      {
+                        "value": "interview",
+                        "title": "Interview"
+                      },
+                      {
+                        "value": "offer",
+                        "title": "Offer"
+                      }
+                    ],
+                    "title": "Stage at rejection",
+                    "description": "The stage the application was in when it was rejected."
+                  }
+                }
+              },
+              "isActive": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Active",
+                "description": "True while the application is still in screening, interview or offer, that is, not yet hired nor rejected."
+              },
+              "daysInPipeline": {
+                "type": "integer",
+                "derived": true,
+                "title": "Days in pipeline",
+                "description": "Days from the application date until today, or until the day it was hired or rejected."
               }
             }
           }
@@ -1110,8 +588,7 @@
       },
       "uniqueKeys": [
         [
-          "candidateId",
-          "jobPositionId"
+          "applicationNumber"
         ]
       ],
       "lifecycleStates": [
@@ -1138,7 +615,7 @@
       ],
       "transitions": [
         {
-          "transitionId": "moveToInterview",
+          "transitionId": "advanceToInterview",
           "from": [
             "screening"
           ],
@@ -1146,13 +623,14 @@
           "by": [
             "recruiter"
           ],
-          "description": "Advance a screened application to interview.",
+          "description": "The recruiter moves a screened application to interview, handing it to the position's hiring manager.",
+          "payload": [],
           "ruleRefs": [
-            "applicationStageOrder"
+            "recruiterMovesScreeningAndInterview"
           ]
         },
         {
-          "transitionId": "moveToOffer",
+          "transitionId": "extendOffer",
           "from": [
             "interview"
           ],
@@ -1160,14 +638,14 @@
           "by": [
             "hiringManager"
           ],
-          "description": "Approve an offer for an interviewed candidate in a position managed by the hiring manager.",
+          "description": "The position's hiring manager decides to extend an offer to the interviewed candidate.",
+          "payload": [],
           "ruleRefs": [
-            "applicationStageOrder",
-            "hiringManagerManagesPosition"
+            "onlyPositionHiringManagerDecides"
           ]
         },
         {
-          "transitionId": "moveToHired",
+          "transitionId": "hire",
           "from": [
             "offer"
           ],
@@ -1175,16 +653,16 @@
           "by": [
             "hiringManager"
           ],
-          "description": "Hire an offered candidate while the job position still has hiring capacity.",
+          "description": "The position's hiring manager confirms the hire; when hires reach the headcount the position closes automatically.",
+          "payload": [],
           "ruleRefs": [
-            "applicationStageOrder",
-            "hiringManagerManagesPosition",
-            "jobPositionHasRemainingHeadcount",
-            "closePositionWhenHeadcountFilled"
+            "onlyPositionHiringManagerDecides",
+            "hireWithinRemainingHeadcount",
+            "positionClosesWhenHeadcountFilled"
           ]
         },
         {
-          "transitionId": "rejectApplication",
+          "transitionId": "reject",
           "from": [
             "screening",
             "interview",
@@ -1192,27 +670,757 @@
           ],
           "to": "rejected",
           "by": [
-            "recruiter"
+            "recruiter",
+            "hiringManager"
           ],
-          "description": "Reject an application and record the reason it will not proceed.",
+          "description": "The application is closed with a reason; normally the recruiter records it, and the hiring manager may decline at interview instead of returning it.",
+          "payload": [
+            "details.rejection.reason"
+          ],
           "ruleRefs": [
-            "rejectionReasonRequired"
+            "rejectionRequiresReason"
           ]
         }
       ]
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "hiringPipeline",
+      "entityId": "Candidate",
+      "title": "Candidate",
+      "description": "A person who applies to job positions. Name lives in the master record, the e-mail is a linked contact channel, the resume is a platform attachment; the module namespace keeps only the candidate's source.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "applications": {
+          "relationshipId": "applicationCandidate",
+          "to": "Application",
+          "via": "Application.candidateId",
+          "cardinality": "1:N",
+          "title": "Applications",
+          "description": "The applications this candidate has made to job positions.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
+        },
+        "emails": {
+          "relationshipId": "candidateEmail",
+          "to": "CandidateEmail",
+          "via": "HasContact",
+          "cardinality": "1:N",
+          "title": "E-mails",
+          "description": "The candidate's e-mail addresses, linked as contact channels (HasContact).",
+          "role": "HasContact"
+        },
+        "jobPositions": {
+          "relationshipId": "jobPositionCandidates",
+          "to": "JobPosition",
+          "via": "Application",
+          "cardinality": "N:N",
+          "title": "Positions applied to",
+          "description": "The job positions this candidate applied to, read through their applications.",
+          "mode": "throughTable",
+          "path": "JobPosition.id <- Application.jobPositionId, Application.candidateId -> Candidate.id",
+          "derived": true,
+          "direction": "to"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Reads the candidate by mdmId to show them on the application list and the application screen; used by recruiters and hiring managers.",
+        "locate.byName": "Finds candidates whose name contains the typed text, filtered to the hiringPipeline.Candidate role; used by the recruiter before registering and when recording an application.",
+        "locate.byContact": "Finds the candidate who owns a given e-mail address so the recruiter does not register the same person twice.",
+        "locate.byDocument": "Finds the person holding a national document, when the recruiter has one, to deduplicate before registering.",
+        "register.createOrAttach": "Registers the candidate: looks the person up, creates the master record only when absent, attaches the hiringPipeline.Candidate role and writes the source; used by the recruiter.",
+        "edit.platformFields": "Lets the recruiter correct the candidate's name, other names and privacy consent on the master record.",
+        "edit.moduleNamespace": "Lets the recruiter change the candidate's source in the hiringPipeline namespace.",
+        "link.contact": "Adds the candidate's e-mail as a ContactChannel linked by HasContact when the recruiter registers or updates the candidate.",
+        "attach.document": "Stores the candidate's resume (file or link) against the record under the resume category; uploaded by the recruiter and opened by recruiters and hiring managers.",
+        "listLinks": "Shows the candidate's linked e-mails and other relationships on the candidate screen for recruiters.",
+        "inactivate": "Takes a candidate out of use without deleting them, and reactivates them later; done by the recruiter.",
+        "comment": "Lets recruiters and hiring managers leave notes about the candidate.",
+        "tag": "Lets the recruiter label candidates with free tags (skills, talent pool) inside the hiringPipeline namespace.",
+        "statusHistory.read": "Shows recruiters when the candidate record was inactivated or reactivated, and by whom.",
+        "audit": "Tells an administrator who changed the candidate record and when."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
+        "rule-delete-blocked-by-relationships",
+        "rule-person-privacy-consent-required-br-eu",
+        "candidateRequiresEmail",
+        "candidateSourceRequired"
+      ],
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "hiringPipeline.Candidate",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "writePrecondition": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "The master Person record of the candidate as the platform stores it, plus this module's namespace.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Person"
+                      }
+                    ],
+                    "description": "Always Person for a candidate.",
+                    "title": "Subtype"
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 200,
+                    "description": "Full name of the candidate, used to search for them before registering and shown on every application.",
+                    "title": "Name"
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Active"
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inactive"
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Merged"
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Blocked"
+                      }
+                    ],
+                    "title": "Status",
+                    "description": "Platform status of the record; an inactive candidate is no longer offered when recording applications."
+                  },
+                  "docType": {
+                    "type": "enum",
+                    "indexed": true,
+                    "values": [
+                      {
+                        "value": "SSN",
+                        "title": "SSN"
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passport"
+                      },
+                      {
+                        "value": "DriversLicense",
+                        "title": "Driver's license"
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "National ID"
+                      },
+                      {
+                        "value": "CPF",
+                        "title": "CPF"
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Other"
+                      }
+                    ],
+                    "title": "Document type",
+                    "description": "Type of national document, when the recruiter has it; used only to deduplicate."
+                  },
+                  "docId": {
+                    "type": "string",
+                    "indexed": true,
+                    "description": "National document number of the candidate, when known; used only to deduplicate.",
+                    "title": "Document number"
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "Country of the candidate (ISO 3166-1 alpha-2); decides the privacy rules that apply.",
+                    "title": "Country"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Registered at",
+                    "description": "When the candidate record was created."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Updated at",
+                    "description": "When the candidate record was last changed."
+                  }
+                },
+                "description": "Platform identification of the candidate; the name is what recruiters search and see."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Other names the candidate is known by, such as a nickname or maiden name, which help find them.",
+                    "title": "Other names"
+                  },
+                  "contacts": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "ContactSummary",
+                    "derived": true,
+                    "description": "Summary of the candidate's linked contact channels; the candidate's e-mail appears here.",
+                    "title": "Contacts"
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Compact keys the platform keeps for the candidate's links.",
+                    "title": "Relationship keys"
+                  }
+                },
+                "description": "Platform base data of the candidate."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Candidate's consent to have their personal data processed for recruiting; required for residents of Brazil or the EU.",
+                    "title": "Privacy consent"
+                  }
+                },
+                "description": "Platform person data; the hiring pipeline does not use any of it besides consent."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Fields promoted by the organization; read only in this module."
+              },
+              "hiringPipeline": {
+                "type": "object",
+                "owner": "module",
+                "fields": {
+                  "source": {
+                    "type": "enum",
+                    "required": true,
+                    "values": [
+                      {
+                        "value": "referral",
+                        "title": "Referral"
+                      },
+                      {
+                        "value": "jobBoard",
+                        "title": "Job board"
+                      },
+                      {
+                        "value": "linkedIn",
+                        "title": "LinkedIn"
+                      },
+                      {
+                        "value": "careerSite",
+                        "title": "Career site"
+                      },
+                      {
+                        "value": "agency",
+                        "title": "Agency"
+                      },
+                      {
+                        "value": "event",
+                        "title": "Event"
+                      },
+                      {
+                        "value": "other",
+                        "title": "Other"
+                      }
+                    ],
+                    "title": "Source",
+                    "description": "Channel through which the candidate reached the organization, recorded by the recruiter at registration."
+                  }
+                },
+                "description": "What the hiring pipeline knows about the candidate: only where the candidate came from."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "hiringPipeline",
+      "entityId": "CandidateEmail",
+      "title": "Candidate E-mail",
+      "description": "The candidate's e-mail address as a contact channel record, linked to the candidate by HasContact and used to find duplicates.",
+      "displayField": "details.contactChannel.value",
+      "relationships": {
+        "candidate": {
+          "relationshipId": "candidateEmail",
+          "to": "Candidate",
+          "via": "HasContact",
+          "cardinality": "N:1",
+          "title": "Candidate",
+          "description": "The candidate who owns this e-mail address, linked by HasContact.",
+          "direction": "to",
+          "role": "HasContact"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Reads the candidate's e-mail record by id so the candidate screen and application lists can show the address.",
+        "locate.byContact": "Finds the e-mail record holding a typed address so the recruiter detects an already registered candidate before creating a new one.",
+        "register.createOrAttach": "Creates the e-mail record when the address is new, or attaches the hiringPipeline.CandidateEmail role to the existing one, when the recruiter registers a candidate.",
+        "edit.platformFields": "Lets the recruiter correct a mistyped address or mark it verified.",
+        "inactivate": "Lets the recruiter take an address the candidate no longer uses out of service without deleting it, and reactivate it later.",
+        "link": "Links the e-mail to its candidate through HasContact when the recruiter registers or updates the candidate.",
+        "unlink": "Closes the HasContact link when the recruiter removes an address from a candidate, keeping its history.",
+        "listLinks": "Shows on the e-mail record which candidate it belongs to, for the recruiter and the hiring manager.",
+        "audit": "Shows an administrator who changed a candidate's e-mail and when."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-identity-never-in-namespace",
+        "rule-contact-value-unique-per-type",
+        "rule-delete-blocked-by-relationships",
+        "rule-document-shape-validated"
+      ],
+      "kind": "role",
+      "subtype": "ContactChannel",
+      "roleTag": "hiringPipeline.CandidateEmail",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "writePrecondition": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "The JSONB document, as a map of groups (see groups).",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "ContactChannel",
+                        "title": "Contact channel"
+                      }
+                    ],
+                    "description": "Always ContactChannel for a candidate e-mail.",
+                    "title": "Subtype"
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 200,
+                    "description": "How recruiters recognise this e-mail record in a list, usually the address itself.",
+                    "title": "Name"
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Active"
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inactive"
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Merged"
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Blocked"
+                      }
+                    ],
+                    "title": "Status",
+                    "description": "Whether this e-mail is still in use for the candidate."
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "ISO 3166-1 alpha-2 country the record belongs to.",
+                    "title": "Country"
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Module roles of the record, including hiringPipeline.CandidateEmail.",
+                    "title": "Module roles"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Created at",
+                    "description": "When the e-mail record was created."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Updated at",
+                    "description": "When the e-mail record was last changed."
+                  }
+                },
+                "description": "Index columns of the platform for the candidate's e-mail record."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Compact keys recomputed by the engine, including the candidate this e-mail belongs to.",
+                    "title": "Relationship references"
+                  }
+                },
+                "description": "What every record has; nothing of it is used by this role beyond the engine-derived references."
+              },
+              "contactChannel": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "contactType": {
+                    "type": "enum",
+                    "required": true,
+                    "values": [
+                      {
+                        "value": "Email",
+                        "title": "E-mail"
+                      }
+                    ],
+                    "title": "Contact type",
+                    "description": "Always Email for a candidate e-mail."
+                  },
+                  "value": {
+                    "type": "string",
+                    "required": true,
+                    "description": "The candidate's e-mail address, used by recruiters to reach the candidate and to detect duplicate registrations.",
+                    "title": "E-mail address",
+                    "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+                    "maxLength": 254
+                  },
+                  "isVerified": {
+                    "type": "boolean",
+                    "required": true,
+                    "title": "Verified",
+                    "description": "Whether the address has been confirmed as belonging to the candidate."
+                  },
+                  "verifiedAt": {
+                    "type": "timestamp",
+                    "title": "Verified at",
+                    "description": "When the address was confirmed."
+                  }
+                },
+                "description": "The candidate's e-mail as a contact channel record."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Fields promoted by the organization; read only for this module."
+              },
+              "hiringPipeline": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "hiringPipeline",
+      "entityId": "HiringManager",
+      "title": "Hiring Manager",
+      "description": "The person responsible for a job position who decides offers and hires; the positions and applications they see are scoped to the positions that point at them.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "jobPositions": {
+          "relationshipId": "jobPositionHiringManager",
+          "to": "JobPosition",
+          "via": "JobPosition.hiringManagerId",
+          "cardinality": "1:N",
+          "title": "Job positions managed",
+          "description": "The job positions for which this person decides offers and hires; scopes what the hiring manager sees.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
+        }
+      },
+      "capabilities": {
+        "read.byId": "Reads the hiring manager by mdmId to show the name on job positions and applications; used by recruiters and hiring managers.",
+        "locate.byName": "Finds a hiring manager by typed name when a recruiter opens or edits a job position.",
+        "locate.byContact": "Finds the hiring manager behind a work e-mail before registering, so the same person is not created twice; used by the recruiter.",
+        "locate.byLogin": "Resolves the signed-in hiring manager from the login e-mail so the platform can scope positions and applications to the ones pointing at her.",
+        "register.createOrAttach": "Creates the person when absent, or attaches the hiringPipeline.HiringManager role to an existing person, when a recruiter assigns a hiring manager to a position.",
+        "edit.platformFields": "Corrects the hiring manager's name or other platform fields; used by the recruiter.",
+        "inactivate": "Takes a hiring manager out of use so new positions cannot be assigned to her, keeping past positions intact; used by the recruiter.",
+        "link.contact": "Adds the work e-mail or phone of the hiring manager as a ContactChannel linked by HasContact; used by the recruiter.",
+        "listLinks": "Shows the hiring manager's related records, such as contacts and reporting lines, on the record screen.",
+        "invite.login": "Gives the hiring manager a login so she can see and decide on the applications of her positions; triggered by the recruiter.",
+        "comment": "Leaves notes on the hiring manager record, such as availability for interviews; used by recruiters."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
+        "rule-delete-blocked-by-relationships",
+        "rule-person-privacy-consent-required-br-eu",
+        "inactiveHiringManagerCannotBeAssigned"
+      ],
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "hiringPipeline.HiringManager",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "writePrecondition": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "The master record of the person who manages a job position, as the MDM stores it.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Person"
+                      }
+                    ],
+                    "description": "Always Person for a hiring manager.",
+                    "title": "Subtype"
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 200,
+                    "description": "Full name of the hiring manager, shown on job positions and when assigning a position.",
+                    "title": "Name"
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Active"
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inactive"
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Merged"
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Blocked"
+                      }
+                    ],
+                    "title": "Status",
+                    "description": "Platform status; only active hiring managers can be assigned to new positions."
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "Country whose legal rules apply to this person's data.",
+                    "title": "Country"
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Module roles of the record; carries hiringPipeline.HiringManager.",
+                    "title": "Roles"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Created at",
+                    "description": "When the record was created."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Updated at",
+                    "description": "When the record was last changed."
+                  }
+                },
+                "description": "Index columns of the platform record."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "contacts": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "ContactSummary",
+                    "derived": true,
+                    "description": "Summary of the contact channels linked to the hiring manager, such as the work e-mail.",
+                    "title": "Contacts"
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Compact keys recomputed by the engine on every link and unlink.",
+                    "title": "Relationship keys"
+                  }
+                },
+                "description": "What every record has, whatever its subtype."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consent to process this person's data, required for residents of Brazil and the EU.",
+                    "title": "Privacy consent"
+                  }
+                },
+                "description": "Natural-person data of the platform; this role uses none beyond what the platform keeps."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Fields promoted by the organization; read only."
+              },
+              "hiringPipeline": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "relationships": [
-    {
-      "relationshipId": "candidateHasContact",
-      "from": "Candidate",
-      "to": "CandidateContact",
-      "type": "oneToMany",
-      "required": true,
-      "mode": "mdmRelationship",
-      "description": "A candidate has one or more contact channels, including the email used for identification and communication.",
-      "catalogType": "HasContact"
-    },
     {
       "relationshipId": "jobPositionHiringManager",
       "from": "JobPosition",
@@ -1220,18 +1428,8 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Each job position is assigned to one responsible hiring manager, who decides offers and hiring outcomes.",
+      "description": "Each job position has one hiring manager who decides offers and hires for it.",
       "field": "JobPosition.hiringManagerId"
-    },
-    {
-      "relationshipId": "applicationCandidate",
-      "from": "Application",
-      "to": "Candidate",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Each application belongs to the candidate who applied for the position.",
-      "field": "Application.candidateId"
     },
     {
       "relationshipId": "applicationJobPosition",
@@ -1240,28 +1438,45 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Each application is submitted for one job position.",
+      "description": "Each application is made to one job position.",
       "field": "Application.jobPositionId"
+    },
+    {
+      "relationshipId": "applicationCandidate",
+      "from": "Application",
+      "to": "Candidate",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Each application belongs to one candidate.",
+      "field": "Application.candidateId"
+    },
+    {
+      "relationshipId": "candidateEmail",
+      "from": "Candidate",
+      "to": "CandidateEmail",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "The candidate's e-mail addresses are contact channels linked to the candidate.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "jobPositionCandidates",
+      "from": "JobPosition",
+      "to": "Candidate",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "The candidates who applied to a job position, read through its applications.",
+      "through": "Application",
+      "path": "JobPosition.id <- Application.jobPositionId, Application.candidateId -> Candidate.id",
+      "derived": true
     }
   ],
   "removedOrphans": [],
   "liftedAggregateEntities": [],
   "normalizations": [
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "Candidate",
-      "detail": "roleTag hiringPipeline.Candidate; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "CandidateContact",
-      "detail": "roleTag hiringPipeline.CandidateContact; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "HiringManager",
-      "detail": "roleTag hiringPipeline.HiringManager; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
     {
       "kind": "derivedFromPlatform",
       "entityId": "JobPosition",
@@ -1275,6 +1490,61 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Candidate",
+      "detail": "roleTag hiringPipeline.Candidate; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "CandidateEmail",
+      "detail": "roleTag hiringPipeline.CandidateEmail; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "HiringManager",
+      "detail": "roleTag hiringPipeline.HiringManager; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "JobPosition",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "JobPosition",
+      "detail": "record.fields.details.fields.hiresSoFar.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "JobPosition",
+      "detail": "record.fields.details.fields.remainingOpenings.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "JobPosition",
+      "detail": "record.fields.details.fields.applicationsByStage.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "JobPosition",
+      "detail": "record.fields.details.fields.isFilled.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Application",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Application",
+      "detail": "record.fields.details.fields.isActive.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Application",
+      "detail": "record.fields.details.fields.daysInPipeline.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Candidate",
       "detail": "record.fields.id, record.fields.version"
     },
     {
@@ -1283,28 +1553,33 @@
       "detail": "Candidate.details.identification.subtype.values"
     },
     {
+      "kind": "tightened",
+      "entityId": "Candidate",
+      "detail": "Candidate.details.identification.docType.values"
+    },
+    {
       "kind": "derivedFromPlatform",
-      "entityId": "CandidateContact",
+      "entityId": "CandidateEmail",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "tightened",
-      "entityId": "CandidateContact",
-      "detail": "CandidateContact.details.identification.subtype.values"
+      "entityId": "CandidateEmail",
+      "detail": "CandidateEmail.details.identification.subtype.values"
     },
     {
       "kind": "tightened",
-      "entityId": "CandidateContact",
-      "detail": "CandidateContact.details.contactChannel.contactType.values"
+      "entityId": "CandidateEmail",
+      "detail": "CandidateEmail.details.contactChannel.contactType.values"
     },
     {
       "kind": "tightened",
-      "entityId": "CandidateContact",
-      "detail": "CandidateContact.details.contactChannel.value.pattern"
+      "entityId": "CandidateEmail",
+      "detail": "CandidateEmail.details.contactChannel.value.pattern"
     },
     {
       "kind": "namespaceEmpty",
-      "entityId": "CandidateContact",
+      "entityId": "CandidateEmail",
       "detail": "details.hiringPipeline"
     },
     {
@@ -1321,26 +1596,6 @@
       "kind": "namespaceEmpty",
       "entityId": "HiringManager",
       "detail": "details.hiringPipeline"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "JobPosition",
-      "detail": "record.fields.id, record.fields.version"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "JobPosition",
-      "detail": "record.fields.details.fields.filledHeadcount.derived (derived[])"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "JobPosition",
-      "detail": "record.fields.details.fields.remainingHeadcount.derived (derived[])"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "Application",
-      "detail": "record.fields.id, record.fields.version"
     }
   ]
 }

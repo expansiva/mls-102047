@@ -1,13 +1,13 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/ontology/HiringManager.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const hiringPipelineEntityHiringManager = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "hiringPipeline",
   "entityId": "HiringManager",
   "title": "Hiring Manager",
-  "description": "A person responsible for a job position and authorized to decide its offers and hiring outcomes.",
+  "description": "The person responsible for a job position who decides offers and hires; the positions and applications they see are scoped to the positions that point at them.",
   "displayField": "details.identification.name",
   "relationships": {
     "jobPositions": {
@@ -16,28 +16,32 @@ export const hiringPipelineEntityHiringManager = {
       "via": "JobPosition.hiringManagerId",
       "cardinality": "1:N",
       "title": "Job positions managed",
-      "description": "Job positions for which this hiring manager is the responsible decision-maker for offers and hiring outcomes.",
+      "description": "The job positions for which this person decides offers and hires; scopes what the hiring manager sees.",
       "mode": "fk",
       "direction": "to",
-      "required": "Never; a hiring manager may be registered before being assigned to a job position.",
-      "role": "responsible hiring manager"
+      "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Reads a hiring manager by known master-record id through the MDM index and document store for recruiters and hiring managers viewing a responsible manager.",
-    "locate.byName": "Finds a hiring manager by typed name through the Person name index for recruiters assigning a manager to a job position.",
-    "locate.byTag": "Lists people carrying the hiringPipeline.HiringManager role tag through the indexed MDM tag lookup for recruiters choosing an eligible hiring manager.",
-    "register.createOrAttach": "Creates a Person when absent or attaches the Hiring Manager role to the existing person through document or contact matching for recruiters setting up position responsibility.",
-    "edit.platformFields": "Updates platform-owned identification data through the MDM person update route for recruiters maintaining a hiring manager record.",
-    "inactivate": "Inactivates or reactivates the hiring-manager master record through the platform status operation for recruiters when the person must no longer be assigned to positions.",
-    "statusHistory.read": "Shows master-record status changes through MDM status history for recruiters reviewing whether a hiring manager is active.",
-    "audit": "Shows who changed the hiring-manager master record and when through the MDM audit log for recruiters investigating record maintenance."
+    "read.byId": "Reads the hiring manager by mdmId to show the name on job positions and applications; used by recruiters and hiring managers.",
+    "locate.byName": "Finds a hiring manager by typed name when a recruiter opens or edits a job position.",
+    "locate.byContact": "Finds the hiring manager behind a work e-mail before registering, so the same person is not created twice; used by the recruiter.",
+    "locate.byLogin": "Resolves the signed-in hiring manager from the login e-mail so the platform can scope positions and applications to the ones pointing at her.",
+    "register.createOrAttach": "Creates the person when absent, or attaches the hiringPipeline.HiringManager role to an existing person, when a recruiter assigns a hiring manager to a position.",
+    "edit.platformFields": "Corrects the hiring manager's name or other platform fields; used by the recruiter.",
+    "inactivate": "Takes a hiring manager out of use so new positions cannot be assigned to her, keeping past positions intact; used by the recruiter.",
+    "link.contact": "Adds the work e-mail or phone of the hiring manager as a ContactChannel linked by HasContact; used by the recruiter.",
+    "listLinks": "Shows the hiring manager's related records, such as contacts and reporting lines, on the record screen.",
+    "invite.login": "Gives the hiring manager a login so she can see and decide on the applications of her positions; triggered by the recruiter.",
+    "comment": "Leaves notes on the hiring manager record, such as availability for interviews; used by recruiters."
   },
   "rules": [
     "rule-foreign-namespace-refused",
     "rule-identity-never-in-namespace",
     "rule-document-shape-validated",
-    "rule-person-privacy-consent-required-br-eu"
+    "rule-delete-blocked-by-relationships",
+    "rule-person-privacy-consent-required-br-eu",
+    "inactiveHiringManagerCannotBeAssigned"
   ],
   "kind": "role",
   "subtype": "Person",
@@ -56,12 +60,13 @@ export const hiringPipelineEntityHiringManager = {
         "type": "integer",
         "required": true,
         "derived": true,
+        "writePrecondition": true,
         "description": "Bumped by the engine on every write; optimistic concurrency."
       },
       "details": {
         "type": "object",
         "required": true,
-        "description": "Platform person record read by the hiring pipeline for a person who manages job positions.",
+        "description": "The master record of the person who manages a job position, as the MDM stores it.",
         "fields": {
           "identification": {
             "type": "object",
@@ -75,25 +80,19 @@ export const hiringPipelineEntityHiringManager = {
                 "values": [
                   {
                     "value": "Person",
-                    "title": "Person",
-                    "description": "A natural person."
+                    "title": "Person"
                   }
                 ],
-                "description": "Platform-derived subtype identifying this master record as a person.",
-                "title": "Record subtype",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "description": "Always Person for a hiring manager.",
+                "title": "Subtype"
               },
               "name": {
                 "type": "string",
                 "required": true,
                 "indexed": true,
-                "maxLength": 0,
-                "description": "Name used by recruiters to identify the hiring manager when assigning responsibility for a job position.",
-                "title": "Name",
-                "min": 0,
-                "max": 0
+                "maxLength": 200,
+                "description": "Full name of the hiring manager, shown on job positions and when assigning a position.",
+                "title": "Name"
               },
               "status": {
                 "type": "enum",
@@ -103,51 +102,102 @@ export const hiringPipelineEntityHiringManager = {
                 "values": [
                   {
                     "value": "Active",
-                    "title": "Active",
-                    "description": "The person is active."
+                    "title": "Active"
                   },
                   {
                     "value": "Inactive",
-                    "title": "Inactive",
-                    "description": "The person is inactive."
+                    "title": "Inactive"
                   },
                   {
                     "value": "Merged",
-                    "title": "Merged",
-                    "description": "The record was merged into another person."
+                    "title": "Merged"
                   },
                   {
                     "value": "Blocked",
-                    "title": "Blocked",
-                    "description": "The person is blocked."
+                    "title": "Blocked"
                   }
                 ],
                 "title": "Status",
-                "description": "Platform-derived master-record status that indicates whether this hiring manager can be used.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "description": "Platform status; only active hiring managers can be assigned to new positions."
+              },
+              "countryCode": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "pattern": "^[A-Z]{2}$",
+                "maxLength": 2,
+                "default": "US",
+                "description": "Country whose legal rules apply to this person's data.",
+                "title": "Country"
+              },
+              "tags": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "derived": true,
+                "description": "Module roles of the record; carries hiringPipeline.HiringManager.",
+                "title": "Roles"
+              },
+              "createdAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Created at",
+                "description": "When the record was created."
+              },
+              "updatedAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Updated at",
+                "description": "When the record was last changed."
               }
             },
-            "description": "Platform identification data used to recognize the hiring manager."
+            "description": "Index columns of the platform record."
           },
           "base": {
             "type": "object",
             "owner": "platform",
-            "fields": {},
-            "description": "Platform base data for the person; no base fields are specific to the hiring-manager role."
+            "fields": {
+              "contacts": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "ContactSummary",
+                "derived": true,
+                "description": "Summary of the contact channels linked to the hiring manager, such as the work e-mail.",
+                "title": "Contacts"
+              },
+              "relationshipRefs": {
+                "type": "object",
+                "required": true,
+                "derived": true,
+                "description": "Compact keys recomputed by the engine on every link and unlink.",
+                "title": "Relationship keys"
+              }
+            },
+            "description": "What every record has, whatever its subtype."
           },
           "person": {
             "type": "object",
             "owner": "platform",
-            "fields": {},
-            "description": "Platform natural-person data; no person fields beyond identification are used by this role."
+            "fields": {
+              "privacyConsent": {
+                "type": "object",
+                "of": "PrivacyConsent",
+                "description": "Consent to process this person's data, required for residents of Brazil and the EU.",
+                "title": "Privacy consent"
+              }
+            },
+            "description": "Natural-person data of the platform; this role uses none beyond what the platform keeps."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Organization-promoted data read from the platform registry; this module does not declare fields here."
+            "description": "Fields promoted by the organization; read only."
           },
           "hiringPipeline": {
             "type": "object",
@@ -159,7 +209,7 @@ export const hiringPipelineEntityHiringManager = {
       }
     }
   }
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type HiringPipelineEntityHiringManagerType = typeof hiringPipelineEntityHiringManager;
 
