@@ -1,0 +1,391 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 153714,
+  "receivedAt": "2026-10-12T23:20:58.911Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "The recruiting home is where the recruiter keeps an eye on the whole pipeline: position indicators (hires so far, remaining openings, applications by stage, filled positions) and active applications with their days in the pipeline. Next to these sits a work inbox of applications that need the recruiter's attention. Fixed monitoring of indicators plus actions on what needs attention is what a dashboard command center does, so both devices use that category.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "dashboardCommandCenter"
+            },
+            "intent": "Give the recruiter one place to see how hiring is going across every position and to deal with the applications waiting for them: record new applications, move screened ones to interview, and reject with a reason the ones that won't go forward.",
+            "sections": [
+              {
+                "id": "workInbox",
+                "priority": "primary",
+                "purpose": "Applications that need the recruiter now, grouped by what to do next: record, move to interview, or reject with a reason, including those returned by the hiring manager.",
+                "organisms": [
+                  "applicationsInbox"
+                ]
+              },
+              {
+                "id": "pipelineOverview",
+                "priority": "main",
+                "purpose": "How each position is doing: hires so far against remaining openings, applications by stage, which positions are filled, and how long active applications have been in the pipeline.",
+                "organisms": [
+                  "pipelineHighlights"
+                ]
+              }
+            ],
+            "organisms": {
+              "pipelineHighlights": {
+                "kind": "highlights",
+                "text": "Positions with hires so far, remaining openings, applications by stage and which are filled; active applications and their days in the pipeline, so the recruiter spots positions close to filling and applications that have been waiting too long.",
+                "intents": [
+                  {
+                    "id": "openJobPositions",
+                    "kind": "navigate",
+                    "to": "job_positions"
+                  },
+                  {
+                    "id": "openApplications",
+                    "kind": "navigate",
+                    "to": "applications"
+                  }
+                ]
+              },
+              "applicationsInbox": {
+                "kind": "inbox",
+                "text": "Applications waiting for me: new applications to record by choosing the candidate and an open position, applications in screening to move to interview or reject, and applications returned by the hiring manager to reject with a reason.",
+                "intents": [
+                  {
+                    "id": "recordApplication",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "advanceToInterview",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "rejectApplication",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "openApplicationsPage",
+                    "kind": "navigate",
+                    "to": "applications"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "pipelineHighlights": [
+                {
+                  "role": "Headline counts: hires so far, remaining openings, filled positions, active applications",
+                  "preferred": "groupviewmetric--ml-metric-card",
+                  "alternative": "groupviewmetric--ml-metric-big-number"
+                },
+                {
+                  "role": "Applications by stage across positions",
+                  "preferred": "groupviewchart--ml-bar-chart",
+                  "alternative": "groupviewchart--ml-pie-chart"
+                },
+                {
+                  "role": "Positions with headcount progress and filled status",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewtable--ml-view-table"
+                },
+                {
+                  "role": "Hires against headcount for a position",
+                  "preferred": "groupshowprogress--ml-linear-progress",
+                  "alternative": "groupshowprogress--ml-circular-progress"
+                }
+              ],
+              "applicationsInbox": [
+                {
+                  "role": "List of applications waiting for an action",
+                  "preferred": "groupviewtable--ml-side-detail-table",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                },
+                {
+                  "role": "Switch between to record, in screening and returned for rejection",
+                  "preferred": "groupnavigatesection--ml-navigate-pills",
+                  "alternative": "groupnavigatesection--ml-tabs"
+                },
+                {
+                  "role": "Pick the candidate and the open position for a new application",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "Rejection reason",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "Record, move to interview and reject actions",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-split-button"
+                },
+                {
+                  "role": "Confirmation after an action",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "pipelineHighlights": {
+                "reads": [
+                  "JobPosition.title",
+                  "JobPosition.department",
+                  "JobPosition.status",
+                  "JobPosition.hiringManagerId",
+                  "HiringManager.details.identification.name",
+                  "JobPosition.details.headcount",
+                  "JobPosition.details.hiresSoFar",
+                  "JobPosition.details.remainingOpenings",
+                  "JobPosition.details.applicationsByStage",
+                  "JobPosition.details.isFilled",
+                  "Application.applicationNumber",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.details.isActive",
+                  "Application.details.daysInPipeline"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "applicationsInbox": {
+                "reads": [
+                  "Application.applicationNumber",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.jobPositionId",
+                  "Application.candidateId",
+                  "Application.details.daysInPipeline",
+                  "Application.details.isActive",
+                  "Candidate.details.identification.name",
+                  "Candidate.details.hiringPipeline.source",
+                  "CandidateEmail.details.contactChannel.value",
+                  "JobPosition.title",
+                  "JobPosition.status",
+                  "JobPosition.details.remainingOpenings"
+                ],
+                "edits": [
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Application.details.rejection.reason"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "recordApplication",
+                    "write": "Application.create"
+                  },
+                  {
+                    "intentId": "advanceToInterview",
+                    "write": "Application.advanceToInterview"
+                  },
+                  {
+                    "intentId": "rejectApplication",
+                    "write": "Application.reject"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "dashboardCommandCenter"
+            },
+            "intent": "On a narrow screen (about 390px, still usable at 360px and 430px), the recruiter sees first the applications waiting for them and acts on them one at a time, then checks a short overview of how positions are filling.",
+            "sections": [
+              {
+                "id": "workInbox",
+                "priority": "primary",
+                "purpose": "Applications waiting for the recruiter, stacked as one column so each one can be recorded, moved to interview or rejected with a reason.",
+                "organisms": [
+                  "applicationsInbox"
+                ]
+              },
+              {
+                "id": "pipelineOverview",
+                "priority": "secondary",
+                "purpose": "Short pipeline summary below the inbox: hires so far, remaining openings, applications by stage, filled positions and days in the pipeline for active applications.",
+                "organisms": [
+                  "pipelineHighlights"
+                ]
+              }
+            ],
+            "organisms": {
+              "pipelineHighlights": {
+                "kind": "highlights",
+                "text": "Positions with hires so far, remaining openings, applications by stage and which are filled; active applications and their days in the pipeline, as compact indicators that wrap to fit the screen width.",
+                "intents": [
+                  {
+                    "id": "openJobPositions",
+                    "kind": "navigate",
+                    "to": "job_positions"
+                  },
+                  {
+                    "id": "openApplications",
+                    "kind": "navigate",
+                    "to": "applications"
+                  }
+                ]
+              },
+              "applicationsInbox": {
+                "kind": "inbox",
+                "text": "Applications waiting for me: new applications to record, applications in screening to move to interview or reject, and applications returned by the hiring manager to reject with a reason, each shown as a stacked item with its actions.",
+                "intents": [
+                  {
+                    "id": "recordApplication",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "advanceToInterview",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "rejectApplication",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "openApplicationsPage",
+                    "kind": "navigate",
+                    "to": "applications"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "pipelineHighlights": [
+                {
+                  "role": "Compact headline counts",
+                  "preferred": "groupviewmetric--ml-metric-card",
+                  "alternative": "groupviewmetric--ml-compact-metric-sparkline"
+                },
+                {
+                  "role": "Applications by stage",
+                  "preferred": "groupviewchart--ml-bar-chart",
+                  "alternative": "groupviewchart--ml-pie-chart"
+                },
+                {
+                  "role": "Positions with filled status on a narrow screen",
+                  "preferred": "groupviewtable--ml-responsive-table",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ],
+              "applicationsInbox": [
+                {
+                  "role": "Stacked list of applications waiting for an action",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                },
+                {
+                  "role": "Switch between inbox groups",
+                  "preferred": "groupnavigatesection--ml-navigate-pills",
+                  "alternative": "groupnavigatesection--ml-tabs"
+                },
+                {
+                  "role": "Pick the candidate and open position",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "Rejection reason",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "Actions on an application",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-kebab-action-trigger"
+                },
+                {
+                  "role": "Confirmation after an action",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "pipelineHighlights": {
+                "reads": [
+                  "JobPosition.title",
+                  "JobPosition.status",
+                  "JobPosition.hiringManagerId",
+                  "HiringManager.details.identification.name",
+                  "JobPosition.details.headcount",
+                  "JobPosition.details.hiresSoFar",
+                  "JobPosition.details.remainingOpenings",
+                  "JobPosition.details.applicationsByStage",
+                  "JobPosition.details.isFilled",
+                  "Application.applicationNumber",
+                  "Application.status",
+                  "Application.details.isActive",
+                  "Application.details.daysInPipeline"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "applicationsInbox": {
+                "reads": [
+                  "Application.applicationNumber",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.jobPositionId",
+                  "Application.candidateId",
+                  "Application.details.daysInPipeline",
+                  "Application.details.isActive",
+                  "Candidate.details.identification.name",
+                  "Candidate.details.hiringPipeline.source",
+                  "CandidateEmail.details.contactChannel.value",
+                  "JobPosition.title",
+                  "JobPosition.status",
+                  "JobPosition.details.remainingOpenings"
+                ],
+                "edits": [
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Application.details.rejection.reason"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "recordApplication",
+                    "write": "Application.create"
+                  },
+                  {
+                    "intentId": "advanceToInterview",
+                    "write": "Application.advanceToInterview"
+                  },
+                  {
+                    "intentId": "rejectApplication",
+                    "write": "Application.reject"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 18,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}
