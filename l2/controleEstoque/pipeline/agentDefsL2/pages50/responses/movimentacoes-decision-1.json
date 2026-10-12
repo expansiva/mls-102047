@@ -1,0 +1,328 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 116543,
+  "receivedAt": "2026-10-12T20:54:31.423Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "A página trata do controle de estoque: o estoquista registra entradas e saídas de quantidade, que recalculam o saldo atual do produto e podem disparar o aviso de abaixo do mínimo, e consulta o histórico dessas movimentações. Isso corresponde a inventoryControl (saldos, níveis mínimos, alertas e ajustes), e não a um cadastro de produto ou a uma simples captura de campo.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "inventoryControl"
+            },
+            "intent": "Permite ao estoquista registrar uma entrada ou saída de quantidade de um produto, conferindo antes o saldo atual, e acompanhar o histórico permanente de movimentações do estoque.",
+            "sections": [
+              {
+                "id": "registro",
+                "priority": "primary",
+                "purpose": "Escolher o produto, conferir o saldo atual e o mínimo, informar se é entrada ou saída e a quantidade, e confirmar o registro.",
+                "organisms": [
+                  "registroMovimentacao",
+                  "acoesRegistro"
+                ]
+              },
+              {
+                "id": "historico",
+                "priority": "main",
+                "purpose": "Mostrar as entradas e saídas já registradas, com número, produto, tipo, quantidade e data, para conferência e localização de um registro.",
+                "organisms": [
+                  "historicoMovimentacoes"
+                ]
+              }
+            ],
+            "organisms": {
+              "historicoMovimentacoes": {
+                "kind": "list",
+                "text": "Vejo as entradas e saídas de estoque, com número, produto, tipo, quantidade na unidade do produto e quando foram registradas; posso filtrar por tipo, período ou número.",
+                "intents": []
+              },
+              "registroMovimentacao": {
+                "kind": "form",
+                "text": "Registro uma entrada ou saída de quantidade de um produto: escolho o produto, vejo o saldo atual e se está abaixo do mínimo, indico o tipo e a quantidade maior que zero.",
+                "intents": []
+              },
+              "acoesRegistro": {
+                "kind": "actions",
+                "text": "Registro a movimentação no estoque; ela fica permanente, o saldo é atualizado e recebo aviso se o produto ficar abaixo do mínimo.",
+                "intents": [
+                  {
+                    "id": "registrarMovimentacao",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "historicoMovimentacoes": [
+                {
+                  "role": "tabela do histórico de movimentações",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewtable--ml-advanced-data-table"
+                },
+                {
+                  "role": "filtro por tipo entrada ou saída",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-select"
+                },
+                {
+                  "role": "filtro por período de registro",
+                  "preferred": "groupenterdateinterval--ml-date-interval-presets",
+                  "alternative": "groupenterdateinterval--ml-date-range-dual-calendar"
+                },
+                {
+                  "role": "busca pelo número da movimentação",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": ""
+                }
+              ],
+              "registroMovimentacao": [
+                {
+                  "role": "escolha do produto pelo nome",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "tipo da movimentação",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "quantidade movimentada",
+                  "preferred": "groupenternumber--ml-number-input",
+                  "alternative": "groupenternumber--ml-number-stepper"
+                }
+              ],
+              "acoesRegistro": [
+                {
+                  "role": "confirmar o registro",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "confirmação do registro",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": ""
+                },
+                {
+                  "role": "aviso de saldo abaixo do mínimo",
+                  "preferred": "groupnotifyuser--ml-contextual-feedback",
+                  "alternative": "groupnotifyuser--ml-notify-banner"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "historicoMovimentacoes": {
+                "reads": [
+                  "Movimentacao.numero",
+                  "Movimentacao.tipo",
+                  "Movimentacao.registradoEm",
+                  "Movimentacao.details.quantidade",
+                  "Movimentacao.produtoId",
+                  "Produto.details.identification.name",
+                  "Produto.details.product.unitOfMeasure"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "registroMovimentacao": {
+                "reads": [
+                  "Produto.details.identification.name",
+                  "Produto.details.product.sku",
+                  "Produto.details.product.unitOfMeasure",
+                  "Produto.details.controleEstoque.saldoAtual",
+                  "Produto.details.controleEstoque.saldoMinimo",
+                  "Produto.details.controleEstoque.abaixoDoMinimo"
+                ],
+                "edits": [
+                  "Movimentacao.produtoId",
+                  "Movimentacao.tipo",
+                  "Movimentacao.details.quantidade"
+                ],
+                "selects": "",
+                "submits": []
+              },
+              "acoesRegistro": {
+                "reads": [
+                  "Produto.details.controleEstoque.saldoAtual",
+                  "Produto.details.controleEstoque.abaixoDoMinimo"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "registrarMovimentacao",
+                    "write": "Movimentacao.create"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "inventoryControl"
+            },
+            "intent": "No celular, o estoquista registra rapidamente uma entrada ou saída de um produto, vendo o saldo atual antes de confirmar, e consulta abaixo o histórico de movimentações em conteúdo fluido de coluna única, por volta de 390px e utilizável entre 360px e 430px.",
+            "sections": [
+              {
+                "id": "registro",
+                "priority": "primary",
+                "purpose": "Registrar a movimentação em poucos toques: produto, saldo atual, tipo, quantidade e confirmação ao final do formulário.",
+                "organisms": [
+                  "registroMovimentacao",
+                  "acoesRegistro"
+                ]
+              },
+              {
+                "id": "historico",
+                "priority": "main",
+                "purpose": "Listar as movimentações recentes em itens empilhados e legíveis em tela estreita, com filtro por tipo.",
+                "organisms": [
+                  "historicoMovimentacoes"
+                ]
+              }
+            ],
+            "organisms": {
+              "historicoMovimentacoes": {
+                "kind": "list",
+                "text": "Vejo as entradas e saídas de estoque em itens empilhados com produto, tipo, quantidade e data; posso filtrar por tipo ou período.",
+                "intents": []
+              },
+              "registroMovimentacao": {
+                "kind": "form",
+                "text": "Registro uma entrada ou saída de quantidade de um produto, vendo o saldo atual e se ele está abaixo do mínimo antes de informar a quantidade.",
+                "intents": []
+              },
+              "acoesRegistro": {
+                "kind": "actions",
+                "text": "Registro a movimentação no estoque com um botão de largura total; recebo a confirmação e o aviso de abaixo do mínimo quando ocorrer.",
+                "intents": [
+                  {
+                    "id": "registrarMovimentacao",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "historicoMovimentacoes": [
+                {
+                  "role": "lista do histórico de movimentações",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                },
+                {
+                  "role": "filtro por tipo entrada ou saída",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": ""
+                },
+                {
+                  "role": "filtro por período de registro",
+                  "preferred": "groupenterdateinterval--ml-date-interval-presets",
+                  "alternative": ""
+                }
+              ],
+              "registroMovimentacao": [
+                {
+                  "role": "escolha do produto pelo nome",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "tipo da movimentação",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "quantidade movimentada",
+                  "preferred": "groupenternumber--ml-number-stepper",
+                  "alternative": "groupenternumber--ml-number-input"
+                }
+              ],
+              "acoesRegistro": [
+                {
+                  "role": "confirmar o registro",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "confirmação do registro",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": ""
+                },
+                {
+                  "role": "aviso de saldo abaixo do mínimo",
+                  "preferred": "groupnotifyuser--ml-contextual-feedback",
+                  "alternative": "groupnotifyuser--ml-notify-banner"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "historicoMovimentacoes": {
+                "reads": [
+                  "Movimentacao.numero",
+                  "Movimentacao.tipo",
+                  "Movimentacao.registradoEm",
+                  "Movimentacao.details.quantidade",
+                  "Movimentacao.produtoId",
+                  "Produto.details.identification.name",
+                  "Produto.details.product.unitOfMeasure"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "registroMovimentacao": {
+                "reads": [
+                  "Produto.details.identification.name",
+                  "Produto.details.product.unitOfMeasure",
+                  "Produto.details.controleEstoque.saldoAtual",
+                  "Produto.details.controleEstoque.saldoMinimo",
+                  "Produto.details.controleEstoque.abaixoDoMinimo"
+                ],
+                "edits": [
+                  "Movimentacao.produtoId",
+                  "Movimentacao.tipo",
+                  "Movimentacao.details.quantidade"
+                ],
+                "selects": "",
+                "submits": []
+              },
+              "acoesRegistro": {
+                "reads": [
+                  "Produto.details.controleEstoque.saldoAtual",
+                  "Produto.details.controleEstoque.abaixoDoMinimo"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "registrarMovimentacao",
+                    "write": "Movimentacao.create"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 13,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

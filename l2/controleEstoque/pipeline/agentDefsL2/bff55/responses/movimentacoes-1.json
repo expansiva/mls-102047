@@ -1,0 +1,576 @@
+{
+  "attempt": "1",
+  "model": "claude-opus-5-5",
+  "promptChars": 21905,
+  "receivedAt": "2026-10-12T20:56:49.158Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Bff",
+      "arguments": {
+        "types": [
+          {
+            "name": "ProdutoOpcao",
+            "description": "Produto encontrado na busca por nome, para o estoquista escolher o item da movimentação.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.id"
+                  ]
+                }
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "sku",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.product.sku"
+                  ]
+                }
+              },
+              {
+                "name": "unitOfMeasure",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.product.unitOfMeasure"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ProdutoSaldo",
+            "description": "Produto escolhido com seu saldo atual, saldo mínimo e situação abaixo do mínimo, já calculados.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.id"
+                  ]
+                }
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "sku",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.product.sku"
+                  ]
+                }
+              },
+              {
+                "name": "unitOfMeasure",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.product.unitOfMeasure"
+                  ]
+                }
+              },
+              {
+                "name": "saldoAtual",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.controleEstoque.saldoAtual"
+                  ]
+                }
+              },
+              {
+                "name": "saldoMinimo",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.controleEstoque.saldoMinimo"
+                  ]
+                }
+              },
+              {
+                "name": "abaixoDoMinimo",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.controleEstoque.abaixoDoMinimo"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ProdutoRef",
+            "description": "Nome e unidade do produto de uma movimentação.",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "unitOfMeasure",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.details.product.unitOfMeasure"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "MovimentacaoHistoricoItem",
+            "description": "Linha do histórico de movimentações, com o produto e sua unidade.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.id"
+                  ]
+                }
+              },
+              {
+                "name": "numero",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.numero"
+                  ]
+                }
+              },
+              {
+                "name": "tipo",
+                "type": "'inbound' | 'outbound'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.tipo"
+                  ]
+                }
+              },
+              {
+                "name": "registradoEm",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.registradoEm"
+                  ]
+                }
+              },
+              {
+                "name": "quantidade",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.details.quantidade"
+                  ]
+                }
+              },
+              {
+                "name": "produtoId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.produtoId"
+                  ]
+                }
+              },
+              {
+                "name": "produto",
+                "type": "ProdutoRef",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.produtoId"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "endpoints": [
+          {
+            "id": "qryHistoricoMovimentacoes",
+            "kind": "qry",
+            "when": "onLoad",
+            "input": [
+              {
+                "name": "tipo",
+                "type": "'inbound' | 'outbound'",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.tipo"
+                  ]
+                }
+              },
+              {
+                "name": "registradoDe",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "context",
+                  "paths": [
+                    "Movimentacao.registradoEm"
+                  ]
+                }
+              },
+              {
+                "name": "registradoAte",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "context",
+                  "paths": [
+                    "Movimentacao.registradoEm"
+                  ]
+                }
+              },
+              {
+                "name": "numero",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.numero"
+                  ]
+                }
+              },
+              {
+                "name": "page",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              },
+              {
+                "name": "pageSize",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "movimentacoes",
+                "type": "MovimentacaoHistoricoItem[]",
+                "paginated": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.id"
+                  ]
+                }
+              }
+            ],
+            "rules": [],
+            "jsdoc": {
+              "purpose": "Carrega o histórico permanente de entradas e saídas do estoque, paginado, ao abrir a página e quando o estoquista filtra ou pede a próxima página.",
+              "input": "tipo: filtra entradas (inbound) ou saídas (outbound); registradoDe/registradoAte: período de registro (inclusivo); numero: texto contido no número da movimentação; page/pageSize: paginação.",
+              "processing": "Filtra Movimentacao por tipo e intervalo de registradoEm (colunas indexadas) e por número contendo o texto; ordena por registradoEm decrescente; junta o nome e a unidade de medida do Produto apontado por produtoId numa única consulta, sem chamada por linha.",
+              "output": "Página { items, page, pageSize, hasMore } de movimentações com número, tipo, quantidade, data e produto (nome e unidade), já no formato da lista."
+            }
+          },
+          {
+            "id": "qryBuscarProdutos",
+            "kind": "qry",
+            "when": "interaction",
+            "input": [
+              {
+                "name": "texto",
+                "type": "string",
+                "origin": {
+                  "kind": "context",
+                  "paths": [
+                    "Produto.details.identification.name"
+                  ]
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "produtos",
+                "type": "ProdutoOpcao[]",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.id"
+                  ]
+                }
+              }
+            ],
+            "rules": [],
+            "jsdoc": {
+              "purpose": "Busca produtos pelo nome enquanto o estoquista digita, para escolher o produto da movimentação.",
+              "input": "texto: parte do nome do produto digitado.",
+              "processing": "Filtra produtos de subtipo Product com situação Active cujo nome contém o texto; ordena por nome e limita a poucas opções (ex.: 20), sem paginar.",
+              "output": "Lista curta de opções com id, nome, SKU e unidade para o seletor do formulário."
+            }
+          },
+          {
+            "id": "qryProdutoSaldo",
+            "kind": "qry",
+            "when": "interaction",
+            "input": [
+              {
+                "name": "produtoId",
+                "type": "string",
+                "origin": {
+                  "kind": "context",
+                  "paths": [
+                    "Produto.id"
+                  ]
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "produto",
+                "type": "ProdutoSaldo",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.id"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "avisoSaldoAbaixoDoMinimo"
+            ],
+            "jsdoc": {
+              "purpose": "Lê o produto escolhido com o saldo atual e o mínimo, para o estoquista conferir antes de registrar.",
+              "input": "produtoId: id do produto escolhido no formulário (ou vindo da URL).",
+              "processing": "Lê o produto pelo id; saldoAtual é calculado como soma das entradas menos soma das saídas das movimentações do produto; abaixoDoMinimo é calculado comparando saldoAtual < saldoMinimo (avisoSaldoAbaixoDoMinimo). Valores derivados nunca são gravados.",
+              "output": "Produto com nome, SKU, unidade, saldo atual, saldo mínimo e indicador abaixo do mínimo, exibidos no formulário e nas ações."
+            }
+          },
+          {
+            "id": "cmdRegistrarMovimentacao",
+            "kind": "cmd",
+            "when": "registrarMovimentacao",
+            "writes": "Movimentacao.create",
+            "input": [
+              {
+                "name": "produtoId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.produtoId"
+                  ]
+                }
+              },
+              {
+                "name": "tipo",
+                "type": "'inbound' | 'outbound'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.tipo"
+                  ]
+                }
+              },
+              {
+                "name": "quantidade",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.details.quantidade"
+                  ]
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "movimentacao",
+                "type": "MovimentacaoHistoricoItem",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Movimentacao.id"
+                  ]
+                }
+              },
+              {
+                "name": "produto",
+                "type": "ProdutoSaldo",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Produto.id"
+                  ]
+                }
+              },
+              {
+                "name": "avisoAbaixoDoMinimo",
+                "type": "boolean",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Produto.details.controleEstoque.saldoAtual",
+                    "Produto.details.controleEstoque.saldoMinimo"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "quantidadePositiva",
+              "movimentacaoImutavel",
+              "avisoSaldoAbaixoDoMinimo"
+            ],
+            "jsdoc": {
+              "purpose": "Registra a entrada ou saída de quantidade do produto e devolve o que a página redesenha: a nova linha do histórico, o saldo atualizado e o aviso.",
+              "input": "produtoId: produto movimentado; tipo: inbound (entrada) ou outbound (saída); quantidade: quantidade na unidade do produto.",
+              "processing": "Recusa quantidade menor ou igual a zero (quantidadePositiva); verifica que o produto existe; emite o número pela sequência da plataforma e grava registradoEm com a hora do servidor; insere a movimentação como registro permanente, sem nenhuma operação de alteração (movimentacaoImutavel); recalcula saldoAtual a partir das movimentações e abaixoDoMinimo (saldoAtual < saldoMinimo), sem gravá-los; sinaliza o aviso quando o saldo fica abaixo do mínimo (avisoSaldoAbaixoDoMinimo).",
+              "output": "movimentacao: linha nova para inserir no histórico; produto: saldo atualizado para o formulário e as ações; avisoAbaixoDoMinimo: true quando o produto ficou abaixo do mínimo, para exibir o aviso."
+            }
+          }
+        ],
+        "bindings": {
+          "organisms": [
+            {
+              "organism": "historicoMovimentacoes",
+              "reads": "qryHistoricoMovimentacoes.movimentacoes"
+            },
+            {
+              "organism": "registroMovimentacao",
+              "reads": "qryBuscarProdutos.produtos"
+            },
+            {
+              "organism": "registroMovimentacao",
+              "reads": "qryProdutoSaldo.produto"
+            },
+            {
+              "organism": "acoesRegistro",
+              "reads": "qryProdutoSaldo.produto"
+            },
+            {
+              "organism": "acoesRegistro",
+              "reads": "cmdRegistrarMovimentacao.avisoAbaixoDoMinimo"
+            }
+          ],
+          "commands": [
+            {
+              "endpoint": "cmdRegistrarMovimentacao",
+              "refreshes": []
+            }
+          ],
+          "selections": [],
+          "updates": [
+            {
+              "endpoint": "cmdRegistrarMovimentacao",
+              "state": "qryHistoricoMovimentacoes.movimentacoes",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "cmdRegistrarMovimentacao",
+              "state": "qryProdutoSaldo.produto",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "qryHistoricoMovimentacoes",
+              "state": "qryHistoricoMovimentacoes.movimentacoes",
+              "mode": "replace"
+            }
+          ],
+          "journeys": [
+            {
+              "step": "registrarMovimentacao/localizarProdutoMovimentacao",
+              "organisms": [
+                "registroMovimentacao"
+              ],
+              "endpoints": [
+                "qryBuscarProdutos"
+              ]
+            },
+            {
+              "step": "registrarMovimentacao/verSaldoMovimentacao",
+              "organisms": [
+                "registroMovimentacao",
+                "acoesRegistro"
+              ],
+              "endpoints": [
+                "qryProdutoSaldo"
+              ]
+            },
+            {
+              "step": "registrarMovimentacao/registrarMovimentacaoEstoque",
+              "organisms": [
+                "registroMovimentacao",
+                "acoesRegistro",
+                "historicoMovimentacoes"
+              ],
+              "endpoints": [
+                "cmdRegistrarMovimentacao",
+                "qryHistoricoMovimentacoes"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 13,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}
