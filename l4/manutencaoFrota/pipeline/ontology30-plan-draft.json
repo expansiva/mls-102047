@@ -1,230 +1,189 @@
 {
   "moduleName": "manutencaoFrota",
-  "businessDomain": "Gestão de manutenção de frota para transportadora",
+  "businessDomain": "Manutenção de frota de transportadora: veículos atribuídos a motoristas, abastecimentos, planos de manutenção preventiva por km ou meses e ordens de manutenção em oficinas.",
   "entities": [
     {
-      "entityId": "Vehicle",
-      "kind": "role",
-      "family": "mdm",
-      "title": "Veículo",
-      "description": "Veículo da frota, mantido como ativo veicular compartilhado da organização, com dados de operação específicos deste módulo.",
-      "displayField": "details.identification.name",
-      "writer": "crud",
-      "subtype": "AssetVehicle",
-      "roleTag": "manutencaoFrota.Vehicle",
-      "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "entityId": "Driver",
+      "entityId": "Motorista",
       "kind": "role",
       "family": "mdm",
       "title": "Motorista",
-      "description": "Pessoa que conduz veículos atribuídos e registra os abastecimentos realizados.",
+      "description": "Pessoa que dirige os veículos da transportadora, registra abastecimentos e vê apenas os veículos atribuídos a ela.",
       "displayField": "details.identification.name",
       "writer": "crud",
       "subtype": "Person",
-      "roleTag": "manutencaoFrota.Driver",
+      "roleTag": "manutencaoFrota.Motorista",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "Workshop",
+      "entityId": "Oficina",
       "kind": "role",
       "family": "mdm",
       "title": "Oficina",
-      "description": "Empresa oficina responsável pela execução de serviços registrados nas ordens de manutenção.",
+      "description": "Empresa que executa as manutenções dos veículos, indicada em cada ordem de manutenção.",
       "displayField": "details.identification.name",
-      "writer": "crud",
       "subtype": "Company",
-      "roleTag": "manutencaoFrota.Workshop",
+      "roleTag": "manutencaoFrota.Oficina",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "VehicleAssignment",
+      "entityId": "Veiculo",
       "kind": "entity",
       "family": "tdm",
-      "title": "Atribuição de veículo",
-      "description": "Registro operacional que vincula um veículo da frota ao motorista autorizado a conduzi-lo.",
-      "displayField": "details.assignmentLabel",
-      "writer": "crud",
-      "class": "supporting",
+      "title": "Veículo",
+      "description": "Veículo da frota operado por este módulo, com placa, modelo, ano, quilometragem atual e o motorista a quem está atribuído.",
+      "displayField": "placa",
+      "class": "core",
       "storage": {
         "target": "moduleDatabase",
-        "table": "manutencaoFrota_vehicleassignment",
+        "table": "manutencaoFrota_veiculo",
         "kind": "relational"
       }
     },
     {
-      "entityId": "Fueling",
+      "entityId": "Abastecimento",
       "kind": "entity",
       "family": "tdm",
       "title": "Abastecimento",
-      "description": "Registro de abastecimento realizado por um motorista em um veículo atribuído.",
-      "displayField": "details.fuelingDate",
+      "description": "Registro de abastecimento de um veículo feito pelo motorista, com data, litros, valor e km no painel.",
+      "displayField": "dataAbastecimento",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
-        "table": "manutencaoFrota_fueling",
+        "table": "manutencaoFrota_abastecimento",
         "kind": "relational"
       }
     },
     {
-      "entityId": "MaintenancePlan",
+      "entityId": "PlanoManutencao",
       "kind": "entity",
       "family": "tdm",
       "title": "Plano de manutenção preventiva",
-      "description": "Definição da periodicidade preventiva de manutenção de um veículo por quilometragem, meses ou ambos.",
-      "displayField": "details.name",
+      "description": "Plano de preventiva de um veículo, a cada N km e/ou N meses, com a referência da última preventiva e o km e a data previstos para a próxima; indica quando o veículo passou do previsto.",
+      "displayField": "descricao",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
-        "table": "manutencaoFrota_maintenanceplan",
+        "table": "manutencaoFrota_planomanutencao",
         "kind": "relational"
       }
     },
     {
-      "entityId": "MaintenanceOrder",
+      "entityId": "OrdemManutencao",
       "kind": "entity",
       "family": "tdm",
       "title": "Ordem de manutenção",
-      "description": "Ordem aberta para registrar e acompanhar uma manutenção preventiva vencida ou o reparo de um defeito do veículo.",
-      "displayField": "details.description",
+      "description": "Ordem de manutenção preventiva ou por defeito de um veículo, com oficina, descrição, custo e datas de entrada e saída.",
+      "displayField": "numero",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
-        "table": "manutencaoFrota_maintenanceorder",
+        "table": "manutencaoFrota_ordemmanutencao",
         "kind": "relational"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "vehicleAssignmentVehicle",
-      "from": "VehicleAssignment",
-      "to": "Vehicle",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada atribuição vincula obrigatoriamente um veículo da frota.",
-      "field": "VehicleAssignment.vehicleId"
-    },
-    {
-      "relationshipId": "vehicleAssignmentDriver",
-      "from": "VehicleAssignment",
-      "to": "Driver",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada atribuição vincula obrigatoriamente o motorista autorizado a conduzir o veículo.",
-      "field": "VehicleAssignment.driverId"
-    },
-    {
-      "relationshipId": "vehicleAssignedDrivers",
-      "from": "Vehicle",
-      "to": "Driver",
-      "type": "manyToMany",
-      "required": false,
-      "mode": "throughTable",
-      "description": "Os motoristas que podem consultar e conduzir um veículo são obtidos pelas suas atribuições de veículo.",
-      "through": "VehicleAssignment",
-      "path": "VehicleAssignment.vehicleId -> VehicleAssignment.driverId",
-      "derived": true
-    },
-    {
-      "relationshipId": "fuelingVehicle",
-      "from": "Fueling",
-      "to": "Vehicle",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Todo abastecimento é registrado para um único veículo atribuído.",
-      "field": "Fueling.vehicleId"
-    },
-    {
-      "relationshipId": "fuelingDriver",
-      "from": "Fueling",
-      "to": "Driver",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Todo abastecimento identifica o motorista que o registrou.",
-      "field": "Fueling.driverId"
-    },
-    {
-      "relationshipId": "maintenancePlanVehicle",
-      "from": "MaintenancePlan",
-      "to": "Vehicle",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada plano preventivo é definido para um veículo da frota.",
-      "field": "MaintenancePlan.vehicleId"
-    },
-    {
-      "relationshipId": "maintenanceOrderVehicle",
-      "from": "MaintenanceOrder",
-      "to": "Vehicle",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada ordem de manutenção pertence a um único veículo.",
-      "field": "MaintenanceOrder.vehicleId"
-    },
-    {
-      "relationshipId": "maintenanceOrderPlan",
-      "from": "MaintenanceOrder",
-      "to": "MaintenancePlan",
+      "relationshipId": "veiculoMotorista",
+      "from": "Veiculo",
+      "to": "Motorista",
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Uma ordem preventiva pode decorrer de um plano de manutenção; ordens por defeito não exigem plano.",
-      "field": "MaintenanceOrder.maintenancePlanId"
+      "description": "Motorista a quem o veículo está atribuído; define os veículos que o motorista pode ver.",
+      "field": "Veiculo.motoristaId"
     },
     {
-      "relationshipId": "maintenanceOrderWorkshop",
-      "from": "MaintenanceOrder",
-      "to": "Workshop",
+      "relationshipId": "abastecimentoVeiculo",
+      "from": "Abastecimento",
+      "to": "Veiculo",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada ordem de manutenção informa a oficina responsável pelo serviço.",
-      "field": "MaintenanceOrder.workshopId"
+      "description": "Veículo abastecido.",
+      "field": "Abastecimento.veiculoId"
+    },
+    {
+      "relationshipId": "abastecimentoMotorista",
+      "from": "Abastecimento",
+      "to": "Motorista",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Motorista que registrou o abastecimento.",
+      "field": "Abastecimento.motoristaId"
+    },
+    {
+      "relationshipId": "planoVeiculo",
+      "from": "PlanoManutencao",
+      "to": "Veiculo",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Veículo ao qual o plano de preventiva se aplica.",
+      "field": "PlanoManutencao.veiculoId"
+    },
+    {
+      "relationshipId": "ordemVeiculo",
+      "from": "OrdemManutencao",
+      "to": "Veiculo",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Veículo que entra em manutenção.",
+      "field": "OrdemManutencao.veiculoId"
+    },
+    {
+      "relationshipId": "ordemPlano",
+      "from": "OrdemManutencao",
+      "to": "PlanoManutencao",
+      "type": "manyToOne",
+      "required": false,
+      "mode": "fk",
+      "description": "Plano de preventiva que originou a ordem, quando ela é preventiva.",
+      "field": "OrdemManutencao.planoId"
+    },
+    {
+      "relationshipId": "ordemOficina",
+      "from": "OrdemManutencao",
+      "to": "Oficina",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Oficina que executa a manutenção.",
+      "field": "OrdemManutencao.oficinaId"
     }
   ],
   "normalizations": [
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Vehicle",
-      "detail": "roleTag manutencaoFrota.Vehicle; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Motorista",
+      "detail": "roleTag manutencaoFrota.Motorista; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Driver",
-      "detail": "roleTag manutencaoFrota.Driver; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Oficina",
+      "detail": "roleTag manutencaoFrota.Oficina; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Workshop",
-      "detail": "roleTag manutencaoFrota.Workshop; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Veiculo",
+      "detail": "storage.table manutencaoFrota_veiculo"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "VehicleAssignment",
-      "detail": "storage.table manutencaoFrota_vehicleassignment"
+      "entityId": "Abastecimento",
+      "detail": "storage.table manutencaoFrota_abastecimento"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Fueling",
-      "detail": "storage.table manutencaoFrota_fueling"
+      "entityId": "PlanoManutencao",
+      "detail": "storage.table manutencaoFrota_planomanutencao"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "MaintenancePlan",
-      "detail": "storage.table manutencaoFrota_maintenanceplan"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "MaintenanceOrder",
-      "detail": "storage.table manutencaoFrota_maintenanceorder"
+      "entityId": "OrdemManutencao",
+      "detail": "storage.table manutencaoFrota_ordemmanutencao"
     }
   ]
 }

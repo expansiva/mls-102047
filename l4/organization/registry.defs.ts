@@ -7,84 +7,6 @@ export const solutionRegistry = {
   "level1SchemaVersion": "2026-09-15-mdm-ontology-v2",
   "modules": [
     {
-      "moduleName": "manutencaoFrota",
-      "actors": [
-        {
-          "actorId": "motorista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gestor",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "AssetVehicle",
-          "roleTag": "manutencaoFrota.Vehicle",
-          "namespace": "manutencaoFrota"
-        },
-        {
-          "subtype": "Person",
-          "roleTag": "manutencaoFrota.Driver",
-          "namespace": "manutencaoFrota"
-        },
-        {
-          "subtype": "Company",
-          "roleTag": "manutencaoFrota.Workshop",
-          "namespace": "manutencaoFrota"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Vehicle",
-          "kind": "role",
-          "mdmSubtype": "AssetVehicle",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Driver",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Workshop",
-          "kind": "role",
-          "mdmSubtype": "Company",
-          "class": "mdm"
-        },
-        {
-          "entityId": "VehicleAssignment",
-          "kind": "entity",
-          "class": "supporting"
-        },
-        {
-          "entityId": "Fueling",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "MaintenancePlan",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "MaintenanceOrder",
-          "kind": "entity",
-          "class": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "alertaPreventivaVencida",
-          "on": "Fueling.create"
-        }
-      ],
-      "updatedAt": "2026-09-18T08:19:42.172Z"
-    },
-    {
       "moduleName": "mensalidadesAcademia",
       "actors": [
         {
@@ -676,6 +598,73 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-12T19:34:07.351Z"
+    },
+    {
+      "moduleName": "manutencaoFrota",
+      "actors": [
+        {
+          "actorId": "motorista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gestor",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "manutencaoFrota.Motorista",
+          "namespace": "manutencaoFrota"
+        },
+        {
+          "subtype": "Company",
+          "roleTag": "manutencaoFrota.Oficina",
+          "namespace": "manutencaoFrota"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Motorista",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Oficina",
+          "kind": "role",
+          "mdmSubtype": "Company",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Veiculo",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Abastecimento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PlanoManutencao",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "OrdemManutencao",
+          "kind": "entity",
+          "class": "core"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "ordemManutencaoConcluida",
+          "on": "OrdemManutencao.concluir"
+        }
+      ],
+      "updatedAt": "2026-10-12T19:38:44.675Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

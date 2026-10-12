@@ -1,0 +1,250 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "manutencaoFrota",
+    "entityId": "OrdemManutencao",
+    "title": "Ordem de manutenção",
+    "description": "Ordem de manutenção preventiva ou por defeito de um veículo, com oficina, descrição, custo e datas de entrada e saída.",
+    "displayField": "numero",
+    "relationships": {
+      "veiculo": {
+        "relationshipId": "ordemVeiculo",
+        "to": "Veiculo",
+        "via": "OrdemManutencao.veiculoId",
+        "cardinality": "N:1",
+        "title": "Veículo da ordem",
+        "description": "Veículo que entra em manutenção.",
+        "mode": "fk",
+        "required": true
+      },
+      "plano": {
+        "relationshipId": "ordemPlano",
+        "to": "PlanoManutencao",
+        "via": "OrdemManutencao.planoId",
+        "cardinality": "N:1",
+        "title": "Plano de preventiva",
+        "description": "Plano de preventiva que originou a ordem.",
+        "mode": "fk",
+        "required": "quando a ordem é do tipo preventiva"
+      },
+      "oficina": {
+        "relationshipId": "ordemOficina",
+        "to": "Oficina",
+        "via": "OrdemManutencao.oficinaId",
+        "cardinality": "N:1",
+        "title": "Oficina executora",
+        "description": "Oficina que executa a manutenção.",
+        "mode": "fk",
+        "required": true
+      }
+    },
+    "capabilities": {
+      "read.byId": "Abre a ordem de manutenção pelo id para o gestor conferir oficina, descrição, datas e custo.",
+      "locate.byColumn": "Lista as ordens filtradas por veículo, oficina, tipo, situação ou datas de entrada e saída, para o gestor localizar as ordens abertas.",
+      "locate.byText": "Busca a ordem pelo número digitado pelo gestor na caixa de pesquisa.",
+      "count": "Conta as ordens abertas por veículo ou oficina para os totais da lista do gestor.",
+      "listByForeignKey": "Lista as ordens de um veículo, de um plano ou de uma oficina na tela desse registro.",
+      "create": "O gestor abre a ordem preventiva (vinculada ao plano vencido) ou por defeito, com oficina, descrição e data de entrada.",
+      "update": "O gestor corrige a descrição, a oficina ou a data de entrada de uma ordem ainda aberta.",
+      "transition": "O gestor conclui a ordem, passando de aberta para concluída ao informar custo e data de saída.",
+      "uniqueKey": "O motor recusa duas ordens com o mesmo número.",
+      "transaction": "Na conclusão de uma ordem preventiva, grava a ordem e atualiza a próxima preventiva do plano tudo ou nada.",
+      "read.mdmRecord": "Lê na plataforma o nome da oficina apontada pela ordem para exibir na lista e na ficha.",
+      "sequence.next": "Emite o número sequencial da ordem na abertura, pela chave manutencaoFrota.OrdemManutencao.",
+      "attach.document": "O gestor anexa à ordem a nota fiscal ou o orçamento da oficina.",
+      "comment": "O gestor registra observações sobre o andamento da manutenção na ordem."
+    },
+    "rules": [
+      "numeroOrdemSequencial",
+      "ordemPreventivaExigePlano",
+      "ordemDefeitoSemPlano",
+      "concluirExigeCustoEDataSaida",
+      "dataSaidaNaoAnteriorEntrada",
+      "concluirPreventivaAtualizaPlano"
+    ],
+    "kind": "entity",
+    "class": "core",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "manutencaoFrota_ordemmanutencao",
+      "kind": "relational"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "numero": {
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "indexed": true,
+          "title": "Número da ordem",
+          "description": "Número sequencial da ordem de manutenção, emitido pela plataforma na abertura e citado pelo gestor e pela oficina.",
+          "maxLength": 30
+        },
+        "veiculoId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "Veiculo"
+          ],
+          "title": "Veículo",
+          "description": "Veículo que entra em manutenção."
+        },
+        "planoId": {
+          "type": "record",
+          "indexed": true,
+          "to": [
+            "PlanoManutencao"
+          ],
+          "title": "Plano de preventiva",
+          "description": "Plano de manutenção preventiva que originou a ordem; preenchido apenas quando a ordem é preventiva."
+        },
+        "oficinaId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "Oficina"
+          ],
+          "title": "Oficina",
+          "description": "Oficina que executa a manutenção."
+        },
+        "tipo": {
+          "type": "enum",
+          "required": true,
+          "indexed": true,
+          "values": [
+            {
+              "value": "preventive",
+              "title": "Preventiva"
+            },
+            {
+              "value": "defect",
+              "title": "Defeito"
+            }
+          ],
+          "title": "Tipo da ordem",
+          "description": "Motivo da abertura: preventiva por plano vencido ou corretiva por defeito."
+        },
+        "status": {
+          "type": "enum",
+          "required": true,
+          "indexed": true,
+          "values": [
+            {
+              "value": "open",
+              "title": "Aberta"
+            },
+            {
+              "value": "completed",
+              "title": "Concluída"
+            }
+          ],
+          "title": "Situação",
+          "description": "Situação da ordem: aberta enquanto o veículo está na oficina, concluída após a saída."
+        },
+        "dataEntrada": {
+          "type": "date",
+          "required": true,
+          "indexed": true,
+          "title": "Data de entrada",
+          "description": "Data em que o veículo entrou na oficina."
+        },
+        "dataSaida": {
+          "type": "date",
+          "indexed": true,
+          "title": "Data de saída",
+          "description": "Data em que o veículo saiu da oficina; informada na conclusão da ordem."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "title": "Detalhes",
+          "description": "Dados descritivos da ordem de manutenção.",
+          "fields": {
+            "descricao": {
+              "type": "text",
+              "required": true,
+              "title": "Descrição",
+              "description": "Descrição do serviço a executar ou do defeito apresentado pelo veículo.",
+              "maxLength": 4000
+            },
+            "custo": {
+              "type": "money",
+              "title": "Custo",
+              "description": "Custo total da manutenção, informado pelo gestor ao concluir a ordem.",
+              "min": 0
+            },
+            "diasNaOficina": {
+              "type": "integer",
+              "derived": true,
+              "title": "Dias na oficina",
+              "description": "Quantidade de dias entre a data de entrada e a data de saída; enquanto a ordem está aberta, conta até hoje."
+            }
+          }
+        }
+      }
+    },
+    "uniqueKeys": [
+      [
+        "numero"
+      ]
+    ],
+    "lifecycleStates": [
+      {
+        "state": "open",
+        "reachedBy": "actor"
+      },
+      {
+        "state": "completed",
+        "reachedBy": "actor"
+      }
+    ],
+    "transitions": [
+      {
+        "transitionId": "concluir",
+        "from": [
+          "open"
+        ],
+        "to": "completed",
+        "by": [
+          "gestor"
+        ],
+        "description": "O gestor informa o custo e a data de saída e conclui a ordem; se a ordem é preventiva, o plano de origem passa a prever a próxima preventiva.",
+        "payload": [
+          "details.custo",
+          "dataSaida"
+        ],
+        "ruleRefs": [
+          "concluirExigeCustoEDataSaida",
+          "dataSaidaNaoAnteriorEntrada",
+          "concluirPreventivaAtualizaPlano"
+        ]
+      }
+    ]
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "OrdemManutencao",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "OrdemManutencao",
+      "detail": "record.fields.details.fields.diasNaOficina.derived (derived[])"
+    }
+  ]
+}

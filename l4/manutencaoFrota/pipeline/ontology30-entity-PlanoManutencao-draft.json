@@ -1,0 +1,241 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "manutencaoFrota",
+    "entityId": "PlanoManutencao",
+    "title": "Plano de manutenção preventiva",
+    "description": "Plano de preventiva de um veículo, a cada N km e/ou N meses, com a referência da última preventiva e o km e a data previstos para a próxima; indica quando o veículo passou do previsto.",
+    "displayField": "descricao",
+    "relationships": {
+      "veiculo": {
+        "relationshipId": "planoVeiculo",
+        "to": "Veiculo",
+        "via": "PlanoManutencao.veiculoId",
+        "cardinality": "N:1",
+        "title": "Veículo do plano",
+        "description": "Veículo ao qual o plano de preventiva se aplica.",
+        "mode": "fk",
+        "required": true
+      },
+      "ordens": {
+        "relationshipId": "ordemPlano",
+        "to": "OrdemManutencao",
+        "via": "OrdemManutencao.planoId",
+        "cardinality": "1:N",
+        "title": "Ordens originadas pelo plano",
+        "description": "Ordens de manutenção preventiva abertas a partir deste plano.",
+        "mode": "fk",
+        "direction": "to"
+      }
+    },
+    "capabilities": {
+      "read.byId": "Abre o plano pelo id para o gestor conferir o km e a data previstos da próxima preventiva e o aviso de preventiva vencida.",
+      "locate.byColumn": "Lista os planos ativos filtrando por veículo e ordenando pelo km ou pela data prevista da próxima preventiva, para o gestor acompanhar os vencidos da frota.",
+      "locate.byText": "Procura planos pela descrição digitada na busca da lista do gestor.",
+      "count": "Conta os planos ativos vencidos para o selo de avisos no painel do gestor.",
+      "listByForeignKey": "Lista os planos de um veículo na ficha do veículo e preenche a lista da frota sem uma consulta por linha.",
+      "create": "O gestor cadastra o plano de preventiva de um veículo com o intervalo em km e/ou meses e a referência da última preventiva.",
+      "update": "O gestor ajusta intervalos ou desativa o plano, e o processo recalcula o km e a data previstos após cada preventiva concluída.",
+      "delete": "O gestor remove um plano cadastrado por engano que ainda não originou ordens.",
+      "transaction": "Atualiza a referência da última preventiva do plano junto com o fechamento da ordem preventiva, tudo ou nada.",
+      "read.mdmRecord": "Lê os dados de mestre ligados ao veículo do plano (como a oficina da última ordem) para exibir nomes na ficha do plano.",
+      "comment": "O gestor deixa anotações sobre o plano, como peças combinadas com a oficina.",
+      "manutencaoFrota.avisoPreventivaVencida": "Avisa o gestor quando a quilometragem atual do veículo passa do km previsto para a próxima preventiva do plano, a partir do qual ele abre a ordem preventiva."
+    },
+    "rules": [
+      "planoIntervaloObrigatorio",
+      "proximaPreventivaCalculada",
+      "avisoPreventivaVencidaKm",
+      "recalcularAposPreventiva",
+      "planoInativoSemAviso"
+    ],
+    "kind": "entity",
+    "class": "core",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "manutencaoFrota_planomanutencao",
+      "kind": "relational"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "veiculoId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "Veiculo"
+          ],
+          "title": "Veículo",
+          "description": "Veículo ao qual o plano de preventiva se aplica; usado para localizar os planos de um veículo."
+        },
+        "descricao": {
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "title": "Descrição",
+          "description": "Nome do plano exibido nas listas e no aviso (ex.: troca de óleo e filtros); pesquisável por texto.",
+          "maxLength": 200
+        },
+        "ativo": {
+          "type": "boolean",
+          "required": true,
+          "indexed": true,
+          "title": "Ativo",
+          "description": "Indica se o plano ainda é acompanhado; planos inativos não geram aviso de preventiva vencida."
+        },
+        "kmProximaPreventiva": {
+          "type": "integer",
+          "indexed": true,
+          "title": "Km previsto da próxima preventiva",
+          "description": "Quilometragem em que a próxima preventiva deve ser feita: km da última preventiva somado ao intervalo em km. Recalculado após cada preventiva; ordena e filtra a lista de vencidos.",
+          "min": 0
+        },
+        "dataProximaPreventiva": {
+          "type": "date",
+          "indexed": true,
+          "title": "Data prevista da próxima preventiva",
+          "description": "Data em que a próxima preventiva deve ser feita: data da última preventiva somada ao intervalo em meses. Recalculada após cada preventiva; ordena e filtra a lista de vencidos."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "title": "Detalhes do plano",
+          "description": "Intervalos, referência da última preventiva e observações.",
+          "fields": {
+            "intervaloKm": {
+              "type": "integer",
+              "title": "Intervalo em km",
+              "description": "A cada quantos quilômetros a preventiva deve ser repetida.",
+              "min": 1
+            },
+            "intervaloMeses": {
+              "type": "integer",
+              "title": "Intervalo em meses",
+              "description": "A cada quantos meses a preventiva deve ser repetida.",
+              "min": 1,
+              "max": 120
+            },
+            "ultimaPreventiva": {
+              "type": "object",
+              "required": true,
+              "title": "Última preventiva",
+              "description": "Referência a partir da qual a próxima preventiva é calculada.",
+              "fields": {
+                "km": {
+                  "type": "integer",
+                  "title": "Km da última preventiva",
+                  "description": "Quilometragem do veículo quando a última preventiva foi feita.",
+                  "min": 0
+                },
+                "data": {
+                  "type": "date",
+                  "title": "Data da última preventiva",
+                  "description": "Data em que a última preventiva foi feita."
+                },
+                "ordemId": {
+                  "type": "record",
+                  "to": [
+                    "OrdemManutencao"
+                  ],
+                  "title": "Ordem da última preventiva",
+                  "description": "Ordem de manutenção preventiva que atualizou esta referência, quando houver."
+                }
+              }
+            },
+            "observacoes": {
+              "type": "text",
+              "title": "Observações",
+              "description": "Itens a verificar ou orientações para a oficina nesta preventiva.",
+              "maxLength": 2000
+            },
+            "vencidoPorKm": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Passou do km previsto",
+              "description": "Plano ativo cujo veículo está com a quilometragem atual igual ou acima do km previsto para a próxima preventiva."
+            },
+            "vencidoPorPrazo": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Passou do prazo",
+              "description": "Plano ativo cuja data prevista para a próxima preventiva é anterior a hoje."
+            },
+            "vencido": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Preventiva vencida",
+              "description": "Plano ativo que passou do km previsto ou do prazo da próxima preventiva."
+            },
+            "kmExcedente": {
+              "type": "integer",
+              "derived": true,
+              "title": "Km além do previsto",
+              "description": "Quantos quilômetros a quilometragem atual do veículo passou do km previsto para a próxima preventiva; zero quando ainda não passou."
+            },
+            "kmRestante": {
+              "type": "integer",
+              "derived": true,
+              "title": "Km até a próxima preventiva",
+              "description": "Quantos quilômetros faltam, pela quilometragem atual do veículo, para chegar ao km previsto da próxima preventiva."
+            },
+            "possuiOrdemAberta": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Ordem preventiva em aberto",
+              "description": "Existe ordem de manutenção preventiva originada deste plano que ainda não teve data de saída."
+            }
+          }
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PlanoManutencao",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PlanoManutencao",
+      "detail": "record.fields.details.fields.vencidoPorKm.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PlanoManutencao",
+      "detail": "record.fields.details.fields.vencidoPorPrazo.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PlanoManutencao",
+      "detail": "record.fields.details.fields.vencido.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PlanoManutencao",
+      "detail": "record.fields.details.fields.kmExcedente.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PlanoManutencao",
+      "detail": "record.fields.details.fields.kmRestante.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PlanoManutencao",
+      "detail": "record.fields.details.fields.possuiOrdemAberta.derived (derived[])"
+    }
+  ]
+}

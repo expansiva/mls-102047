@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/manutencaoFrota/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -9,36 +9,46 @@ export const manutencaoFrotaJourneyIndex = {
     {
       "journeyId": "registrarAbastecimento",
       "actorRef": "motorista",
-      "title": "Registrar abastecimento do veículo dirigido"
+      "title": "Registrar abastecimento"
     },
     {
-      "journeyId": "consultarVeiculosAtribuidos",
+      "journeyId": "consultarMeusVeiculos",
       "actorRef": "motorista",
-      "title": "Consultar veículos atribuídos"
+      "title": "Consultar meus veículos"
     },
     {
-      "journeyId": "cadastrarPlanoPreventivo",
+      "journeyId": "cadastrarVeiculo",
       "actorRef": "gestor",
-      "title": "Cadastrar plano de manutenção preventiva"
+      "title": "Cadastrar veículo"
+    },
+    {
+      "journeyId": "cadastrarPlanoPreventiva",
+      "actorRef": "gestor",
+      "title": "Cadastrar plano de preventiva"
+    },
+    {
+      "journeyId": "abrirOrdemPorAviso",
+      "actorRef": "gestor",
+      "title": "Abrir ordem por preventiva vencida"
     },
     {
       "journeyId": "abrirOrdemPorDefeito",
       "actorRef": "gestor",
-      "title": "Abrir ordem de manutenção por defeito"
+      "title": "Abrir ordem por defeito"
     },
     {
-      "journeyId": "tratarAlertaPreventivaVencida",
+      "journeyId": "concluirOrdem",
       "actorRef": "gestor",
-      "title": "Tratar alerta de manutenção preventiva vencida"
+      "title": "Concluir ordem de manutenção"
     },
     {
-      "journeyId": "atualizarOrdemManutencao",
+      "journeyId": "acompanharFrota",
       "actorRef": "gestor",
-      "title": "Atualizar ordem de manutenção"
+      "title": "Acompanhar preventivas da frota"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type ManutencaoFrotaJourneyIndexType = typeof manutencaoFrotaJourneyIndex;
 
