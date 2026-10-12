@@ -1,33 +1,39 @@
 /// <mls fileReference="_102047_/l4/mensalidadesAcademia/rules.defs.ts" enhancement="_blank"/>
 
-import type { Ns5RulesArtifactV2 } from '/_102035_/l2/solution/types.js';
+import type { Ns5RulesArtifactV2, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const mensalidadesAcademiaRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "mensalidadesAcademia",
   "rules": {
-    "cancelamentoSomenteMatriculaAtiva": "Uma matrícula somente pode ser cancelada enquanto estiver ativa.",
-    "cancelamentoInterrompeGeracao": "O cancelamento da matrícula interrompe a geração de mensalidades futuras para ela.",
-    "ruleForeignNamespaceRefused": "Dados de namespace de outro módulo não podem ser gravados no namespace de mensalidades da academia.",
-    "ruleDocumentShapeValidated": "O documento cadastral do aluno deve respeitar a estrutura de dados exigida para esse documento.",
-    "ruleIdentityNeverInNamespace": "A identidade mestre do aluno não pode ser armazenada no namespace do módulo de mensalidades da academia.",
-    "rulePersonPrivacyConsentRequiredBrEu": "O aluno residente no Brasil ou na União Europeia deve possuir o consentimento de privacidade exigido.",
-    "matriculaAtivaUnicaPorAluno": "Um aluno pode possuir somente uma matrícula ativa por vez.",
-    "mensalidadeUnicaPorMatriculaEcompetencia": "Uma matrícula pode possuir somente uma mensalidade para cada mês de competência.",
-    "mensalidadeGeradaParaMatriculaAtiva": "A mensalidade mensal somente pode ser gerada para matrícula ativa, com o valor do plano e vencimento no dia de vencimento do plano correspondente à competência.",
-    "situacaoMensalidadeDerivada": "A mensalidade é paga quando o total de pagamentos alcança o valor da cobrança, vencida quando possui saldo devedor após o vencimento e em aberto nos demais casos.",
-    "paymentAmountPositive": "O valor de cada pagamento deve ser positivo.",
-    "paymentUpdatesMonthlyFee": "Todo pagamento registrado deve compor o total pago e atualizar o saldo devedor da mensalidade correspondente.",
-    "paymentRegularizesStudentWhenApplicable": "O registro de pagamento deve regularizar a situação do aluno quando ele deixar de atender ao critério de bloqueio por mensalidades vencidas.",
-    "alunoBloqueadoPorDuasMensalidadesVencidas": "O aluno com duas ou mais mensalidades vencidas fica bloqueado e não pode entrar na academia até deixar de possuir duas mensalidades vencidas.",
-    "saldoDevedorMensalidadeCalculado": "O saldo devedor da mensalidade corresponde ao valor da cobrança menos o total pago, nunca sendo inferior a zero.",
-    "totalAreceberMensalCalculado": "O total a receber do mês corresponde à soma dos valores das mensalidades geradas para o mês.",
-    "totalRecebidoMensalCalculado": "O total recebido do mês corresponde à soma dos pagamentos registrados para mensalidades geradas no mês.",
-    "quantidadeAlunosAtivosCalculada": "A quantidade de alunos ativos do período corresponde ao número de alunos com matrícula ativa no período.",
-    "quantidadeAlunosBloqueadosCalculada": "A quantidade de alunos bloqueados do período corresponde ao número de alunos com duas ou mais mensalidades vencidas no período.",
-    "quantidadeAlunosInadimplentesCalculada": "A quantidade de alunos inadimplentes do período corresponde ao número de alunos com ao menos uma mensalidade vencida no período."
+    "planoValorPositivo": "O valor do plano deve ser maior que zero.",
+    "planoDiaVencimentoValido": "O dia de vencimento do plano deve ser um dia do mês entre 1 e 31; nos meses mais curtos, o vencimento cai no último dia do mês.",
+    "planoNomeUnico": "Não pode haver dois planos com o mesmo nome na academia.",
+    "planoInativoNaoMatricula": "Um plano inativo não pode receber novas matrículas.",
+    "umaMatriculaAtivaPorAluno": "Um aluno pode ter no máximo uma matrícula ativa por vez.",
+    "matriculaDataInicioObrigatoria": "Toda matrícula deve ter uma data de início, a partir da qual passa a receber mensalidades.",
+    "gerarApenasMatriculasAtivas": "As mensalidades do mês são geradas somente para matrículas ativas com data de início até o mês de referência.",
+    "mensalidadeUnicaPorMatriculaMes": "Cada matrícula pode ter no máximo uma mensalidade por mês de referência; gerar novamente o mesmo mês não duplica mensalidades já geradas.",
+    "valorDaMensalidadeDoPlano": "O valor da mensalidade é copiado do valor do plano no momento da geração e não muda se o plano for alterado depois.",
+    "vencimentoNoDiaDoPlano": "O vencimento da mensalidade é o dia de vencimento do plano dentro do mês de referência.",
+    "mensalidadeVencidaAposVencimento": "Uma mensalidade não paga cuja data de vencimento já passou fica vencida.",
+    "mensalidadePagaQuandoQuitada": "Uma mensalidade fica paga quando a soma dos pagamentos registrados para ela alcança o valor cobrado.",
+    "pagamentoValorPositivo": "O valor de um pagamento deve ser maior que zero.",
+    "pagamentoSomenteMensalidadeAberta": "Só é possível registrar pagamento para mensalidade em aberto ou vencida, nunca para mensalidade já paga.",
+    "pagamentoQuitaMensalidade": "Ao registrar um pagamento, a mensalidade passa a paga quando o total pago alcança o valor cobrado; caso contrário, mantém o saldo devedor.",
+    "alunoBloqueadoComDuasVencidas": "O aluno com duas ou mais mensalidades vencidas fica bloqueado.",
+    "alunoBloqueadoDuasVencidas": "A matrícula do aluno é considerada bloqueada enquanto ele tiver duas ou mais mensalidades vencidas.",
+    "alunoBloqueadoNaoPodeEntrar": "O aluno bloqueado não pode entrar na academia até regularizar as mensalidades vencidas.",
+    "alunoBloqueadoNaoEntra": "Só é liberado para entrada o aluno com matrícula ativa e que não esteja bloqueado.",
+    "desbloqueioAposRegularizacao": "O aluno deixa de estar bloqueado quando, após os pagamentos, passa a ter menos de duas mensalidades vencidas.",
+    "alunoInadimplenteComUmaVencida": "O aluno é inadimplente quando tem ao menos uma mensalidade vencida e não paga.",
+    "cancelamentoEncerraMensalidadesFuturas": "Ao cancelar a matrícula, não são geradas mensalidades para meses posteriores à data de cancelamento.",
+    "cancelamentoEncerraGeracaoFutura": "Somente matrícula ativa pode ser cancelada, e o cancelamento encerra a geração de mensalidades futuras.",
+    "matriculaCanceladaEncerraGeracao": "Uma matrícula cancelada nunca é incluída na geração de mensalidades.",
+    "painelTotalAreceber": "O total a receber no mês é a soma dos saldos das mensalidades com vencimento no mês de referência que ainda não foram quitadas.",
+    "painelTotalRecebido": "O total recebido no mês é a soma dos valores dos pagamentos com data de pagamento dentro do mês de referência."
   }
-} as const satisfies Ns5RulesArtifactV2;
+} as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
 export type MensalidadesAcademiaRulesType = typeof mensalidadesAcademiaRules;
 

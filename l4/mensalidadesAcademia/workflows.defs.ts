@@ -1,53 +1,58 @@
 /// <mls fileReference="_102047_/l4/mensalidadesAcademia/workflows.defs.ts" enhancement="_blank"/>
 
-import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5WorkflowsArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const mensalidadesAcademiaWorkflows = {
   "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "mensalidadesAcademia",
   "processes": [
     {
-      "processId": "lembrarGeracaoMensalidades",
-      "title": "Lembrete mensal de geração de mensalidades",
-      "description": "Lembra a gerência de gerar as mensalidades dos alunos com matrícula ativa a cada mês.",
+      "processId": "geracaoMensalDeMensalidades",
+      "title": "Geração mensal de mensalidades",
+      "description": "Todo mês a gerência gera as mensalidades do mês para todos os alunos com matrícula ativa, uma por aluno, com o valor do plano e o vencimento.",
       "trigger": {
         "kind": "scheduled",
-        "schedule": "Todo mês"
+        "schedule": "todo mês"
       },
       "tasks": [
         {
-          "taskId": "alertarGerenciaGeracao",
+          "taskId": "lembrarGeracaoMensalidades",
           "kind": "alert",
           "actorRef": "gerencia",
           "next": [],
-          "description": "Gere as mensalidades do mês executando a jornada Gerar mensalidades do mês para todos os alunos com matrícula ativa."
+          "description": "A gerência deve gerar as mensalidades do mês de referência para todas as matrículas ativas, pela jornada gerarMensalidadesDoMes, sem duplicar as já geradas."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
+      "journeyId": "cadastrarPlano",
+      "inProcess": false
+    },
+    {
       "journeyId": "matricularAluno",
       "inProcess": false
     },
     {
       "journeyId": "gerarMensalidadesDoMes",
+      "inProcess": true,
+      "processId": "geracaoMensalDeMensalidades"
+    },
+    {
+      "journeyId": "registrarPagamento",
       "inProcess": false
     },
     {
-      "journeyId": "registrarPagamentoMensalidade",
+      "journeyId": "verificarEntradaAluno",
       "inProcess": false
     },
     {
-      "journeyId": "acompanharIndicadoresAcademia",
-      "inProcess": false
-    },
-    {
-      "journeyId": "cancelarPropriaMatricula",
+      "journeyId": "acompanharPainel",
       "inProcess": false
     }
   ]
-} as const satisfies Ns5WorkflowsArtifact;
+} as const satisfies Ns5Readonly<Ns5WorkflowsArtifact>;
 
 export type MensalidadesAcademiaWorkflowsType = typeof mensalidadesAcademiaWorkflows;
 

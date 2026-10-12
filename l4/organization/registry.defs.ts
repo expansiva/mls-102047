@@ -7,71 +7,6 @@ export const solutionRegistry = {
   "level1SchemaVersion": "2026-09-15-mdm-ontology-v2",
   "modules": [
     {
-      "moduleName": "mensalidadesAcademia",
-      "actors": [
-        {
-          "actorId": "recepcao",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gerencia",
-          "kind": "internal"
-        },
-        {
-          "actorId": "aluno",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "mensalidadesAcademia.Aluno",
-          "namespace": "mensalidadesAcademia"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Aluno",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Plano",
-          "kind": "entity",
-          "class": "supporting"
-        },
-        {
-          "entityId": "Matricula",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Mensalidade",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Pagamento",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "IndicadoresAcademia",
-          "kind": "entity",
-          "class": "supporting"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "cancelarMatricula",
-          "on": "Matricula.cancelarMatricula"
-        }
-      ],
-      "updatedAt": "2026-09-18T06:32:22.971Z"
-    },
-    {
       "moduleName": "ordenServicio",
       "actors": [
         {
@@ -665,6 +600,75 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-12T19:38:44.675Z"
+    },
+    {
+      "moduleName": "mensalidadesAcademia",
+      "actors": [
+        {
+          "actorId": "recepcao",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerencia",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "mensalidadesAcademia.Aluno",
+          "namespace": "mensalidadesAcademia"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Aluno",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Plano",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Matricula",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Mensalidade",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Pagamento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PainelMensalidades",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "matriculaCancelada",
+          "on": "Matricula.cancelarMatricula"
+        },
+        {
+          "eventId": "mensalidadeGerada",
+          "on": "Mensalidade.create"
+        },
+        {
+          "eventId": "pagamentoRegistrado",
+          "on": "Pagamento.create"
+        }
+      ],
+      "updatedAt": "2026-10-12T20:25:09.795Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

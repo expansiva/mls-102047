@@ -1,13 +1,13 @@
 {
   "moduleName": "mensalidadesAcademia",
-  "businessDomain": "Gestão de mensalidades de academia",
+  "businessDomain": "Gestão de mensalidades de academia: planos, matrículas, cobrança mensal, pagamentos, bloqueio por inadimplência e painel financeiro",
   "entities": [
     {
       "entityId": "Aluno",
       "kind": "role",
       "family": "mdm",
       "title": "Aluno",
-      "description": "Pessoa cadastrada na academia que possui matrícula em plano e pode cancelar a própria matrícula.",
+      "description": "Pessoa matriculada na academia. Registro mestre de Pessoa compartilhado com outros módulos; o módulo guarda apenas seu próprio namespace.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "mensalidadesAcademia.Aluno",
@@ -18,10 +18,9 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Plano",
-      "description": "Catálogo de planos da academia, com periodicidade, valor e dia de vencimento usados nas matrículas.",
-      "displayField": "name",
-      "writer": "crud",
-      "class": "supporting",
+      "description": "Plano oferecido pela academia (mensal, trimestral ou anual) com valor e dia de vencimento.",
+      "displayField": "nome",
+      "class": "core",
       "storage": {
         "target": "moduleDatabase",
         "table": "mensalidadesAcademia_plano",
@@ -33,8 +32,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Matrícula",
-      "description": "Vínculo do aluno a um plano a partir de uma data, cuja situação define a geração de mensalidades futuras.",
-      "displayField": "id",
+      "description": "Vínculo do aluno com um plano a partir de uma data de início. Pode estar ativa, bloqueada por mensalidades vencidas ou cancelada; o cancelamento encerra a geração de mensalidades futuras.",
+      "displayField": "dataInicio",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
@@ -47,8 +46,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Mensalidade",
-      "description": "Cobrança mensal gerada para uma matrícula ativa, com valor, vencimento e situação de pagamento.",
-      "displayField": "id",
+      "description": "Cobrança mensal de uma matrícula ativa, com mês de referência, valor do plano e vencimento. Fica vencida quando não paga após o vencimento (situação derivada).",
+      "displayField": "mesReferencia",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
@@ -61,8 +60,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Pagamento",
-      "description": "Registro de um pagamento recebido para regularizar uma mensalidade.",
-      "displayField": "id",
+      "description": "Registro do pagamento de uma mensalidade com data, valor e forma de pagamento.",
+      "displayField": "dataPagamento",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
@@ -71,17 +70,17 @@
       }
     },
     {
-      "entityId": "IndicadoresAcademia",
+      "entityId": "PainelMensalidades",
       "kind": "entity",
       "family": "ddm",
-      "title": "Indicadores da academia",
-      "description": "Resumo mensal recalculado dos valores a receber e recebidos e das quantidades de alunos ativos, bloqueados e inadimplentes.",
-      "displayField": "period",
+      "title": "Painel de mensalidades",
+      "description": "Resumo recalculado para a gerência: total a receber no mês, total recebido, quantidade de alunos ativos, bloqueados e inadimplentes.",
+      "displayField": "mesReferencia",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "mensalidadesAcademia_indicadoresacademia",
-        "kind": "timeSeries"
+        "table": "mensalidadesAcademia_painelmensalidades",
+        "kind": "relational"
       }
     }
   ],
@@ -93,7 +92,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada matrícula pertence obrigatoriamente a um aluno.",
+      "description": "Cada matrícula pertence a um aluno.",
       "field": "Matricula.alunoId"
     },
     {
@@ -103,7 +102,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada matrícula é realizada obrigatoriamente em um plano da academia.",
+      "description": "Cada matrícula é feita em um plano.",
       "field": "Matricula.planoId"
     },
     {
@@ -113,8 +112,18 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada mensalidade é gerada obrigatoriamente para uma matrícula.",
+      "description": "Cada mensalidade é gerada a partir de uma matrícula ativa.",
       "field": "Mensalidade.matriculaId"
+    },
+    {
+      "relationshipId": "mensalidadeAluno",
+      "from": "Mensalidade",
+      "to": "Aluno",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada mensalidade é cobrada de um aluno, permitindo localizar suas mensalidades em aberto ou vencidas.",
+      "field": "Mensalidade.alunoId"
     },
     {
       "relationshipId": "pagamentoMensalidade",
@@ -123,7 +132,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada pagamento registrado pertence obrigatoriamente a uma mensalidade.",
+      "description": "Cada pagamento quita uma mensalidade.",
       "field": "Pagamento.mensalidadeId"
     }
   ],
@@ -155,8 +164,8 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
-      "detail": "storage.table mensalidadesAcademia_indicadoresacademia"
+      "entityId": "PainelMensalidades",
+      "detail": "storage.table mensalidadesAcademia_painelmensalidades"
     }
   ]
 }

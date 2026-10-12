@@ -1,15 +1,20 @@
 /// <mls fileReference="_102047_/l4/mensalidadesAcademia/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const mensalidadesAcademiaJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "moduleName": "mensalidadesAcademia",
   "journeys": [
     {
+      "journeyId": "cadastrarPlano",
+      "actorRef": "gerencia",
+      "title": "Cadastrar plano"
+    },
+    {
       "journeyId": "matricularAluno",
       "actorRef": "recepcao",
-      "title": "Matricular aluno em um plano"
+      "title": "Matricular aluno em plano"
     },
     {
       "journeyId": "gerarMensalidadesDoMes",
@@ -17,23 +22,32 @@ export const mensalidadesAcademiaJourneyIndex = {
       "title": "Gerar mensalidades do mês"
     },
     {
-      "journeyId": "registrarPagamentoMensalidade",
+      "journeyId": "registrarPagamento",
       "actorRef": "recepcao",
       "title": "Registrar pagamento de mensalidade"
     },
     {
-      "journeyId": "acompanharIndicadoresAcademia",
-      "actorRef": "gerencia",
-      "title": "Acompanhar indicadores da academia"
+      "journeyId": "verificarEntradaAluno",
+      "actorRef": "recepcao",
+      "title": "Verificar se o aluno pode entrar"
     },
     {
-      "journeyId": "cancelarPropriaMatricula",
-      "actorRef": "aluno",
-      "title": "Cancelar própria matrícula"
+      "journeyId": "acompanharPainel",
+      "actorRef": "gerencia",
+      "title": "Acompanhar painel de mensalidades"
     }
   ],
-  "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+  "systemDecisions": [
+    {
+      "decisionId": "dropInferredActorAluno",
+      "chosen": "drop",
+      "alternatives": [
+        "keep"
+      ],
+      "decidedBy": "system"
+    }
+  ]
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type MensalidadesAcademiaJourneyIndexType = typeof mensalidadesAcademiaJourneyIndex;
 

@@ -1,0 +1,108 @@
+/// <mls fileReference="_102047_/l4/mensalidadesAcademia/ontology/PainelMensalidades.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const mensalidadesAcademiaEntityPainelMensalidades = {
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+  "moduleName": "mensalidadesAcademia",
+  "entityId": "PainelMensalidades",
+  "title": "Painel de mensalidades",
+  "description": "Resumo recalculado para a gerência: total a receber no mês, total recebido, quantidade de alunos ativos, bloqueados e inadimplentes.",
+  "displayField": "mesReferencia",
+  "relationships": {},
+  "capabilities": {
+    "aggregate.byWindow": "Resume por mês as mensalidades, os pagamentos e as matrículas do módulo (agregado com janela mensal) para montar o painel que a gerência acompanha.",
+    "read.window": "Lê os indicadores de um mês de referência pela coluna indexada mesReferencia; usado pela gerência na tela do painel de mensalidades.",
+    "refresh": "Mantém o painel atualizado à medida que a gerência gera mensalidades e a recepção registra pagamentos e matrículas; executado pela plataforma, sem ação de ninguém.",
+    "rebuild": "Recalcula todo o painel a partir das mensalidades, pagamentos e matrículas em uma migração ou publicação do módulo.",
+    "retain": "Descarta linhas do painel de meses muito antigos que a gerência não consulta mais, para a série não crescer indefinidamente; executado pela plataforma.",
+    "backfill": "Preenche o painel de meses já passados quando ele é ativado depois que a academia já tem mensalidades e pagamentos registrados; usado pela gerência ao começar a usar o painel."
+  },
+  "rules": [
+    "mensalidadeVencidaAposVencimento",
+    "alunoBloqueadoDuasVencidas",
+    "matriculaCanceladaEncerraGeracao"
+  ],
+  "kind": "entity",
+  "class": "supporting",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "mensalidadesAcademia_painelmensalidades",
+    "kind": "relational"
+  },
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "derived": true,
+        "indexed": true,
+        "title": "Id"
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true
+      },
+      "mesReferencia": {
+        "type": "timestamp",
+        "required": true,
+        "indexed": true,
+        "title": "Mês de referência",
+        "description": "Início do mês que esta linha do painel resume (janela mensal). Calculado pela plataforma a partir das mensalidades, pagamentos e matrículas; ninguém o digita.",
+        "derived": true
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "title": "Indicadores do mês",
+        "description": "Indicadores do painel da gerência, recalculados a partir das tabelas Mensalidade, Pagamento e Matricula e do papel Aluno. Nenhum valor é digitado.",
+        "fields": {
+          "totalAReceber": {
+            "type": "money",
+            "required": true,
+            "title": "Total a receber no mês",
+            "description": "Soma dos valores das mensalidades com vencimento no mês de referência que ainda não foram quitadas.",
+            "derived": true
+          },
+          "totalRecebido": {
+            "type": "money",
+            "required": true,
+            "title": "Total recebido no mês",
+            "description": "Soma dos valores dos pagamentos registrados pela recepção com data de pagamento dentro do mês de referência.",
+            "derived": true
+          },
+          "quantidadeAlunosAtivos": {
+            "type": "integer",
+            "required": true,
+            "title": "Alunos ativos",
+            "description": "Quantidade de alunos com matrícula ativa (não cancelada) em algum plano no mês de referência.",
+            "min": 0,
+            "derived": true
+          },
+          "quantidadeAlunosBloqueados": {
+            "type": "integer",
+            "required": true,
+            "title": "Alunos bloqueados",
+            "description": "Quantidade de alunos com duas ou mais mensalidades vencidas, que não podem entrar na academia até regularizar.",
+            "min": 0,
+            "derived": true
+          },
+          "quantidadeAlunosInadimplentes": {
+            "type": "integer",
+            "required": true,
+            "title": "Alunos inadimplentes",
+            "description": "Quantidade de alunos com pelo menos uma mensalidade vencida e não paga.",
+            "min": 0,
+            "derived": true
+          }
+        },
+        "derived": true
+      }
+    }
+  }
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+
+export type MensalidadesAcademiaEntityPainelMensalidadesType = typeof mensalidadesAcademiaEntityPainelMensalidades;
+
+export default mensalidadesAcademiaEntityPainelMensalidades;

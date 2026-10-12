@@ -4,46 +4,62 @@
     "moduleName": "mensalidadesAcademia",
     "entityId": "Mensalidade",
     "title": "Mensalidade",
-    "description": "Cobrança mensal gerada para uma matrícula ativa, com valor, vencimento e situação de pagamento.",
-    "displayField": "id",
+    "description": "Cobrança mensal de uma matrícula ativa, com mês de referência, valor do plano e vencimento. Fica vencida quando não paga após o vencimento (situação derivada).",
+    "displayField": "mesReferencia",
     "relationships": {
       "matricula": {
         "relationshipId": "mensalidadeMatricula",
         "to": "Matricula",
         "via": "Mensalidade.matriculaId",
         "cardinality": "N:1",
-        "title": "Matrícula da mensalidade",
-        "description": "Cada mensalidade pertence à matrícula para a qual foi gerada.",
+        "title": "Matrícula de origem",
+        "description": "Cada mensalidade é gerada a partir de uma matrícula ativa.",
         "mode": "fk",
-        "required": "Sempre, ao gerar a mensalidade.",
-        "role": "cobrança da matrícula"
+        "required": true
+      },
+      "aluno": {
+        "relationshipId": "mensalidadeAluno",
+        "to": "Aluno",
+        "via": "Mensalidade.alunoId",
+        "cardinality": "N:1",
+        "title": "Aluno cobrado",
+        "description": "Cada mensalidade é cobrada de um aluno.",
+        "mode": "fk",
+        "required": true
       },
       "pagamentos": {
         "relationshipId": "pagamentoMensalidade",
         "to": "Pagamento",
         "via": "Pagamento.mensalidadeId",
         "cardinality": "1:N",
-        "title": "Pagamentos da mensalidade",
-        "description": "Pagamentos registrados para quitar total ou parcialmente esta mensalidade.",
+        "title": "Pagamentos",
+        "description": "Pagamentos que quitam esta mensalidade.",
         "mode": "fk",
         "direction": "to",
-        "required": "Quando houver pagamento registrado para esta mensalidade.",
-        "role": "quitação"
+        "required": true
       }
     },
     "capabilities": {
-      "read.byId": "Lê uma mensalidade pelo identificador da linha para a recepção ou a gerência conferir a cobrança selecionada.",
-      "locate.byColumn": "Lista mensalidades por matrícula, competência ou vencimento, com paginação, para a recepção e a gerência localizarem cobranças.",
-      "count": "Conta mensalidades conforme os filtros de matrícula, competência ou vencimento para exibir totais nas consultas da gerência.",
-      "listByForeignKey": "Lista as mensalidades vinculadas a uma matrícula pelo campo matriculaId para a recepção e a gerência consultarem o histórico de cobranças.",
-      "create": "Cria a mensalidade de uma matrícula ativa para a competência mensal, com valor do plano e vencimento, durante a geração feita pela gerência.",
-      "uniqueKey": "Impede uma segunda mensalidade para a mesma matrícula e competência pelo índice único, protegendo a geração mensal da gerência.",
-      "transaction": "Grava em uma única transação as mensalidades geradas para as matrículas ativas do mês pela gerência."
+      "create": "Grava as mensalidades do mês, uma por matrícula ativa, com o valor do plano e o vencimento no dia do plano; usado pela gerência ao gerar as mensalidades do mês.",
+      "transaction": "Grava todas as mensalidades do mês de referência em uma única operação, tudo ou nada; usado pela gerência na geração mensal.",
+      "uniqueKey": "Recusa uma segunda mensalidade para a mesma matrícula ou o mesmo aluno no mesmo mês de referência, pelo índice único em matrícula + mês e aluno + mês; aplicado pelo motor na geração.",
+      "locate.byColumn": "Lista as mensalidades filtradas por mês de referência, aluno ou vencimento, ordenadas por vencimento; usado pela gerência ao revisar as geradas e consultar as vencidas e pela recepção ao localizar as do aluno.",
+      "listByForeignKey": "Lista as mensalidades de um aluno ou de uma matrícula pela chave estrangeira; usado pela recepção para ver as mensalidades em aberto ou vencidas do aluno.",
+      "read.byId": "Lê uma mensalidade pelo id para conferir mês de referência, valor, vencimento e situação; usado pela recepção antes de lançar o pagamento.",
+      "count": "Conta as mensalidades do mês ou as vencidas de um aluno com o mesmo filtro da lista; usado no painel da gerência e na verificação de bloqueio.",
+      "read.mdmRecord": "Lê no cadastro mestre o nome do aluno apontado pela mensalidade, hidratando a lista inteira de uma vez; usado nas listas da recepção e da gerência.",
+      "update": "Corrige a observação ou o vencimento de uma mensalidade gerada; usado pela gerência.",
+      "comment": "Registra notas sobre a cobrança, como uma negociação com o aluno; usado pela recepção e pela gerência."
     },
     "rules": [
-      "mensalidadeUnicaPorMatriculaECompetencia",
-      "mensalidadeGeradaParaMatriculaAtiva",
-      "situacaoMensalidadeDerivada"
+      "mensalidadeUnicaPorMatriculaMes",
+      "gerarApenasMatriculasAtivas",
+      "valorDaMensalidadeDoPlano",
+      "vencimentoNoDiaDoPlano",
+      "mensalidadePagaQuandoQuitada",
+      "mensalidadeVencidaAposVencimento",
+      "alunoBloqueadoComDuasVencidas",
+      "cancelamentoEncerraGeracaoFutura"
     ],
     "kind": "entity",
     "class": "core",
@@ -70,75 +86,97 @@
           "type": "record",
           "required": true,
           "indexed": true,
-          "of": "Address",
           "to": [
             "Matricula"
           ],
           "title": "Matrícula",
-          "description": "Matrícula ativa para a qual esta mensalidade foi gerada.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "description": "Matrícula ativa a partir da qual a mensalidade foi gerada; define o plano, o valor e o dia de vencimento."
         },
-        "competencia": {
-          "type": "date",
+        "alunoId": {
+          "type": "record",
           "required": true,
           "indexed": true,
-          "of": "Address",
-          "title": "Competência",
-          "description": "Mês de referência da cobrança mensal.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "to": [
+            "Aluno"
+          ],
+          "title": "Aluno",
+          "description": "Aluno cobrado; usado pela recepção para localizar as mensalidades em aberto ou vencidas do aluno e para contar mensalidades vencidas no bloqueio."
+        },
+        "mesReferencia": {
+          "type": "string",
+          "required": true,
+          "indexed": true,
+          "title": "Mês de referência",
+          "description": "Mês cobrado no formato AAAA-MM; filtra as mensalidades geradas no mês e impede gerar duas para a mesma matrícula.",
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
         },
         "vencimento": {
           "type": "date",
           "required": true,
           "indexed": true,
-          "of": "Address",
           "title": "Vencimento",
-          "description": "Data em que a mensalidade deve ser paga, definida a partir do dia de vencimento do plano.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "description": "Data de vencimento no mês de referência, no dia de vencimento do plano; usada para ordenar e para saber se a mensalidade está vencida."
         },
         "details": {
           "type": "object",
           "required": true,
-          "of": "Address",
-          "title": "Dados da mensalidade",
-          "description": "Informações próprias da cobrança mensal que não são usadas como filtro ou ordenação.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "title": "Detalhes",
+          "description": "Dados da cobrança que só são exibidos.",
           "fields": {
-            "valorCobranca": {
+            "valor": {
               "type": "money",
               "required": true,
-              "of": "Address",
-              "title": "Valor da cobrança",
-              "description": "Valor da mensalidade gerada conforme o plano vigente na matrícula.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0
+              "title": "Valor",
+              "description": "Valor cobrado, copiado do valor do plano no momento da geração, para que mudanças futuras no plano não alterem cobranças já geradas.",
+              "min": 0
+            },
+            "geradaEm": {
+              "type": "timestamp",
+              "required": true,
+              "title": "Gerada em",
+              "description": "Momento em que a gerência gerou a mensalidade."
+            },
+            "observacao": {
+              "type": "text",
+              "title": "Observação",
+              "description": "Anotação livre sobre esta cobrança.",
+              "maxLength": 500
             },
             "totalPago": {
               "type": "money",
               "derived": true,
               "title": "Total pago",
-              "description": "Soma dos pagamentos registrados para esta mensalidade."
+              "description": "Soma dos valores dos pagamentos registrados para esta mensalidade."
             },
-            "saldoDevedor": {
-              "type": "money",
+            "paga": {
+              "type": "boolean",
               "derived": true,
-              "title": "Saldo devedor",
-              "description": "Valor da cobrança menos a soma dos pagamentos registrados para esta mensalidade, nunca inferior a zero."
+              "title": "Paga",
+              "description": "Verdadeiro quando a soma dos pagamentos desta mensalidade alcança o valor cobrado."
+            },
+            "vencida": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Vencida",
+              "description": "Não paga e com vencimento anterior a hoje."
             },
             "situacao": {
               "type": "string",
               "derived": true,
               "title": "Situação",
-              "description": "Paga quando os pagamentos registrados alcançam o valor da cobrança; vencida quando ainda há saldo devedor e o vencimento é anterior a hoje; em aberto nos demais casos."
+              "description": "Paga quando quitada pelos pagamentos; vencida quando não paga e com vencimento anterior a hoje; em aberto nos demais casos."
+            },
+            "saldoDevedor": {
+              "type": "money",
+              "derived": true,
+              "title": "Saldo devedor",
+              "description": "Valor cobrado menos a soma dos pagamentos desta mensalidade, nunca menor que zero."
+            },
+            "diasEmAtraso": {
+              "type": "integer",
+              "derived": true,
+              "title": "Dias em atraso",
+              "description": "Dias passados desde o vencimento enquanto a mensalidade não estiver paga; zero quando paga ou ainda não vencida."
             }
           }
         }
@@ -147,7 +185,11 @@
     "uniqueKeys": [
       [
         "matriculaId",
-        "competencia"
+        "mesReferencia"
+      ],
+      [
+        "alunoId",
+        "mesReferencia"
       ]
     ]
   },
@@ -165,12 +207,27 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Mensalidade",
-      "detail": "record.fields.details.fields.saldoDevedor.derived (derived[])"
+      "detail": "record.fields.details.fields.paga.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Mensalidade",
+      "detail": "record.fields.details.fields.vencida.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "Mensalidade",
       "detail": "record.fields.details.fields.situacao.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Mensalidade",
+      "detail": "record.fields.details.fields.saldoDevedor.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Mensalidade",
+      "detail": "record.fields.details.fields.diasEmAtraso.derived (derived[])"
     }
   ]
 }

@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/mensalidadesAcademia/access.defs.ts" enhancement="_blank"/>
 
-import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5AccessArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const mensalidadesAcademiaAccess = {
   "schemaVersion": "2026-09-12-ns5-access-v3",
@@ -11,131 +11,176 @@ export const mensalidadesAcademiaAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Recepção",
-      "description": "Matricula alunos em planos e registra pagamentos de mensalidades."
+      "description": "Matricula alunos em planos a partir de uma data e registra os pagamentos das mensalidades (data, valor e forma).",
+      "personEntity": ""
     },
     {
       "actorId": "gerencia",
       "kind": "internal",
       "origin": "named",
       "title": "Gerência",
-      "description": "Gera mensalidades mensais e acompanha os indicadores financeiros e de alunos."
-    },
-    {
-      "actorId": "aluno",
-      "kind": "external",
-      "origin": "named",
-      "title": "Aluno",
-      "description": "Cancela a própria matrícula."
+      "description": "Gera todo mês as mensalidades dos alunos ativos e acompanha o painel de valores a receber, valores recebidos, alunos ativos, bloqueados e inadimplentes.",
+      "personEntity": ""
     }
   ],
   "grants": [
     {
-      "grantId": "recepcaoGerenciarCadastrosEcobrancas",
+      "grantId": "recepcaoAlunos",
       "actorRef": "recepcao",
-      "title": "Gerenciar planos, matrículas e pagamentos",
-      "description": "Permite à recepção consultar e manter os planos, registrar matrículas e consultar mensalidades para registrar os pagamentos recebidos em toda a academia.",
+      "title": "Cadastro e consulta de alunos",
+      "description": "A recepção localiza o aluno por nome ou documento, cadastra o aluno quando ele não existe e verifica se ele está bloqueado na chegada à academia.",
       "entityRefs": [
-        "Plano",
+        "Aluno"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os alunos da academia."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "A recepção vê o cadastro completo do aluno, incluindo a situação de bloqueio e inadimplência calculada pelo módulo."
+      }
+    },
+    {
+      "grantId": "recepcaoPlanosConsulta",
+      "actorRef": "recepcao",
+      "title": "Consulta de planos para matrícula",
+      "description": "A recepção escolhe o plano da matrícula vendo nome, periodicidade, valor e dia de vencimento.",
+      "entityRefs": [
+        "Plano"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os planos da academia."
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "A recepção vê os dados do plano necessários para a matrícula, sem as observações internas.",
+        "allowedFields": [
+          "Plano.id",
+          "Plano.nome",
+          "Plano.periodicidade",
+          "Plano.ativo",
+          "Plano.details.valor",
+          "Plano.details.diaVencimento"
+        ]
+      }
+    },
+    {
+      "grantId": "recepcaoMatriculas",
+      "actorRef": "recepcao",
+      "title": "Matrículas dos alunos",
+      "description": "A recepção matricula alunos em planos a partir de uma data, registra cancelamentos e consulta se a matrícula está liberada para entrada.",
+      "entityRefs": [
+        "Matricula"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todas as matrículas da academia."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "A recepção vê a matrícula completa, inclusive bloqueio e mensalidades vencidas."
+      }
+    },
+    {
+      "grantId": "recepcaoMensalidadesPagamentos",
+      "actorRef": "recepcao",
+      "title": "Mensalidades e pagamentos",
+      "description": "A recepção localiza as mensalidades em aberto ou vencidas do aluno e registra os pagamentos com data, valor e forma.",
+      "entityRefs": [
+        "Mensalidade",
+        "Pagamento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todas as mensalidades e pagamentos da academia."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "A recepção vê a mensalidade e o pagamento completos, incluindo saldo devedor e situação."
+      }
+    },
+    {
+      "grantId": "gerenciaPlanos",
+      "actorRef": "gerencia",
+      "title": "Gestão de planos",
+      "description": "A gerência cadastra e mantém os planos mensal, trimestral e anual, com valor e dia de vencimento.",
+      "entityRefs": [
+        "Plano"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os planos da academia."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "A gerência vê e mantém todos os dados do plano."
+      }
+    },
+    {
+      "grantId": "gerenciaMatriculasMensalidades",
+      "actorRef": "gerencia",
+      "title": "Geração e acompanhamento de mensalidades",
+      "description": "A gerência confere as matrículas ativas, gera as mensalidades do mês e acompanha pagamentos, vencidas e inadimplentes.",
+      "entityRefs": [
         "Matricula",
         "Mensalidade",
         "Pagamento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os registros de planos, matrículas, mensalidades e pagamentos de toda a organização."
+        "description": "Todas as matrículas, mensalidades e pagamentos da academia."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "A recepção visualiza todos os campos dos planos, matrículas, mensalidades e pagamentos necessários para efetuar matrículas e registrar recebimentos."
+        "description": "A gerência vê os registros completos para gerar e conferir as cobranças."
       }
     },
     {
-      "grantId": "recepcaoLocalizarAluno",
-      "actorRef": "recepcao",
-      "title": "Localizar alunos para matrícula",
-      "description": "Permite à recepção localizar ou cadastrar o aluno necessário para realizar uma matrícula.",
+      "grantId": "gerenciaAlunosConsulta",
+      "actorRef": "gerencia",
+      "title": "Consulta de alunos",
+      "description": "A gerência identifica os alunos das mensalidades e os inadimplentes e bloqueados.",
       "entityRefs": [
         "Aluno"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os cadastros de alunos da organização necessários para a matrícula."
+        "description": "Todos os alunos da academia."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "A recepção visualiza os dados de identificação e os dados básicos do aluno necessários para localizá-lo ou cadastrá-lo, sem acesso aos demais ramos do registro mestre.",
+        "description": "A gerência vê nome, documento, situação do cadastro e a situação de bloqueio e inadimplência; endereços, contatos e dados pessoais ficam com a recepção.",
         "allowedFields": [
-          "Aluno.details.identification",
-          "Aluno.details.base"
+          "Aluno.id",
+          "Aluno.details.identification.name",
+          "Aluno.details.identification.status",
+          "Aluno.details.identification.docType",
+          "Aluno.details.identification.docId",
+          "Aluno.details.mensalidadesAcademia"
         ]
       }
     },
     {
-      "grantId": "gerenciaGerarMensalidades",
+      "grantId": "gerenciaPainel",
       "actorRef": "gerencia",
-      "title": "Gerar mensalidades mensais",
-      "description": "Permite à gerência consultar planos e matrículas ativas e gerar as mensalidades mensais da academia.",
+      "title": "Painel de mensalidades",
+      "description": "A gerência acompanha o total a receber no mês, o total recebido e as quantidades de alunos ativos, bloqueados e inadimplentes.",
       "entityRefs": [
-        "Plano",
-        "Matricula",
-        "Mensalidade"
+        "PainelMensalidades"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os planos, matrículas e mensalidades de toda a organização."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "A gerência visualiza todos os campos dos planos, matrículas e mensalidades necessários para a geração mensal das cobranças."
-      }
-    },
-    {
-      "grantId": "gerenciaAcompanharIndicadores",
-      "actorRef": "gerencia",
-      "title": "Acompanhar indicadores da academia",
-      "description": "Permite à gerência consultar os totais financeiros e as quantidades mensais de alunos ativos, bloqueados e inadimplentes.",
-      "entityRefs": [
-        "IndicadoresAcademia"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Abrange os indicadores mensais consolidados de toda a organização."
+        "description": "Indicadores de toda a academia."
       },
       "disclosure": {
         "mode": "aggregateOnly",
-        "description": "A gerência visualiza somente o período e as medidas consolidadas dos indicadores, sem acesso a registros individuais por meio deste acesso.",
-        "allowedFields": [
-          "IndicadoresAcademia.period",
-          "IndicadoresAcademia.details"
-        ]
-      }
-    },
-    {
-      "grantId": "alunoCancelarPropriaMatricula",
-      "actorRef": "aluno",
-      "title": "Cancelar própria matrícula",
-      "description": "Permite ao aluno consultar e cancelar somente a própria matrícula.",
-      "entityRefs": [
-        "Matricula"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Abrange exclusivamente as matrículas que alcançam o cadastro de aluno correspondente ao login da sessão.",
-        "anchorEntity": "Aluno"
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "O aluno visualiza o plano vinculado, a situação, a data de início e a eventual data de cancelamento de sua própria matrícula.",
-        "allowedFields": [
-          "Matricula.planoId",
-          "Matricula.status",
-          "Matricula.dataInicio",
-          "Matricula.details.dataCancelamento"
-        ]
+        "description": "Somente totais e contagens calculados por mês de referência."
       }
     }
   ]
-} as const satisfies Ns5AccessArtifact;
+} as const satisfies Ns5Readonly<Ns5AccessArtifact>;
 
 export type MensalidadesAcademiaAccessType = typeof mensalidadesAcademiaAccess;
 

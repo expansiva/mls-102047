@@ -4,7 +4,7 @@
     "moduleName": "mensalidadesAcademia",
     "entityId": "Aluno",
     "title": "Aluno",
-    "description": "Pessoa cadastrada na academia que possui matrícula em plano e pode cancelar a própria matrícula.",
+    "description": "Pessoa matriculada na academia. Registro mestre de Pessoa compartilhado com outros módulos; o módulo guarda apenas seu próprio namespace.",
     "displayField": "details.identification.name",
     "relationships": {
       "matriculas": {
@@ -13,29 +13,48 @@
         "via": "Matricula.alunoId",
         "cardinality": "1:N",
         "title": "Matrículas do aluno",
-        "description": "Matrículas da academia que pertencem a este aluno.",
+        "description": "Matrículas do aluno em planos da academia.",
         "mode": "fk",
         "direction": "to",
-        "required": "Sempre que existir uma matrícula, ela deve referenciar este aluno.",
-        "role": "aluno"
+        "required": true
+      },
+      "mensalidades": {
+        "relationshipId": "mensalidadeAluno",
+        "to": "Mensalidade",
+        "via": "Mensalidade.alunoId",
+        "cardinality": "1:N",
+        "title": "Mensalidades do aluno",
+        "description": "Mensalidades cobradas do aluno, para ver as em aberto e as vencidas.",
+        "mode": "fk",
+        "direction": "to",
+        "required": true
       }
     },
     "capabilities": {
-      "read.byId": "Lê o cadastro mestre do aluno pelo identificador, para exibir seus dados nas matrículas e na área do aluno.",
-      "locate.byName": "Localiza alunos pelo nome no índice mestre, para a recepção selecionar ou iniciar o cadastro durante a matrícula.",
-      "locate.byDocument": "Localiza o aluno pelo CPF no índice mestre, para a recepção evitar cadastros duplicados antes da matrícula.",
-      "register.createOrAttach": "Cria a pessoa quando ela não existe ou anexa o papel de Aluno ao cadastro existente por documento, para a recepção matriculá-la na academia.",
-      "edit.platformFields": "Atualiza os dados pessoais e cadastrais mantidos pela plataforma, para a recepção corrigir o cadastro do aluno.",
-      "edit.moduleNamespace": "Atualiza somente o namespace do módulo do aluno, quando houver dado exclusivo da academia autorizado para manutenção.",
-      "inactivate": "Inativa ou reativa o cadastro mestre sem excluí-lo, para a recepção manter registros de alunos que não devem mais ser usados.",
-      "invite.login": "Convida o aluno para criar acesso de login vinculado ao seu cadastro mestre, para que ele possa cancelar a própria matrícula.",
-      "audit": "Consulta quem alterou o cadastro mestre do aluno e quando, para a gerência e a administração acompanharem alterações."
+      "read.byId": "Lê o aluno pelo id para exibir nome e documento nas telas de matrícula, mensalidades e pagamentos; usado pela recepção e gerência.",
+      "locate.byName": "A recepção busca o aluno pelo nome ao matricular e ao verificar a entrada na academia.",
+      "locate.byDocument": "A recepção busca o aluno pelo CPF ou outro documento, evitando cadastro duplicado antes de matricular.",
+      "register.createOrAttach": "Ao matricular, a recepção cadastra o aluno quando não existe ou vincula o papel de aluno a uma pessoa já existente.",
+      "edit.platformFields": "A recepção corrige nome, documento, endereço e consentimento do aluno.",
+      "edit.moduleNamespace": "O módulo grava apenas seu namespace do aluno, hoje vazio.",
+      "inactivate": "A gerência inativa o cadastro de aluno que deixou a academia, podendo reativá-lo depois.",
+      "link.contact": "A recepção registra telefone, WhatsApp ou e-mail do aluno como canais de contato vinculados.",
+      "listLinks": "A recepção vê os contatos e vínculos do aluno na ficha.",
+      "comment": "A recepção e a gerência deixam observações na ficha do aluno, como combinados de regularização.",
+      "attach.document": "A recepção anexa foto ou documento digitalizado do aluno.",
+      "statusHistory.read": "A gerência consulta quando o cadastro do aluno foi ativado ou inativado.",
+      "audit": "A gerência verifica quem alterou os dados do aluno e quando.",
+      "mensalidadesAcademia.verificarEntrada": "Na chegada, a recepção vê se o aluno está liberado ou bloqueado e quantas mensalidades vencidas ele tem, calculado a partir das mensalidades."
     },
     "rules": [
       "rule-foreign-namespace-refused",
+      "rule-delete-blocked-by-relationships",
       "rule-document-shape-validated",
       "rule-identity-never-in-namespace",
-      "rule-person-privacy-consent-required-br-eu"
+      "rule-person-privacy-consent-required-br-eu",
+      "mensalidadeVencidaAposVencimento",
+      "alunoBloqueadoComDuasVencidas",
+      "alunoBloqueadoNaoPodeEntrar"
     ],
     "kind": "role",
     "subtype": "Person",
@@ -54,12 +73,13 @@
           "type": "integer",
           "required": true,
           "derived": true,
+          "writePrecondition": true,
           "description": "Bumped by the engine on every write; optimistic concurrency."
         },
         "details": {
           "type": "object",
           "required": true,
-          "description": "Documento mestre da pessoa usada como aluno pela academia.",
+          "description": "Registro mestre de Pessoa visto pela academia: identificação, base, dados de pessoa, campos gerais e o namespace do módulo.",
           "fields": {
             "identification": {
               "type": "object",
@@ -73,25 +93,19 @@
                   "values": [
                     {
                       "value": "Person",
-                      "title": "Pessoa",
-                      "description": "Pessoa natural cadastrada como aluno."
+                      "title": "Pessoa"
                     }
                   ],
-                  "description": "Subtipo mestre da pessoa, mantido pela plataforma como Pessoa.",
-                  "title": "Subtipo",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
+                  "description": "Sempre Pessoa: o aluno é uma pessoa física.",
+                  "title": "Subtipo"
                 },
                 "name": {
                   "type": "string",
                   "required": true,
                   "indexed": true,
-                  "maxLength": 0,
-                  "description": "Nome pelo qual a recepção identifica o aluno ao realizar a matrícula.",
-                  "title": "Nome",
-                  "min": 0,
-                  "max": 0
+                  "maxLength": 200,
+                  "description": "Nome do aluno, usado pela recepção para buscá-lo na matrícula e na chegada à academia.",
+                  "title": "Nome"
                 },
                 "status": {
                   "type": "enum",
@@ -101,30 +115,23 @@
                   "values": [
                     {
                       "value": "Active",
-                      "title": "Ativo",
-                      "description": "Cadastro mestre ativo."
+                      "title": "Ativo"
                     },
                     {
                       "value": "Inactive",
-                      "title": "Inativo",
-                      "description": "Cadastro mestre inativo."
+                      "title": "Inativo"
                     },
                     {
                       "value": "Merged",
-                      "title": "Mesclado",
-                      "description": "Cadastro mestre mesclado a outro registro."
+                      "title": "Mesclado"
                     },
                     {
                       "value": "Blocked",
-                      "title": "Bloqueado",
-                      "description": "Cadastro mestre bloqueado pela plataforma."
+                      "title": "Bloqueado"
                     }
                   ],
                   "title": "Situação do cadastro",
-                  "description": "Situação mestre do cadastro da pessoa, mantida pela plataforma.",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
+                  "description": "Situação do registro mestre (ativo/inativo) mantida pela plataforma; não é a situação da matrícula nem o bloqueio por inadimplência."
                 },
                 "docType": {
                   "type": "enum",
@@ -132,73 +139,182 @@
                   "values": [
                     {
                       "value": "CPF",
-                      "title": "CPF",
-                      "description": "Cadastro de Pessoas Físicas."
+                      "title": "CPF"
+                    },
+                    {
+                      "value": "Passport",
+                      "title": "Passaporte"
+                    },
+                    {
+                      "value": "NationalId",
+                      "title": "Documento de identidade"
+                    },
+                    {
+                      "value": "Other",
+                      "title": "Outro"
                     }
                   ],
                   "title": "Tipo de documento",
-                  "description": "Tipo do documento nacional usado para localizar ou cadastrar o aluno.",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
+                  "description": "Tipo do documento nacional do aluno, usado para evitar cadastro duplicado."
                 },
                 "docId": {
                   "type": "string",
                   "indexed": true,
-                  "description": "Número do CPF usado para evitar duplicidade no cadastro do aluno.",
-                  "title": "Número do documento",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
+                  "description": "Número do documento do aluno; a recepção pode buscá-lo por ele.",
+                  "title": "Número do documento"
                 },
                 "countryCode": {
                   "type": "string",
                   "required": true,
                   "indexed": true,
-                  "pattern": "^BR$",
+                  "pattern": "^[A-Z]{2}$",
                   "maxLength": 2,
                   "default": "US",
-                  "description": "Código do país do aluno e das regras aplicáveis ao seu cadastro.",
-                  "title": "País",
-                  "min": 0,
-                  "max": 0
+                  "description": "País do documento e das regras legais aplicáveis (ex.: BR para LGPD).",
+                  "title": "País"
+                },
+                "tags": {
+                  "type": "string",
+                  "required": true,
+                  "collection": true,
+                  "derived": true,
+                  "description": "Papéis do registro nos módulos; inclui mensalidadesAcademia.Aluno, gravado pela plataforma.",
+                  "title": "Papéis"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "title": "Criado em",
+                  "description": "Quando o registro mestre foi criado."
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "title": "Atualizado em",
+                  "description": "Última alteração do registro mestre."
                 }
               },
-              "description": "Dados de identificação da pessoa cadastrada como aluno."
+              "description": "Colunas de índice da plataforma usadas para localizar o aluno na recepção."
             },
             "base": {
               "type": "object",
               "owner": "platform",
-              "fields": {},
-              "description": "Dados básicos da pessoa mantidos pela plataforma."
+              "fields": {
+                "aliases": {
+                  "type": "string",
+                  "required": true,
+                  "collection": true,
+                  "description": "Outros nomes pelos quais o aluno é conhecido na recepção.",
+                  "title": "Apelidos"
+                },
+                "addresses": {
+                  "type": "object",
+                  "required": true,
+                  "collection": true,
+                  "of": "Address",
+                  "title": "Endereços",
+                  "description": "Endereços do aluno, mantidos na plataforma."
+                },
+                "contacts": {
+                  "type": "object",
+                  "required": true,
+                  "collection": true,
+                  "of": "ContactSummary",
+                  "derived": true,
+                  "description": "Resumo dos canais de contato (telefone, WhatsApp, e-mail) vinculados ao aluno; derivado dos vínculos de contato.",
+                  "title": "Contatos"
+                },
+                "relationshipRefs": {
+                  "type": "object",
+                  "required": true,
+                  "derived": true,
+                  "description": "Chaves compactas dos relacionamentos do aluno, recalculadas pela plataforma.",
+                  "title": "Vínculos"
+                },
+                "notes": {
+                  "type": "string",
+                  "maxLength": 1000,
+                  "title": "Observações",
+                  "description": "Observações gerais sobre o aluno."
+                }
+              },
+              "description": "Dados comuns a todo registro mestre que a academia consulta."
             },
             "person": {
               "type": "object",
               "owner": "platform",
               "fields": {
+                "birthDate": {
+                  "type": "date",
+                  "title": "Data de nascimento",
+                  "description": "Data de nascimento do aluno."
+                },
+                "gender": {
+                  "type": "enum",
+                  "values": [
+                    {
+                      "value": "Male",
+                      "title": "Masculino"
+                    },
+                    {
+                      "value": "Female",
+                      "title": "Feminino"
+                    },
+                    {
+                      "value": "NonBinary",
+                      "title": "Não binário"
+                    },
+                    {
+                      "value": "NotDisclosed",
+                      "title": "Não informado"
+                    }
+                  ],
+                  "title": "Gênero",
+                  "description": "Gênero informado pelo aluno."
+                },
                 "privacyConsent": {
                   "type": "object",
                   "of": "PrivacyConsent",
-                  "description": "Consentimento de privacidade do aluno exigido para residentes no Brasil.",
-                  "title": "Consentimento de privacidade",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
+                  "description": "Consentimento LGPD do aluno, coletado no cadastro pela recepção.",
+                  "title": "Consentimento de privacidade"
                 }
               },
-              "description": "Dados próprios de pessoa natural relevantes para o cadastro do aluno."
+              "description": "Dados de pessoa física usados pela academia."
             },
             "general": {
               "type": "object",
               "owner": "organization",
               "open": true,
-              "description": "Dados promovidos pela organização e apenas lidos por este módulo."
+              "description": "Campos promovidos pela organização; o módulo apenas lê."
             },
             "mensalidadesAcademia": {
               "type": "object",
               "owner": "module",
-              "fields": {},
-              "description": "Module namespace; the prompt asked for no data of this module about the record."
+              "fields": {
+                "mensalidadesVencidas": {
+                  "type": "integer",
+                  "derived": true,
+                  "title": "Mensalidades vencidas",
+                  "description": "Quantidade de mensalidades do aluno em aberto e com vencimento anterior a hoje."
+                },
+                "bloqueado": {
+                  "type": "boolean",
+                  "derived": true,
+                  "title": "Bloqueado",
+                  "description": "Verdadeiro quando o aluno tem duas ou mais mensalidades vencidas; deixa de estar bloqueado ao regularizar os pagamentos."
+                },
+                "inadimplente": {
+                  "type": "boolean",
+                  "derived": true,
+                  "title": "Inadimplente",
+                  "description": "Verdadeiro quando o aluno tem ao menos uma mensalidade vencida."
+                }
+              },
+              "description": "Namespace do módulo. Vazio: matrícula, mensalidades e pagamentos são entidades próprias do módulo, e a situação de bloqueio é calculada."
             }
           }
         }
@@ -222,14 +338,19 @@
       "detail": "Aluno.details.identification.docType.values"
     },
     {
-      "kind": "tightened",
+      "kind": "derivedFromPlatform",
       "entityId": "Aluno",
-      "detail": "Aluno.details.identification.countryCode.pattern"
+      "detail": "record.fields.details.mensalidadesAcademia.fields.mensalidadesVencidas.derived (derived[])"
     },
     {
-      "kind": "namespaceEmpty",
+      "kind": "derivedFromPlatform",
       "entityId": "Aluno",
-      "detail": "details.mensalidadesAcademia"
+      "detail": "record.fields.details.mensalidadesAcademia.fields.bloqueado.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Aluno",
+      "detail": "record.fields.details.mensalidadesAcademia.fields.inadimplente.derived (derived[])"
     }
   ]
 }

@@ -1,14 +1,14 @@
 /// <mls fileReference="_102047_/l4/mensalidadesAcademia/ontology/Pagamento.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const mensalidadesAcademiaEntityPagamento = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "mensalidadesAcademia",
   "entityId": "Pagamento",
   "title": "Pagamento",
-  "description": "Registro de um pagamento recebido para regularizar uma mensalidade.",
-  "displayField": "id",
+  "description": "Registro do pagamento de uma mensalidade com data, valor e forma de pagamento.",
+  "displayField": "dataPagamento",
   "relationships": {
     "mensalidade": {
       "relationshipId": "pagamentoMensalidade",
@@ -16,23 +16,30 @@ export const mensalidadesAcademiaEntityPagamento = {
       "via": "Pagamento.mensalidadeId",
       "cardinality": "N:1",
       "title": "Mensalidade paga",
-      "description": "Cada pagamento registrado pertence à mensalidade que está sendo regularizada.",
+      "description": "Cada pagamento quita uma mensalidade.",
       "mode": "fk",
-      "required": "Sempre"
+      "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Lê um pagamento pelo identificador da linha para a recepção conferir o recebimento registrado.",
-    "locate.byColumn": "Lista pagamentos por mensalidade ou por data de pagamento, com ordenação e paginação, para a recepção consultar recebimentos.",
-    "count": "Conta os pagamentos que correspondem aos filtros de mensalidade ou data para a conferência da recepção.",
-    "listByForeignKey": "Lista os pagamentos vinculados a uma mensalidade pelo campo mensalidadeId para exibir os recebimentos que a regularizam.",
-    "create": "Registra um pagamento com data, valor e forma de pagamento para a recepção regularizar uma mensalidade.",
-    "transaction": "Grava o pagamento e atualiza a situação da mensalidade e a regularidade do aluno de forma atômica durante o registro pela recepção."
+    "create": "A recepção registra o pagamento com data, valor e forma, na mesma operação que marca a mensalidade como paga.",
+    "transaction": "Grava o pagamento e atualiza a situação da mensalidade tudo ou nada, para não haver pagamento sem mensalidade paga.",
+    "read.byId": "Abre um pagamento já conhecido para a recepção ou a gerência conferirem.",
+    "listByForeignKey": "Lista os pagamentos de uma mensalidade, ou de várias de uma vez, na tela da mensalidade do aluno.",
+    "locate.byColumn": "Lista pagamentos por data e forma de pagamento, ordenados pela data, para a recepção e a gerência.",
+    "count": "Conta os pagamentos de um período no cabeçalho da lista da gerência.",
+    "update": "A recepção corrige a observação ou um erro de digitação do pagamento lançado.",
+    "read.mdmRecord": "Mostra o nome do aluno por trás da mensalidade paga, lendo o registro mestre.",
+    "sequence.next": "Emite o número de recibo que a recepção informa ao aluno.",
+    "comment": "A recepção deixa uma nota sobre o pagamento, como acordo de regularização.",
+    "attach.document": "Anexa o comprovante de Pix ou de transferência apresentado pelo aluno.",
+    "audit": "Registra quem lançou ou alterou cada pagamento, para conferência da gerência."
   },
   "rules": [
-    "paymentAmountPositive",
-    "paymentUpdatesMonthlyFee",
-    "paymentRegularizesStudentWhenApplicable"
+    "pagamentoValorPositivo",
+    "pagamentoSomenteMensalidadeAberta",
+    "pagamentoQuitaMensalidade",
+    "desbloqueioAposRegularizacao"
   ],
   "kind": "entity",
   "class": "event",
@@ -59,89 +66,76 @@ export const mensalidadesAcademiaEntityPagamento = {
         "type": "record",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
         "to": [
           "Mensalidade"
         ],
         "title": "Mensalidade",
-        "description": "Mensalidade que está sendo regularizada por este pagamento.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "description": "Mensalidade quitada por este pagamento."
       },
       "dataPagamento": {
         "type": "date",
         "required": true,
         "indexed": true,
-        "of": "ContactSummary",
         "title": "Data do pagamento",
-        "description": "Data em que a academia recebeu o pagamento da mensalidade.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "description": "Data em que o aluno pagou a mensalidade; usada para ordenar e somar o total recebido no mês."
+      },
+      "formaPagamento": {
+        "type": "enum",
+        "required": true,
+        "indexed": true,
+        "values": [
+          {
+            "value": "cash",
+            "title": "Dinheiro"
+          },
+          {
+            "value": "pix",
+            "title": "Pix"
+          },
+          {
+            "value": "debitCard",
+            "title": "Cartão de débito"
+          },
+          {
+            "value": "creditCard",
+            "title": "Cartão de crédito"
+          },
+          {
+            "value": "bankSlip",
+            "title": "Boleto"
+          },
+          {
+            "value": "bankTransfer",
+            "title": "Transferência bancária"
+          }
+        ],
+        "title": "Forma de pagamento",
+        "description": "Meio usado pelo aluno para pagar."
       },
       "details": {
         "type": "object",
         "required": true,
-        "of": "ContactSummary",
-        "title": "Dados do pagamento",
-        "description": "Informações registradas pela recepção sobre o valor e a forma de recebimento.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0,
+        "title": "Detalhes",
+        "description": "Dados do pagamento que só são exibidos.",
         "fields": {
           "valor": {
             "type": "money",
             "required": true,
-            "of": "ContactSummary",
             "title": "Valor pago",
-            "description": "Valor efetivamente recebido para a mensalidade.",
-            "maxLength": 0,
-            "min": 0.01,
-            "max": 0
+            "description": "Valor recebido pela recepção neste pagamento.",
+            "min": 0.01
           },
-          "formaPagamento": {
-            "type": "enum",
-            "required": true,
-            "of": "ContactSummary",
-            "values": [
-              {
-                "value": "cash",
-                "title": "Dinheiro",
-                "description": "Pagamento recebido em dinheiro."
-              },
-              {
-                "value": "pix",
-                "title": "Pix",
-                "description": "Pagamento recebido por Pix."
-              },
-              {
-                "value": "debitCard",
-                "title": "Cartão de débito",
-                "description": "Pagamento recebido por cartão de débito."
-              },
-              {
-                "value": "creditCard",
-                "title": "Cartão de crédito",
-                "description": "Pagamento recebido por cartão de crédito."
-              },
-              {
-                "value": "bankTransfer",
-                "title": "Transferência bancária",
-                "description": "Pagamento recebido por transferência bancária."
-              }
-            ],
-            "title": "Forma de pagamento",
-            "description": "Meio pelo qual o aluno realizou o pagamento.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+          "observacao": {
+            "type": "text",
+            "title": "Observação",
+            "description": "Anotação livre da recepção sobre o pagamento.",
+            "maxLength": 500
           }
         }
       }
     }
   }
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type MensalidadesAcademiaEntityPagamentoType = typeof mensalidadesAcademiaEntityPagamento;
 

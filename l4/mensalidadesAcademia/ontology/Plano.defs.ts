@@ -1,42 +1,46 @@
 /// <mls fileReference="_102047_/l4/mensalidadesAcademia/ontology/Plano.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const mensalidadesAcademiaEntityPlano = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "mensalidadesAcademia",
   "entityId": "Plano",
   "title": "Plano",
-  "description": "Catálogo de planos da academia, com periodicidade, valor e dia de vencimento usados nas matrículas.",
-  "displayField": "name",
+  "description": "Plano oferecido pela academia (mensal, trimestral ou anual) com valor e dia de vencimento.",
+  "displayField": "nome",
   "relationships": {
     "matriculas": {
       "relationshipId": "matriculaPlano",
       "to": "Matricula",
       "via": "Matricula.planoId",
       "cardinality": "1:N",
-      "title": "Matrículas no plano",
-      "description": "Matrículas realizadas obrigatoriamente neste plano da academia.",
+      "title": "Matrículas do plano",
+      "description": "Matrículas feitas neste plano.",
       "mode": "fk",
       "direction": "to",
-      "required": "Sempre"
+      "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Consulta um plano pelo seu identificador no repositório de planos para a recepção ou a gerência que já possui a referência.",
-    "locate.byColumn": "Lista planos por nome, com ordenação e paginação, para a recepção ou a gerência localizar o plano escolhido.",
-    "locate.byText": "Pesquisa planos pelo trecho digitado no nome para a recepção ou a gerência encontrar rapidamente um plano.",
-    "count": "Conta os planos que atendem ao filtro informado para a gerência acompanhar o catálogo.",
-    "listByForeignKey": "Lista as matrículas vinculadas a um plano para a gerência consultar os alunos que o utilizam.",
-    "create": "Cadastra um novo plano com periodicidade, valor e dia de vencimento para a gerência manter o catálogo.",
-    "update": "Atualiza os dados comerciais de um plano para a gerência manter o catálogo vigente.",
-    "delete": "Remove fisicamente um plano do catálogo para a gerência quando ele não deve mais ser utilizado.",
-    "uniqueKey": "Impede o cadastro de dois planos com o mesmo nome por meio da chave única do catálogo, para a gerência."
+    "create": "A gerência cadastra um plano com nome, periodicidade, valor e dia de vencimento.",
+    "read.byId": "Lê um plano pelo id ao exibir a matrícula ou ao gerar a mensalidade com o valor e o vencimento do plano.",
+    "locate.byColumn": "Lista planos por periodicidade e situação ativa; usada pela gerência e pela recepção ao escolher o plano da matrícula.",
+    "locate.byText": "Busca planos pelo nome para a gerência evitar duplicidade antes de cadastrar.",
+    "count": "Conta os planos que um filtro encontra, para o cabeçalho das listagens da gerência.",
+    "update": "A gerência altera valor, dia de vencimento, descrição ou desativa o plano.",
+    "uniqueKey": "Impede dois planos com o mesmo nome, por índice único na coluna nome.",
+    "listByForeignKey": "Lista as matrículas que apontam para o plano, pela chave planoId da matrícula, na tela do plano.",
+    "comment": "A gerência deixa observações internas sobre o plano."
   },
-  "rules": [],
-  "writer": "crud",
+  "rules": [
+    "planoValorPositivo",
+    "planoDiaVencimentoValido",
+    "planoNomeUnico",
+    "planoInativoNaoMatricula"
+  ],
   "kind": "entity",
-  "class": "supporting",
+  "class": "core",
   "storage": {
     "target": "moduleDatabase",
     "table": "mensalidadesAcademia_plano",
@@ -56,74 +60,68 @@ export const mensalidadesAcademiaEntityPlano = {
         "required": true,
         "derived": true
       },
-      "name": {
+      "nome": {
         "type": "string",
         "required": true,
         "unique": true,
         "indexed": true,
-        "of": "Address",
         "title": "Nome",
-        "description": "Nome pelo qual o plano é identificado e localizado pela recepção e pela gerência.",
-        "maxLength": 120,
-        "min": 0,
-        "max": 0
+        "description": "Nome do plano oferecido pela academia, usado para localizar e evitar duplicidade.",
+        "maxLength": 80
+      },
+      "periodicidade": {
+        "type": "enum",
+        "required": true,
+        "indexed": true,
+        "values": [
+          {
+            "value": "mensal",
+            "title": "Mensal"
+          },
+          {
+            "value": "trimestral",
+            "title": "Trimestral"
+          },
+          {
+            "value": "anual",
+            "title": "Anual"
+          }
+        ],
+        "title": "Periodicidade",
+        "description": "Periodicidade de cobrança do plano."
+      },
+      "ativo": {
+        "type": "boolean",
+        "required": true,
+        "indexed": true,
+        "title": "Ativo",
+        "description": "Indica se o plano está disponível para novas matrículas."
       },
       "details": {
         "type": "object",
         "required": true,
-        "of": "Address",
-        "title": "Detalhes do plano",
-        "description": "Características comerciais do plano da academia.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0,
+        "title": "Detalhes",
+        "description": "Demais dados do plano.",
         "fields": {
-          "periodicidade": {
-            "type": "enum",
-            "required": true,
-            "of": "Address",
-            "values": [
-              {
-                "value": "monthly",
-                "title": "Mensal",
-                "description": "Plano comercial mensal."
-              },
-              {
-                "value": "quarterly",
-                "title": "Trimestral",
-                "description": "Plano comercial trimestral."
-              },
-              {
-                "value": "annual",
-                "title": "Anual",
-                "description": "Plano comercial anual."
-              }
-            ],
-            "title": "Periodicidade",
-            "description": "Periodicidade comercial do plano contratado pelo aluno.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
-          },
           "valor": {
             "type": "money",
             "required": true,
-            "of": "Address",
             "title": "Valor",
-            "description": "Valor do plano usado para gerar a mensalidade do aluno.",
-            "maxLength": 0,
-            "min": 0.01,
-            "max": 0
+            "description": "Valor do plano cobrado em cada mensalidade gerada.",
+            "min": 0
           },
           "diaVencimento": {
             "type": "integer",
             "required": true,
-            "of": "Address",
             "title": "Dia de vencimento",
-            "description": "Dia do mês usado como vencimento das mensalidades geradas para este plano.",
-            "maxLength": 0,
+            "description": "Dia do mês em que vence a mensalidade deste plano.",
             "min": 1,
-            "max": 31
+            "max": 28
+          },
+          "descricao": {
+            "type": "text",
+            "title": "Descrição",
+            "description": "Observações livres sobre o plano."
           }
         }
       }
@@ -131,10 +129,10 @@ export const mensalidadesAcademiaEntityPlano = {
   },
   "uniqueKeys": [
     [
-      "name"
+      "nome"
     ]
   ]
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type MensalidadesAcademiaEntityPlanoType = typeof mensalidadesAcademiaEntityPlano;
 
