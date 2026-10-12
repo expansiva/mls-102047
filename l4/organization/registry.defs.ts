@@ -477,38 +477,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-09-20T10:52:08.240Z"
     },
     {
-      "moduleName": "controleEstoque",
-      "actors": [
-        {
-          "actorId": "estoquista",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Product",
-          "roleTag": "controleEstoque.Produto",
-          "namespace": "controleEstoque"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Produto",
-          "kind": "role",
-          "mdmSubtype": "Product",
-          "class": "mdm"
-        },
-        {
-          "entityId": "MovimentacaoEstoque",
-          "kind": "entity",
-          "class": "event"
-        }
-      ],
-      "events": [],
-      "updatedAt": "2026-09-28T17:36:36.016Z"
-    },
-    {
       "moduleName": "reembolsoDespesas",
       "actors": [
         {
@@ -667,6 +635,47 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-07T07:16:47.918Z"
+    },
+    {
+      "moduleName": "controleEstoque",
+      "actors": [
+        {
+          "actorId": "estoquista",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Product",
+          "roleTag": "controleEstoque.Produto",
+          "namespace": "controleEstoque"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Produto",
+          "kind": "role",
+          "mdmSubtype": "Product",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Movimentacao",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "produtoCadastrado",
+          "on": "Produto.create"
+        },
+        {
+          "eventId": "movimentacaoRegistrada",
+          "on": "Movimentacao.create"
+        }
+      ],
+      "updatedAt": "2026-10-12T15:41:38.204Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

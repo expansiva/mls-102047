@@ -9,22 +9,22 @@ export const controleEstoqueJourneyIndex = {
     {
       "journeyId": "cadastrarProduto",
       "actorRef": "estoquista",
-      "title": "Cadastrar produto de estoque"
+      "title": "Cadastrar produto"
     },
     {
-      "journeyId": "registrarMovimentacaoEstoque",
+      "journeyId": "registrarMovimentacao",
       "actorRef": "estoquista",
-      "title": "Registrar movimentação de estoque"
+      "title": "Registrar movimentação"
     },
     {
-      "journeyId": "acompanharSaldos",
+      "journeyId": "consultarSaldo",
       "actorRef": "estoquista",
-      "title": "Acompanhar saldos do estoque"
+      "title": "Consultar saldo"
     },
     {
-      "journeyId": "tratarAvisoSaldoBaixo",
+      "journeyId": "conferirAvisoMinimo",
       "actorRef": "estoquista",
-      "title": "Verificar aviso de saldo baixo"
+      "title": "Conferir aviso de mínimo"
     }
   ],
   "systemDecisions": []

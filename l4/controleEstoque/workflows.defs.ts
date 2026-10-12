@@ -12,15 +12,15 @@ export const controleEstoqueWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "registrarMovimentacaoEstoque",
+      "journeyId": "registrarMovimentacao",
       "inProcess": false
     },
     {
-      "journeyId": "acompanharSaldos",
+      "journeyId": "consultarSaldo",
       "inProcess": false
     },
     {
-      "journeyId": "tratarAvisoSaldoBaixo",
+      "journeyId": "conferirAvisoMinimo",
       "inProcess": false
     }
   ]

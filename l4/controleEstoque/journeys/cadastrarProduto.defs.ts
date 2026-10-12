@@ -7,29 +7,30 @@ export const cadastrarProdutoJourney = {
   "journeyId": "cadastrarProduto",
   "business": {
     "actorRef": "estoquista",
-    "title": "Cadastrar produto de estoque",
-    "goal": "Cadastrar um produto e definir a quantidade mínima para acompanhamento do estoque.",
+    "title": "Cadastrar produto",
+    "goal": "Cadastrar um produto no estoque e definir o saldo mínimo para aviso.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "informarProduto",
+        "stepId": "registrarProduto",
         "kind": "act",
         "entity": "Produto",
         "effect": "create",
-        "title": "Cadastrar produto",
-        "description": "Registra o produto no estoque com sua quantidade mínima para permitir o acompanhamento do saldo."
+        "title": "Registrar produto",
+        "description": "Informa os dados do produto e o saldo mínimo que dispara o aviso."
       }
     ],
     "outcome": {
-      "statement": "O produto fica disponível para registrar entradas e saídas e para monitorar o saldo mínimo.",
+      "statement": "O produto está cadastrado no estoque com o saldo mínimo definido.",
       "evidence": [
-        "Produto cadastrado com quantidade mínima definida."
+        "O produto pode ser localizado no estoque.",
+        "O saldo mínimo informado está gravado no produto."
       ]
     }
   },
-  "businessHash": "sha256:24b2a9cdf5d9b30171dbee711d8f47c9bccfc925fe881d4d7740ea00ceaf5563"
+  "businessHash": "sha256:187fc3d2db0078a0ee823d346e998853ff91839a2fc7cfd0a2f7fd2afdb8bc86"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CadastrarProdutoJourneyType = typeof cadastrarProdutoJourney;
