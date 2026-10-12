@@ -1,37 +1,37 @@
 /// <mls fileReference="_102047_/l4/compras/workflows.defs.ts" enhancement="_blank"/>
 
-import type { Ns5WorkflowsArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5WorkflowsArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const comprasWorkflows = {
   "schemaVersion": "2026-09-17-ns5-workflows-v3",
   "moduleName": "compras",
   "processes": [
     {
-      "processId": "aprovarPedidoAcimaDoLimite",
-      "title": "Aprovação de pedido de compra acima do limite",
-      "description": "Orquestra o encaminhamento de pedidos de compra acima do limite para a decisão do gerente de compras.",
+      "processId": "fluxoAprovacaoPedido",
+      "title": "Aprovar pedido de compra acima do limite",
+      "description": "O comprador abre e envia o pedido de compra e, quando o valor ultrapassa o limite, o gerente de compras aprova ou rejeita.",
       "trigger": {
         "kind": "manual",
         "actorRef": "comprador"
       },
       "tasks": [
         {
-          "taskId": "enviarEEncaminharPedido",
+          "taskId": "abrirEEnviarPedido",
           "kind": "human",
           "actorRef": "comprador",
-          "journeyRef": "abrirEenviarPedidoCompra",
+          "journeyRef": "abrirPedidoCompra",
           "next": [
-            "decidirPedidoEncaminhado"
+            "decidirAprovacao"
           ],
-          "description": "O comprador envia o pedido de compra e encaminha ao gerente de compras aqueles cujo valor exige aprovação."
+          "description": "O comprador abre o pedido de compra para um fornecedor com produtos, quantidades e preços e o envia."
         },
         {
-          "taskId": "decidirPedidoEncaminhado",
+          "taskId": "decidirAprovacao",
           "kind": "human",
           "actorRef": "gerenteCompras",
-          "journeyRef": "decidirPedidoAcimaDoLimite",
+          "journeyRef": "aprovarPedidoCompra",
           "next": [],
-          "description": "O gerente de compras avalia o pedido encaminhado e registra sua aprovação ou rejeição."
+          "description": "O gerente de compras analisa o pedido acima do limite e decide aprovar ou rejeitar."
         }
       ]
     }
@@ -42,25 +42,29 @@ export const comprasWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "abrirEenviarPedidoCompra",
-      "inProcess": true,
-      "processId": "aprovarPedidoAcimaDoLimite"
-    },
-    {
-      "journeyId": "decidirPedidoAcimaDoLimite",
-      "inProcess": true,
-      "processId": "aprovarPedidoAcimaDoLimite"
-    },
-    {
-      "journeyId": "registrarRecebimentoPedido",
+      "journeyId": "cadastrarOfertaFornecedor",
       "inProcess": false
     },
     {
-      "journeyId": "acompanharIndicadoresDeCompras",
+      "journeyId": "abrirPedidoCompra",
+      "inProcess": true,
+      "processId": "fluxoAprovacaoPedido"
+    },
+    {
+      "journeyId": "aprovarPedidoCompra",
+      "inProcess": true,
+      "processId": "fluxoAprovacaoPedido"
+    },
+    {
+      "journeyId": "registrarRecebimento",
+      "inProcess": false
+    },
+    {
+      "journeyId": "acompanharPainelCompras",
       "inProcess": false
     }
   ]
-} as const satisfies Ns5WorkflowsArtifact;
+} as const satisfies Ns5Readonly<Ns5WorkflowsArtifact>;
 
 export type ComprasWorkflowsType = typeof comprasWorkflows;
 
