@@ -1,14 +1,14 @@
 {
   "plan": {
     "moduleName": "inscricaoEvento",
-    "businessDomain": "Inscrição em eventos: cadastro e publicação de eventos com vagas limitadas, inscrição pública por nome e e-mail, lista de espera por ordem de chegada com promoção automática e acompanhamento dos inscritos pelo organizador.",
+    "businessDomain": "Inscrição em eventos: cadastro e publicação de eventos com vagas limitadas, inscrição pública por nome e e-mail, lista de espera por ordem de chegada com promoção automática e acompanhamento de inscritos pelo organizador.",
     "entities": [
       {
         "entityId": "Evento",
         "kind": "entity",
         "family": "tdm",
         "title": "Evento",
-        "description": "Evento cadastrado pelo organizador com título, descrição, data, local e número de vagas; nasce como rascunho e, ao ser publicado, ganha uma página pública de inscrição. Vagas ocupadas, vagas disponíveis e tamanho da lista de espera são valores derivados das inscrições.",
+        "description": "Evento cadastrado pelo organizador com título, descrição, data, local e número de vagas; nasce em rascunho e, ao ser publicado, ganha página pública de inscrição. Vagas ocupadas e tamanho da lista de espera são valores derivados das inscrições.",
         "displayField": "titulo",
         "class": "core",
         "storage": {
@@ -22,8 +22,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Inscrição",
-        "description": "Inscrição de uma pessoa em um evento publicado: confirmada quando há vaga, em lista de espera por ordem de chegada quando as vagas acabam, promovida quando um confirmado cancela, ou cancelada. Um mesmo e-mail só pode ter uma inscrição por evento.",
-        "displayField": "numeroInscricao",
+        "description": "Inscrição de uma pessoa em um evento publicado, confirmada quando há vaga ou em lista de espera por ordem de chegada; pode ser cancelada e, em espera, promovida quando uma vaga é liberada. Um mesmo e-mail só se inscreve uma vez por evento.",
+        "displayField": "numero",
         "class": "event",
         "storage": {
           "target": "moduleDatabase",
@@ -36,7 +36,7 @@
         "kind": "role",
         "family": "mdm",
         "title": "Participante",
-        "description": "Pessoa que se inscreve em eventos pela página pública informando nome e e-mail; registro mestre compartilhado da organização, criado ou anexado na inscrição.",
+        "description": "Pessoa que se inscreve em eventos pela página pública, identificada pelo nome e pelo e-mail; criada ou anexada no momento da inscrição.",
         "displayField": "details.identification.name",
         "subtype": "Person",
         "roleTag": "inscricaoEvento.Participante",
@@ -47,7 +47,7 @@
         "kind": "role",
         "family": "mdm",
         "title": "E-mail do participante",
-        "description": "Canal de contato de e-mail informado pelo participante na inscrição; é por ele que se garante uma única inscrição por evento.",
+        "description": "Canal de e-mail informado pelo participante na inscrição, registro de contato que permite garantir uma única inscrição por e-mail em cada evento.",
         "displayField": "details.identification.name",
         "subtype": "ContactChannel",
         "roleTag": "inscricaoEvento.EmailParticipante",
@@ -62,7 +62,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada inscrição pertence a um evento; um evento reúne as inscrições confirmadas e a lista de espera.",
+        "description": "Cada inscrição pertence a um evento; um evento reúne confirmados e lista de espera.",
         "field": "Inscricao.eventoId"
       },
       {
@@ -72,7 +72,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada inscrição é de um participante; um participante pode se inscrever em vários eventos.",
+        "description": "Cada inscrição é de um participante; um participante pode se inscrever em vários eventos, uma única vez em cada.",
         "field": "Inscricao.participanteId"
       },
       {
@@ -86,13 +86,13 @@
         "catalogType": "HasContact"
       },
       {
-        "relationshipId": "eventoParticipantes",
+        "relationshipId": "participantesDoEvento",
         "from": "Evento",
         "to": "Participante",
         "type": "manyToMany",
         "required": false,
         "mode": "throughTable",
-        "description": "Participantes inscritos em um evento, obtidos a partir das inscrições.",
+        "description": "Pessoas inscritas em um evento, obtidas a partir das suas inscrições.",
         "through": "Inscricao",
         "path": "Evento <- Inscricao.eventoId -> Inscricao.participanteId -> Participante",
         "derived": true
@@ -127,7 +127,7 @@
       "moduleName": "inscricaoEvento",
       "entityId": "Evento",
       "title": "Evento",
-      "description": "Evento cadastrado pelo organizador com título, descrição, data, local e número de vagas; nasce como rascunho e, ao ser publicado, ganha uma página pública de inscrição. Vagas ocupadas, vagas disponíveis e tamanho da lista de espera são valores derivados das inscrições.",
+      "description": "Evento cadastrado pelo organizador com título, descrição, data, local e número de vagas; nasce em rascunho e, ao ser publicado, ganha página pública de inscrição. Vagas ocupadas e tamanho da lista de espera são valores derivados das inscrições.",
       "displayField": "titulo",
       "relationships": {
         "inscricoes": {
@@ -136,42 +136,42 @@
           "via": "Inscricao.eventoId",
           "cardinality": "1:N",
           "title": "Inscrições do evento",
-          "description": "Inscrições confirmadas e lista de espera deste evento.",
+          "description": "Inscrições confirmadas e lista de espera deste evento, por ordem de chegada.",
           "mode": "fk",
           "direction": "to",
           "required": true
         },
         "participantes": {
-          "relationshipId": "eventoParticipantes",
+          "relationshipId": "participantesDoEvento",
           "to": "Participante",
           "via": "Inscricao",
           "cardinality": "N:N",
-          "title": "Participantes inscritos",
-          "description": "Pessoas inscritas no evento, obtidas a partir das inscrições.",
+          "title": "Participantes do evento",
+          "description": "Pessoas inscritas no evento, obtidas a partir das suas inscrições.",
           "mode": "throughTable",
           "path": "Evento <- Inscricao.eventoId -> Inscricao.participanteId -> Participante",
           "derived": true
         }
       },
       "capabilities": {
-        "read.byId": "Abre um evento pelo id, para o organizador revisar e editar e para a página pública exibir título, descrição, data, local e disponibilidade.",
-        "locate.byColumn": "Lista os eventos filtrando por situação e ordenando por data, na lista do organizador.",
-        "locate.byText": "Busca eventos pelo título digitado na caixa de busca do organizador.",
+        "read.byId": "Abre o evento pelo id para o organizador revisar antes de publicar e para a página pública mostrar seus detalhes.",
+        "locate.byColumn": "Lista os eventos filtrando por situação e ordenando pela data do evento, para o organizador encontrar o que editar ou acompanhar.",
+        "locate.byText": "Busca eventos pelo título digitado na caixa de pesquisa da lista do organizador.",
         "count": "Conta os eventos por situação no cabeçalho da lista do organizador.",
-        "listByForeignKey": "Lista as inscrições que apontam para o evento, para o organizador acompanhar confirmados e lista de espera.",
-        "create": "Cria o evento como rascunho com título, descrição, data, local e número de vagas; usado pelo organizador.",
-        "update": "Altera título, descrição, data, local ou número de vagas de um evento; usado pelo organizador.",
-        "transition": "Publica o evento, movendo-o de rascunho para publicado; feito pelo organizador.",
-        "transaction": "Grava a redução de vagas e a promoção de inscrições da lista de espera juntas, tudo ou nada, quando o organizador altera o número de vagas.",
-        "inscricaoEvento.paginaPublica": "Exibe a página pública de um evento publicado, com dados e disponibilidade de vagas, para qualquer pessoa do público se inscrever.",
-        "inscricaoEvento.ocupacao": "Mostra ao organizador o total de vagas, as vagas ocupadas, as disponíveis e o tamanho da lista de espera do evento."
+        "listByForeignKey": "Lista as inscrições de um evento, confirmadas e em espera por ordem de chegada, para o organizador acompanhar e calcular a ocupação.",
+        "create": "O organizador cadastra um novo evento com título, descrição, data, local e número de vagas, que nasce em rascunho.",
+        "update": "O organizador corrige título, descrição, data, local ou número de vagas de um evento já cadastrado.",
+        "transition": "O organizador publica o evento em rascunho, abrindo a página pública de inscrição.",
+        "read.mdmRecord": "Lê o nome e o e-mail dos participantes inscritos no evento para a lista do organizador e o arquivo CSV.",
+        "inscricaoEvento.paginaPublica": "Exibe ao público a página de um evento publicado com título, descrição, data, local e disponibilidade de vagas, sem login.",
+        "inscricaoEvento.exportarCsv": "Gera para o organizador o arquivo CSV com os inscritos do evento, confirmados e lista de espera, com nome, e-mail, situação e ordem de chegada."
       },
       "rules": [
+        "eventoCompletoParaPublicar",
         "numeroVagasPositivo",
-        "publicarExigeDadosCompletos",
-        "inscricaoSomenteEmEventoPublicado",
-        "inscricaoExcedenteVaiParaEspera",
-        "aumentoVagasPromoveListaEspera"
+        "somentePublicadoRecebeInscricao",
+        "inscricaoAlemDasVagasVaiParaEspera",
+        "vagasNaoMenoresQueConfirmados"
       ],
       "kind": "entity",
       "class": "core",
@@ -199,7 +199,7 @@
             "required": true,
             "indexed": true,
             "title": "Título",
-            "description": "Título do evento, exibido na lista do organizador e na página pública; usado na busca por texto e na ordenação.",
+            "description": "Nome do evento exibido na lista do organizador e na página pública; usado na busca por texto.",
             "maxLength": 200
           },
           "dataEvento": {
@@ -207,7 +207,7 @@
             "required": true,
             "indexed": true,
             "title": "Data do evento",
-            "description": "Data e hora em que o evento acontece; a lista de eventos é filtrada e ordenada por ela."
+            "description": "Data e hora em que o evento acontece; ordena a lista de eventos e permite filtrar os próximos."
           },
           "status": {
             "type": "enum",
@@ -226,37 +226,33 @@
               }
             ],
             "title": "Situação",
-            "description": "Situação do evento no ciclo de vida: rascunho enquanto o organizador prepara, publicado quando a página pública aceita inscrições."
+            "description": "Etapa do evento: em rascunho enquanto o organizador prepara, publicado quando a página pública passa a aceitar inscrições."
           },
           "details": {
             "type": "object",
             "required": true,
             "title": "Detalhes",
-            "description": "Dados do evento que apenas são exibidos.",
+            "description": "Dados descritivos do evento.",
             "fields": {
               "descricao": {
                 "type": "text",
+                "required": true,
                 "title": "Descrição",
-                "description": "Texto que apresenta o evento na página pública."
+                "description": "Texto que apresenta o evento na página pública: programação, público-alvo e demais informações."
               },
               "local": {
                 "type": "string",
                 "required": true,
                 "title": "Local",
-                "description": "Onde o evento acontece, como o organizador o descreve (endereço, sala ou link).",
+                "description": "Onde o evento acontece, como informado pelo organizador (endereço, sala ou link de transmissão).",
                 "maxLength": 300
               },
               "numeroVagas": {
                 "type": "integer",
                 "required": true,
                 "title": "Número de vagas",
-                "description": "Quantidade de inscrições confirmadas que o evento comporta; além dela, as novas inscrições vão para a lista de espera.",
+                "description": "Quantidade de inscrições confirmadas que o evento comporta; acima disso as inscrições entram na lista de espera.",
                 "min": 1
-              },
-              "publicadoEm": {
-                "type": "timestamp",
-                "title": "Publicado em",
-                "description": "Momento em que o organizador publicou o evento."
               },
               "vagasOcupadas": {
                 "type": "integer",
@@ -268,7 +264,7 @@
                 "type": "integer",
                 "derived": true,
                 "title": "Vagas disponíveis",
-                "description": "Número de vagas do evento menos as vagas ocupadas, nunca abaixo de zero."
+                "description": "Número de vagas do evento menos as vagas ocupadas pelas inscrições confirmadas, nunca abaixo de zero."
               },
               "tamanhoListaEspera": {
                 "type": "integer",
@@ -280,7 +276,7 @@
                 "type": "boolean",
                 "derived": true,
                 "title": "Lotado",
-                "description": "Verdadeiro quando as vagas ocupadas atingem o número de vagas do evento; novas inscrições vão para a lista de espera."
+                "description": "Verdadeiro quando as inscrições confirmadas já ocupam todas as vagas do evento, de modo que novas inscrições vão para a lista de espera."
               }
             }
           }
@@ -306,10 +302,10 @@
           "by": [
             "organizador"
           ],
-          "description": "O organizador publica o evento, que passa a ter uma página pública de inscrição.",
+          "description": "O organizador publica o evento, que ganha página pública e passa a aceitar inscrições.",
           "payload": [],
           "ruleRefs": [
-            "publicarExigeDadosCompletos"
+            "eventoCompletoParaPublicar"
           ]
         }
       ]
@@ -319,8 +315,8 @@
       "moduleName": "inscricaoEvento",
       "entityId": "Inscricao",
       "title": "Inscrição",
-      "description": "Inscrição de uma pessoa em um evento publicado: confirmada quando há vaga, em lista de espera por ordem de chegada quando as vagas acabam, promovida quando um confirmado cancela, ou cancelada. Um mesmo e-mail só pode ter uma inscrição por evento.",
-      "displayField": "numeroInscricao",
+      "description": "Inscrição de uma pessoa em um evento publicado, confirmada quando há vaga ou em lista de espera por ordem de chegada; pode ser cancelada e, em espera, promovida quando uma vaga é liberada. Um mesmo e-mail só se inscreve uma vez por evento.",
+      "displayField": "numero",
       "relationships": {
         "evento": {
           "relationshipId": "inscricaoEvento",
@@ -328,7 +324,7 @@
           "via": "Inscricao.eventoId",
           "cardinality": "N:1",
           "title": "Evento da inscrição",
-          "description": "Cada inscrição pertence a um evento.",
+          "description": "Cada inscrição pertence a um evento; o evento reúne confirmados e lista de espera.",
           "mode": "fk",
           "required": true
         },
@@ -338,31 +334,31 @@
           "via": "Inscricao.participanteId",
           "cardinality": "N:1",
           "title": "Participante inscrito",
-          "description": "Cada inscrição é de um participante; o mesmo participante pode se inscrever em vários eventos.",
+          "description": "Cada inscrição é de um participante, que só pode se inscrever uma vez em cada evento.",
           "mode": "fk",
           "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Abre uma inscrição pelo id para o organizador ver o detalhe ou para a pessoa ver a própria inscrição.",
-        "locate.byColumn": "Lista as inscrições de um evento filtradas por situação e ordenadas pela data de inscrição, para o organizador ver confirmados e lista de espera e para a pessoa localizar a própria inscrição.",
-        "listByForeignKey": "Lista as inscrições de um evento ou de um participante pela chave estrangeira, usada na tela de inscritos do organizador e no processo de promoção.",
-        "count": "Conta as inscrições confirmadas e em espera de um evento para mostrar as vagas ocupadas e decidir se uma nova inscrição é confirmada ou vai para a espera.",
-        "create": "Grava a inscrição enviada pela pessoa na página pública, como confirmada ou em lista de espera conforme as vagas.",
-        "transition": "Move a inscrição para cancelada quando a pessoa desiste e para confirmada quando o processo promove o primeiro da lista de espera.",
-        "uniqueKey": "Recusa uma segunda inscrição do mesmo participante (mesmo e-mail) no mesmo evento e garante número de inscrição único.",
-        "transaction": "Cancela uma inscrição e promove o primeiro da lista de espera numa única operação, sem perder nem duplicar vaga.",
-        "read.mdmRecord": "Lê nome e e-mail do participante de cada inscrição no cadastro mestre, hidratando a lista de inscritos de uma vez.",
-        "sequence.next": "Emite o número da inscrição na criação, pela sequência da plataforma por evento.",
-        "inscricaoEvento.exportarCsv": "Gera o arquivo CSV com os inscritos de um evento (número, nome, e-mail, situação e data de inscrição) para o organizador baixar."
+        "create": "Registra a inscrição enviada pela pessoa na página pública do evento, já como confirmada ou em lista de espera conforme as vagas; usado pelo público.",
+        "uniqueKey": "Recusa uma segunda inscrição do mesmo participante (mesmo e-mail) no mesmo evento pelo índice único evento + participante; aplicado pelo motor na gravação.",
+        "sequence.next": "Emite o número da inscrição na criação, com sequência por evento, para a pessoa informar ao localizar a própria inscrição.",
+        "transaction": "Grava em uma só operação o cancelamento de uma inscrição confirmada e a promoção do primeiro da lista de espera; usado pelo cancelamento e pelo processo de promoção.",
+        "transition": "Move a inscrição para cancelada (pelo público) ou de em espera para confirmada (pelo processo de promoção), atualizando a coluna de situação.",
+        "read.byId": "Lê uma inscrição pelo id para mostrar seus dados à pessoa ou ao organizador.",
+        "locate.byColumn": "Localiza inscrições por evento, situação e número, ordenadas pela data de inscrição; usado pela pessoa para achar a própria inscrição e pelo organizador para ver confirmados e espera.",
+        "listByForeignKey": "Lista todas as inscrições de um evento, confirmados e lista de espera em ordem de chegada; usado pelo organizador e pelo processo de promoção para achar o primeiro da espera.",
+        "count": "Conta inscrições confirmadas e em espera de um evento para o total de vagas ocupadas e a disponibilidade mostrada na página pública e ao organizador.",
+        "read.mdmRecord": "Lê nome e e-mail do participante no registro mestre, hidratando a lista inteira de uma vez, para a tela de inscritos e o CSV do organizador.",
+        "inscricaoEvento.exportarCsv": "Gera o arquivo CSV com os inscritos do evento (número, nome, e-mail, situação e data de inscrição) em ordem de chegada; usado pelo organizador."
       },
       "rules": [
-        "inscricaoEmailUnicoPorEvento",
-        "inscricaoSomenteEventoPublicado",
-        "inscricaoListaEsperaQuandoLotado",
-        "inscricaoPromocaoOrdemChegada",
-        "inscricaoCancelamentoSomentePropria",
-        "inscricaoNumeroSequencial"
+        "inscricaoSomenteEmEventoPublicado",
+        "emailUnicoPorEvento",
+        "confirmarSeHaVaga",
+        "esperaPorOrdemDeChegada",
+        "promoverPrimeiroDaEspera",
+        "cancelarApenasPropriaInscricao"
       ],
       "kind": "entity",
       "class": "event",
@@ -385,14 +381,13 @@
             "required": true,
             "derived": true
           },
-          "numeroInscricao": {
+          "numero": {
             "type": "string",
             "required": true,
-            "unique": true,
             "indexed": true,
             "title": "Número da inscrição",
-            "description": "Número que a pessoa e o organizador citam para identificar a inscrição, emitido pela sequência da plataforma na criação.",
-            "maxLength": 30
+            "description": "Número da inscrição que a pessoa recebe e informa, emitido por sequence.next no momento da criação, com sequência própria de cada evento.",
+            "maxLength": 20
           },
           "eventoId": {
             "type": "record",
@@ -402,7 +397,7 @@
               "Evento"
             ],
             "title": "Evento",
-            "description": "Evento publicado no qual a pessoa se inscreveu."
+            "description": "Evento publicado ao qual a inscrição pertence; usado para listar confirmados e lista de espera do evento."
           },
           "participanteId": {
             "type": "record",
@@ -412,7 +407,7 @@
               "Participante"
             ],
             "title": "Participante",
-            "description": "Pessoa inscrita; nome e e-mail ficam no cadastro mestre do participante e são lidos de lá."
+            "description": "Pessoa inscrita, registro mestre localizado ou criado pelo e-mail informado na página pública; nome e e-mail são lidos do registro mestre."
           },
           "status": {
             "type": "enum",
@@ -421,92 +416,42 @@
             "values": [
               {
                 "value": "confirmada",
-                "title": "Confirmada",
-                "description": "A inscrição ocupa uma vaga do evento."
+                "title": "Confirmada"
               },
               {
-                "value": "listaEspera",
-                "title": "Lista de espera",
-                "description": "As vagas tinham acabado; aguarda promoção por ordem de chegada."
+                "value": "emEspera",
+                "title": "Em lista de espera"
               },
               {
                 "value": "cancelada",
-                "title": "Cancelada",
-                "description": "A pessoa desistiu da inscrição."
+                "title": "Cancelada"
               }
             ],
             "title": "Situação",
-            "description": "Situação da inscrição: confirmada com vaga, em lista de espera ou cancelada."
+            "description": "Situação da inscrição: confirmada quando ocupa vaga, em espera quando entrou na lista de espera, cancelada quando a pessoa desistiu."
           },
-          "inscritoEm": {
+          "inscritaEm": {
             "type": "timestamp",
             "required": true,
             "indexed": true,
             "title": "Data e hora da inscrição",
-            "description": "Momento em que a inscrição chegou; define a ordem de chegada da lista de espera e a ordenação da lista de inscritos."
+            "description": "Momento em que a inscrição chegou; define a ordem de chegada da lista de espera e a ordenação da lista de inscritos e do CSV."
           },
           "details": {
             "type": "object",
             "required": true,
             "title": "Detalhes",
-            "description": "Demais dados da inscrição.",
+            "description": "Dados complementares da inscrição.",
             "fields": {
-              "confirmadaEm": {
-                "type": "timestamp",
-                "title": "Confirmada em",
-                "description": "Momento em que a inscrição passou a ocupar uma vaga, na criação ou na promoção da lista de espera."
-              },
               "promovidaEm": {
                 "type": "timestamp",
                 "title": "Promovida em",
-                "description": "Momento em que a inscrição saiu da lista de espera e foi confirmada após um cancelamento."
+                "description": "Momento em que a inscrição saiu da lista de espera e foi confirmada numa vaga liberada por cancelamento."
               },
               "canceladaEm": {
                 "type": "timestamp",
                 "title": "Cancelada em",
-                "description": "Momento em que a pessoa cancelou a inscrição."
-              },
-              "situacaoAoCancelar": {
-                "type": "enum",
-                "values": [
-                  {
-                    "value": "confirmada",
-                    "title": "Confirmada"
-                  },
-                  {
-                    "value": "listaEspera",
-                    "title": "Lista de espera"
-                  }
-                ],
-                "title": "Situação ao cancelar",
-                "description": "Se a inscrição ocupava uma vaga ou estava na lista de espera quando foi cancelada; decide se há promoção."
-              },
-              "idioma": {
-                "type": "enum",
-                "values": [
-                  {
-                    "value": "pt",
-                    "title": "Português"
-                  },
-                  {
-                    "value": "en",
-                    "title": "Inglês"
-                  }
-                ],
-                "title": "Idioma",
-                "description": "Idioma em que a pessoa usou a página pública, para as mensagens da inscrição."
-              },
-              "posicaoListaEspera": {
-                "type": "integer",
-                "derived": true,
-                "title": "Posição na lista de espera",
-                "description": "Posição desta inscrição entre as inscrições em lista de espera do mesmo evento, contada pela ordem de chegada; vazia quando a inscrição não está em espera."
-              },
-              "ocupaVaga": {
-                "type": "boolean",
-                "derived": true,
-                "title": "Ocupa vaga",
-                "description": "Verdadeiro quando a inscrição está confirmada e portanto conta nas vagas ocupadas do evento."
+                "description": "Momento em que a pessoa cancelou a própria inscrição."
               }
             }
           }
@@ -518,7 +463,8 @@
           "participanteId"
         ],
         [
-          "numeroInscricao"
+          "eventoId",
+          "numero"
         ]
       ],
       "lifecycleStates": [
@@ -527,7 +473,7 @@
           "reachedBy": "command"
         },
         {
-          "state": "listaEspera",
+          "state": "emEspera",
           "reachedBy": "command"
         },
         {
@@ -540,30 +486,31 @@
           "transitionId": "cancelar",
           "from": [
             "confirmada",
-            "listaEspera"
+            "emEspera"
           ],
           "to": "cancelada",
           "by": [
             "publico"
           ],
-          "description": "A pessoa cancela a própria inscrição; se ocupava uma vaga, a vaga é liberada e o processo de promoção da lista de espera é disparado.",
+          "description": "A pessoa cancela a própria inscrição; se estava confirmada, a vaga liberada dispara a promoção do primeiro da lista de espera.",
           "payload": [],
           "ruleRefs": [
-            "inscricaoCancelamentoSomentePropria",
-            "inscricaoPromocaoOrdemChegada"
+            "cancelarApenasPropriaInscricao",
+            "promoverPrimeiroDaEspera"
           ]
         },
         {
           "transitionId": "promover",
           "from": [
-            "listaEspera"
+            "emEspera"
           ],
           "to": "confirmada",
           "by": [],
-          "description": "O processo promove a inscrição mais antiga da lista de espera do evento quando uma vaga é liberada por cancelamento.",
+          "description": "O processo de promoção confirma a inscrição mais antiga da lista de espera do evento quando uma vaga é liberada.",
           "payload": [],
           "ruleRefs": [
-            "inscricaoPromocaoOrdemChegada"
+            "promoverPrimeiroDaEspera",
+            "esperaPorOrdemDeChegada"
           ]
         }
       ]
@@ -573,7 +520,7 @@
       "moduleName": "inscricaoEvento",
       "entityId": "Participante",
       "title": "Participante",
-      "description": "Pessoa que se inscreve em eventos pela página pública informando nome e e-mail; registro mestre compartilhado da organização, criado ou anexado na inscrição.",
+      "description": "Pessoa que se inscreve em eventos pela página pública, identificada pelo nome e pelo e-mail; criada ou anexada no momento da inscrição.",
       "displayField": "details.identification.name",
       "relationships": {
         "inscricoes": {
@@ -582,28 +529,28 @@
           "via": "Inscricao.participanteId",
           "cardinality": "1:N",
           "title": "Inscrições do participante",
-          "description": "Um participante pode ter várias inscrições, uma por evento.",
+          "description": "Inscrições feitas por esta pessoa; no máximo uma por evento.",
           "mode": "fk",
           "direction": "to",
           "required": true
         },
-        "email": {
+        "emails": {
           "relationshipId": "participanteEmail",
           "to": "EmailParticipante",
           "via": "HasContact",
           "cardinality": "1:N",
           "title": "E-mail do participante",
-          "description": "O e-mail informado na inscrição é um canal de contato ligado à pessoa por HasContact.",
+          "description": "Canal de e-mail informado na inscrição, vinculado por HasContact.",
           "required": true,
           "role": "HasContact"
         },
         "eventos": {
-          "relationshipId": "eventoParticipantes",
+          "relationshipId": "participantesDoEvento",
           "to": "Evento",
           "via": "Inscricao",
           "cardinality": "N:N",
-          "title": "Eventos em que está inscrito",
-          "description": "Eventos alcançados pelas inscrições do participante.",
+          "title": "Eventos em que se inscreveu",
+          "description": "Eventos obtidos a partir das inscrições do participante.",
           "mode": "throughTable",
           "path": "Evento <- Inscricao.eventoId -> Inscricao.participanteId -> Participante",
           "derived": true,
@@ -611,16 +558,18 @@
         }
       },
       "capabilities": {
-        "read.byId": "Lê o participante pelo mdmId para preencher a lista de inscritos do organizador; usado pelas telas de inscritos e pela exportação CSV.",
-        "locate.byName": "Busca participantes pelo nome na lista de inscritos; usado pelo organizador.",
-        "locate.byContact": "Localiza a pessoa pelo e-mail informado, para reconhecer o mesmo participante e anexar o papel em vez de duplicar; usado pela inscrição pública.",
-        "register.createOrAttach": "Cria o participante quando o e-mail ainda não existe ou anexa o papel inscricaoEvento.Participante à pessoa existente; acionado quando o público se inscreve.",
-        "link.contact": "Cria o canal de e-mail da inscrição e o liga à pessoa por HasContact; no lugar de qualquer campo de e-mail no registro.",
-        "listLinks": "Mostra os vínculos do participante, incluindo seu e-mail; usado pelo organizador na ficha do inscrito.",
-        "edit.platformFields": "Corrige o nome e o consentimento de privacidade do participante; usado pelo organizador.",
-        "edit.moduleNamespace": "Grava somente o namespace inscricaoEvento do registro, hoje vazio; usado pelo próprio módulo.",
-        "inactivate": "Inativa o participante sem apagá-lo, preservando o histórico das inscrições; usado pelo organizador.",
-        "audit": "Consulta quem alterou o registro do participante e quando; usado por administradores."
+        "read.byId": "Lê o participante pelo mdmId para preencher nome e e-mail na lista de inscritos do organizador e no CSV.",
+        "locate.byName": "O organizador procura um participante pelo nome ao conferir os inscritos de um evento.",
+        "locate.byContact": "Na inscrição pela página pública, localiza a pessoa pelo e-mail informado para não duplicar o registro e impedir segunda inscrição no mesmo evento.",
+        "register.createOrAttach": "Ao se inscrever, o público cria o participante pelo e-mail ou anexa o papel inscricaoEvento.Participante a uma pessoa já existente.",
+        "link.contact": "Cria o canal EmailParticipante com o e-mail da inscrição e o vincula por HasContact.",
+        "edit.platformFields": "O organizador corrige o nome de um participante digitado errado na inscrição.",
+        "inactivate": "O organizador inativa um participante sem apagá-lo, mantendo o histórico de inscrições.",
+        "listLinks": "Mostra os canais de contato do participante na ficha vista pelo organizador.",
+        "comment": "O organizador deixa observações sobre o participante (por exemplo, necessidades de acessibilidade).",
+        "tag": "O organizador marca participantes com rótulos livres do módulo.",
+        "statusHistory.read": "Mostra ao organizador quando o participante foi ativado ou inativado.",
+        "audit": "Registra quem criou ou alterou o participante, consultável pelo administrador."
       },
       "rules": [
         "rule-foreign-namespace-refused",
@@ -652,7 +601,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Registro mestre da pessoa que se inscreve em eventos, com as camadas da plataforma e o namespace do módulo.",
+            "description": "Registro mestre da pessoa que se inscreve em eventos, com o papel inscricaoEvento.Participante.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -664,19 +613,10 @@
                     "indexed": true,
                     "derived": true,
                     "values": [
-                      "Person",
-                      "Company",
-                      "ContactChannel",
-                      "Animal",
-                      "Product",
-                      "Service",
-                      "Location",
-                      "BankAccount",
-                      "Document",
-                      "AssetGeneric",
-                      "AssetVehicle",
-                      "AssetProperty",
-                      "AssetEquipment"
+                      {
+                        "value": "Person",
+                        "title": "Pessoa"
+                      }
                     ],
                     "description": "Sempre Person: o participante é uma pessoa física.",
                     "title": "Subtipo"
@@ -686,7 +626,7 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 200,
-                    "description": "Nome informado pela pessoa no formulário público de inscrição; é como o organizador reconhece o participante.",
+                    "description": "Nome informado pela pessoa ao se inscrever na página pública do evento; é como o organizador a reconhece na lista de inscritos e no CSV.",
                     "title": "Nome"
                   },
                   "status": {
@@ -695,13 +635,25 @@
                     "indexed": true,
                     "derived": true,
                     "values": [
-                      "Active",
-                      "Inactive",
-                      "Merged",
-                      "Blocked"
+                      {
+                        "value": "Active",
+                        "title": "Ativo"
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo"
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado"
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado"
+                      }
                     ],
                     "title": "Situação",
-                    "description": "Ativo ou inativo no cadastro mestre; o participante nunca é excluído, apenas inativado."
+                    "description": "Situação do registro mestre (ativo ou inativo), mantida pela plataforma."
                   },
                   "countryCode": {
                     "type": "string",
@@ -710,7 +662,7 @@
                     "pattern": "^[A-Z]{2}$",
                     "maxLength": 2,
                     "default": "US",
-                    "description": "Código ISO do país da pessoa, usado para saber se a regra de consentimento de privacidade se aplica.",
+                    "description": "País da pessoa (ISO 3166-1 alfa-2), que define as regras de privacidade aplicáveis à inscrição.",
                     "title": "País"
                   },
                   "tags": {
@@ -718,11 +670,11 @@
                     "required": true,
                     "collection": true,
                     "derived": true,
-                    "description": "Papéis de módulo da pessoa; inclui inscricaoEvento.Participante quando ela se inscreve em um evento.",
+                    "description": "Papéis de módulos no registro; contém inscricaoEvento.Participante após a primeira inscrição.",
                     "title": "Papéis"
                   }
                 },
-                "description": "Identificação da pessoa na base mestre da organização."
+                "description": "Colunas de índice da plataforma usadas para localizar e listar o participante."
               },
               "base": {
                 "type": "object",
@@ -734,18 +686,11 @@
                     "collection": true,
                     "of": "ContactSummary",
                     "derived": true,
-                    "description": "Resumo dos canais ligados à pessoa; o e-mail da inscrição aparece aqui como contato vinculado por HasContact.",
+                    "description": "Resumo dos canais de contato vinculados por HasContact; inclui o e-mail informado na inscrição, usado para identificar a pessoa e enviar avisos do evento.",
                     "title": "Contatos"
-                  },
-                  "relationshipRefs": {
-                    "type": "object",
-                    "required": true,
-                    "derived": true,
-                    "description": "Chaves compactas recalculadas pelo motor a cada vínculo; não são escritas pelo módulo.",
-                    "title": "Referências de relacionamento"
                   }
                 },
-                "description": "Dados comuns a qualquer registro mestre."
+                "description": "Dados comuns da plataforma; o módulo lê apenas os contatos vinculados."
               },
               "person": {
                 "type": "object",
@@ -754,17 +699,17 @@
                   "privacyConsent": {
                     "type": "object",
                     "of": "PrivacyConsent",
-                    "description": "Consentimento LGPD/GDPR da pessoa para o tratamento do nome e e-mail informados na inscrição.",
+                    "description": "Consentimento dado na página pública para o uso do nome e do e-mail na gestão da inscrição (LGPD/GDPR).",
                     "title": "Consentimento de privacidade"
                   }
                 },
-                "description": "Dados de pessoa física mantidos pela plataforma."
+                "description": "Dados de pessoa física da plataforma usados pelo módulo."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Campos promovidos pela organização; este módulo apenas lê."
+                "description": "Campos promovidos pela organização; o módulo apenas lê."
               },
               "inscricaoEvento": {
                 "type": "object",
@@ -782,7 +727,7 @@
       "moduleName": "inscricaoEvento",
       "entityId": "EmailParticipante",
       "title": "E-mail do participante",
-      "description": "Canal de contato de e-mail informado pelo participante na inscrição; é por ele que se garante uma única inscrição por evento.",
+      "description": "Canal de e-mail informado pelo participante na inscrição, registro de contato que permite garantir uma única inscrição por e-mail em cada evento.",
       "displayField": "details.identification.name",
       "relationships": {
         "participante": {
@@ -791,30 +736,30 @@
           "via": "HasContact",
           "cardinality": "N:1",
           "title": "Participante dono do e-mail",
-          "description": "O participante que informou este e-mail na inscrição, ligado por HasContact.",
+          "description": "O participante possui este e-mail como canal de contato (HasContact).",
           "direction": "to",
           "required": true,
           "role": "HasContact"
         }
       },
       "capabilities": {
-        "read.byId": "Lê o e-mail pelo mdmId para preencher a lista de inscritos e o CSV do organizador.",
-        "locate.byContact": "Encontra o e-mail já registrado quando o público se inscreve, para reaproveitar o participante e checar a inscrição única por evento.",
-        "register.createOrAttach": "Cria o canal de e-mail na inscrição pública quando ainda não existe e marca o papel inscricaoEvento.EmailParticipante.",
-        "link": "Liga o e-mail ao participante por HasContact no momento da inscrição.",
-        "unlink": "Encerra o vínculo do e-mail com o participante mantendo o histórico, quando o organizador corrige um cadastro.",
-        "listLinks": "Mostra ao organizador o participante dono do e-mail.",
-        "edit.platformFields": "Permite ao organizador corrigir um e-mail digitado errado.",
-        "inactivate": "Retira de uso um e-mail inválido sem apagá-lo.",
-        "audit": "Informa quem registrou ou alterou o e-mail e quando."
+        "read.byId": "Lê o e-mail pelo id ao montar a lista de inscritos e o CSV do organizador.",
+        "locate.byContact": "Localiza o e-mail já existente quando alguém se inscreve na página pública, para reaproveitar o registro e checar inscrição duplicada no evento.",
+        "register.createOrAttach": "Cria o canal de e-mail na inscrição pública quando ainda não existe, ou o reaproveita, marcando o papel inscricaoEvento.EmailParticipante.",
+        "link": "Vincula o e-mail ao participante por HasContact no momento da inscrição.",
+        "listLinks": "Mostra ao organizador a qual participante o e-mail pertence.",
+        "edit.platformFields": "Permite ao organizador corrigir um e-mail digitado errado por um inscrito.",
+        "inactivate": "Retira de uso um e-mail inválido sem apagá-lo, preservando o histórico das inscrições.",
+        "unlink": "Encerra o vínculo do e-mail com o participante mantendo o histórico, quando o organizador corrige o contato.",
+        "audit": "Mostra quem criou ou alterou o e-mail e quando."
       },
       "rules": [
+        "rule-contact-value-unique-per-type",
         "rule-foreign-namespace-refused",
         "rule-identity-never-in-namespace",
-        "rule-contact-value-unique-per-type",
         "rule-delete-blocked-by-relationships",
         "rule-document-shape-validated",
-        "umaInscricaoPorEmailPorEvento"
+        "emailUnicoPorEvento"
       ],
       "kind": "role",
       "subtype": "ContactChannel",
@@ -856,7 +801,7 @@
                         "title": "Canal de contato"
                       }
                     ],
-                    "description": "Sempre ContactChannel: o e-mail é um canal de contato do participante.",
+                    "description": "Sempre ContactChannel: o e-mail é um registro de contato próprio.",
                     "title": "Subtipo"
                   },
                   "name": {
@@ -864,8 +809,8 @@
                     "required": true,
                     "indexed": true,
                     "maxLength": 200,
-                    "description": "Como o e-mail aparece nas listas do organizador; normalmente o próprio endereço de e-mail.",
-                    "title": "Nome de exibição"
+                    "description": "Rótulo legível do canal, normalmente o próprio e-mail informado na inscrição.",
+                    "title": "Nome"
                   },
                   "status": {
                     "type": "enum",
@@ -873,13 +818,25 @@
                     "indexed": true,
                     "derived": true,
                     "values": [
-                      "Active",
-                      "Inactive",
-                      "Merged",
-                      "Blocked"
+                      {
+                        "value": "Active",
+                        "title": "Ativo"
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo"
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado"
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado"
+                      }
                     ],
-                    "title": "Situação no MDM",
-                    "description": "Ativo enquanto o e-mail está em uso; inativo quando deixa de ser usado."
+                    "title": "Situação",
+                    "description": "Situação do registro no MDM (ativo ou inativo)."
                   },
                   "countryCode": {
                     "type": "string",
@@ -888,7 +845,7 @@
                     "pattern": "^[A-Z]{2}$",
                     "maxLength": 2,
                     "default": "US",
-                    "description": "País (ISO 3166-1 alfa-2) da organização que recebeu a inscrição.",
+                    "description": "País (ISO 3166-1 alfa-2) a que o registro pertence.",
                     "title": "País"
                   },
                   "tags": {
@@ -905,7 +862,7 @@
                     "indexed": true,
                     "derived": true,
                     "title": "Criado em",
-                    "description": "Quando o e-mail foi registrado pela primeira vez."
+                    "description": "Momento em que o e-mail foi registrado pela primeira vez."
                   },
                   "updatedAt": {
                     "type": "string",
@@ -916,7 +873,7 @@
                     "description": "Última alteração do registro."
                   }
                 },
-                "description": "Índice do canal de e-mail informado na inscrição."
+                "description": "Identificação do canal de e-mail do participante no MDM."
               },
               "base": {
                 "type": "object",
@@ -926,11 +883,11 @@
                     "type": "object",
                     "required": true,
                     "derived": true,
-                    "description": "Chaves compactas recalculadas pelo motor, incluindo o participante dono do e-mail via HasContact.",
-                    "title": "Vínculos"
+                    "description": "Chaves compactas recalculadas pela plataforma, incluindo o participante dono do e-mail via HasContact.",
+                    "title": "Referências de relacionamento"
                   }
                 },
-                "description": "Dados comuns do registro; o módulo lê apenas os vínculos derivados."
+                "description": "Dados comuns da plataforma; o módulo apenas lê as referências de relacionamento."
               },
               "contactChannel": {
                 "type": "object",
@@ -946,12 +903,12 @@
                       }
                     ],
                     "title": "Tipo de contato",
-                    "description": "Neste módulo, sempre e-mail."
+                    "description": "Neste módulo é sempre e-mail."
                   },
                   "value": {
                     "type": "string",
                     "required": true,
-                    "description": "Endereço de e-mail informado na inscrição; é a chave que garante uma única inscrição por evento.",
+                    "description": "Endereço de e-mail usado na inscrição; garante uma única inscrição por e-mail em cada evento.",
                     "title": "E-mail",
                     "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
                     "maxLength": 254
@@ -960,21 +917,16 @@
                     "type": "boolean",
                     "required": true,
                     "title": "Verificado",
-                    "description": "Se a plataforma já confirmou que o e-mail pertence ao participante."
-                  },
-                  "verifiedAt": {
-                    "type": "timestamp",
-                    "title": "Verificado em",
-                    "description": "Quando a verificação aconteceu."
+                    "description": "Indica se a plataforma já verificou o e-mail; o módulo não exige verificação para inscrever."
                   }
                 },
-                "description": "O e-mail que o participante digitou na página pública do evento."
+                "description": "O e-mail informado pelo participante na página pública do evento."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Campos promovidos pela organização; o módulo apenas lê."
+                "description": "Campos promovidos pela organização; lidos, não declarados aqui."
               },
               "inscricaoEvento": {
                 "type": "object",
@@ -996,7 +948,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada inscrição pertence a um evento; um evento reúne as inscrições confirmadas e a lista de espera.",
+      "description": "Cada inscrição pertence a um evento; um evento reúne confirmados e lista de espera.",
       "field": "Inscricao.eventoId"
     },
     {
@@ -1006,7 +958,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada inscrição é de um participante; um participante pode se inscrever em vários eventos.",
+      "description": "Cada inscrição é de um participante; um participante pode se inscrever em vários eventos, uma única vez em cada.",
       "field": "Inscricao.participanteId"
     },
     {
@@ -1020,13 +972,13 @@
       "catalogType": "HasContact"
     },
     {
-      "relationshipId": "eventoParticipantes",
+      "relationshipId": "participantesDoEvento",
       "from": "Evento",
       "to": "Participante",
       "type": "manyToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Participantes inscritos em um evento, obtidos a partir das inscrições.",
+      "description": "Pessoas inscritas em um evento, obtidas a partir das suas inscrições.",
       "through": "Inscricao",
       "path": "Evento <- Inscricao.eventoId -> Inscricao.participanteId -> Participante",
       "derived": true
@@ -1087,18 +1039,13 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Inscricao",
-      "detail": "record.fields.details.fields.posicaoListaEspera.derived (derived[])"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "Inscricao",
-      "detail": "record.fields.details.fields.ocupaVaga.derived (derived[])"
-    },
-    {
-      "kind": "derivedFromPlatform",
       "entityId": "Participante",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Participante",
+      "detail": "Participante.details.identification.subtype.values"
     },
     {
       "kind": "namespaceEmpty",

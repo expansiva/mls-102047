@@ -19,7 +19,7 @@ export const cadastrarPublicarEventoJourney = {
         "entity": "Evento",
         "effect": "create",
         "title": "Cadastrar novo evento",
-        "description": "O organizador informa título, descrição, data, local e número de vagas e salva o evento como rascunho."
+        "description": "O organizador informa título, descrição, data, local e número de vagas do evento, que fica em rascunho."
       },
       {
         "stepId": "revisarEvento",
@@ -39,14 +39,14 @@ export const cadastrarPublicarEventoJourney = {
       }
     ],
     "outcome": {
-      "statement": "O evento está publicado e disponível para inscrições na página pública.",
+      "statement": "O evento está publicado e aceita inscrições pela página pública.",
       "evidence": [
         "Evento com situação publicado",
         "Página pública do evento acessível"
       ]
     }
   },
-  "businessHash": "sha256:15ae2a8e49b2339f9f00f25d15812013044d794c3ab9627ee346c9f95432b646"
+  "businessHash": "sha256:54c6b479a6ee0d07e3e89a52f926d8cf104222629822293170c918d6cbf51303"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CadastrarPublicarEventoJourneyType = typeof cadastrarPublicarEventoJourney;

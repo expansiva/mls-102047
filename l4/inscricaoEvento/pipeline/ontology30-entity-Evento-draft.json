@@ -4,7 +4,7 @@
     "moduleName": "inscricaoEvento",
     "entityId": "Evento",
     "title": "Evento",
-    "description": "Evento cadastrado pelo organizador com título, descrição, data, local e número de vagas; nasce como rascunho e, ao ser publicado, ganha uma página pública de inscrição. Vagas ocupadas, vagas disponíveis e tamanho da lista de espera são valores derivados das inscrições.",
+    "description": "Evento cadastrado pelo organizador com título, descrição, data, local e número de vagas; nasce em rascunho e, ao ser publicado, ganha página pública de inscrição. Vagas ocupadas e tamanho da lista de espera são valores derivados das inscrições.",
     "displayField": "titulo",
     "relationships": {
       "inscricoes": {
@@ -13,42 +13,42 @@
         "via": "Inscricao.eventoId",
         "cardinality": "1:N",
         "title": "Inscrições do evento",
-        "description": "Inscrições confirmadas e lista de espera deste evento.",
+        "description": "Inscrições confirmadas e lista de espera deste evento, por ordem de chegada.",
         "mode": "fk",
         "direction": "to",
         "required": true
       },
       "participantes": {
-        "relationshipId": "eventoParticipantes",
+        "relationshipId": "participantesDoEvento",
         "to": "Participante",
         "via": "Inscricao",
         "cardinality": "N:N",
-        "title": "Participantes inscritos",
-        "description": "Pessoas inscritas no evento, obtidas a partir das inscrições.",
+        "title": "Participantes do evento",
+        "description": "Pessoas inscritas no evento, obtidas a partir das suas inscrições.",
         "mode": "throughTable",
         "path": "Evento <- Inscricao.eventoId -> Inscricao.participanteId -> Participante",
         "derived": true
       }
     },
     "capabilities": {
-      "read.byId": "Abre um evento pelo id, para o organizador revisar e editar e para a página pública exibir título, descrição, data, local e disponibilidade.",
-      "locate.byColumn": "Lista os eventos filtrando por situação e ordenando por data, na lista do organizador.",
-      "locate.byText": "Busca eventos pelo título digitado na caixa de busca do organizador.",
+      "read.byId": "Abre o evento pelo id para o organizador revisar antes de publicar e para a página pública mostrar seus detalhes.",
+      "locate.byColumn": "Lista os eventos filtrando por situação e ordenando pela data do evento, para o organizador encontrar o que editar ou acompanhar.",
+      "locate.byText": "Busca eventos pelo título digitado na caixa de pesquisa da lista do organizador.",
       "count": "Conta os eventos por situação no cabeçalho da lista do organizador.",
-      "listByForeignKey": "Lista as inscrições que apontam para o evento, para o organizador acompanhar confirmados e lista de espera.",
-      "create": "Cria o evento como rascunho com título, descrição, data, local e número de vagas; usado pelo organizador.",
-      "update": "Altera título, descrição, data, local ou número de vagas de um evento; usado pelo organizador.",
-      "transition": "Publica o evento, movendo-o de rascunho para publicado; feito pelo organizador.",
-      "transaction": "Grava a redução de vagas e a promoção de inscrições da lista de espera juntas, tudo ou nada, quando o organizador altera o número de vagas.",
-      "inscricaoEvento.paginaPublica": "Exibe a página pública de um evento publicado, com dados e disponibilidade de vagas, para qualquer pessoa do público se inscrever.",
-      "inscricaoEvento.ocupacao": "Mostra ao organizador o total de vagas, as vagas ocupadas, as disponíveis e o tamanho da lista de espera do evento."
+      "listByForeignKey": "Lista as inscrições de um evento, confirmadas e em espera por ordem de chegada, para o organizador acompanhar e calcular a ocupação.",
+      "create": "O organizador cadastra um novo evento com título, descrição, data, local e número de vagas, que nasce em rascunho.",
+      "update": "O organizador corrige título, descrição, data, local ou número de vagas de um evento já cadastrado.",
+      "transition": "O organizador publica o evento em rascunho, abrindo a página pública de inscrição.",
+      "read.mdmRecord": "Lê o nome e o e-mail dos participantes inscritos no evento para a lista do organizador e o arquivo CSV.",
+      "inscricaoEvento.paginaPublica": "Exibe ao público a página de um evento publicado com título, descrição, data, local e disponibilidade de vagas, sem login.",
+      "inscricaoEvento.exportarCsv": "Gera para o organizador o arquivo CSV com os inscritos do evento, confirmados e lista de espera, com nome, e-mail, situação e ordem de chegada."
     },
     "rules": [
+      "eventoCompletoParaPublicar",
       "numeroVagasPositivo",
-      "publicarExigeDadosCompletos",
-      "inscricaoSomenteEmEventoPublicado",
-      "inscricaoExcedenteVaiParaEspera",
-      "aumentoVagasPromoveListaEspera"
+      "somentePublicadoRecebeInscricao",
+      "inscricaoAlemDasVagasVaiParaEspera",
+      "vagasNaoMenoresQueConfirmados"
     ],
     "kind": "entity",
     "class": "core",
@@ -76,7 +76,7 @@
           "required": true,
           "indexed": true,
           "title": "Título",
-          "description": "Título do evento, exibido na lista do organizador e na página pública; usado na busca por texto e na ordenação.",
+          "description": "Nome do evento exibido na lista do organizador e na página pública; usado na busca por texto.",
           "maxLength": 200
         },
         "dataEvento": {
@@ -84,7 +84,7 @@
           "required": true,
           "indexed": true,
           "title": "Data do evento",
-          "description": "Data e hora em que o evento acontece; a lista de eventos é filtrada e ordenada por ela."
+          "description": "Data e hora em que o evento acontece; ordena a lista de eventos e permite filtrar os próximos."
         },
         "status": {
           "type": "enum",
@@ -103,37 +103,33 @@
             }
           ],
           "title": "Situação",
-          "description": "Situação do evento no ciclo de vida: rascunho enquanto o organizador prepara, publicado quando a página pública aceita inscrições."
+          "description": "Etapa do evento: em rascunho enquanto o organizador prepara, publicado quando a página pública passa a aceitar inscrições."
         },
         "details": {
           "type": "object",
           "required": true,
           "title": "Detalhes",
-          "description": "Dados do evento que apenas são exibidos.",
+          "description": "Dados descritivos do evento.",
           "fields": {
             "descricao": {
               "type": "text",
+              "required": true,
               "title": "Descrição",
-              "description": "Texto que apresenta o evento na página pública."
+              "description": "Texto que apresenta o evento na página pública: programação, público-alvo e demais informações."
             },
             "local": {
               "type": "string",
               "required": true,
               "title": "Local",
-              "description": "Onde o evento acontece, como o organizador o descreve (endereço, sala ou link).",
+              "description": "Onde o evento acontece, como informado pelo organizador (endereço, sala ou link de transmissão).",
               "maxLength": 300
             },
             "numeroVagas": {
               "type": "integer",
               "required": true,
               "title": "Número de vagas",
-              "description": "Quantidade de inscrições confirmadas que o evento comporta; além dela, as novas inscrições vão para a lista de espera.",
+              "description": "Quantidade de inscrições confirmadas que o evento comporta; acima disso as inscrições entram na lista de espera.",
               "min": 1
-            },
-            "publicadoEm": {
-              "type": "timestamp",
-              "title": "Publicado em",
-              "description": "Momento em que o organizador publicou o evento."
             },
             "vagasOcupadas": {
               "type": "integer",
@@ -145,7 +141,7 @@
               "type": "integer",
               "derived": true,
               "title": "Vagas disponíveis",
-              "description": "Número de vagas do evento menos as vagas ocupadas, nunca abaixo de zero."
+              "description": "Número de vagas do evento menos as vagas ocupadas pelas inscrições confirmadas, nunca abaixo de zero."
             },
             "tamanhoListaEspera": {
               "type": "integer",
@@ -157,7 +153,7 @@
               "type": "boolean",
               "derived": true,
               "title": "Lotado",
-              "description": "Verdadeiro quando as vagas ocupadas atingem o número de vagas do evento; novas inscrições vão para a lista de espera."
+              "description": "Verdadeiro quando as inscrições confirmadas já ocupam todas as vagas do evento, de modo que novas inscrições vão para a lista de espera."
             }
           }
         }
@@ -183,10 +179,10 @@
         "by": [
           "organizador"
         ],
-        "description": "O organizador publica o evento, que passa a ter uma página pública de inscrição.",
+        "description": "O organizador publica o evento, que ganha página pública e passa a aceitar inscrições.",
         "payload": [],
         "ruleRefs": [
-          "publicarExigeDadosCompletos"
+          "eventoCompletoParaPublicar"
         ]
       }
     ]

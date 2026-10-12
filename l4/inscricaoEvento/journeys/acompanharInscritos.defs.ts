@@ -7,8 +7,8 @@ export const acompanharInscritosJourney = {
   "journeyId": "acompanharInscritos",
   "business": {
     "actorRef": "organizador",
-    "title": "Acompanhar inscritos e baixar CSV",
-    "goal": "Ver os inscritos de um evento, o total de vagas ocupadas, a lista de espera e baixar a lista em CSV.",
+    "title": "Acompanhar inscritos e baixar lista",
+    "goal": "Ver os inscritos de um evento, o total de vagas ocupadas e baixar a lista em CSV.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,7 +18,7 @@ export const acompanharInscritosJourney = {
         "kind": "locate",
         "entity": "Evento",
         "title": "Localizar evento",
-        "description": "O organizador escolhe o evento cujos inscritos quer acompanhar."
+        "description": "O organizador busca o evento publicado que deseja acompanhar."
       },
       {
         "stepId": "verOcupacao",
@@ -28,30 +28,29 @@ export const acompanharInscritosJourney = {
         "description": "O organizador vê o total de vagas, as vagas ocupadas e o tamanho da lista de espera."
       },
       {
-        "stepId": "verInscricoes",
+        "stepId": "verInscritos",
         "kind": "inspect",
         "entity": "Inscricao",
         "title": "Ver lista de inscritos",
-        "description": "O organizador vê as inscrições confirmadas e a lista de espera na ordem de chegada."
+        "description": "O organizador vê os inscritos confirmados e a lista de espera na ordem de chegada."
       },
       {
         "stepId": "baixarCsv",
-        "kind": "act",
+        "kind": "inspect",
         "entity": "Inscricao",
-        "effect": "create",
         "title": "Baixar lista em CSV",
-        "description": "O organizador gera e baixa o arquivo CSV com a lista de inscritos do evento."
+        "description": "O organizador baixa a lista de inscritos do evento em arquivo CSV."
       }
     ],
     "outcome": {
       "statement": "O organizador conhece a ocupação do evento e tem a lista de inscritos em CSV.",
       "evidence": [
         "Total de vagas ocupadas exibido",
-        "Arquivo CSV baixado com nome e e-mail dos inscritos"
+        "Arquivo CSV com os inscritos baixado"
       ]
     }
   },
-  "businessHash": "sha256:fe6a74a5880117b1f733059d7f2ef114ec39172d0961f2526b1300d3c4fc574a"
+  "businessHash": "sha256:e6fb53d30de796a20f2c1afe1ec31039fb4f401c808ca2612977c43a189e0b6f"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharInscritosJourneyType = typeof acompanharInscritosJourney;

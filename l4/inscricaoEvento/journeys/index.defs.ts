@@ -19,10 +19,10 @@ export const inscricaoEventoJourneyIndex = {
     {
       "journeyId": "acompanharInscritos",
       "actorRef": "organizador",
-      "title": "Acompanhar inscritos e baixar CSV"
+      "title": "Acompanhar inscritos e baixar lista"
     },
     {
-      "journeyId": "inscreverEmEvento",
+      "journeyId": "inscreverEvento",
       "actorRef": "publico",
       "title": "Inscrever-se em evento"
     },

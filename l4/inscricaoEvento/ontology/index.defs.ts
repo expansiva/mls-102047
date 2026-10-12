@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const inscricaoEventoOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "inscricaoEvento",
-  "businessDomain": "Inscrição em eventos: cadastro e publicação de eventos com vagas limitadas, inscrição pública por nome e e-mail, lista de espera por ordem de chegada com promoção automática e acompanhamento dos inscritos pelo organizador.",
+  "businessDomain": "Inscrição em eventos: cadastro e publicação de eventos com vagas limitadas, inscrição pública por nome e e-mail, lista de espera por ordem de chegada com promoção automática e acompanhamento de inscritos pelo organizador.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "inscricaoEvento",
@@ -41,7 +41,7 @@ export const inscricaoEventoOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada inscrição pertence a um evento; um evento reúne as inscrições confirmadas e a lista de espera.",
+      "description": "Cada inscrição pertence a um evento; um evento reúne confirmados e lista de espera.",
       "field": "Inscricao.eventoId"
     },
     {
@@ -51,7 +51,7 @@ export const inscricaoEventoOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada inscrição é de um participante; um participante pode se inscrever em vários eventos.",
+      "description": "Cada inscrição é de um participante; um participante pode se inscrever em vários eventos, uma única vez em cada.",
       "field": "Inscricao.participanteId"
     },
     {
@@ -65,13 +65,13 @@ export const inscricaoEventoOntologyIndex = {
       "catalogType": "HasContact"
     },
     {
-      "relationshipId": "eventoParticipantes",
+      "relationshipId": "participantesDoEvento",
       "from": "Evento",
       "to": "Participante",
       "type": "manyToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Participantes inscritos em um evento, obtidos a partir das inscrições.",
+      "description": "Pessoas inscritas em um evento, obtidas a partir das suas inscrições.",
       "through": "Inscricao",
       "path": "Evento <- Inscricao.eventoId -> Inscricao.participanteId -> Participante",
       "derived": true

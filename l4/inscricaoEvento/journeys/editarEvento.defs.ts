@@ -21,12 +21,12 @@ export const editarEventoJourney = {
         "description": "O organizador busca o evento na lista de eventos."
       },
       {
-        "stepId": "alterarEvento",
+        "stepId": "atualizarEvento",
         "kind": "act",
         "entity": "Evento",
         "effect": "update",
-        "title": "Alterar dados do evento",
-        "description": "O organizador altera título, descrição, data, local ou número de vagas e salva."
+        "title": "Atualizar dados do evento",
+        "description": "O organizador altera título, descrição, data, local ou número de vagas."
       }
     ],
     "outcome": {
@@ -36,7 +36,7 @@ export const editarEventoJourney = {
       ]
     }
   },
-  "businessHash": "sha256:951b27e2411efe79f1ceffb3d7919b07823ea2f6b1b459437637d5a8c33f5732"
+  "businessHash": "sha256:6a2152623660be8f4f56cb9fc83704d7ebd4c9bc3501db84a7c0c1c298aa03cf"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type EditarEventoJourneyType = typeof editarEventoJourney;

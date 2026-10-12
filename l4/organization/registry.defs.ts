@@ -339,75 +339,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-10-12T19:26:48.918Z"
     },
     {
-      "moduleName": "inscricaoEvento",
-      "actors": [
-        {
-          "actorId": "organizador",
-          "kind": "internal"
-        },
-        {
-          "actorId": "publico",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "inscricaoEvento.Participante",
-          "namespace": "inscricaoEvento"
-        },
-        {
-          "subtype": "ContactChannel",
-          "roleTag": "inscricaoEvento.EmailParticipante",
-          "namespace": "inscricaoEvento"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Evento",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Inscricao",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "Participante",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "EmailParticipante",
-          "kind": "role",
-          "mdmSubtype": "ContactChannel",
-          "class": "mdm"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "eventoPublicado",
-          "on": "Evento.publicar"
-        },
-        {
-          "eventId": "inscricaoRealizada",
-          "on": "Inscricao.create"
-        },
-        {
-          "eventId": "inscricaoCancelada",
-          "on": "Inscricao.cancelar"
-        },
-        {
-          "eventId": "inscricaoPromovida",
-          "on": "Inscricao.promover"
-        }
-      ],
-      "updatedAt": "2026-10-12T19:30:28.695Z"
-    },
-    {
       "moduleName": "locacaoEquipamentos",
       "actors": [
         {
@@ -761,6 +692,75 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-12T20:34:35.305Z"
+    },
+    {
+      "moduleName": "inscricaoEvento",
+      "actors": [
+        {
+          "actorId": "organizador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "publico",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "inscricaoEvento.Participante",
+          "namespace": "inscricaoEvento"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "inscricaoEvento.EmailParticipante",
+          "namespace": "inscricaoEvento"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Evento",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Inscricao",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "Participante",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "EmailParticipante",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "eventoPublicado",
+          "on": "Evento.publicar"
+        },
+        {
+          "eventId": "inscricaoRealizada",
+          "on": "Inscricao.create"
+        },
+        {
+          "eventId": "inscricaoCancelada",
+          "on": "Inscricao.cancelar"
+        },
+        {
+          "eventId": "inscricaoPromovida",
+          "on": "Inscricao.promover"
+        }
+      ],
+      "updatedAt": "2026-10-12T22:55:44.737Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

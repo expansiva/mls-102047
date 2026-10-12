@@ -8,7 +8,7 @@ export const cancelarInscricaoJourney = {
   "business": {
     "actorRef": "publico",
     "title": "Cancelar inscrição",
-    "goal": "Desistir da inscrição em um evento, liberando a vaga.",
+    "goal": "Desistir da própria inscrição em um evento, liberando a vaga.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,27 +18,27 @@ export const cancelarInscricaoJourney = {
         "kind": "locate",
         "entity": "Inscricao",
         "title": "Localizar minha inscrição",
-        "description": "A pessoa localiza a própria inscrição no evento."
+        "description": "A pessoa encontra a própria inscrição no evento."
       },
       {
-        "stepId": "cancelar",
+        "stepId": "cancelarMinhaInscricao",
         "kind": "act",
         "entity": "Inscricao",
         "effect": "transition",
         "transitionRef": "cancelar",
         "title": "Cancelar inscrição",
-        "description": "A pessoa cancela a inscrição; se ocupava uma vaga, o primeiro da lista de espera é promovido automaticamente para confirmado."
+        "description": "A pessoa cancela a inscrição; se era confirmada, o primeiro da lista de espera é promovido para a vaga liberada."
       }
     ],
     "outcome": {
       "statement": "A inscrição está cancelada e a vaga foi repassada ao primeiro da lista de espera, se houver.",
       "evidence": [
         "Inscrição com situação cancelada",
-        "Primeira inscrição da lista de espera passa a confirmada"
+        "Primeiro da lista de espera com inscrição confirmada"
       ]
     }
   },
-  "businessHash": "sha256:ba42803107df0f175d32fd1ac93668a96654eba56d71c2e279571210b8437c4e"
+  "businessHash": "sha256:5726b6196b406b6afc855abe03f56dce4ba8afee99655c3d11fc37d33cf22a18"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CancelarInscricaoJourneyType = typeof cancelarInscricaoJourney;
