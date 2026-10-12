@@ -655,6 +655,112 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-12T20:29:01.147Z"
+    },
+    {
+      "moduleName": "compras",
+      "actors": [
+        {
+          "actorId": "comprador",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerenteCompras",
+          "kind": "internal"
+        },
+        {
+          "actorId": "almoxarife",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Company",
+          "roleTag": "compras.Fornecedor",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "compras.ContatoFornecedor",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "Product",
+          "roleTag": "compras.Produto",
+          "namespace": "compras"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "compras.Comprador",
+          "namespace": "compras"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Fornecedor",
+          "kind": "role",
+          "mdmSubtype": "Company",
+          "class": "mdm"
+        },
+        {
+          "entityId": "ContatoFornecedor",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Produto",
+          "kind": "role",
+          "mdmSubtype": "Product",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Comprador",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "ProdutoFornecido",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "PedidoCompra",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "ItemPedido",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "Recebimento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PainelCompras",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "recebimentoCompraRegistrado",
+          "on": "Recebimento.create"
+        },
+        {
+          "eventId": "pedidoCompraRecebidoTotal",
+          "on": "PedidoCompra.receberTotal"
+        },
+        {
+          "eventId": "pedidoCompraAprovado",
+          "on": "PedidoCompra.aprovar"
+        }
+      ],
+      "updatedAt": "2026-10-12T20:34:35.305Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

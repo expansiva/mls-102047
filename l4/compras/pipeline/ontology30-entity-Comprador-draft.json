@@ -1,0 +1,253 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "compras",
+    "entityId": "Comprador",
+    "title": "Comprador",
+    "description": "Pessoa que atua como comprador; responsável pelos produtos fornecidos e pedidos de compra que cadastra.",
+    "displayField": "details.identification.name",
+    "relationships": {
+      "produtosFornecidos": {
+        "relationshipId": "produtoFornecidoComprador",
+        "to": "ProdutoFornecido",
+        "via": "ProdutoFornecido.compradorId",
+        "cardinality": "1:N",
+        "title": "Produtos fornecidos cadastrados",
+        "description": "Produtos fornecidos com preço combinado que este comprador cadastrou e negociou.",
+        "mode": "fk",
+        "direction": "to",
+        "required": true
+      },
+      "pedidos": {
+        "relationshipId": "pedidoComprador",
+        "to": "PedidoCompra",
+        "via": "PedidoCompra.compradorId",
+        "cardinality": "1:N",
+        "title": "Pedidos de compra",
+        "description": "Pedidos de compra que este comprador abriu e enviou.",
+        "mode": "fk",
+        "direction": "to",
+        "required": true
+      }
+    },
+    "capabilities": {
+      "read.byId": "Lê o comprador pelo id para exibir seu nome nos pedidos de compra e produtos fornecidos; usado por todas as telas do módulo.",
+      "locate.byName": "Localiza compradores pelo nome para filtrar pedidos e produtos fornecidos; usado pelo gerente de compras.",
+      "locate.byDocument": "Localiza a pessoa pelo CPF antes de registrá-la como comprador, evitando duplicidade; usado por quem mantém o cadastro.",
+      "register.createOrAttach": "Cria a pessoa quando não existe e anexa o papel compras.Comprador, inclusive automaticamente quando ela abre seu primeiro pedido.",
+      "edit.platformFields": "Corrige nome, documento e consentimento do comprador; usado por quem mantém o cadastro.",
+      "inactivate": "Inativa o comprador que deixou a função sem apagar seus pedidos e produtos fornecidos; pode ser reativado.",
+      "link.contact": "Vincula telefone ou e-mail do comprador como canal de contato (HasContact), para o fornecedor e o gerente falarem com ele.",
+      "listLinks": "Mostra os vínculos do comprador com validade e papel na ficha da pessoa.",
+      "locate.byLogin": "Resolve o comprador da sessão pelo e-mail de login, para que seus pedidos fiquem associados a ele.",
+      "invite.login": "Dá acesso ao sistema a uma pessoa cadastrada como comprador; a plataforma emite o convite.",
+      "comment": "Registra observações sobre o comprador na sua ficha; usado pelo gerente de compras.",
+      "tag": "Marca o comprador com rótulos livres do módulo compras, como categoria de compra que atende.",
+      "statusHistory.read": "Mostra quando o comprador foi ativado ou inativado e por quem.",
+      "audit": "Informa quem alterou o cadastro do comprador e quando, para auditoria."
+    },
+    "rules": [
+      "rule-foreign-namespace-refused",
+      "rule-identity-never-in-namespace",
+      "rule-document-shape-validated",
+      "rule-person-privacy-consent-required-br-eu",
+      "rule-delete-blocked-by-relationships"
+    ],
+    "kind": "role",
+    "subtype": "Person",
+    "roleTag": "compras.Comprador",
+    "source": "/_102034_/l4/ontology/mdm.defs.ts",
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "indexed": true,
+          "derived": true,
+          "description": "mdmId; stable through promotion and merge."
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true,
+          "writePrecondition": true,
+          "description": "Bumped by the engine on every write; optimistic concurrency."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "description": "Registro mestre da pessoa que atua como comprador no módulo compras.",
+          "fields": {
+            "identification": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "subtype": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    {
+                      "value": "Person",
+                      "title": "Pessoa"
+                    }
+                  ],
+                  "description": "Sempre pessoa física: o comprador é uma pessoa.",
+                  "title": "Subtipo"
+                },
+                "name": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "maxLength": 200,
+                  "description": "Nome do comprador, como aparece nos pedidos de compra e nos produtos fornecidos que ele cadastra.",
+                  "title": "Nome"
+                },
+                "status": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    {
+                      "value": "Active",
+                      "title": "Ativo"
+                    },
+                    {
+                      "value": "Inactive",
+                      "title": "Inativo"
+                    },
+                    {
+                      "value": "Merged",
+                      "title": "Mesclado"
+                    },
+                    {
+                      "value": "Blocked",
+                      "title": "Bloqueado"
+                    }
+                  ],
+                  "title": "Situação",
+                  "description": "Situação do registro mestre; um comprador inativo deixa de abrir pedidos."
+                },
+                "docType": {
+                  "type": "enum",
+                  "indexed": true,
+                  "values": [
+                    {
+                      "value": "CPF",
+                      "title": "CPF"
+                    }
+                  ],
+                  "title": "Tipo de documento",
+                  "description": "Documento nacional do comprador, usado para evitar cadastro duplicado."
+                },
+                "docId": {
+                  "type": "string",
+                  "indexed": true,
+                  "description": "Número do CPF do comprador.",
+                  "title": "Número do documento",
+                  "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$"
+                },
+                "countryCode": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "pattern": "^[A-Z]{2}$",
+                  "maxLength": 2,
+                  "default": "US",
+                  "description": "País do documento e das regras legais aplicáveis ao comprador (BR).",
+                  "title": "País"
+                },
+                "tags": {
+                  "type": "string",
+                  "required": true,
+                  "collection": true,
+                  "derived": true,
+                  "description": "Papéis de módulo da pessoa; inclui compras.Comprador.",
+                  "title": "Papéis"
+                }
+              },
+              "description": "Dados de identificação da pessoa comprador, mantidos pela organização."
+            },
+            "base": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "contacts": {
+                  "type": "object",
+                  "required": true,
+                  "collection": true,
+                  "of": "ContactSummary",
+                  "derived": true,
+                  "description": "Resumo dos canais de contato do comprador (telefone, e-mail), mantidos como registros vinculados.",
+                  "title": "Contatos"
+                },
+                "relationshipRefs": {
+                  "type": "object",
+                  "required": true,
+                  "derived": true,
+                  "description": "Chaves compactas dos vínculos da pessoa, recalculadas pela plataforma.",
+                  "title": "Vínculos"
+                }
+              },
+              "description": "Dados comuns a todo registro mestre."
+            },
+            "person": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "privacyConsent": {
+                  "type": "object",
+                  "of": "PrivacyConsent",
+                  "description": "Consentimento LGPD do comprador, exigido para residentes no Brasil.",
+                  "title": "Consentimento de privacidade"
+                }
+              },
+              "description": "Dados de pessoa física do comprador."
+            },
+            "general": {
+              "type": "object",
+              "owner": "organization",
+              "open": true,
+              "description": "Campos promovidos pela organização; o módulo compras apenas lê."
+            },
+            "compras": {
+              "type": "object",
+              "owner": "module",
+              "fields": {},
+              "description": "Module namespace; the prompt asked for no data of this module about the record."
+            }
+          }
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Comprador",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Comprador",
+      "detail": "Comprador.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Comprador",
+      "detail": "Comprador.details.identification.docType.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Comprador",
+      "detail": "Comprador.details.identification.docId.pattern"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Comprador",
+      "detail": "details.compras"
+    }
+  ]
+}

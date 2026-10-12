@@ -1,0 +1,171 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "compras",
+    "entityId": "ProdutoFornecido",
+    "title": "Produto fornecido",
+    "description": "Produto que um fornecedor fornece, com o preço combinado vigente, usado para sugerir o preço nos itens do pedido.",
+    "displayField": "produtoId",
+    "relationships": {
+      "fornecedor": {
+        "relationshipId": "produtoFornecidoFornecedor",
+        "to": "Fornecedor",
+        "via": "ProdutoFornecido.fornecedorId",
+        "cardinality": "N:1",
+        "title": "Fornecedor do produto",
+        "description": "Cada produto fornecido pertence a um fornecedor.",
+        "mode": "fk",
+        "required": true
+      },
+      "produto": {
+        "relationshipId": "produtoFornecidoProduto",
+        "to": "Produto",
+        "via": "ProdutoFornecido.produtoId",
+        "cardinality": "N:1",
+        "title": "Produto do catálogo",
+        "description": "Cada produto fornecido aponta para o produto do catálogo.",
+        "mode": "fk",
+        "required": true
+      },
+      "comprador": {
+        "relationshipId": "produtoFornecidoComprador",
+        "to": "Comprador",
+        "via": "ProdutoFornecido.compradorId",
+        "cardinality": "N:1",
+        "title": "Comprador responsável",
+        "description": "Comprador responsável pelo cadastro e pela negociação do preço combinado.",
+        "mode": "fk",
+        "required": true
+      }
+    },
+    "capabilities": {
+      "read.byId": "Abre um produto fornecido pelo id para o comprador conferir ou ajustar o preço combinado.",
+      "locate.byColumn": "Lista os produtos fornecidos filtrando por fornecedor, produto, comprador ou ativo, usada pelo comprador na tela do fornecedor e ao montar o pedido.",
+      "listByForeignKey": "Lista os produtos e preços combinados de um fornecedor na ficha dele (verFornecedor), e preenche de uma vez os preços sugeridos dos itens de um pedido.",
+      "count": "Conta quantos produtos ativos cada fornecedor fornece, exibido no cabeçalho da ficha do fornecedor.",
+      "create": "Inclui um produto fornecido com o preço combinado, quando o comprador escolhe o produto e informa o preço (incluirProdutoFornecido).",
+      "update": "Altera o preço combinado, a data da negociação ou desativa o produto quando há nova negociação (ajustarPreco), feito pelo comprador.",
+      "delete": "Remove um produto fornecido cadastrado por engano, feito pelo comprador antes de ser usado em pedidos.",
+      "uniqueKey": "Recusa um segundo cadastro do mesmo produto para o mesmo fornecedor, pelo índice único de fornecedor e produto.",
+      "read.mdmRecord": "Lê no MDM a razão social do fornecedor, o nome e a unidade do produto e o nome do comprador para exibir na lista.",
+      "comment": "Permite ao comprador deixar notas sobre a negociação do preço com o fornecedor."
+    },
+    "rules": [
+      "precoCombinadoPositivo",
+      "produtoUnicoPorFornecedor",
+      "produtoFornecidoInativoNaoSugerido"
+    ],
+    "kind": "entity",
+    "class": "supporting",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "compras_produtofornecido",
+      "kind": "relational"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "fornecedorId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "Fornecedor"
+          ],
+          "title": "Fornecedor",
+          "description": "Fornecedor que fornece o produto pelo preço combinado."
+        },
+        "produtoId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "Produto"
+          ],
+          "title": "Produto",
+          "description": "Produto do catálogo que o fornecedor fornece; usado para sugerir o preço nos itens do pedido."
+        },
+        "compradorId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "Comprador"
+          ],
+          "title": "Comprador responsável",
+          "description": "Comprador que cadastrou o produto fornecido e negociou o preço combinado."
+        },
+        "ativo": {
+          "type": "boolean",
+          "required": true,
+          "indexed": true,
+          "title": "Ativo",
+          "description": "Indica se o fornecedor ainda fornece este produto; só os ativos são sugeridos nos itens do pedido."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "title": "Detalhes",
+          "description": "Condições combinadas com o fornecedor para este produto.",
+          "fields": {
+            "precoCombinado": {
+              "type": "money",
+              "required": true,
+              "title": "Preço combinado",
+              "description": "Preço unitário vigente negociado com o fornecedor, sugerido nos itens do pedido de compra.",
+              "min": 0
+            },
+            "dataNegociacao": {
+              "type": "date",
+              "required": true,
+              "title": "Data da negociação",
+              "description": "Data em que o preço combinado atual foi negociado com o fornecedor."
+            },
+            "codigoNoFornecedor": {
+              "type": "string",
+              "title": "Código no fornecedor",
+              "description": "Código que o fornecedor usa para este produto no catálogo dele, para conferência no pedido.",
+              "maxLength": 60
+            },
+            "quantidadeMinima": {
+              "type": "number",
+              "title": "Quantidade mínima",
+              "description": "Quantidade mínima por pedido combinada com o fornecedor, quando houver.",
+              "min": 0
+            },
+            "observacoes": {
+              "type": "text",
+              "title": "Observações",
+              "description": "Anotações livres do comprador sobre a negociação deste produto.",
+              "maxLength": 2000
+            }
+          }
+        }
+      }
+    },
+    "uniqueKeys": [
+      [
+        "fornecedorId",
+        "produtoId"
+      ]
+    ]
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ProdutoFornecido",
+      "detail": "record.fields.id, record.fields.version"
+    }
+  ]
+}

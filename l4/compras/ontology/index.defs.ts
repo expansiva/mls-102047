@@ -1,11 +1,11 @@
 /// <mls fileReference="_102047_/l4/compras/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const comprasOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "compras",
-  "businessDomain": "Compras",
+  "businessDomain": "Compras: cadastro de fornecedores e produtos fornecidos com preço combinado, pedidos de compra com aprovação acima de valor limite, recebimento total ou parcial com entrada no estoque e painel de acompanhamento.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "compras",
@@ -13,119 +13,156 @@ export const comprasOntologyIndex = {
   },
   "entities": [
     {
-      "entityId": "Supplier",
+      "entityId": "Fornecedor",
       "kind": "role",
       "subtype": "Company"
     },
     {
-      "entityId": "SupplierContact",
+      "entityId": "ContatoFornecedor",
       "kind": "role",
       "subtype": "ContactChannel"
     },
     {
-      "entityId": "Product",
+      "entityId": "Produto",
       "kind": "role",
       "subtype": "Product"
     },
     {
-      "entityId": "Buyer",
+      "entityId": "Comprador",
       "kind": "role",
       "subtype": "Person"
     },
     {
-      "entityId": "SupplierOffering",
+      "entityId": "ProdutoFornecido",
       "kind": "entity",
       "class": "supporting"
     },
     {
-      "entityId": "PurchaseOrder",
+      "entityId": "PedidoCompra",
       "kind": "entity",
       "class": "core"
     },
     {
-      "entityId": "GoodsReceipt",
+      "entityId": "ItemPedido",
+      "kind": "entity",
+      "class": "supporting"
+    },
+    {
+      "entityId": "Recebimento",
       "kind": "entity",
       "class": "event"
     },
     {
-      "entityId": "PurchaseOrderDashboard",
+      "entityId": "PainelCompras",
       "kind": "entity",
       "class": "supporting"
     }
   ],
   "relationships": [
     {
-      "relationshipId": "supplierHasContact",
-      "from": "Supplier",
-      "to": "SupplierContact",
+      "relationshipId": "fornecedorContato",
+      "from": "Fornecedor",
+      "to": "ContatoFornecedor",
       "type": "oneToMany",
       "required": false,
       "mode": "mdmRelationship",
-      "description": "Um fornecedor pode ter canais de contato vinculados para sua comunicação comercial.",
+      "description": "O fornecedor possui canais de contato (telefone, e-mail) vinculados.",
       "catalogType": "HasContact"
     },
     {
-      "relationshipId": "supplierSuppliesProduct",
-      "from": "Supplier",
-      "to": "Product",
+      "relationshipId": "produtoFornecidoFornecedor",
+      "from": "ProdutoFornecido",
+      "to": "Fornecedor",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada produto fornecido pertence a um fornecedor.",
+      "field": "ProdutoFornecido.fornecedorId"
+    },
+    {
+      "relationshipId": "produtoFornecidoProduto",
+      "from": "ProdutoFornecido",
+      "to": "Produto",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada produto fornecido aponta para o produto do catálogo.",
+      "field": "ProdutoFornecido.produtoId"
+    },
+    {
+      "relationshipId": "produtoFornecidoComprador",
+      "from": "ProdutoFornecido",
+      "to": "Comprador",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Comprador responsável pelo cadastro e pela negociação do preço combinado.",
+      "field": "ProdutoFornecido.compradorId"
+    },
+    {
+      "relationshipId": "fornecedorProdutos",
+      "from": "Fornecedor",
+      "to": "Produto",
       "type": "manyToMany",
       "required": false,
-      "mode": "mdmRelationship",
-      "description": "Um fornecedor pode fornecer diversos produtos, e um produto pode ser fornecido por diversos fornecedores.",
-      "catalogType": "SuppliesProduct"
+      "mode": "throughTable",
+      "description": "Produtos que o fornecedor fornece, obtidos pelos produtos fornecidos cadastrados.",
+      "through": "ProdutoFornecido",
+      "path": "Fornecedor <- ProdutoFornecido.fornecedorId -> ProdutoFornecido.produtoId -> Produto",
+      "derived": true
     },
     {
-      "relationshipId": "supplierOfferingSupplier",
-      "from": "SupplierOffering",
-      "to": "Supplier",
+      "relationshipId": "pedidoFornecedor",
+      "from": "PedidoCompra",
+      "to": "Fornecedor",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento pertence a um fornecedor.",
-      "field": "SupplierOffering.supplierId"
+      "description": "Cada pedido de compra é feito para um fornecedor.",
+      "field": "PedidoCompra.fornecedorId"
     },
     {
-      "relationshipId": "supplierOfferingProduct",
-      "from": "SupplierOffering",
-      "to": "Product",
+      "relationshipId": "pedidoComprador",
+      "from": "PedidoCompra",
+      "to": "Comprador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento define o preço combinado para um produto.",
-      "field": "SupplierOffering.productId"
+      "description": "Comprador que abriu e enviou o pedido.",
+      "field": "PedidoCompra.compradorId"
     },
     {
-      "relationshipId": "supplierOfferingBuyer",
-      "from": "SupplierOffering",
-      "to": "Buyer",
+      "relationshipId": "itemPedidoPedido",
+      "from": "ItemPedido",
+      "to": "PedidoCompra",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento é cadastrada por um comprador para permitir o escopo pessoal do cadastro.",
-      "field": "SupplierOffering.buyerId"
+      "description": "Cada item pertence a um pedido de compra, que tem um ou mais itens.",
+      "field": "ItemPedido.pedidoCompraId"
     },
     {
-      "relationshipId": "purchaseOrderSupplier",
-      "from": "PurchaseOrder",
-      "to": "Supplier",
+      "relationshipId": "itemPedidoProduto",
+      "from": "ItemPedido",
+      "to": "Produto",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada pedido de compra é aberto para um fornecedor.",
-      "field": "PurchaseOrder.supplierId"
+      "description": "Cada item do pedido é de um produto.",
+      "field": "ItemPedido.produtoId"
     },
     {
-      "relationshipId": "goodsReceiptPurchaseOrder",
-      "from": "GoodsReceipt",
-      "to": "PurchaseOrder",
+      "relationshipId": "recebimentoPedido",
+      "from": "Recebimento",
+      "to": "PedidoCompra",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento registra a entrega total ou parcial de um pedido de compra.",
-      "field": "GoodsReceipt.purchaseOrderId"
+      "description": "Cada recebimento registra a chegada, total ou parcial, de um pedido de compra.",
+      "field": "Recebimento.pedidoCompraId"
     }
   ]
-} as const satisfies Ns5OntologyIndexV3;
+} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
 
 export type ComprasOntologyIndexType = typeof comprasOntologyIndex;
 

@@ -1,36 +1,57 @@
 {
   "candidates": [
     {
-      "kind": "uncitedHumanTransition",
-      "candidateId": "uncited:PurchaseOrder.rejectPurchaseOrder",
-      "entityId": "PurchaseOrder",
-      "transitionId": "rejectPurchaseOrder",
-      "by": [
-        "gerenteCompras"
-      ],
-      "from": [
-        "pendingApproval"
-      ],
-      "to": "rejected",
-      "description": "Rejeita o pedido submetido, impedindo seu envio ao fornecedor.",
-      "likelyCoveredBy": []
-    },
-    {
       "kind": "incompleteDecide",
-      "candidateId": "decide:PurchaseOrder.pendingApproval",
-      "entityId": "PurchaseOrder",
-      "origin": "pendingApproval",
-      "journeyId": "decidirPedidoSubmetido",
-      "stepId": "decidirAprovarOuRejeitar",
+      "candidateId": "decide:PedidoCompra.aguardandoAprovacao",
+      "entityId": "PedidoCompra",
+      "origin": "aguardandoAprovacao",
+      "journeyId": "aprovarPedido",
+      "stepId": "decidirPedido",
       "transitionIds": [
-        "decidePurchaseOrder",
-        "rejectPurchaseOrder"
+        "liberarAbaixoLimite",
+        "aprovar",
+        "rejeitar"
       ],
       "citedTransitionIds": [
-        "decidePurchaseOrder"
+        "aprovar",
+        "rejeitar"
+      ]
+    },
+    {
+      "kind": "writtenSwitch",
+      "candidateId": "switch:ProdutoFornecido.ativo",
+      "entityId": "ProdutoFornecido",
+      "fieldId": "ativo",
+      "title": "Ativo",
+      "type": "boolean",
+      "citedBy": [
+        "derived:Fornecedor.status",
+        "derived:ContatoFornecedor.status",
+        "derived:Produto.status",
+        "derived:Comprador.status"
       ]
     }
   ],
-  "verdicts": [],
-  "rounds": 0
+  "verdicts": [
+    {
+      "candidateId": "switch:ProdutoFornecido.ativo",
+      "verdict": "transitionUnjustified",
+      "journeyBrief": {
+        "actor": "",
+        "title": "",
+        "goal": "",
+        "transitionRef": ""
+      },
+      "coveredBy": "",
+      "states": []
+    }
+  ],
+  "rounds": 0,
+  "comments": [
+    {
+      "code": "NS5_JUDGE_COVERED_KIND",
+      "message": "coveredByAct applies only to an uncited human transition.",
+      "candidateId": "decide:PedidoCompra.aguardandoAprovacao"
+    }
+  ]
 }

@@ -5,392 +5,1259 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
-      "pageId": "pedidos_de_compra_comprador",
+      "pageId": "inicio_comprador",
       "actors": [
         "comprador"
       ],
       "reads": [
         {
-          "entity": "Buyer",
+          "entity": "Comprador",
           "family": "mdm",
           "scope": "own",
           "derived": [],
           "from": [
-            "grant:compradorPerfilProprio",
-            "journey:abrirEenviarPedidoCompra/abrirPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/consultarCondicoesFornecimento",
-            "journey:abrirEenviarPedidoCompra/enviarPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/localizarFornecedor",
-            "relationship:Buyer/supplierOfferingBuyer",
-            "relationship:SupplierOffering/supplierOfferingBuyer"
+            "grant:compradorProprioCadastro",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador"
           ]
         },
         {
-          "entity": "Product",
+          "entity": "Fornecedor",
           "family": "mdm",
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:compradorCadastrosDeCompra",
-            "journey:abrirEenviarPedidoCompra/abrirPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/consultarCondicoesFornecimento",
-            "journey:abrirEenviarPedidoCompra/enviarPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/localizarFornecedor",
-            "relationship:Product/supplierOfferingProduct",
-            "relationship:Product/supplierSuppliesProduct",
-            "relationship:Supplier/supplierSuppliesProduct",
-            "relationship:SupplierOffering/supplierOfferingProduct"
+            "grant:compradorFornecedores",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor"
           ]
         },
         {
-          "entity": "PurchaseOrder",
+          "entity": "ItemPedido",
           "family": "tdm",
-          "scope": "organization",
+          "scope": "own",
           "derived": [
-            "details.isOpen",
-            "details.isOverdue",
-            "details.orderTotal",
-            "details.receiptSituation",
-            "details.requiresApproval"
+            "details.precoDivergeDoCombinado",
+            "details.quantidadeRecebida",
+            "details.saldoAReceber",
+            "details.totalmenteRecebido",
+            "details.valorTotalItem"
           ],
           "from": [
-            "grant:compradorPedidosDeCompra",
-            "journey:abrirEenviarPedidoCompra/abrirPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/consultarCondicoesFornecimento",
-            "journey:abrirEenviarPedidoCompra/enviarPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/localizarFornecedor",
-            "relationship:PurchaseOrder/purchaseOrderSupplier",
-            "relationship:Supplier/purchaseOrderSupplier"
+            "grant:compradorMeusPedidos",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/itemPedidoProduto"
           ]
         },
         {
-          "entity": "Supplier",
+          "entity": "PedidoCompra",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.acimaDoLimite",
+            "details.atrasado",
+            "details.emAberto",
+            "details.quantidadePendente",
+            "details.quantidadeRecebida",
+            "details.valorTotal"
+          ],
+          "from": [
+            "grant:compradorMeusPedidos",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:PedidoCompra/pedidoFornecedor"
+          ]
+        },
+        {
+          "entity": "Produto",
           "family": "mdm",
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:compradorCadastrosDeCompra",
-            "journey:abrirEenviarPedidoCompra/abrirPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/consultarCondicoesFornecimento",
-            "journey:abrirEenviarPedidoCompra/enviarPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/localizarFornecedor",
-            "relationship:Product/supplierSuppliesProduct",
-            "relationship:PurchaseOrder/purchaseOrderSupplier",
-            "relationship:Supplier/purchaseOrderSupplier",
-            "relationship:Supplier/supplierOfferingSupplier",
-            "relationship:Supplier/supplierSuppliesProduct",
-            "relationship:SupplierOffering/supplierOfferingSupplier"
+            "grant:compradorCatalogoProdutos",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:Produto/produtoFornecidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoProduto"
           ]
         },
         {
-          "entity": "SupplierOffering",
+          "entity": "ProdutoFornecido",
           "family": "tdm",
-          "scope": "own",
+          "scope": "organization",
           "derived": [],
           "from": [
-            "grant:compradorCondicoesProprias",
-            "journey:abrirEenviarPedidoCompra/abrirPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/consultarCondicoesFornecimento",
-            "journey:abrirEenviarPedidoCompra/enviarPedidoCompra",
-            "journey:abrirEenviarPedidoCompra/localizarFornecedor",
-            "relationship:Buyer/supplierOfferingBuyer",
-            "relationship:Product/supplierOfferingProduct",
-            "relationship:Supplier/supplierOfferingSupplier",
-            "relationship:Supplier/supplierSuppliesProduct",
-            "relationship:SupplierOffering/supplierOfferingBuyer",
-            "relationship:SupplierOffering/supplierOfferingProduct",
-            "relationship:SupplierOffering/supplierOfferingSupplier"
+            "grant:compradorProdutosFornecidos",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:Produto/produtoFornecidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor",
+            "relationship:ProdutoFornecido/produtoFornecidoProduto"
           ]
         }
       ],
       "writes": [
         {
-          "entity": "PurchaseOrder",
+          "entity": "ItemPedido",
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:abrirEenviarPedidoCompra/abrirPedidoCompra"
+            "journey:abrirEnviarPedido/incluirItem"
           ]
         },
         {
-          "entity": "PurchaseOrder",
+          "entity": "PedidoCompra",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:abrirEnviarPedido/abrirPedido"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
           "operation": "transition",
-          "transitionRef": "sendPurchaseOrder",
+          "transitionRef": "enviar",
           "from": [
-            "journey:abrirEenviarPedidoCompra/enviarPedidoCompra"
+            "journey:abrirEnviarPedido/enviarPedido"
           ]
         }
       ]
     },
     {
-      "pageId": "fornecedores_e_condicoes",
+      "pageId": "meus_pedidos",
       "actors": [
         "comprador"
       ],
       "reads": [
         {
-          "entity": "Buyer",
+          "entity": "Comprador",
           "family": "mdm",
           "scope": "own",
           "derived": [],
           "from": [
-            "grant:compradorPerfilProprio",
-            "journey:cadastrarFornecedor/cadastrarFornecedor",
-            "journey:cadastrarFornecedor/localizarProduto",
-            "journey:cadastrarFornecedor/registrarCondicaoFornecimento",
-            "relationship:Buyer/supplierOfferingBuyer",
-            "relationship:SupplierOffering/supplierOfferingBuyer"
+            "grant:compradorProprioCadastro",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador"
           ]
         },
         {
-          "entity": "Product",
+          "entity": "ContatoFornecedor",
           "family": "mdm",
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:compradorCadastrosDeCompra",
-            "journey:cadastrarFornecedor/cadastrarFornecedor",
-            "journey:cadastrarFornecedor/localizarProduto",
-            "journey:cadastrarFornecedor/registrarCondicaoFornecimento",
-            "relationship:Product/supplierOfferingProduct",
-            "relationship:Product/supplierSuppliesProduct",
-            "relationship:Supplier/supplierSuppliesProduct",
-            "relationship:SupplierOffering/supplierOfferingProduct"
+            "grant:compradorFornecedores",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:ContatoFornecedor/fornecedorContato",
+            "relationship:Fornecedor/fornecedorContato",
+            "relationship:Fornecedor/pedidoFornecedor"
           ]
         },
         {
-          "entity": "PurchaseOrder",
-          "family": "tdm",
+          "entity": "Fornecedor",
+          "family": "mdm",
           "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:compradorFornecedores",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:ContatoFornecedor/fornecedorContato",
+            "relationship:Fornecedor/fornecedorContato",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor"
+          ]
+        },
+        {
+          "entity": "ItemPedido",
+          "family": "tdm",
+          "scope": "own",
           "derived": [
-            "details.isOpen",
-            "details.isOverdue",
-            "details.orderTotal",
-            "details.receiptSituation",
-            "details.requiresApproval"
+            "details.precoDivergeDoCombinado",
+            "details.quantidadeRecebida",
+            "details.saldoAReceber",
+            "details.totalmenteRecebido",
+            "details.valorTotalItem"
           ],
           "from": [
-            "grant:compradorPedidosDeCompra",
-            "journey:cadastrarFornecedor/cadastrarFornecedor",
-            "journey:cadastrarFornecedor/localizarProduto",
-            "journey:cadastrarFornecedor/registrarCondicaoFornecimento",
-            "relationship:PurchaseOrder/purchaseOrderSupplier",
-            "relationship:Supplier/purchaseOrderSupplier"
+            "grant:compradorMeusPedidos",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/itemPedidoProduto"
           ]
         },
         {
-          "entity": "Supplier",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "grant:compradorCadastrosDeCompra",
-            "journey:cadastrarFornecedor/cadastrarFornecedor",
-            "journey:cadastrarFornecedor/localizarProduto",
-            "journey:cadastrarFornecedor/registrarCondicaoFornecimento",
-            "relationship:Product/supplierSuppliesProduct",
-            "relationship:PurchaseOrder/purchaseOrderSupplier",
-            "relationship:Supplier/purchaseOrderSupplier",
-            "relationship:Supplier/supplierHasContact",
-            "relationship:Supplier/supplierOfferingSupplier",
-            "relationship:Supplier/supplierSuppliesProduct",
-            "relationship:SupplierContact/supplierHasContact",
-            "relationship:SupplierOffering/supplierOfferingSupplier"
-          ]
-        },
-        {
-          "entity": "SupplierContact",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "grant:compradorCadastrosDeCompra",
-            "journey:cadastrarFornecedor/cadastrarFornecedor",
-            "journey:cadastrarFornecedor/localizarProduto",
-            "journey:cadastrarFornecedor/registrarCondicaoFornecimento",
-            "relationship:Supplier/supplierHasContact",
-            "relationship:SupplierContact/supplierHasContact"
-          ]
-        },
-        {
-          "entity": "SupplierOffering",
+          "entity": "PedidoCompra",
           "family": "tdm",
           "scope": "own",
+          "derived": [
+            "details.acimaDoLimite",
+            "details.atrasado",
+            "details.emAberto",
+            "details.quantidadePendente",
+            "details.quantidadeRecebida",
+            "details.valorTotal"
+          ],
+          "from": [
+            "grant:compradorMeusPedidos",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:PedidoCompra/pedidoFornecedor"
+          ]
+        },
+        {
+          "entity": "Produto",
+          "family": "mdm",
+          "scope": "organization",
           "derived": [],
           "from": [
-            "grant:compradorCondicoesProprias",
-            "journey:cadastrarFornecedor/cadastrarFornecedor",
-            "journey:cadastrarFornecedor/localizarProduto",
-            "journey:cadastrarFornecedor/registrarCondicaoFornecimento",
-            "relationship:Buyer/supplierOfferingBuyer",
-            "relationship:Product/supplierOfferingProduct",
-            "relationship:Supplier/supplierOfferingSupplier",
-            "relationship:SupplierOffering/supplierOfferingBuyer",
-            "relationship:SupplierOffering/supplierOfferingProduct",
-            "relationship:SupplierOffering/supplierOfferingSupplier"
+            "grant:compradorCatalogoProdutos",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:Produto/produtoFornecidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoProduto"
+          ]
+        },
+        {
+          "entity": "ProdutoFornecido",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:compradorProdutosFornecidos",
+            "journey:abrirEnviarPedido/abrirPedido",
+            "journey:abrirEnviarPedido/enviarPedido",
+            "journey:abrirEnviarPedido/incluirItem",
+            "journey:abrirEnviarPedido/revisarPedido",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:Produto/produtoFornecidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor",
+            "relationship:ProdutoFornecido/produtoFornecidoProduto"
           ]
         }
       ],
       "writes": [
         {
-          "entity": "Supplier",
+          "entity": "ItemPedido",
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:cadastrarFornecedor/cadastrarFornecedor"
+            "journey:abrirEnviarPedido/incluirItem"
           ]
         },
         {
-          "entity": "SupplierOffering",
+          "entity": "PedidoCompra",
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:cadastrarFornecedor/registrarCondicaoFornecimento"
+            "journey:abrirEnviarPedido/abrirPedido"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "operation": "transition",
+          "transitionRef": "enviar",
+          "from": [
+            "journey:abrirEnviarPedido/enviarPedido"
           ]
         }
       ]
     },
     {
-      "pageId": "pedidos_de_compra_gerente",
+      "pageId": "fornecedores",
+      "actors": [
+        "almoxarife",
+        "comprador",
+        "gerenteCompras"
+      ],
+      "reads": [
+        {
+          "entity": "Comprador",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:compradorProprioCadastro",
+            "grant:gerenteConsultaCadastros",
+            "journey:cadastrarFornecedor/buscarFornecedor",
+            "journey:cadastrarFornecedor/registrarFornecedor",
+            "journey:cadastrarProdutoFornecido/ajustarPreco",
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido",
+            "journey:cadastrarProdutoFornecido/localizarFornecedor",
+            "journey:cadastrarProdutoFornecido/verFornecedor",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador"
+          ]
+        },
+        {
+          "entity": "ContatoFornecedor",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:compradorFornecedores",
+            "journey:cadastrarFornecedor/buscarFornecedor",
+            "journey:cadastrarFornecedor/registrarFornecedor",
+            "journey:cadastrarProdutoFornecido/ajustarPreco",
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido",
+            "journey:cadastrarProdutoFornecido/localizarFornecedor",
+            "journey:cadastrarProdutoFornecido/verFornecedor",
+            "relationship:ContatoFornecedor/fornecedorContato",
+            "relationship:Fornecedor/fornecedorContato"
+          ]
+        },
+        {
+          "entity": "Fornecedor",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:almoxarifeConsultaCadastros",
+            "grant:compradorFornecedores",
+            "grant:gerenteConsultaCadastros",
+            "journey:cadastrarFornecedor/buscarFornecedor",
+            "journey:cadastrarFornecedor/registrarFornecedor",
+            "journey:cadastrarProdutoFornecido/ajustarPreco",
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido",
+            "journey:cadastrarProdutoFornecido/localizarFornecedor",
+            "journey:cadastrarProdutoFornecido/verFornecedor",
+            "relationship:ContatoFornecedor/fornecedorContato",
+            "relationship:Fornecedor/fornecedorContato",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor"
+          ]
+        },
+        {
+          "entity": "ItemPedido",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.precoDivergeDoCombinado",
+            "details.quantidadeRecebida",
+            "details.saldoAReceber",
+            "details.totalmenteRecebido",
+            "details.valorTotalItem"
+          ],
+          "from": [
+            "grant:almoxarifePedidosRecebimento",
+            "grant:compradorMeusPedidos",
+            "grant:gerentePedidos",
+            "journey:cadastrarFornecedor/buscarFornecedor",
+            "journey:cadastrarFornecedor/registrarFornecedor",
+            "journey:cadastrarProdutoFornecido/ajustarPreco",
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido",
+            "journey:cadastrarProdutoFornecido/localizarFornecedor",
+            "journey:cadastrarProdutoFornecido/verFornecedor",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:Produto/itemPedidoProduto"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.acimaDoLimite",
+            "details.atrasado",
+            "details.emAberto",
+            "details.quantidadePendente",
+            "details.quantidadeRecebida",
+            "details.valorTotal"
+          ],
+          "from": [
+            "grant:almoxarifePedidosRecebimento",
+            "grant:compradorMeusPedidos",
+            "grant:gerentePedidos",
+            "journey:cadastrarFornecedor/buscarFornecedor",
+            "journey:cadastrarFornecedor/registrarFornecedor",
+            "journey:cadastrarProdutoFornecido/ajustarPreco",
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido",
+            "journey:cadastrarProdutoFornecido/localizarFornecedor",
+            "journey:cadastrarProdutoFornecido/verFornecedor",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:Recebimento/recebimentoPedido"
+          ]
+        },
+        {
+          "entity": "Produto",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:almoxarifeConsultaCadastros",
+            "grant:compradorCatalogoProdutos",
+            "grant:gerenteConsultaCadastros",
+            "journey:cadastrarFornecedor/buscarFornecedor",
+            "journey:cadastrarFornecedor/registrarFornecedor",
+            "journey:cadastrarProdutoFornecido/ajustarPreco",
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido",
+            "journey:cadastrarProdutoFornecido/localizarFornecedor",
+            "journey:cadastrarProdutoFornecido/verFornecedor",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:Produto/produtoFornecidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoProduto"
+          ]
+        },
+        {
+          "entity": "ProdutoFornecido",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:compradorProdutosFornecidos",
+            "grant:gerenteConsultaCadastros",
+            "journey:cadastrarFornecedor/buscarFornecedor",
+            "journey:cadastrarFornecedor/registrarFornecedor",
+            "journey:cadastrarProdutoFornecido/ajustarPreco",
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido",
+            "journey:cadastrarProdutoFornecido/localizarFornecedor",
+            "journey:cadastrarProdutoFornecido/verFornecedor",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:Produto/produtoFornecidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor",
+            "relationship:ProdutoFornecido/produtoFornecidoProduto"
+          ]
+        },
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeTotalRecebida",
+            "details.tipoRecebimento"
+          ],
+          "from": [
+            "grant:almoxarifeRecebimentos",
+            "grant:gerentePedidos",
+            "journey:cadastrarFornecedor/buscarFornecedor",
+            "journey:cadastrarFornecedor/registrarFornecedor",
+            "journey:cadastrarProdutoFornecido/ajustarPreco",
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido",
+            "journey:cadastrarProdutoFornecido/localizarFornecedor",
+            "journey:cadastrarProdutoFornecido/verFornecedor",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Recebimento/recebimentoPedido"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Fornecedor",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:cadastrarFornecedor/registrarFornecedor"
+          ]
+        },
+        {
+          "entity": "ProdutoFornecido",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:cadastrarProdutoFornecido/incluirProdutoFornecido"
+          ]
+        },
+        {
+          "entity": "ProdutoFornecido",
+          "operation": "update",
+          "transitionRef": "",
+          "from": [
+            "journey:cadastrarProdutoFornecido/ajustarPreco"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "produtos",
+      "actors": [
+        "almoxarife",
+        "comprador",
+        "gerenteCompras"
+      ],
+      "reads": [],
+      "writes": []
+    },
+    {
+      "pageId": "painel_compras",
       "actors": [
         "gerenteCompras"
       ],
       "reads": [
         {
-          "entity": "Product",
+          "entity": "Comprador",
           "family": "mdm",
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gerentePedidosDeCompra",
-            "journey:acompanharIndicadoresDeCompras/consultarPedidosDeCompra",
-            "journey:acompanharIndicadoresDeCompras/inspecionarIndicadoresDePedidos",
-            "journey:decidirPedidoAcimaDoLimite/inspecionarPedidoCompra",
-            "journey:decidirPedidoAcimaDoLimite/localizarPedidoPendente",
-            "journey:decidirPedidoAcimaDoLimite/registrarDecisaoDoPedido",
-            "relationship:Product/supplierSuppliesProduct",
-            "relationship:Supplier/purchaseOrderSupplier",
-            "relationship:Supplier/supplierSuppliesProduct"
+            "grant:gerenteConsultaCadastros",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador"
           ]
         },
         {
-          "entity": "PurchaseOrder",
+          "entity": "Fornecedor",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenteConsultaCadastros",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor"
+          ]
+        },
+        {
+          "entity": "ItemPedido",
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.isOpen",
-            "details.isOverdue",
-            "details.orderTotal",
-            "details.receiptSituation",
-            "details.requiresApproval"
+            "details.precoDivergeDoCombinado",
+            "details.quantidadeRecebida",
+            "details.saldoAReceber",
+            "details.totalmenteRecebido",
+            "details.valorTotalItem"
           ],
           "from": [
-            "grant:gerentePedidosDeCompra",
-            "journey:acompanharIndicadoresDeCompras/consultarPedidosDeCompra",
-            "journey:acompanharIndicadoresDeCompras/inspecionarIndicadoresDePedidos",
-            "journey:decidirPedidoAcimaDoLimite/inspecionarPedidoCompra",
-            "journey:decidirPedidoAcimaDoLimite/localizarPedidoPendente",
-            "journey:decidirPedidoAcimaDoLimite/registrarDecisaoDoPedido",
-            "relationship:PurchaseOrder/purchaseOrderSupplier",
-            "relationship:Supplier/purchaseOrderSupplier"
+            "grant:gerentePedidos",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/itemPedidoProduto"
           ]
         },
         {
-          "entity": "PurchaseOrderDashboard",
+          "entity": "PainelCompras",
           "family": "ddm",
           "scope": "organization",
           "derived": [
-            "details.openPurchaseOrdersCount",
-            "details.overduePurchaseOrdersCount",
-            "details.totalPurchasedAmount",
-            "groupKey",
-            "period"
+            "details.pedidosAtrasados",
+            "details.pedidosEmAberto",
+            "details.pedidosNoMes",
+            "details.totalComprado",
+            "fornecedorId",
+            "periodo"
           ],
           "from": [
-            "grant:gerenteIndicadoresDeCompras",
+            "grant:gerentePainel",
+            "journey:acompanharPainel/verPainel",
             "organism:highlights"
           ]
         },
         {
-          "entity": "Supplier",
+          "entity": "PedidoCompra",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.acimaDoLimite",
+            "details.atrasado",
+            "details.emAberto",
+            "details.quantidadePendente",
+            "details.quantidadeRecebida",
+            "details.valorTotal"
+          ],
+          "from": [
+            "grant:gerentePedidos",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:PedidoCompra/recebimentoPedido",
+            "relationship:Recebimento/recebimentoPedido"
+          ]
+        },
+        {
+          "entity": "Produto",
           "family": "mdm",
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gerentePedidosDeCompra",
-            "journey:acompanharIndicadoresDeCompras/consultarPedidosDeCompra",
-            "journey:acompanharIndicadoresDeCompras/inspecionarIndicadoresDePedidos",
-            "journey:decidirPedidoAcimaDoLimite/inspecionarPedidoCompra",
-            "journey:decidirPedidoAcimaDoLimite/localizarPedidoPendente",
-            "journey:decidirPedidoAcimaDoLimite/registrarDecisaoDoPedido",
-            "relationship:Product/supplierSuppliesProduct",
-            "relationship:PurchaseOrder/purchaseOrderSupplier",
-            "relationship:Supplier/purchaseOrderSupplier",
-            "relationship:Supplier/supplierSuppliesProduct"
+            "grant:gerenteConsultaCadastros",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:Produto/produtoFornecidoProduto"
+          ]
+        },
+        {
+          "entity": "ProdutoFornecido",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenteConsultaCadastros",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:Produto/produtoFornecidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor"
+          ]
+        },
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeTotalRecebida",
+            "details.tipoRecebimento"
+          ],
+          "from": [
+            "grant:gerentePedidos",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:PedidoCompra/recebimentoPedido",
+            "relationship:Recebimento/recebimentoPedido"
           ]
         }
       ],
       "writes": [
         {
-          "entity": "PurchaseOrder",
+          "entity": "PedidoCompra",
           "operation": "transition",
-          "transitionRef": "decidePurchaseOrder",
+          "transitionRef": "aprovar",
           "from": [
-            "journey:decidirPedidoAcimaDoLimite/registrarDecisaoDoPedido"
+            "journey:aprovarPedido/aprovar"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "operation": "transition",
+          "transitionRef": "liberarAbaixoLimite",
+          "from": [
+            "journey:aprovarPedido/decidirPedido"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "operation": "transition",
+          "transitionRef": "rejeitar",
+          "from": [
+            "journey:aprovarPedido/rejeitar"
           ]
         }
       ]
     },
     {
-      "pageId": "recebimentos_de_pedidos",
+      "pageId": "pedidos_compra",
       "actors": [
-        "almoxarife"
+        "gerenteCompras"
       ],
       "reads": [
         {
-          "entity": "GoodsReceipt",
-          "family": "tdm",
+          "entity": "Comprador",
+          "family": "mdm",
           "scope": "organization",
-          "derived": [
-            "details.receiptCompletion"
-          ],
+          "derived": [],
           "from": [
-            "grant:almoxarifeRecebimentos",
-            "journey:registrarRecebimentoPedido/inspecionarItensDoPedido",
-            "journey:registrarRecebimentoPedido/localizarPedidoParaRecebimento",
-            "journey:registrarRecebimentoPedido/registrarRecebimento",
-            "relationship:GoodsReceipt/goodsReceiptPurchaseOrder",
-            "relationship:PurchaseOrder/goodsReceiptPurchaseOrder"
+            "grant:gerenteConsultaCadastros",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador"
           ]
         },
         {
-          "entity": "PurchaseOrder",
+          "entity": "Fornecedor",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenteConsultaCadastros",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor"
+          ]
+        },
+        {
+          "entity": "ItemPedido",
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.isOpen",
-            "details.isOverdue",
-            "details.orderTotal",
-            "details.receiptSituation",
-            "details.requiresApproval"
+            "details.precoDivergeDoCombinado",
+            "details.quantidadeRecebida",
+            "details.saldoAReceber",
+            "details.totalmenteRecebido",
+            "details.valorTotalItem"
           ],
           "from": [
-            "grant:almoxarifeRecebimentos",
-            "journey:registrarRecebimentoPedido/inspecionarItensDoPedido",
-            "journey:registrarRecebimentoPedido/localizarPedidoParaRecebimento",
-            "journey:registrarRecebimentoPedido/registrarRecebimento",
-            "relationship:GoodsReceipt/goodsReceiptPurchaseOrder",
-            "relationship:PurchaseOrder/goodsReceiptPurchaseOrder"
+            "grant:gerentePedidos",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/itemPedidoProduto"
+          ]
+        },
+        {
+          "entity": "PainelCompras",
+          "family": "ddm",
+          "scope": "organization",
+          "derived": [
+            "details.pedidosAtrasados",
+            "details.pedidosEmAberto",
+            "details.pedidosNoMes",
+            "details.totalComprado",
+            "fornecedorId",
+            "periodo"
+          ],
+          "from": [
+            "grant:gerentePainel",
+            "journey:acompanharPainel/verPainel"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.acimaDoLimite",
+            "details.atrasado",
+            "details.emAberto",
+            "details.quantidadePendente",
+            "details.quantidadeRecebida",
+            "details.valorTotal"
+          ],
+          "from": [
+            "grant:gerentePedidos",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:PedidoCompra/recebimentoPedido",
+            "relationship:Recebimento/recebimentoPedido"
+          ]
+        },
+        {
+          "entity": "Produto",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenteConsultaCadastros",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/fornecedorProdutos",
+            "relationship:Produto/itemPedidoProduto",
+            "relationship:Produto/produtoFornecidoProduto"
+          ]
+        },
+        {
+          "entity": "ProdutoFornecido",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenteConsultaCadastros",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:Comprador/produtoFornecidoComprador",
+            "relationship:Fornecedor/fornecedorProdutos",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:Fornecedor/produtoFornecidoFornecedor",
+            "relationship:Produto/produtoFornecidoProduto",
+            "relationship:ProdutoFornecido/produtoFornecidoComprador",
+            "relationship:ProdutoFornecido/produtoFornecidoFornecedor"
+          ]
+        },
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeTotalRecebida",
+            "details.tipoRecebimento"
+          ],
+          "from": [
+            "grant:gerentePedidos",
+            "journey:acompanharPainel/listarAtrasados",
+            "journey:acompanharPainel/verPainel",
+            "journey:acompanharPainel/verPedido",
+            "journey:aprovarPedido/analisarPedido",
+            "journey:aprovarPedido/aprovar",
+            "journey:aprovarPedido/localizarPendentes",
+            "journey:aprovarPedido/rejeitar",
+            "relationship:PedidoCompra/recebimentoPedido",
+            "relationship:Recebimento/recebimentoPedido"
           ]
         }
       ],
       "writes": [
         {
-          "entity": "GoodsReceipt",
+          "entity": "PedidoCompra",
+          "operation": "transition",
+          "transitionRef": "aprovar",
+          "from": [
+            "journey:aprovarPedido/aprovar"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "operation": "transition",
+          "transitionRef": "liberarAbaixoLimite",
+          "from": [
+            "journey:aprovarPedido/decidirPedido"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "operation": "transition",
+          "transitionRef": "rejeitar",
+          "from": [
+            "journey:aprovarPedido/rejeitar"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "inicio_almoxarife",
+      "actors": [
+        "almoxarife"
+      ],
+      "reads": [
+        {
+          "entity": "Fornecedor",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:almoxarifeConsultaCadastros",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:PedidoCompra/pedidoFornecedor"
+          ]
+        },
+        {
+          "entity": "ItemPedido",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.precoDivergeDoCombinado",
+            "details.quantidadeRecebida",
+            "details.saldoAReceber",
+            "details.totalmenteRecebido",
+            "details.valorTotalItem"
+          ],
+          "from": [
+            "grant:almoxarifePedidosRecebimento",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/itemPedidoProduto"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.acimaDoLimite",
+            "details.atrasado",
+            "details.emAberto",
+            "details.quantidadePendente",
+            "details.quantidadeRecebida",
+            "details.valorTotal"
+          ],
+          "from": [
+            "grant:almoxarifePedidosRecebimento",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:Fornecedor/pedidoFornecedor",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:PedidoCompra/pedidoFornecedor",
+            "relationship:PedidoCompra/recebimentoPedido",
+            "relationship:Recebimento/recebimentoPedido"
+          ]
+        },
+        {
+          "entity": "Produto",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:almoxarifeConsultaCadastros",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/itemPedidoProduto"
+          ]
+        },
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeTotalRecebida",
+            "details.tipoRecebimento"
+          ],
+          "from": [
+            "grant:almoxarifeRecebimentos",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:PedidoCompra/recebimentoPedido",
+            "relationship:Recebimento/recebimentoPedido"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Recebimento",
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:registrarRecebimentoPedido/registrarRecebimento"
+            "journey:registrarRecebimento/registrarEntrada"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "recebimentos",
+      "actors": [
+        "almoxarife",
+        "gerenteCompras"
+      ],
+      "reads": [
+        {
+          "entity": "Comprador",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenteConsultaCadastros",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:PedidoCompra/pedidoComprador"
+          ]
+        },
+        {
+          "entity": "ItemPedido",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.precoDivergeDoCombinado",
+            "details.quantidadeRecebida",
+            "details.saldoAReceber",
+            "details.totalmenteRecebido",
+            "details.valorTotalItem"
+          ],
+          "from": [
+            "grant:almoxarifePedidosRecebimento",
+            "grant:gerentePedidos",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/itemPedidoProduto"
+          ]
+        },
+        {
+          "entity": "PedidoCompra",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.acimaDoLimite",
+            "details.atrasado",
+            "details.emAberto",
+            "details.quantidadePendente",
+            "details.quantidadeRecebida",
+            "details.valorTotal"
+          ],
+          "from": [
+            "grant:almoxarifePedidosRecebimento",
+            "grant:gerentePedidos",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:Comprador/pedidoComprador",
+            "relationship:ItemPedido/itemPedidoPedido",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:PedidoCompra/pedidoComprador",
+            "relationship:PedidoCompra/recebimentoPedido",
+            "relationship:Recebimento/recebimentoPedido"
+          ]
+        },
+        {
+          "entity": "Produto",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:almoxarifeConsultaCadastros",
+            "grant:gerenteConsultaCadastros",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:ItemPedido/itemPedidoProduto",
+            "relationship:PedidoCompra/itemPedidoPedido",
+            "relationship:Produto/itemPedidoProduto"
+          ]
+        },
+        {
+          "entity": "Recebimento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeTotalRecebida",
+            "details.tipoRecebimento"
+          ],
+          "from": [
+            "grant:almoxarifeRecebimentos",
+            "grant:gerentePedidos",
+            "journey:registrarRecebimento/conferirPedido",
+            "journey:registrarRecebimento/localizarPedido",
+            "journey:registrarRecebimento/registrarEntrada",
+            "relationship:PedidoCompra/recebimentoPedido",
+            "relationship:Recebimento/recebimentoPedido"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Recebimento",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:registrarRecebimento/registrarEntrada"
           ]
         }
       ]
@@ -398,6 +1265,6 @@
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-10-02T16:05:07.622Z"
+    "generatedAt": "2026-10-12T20:35:26.842Z"
   }
 }

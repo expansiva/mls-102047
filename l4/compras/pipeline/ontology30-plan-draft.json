@@ -1,220 +1,272 @@
 {
   "moduleName": "compras",
-  "businessDomain": "Compras",
+  "businessDomain": "Compras: cadastro de fornecedores e produtos fornecidos com preço combinado, pedidos de compra com aprovação acima de valor limite, recebimento total ou parcial com entrada no estoque e painel de acompanhamento.",
   "entities": [
     {
-      "entityId": "Supplier",
+      "entityId": "Fornecedor",
       "kind": "role",
       "family": "mdm",
       "title": "Fornecedor",
-      "description": "Empresa fornecedora cadastrada ou vinculada para disponibilizar produtos e condições de compra.",
+      "description": "Empresa com CNPJ e razão social da qual a organização compra; registro mestre compartilhado, com o papel de fornecedor no módulo compras.",
       "displayField": "details.identification.name",
       "subtype": "Company",
-      "roleTag": "compras.Supplier",
+      "roleTag": "compras.Fornecedor",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "SupplierContact",
+      "entityId": "ContatoFornecedor",
       "kind": "role",
       "family": "mdm",
       "title": "Contato do fornecedor",
-      "description": "Canal de contato vinculado ao fornecedor para comunicação comercial.",
+      "description": "Canal de contato (telefone, e-mail) do fornecedor, registrado como canal próprio e vinculado por HasContact.",
       "displayField": "details.identification.name",
       "subtype": "ContactChannel",
-      "roleTag": "compras.SupplierContact",
+      "roleTag": "compras.ContatoFornecedor",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "Product",
+      "entityId": "Produto",
       "kind": "role",
       "family": "mdm",
       "title": "Produto",
-      "description": "Produto do cadastro mestre que pode ser fornecido, pedido e recebido nas compras.",
+      "description": "Item de catálogo comprado de fornecedores; o registro mestre é mantido pelo módulo de estoque e aqui é apenas referenciado nas compras.",
       "displayField": "details.identification.name",
+      "writer": "inbound",
       "subtype": "Product",
-      "roleTag": "compras.Product",
+      "roleTag": "compras.Produto",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "Buyer",
+      "entityId": "Comprador",
       "kind": "role",
       "family": "mdm",
       "title": "Comprador",
-      "description": "Pessoa compradora vinculada às condições de fornecimento que cadastra para sustentar o escopo pessoal de seu trabalho.",
+      "description": "Pessoa que atua como comprador; responsável pelos produtos fornecidos e pedidos de compra que cadastra.",
       "displayField": "details.identification.name",
       "subtype": "Person",
-      "roleTag": "compras.Buyer",
+      "roleTag": "compras.Comprador",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "SupplierOffering",
+      "entityId": "ProdutoFornecido",
       "kind": "entity",
       "family": "tdm",
-      "title": "Condição de fornecimento",
-      "description": "Condição comercial de um produto fornecido por um fornecedor, incluindo o preço combinado.",
-      "displayField": "productId",
+      "title": "Produto fornecido",
+      "description": "Produto que um fornecedor fornece, com o preço combinado vigente, usado para sugerir o preço nos itens do pedido.",
+      "displayField": "produtoId",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "compras_supplieroffering",
+        "table": "compras_produtofornecido",
         "kind": "relational"
       }
     },
     {
-      "entityId": "PurchaseOrder",
+      "entityId": "PedidoCompra",
       "kind": "entity",
       "family": "tdm",
       "title": "Pedido de compra",
-      "description": "Pedido de compra aberto para um fornecedor, com itens, quantidades, preços e decisão de aprovação quando necessária.",
-      "displayField": "orderNumber",
+      "description": "Pedido aberto pelo comprador para um fornecedor, enviado, aprovado ou rejeitado pelo gerente quando acima do valor limite, e recebido total ou parcialmente.",
+      "displayField": "numero",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
-        "table": "compras_purchaseorder",
+        "table": "compras_pedidocompra",
         "kind": "relational"
       }
     },
     {
-      "entityId": "GoodsReceipt",
+      "entityId": "ItemPedido",
       "kind": "entity",
       "family": "tdm",
-      "title": "Recebimento de mercadorias",
-      "description": "Registro do recebimento total ou parcial dos itens de um pedido de compra, que origina a entrada no estoque.",
-      "displayField": "receiptNumber",
-      "class": "event",
-      "storage": {
-        "target": "moduleDatabase",
-        "table": "compras_goodsreceipt",
-        "kind": "relational"
-      }
-    },
-    {
-      "entityId": "PurchaseOrderDashboard",
-      "kind": "entity",
-      "family": "ddm",
-      "title": "Painel de pedidos de compra",
-      "description": "Resumo recalculado de pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês.",
-      "displayField": "period",
+      "title": "Item do pedido",
+      "description": "Produto do pedido de compra com quantidade e preço; a quantidade já recebida é derivada dos recebimentos.",
+      "displayField": "produtoId",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "compras_purchaseorderdashboard",
+        "table": "compras_itempedido",
+        "kind": "relational"
+      }
+    },
+    {
+      "entityId": "Recebimento",
+      "kind": "entity",
+      "family": "tdm",
+      "title": "Recebimento",
+      "description": "Registro da chegada total ou parcial de um pedido, com a quantidade recebida de cada item; gera a entrada no estoque dos produtos recebidos.",
+      "displayField": "dataRecebimento",
+      "class": "event",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "compras_recebimento",
+        "kind": "relational"
+      }
+    },
+    {
+      "entityId": "PainelCompras",
+      "kind": "entity",
+      "family": "ddm",
+      "title": "Painel de compras",
+      "description": "Resumo recalculado com a quantidade de pedidos em aberto, de pedidos atrasados e o total comprado por fornecedor no mês.",
+      "displayField": "periodo",
+      "class": "supporting",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "compras_painelcompras",
         "kind": "relational"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "supplierHasContact",
-      "from": "Supplier",
-      "to": "SupplierContact",
+      "relationshipId": "fornecedorContato",
+      "from": "Fornecedor",
+      "to": "ContatoFornecedor",
       "type": "oneToMany",
       "required": false,
       "mode": "mdmRelationship",
-      "description": "Um fornecedor pode ter canais de contato vinculados para sua comunicação comercial.",
+      "description": "O fornecedor possui canais de contato (telefone, e-mail) vinculados.",
       "catalogType": "HasContact"
     },
     {
-      "relationshipId": "supplierSuppliesProduct",
-      "from": "Supplier",
-      "to": "Product",
+      "relationshipId": "produtoFornecidoFornecedor",
+      "from": "ProdutoFornecido",
+      "to": "Fornecedor",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada produto fornecido pertence a um fornecedor.",
+      "field": "ProdutoFornecido.fornecedorId"
+    },
+    {
+      "relationshipId": "produtoFornecidoProduto",
+      "from": "ProdutoFornecido",
+      "to": "Produto",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Cada produto fornecido aponta para o produto do catálogo.",
+      "field": "ProdutoFornecido.produtoId"
+    },
+    {
+      "relationshipId": "produtoFornecidoComprador",
+      "from": "ProdutoFornecido",
+      "to": "Comprador",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Comprador responsável pelo cadastro e pela negociação do preço combinado.",
+      "field": "ProdutoFornecido.compradorId"
+    },
+    {
+      "relationshipId": "fornecedorProdutos",
+      "from": "Fornecedor",
+      "to": "Produto",
       "type": "manyToMany",
       "required": false,
-      "mode": "mdmRelationship",
-      "description": "Um fornecedor pode fornecer diversos produtos, e um produto pode ser fornecido por diversos fornecedores.",
-      "catalogType": "SuppliesProduct"
+      "mode": "throughTable",
+      "description": "Produtos que o fornecedor fornece, obtidos pelos produtos fornecidos cadastrados.",
+      "through": "ProdutoFornecido",
+      "path": "Fornecedor <- ProdutoFornecido.fornecedorId -> ProdutoFornecido.produtoId -> Produto",
+      "derived": true
     },
     {
-      "relationshipId": "supplierOfferingSupplier",
-      "from": "SupplierOffering",
-      "to": "Supplier",
+      "relationshipId": "pedidoFornecedor",
+      "from": "PedidoCompra",
+      "to": "Fornecedor",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento pertence a um fornecedor.",
-      "field": "SupplierOffering.supplierId"
+      "description": "Cada pedido de compra é feito para um fornecedor.",
+      "field": "PedidoCompra.fornecedorId"
     },
     {
-      "relationshipId": "supplierOfferingProduct",
-      "from": "SupplierOffering",
-      "to": "Product",
+      "relationshipId": "pedidoComprador",
+      "from": "PedidoCompra",
+      "to": "Comprador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento define o preço combinado para um produto.",
-      "field": "SupplierOffering.productId"
+      "description": "Comprador que abriu e enviou o pedido.",
+      "field": "PedidoCompra.compradorId"
     },
     {
-      "relationshipId": "supplierOfferingBuyer",
-      "from": "SupplierOffering",
-      "to": "Buyer",
+      "relationshipId": "itemPedidoPedido",
+      "from": "ItemPedido",
+      "to": "PedidoCompra",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento é cadastrada por um comprador para permitir o escopo pessoal do cadastro.",
-      "field": "SupplierOffering.buyerId"
+      "description": "Cada item pertence a um pedido de compra, que tem um ou mais itens.",
+      "field": "ItemPedido.pedidoCompraId"
     },
     {
-      "relationshipId": "purchaseOrderSupplier",
-      "from": "PurchaseOrder",
-      "to": "Supplier",
+      "relationshipId": "itemPedidoProduto",
+      "from": "ItemPedido",
+      "to": "Produto",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada pedido de compra é aberto para um fornecedor.",
-      "field": "PurchaseOrder.supplierId"
+      "description": "Cada item do pedido é de um produto.",
+      "field": "ItemPedido.produtoId"
     },
     {
-      "relationshipId": "goodsReceiptPurchaseOrder",
-      "from": "GoodsReceipt",
-      "to": "PurchaseOrder",
+      "relationshipId": "recebimentoPedido",
+      "from": "Recebimento",
+      "to": "PedidoCompra",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento registra a entrega total ou parcial de um pedido de compra.",
-      "field": "GoodsReceipt.purchaseOrderId"
+      "description": "Cada recebimento registra a chegada, total ou parcial, de um pedido de compra.",
+      "field": "Recebimento.pedidoCompraId"
     }
   ],
   "normalizations": [
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Supplier",
-      "detail": "roleTag compras.Supplier; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Fornecedor",
+      "detail": "roleTag compras.Fornecedor; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "SupplierContact",
-      "detail": "roleTag compras.SupplierContact; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "ContatoFornecedor",
+      "detail": "roleTag compras.ContatoFornecedor; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Product",
-      "detail": "roleTag compras.Product; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Produto",
+      "detail": "roleTag compras.Produto; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Buyer",
-      "detail": "roleTag compras.Buyer; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Comprador",
+      "detail": "roleTag compras.Comprador; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "SupplierOffering",
-      "detail": "storage.table compras_supplieroffering"
+      "entityId": "ProdutoFornecido",
+      "detail": "storage.table compras_produtofornecido"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrder",
-      "detail": "storage.table compras_purchaseorder"
+      "entityId": "PedidoCompra",
+      "detail": "storage.table compras_pedidocompra"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "GoodsReceipt",
-      "detail": "storage.table compras_goodsreceipt"
+      "entityId": "ItemPedido",
+      "detail": "storage.table compras_itempedido"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
-      "detail": "storage.table compras_purchaseorderdashboard"
+      "entityId": "Recebimento",
+      "detail": "storage.table compras_recebimento"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "storage.table compras_painelcompras"
     }
   ]
 }

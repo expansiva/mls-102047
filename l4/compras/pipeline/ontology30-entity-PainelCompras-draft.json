@@ -1,0 +1,146 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "compras",
+    "entityId": "PainelCompras",
+    "title": "Painel de compras",
+    "description": "Resumo recalculado com a quantidade de pedidos em aberto, de pedidos atrasados e o total comprado por fornecedor no mês.",
+    "displayField": "periodo",
+    "relationships": {},
+    "capabilities": {
+      "aggregate.byWindow": "Resume os pedidos de compra, seus itens e recebimentos por mês e por fornecedor, contando pedidos em aberto e atrasados e somando o total comprado, para o painel do gerente de compras.",
+      "read.window": "Lê o painel de um mês, filtrando pela coluna do período e pelo fornecedor, ambas indexadas; é a tela que o gerente de compras abre na jornada de acompanhar o painel.",
+      "refresh": "Mantém o painel atualizado conforme pedidos são enviados, aprovados, rejeitados e recebidos pelo almoxarife, por política da própria plataforma, sem ação de ninguém.",
+      "rebuild": "Recalcula todo o painel a partir dos pedidos e recebimentos numa migração ou publicação do módulo.",
+      "read.mdmRecord": "Lê o registro mestre do fornecedor apontado por cada linha para mostrar a razão social no total comprado por fornecedor que o gerente de compras acompanha.",
+      "retain": "Descarta as linhas de meses antigos que já não interessam ao acompanhamento do gerente, para o painel não crescer indefinidamente.",
+      "compras.abrirPedidosDoIndicador": "A partir de um indicador do painel (em aberto ou atrasados), abre a lista dos pedidos de compra correspondentes, pesquisando os pedidos pela situação e pela previsão de entrega; usado pelo gerente de compras."
+    },
+    "rules": [
+      "pedidoAtrasadoPrevisaoVencida",
+      "totalCompradoConsideraPedidosEnviados",
+      "painelSomenteLeitura"
+    ],
+    "kind": "entity",
+    "class": "supporting",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "compras_painelcompras",
+      "kind": "relational"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "periodo": {
+          "type": "timestamp",
+          "required": true,
+          "indexed": true,
+          "title": "Mês",
+          "description": "Início do mês que esta linha resume; janela mensal calculada sobre os pedidos de compra e seus recebimentos.",
+          "derived": true
+        },
+        "fornecedorId": {
+          "type": "string",
+          "indexed": true,
+          "title": "Fornecedor",
+          "description": "Identificador do registro mestre do fornecedor ao qual a linha se refere; vazio na linha que totaliza todos os fornecedores do mês.",
+          "derived": true
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "title": "Indicadores",
+          "description": "Medidas recalculadas a partir dos pedidos de compra, dos itens e dos recebimentos; ninguém as digita.",
+          "fields": {
+            "pedidosEmAberto": {
+              "type": "integer",
+              "required": true,
+              "title": "Pedidos em aberto",
+              "description": "Quantidade de pedidos de compra enviados ou aprovados que ainda não foram recebidos por completo, nem cancelados ou rejeitados.",
+              "min": 0,
+              "derived": true
+            },
+            "pedidosAtrasados": {
+              "type": "integer",
+              "required": true,
+              "title": "Pedidos atrasados",
+              "description": "Quantidade de pedidos em aberto cuja previsão de entrega já passou sem o recebimento total.",
+              "min": 0,
+              "derived": true
+            },
+            "totalComprado": {
+              "type": "money",
+              "required": true,
+              "title": "Total comprado no mês",
+              "description": "Soma do valor dos pedidos de compra aprovados ou enviados ao fornecedor no mês (quantidade vezes preço dos itens).",
+              "min": 0,
+              "derived": true
+            },
+            "pedidosNoMes": {
+              "type": "integer",
+              "required": true,
+              "title": "Pedidos no mês",
+              "description": "Quantidade de pedidos de compra enviados ao fornecedor no mês, base do total comprado.",
+              "min": 0,
+              "derived": true
+            }
+          },
+          "derived": true
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.periodo.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.fornecedorId.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.fields.pedidosEmAberto.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.fields.pedidosAtrasados.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.fields.totalComprado.derived (ddm)"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.details.fields.pedidosNoMes.derived (ddm)"
+    }
+  ]
+}

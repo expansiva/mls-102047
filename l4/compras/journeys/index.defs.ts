@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/compras/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const comprasJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -9,31 +9,36 @@ export const comprasJourneyIndex = {
     {
       "journeyId": "cadastrarFornecedor",
       "actorRef": "comprador",
-      "title": "Cadastrar fornecedor e condições de fornecimento"
+      "title": "Cadastrar fornecedor"
     },
     {
-      "journeyId": "abrirEenviarPedidoCompra",
+      "journeyId": "cadastrarProdutoFornecido",
+      "actorRef": "comprador",
+      "title": "Cadastrar produto fornecido"
+    },
+    {
+      "journeyId": "abrirEnviarPedido",
       "actorRef": "comprador",
       "title": "Abrir e enviar pedido de compra"
     },
     {
-      "journeyId": "decidirPedidoAcimaDoLimite",
+      "journeyId": "aprovarPedido",
       "actorRef": "gerenteCompras",
-      "title": "Decidir pedido de compra acima do limite"
+      "title": "Aprovar ou rejeitar pedido"
     },
     {
-      "journeyId": "registrarRecebimentoPedido",
+      "journeyId": "registrarRecebimento",
       "actorRef": "almoxarife",
-      "title": "Registrar recebimento total ou parcial"
+      "title": "Registrar recebimento do pedido"
     },
     {
-      "journeyId": "acompanharIndicadoresDeCompras",
+      "journeyId": "acompanharPainel",
       "actorRef": "gerenteCompras",
-      "title": "Acompanhar indicadores de compras"
+      "title": "Acompanhar painel de compras"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type ComprasJourneyIndexType = typeof comprasJourneyIndex;
 

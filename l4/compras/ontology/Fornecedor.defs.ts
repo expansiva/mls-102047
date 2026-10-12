@@ -1,0 +1,281 @@
+/// <mls fileReference="_102047_/l4/compras/ontology/Fornecedor.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const comprasEntityFornecedor = {
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+  "moduleName": "compras",
+  "entityId": "Fornecedor",
+  "title": "Fornecedor",
+  "description": "Empresa com CNPJ e razão social da qual a organização compra; registro mestre compartilhado, com o papel de fornecedor no módulo compras.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "contatos": {
+      "relationshipId": "fornecedorContato",
+      "to": "ContatoFornecedor",
+      "via": "HasContact",
+      "cardinality": "1:N",
+      "title": "Contatos do fornecedor",
+      "description": "Telefones e e-mails do fornecedor vinculados por HasContact."
+    },
+    "produtosFornecidos": {
+      "relationshipId": "produtoFornecidoFornecedor",
+      "to": "ProdutoFornecido",
+      "via": "ProdutoFornecido.fornecedorId",
+      "cardinality": "1:N",
+      "title": "Produtos fornecidos",
+      "description": "Produtos que o fornecedor fornece com o preço combinado.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
+    },
+    "produtos": {
+      "relationshipId": "fornecedorProdutos",
+      "to": "Produto",
+      "via": "ProdutoFornecido",
+      "cardinality": "N:N",
+      "title": "Produtos do fornecedor",
+      "description": "Produtos obtidos pelos produtos fornecidos cadastrados.",
+      "mode": "throughTable",
+      "path": "Fornecedor <- ProdutoFornecido.fornecedorId -> ProdutoFornecido.produtoId -> Produto",
+      "derived": true
+    },
+    "pedidos": {
+      "relationshipId": "pedidoFornecedor",
+      "to": "PedidoCompra",
+      "via": "PedidoCompra.fornecedorId",
+      "cardinality": "1:N",
+      "title": "Pedidos de compra",
+      "description": "Pedidos de compra feitos para este fornecedor.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
+    }
+  },
+  "capabilities": {
+    "read.byId": "Lê o fornecedor pelo id para exibir seus dados na ficha, nos pedidos de compra e nos produtos fornecidos; usado por comprador, gerente de compras e almoxarife.",
+    "locate.byName": "Encontra fornecedores pelo nome digitado na lista, para o comprador escolher o fornecedor ao cadastrar produtos fornecidos ou abrir pedidos.",
+    "locate.byDocument": "Busca o fornecedor pelo CNPJ antes do cadastro, para o comprador não duplicar a empresa.",
+    "register.createOrAttach": "Cria a empresa no cadastro mestre quando o CNPJ não existe e, em todo caso, marca o papel compras.Fornecedor; usado pelo comprador ao registrar o fornecedor.",
+    "edit.platformFields": "Altera razão social, nome fantasia, endereços e observações do fornecedor; usado pelo comprador.",
+    "inactivate": "Inativa o fornecedor com quem a organização deixou de comprar, sem apagar o histórico de pedidos, e permite reativá-lo; usado pelo comprador.",
+    "link.contact": "Vincula telefones e e-mails do fornecedor como canais de contato (HasContact); usado pelo comprador no cadastro.",
+    "listLinks": "Mostra os contatos e demais vínculos do fornecedor na ficha; usado pelo comprador e pelo gerente de compras.",
+    "attach.document": "Anexa ao fornecedor documentos como contrato social ou tabela de preços; usado pelo comprador.",
+    "comment": "Registra observações sobre negociações e atendimento do fornecedor; usado pelo comprador e pelo gerente de compras.",
+    "tag": "Marca o fornecedor com rótulos livres do módulo compras, como categoria de fornecimento; usado pelo comprador.",
+    "statusHistory.read": "Mostra quando o fornecedor foi inativado ou reativado e por quem; usado pelo gerente de compras.",
+    "audit": "Informa quem alterou os dados do fornecedor e quando; consultado pelo gerente de compras."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-identity-never-in-namespace",
+    "rule-document-shape-validated",
+    "rule-delete-blocked-by-relationships",
+    "rule-company-legal-name-required",
+    "fornecedorCnpjUnico",
+    "fornecedorInativoSemNovoPedido"
+  ],
+  "kind": "role",
+  "subtype": "Company",
+  "roleTag": "compras.Fornecedor",
+  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true,
+        "writePrecondition": true,
+        "description": "Bumped by the engine on every write; optimistic concurrency."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "description": "Registro mestre da empresa fornecedora, com o papel compras.Fornecedor.",
+        "fields": {
+          "identification": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "subtype": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Company",
+                    "title": "Empresa"
+                  }
+                ],
+                "description": "Sempre empresa: um fornecedor é uma pessoa jurídica.",
+                "title": "Subtipo"
+              },
+              "name": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "maxLength": 200,
+                "description": "Nome pelo qual o comprador reconhece o fornecedor nas listas e nos pedidos de compra.",
+                "title": "Nome do fornecedor"
+              },
+              "status": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Active",
+                    "title": "Ativo"
+                  },
+                  {
+                    "value": "Inactive",
+                    "title": "Inativo"
+                  },
+                  {
+                    "value": "Merged",
+                    "title": "Mesclado"
+                  },
+                  {
+                    "value": "Blocked",
+                    "title": "Bloqueado"
+                  }
+                ],
+                "title": "Situação",
+                "description": "Situação do registro mestre; fornecedor inativo não recebe novos pedidos de compra."
+              },
+              "docType": {
+                "type": "enum",
+                "indexed": true,
+                "values": [
+                  {
+                    "value": "CNPJ",
+                    "title": "CNPJ"
+                  }
+                ],
+                "title": "Tipo de documento",
+                "description": "Documento nacional do fornecedor; no módulo compras é sempre o CNPJ.",
+                "required": true
+              },
+              "docId": {
+                "type": "string",
+                "indexed": true,
+                "description": "Número do CNPJ do fornecedor, usado pelo comprador para verificar se a empresa já está cadastrada.",
+                "title": "CNPJ",
+                "required": true,
+                "pattern": "^\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2}$"
+              },
+              "countryCode": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "pattern": "^BR$",
+                "maxLength": 2,
+                "default": "US",
+                "description": "País do documento do fornecedor; o CNPJ pertence ao Brasil.",
+                "title": "País"
+              }
+            },
+            "description": "Dados de identificação da empresa fornecedora, usados para buscar e deduplicar."
+          },
+          "base": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "aliases": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "description": "Nome fantasia e outros nomes pelos quais o fornecedor é conhecido, para a busca por nome.",
+                "title": "Outros nomes"
+              },
+              "addresses": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "Address",
+                "title": "Endereços",
+                "description": "Endereços do fornecedor, como sede e local de expedição."
+              },
+              "contacts": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "ContactSummary",
+                "derived": true,
+                "description": "Resumo dos canais de contato (telefone, e-mail) vinculados ao fornecedor; mantidos como registros próprios.",
+                "title": "Contatos"
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 1000,
+                "title": "Observações",
+                "description": "Observações gerais sobre o fornecedor."
+              }
+            },
+            "description": "Dados comuns do registro mestre que o módulo compras lê."
+          },
+          "company": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "companyKind": {
+                "type": "enum",
+                "required": true,
+                "values": [
+                  {
+                    "value": "LegalEntity",
+                    "title": "Pessoa jurídica"
+                  },
+                  {
+                    "value": "Branch",
+                    "title": "Filial"
+                  }
+                ],
+                "description": "Se o fornecedor é a pessoa jurídica principal ou uma filial.",
+                "title": "Tipo de empresa"
+              },
+              "legalName": {
+                "type": "string",
+                "required": true,
+                "description": "Razão social registrada do fornecedor, informada pelo comprador no cadastro.",
+                "title": "Razão social"
+              },
+              "tradeName": {
+                "type": "string",
+                "description": "Nome comercial do fornecedor.",
+                "title": "Nome fantasia"
+              }
+            },
+            "description": "Dados de pessoa jurídica do fornecedor."
+          },
+          "general": {
+            "type": "object",
+            "owner": "organization",
+            "open": true,
+            "description": "Campos promovidos pela organização; o módulo compras apenas lê."
+          },
+          "compras": {
+            "type": "object",
+            "owner": "module",
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
+          }
+        }
+      }
+    }
+  }
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+
+export type ComprasEntityFornecedorType = typeof comprasEntityFornecedor;
+
+export default comprasEntityFornecedor;
