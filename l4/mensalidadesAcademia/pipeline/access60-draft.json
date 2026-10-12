@@ -7,15 +7,15 @@
       "kind": "internal",
       "origin": "named",
       "title": "Recepção",
-      "description": "Matricula alunos em planos a partir de uma data e registra os pagamentos das mensalidades (data, valor e forma).",
-      "personEntity": ""
+      "description": "Matricula o aluno em um plano a partir de uma data e registra os pagamentos das mensalidades (data, valor e forma).",
+      "personEntity": "Recepcionista"
     },
     {
       "actorId": "gerencia",
       "kind": "internal",
       "origin": "named",
       "title": "Gerência",
-      "description": "Gera todo mês as mensalidades dos alunos ativos e acompanha o painel de valores a receber, valores recebidos, alunos ativos, bloqueados e inadimplentes.",
+      "description": "Gera todo mês as mensalidades dos alunos ativos e acompanha o painel com total a receber, total recebido e quantidade de alunos ativos, bloqueados e inadimplentes.",
       "personEntity": ""
     }
   ],
@@ -23,25 +23,25 @@
     {
       "grantId": "recepcaoAlunos",
       "actorRef": "recepcao",
-      "title": "Cadastro e consulta de alunos",
-      "description": "A recepção localiza o aluno por nome ou documento, cadastra o aluno quando ele não existe e verifica se ele está bloqueado na chegada à academia.",
+      "title": "Cadastro de alunos pela recepção",
+      "description": "A recepção procura, registra e consulta os alunos da academia na matrícula, na entrada e no cancelamento, incluindo identificação, contatos e situação de bloqueio.",
       "entityRefs": [
         "Aluno"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Todos os alunos da academia."
+        "description": "Todos os alunos da academia, pois qualquer aluno pode chegar à recepção."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "A recepção vê o cadastro completo do aluno, incluindo a situação de bloqueio e inadimplência calculada pelo módulo."
+        "description": "A recepção vê o cadastro completo do aluno, necessário para evitar duplicidade, contatá-lo e verificar o bloqueio."
       }
     },
     {
-      "grantId": "recepcaoPlanosConsulta",
+      "grantId": "recepcaoPlanos",
       "actorRef": "recepcao",
-      "title": "Consulta de planos para matrícula",
-      "description": "A recepção escolhe o plano da matrícula vendo nome, periodicidade, valor e dia de vencimento.",
+      "title": "Consulta de planos pela recepção",
+      "description": "A recepção consulta os planos para escolher o plano do aluno na matrícula.",
       "entityRefs": [
         "Plano"
       ],
@@ -50,58 +50,57 @@
         "description": "Todos os planos da academia."
       },
       "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "A recepção vê os dados do plano necessários para a matrícula, sem as observações internas.",
-        "allowedFields": [
-          "Plano.id",
-          "Plano.nome",
-          "Plano.periodicidade",
-          "Plano.ativo",
-          "Plano.details.valor",
-          "Plano.details.diaVencimento"
-        ]
-      }
-    },
-    {
-      "grantId": "recepcaoMatriculas",
-      "actorRef": "recepcao",
-      "title": "Matrículas dos alunos",
-      "description": "A recepção matricula alunos em planos a partir de uma data, registra cancelamentos e consulta se a matrícula está liberada para entrada.",
-      "entityRefs": [
-        "Matricula"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Todas as matrículas da academia."
-      },
-      "disclosure": {
         "mode": "fullRecord",
-        "description": "A recepção vê a matrícula completa, inclusive bloqueio e mensalidades vencidas."
+        "description": "A recepção vê nome, periodicidade, valor, dia de vencimento e observações do plano."
       }
     },
     {
-      "grantId": "recepcaoMensalidadesPagamentos",
+      "grantId": "recepcaoMatriculasCobrancas",
       "actorRef": "recepcao",
-      "title": "Mensalidades e pagamentos",
-      "description": "A recepção localiza as mensalidades em aberto ou vencidas do aluno e registra os pagamentos com data, valor e forma.",
+      "title": "Matrículas, mensalidades e pagamentos na recepção",
+      "description": "A recepção cria e cancela matrículas, localiza mensalidades em aberto ou vencidas, verifica a entrada do aluno e registra pagamentos.",
       "entityRefs": [
+        "Matricula",
         "Mensalidade",
         "Pagamento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Todas as mensalidades e pagamentos da academia."
+        "description": "Todas as matrículas, mensalidades e pagamentos da academia, pois qualquer recepcionista atende qualquer aluno."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "A recepção vê a mensalidade e o pagamento completos, incluindo saldo devedor e situação."
+        "description": "A recepção vê os registros completos para conferir situação, valores, vencimentos e pagamentos."
+      }
+    },
+    {
+      "grantId": "recepcaoProprioCadastro",
+      "actorRef": "recepcao",
+      "title": "Próprio cadastro da recepcionista",
+      "description": "A recepcionista consulta o próprio cadastro, que identifica as matrículas que registrou.",
+      "entityRefs": [
+        "Recepcionista"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Apenas o cadastro da recepcionista que está conectada.",
+        "anchorEntity": "Recepcionista"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "A recepcionista vê seu nome, situação e apelidos.",
+        "allowedFields": [
+          "Recepcionista.details.identification.name",
+          "Recepcionista.details.identification.status",
+          "Recepcionista.details.base.aliases"
+        ]
       }
     },
     {
       "grantId": "gerenciaPlanos",
       "actorRef": "gerencia",
-      "title": "Gestão de planos",
-      "description": "A gerência cadastra e mantém os planos mensal, trimestral e anual, com valor e dia de vencimento.",
+      "title": "Manutenção de planos pela gerência",
+      "description": "A gerência cadastra e ajusta os planos mensal, trimestral e anual com valor e dia de vencimento.",
       "entityRefs": [
         "Plano"
       ],
@@ -111,14 +110,14 @@
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "A gerência vê e mantém todos os dados do plano."
+        "description": "A gerência vê o plano completo, incluindo a quantidade de matrículas ativas."
       }
     },
     {
-      "grantId": "gerenciaMatriculasMensalidades",
+      "grantId": "gerenciaCobrancas",
       "actorRef": "gerencia",
       "title": "Geração e acompanhamento de mensalidades",
-      "description": "A gerência confere as matrículas ativas, gera as mensalidades do mês e acompanha pagamentos, vencidas e inadimplentes.",
+      "description": "A gerência consulta as matrículas ativas, gera as mensalidades do mês, confere as geradas e acompanha pagamentos e inadimplência.",
       "entityRefs": [
         "Matricula",
         "Mensalidade",
@@ -130,14 +129,14 @@
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "A gerência vê os registros completos para gerar e conferir as cobranças."
+        "description": "A gerência vê os registros completos de matrículas, mensalidades e pagamentos."
       }
     },
     {
-      "grantId": "gerenciaAlunosConsulta",
+      "grantId": "gerenciaAlunos",
       "actorRef": "gerencia",
-      "title": "Consulta de alunos",
-      "description": "A gerência identifica os alunos das mensalidades e os inadimplentes e bloqueados.",
+      "title": "Consulta de alunos pela gerência",
+      "description": "A gerência identifica os alunos das matrículas e os inadimplentes ou bloqueados, sem acesso a documento, endereço e contatos.",
       "entityRefs": [
         "Aluno"
       ],
@@ -147,13 +146,10 @@
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "A gerência vê nome, documento, situação do cadastro e a situação de bloqueio e inadimplência; endereços, contatos e dados pessoais ficam com a recepção.",
+        "description": "A gerência vê nome, situação do cadastro e os indicadores de mensalidades vencidas, inadimplência e bloqueio.",
         "allowedFields": [
-          "Aluno.id",
           "Aluno.details.identification.name",
           "Aluno.details.identification.status",
-          "Aluno.details.identification.docType",
-          "Aluno.details.identification.docId",
           "Aluno.details.mensalidadesAcademia"
         ]
       }
@@ -161,18 +157,35 @@
     {
       "grantId": "gerenciaPainel",
       "actorRef": "gerencia",
-      "title": "Painel de mensalidades",
-      "description": "A gerência acompanha o total a receber no mês, o total recebido e as quantidades de alunos ativos, bloqueados e inadimplentes.",
+      "title": "Painel financeiro da gerência",
+      "description": "A gerência acompanha o total a receber e recebido no mês e as quantidades de alunos ativos, bloqueados e inadimplentes.",
       "entityRefs": [
         "PainelMensalidades"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Indicadores de toda a academia."
+        "description": "Indicadores de todas as competências da academia."
       },
       "disclosure": {
-        "mode": "aggregateOnly",
-        "description": "Somente totais e contagens calculados por mês de referência."
+        "mode": "fullRecord",
+        "description": "A gerência vê todos os indicadores do painel."
+      }
+    },
+    {
+      "grantId": "gerenciaRecepcionistas",
+      "actorRef": "gerencia",
+      "title": "Cadastro de recepcionistas",
+      "description": "A gerência mantém o cadastro das pessoas da recepção que registram matrículas.",
+      "entityRefs": [
+        "Recepcionista"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todas as recepcionistas da academia."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "A gerência vê o cadastro completo das recepcionistas."
       }
     }
   ]

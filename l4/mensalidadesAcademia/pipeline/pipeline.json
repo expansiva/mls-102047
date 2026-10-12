@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:22:05.858Z",
+      "updatedAt": "2026-10-12T23:00:23.599Z",
       "artifactPaths": [
         "l4/mensalidadesAcademia/module.defs.ts"
       ],
@@ -20,33 +20,39 @@
           "kind": "internal",
           "origin": "named",
           "title": "Recepção",
-          "description": "Matricula alunos em planos a partir de uma data e registra os pagamentos das mensalidades (data, valor e forma)."
+          "description": "Matricula o aluno em um plano a partir de uma data e registra os pagamentos das mensalidades (data, valor e forma)."
         },
         {
           "actorId": "gerencia",
           "kind": "internal",
           "origin": "named",
           "title": "Gerência",
-          "description": "Gera todo mês as mensalidades dos alunos ativos e acompanha o painel de valores a receber, valores recebidos, alunos ativos, bloqueados e inadimplentes."
+          "description": "Gera todo mês as mensalidades dos alunos ativos e acompanha o painel com total a receber, total recebido e quantidade de alunos ativos, bloqueados e inadimplentes."
         },
         {
           "actorId": "aluno",
           "kind": "external",
           "origin": "inferred",
           "title": "Aluno",
-          "description": "Aluno da academia que pode cancelar a própria matrícula, encerrando a geração de mensalidades futuras."
+          "description": "Aluno da academia que pode cancelar a própria matrícula, o que encerra a geração de mensalidades futuras."
+        }
+      ],
+      "normalizations": [
+        {
+          "kind": "ptToPtBR",
+          "detail": "pt→pt-BR"
         }
       ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:22:38.666Z",
+      "updatedAt": "2026-10-12T23:00:50.990Z",
       "artifactPaths": [
-        "l4/mensalidadesAcademia/journeys/cadastrarPlano.defs.ts",
+        "l4/mensalidadesAcademia/journeys/manterPlanos.defs.ts",
         "l4/mensalidadesAcademia/journeys/matricularAluno.defs.ts",
         "l4/mensalidadesAcademia/journeys/gerarMensalidadesDoMes.defs.ts",
         "l4/mensalidadesAcademia/journeys/registrarPagamento.defs.ts",
-        "l4/mensalidadesAcademia/journeys/verificarEntradaAluno.defs.ts",
+        "l4/mensalidadesAcademia/journeys/verificarAcessoAluno.defs.ts",
         "l4/mensalidadesAcademia/journeys/acompanharPainel.defs.ts",
         "l4/mensalidadesAcademia/journeys/index.defs.ts"
       ],
@@ -61,7 +67,7 @@
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:22:49.853Z",
+      "updatedAt": "2026-10-12T23:01:02.228Z",
       "artifactPaths": [
         "l4/mensalidadesAcademia/workflows.defs.ts"
       ],
@@ -72,9 +78,10 @@
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:24:17.728Z",
+      "updatedAt": "2026-10-12T23:02:04.629Z",
       "artifactPaths": [
         "l4/mensalidadesAcademia/ontology/Aluno.defs.ts",
+        "l4/mensalidadesAcademia/ontology/Recepcionista.defs.ts",
         "l4/mensalidadesAcademia/ontology/Plano.defs.ts",
         "l4/mensalidadesAcademia/ontology/Matricula.defs.ts",
         "l4/mensalidadesAcademia/ontology/Mensalidade.defs.ts",
@@ -83,18 +90,23 @@
         "l4/mensalidadesAcademia/ontology/index.defs.ts"
       ],
       "uncitedEntities": [
-        "PainelMensalidades"
+        "Recepcionista"
       ],
       "liftedAggregateEntities": [],
       "compile": {
         "status": "clean",
-        "files": 7
+        "files": 8
       },
       "normalizations": [
         {
           "kind": "derivedFromPlatform",
           "entityId": "Aluno",
           "detail": "roleTag mensalidadesAcademia.Aluno; source /_102034_/l4/ontology/mdm.defs.ts"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Recepcionista",
+          "detail": "roleTag mensalidadesAcademia.Recepcionista; source /_102034_/l4/ontology/mdm.defs.ts"
         },
         {
           "kind": "derivedFromPlatform",
@@ -137,14 +149,14 @@
           "detail": "Aluno.details.identification.docType.values"
         },
         {
-          "kind": "derivedFromPlatform",
+          "kind": "tightened",
           "entityId": "Aluno",
-          "detail": "record.fields.details.mensalidadesAcademia.fields.mensalidadesVencidas.derived (derived[])"
+          "detail": "Aluno.details.person.privacyConsent.required"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "Aluno",
-          "detail": "record.fields.details.mensalidadesAcademia.fields.bloqueado.derived (derived[])"
+          "detail": "record.fields.details.mensalidadesAcademia.fields.quantidadeMensalidadesVencidas.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -153,8 +165,38 @@
         },
         {
           "kind": "derivedFromPlatform",
+          "entityId": "Aluno",
+          "detail": "record.fields.details.mensalidadesAcademia.fields.bloqueado.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Recepcionista",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Recepcionista",
+          "detail": "Recepcionista.details.identification.subtype.values"
+        },
+        {
+          "kind": "tightened",
+          "entityId": "Recepcionista",
+          "detail": "Recepcionista.details.identification.docType.values"
+        },
+        {
+          "kind": "namespaceEmpty",
+          "entityId": "Recepcionista",
+          "detail": "details.mensalidadesAcademia"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "Plano",
           "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Plano",
+          "detail": "record.fields.details.fields.matriculasAtivas.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -179,7 +221,7 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "Matricula",
-          "detail": "record.fields.details.fields.liberadaParaEntrada.derived (derived[])"
+          "detail": "record.fields.details.fields.totalEmAberto.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -208,16 +250,6 @@
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "Mensalidade",
-          "detail": "record.fields.details.fields.saldoDevedor.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Mensalidade",
-          "detail": "record.fields.details.fields.diasEmAtraso.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
           "entityId": "Pagamento",
           "detail": "record.fields.id, record.fields.version"
         },
@@ -229,7 +261,7 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "PainelMensalidades",
-          "detail": "record.fields.mesReferencia.derived (ddm)"
+          "detail": "record.fields.competencia.derived (ddm)"
         },
         {
           "kind": "derivedFromPlatform",
@@ -249,75 +281,95 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "PainelMensalidades",
-          "detail": "record.fields.details.fields.quantidadeAlunosAtivos.derived (ddm)"
+          "detail": "record.fields.details.fields.totalGerado.derived (ddm)"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "PainelMensalidades",
-          "detail": "record.fields.details.fields.quantidadeAlunosBloqueados.derived (ddm)"
+          "detail": "record.fields.details.fields.quantidadeMensalidades.derived (ddm)"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "PainelMensalidades",
-          "detail": "record.fields.details.fields.quantidadeAlunosInadimplentes.derived (ddm)"
+          "detail": "record.fields.details.fields.quantidadeMensalidadesVencidas.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelMensalidades",
+          "detail": "record.fields.details.fields.alunosAtivos.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelMensalidades",
+          "detail": "record.fields.details.fields.alunosBloqueados.derived (ddm)"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PainelMensalidades",
+          "detail": "record.fields.details.fields.alunosInadimplentes.derived (ddm)"
         }
       ],
       "citedRules": [
         "rule-foreign-namespace-refused",
-        "rule-delete-blocked-by-relationships",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
+        "rule-delete-blocked-by-relationships",
         "rule-person-privacy-consent-required-br-eu",
-        "mensalidadeVencidaAposVencimento",
         "alunoBloqueadoComDuasVencidas",
         "alunoBloqueadoNaoPodeEntrar",
+        "planoNomeUnico",
         "planoValorPositivo",
         "planoDiaVencimentoValido",
-        "planoNomeUnico",
-        "planoInativoNaoMatricula",
-        "umaMatriculaAtivaPorAluno",
-        "matriculaDataInicioObrigatoria",
+        "planoAlteracaoNaoAfetaMensalidadesGeradas",
+        "matriculaUnicaAtivaPorAluno",
+        "codigoMatriculaSequencial",
         "cancelamentoEncerraMensalidadesFuturas",
-        "alunoBloqueadoDuasVencidas",
+        "mensalidadeVencidaAposVencimento",
+        "bloqueioPorDuasMensalidadesVencidas",
         "alunoBloqueadoNaoEntra",
-        "mensalidadeUnicaPorMatriculaMes",
-        "gerarApenasMatriculasAtivas",
-        "valorDaMensalidadeDoPlano",
-        "vencimentoNoDiaDoPlano",
+        "matriculaCanceladaNaoGeraMensalidade",
+        "mensalidadeUnicaPorMatriculaCompetencia",
+        "mensalidadeSomenteMatriculaAtiva",
+        "mensalidadeValorDoPlano",
+        "mensalidadeVencimentoNoDiaDoPlano",
         "mensalidadePagaQuandoQuitada",
-        "cancelamentoEncerraGeracaoFutura",
-        "pagamentoValorPositivo",
-        "pagamentoSomenteMensalidadeAberta",
         "pagamentoQuitaMensalidade",
-        "desbloqueioAposRegularizacao",
+        "pagamentoValorPositivo",
+        "pagamentoDataNaoFutura",
+        "alunoDesbloqueadoAoRegularizarVencidas",
+        "alunoInadimplenteComMensalidadeVencida",
         "matriculaCanceladaEncerraGeracao"
       ],
       "citedCapabilities": [
         "read.byId",
         "locate.byName",
         "locate.byDocument",
+        "locate.byContact",
         "register.createOrAttach",
         "edit.platformFields",
-        "edit.moduleNamespace",
-        "inactivate",
         "link.contact",
         "listLinks",
-        "comment",
+        "inactivate",
         "attach.document",
+        "comment",
         "statusHistory.read",
         "audit",
-        "mensalidadesAcademia.verificarEntrada",
-        "create",
+        "mensalidadesAcademia.verificarAcesso",
+        "locate.byLogin",
+        "invite.login",
         "locate.byColumn",
         "locate.byText",
+        "count",
+        "create",
         "update",
         "uniqueKey",
-        "count",
         "listByForeignKey",
         "transition",
         "transaction",
         "read.mdmRecord",
         "sequence.next",
+        "mensalidadesAcademia.gerarMensalidadesDoMes",
+        "mensalidadesAcademia.somarPagamentosDaMensalidade",
         "aggregate.byWindow",
         "read.window",
         "refresh",
@@ -328,20 +380,15 @@
     },
     "judge35": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:24:40.830Z",
+      "updatedAt": "2026-10-12T23:02:38.618Z",
       "artifactPaths": [
         "l4/mensalidadesAcademia/pipeline/judge35-draft.json"
       ],
-      "normalizations": [
-        {
-          "kind": "judgeComment",
-          "detail": "NS5_JUDGE_ORPHAN_PERSISTS switch:Plano.ativo: judge35: written switches still need a lifecycle after ontology repair: Plano.ativo."
-        }
-      ]
+      "noJudgeSignal": true
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:24:58.286Z",
+      "updatedAt": "2026-10-12T23:03:01.228Z",
       "artifactPaths": [
         "l4/mensalidadesAcademia/rules.defs.ts"
       ],
@@ -352,7 +399,7 @@
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:24:58.511Z",
+      "updatedAt": "2026-10-12T23:03:01.272Z",
       "artifactPaths": [
         "l4/mensalidadesAcademia/access.defs.ts"
       ],
@@ -363,7 +410,7 @@
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:25:09.621Z",
+      "updatedAt": "2026-10-12T23:03:17.720Z",
       "artifactPaths": [
         "l4/mensalidadesAcademia/integration.defs.ts"
       ],
@@ -374,7 +421,7 @@
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:25:09.807Z",
+      "updatedAt": "2026-10-12T23:03:17.915Z",
       "artifactPaths": [
         "l4/mensalidadesAcademia/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -389,42 +436,38 @@
     "module": "mensalidadesAcademia",
     "rebuildAll": true
   },
-  "updatedAt": "2026-10-12T20:26:06.289Z",
+  "updatedAt": "2026-10-12T23:04:02.953Z",
   "rebuildAll": {
     "deleted": [
-      "l1/mensalidadesAcademia/pipeline/pipeline.json",
-      "l1/mensalidadesAcademia/tobe/plan/pipeline/pipeline.json",
-      "l2/mensalidadesAcademia/pipeline/menu20-draft.json",
-      "l2/mensalidadesAcademia/pipeline/pipeline.json",
-      "l2/mensalidadesAcademia/tobe/plan/pipeline/menu20-draft.json",
-      "l2/mensalidadesAcademia/tobe/plan/pipeline/pipeline.json",
       "l4/mensalidadesAcademia/access.defs.ts",
       "l4/mensalidadesAcademia/integration.defs.ts",
-      "l4/mensalidadesAcademia/journeys/acompanharIndicadoresAcademia.defs.ts",
-      "l4/mensalidadesAcademia/journeys/cancelarPropriaMatricula.defs.ts",
+      "l4/mensalidadesAcademia/journeys/acompanharPainel.defs.ts",
+      "l4/mensalidadesAcademia/journeys/cadastrarPlano.defs.ts",
       "l4/mensalidadesAcademia/journeys/gerarMensalidadesDoMes.defs.ts",
       "l4/mensalidadesAcademia/journeys/index.defs.ts",
       "l4/mensalidadesAcademia/journeys/matricularAluno.defs.ts",
-      "l4/mensalidadesAcademia/journeys/registrarPagamentoMensalidade.defs.ts",
+      "l4/mensalidadesAcademia/journeys/registrarPagamento.defs.ts",
+      "l4/mensalidadesAcademia/journeys/verificarEntradaAluno.defs.ts",
       "l4/mensalidadesAcademia/module.defs.ts",
       "l4/mensalidadesAcademia/ontology/Aluno.defs.ts",
-      "l4/mensalidadesAcademia/ontology/IndicadoresAcademia.defs.ts",
       "l4/mensalidadesAcademia/ontology/Matricula.defs.ts",
       "l4/mensalidadesAcademia/ontology/Mensalidade.defs.ts",
       "l4/mensalidadesAcademia/ontology/Pagamento.defs.ts",
+      "l4/mensalidadesAcademia/ontology/PainelMensalidades.defs.ts",
       "l4/mensalidadesAcademia/ontology/Plano.defs.ts",
       "l4/mensalidadesAcademia/ontology/index.defs.ts",
       "l4/mensalidadesAcademia/pipeline/access60-draft.json",
       "l4/mensalidadesAcademia/pipeline/finalize-report.json",
       "l4/mensalidadesAcademia/pipeline/integration70-draft.json",
       "l4/mensalidadesAcademia/pipeline/journeys20-draft.json",
+      "l4/mensalidadesAcademia/pipeline/judge35-draft.json",
       "l4/mensalidadesAcademia/pipeline/module10-draft.json",
       "l4/mensalidadesAcademia/pipeline/ontology30-draft.json",
       "l4/mensalidadesAcademia/pipeline/ontology30-entity-Aluno-draft.json",
-      "l4/mensalidadesAcademia/pipeline/ontology30-entity-IndicadoresAcademia-draft.json",
       "l4/mensalidadesAcademia/pipeline/ontology30-entity-Matricula-draft.json",
       "l4/mensalidadesAcademia/pipeline/ontology30-entity-Mensalidade-draft.json",
       "l4/mensalidadesAcademia/pipeline/ontology30-entity-Pagamento-draft.json",
+      "l4/mensalidadesAcademia/pipeline/ontology30-entity-PainelMensalidades-draft.json",
       "l4/mensalidadesAcademia/pipeline/ontology30-entity-Plano-draft.json",
       "l4/mensalidadesAcademia/pipeline/ontology30-plan-draft.json",
       "l4/mensalidadesAcademia/pipeline/pipeline.json",
@@ -438,59 +481,12 @@
       "l4/mensalidadesAcademia/pool/l2/menu20-draft.json",
       "l4/mensalidadesAcademia/pool/l2/needs30-draft.json",
       "l4/mensalidadesAcademia/pool/l2/pipeline.json",
+      "l4/mensalidadesAcademia/pool/l2/responses/menu20/menu-1.json",
       "l4/mensalidadesAcademia/pool/l2/web/backend.json",
       "l4/mensalidadesAcademia/pool/l2/web/effort.json",
       "l4/mensalidadesAcademia/pool/l2/web/l4diff.json",
       "l4/mensalidadesAcademia/pool/l2/web/menu.json",
       "l4/mensalidadesAcademia/rules.defs.ts",
-      "l4/mensalidadesAcademia/tobe/integration/financeiro--mensalidadeGerada.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/access.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/integration.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/journeys/acompanharIndicadoresAcademia.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/journeys/cancelarPropriaMatricula.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/journeys/gerarMensalidadesDoMes.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/journeys/index.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/journeys/matricularAluno.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/journeys/registrarPagamentoMensalidade.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/module.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/ontology/Aluno.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/ontology/IndicadoresAcademia.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/ontology/Matricula.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/ontology/Mensalidade.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/ontology/Pagamento.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/ontology/Plano.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/ontology/index.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/access60-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/finalize-report.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/integration70-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/journeys20-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/module10-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/ontology30-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/ontology30-entity-Aluno-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/ontology30-entity-IndicadoresAcademia-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/ontology30-entity-Matricula-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/ontology30-entity-Mensalidade-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/ontology30-entity-Pagamento-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/ontology30-entity-Plano-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/ontology30-plan-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/pipeline.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/rules40-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/run01_newsolution5.json",
-      "l4/mensalidadesAcademia/tobe/plan/pipeline/workflows50-draft.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l1/20260921054617_mensalidadesAcademia-20260921054617_1.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l1/20260921054640_mensalidadesAcademia-20260921054617_1.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l1/web/l4diff.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l1/web/needs.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l2/20260921054617_mensalidadesAcademia-20260921054617_1.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l2/20260921054640_mensalidadesAcademia-20260921054617_1.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l2/20260921105526_mensalidadesAcademia-20260921054617_1.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l2/web/backend.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l2/web/effort.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l2/web/l4diff.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l2/web/menu.json",
-      "l4/mensalidadesAcademia/tobe/plan/pool/l4/20260921054641_mensalidadesAcademia-20260921054617_1.json",
-      "l4/mensalidadesAcademia/tobe/plan/rules.defs.ts",
-      "l4/mensalidadesAcademia/tobe/plan/workflows.defs.ts",
       "l4/mensalidadesAcademia/workflows.defs.ts"
     ],
     "edited": [
@@ -498,46 +494,46 @@
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-10-12T20:22:05.626Z"
+    "at": "2026-10-12T23:00:23.332Z"
   },
   "poolWiped": [],
   "pool": [
     {
-      "at": "2026-10-12T20:25:42.269Z",
-      "file": "l4/mensalidadesAcademia/pool/l2/20261012202542_mensalidadesAcademia-20261012202542_1.json",
+      "at": "2026-10-12T23:03:38.951Z",
+      "file": "l4/mensalidadesAcademia/pool/l2/20261012230338_mensalidadesAcademia-20261012230338_1.json",
       "from": "l4",
       "to": "l2",
-      "thread": "mensalidadesAcademia-20261012202542",
+      "thread": "mensalidadesAcademia-20261012230338",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T20:26:05.039Z",
-      "file": "l4/mensalidadesAcademia/pool/l1/20261012202604_mensalidadesAcademia-20261012202542_1.json",
+      "at": "2026-10-12T23:04:01.628Z",
+      "file": "l4/mensalidadesAcademia/pool/l1/20261012230401_mensalidadesAcademia-20261012230338_1.json",
       "from": "l2",
       "to": "l1",
-      "thread": "mensalidadesAcademia-20261012202542",
+      "thread": "mensalidadesAcademia-20261012230338",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T20:26:05.680Z",
-      "file": "l4/mensalidadesAcademia/pool/l2/20261012202605_mensalidadesAcademia-20261012202542_1.json",
+      "at": "2026-10-12T23:04:02.279Z",
+      "file": "l4/mensalidadesAcademia/pool/l2/20261012230402_mensalidadesAcademia-20261012230338_1.json",
       "from": "l1",
       "to": "l2",
-      "thread": "mensalidadesAcademia-20261012202542",
+      "thread": "mensalidadesAcademia-20261012230338",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T20:26:06.246Z",
-      "file": "l4/mensalidadesAcademia/pool/l4/20261012202606_mensalidadesAcademia-20261012202542_1.json",
+      "at": "2026-10-12T23:04:02.913Z",
+      "file": "l4/mensalidadesAcademia/pool/l4/20261012230402_mensalidadesAcademia-20261012230338_1.json",
       "from": "l2",
       "to": "l4",
-      "thread": "mensalidadesAcademia-20261012202542",
+      "thread": "mensalidadesAcademia-20261012230338",
       "round": 1,
       "mode": "estimate",
       "outcome": "processed"

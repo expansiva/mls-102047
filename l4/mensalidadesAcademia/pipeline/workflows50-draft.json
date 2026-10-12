@@ -5,25 +5,35 @@
     {
       "processId": "geracaoMensalDeMensalidades",
       "title": "Geração mensal de mensalidades",
-      "description": "Todo mês a gerência gera as mensalidades do mês para todos os alunos com matrícula ativa, uma por aluno, com o valor do plano e o vencimento.",
+      "description": "Todo mês a gerência é lembrada e gera as mensalidades do mês para todos os alunos com matrícula ativa, uma por aluno, com o valor e o vencimento do plano.",
       "trigger": {
         "kind": "scheduled",
         "schedule": "todo mês"
       },
       "tasks": [
         {
-          "taskId": "lembrarGeracaoMensalidades",
+          "taskId": "lembrarGeracaoMensal",
           "kind": "alert",
           "actorRef": "gerencia",
+          "next": [
+            "gerarMensalidadesMes"
+          ],
+          "description": "Lembrar a gerência de gerar as mensalidades do mês na jornada gerarMensalidadesDoMes."
+        },
+        {
+          "taskId": "gerarMensalidadesMes",
+          "kind": "human",
+          "actorRef": "gerencia",
+          "journeyRef": "gerarMensalidadesDoMes",
           "next": [],
-          "description": "A gerência deve gerar as mensalidades do mês de referência para todas as matrículas ativas, pela jornada gerarMensalidadesDoMes, sem duplicar as já geradas."
+          "description": "A gerência gera e confere uma mensalidade por matrícula ativa com o valor e o vencimento do plano."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "cadastrarPlano",
+      "journeyId": "manterPlanos",
       "inProcess": false
     },
     {
@@ -40,7 +50,7 @@
       "inProcess": false
     },
     {
-      "journeyId": "verificarEntradaAluno",
+      "journeyId": "verificarAcessoAluno",
       "inProcess": false
     },
     {

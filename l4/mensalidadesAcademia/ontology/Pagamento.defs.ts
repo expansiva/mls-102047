@@ -7,7 +7,7 @@ export const mensalidadesAcademiaEntityPagamento = {
   "moduleName": "mensalidadesAcademia",
   "entityId": "Pagamento",
   "title": "Pagamento",
-  "description": "Registro do pagamento de uma mensalidade com data, valor e forma de pagamento.",
+  "description": "Pagamento de uma mensalidade registrado pela recepção, com data, valor e forma de pagamento.",
   "displayField": "dataPagamento",
   "relationships": {
     "mensalidade": {
@@ -15,31 +15,28 @@ export const mensalidadesAcademiaEntityPagamento = {
       "to": "Mensalidade",
       "via": "Pagamento.mensalidadeId",
       "cardinality": "N:1",
-      "title": "Mensalidade paga",
-      "description": "Cada pagamento quita uma mensalidade.",
+      "title": "Mensalidade quitada",
+      "description": "O pagamento quita uma mensalidade, que passa a paga.",
       "mode": "fk",
       "required": true
     }
   },
   "capabilities": {
-    "create": "A recepção registra o pagamento com data, valor e forma, na mesma operação que marca a mensalidade como paga.",
-    "transaction": "Grava o pagamento e atualiza a situação da mensalidade tudo ou nada, para não haver pagamento sem mensalidade paga.",
-    "read.byId": "Abre um pagamento já conhecido para a recepção ou a gerência conferirem.",
-    "listByForeignKey": "Lista os pagamentos de uma mensalidade, ou de várias de uma vez, na tela da mensalidade do aluno.",
-    "locate.byColumn": "Lista pagamentos por data e forma de pagamento, ordenados pela data, para a recepção e a gerência.",
-    "count": "Conta os pagamentos de um período no cabeçalho da lista da gerência.",
-    "update": "A recepção corrige a observação ou um erro de digitação do pagamento lançado.",
-    "read.mdmRecord": "Mostra o nome do aluno por trás da mensalidade paga, lendo o registro mestre.",
-    "sequence.next": "Emite o número de recibo que a recepção informa ao aluno.",
-    "comment": "A recepção deixa uma nota sobre o pagamento, como acordo de regularização.",
-    "attach.document": "Anexa o comprovante de Pix ou de transferência apresentado pelo aluno.",
-    "audit": "Registra quem lançou ou alterou cada pagamento, para conferência da gerência."
+    "create": "A recepção registra um pagamento com data, valor e forma; a mensalidade vinculada passa a paga e, regularizadas as vencidas, o aluno é desbloqueado.",
+    "read.byId": "Lê um pagamento pelo id a partir de qualquer tela que já o tenha em mãos, como a conferência da mensalidade.",
+    "locate.byColumn": "Lista pagamentos por mensalidade ou por data de pagamento, ordenados e paginados, para a recepção e a gerência.",
+    "listByForeignKey": "Mostra na tela da mensalidade todos os pagamentos que apontam para ela, usado pela recepção e pela gerência.",
+    "count": "Conta os pagamentos de um filtro, por exemplo no período, para totais de cabeçalho usados pela gerência.",
+    "update": "A recepção corrige dados de um pagamento lançado com erro, como forma ou observação.",
+    "transaction": "Grava o pagamento, a mudança da mensalidade para paga e o desbloqueio do aluno de forma atômica no registro feito pela recepção.",
+    "comment": "A recepção deixa notas sobre o pagamento, como combinados com o aluno.",
+    "mensalidadesAcademia.somarPagamentosDaMensalidade": "Soma os valores pagos de uma mensalidade para saber se está quitada, usado ao registrar o pagamento pela recepção."
   },
   "rules": [
-    "pagamentoValorPositivo",
-    "pagamentoSomenteMensalidadeAberta",
     "pagamentoQuitaMensalidade",
-    "desbloqueioAposRegularizacao"
+    "pagamentoValorPositivo",
+    "pagamentoDataNaoFutura",
+    "alunoDesbloqueadoAoRegularizarVencidas"
   ],
   "kind": "entity",
   "class": "event",
@@ -77,53 +74,52 @@ export const mensalidadesAcademiaEntityPagamento = {
         "required": true,
         "indexed": true,
         "title": "Data do pagamento",
-        "description": "Data em que o aluno pagou a mensalidade; usada para ordenar e somar o total recebido no mês."
-      },
-      "formaPagamento": {
-        "type": "enum",
-        "required": true,
-        "indexed": true,
-        "values": [
-          {
-            "value": "cash",
-            "title": "Dinheiro"
-          },
-          {
-            "value": "pix",
-            "title": "Pix"
-          },
-          {
-            "value": "debitCard",
-            "title": "Cartão de débito"
-          },
-          {
-            "value": "creditCard",
-            "title": "Cartão de crédito"
-          },
-          {
-            "value": "bankSlip",
-            "title": "Boleto"
-          },
-          {
-            "value": "bankTransfer",
-            "title": "Transferência bancária"
-          }
-        ],
-        "title": "Forma de pagamento",
-        "description": "Meio usado pelo aluno para pagar."
+        "description": "Data em que o aluno efetuou o pagamento, informada pela recepção."
       },
       "details": {
         "type": "object",
         "required": true,
         "title": "Detalhes",
-        "description": "Dados do pagamento que só são exibidos.",
+        "description": "Dados do pagamento que nenhuma consulta filtra.",
         "fields": {
           "valor": {
             "type": "money",
             "required": true,
             "title": "Valor pago",
             "description": "Valor recebido pela recepção neste pagamento.",
-            "min": 0.01
+            "min": 0
+          },
+          "forma": {
+            "type": "enum",
+            "required": true,
+            "values": [
+              {
+                "value": "dinheiro",
+                "title": "Dinheiro"
+              },
+              {
+                "value": "pix",
+                "title": "Pix"
+              },
+              {
+                "value": "cartaoCredito",
+                "title": "Cartão de crédito"
+              },
+              {
+                "value": "cartaoDebito",
+                "title": "Cartão de débito"
+              },
+              {
+                "value": "boleto",
+                "title": "Boleto"
+              },
+              {
+                "value": "transferencia",
+                "title": "Transferência"
+              }
+            ],
+            "title": "Forma de pagamento",
+            "description": "Meio pelo qual o aluno pagou."
           },
           "observacao": {
             "type": "text",

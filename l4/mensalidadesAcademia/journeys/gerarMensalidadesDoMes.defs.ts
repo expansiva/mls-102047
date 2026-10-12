@@ -8,17 +8,17 @@ export const gerarMensalidadesDoMesJourney = {
   "business": {
     "actorRef": "gerencia",
     "title": "Gerar mensalidades do mês",
-    "goal": "Gerar uma mensalidade por aluno ativo no mês, com o valor do plano e o vencimento.",
+    "goal": "Gerar uma mensalidade por aluno ativo com o valor do plano e o vencimento do mês.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "conferirMatriculasAtivas",
+        "stepId": "consultarMatriculasAtivas",
         "kind": "locate",
         "entity": "Matricula",
-        "title": "Conferir matrículas ativas",
-        "description": "A gerência consulta as matrículas ativas que receberão mensalidade no mês de referência."
+        "title": "Ver matrículas ativas",
+        "description": "A gerência consulta as matrículas ativas que receberão mensalidade no mês."
       },
       {
         "stepId": "gerarMensalidades",
@@ -26,25 +26,25 @@ export const gerarMensalidadesDoMesJourney = {
         "entity": "Mensalidade",
         "effect": "create",
         "title": "Gerar mensalidades",
-        "description": "A gerência informa o mês de referência e gera uma mensalidade por matrícula ativa com o valor do plano e o vencimento no dia do plano, sem duplicar mensalidades já geradas."
+        "description": "A gerência informa a competência e gera uma mensalidade por matrícula ativa, com o valor do plano e o vencimento no dia do plano, sem duplicar mensalidades já geradas."
       },
       {
-        "stepId": "revisarMensalidadesGeradas",
+        "stepId": "conferirMensalidades",
         "kind": "inspect",
         "entity": "Mensalidade",
-        "title": "Revisar mensalidades geradas",
-        "description": "A gerência confere a lista das mensalidades geradas no mês com aluno, valor e vencimento."
+        "title": "Conferir mensalidades geradas",
+        "description": "A gerência confere a lista de mensalidades geradas para o mês com valores e vencimentos."
       }
     ],
     "outcome": {
-      "statement": "Cada aluno ativo tem exatamente uma mensalidade em aberto para o mês.",
+      "statement": "Cada aluno ativo tem uma mensalidade em aberto no mês com valor e vencimento do plano.",
       "evidence": [
-        "A lista do mês mostra uma mensalidade por aluno ativo com valor e vencimento.",
-        "Matrículas canceladas não recebem mensalidade."
+        "Uma mensalidade em aberto por matrícula ativa na competência",
+        "Valor e data de vencimento iguais aos do plano"
       ]
     }
   },
-  "businessHash": "sha256:0f6a60f22924d65bae822b0d9a3b5a518c479f2ae3e540c122a9aa132f437c6a"
+  "businessHash": "sha256:f0c2644c096cdb4451d4e1b74f2099a166795e1f30c7493765eff2045d727f9f"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type GerarMensalidadesDoMesJourneyType = typeof gerarMensalidadesDoMesJourney;

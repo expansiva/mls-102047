@@ -7,20 +7,21 @@ export const mensalidadesAcademiaEntityPainelMensalidades = {
   "moduleName": "mensalidadesAcademia",
   "entityId": "PainelMensalidades",
   "title": "Painel de mensalidades",
-  "description": "Resumo recalculado para a gerência: total a receber no mês, total recebido, quantidade de alunos ativos, bloqueados e inadimplentes.",
-  "displayField": "mesReferencia",
+  "description": "Painel da gerência recalculado por competência: total a receber no mês, total recebido, quantidade de alunos ativos, bloqueados e inadimplentes.",
+  "displayField": "competencia",
   "relationships": {},
   "capabilities": {
-    "aggregate.byWindow": "Resume por mês as mensalidades, os pagamentos e as matrículas do módulo (agregado com janela mensal) para montar o painel que a gerência acompanha.",
-    "read.window": "Lê os indicadores de um mês de referência pela coluna indexada mesReferencia; usado pela gerência na tela do painel de mensalidades.",
-    "refresh": "Mantém o painel atualizado à medida que a gerência gera mensalidades e a recepção registra pagamentos e matrículas; executado pela plataforma, sem ação de ninguém.",
-    "rebuild": "Recalcula todo o painel a partir das mensalidades, pagamentos e matrículas em uma migração ou publicação do módulo.",
-    "retain": "Descarta linhas do painel de meses muito antigos que a gerência não consulta mais, para a série não crescer indefinidamente; executado pela plataforma.",
-    "backfill": "Preenche o painel de meses já passados quando ele é ativado depois que a academia já tem mensalidades e pagamentos registrados; usado pela gerência ao começar a usar o painel."
+    "aggregate.byWindow": "Resume as mensalidades, os pagamentos e as matrículas por competência mensal (agregado contínuo com time_bucket mensal), gerando os totais e as quantidades que a gerência acompanha no painel.",
+    "read.window": "Lê os indicadores de uma competência ou de um intervalo de meses pela coluna indexada competencia; usado pela gerência ao abrir o painel de mensalidades.",
+    "refresh": "Mantém o painel atualizado conforme a gerência gera mensalidades e a recepção registra pagamentos, por política de atualização do agregado executada pela plataforma.",
+    "rebuild": "Recalcula todo o painel a partir das mensalidades, pagamentos e matrículas numa migração ou publicação do módulo.",
+    "retain": "Descarta competências antigas que a gerência não consulta mais, para o painel não crescer indefinidamente.",
+    "backfill": "Preenche os indicadores de competências já passadas quando o painel é ativado depois de as mensalidades existirem; usado pela gerência para ver o histórico."
   },
   "rules": [
     "mensalidadeVencidaAposVencimento",
-    "alunoBloqueadoDuasVencidas",
+    "alunoBloqueadoComDuasVencidas",
+    "alunoInadimplenteComMensalidadeVencida",
     "matriculaCanceladaEncerraGeracao"
   ],
   "kind": "entity",
@@ -44,43 +45,69 @@ export const mensalidadesAcademiaEntityPainelMensalidades = {
         "required": true,
         "derived": true
       },
-      "mesReferencia": {
+      "competencia": {
         "type": "timestamp",
         "required": true,
         "indexed": true,
-        "title": "Mês de referência",
-        "description": "Início do mês que esta linha do painel resume (janela mensal). Calculado pela plataforma a partir das mensalidades, pagamentos e matrículas; ninguém o digita.",
+        "title": "Competência",
+        "description": "Início do mês de competência que esta linha resume. É a janela mensal do painel: a gerência escolhe o mês e o painel mostra os números daquela competência.",
         "derived": true
       },
       "details": {
         "type": "object",
         "required": true,
         "title": "Indicadores do mês",
-        "description": "Indicadores do painel da gerência, recalculados a partir das tabelas Mensalidade, Pagamento e Matricula e do papel Aluno. Nenhum valor é digitado.",
+        "description": "Indicadores recalculados a partir das mensalidades, pagamentos e matrículas da competência. Ninguém digita estes valores.",
         "fields": {
           "totalAReceber": {
             "type": "money",
             "required": true,
             "title": "Total a receber no mês",
-            "description": "Soma dos valores das mensalidades com vencimento no mês de referência que ainda não foram quitadas.",
+            "description": "Soma dos valores das mensalidades geradas para a competência que ainda não foram quitadas.",
+            "min": 0,
             "derived": true
           },
           "totalRecebido": {
             "type": "money",
             "required": true,
             "title": "Total recebido no mês",
-            "description": "Soma dos valores dos pagamentos registrados pela recepção com data de pagamento dentro do mês de referência.",
-            "derived": true
-          },
-          "quantidadeAlunosAtivos": {
-            "type": "integer",
-            "required": true,
-            "title": "Alunos ativos",
-            "description": "Quantidade de alunos com matrícula ativa (não cancelada) em algum plano no mês de referência.",
+            "description": "Soma dos pagamentos registrados pela recepção para mensalidades da competência.",
             "min": 0,
             "derived": true
           },
-          "quantidadeAlunosBloqueados": {
+          "totalGerado": {
+            "type": "money",
+            "required": true,
+            "title": "Total gerado no mês",
+            "description": "Soma dos valores de todas as mensalidades geradas pela gerência para a competência, pagas ou não.",
+            "min": 0,
+            "derived": true
+          },
+          "quantidadeMensalidades": {
+            "type": "integer",
+            "required": true,
+            "title": "Mensalidades geradas",
+            "description": "Quantidade de mensalidades geradas para a competência, uma por aluno ativo.",
+            "min": 0,
+            "derived": true
+          },
+          "quantidadeMensalidadesVencidas": {
+            "type": "integer",
+            "required": true,
+            "title": "Mensalidades vencidas",
+            "description": "Quantidade de mensalidades da competência em aberto e com vencimento anterior à data do cálculo.",
+            "min": 0,
+            "derived": true
+          },
+          "alunosAtivos": {
+            "type": "integer",
+            "required": true,
+            "title": "Alunos ativos",
+            "description": "Quantidade de alunos com matrícula ativa (não cancelada) na competência.",
+            "min": 0,
+            "derived": true
+          },
+          "alunosBloqueados": {
             "type": "integer",
             "required": true,
             "title": "Alunos bloqueados",
@@ -88,7 +115,7 @@ export const mensalidadesAcademiaEntityPainelMensalidades = {
             "min": 0,
             "derived": true
           },
-          "quantidadeAlunosInadimplentes": {
+          "alunosInadimplentes": {
             "type": "integer",
             "required": true,
             "title": "Alunos inadimplentes",

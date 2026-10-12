@@ -7,9 +7,9 @@ export const mensalidadesAcademiaJourneyIndex = {
   "moduleName": "mensalidadesAcademia",
   "journeys": [
     {
-      "journeyId": "cadastrarPlano",
+      "journeyId": "manterPlanos",
       "actorRef": "gerencia",
-      "title": "Cadastrar plano"
+      "title": "Manter planos da academia"
     },
     {
       "journeyId": "matricularAluno",
@@ -27,26 +27,22 @@ export const mensalidadesAcademiaJourneyIndex = {
       "title": "Registrar pagamento de mensalidade"
     },
     {
-      "journeyId": "verificarEntradaAluno",
+      "journeyId": "verificarAcessoAluno",
       "actorRef": "recepcao",
-      "title": "Verificar se o aluno pode entrar"
+      "title": "Verificar entrada do aluno"
     },
     {
       "journeyId": "acompanharPainel",
       "actorRef": "gerencia",
-      "title": "Acompanhar painel de mensalidades"
+      "title": "Acompanhar painel financeiro"
+    },
+    {
+      "journeyId": "cancelarMatricula",
+      "actorRef": "recepcao",
+      "title": "Cancelar matrícula do aluno"
     }
   ],
-  "systemDecisions": [
-    {
-      "decisionId": "dropInferredActorAluno",
-      "chosen": "drop",
-      "alternatives": [
-        "keep"
-      ],
-      "decidedBy": "system"
-    }
-  ]
+  "systemDecisions": []
 } as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type MensalidadesAcademiaJourneyIndexType = typeof mensalidadesAcademiaJourneyIndex;

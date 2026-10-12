@@ -7,8 +7,8 @@ export const acompanharPainelJourney = {
   "journeyId": "acompanharPainel",
   "business": {
     "actorRef": "gerencia",
-    "title": "Acompanhar painel de mensalidades",
-    "goal": "Acompanhar a situação financeira do mês e dos alunos.",
+    "title": "Acompanhar painel financeiro",
+    "goal": "Ver total a receber e recebido no mês e a quantidade de alunos ativos, bloqueados e inadimplentes.",
     "entry": {
       "mode": "coldStart"
     },
@@ -16,27 +16,27 @@ export const acompanharPainelJourney = {
       {
         "stepId": "abrirPainel",
         "kind": "inspect",
-        "entity": "Mensalidade",
+        "entity": "PainelMensalidades",
         "title": "Abrir painel do mês",
-        "description": "A gerência vê o total a receber no mês, o total recebido e as quantidades de alunos ativos, bloqueados e inadimplentes."
+        "description": "A gerência abre o painel com total a receber, total recebido e quantidades de alunos ativos, bloqueados e inadimplentes."
       },
       {
         "stepId": "listarInadimplentes",
         "kind": "locate",
         "entity": "Mensalidade",
-        "title": "Listar mensalidades vencidas",
-        "description": "A gerência consulta as mensalidades vencidas para identificar os alunos inadimplentes e bloqueados."
+        "title": "Ver mensalidades vencidas",
+        "description": "A gerência consulta as mensalidades vencidas para identificar os alunos inadimplentes."
       }
     ],
     "outcome": {
-      "statement": "A gerência conhece os números do mês e quem está inadimplente.",
+      "statement": "A gerência conhece a situação financeira do mês e os alunos em atraso.",
       "evidence": [
-        "O painel exibe total a receber, total recebido, alunos ativos, bloqueados e inadimplentes.",
-        "A lista de mensalidades vencidas mostra aluno, valor e vencimento."
+        "Totais a receber e recebido do mês exibidos",
+        "Quantidades de alunos ativos, bloqueados e inadimplentes exibidas"
       ]
     }
   },
-  "businessHash": "sha256:140c4d0279a85be65af279924dbc2ab3a2bb007f70a0a1c4a84333f77c209183"
+  "businessHash": "sha256:b7e9b55cfad957c043879bab103909835adbc1b851fbbcb12d7e51f426e9bac4"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharPainelJourneyType = typeof acompanharPainelJourney;

@@ -402,75 +402,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-10-12T19:38:44.675Z"
     },
     {
-      "moduleName": "mensalidadesAcademia",
-      "actors": [
-        {
-          "actorId": "recepcao",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gerencia",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "mensalidadesAcademia.Aluno",
-          "namespace": "mensalidadesAcademia"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Aluno",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Plano",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Matricula",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Mensalidade",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Pagamento",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "PainelMensalidades",
-          "kind": "entity",
-          "class": "supporting"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "matriculaCancelada",
-          "on": "Matricula.cancelarMatricula"
-        },
-        {
-          "eventId": "mensalidadeGerada",
-          "on": "Mensalidade.create"
-        },
-        {
-          "eventId": "pagamentoRegistrado",
-          "on": "Pagamento.create"
-        }
-      ],
-      "updatedAt": "2026-10-12T20:25:09.795Z"
-    },
-    {
       "moduleName": "ordenServicio",
       "actors": [
         {
@@ -761,6 +692,86 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-12T22:58:55.610Z"
+    },
+    {
+      "moduleName": "mensalidadesAcademia",
+      "actors": [
+        {
+          "actorId": "recepcao",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerencia",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "mensalidadesAcademia.Aluno",
+          "namespace": "mensalidadesAcademia"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "mensalidadesAcademia.Recepcionista",
+          "namespace": "mensalidadesAcademia"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Aluno",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Recepcionista",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Plano",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "Matricula",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Mensalidade",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "Pagamento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PainelMensalidades",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "mensalidadeGerada",
+          "on": "Mensalidade.create"
+        },
+        {
+          "eventId": "pagamentoMensalidadeRegistrado",
+          "on": "Pagamento.create"
+        },
+        {
+          "eventId": "matriculaCancelada",
+          "on": "Matricula.cancelarMatricula"
+        }
+      ],
+      "updatedAt": "2026-10-12T23:03:17.905Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

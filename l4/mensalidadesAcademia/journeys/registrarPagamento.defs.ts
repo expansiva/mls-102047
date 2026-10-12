@@ -17,15 +17,15 @@ export const registrarPagamentoJourney = {
         "stepId": "localizarMensalidade",
         "kind": "locate",
         "entity": "Mensalidade",
-        "title": "Localizar mensalidade do aluno",
-        "description": "A recepção busca o aluno e localiza suas mensalidades em aberto ou vencidas."
+        "title": "Buscar mensalidade do aluno",
+        "description": "A recepção localiza as mensalidades em aberto ou vencidas do aluno."
       },
       {
         "stepId": "verMensalidade",
         "kind": "inspect",
         "entity": "Mensalidade",
         "title": "Ver detalhes da mensalidade",
-        "description": "A recepção confere mês de referência, valor, vencimento e situação da mensalidade."
+        "description": "A recepção confere competência, valor, vencimento e situação da mensalidade."
       },
       {
         "stepId": "lancarPagamento",
@@ -33,18 +33,19 @@ export const registrarPagamentoJourney = {
         "entity": "Pagamento",
         "effect": "create",
         "title": "Lançar pagamento",
-        "description": "A recepção registra data, valor e forma do pagamento, e a mensalidade passa a paga; se o aluno estava bloqueado e regularizou, ele é desbloqueado."
+        "description": "A recepção registra data, valor e forma do pagamento; a mensalidade passa a paga e, se o aluno regularizou as vencidas, ele deixa de estar bloqueado."
       }
     ],
     "outcome": {
-      "statement": "O pagamento está registrado e a mensalidade quitada.",
+      "statement": "A mensalidade fica quitada e a situação do aluno é atualizada.",
       "evidence": [
-        "A mensalidade aparece como paga com o pagamento vinculado (data, valor e forma).",
-        "O total recebido do mês aumenta no painel."
+        "Pagamento registrado com data, valor e forma",
+        "Mensalidade com situação paga",
+        "Aluno desbloqueado quando não restam duas mensalidades vencidas"
       ]
     }
   },
-  "businessHash": "sha256:8daa3ecae20f371de69cf7189af8c5833f503ea1db7a1a51d700c9df765c9bba"
+  "businessHash": "sha256:883c9d719db1c0e2086eaece7eddf8fc61db7866abba877987aa9f4dfc2050b4"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarPagamentoJourneyType = typeof registrarPagamentoJourney;
