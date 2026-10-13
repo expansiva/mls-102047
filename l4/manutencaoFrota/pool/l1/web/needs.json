@@ -18,17 +18,15 @@
             "details.precoPorLitro"
           ],
           "from": [
-            "grant:motoristaAbastecimentos",
-            "journey:consultarMeusVeiculos/listarMeusVeiculos",
-            "journey:consultarMeusVeiculos/verVeiculo",
+            "grant:motoristaMeusAbastecimentos",
             "journey:registrarAbastecimento/conferirVeiculo",
             "journey:registrarAbastecimento/lancarAbastecimento",
             "journey:registrarAbastecimento/localizarVeiculo",
             "relationship:Abastecimento/abastecimentoMotorista",
             "relationship:Abastecimento/abastecimentoVeiculo",
             "relationship:Motorista/abastecimentoMotorista",
-            "relationship:Motorista/veiculoMotorista",
-            "relationship:Veiculo/abastecimentoVeiculo"
+            "relationship:Veiculo/abastecimentoVeiculo",
+            "relationship:Veiculo/veiculoMotorista"
           ]
         },
         {
@@ -38,8 +36,63 @@
           "derived": [],
           "from": [
             "grant:motoristaProprioCadastro",
-            "journey:consultarMeusVeiculos/listarMeusVeiculos",
-            "journey:consultarMeusVeiculos/verVeiculo",
+            "journey:registrarAbastecimento/conferirVeiculo",
+            "journey:registrarAbastecimento/lancarAbastecimento",
+            "journey:registrarAbastecimento/localizarVeiculo",
+            "relationship:Abastecimento/abastecimentoMotorista",
+            "relationship:Motorista/abastecimentoMotorista",
+            "relationship:Motorista/veiculoMotorista",
+            "relationship:Veiculo/veiculoMotorista"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Abastecimento",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:registrarAbastecimento/lancarAbastecimento"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "meus_abastecimentos",
+      "actors": [
+        "motorista"
+      ],
+      "reads": [
+        {
+          "entity": "Abastecimento",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.precoPorLitro"
+          ],
+          "from": [
+            "grant:motoristaMeusAbastecimentos",
+            "journey:consultarMeusAbastecimentos/listarAbastecimentos",
+            "journey:consultarMeusAbastecimentos/verAbastecimento",
+            "journey:registrarAbastecimento/conferirVeiculo",
+            "journey:registrarAbastecimento/lancarAbastecimento",
+            "journey:registrarAbastecimento/localizarVeiculo",
+            "relationship:Abastecimento/abastecimentoMotorista",
+            "relationship:Abastecimento/abastecimentoVeiculo",
+            "relationship:Motorista/abastecimentoMotorista",
+            "relationship:Veiculo/abastecimentoVeiculo",
+            "relationship:Veiculo/veiculoMotorista"
+          ]
+        },
+        {
+          "entity": "Motorista",
+          "family": "mdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "grant:motoristaProprioCadastro",
+            "journey:consultarMeusAbastecimentos/listarAbastecimentos",
+            "journey:consultarMeusAbastecimentos/verAbastecimento",
             "journey:registrarAbastecimento/conferirVeiculo",
             "journey:registrarAbastecimento/lancarAbastecimento",
             "journey:registrarAbastecimento/localizarVeiculo",
@@ -77,10 +130,14 @@
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
+            "relationship:Abastecimento/abastecimentoMotorista",
             "relationship:Abastecimento/abastecimentoVeiculo",
-            "relationship:Veiculo/abastecimentoVeiculo"
+            "relationship:Motorista/abastecimentoMotorista",
+            "relationship:Veiculo/abastecimentoVeiculo",
+            "relationship:Veiculo/planoVeiculo",
+            "relationship:Veiculo/veiculoMotorista"
           ]
         },
         {
@@ -89,9 +146,14 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
+            "grant:gestorCadastrosMestres",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
+            "relationship:Abastecimento/abastecimentoMotorista",
+            "relationship:Motorista/abastecimentoMotorista",
+            "relationship:Motorista/veiculoMotorista",
+            "relationship:Veiculo/abastecimentoVeiculo",
+            "relationship:Veiculo/planoVeiculo",
             "relationship:Veiculo/veiculoMotorista"
           ]
         },
@@ -101,9 +163,9 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
+            "grant:gestorCadastrosMestres",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "relationship:Oficina/ordemOficina",
             "relationship:OrdemManutencao/ordemOficina",
             "relationship:PlanoManutencao/ordemPlano"
@@ -114,18 +176,20 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.diasNaOficina"
+            "details.diasNaOficina",
+            "numero"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "relationship:Oficina/ordemOficina",
             "relationship:OrdemManutencao/ordemOficina",
             "relationship:OrdemManutencao/ordemPlano",
             "relationship:OrdemManutencao/ordemVeiculo",
             "relationship:PlanoManutencao/ordemPlano",
-            "relationship:Veiculo/ordemVeiculo"
+            "relationship:Veiculo/ordemVeiculo",
+            "relationship:Veiculo/planoVeiculo"
           ]
         },
         {
@@ -133,17 +197,19 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.kmExcedente",
-            "details.kmRestante",
-            "details.possuiOrdemAberta",
-            "details.vencido",
+            "details.dataPrevista",
+            "details.dataUltimaPreventiva",
+            "details.kmExcedido",
+            "details.kmPrevisto",
+            "details.kmUltimaPreventiva",
+            "details.temOrdemAberta",
             "details.vencidoPorKm",
-            "details.vencidoPorPrazo"
+            "details.vencidoPorTempo"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "relationship:OrdemManutencao/ordemPlano",
             "relationship:PlanoManutencao/ordemPlano",
             "relationship:PlanoManutencao/planoVeiculo",
@@ -155,14 +221,13 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.custoTotalManutencao",
-            "details.emManutencao",
+            "details.kmProximaPreventiva",
             "details.preventivaVencida"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "relationship:Abastecimento/abastecimentoVeiculo",
             "relationship:Motorista/veiculoMotorista",
             "relationship:OrdemManutencao/ordemVeiculo",
@@ -178,7 +243,7 @@
       "writes": []
     },
     {
-      "pageId": "veiculos_frota",
+      "pageId": "veiculos",
       "actors": [
         "gestor"
       ],
@@ -192,20 +257,18 @@
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "journey:cadastrarVeiculo/atribuirMotorista",
             "journey:cadastrarVeiculo/criarVeiculo",
             "relationship:Abastecimento/abastecimentoMotorista",
             "relationship:Abastecimento/abastecimentoVeiculo",
             "relationship:Motorista/abastecimentoMotorista",
-            "relationship:Motorista/veiculoMotorista",
-            "relationship:Veiculo/abastecimentoVeiculo"
+            "relationship:Veiculo/abastecimentoVeiculo",
+            "relationship:Veiculo/veiculoMotorista"
           ]
         },
         {
@@ -214,14 +277,12 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "grant:gestorCadastrosMestres",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "journey:cadastrarVeiculo/atribuirMotorista",
             "journey:cadastrarVeiculo/criarVeiculo",
             "relationship:Abastecimento/abastecimentoMotorista",
@@ -237,19 +298,16 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "grant:gestorCadastrosMestres",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "journey:cadastrarVeiculo/atribuirMotorista",
             "journey:cadastrarVeiculo/criarVeiculo",
             "relationship:Oficina/ordemOficina",
             "relationship:OrdemManutencao/ordemOficina",
-            "relationship:PlanoManutencao/ordemPlano",
             "relationship:Veiculo/ordemVeiculo"
           ]
         },
@@ -258,17 +316,16 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.diasNaOficina"
+            "details.diasNaOficina",
+            "numero"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "journey:cadastrarVeiculo/atribuirMotorista",
             "journey:cadastrarVeiculo/criarVeiculo",
             "relationship:Oficina/ordemOficina",
@@ -285,22 +342,22 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.kmExcedente",
-            "details.kmRestante",
-            "details.possuiOrdemAberta",
-            "details.vencido",
+            "details.dataPrevista",
+            "details.dataUltimaPreventiva",
+            "details.kmExcedido",
+            "details.kmPrevisto",
+            "details.kmUltimaPreventiva",
+            "details.temOrdemAberta",
             "details.vencidoPorKm",
-            "details.vencidoPorPrazo"
+            "details.vencidoPorTempo"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "journey:cadastrarVeiculo/atribuirMotorista",
             "journey:cadastrarVeiculo/criarVeiculo",
             "relationship:OrdemManutencao/ordemPlano",
@@ -315,25 +372,21 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.custoTotalManutencao",
-            "details.emManutencao",
+            "details.kmProximaPreventiva",
             "details.preventivaVencida"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "journey:cadastrarVeiculo/atribuirMotorista",
             "journey:cadastrarVeiculo/criarVeiculo",
             "relationship:Abastecimento/abastecimentoVeiculo",
             "relationship:Motorista/veiculoMotorista",
             "relationship:OrdemManutencao/ordemVeiculo",
-            "relationship:PlanoManutencao/ordemPlano",
             "relationship:PlanoManutencao/planoVeiculo",
             "relationship:Veiculo/abastecimentoVeiculo",
             "relationship:Veiculo/ordemVeiculo",
@@ -348,7 +401,7 @@
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva"
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva"
           ]
         },
         {
@@ -378,7 +431,7 @@
       ]
     },
     {
-      "pageId": "planos_preventiva",
+      "pageId": "planos_manutencao",
       "actors": [
         "gestor"
       ],
@@ -392,10 +445,19 @@
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
+            "journey:cadastrarPlanoPreventiva/criarPlano",
+            "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
+            "relationship:Abastecimento/abastecimentoMotorista",
             "relationship:Abastecimento/abastecimentoVeiculo",
-            "relationship:Veiculo/abastecimentoVeiculo"
+            "relationship:Motorista/abastecimentoMotorista",
+            "relationship:Veiculo/abastecimentoVeiculo",
+            "relationship:Veiculo/planoVeiculo",
+            "relationship:Veiculo/veiculoMotorista"
           ]
         },
         {
@@ -404,14 +466,17 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "grant:gestorCadastrosMestres",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
+            "relationship:Abastecimento/abastecimentoMotorista",
+            "relationship:Motorista/abastecimentoMotorista",
+            "relationship:Veiculo/abastecimentoVeiculo",
             "relationship:Veiculo/planoVeiculo",
             "relationship:Veiculo/veiculoMotorista"
           ]
@@ -422,14 +487,17 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "grant:gestorCadastrosMestres",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "relationship:Oficina/ordemOficina",
             "relationship:OrdemManutencao/ordemOficina",
+            "relationship:PlanoManutencao/ordemPlano",
             "relationship:Veiculo/ordemVeiculo"
           ]
         },
@@ -438,17 +506,18 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.diasNaOficina"
+            "details.diasNaOficina",
+            "numero"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "relationship:Oficina/ordemOficina",
             "relationship:OrdemManutencao/ordemOficina",
             "relationship:OrdemManutencao/ordemPlano",
@@ -463,23 +532,24 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.kmExcedente",
-            "details.kmRestante",
-            "details.possuiOrdemAberta",
-            "details.vencido",
+            "details.dataPrevista",
+            "details.dataUltimaPreventiva",
+            "details.kmExcedido",
+            "details.kmPrevisto",
+            "details.kmUltimaPreventiva",
+            "details.temOrdemAberta",
             "details.vencidoPorKm",
-            "details.vencidoPorPrazo"
+            "details.vencidoPorTempo"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
-            "process:atualizarPlanoAposPreventiva",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "relationship:OrdemManutencao/ordemPlano",
             "relationship:PlanoManutencao/ordemPlano",
             "relationship:PlanoManutencao/planoVeiculo",
@@ -492,19 +562,18 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.custoTotalManutencao",
-            "details.emManutencao",
+            "details.kmProximaPreventiva",
             "details.preventivaVencida"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:acompanharFrota/listarVencidos",
-            "journey:acompanharFrota/verVeiculoFrota",
-            "journey:cadastrarPlanoPreventiva/conferirPlano",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
+            "journey:acompanharPreventivasVencidas/listarVencidos",
+            "journey:acompanharPreventivasVencidas/verPlanoVencido",
             "journey:cadastrarPlanoPreventiva/criarPlano",
             "journey:cadastrarPlanoPreventiva/localizarVeiculoPlano",
+            "journey:cadastrarPlanoPreventiva/verVeiculoPlano",
             "relationship:Abastecimento/abastecimentoVeiculo",
             "relationship:Motorista/veiculoMotorista",
             "relationship:OrdemManutencao/ordemVeiculo",
@@ -523,7 +592,7 @@
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva"
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano"
           ]
         },
         {
@@ -551,17 +620,17 @@
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:concluirOrdem/conferirOrdem",
-            "journey:concluirOrdem/fecharOrdem",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
             "journey:concluirOrdem/localizarOrdem",
-            "relationship:Abastecimento/abastecimentoMotorista",
-            "relationship:Motorista/veiculoMotorista",
+            "journey:concluirOrdem/registrarConclusao",
+            "journey:concluirOrdem/verOrdem",
+            "relationship:Motorista/abastecimentoMotorista",
             "relationship:Veiculo/ordemVeiculo",
-            "relationship:Veiculo/planoVeiculo"
+            "relationship:Veiculo/planoVeiculo",
+            "relationship:Veiculo/veiculoMotorista"
           ]
         },
         {
@@ -570,15 +639,16 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:concluirOrdem/conferirOrdem",
-            "journey:concluirOrdem/fecharOrdem",
+            "grant:gestorCadastrosMestres",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
             "journey:concluirOrdem/localizarOrdem",
+            "journey:concluirOrdem/registrarConclusao",
+            "journey:concluirOrdem/verOrdem",
             "relationship:Abastecimento/abastecimentoMotorista",
+            "relationship:Motorista/abastecimentoMotorista",
             "relationship:Motorista/veiculoMotorista",
             "relationship:Veiculo/ordemVeiculo",
             "relationship:Veiculo/planoVeiculo",
@@ -591,14 +661,14 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:concluirOrdem/conferirOrdem",
-            "journey:concluirOrdem/fecharOrdem",
+            "grant:gestorCadastrosMestres",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
             "journey:concluirOrdem/localizarOrdem",
+            "journey:concluirOrdem/registrarConclusao",
+            "journey:concluirOrdem/verOrdem",
             "relationship:Oficina/ordemOficina",
             "relationship:OrdemManutencao/ordemOficina"
           ]
@@ -608,17 +678,18 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.diasNaOficina"
+            "details.diasNaOficina",
+            "numero"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:concluirOrdem/conferirOrdem",
-            "journey:concluirOrdem/fecharOrdem",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
             "journey:concluirOrdem/localizarOrdem",
+            "journey:concluirOrdem/registrarConclusao",
+            "journey:concluirOrdem/verOrdem",
             "relationship:Oficina/ordemOficina",
             "relationship:OrdemManutencao/ordemOficina",
             "relationship:OrdemManutencao/ordemPlano",
@@ -633,23 +704,24 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.kmExcedente",
-            "details.kmRestante",
-            "details.possuiOrdemAberta",
-            "details.vencido",
+            "details.dataPrevista",
+            "details.dataUltimaPreventiva",
+            "details.kmExcedido",
+            "details.kmPrevisto",
+            "details.kmUltimaPreventiva",
+            "details.temOrdemAberta",
             "details.vencidoPorKm",
-            "details.vencidoPorPrazo"
+            "details.vencidoPorTempo"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:concluirOrdem/conferirOrdem",
-            "journey:concluirOrdem/fecharOrdem",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
             "journey:concluirOrdem/localizarOrdem",
-            "process:atualizarPlanoAposPreventiva",
+            "journey:concluirOrdem/registrarConclusao",
+            "journey:concluirOrdem/verOrdem",
             "relationship:OrdemManutencao/ordemPlano",
             "relationship:PlanoManutencao/ordemPlano",
             "relationship:PlanoManutencao/planoVeiculo",
@@ -662,26 +734,22 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.custoTotalManutencao",
-            "details.emManutencao",
+            "details.kmProximaPreventiva",
             "details.preventivaVencida"
           ],
           "from": [
             "grant:gestorFrota",
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorAviso/verAviso",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva",
-            "journey:abrirOrdemPorDefeito/localizarVeiculoDefeito",
-            "journey:concluirOrdem/conferirOrdem",
-            "journey:concluirOrdem/fecharOrdem",
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemDefeito/localizarVeiculoDefeito",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano",
+            "journey:abrirOrdemPlanoVencido/verAvisoPlano",
             "journey:concluirOrdem/localizarOrdem",
-            "relationship:Abastecimento/abastecimentoMotorista",
-            "relationship:Abastecimento/abastecimentoVeiculo",
+            "journey:concluirOrdem/registrarConclusao",
+            "journey:concluirOrdem/verOrdem",
             "relationship:Motorista/veiculoMotorista",
             "relationship:OrdemManutencao/ordemVeiculo",
             "relationship:PlanoManutencao/ordemPlano",
             "relationship:PlanoManutencao/planoVeiculo",
-            "relationship:Veiculo/abastecimentoVeiculo",
             "relationship:Veiculo/ordemVeiculo",
             "relationship:Veiculo/planoVeiculo",
             "relationship:Veiculo/veiculoMotorista"
@@ -694,8 +762,8 @@
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:abrirOrdemPorAviso/abrirOrdemPreventiva",
-            "journey:abrirOrdemPorDefeito/abrirOrdemCorretiva"
+            "journey:abrirOrdemDefeito/abrirOrdemCorretiva",
+            "journey:abrirOrdemPlanoVencido/abrirOrdemPlano"
           ]
         },
         {
@@ -703,13 +771,13 @@
           "operation": "transition",
           "transitionRef": "concluir",
           "from": [
-            "journey:concluirOrdem/fecharOrdem"
+            "journey:concluirOrdem/registrarConclusao"
           ]
         }
       ]
     },
     {
-      "pageId": "abastecimentos_frota",
+      "pageId": "abastecimentos",
       "actors": [
         "gestor"
       ],
@@ -728,7 +796,7 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:gestorFrota",
+            "grant:gestorCadastrosMestres",
             "organism:form"
           ]
         }
@@ -751,10 +819,46 @@
           ]
         }
       ]
+    },
+    {
+      "pageId": "oficinas",
+      "actors": [
+        "gestor"
+      ],
+      "reads": [
+        {
+          "entity": "Oficina",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gestorCadastrosMestres",
+            "organism:form"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Oficina",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "organism:form"
+          ]
+        },
+        {
+          "entity": "Oficina",
+          "operation": "update",
+          "transitionRef": "",
+          "from": [
+            "organism:form"
+          ]
+        }
+      ]
     }
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-10-12T19:39:37.072Z"
+    "generatedAt": "2026-10-13T01:05:54.787Z"
   }
 }

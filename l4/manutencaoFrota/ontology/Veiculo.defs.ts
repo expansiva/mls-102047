@@ -7,7 +7,7 @@ export const manutencaoFrotaEntityVeiculo = {
   "moduleName": "manutencaoFrota",
   "entityId": "Veiculo",
   "title": "Veículo",
-  "description": "Veículo da frota operado por este módulo, com placa, modelo, ano, quilometragem atual e o motorista a quem está atribuído.",
+  "description": "Veículo da frota operado por este módulo, com placa, modelo, ano e quilometragem atual, atribuído a um motorista; a quilometragem é atualizada pelos abastecimentos.",
   "displayField": "placa",
   "relationships": {
     "motorista": {
@@ -15,8 +15,8 @@ export const manutencaoFrotaEntityVeiculo = {
       "to": "Motorista",
       "via": "Veiculo.motoristaId",
       "cardinality": "N:1",
-      "title": "Motorista atribuído",
-      "description": "Motorista que dirige o veículo; só ele o vê entre os motoristas.",
+      "title": "Motorista que dirige o veículo",
+      "description": "Caminho do escopo do motorista: ele só vê os veículos atribuídos a ele.",
       "mode": "fk"
     },
     "abastecimentos": {
@@ -24,8 +24,7 @@ export const manutencaoFrotaEntityVeiculo = {
       "to": "Abastecimento",
       "via": "Abastecimento.veiculoId",
       "cardinality": "1:N",
-      "title": "Abastecimentos",
-      "description": "Abastecimentos registrados para o veículo.",
+      "title": "Abastecimentos do veículo",
       "mode": "fk",
       "direction": "to",
       "required": true
@@ -35,8 +34,7 @@ export const manutencaoFrotaEntityVeiculo = {
       "to": "PlanoManutencao",
       "via": "PlanoManutencao.veiculoId",
       "cardinality": "1:N",
-      "title": "Planos de preventiva",
-      "description": "Planos de manutenção preventiva do veículo.",
+      "title": "Planos de preventiva do veículo",
       "mode": "fk",
       "direction": "to",
       "required": true
@@ -46,33 +44,30 @@ export const manutencaoFrotaEntityVeiculo = {
       "to": "OrdemManutencao",
       "via": "OrdemManutencao.veiculoId",
       "cardinality": "1:N",
-      "title": "Ordens de manutenção",
-      "description": "Ordens de manutenção preventiva ou corretiva do veículo.",
+      "title": "Ordens de manutenção do veículo",
       "mode": "fk",
       "direction": "to",
       "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Abre a ficha do veículo pelo id para o motorista conferir placa, modelo e km e para o gestor acompanhar a frota.",
-    "locate.byColumn": "Lista veículos filtrando por motorista atribuído (os veículos do motorista logado) ou pela placa, ordenando por placa ou quilometragem; usado pelo motorista e pelo gestor.",
-    "locate.byText": "Busca o veículo por parte da placa na caixa de pesquisa do gestor.",
-    "count": "Conta os veículos da frota ou do motorista no cabeçalho da lista.",
+    "read.byId": "Abre a ficha do veículo pelo id para o motorista conferir placa, modelo e quilometragem antes de abastecer e para o gestor ver seus planos.",
+    "locate.byColumn": "Lista os veículos filtrando por placa ou motorista atribuído; para o motorista a lista vem sempre restrita aos veículos atribuídos a ele.",
+    "locate.byText": "Busca veículos por parte da placa ou do modelo, usada pelo gestor ao cadastrar planos e abrir ordens por defeito.",
+    "count": "Conta os veículos da frota e os de um motorista para os totais das listas do gestor.",
     "listByForeignKey": "Lista os veículos atribuídos a um motorista pela coluna motoristaId, base do escopo do motorista.",
     "create": "O gestor cadastra o veículo com placa, modelo, ano e quilometragem atual.",
-    "update": "O gestor atribui o veículo a um motorista e corrige dados; o lançamento de abastecimento atualiza a quilometragem atual.",
-    "uniqueKey": "O engine recusa um segundo veículo com a mesma placa.",
-    "transaction": "Grava o abastecimento e a nova quilometragem atual do veículo juntos, tudo ou nada.",
-    "read.mdmRecord": "Lê no MDM o nome do motorista atribuído para exibir na ficha e na lista do gestor.",
-    "attach.document": "O gestor anexa documento do veículo (CRLV, fotos) à ficha.",
-    "comment": "O gestor deixa observações sobre o veículo.",
-    "manutencaoFrota.avisoPreventivaVencida": "Sinaliza ao gestor os veículos cuja quilometragem atual passou do km previsto da próxima preventiva, calculado na leitura."
+    "update": "O gestor atribui ou troca o motorista do veículo e corrige seus dados; o abastecimento atualiza a quilometragem atual.",
+    "uniqueKey": "Recusa o cadastro de um segundo veículo com a mesma placa.",
+    "transaction": "Grava o abastecimento e a nova quilometragem atual do veículo de uma só vez, tudo ou nada.",
+    "read.mdmRecord": "Lê o registro mestre do motorista atribuído para exibir seu nome na ficha e na lista de veículos.",
+    "manutencaoFrota.avisoPreventivaKm": "Destaca para o gestor os veículos cuja quilometragem atual passou do km previsto para a próxima preventiva, a partir dos planos do veículo."
   },
   "rules": [
-    "placaUnicaNaFrota",
-    "motoristaVeSoVeiculosAtribuidos",
+    "placaUnica",
     "quilometragemNaoRegride",
-    "avisoPreventivaVencidaPorKm"
+    "motoristaVeSomenteVeiculosAtribuidos",
+    "avisoPreventivaVencidaKm"
   ],
   "kind": "entity",
   "class": "core",
@@ -101,9 +96,17 @@ export const manutencaoFrotaEntityVeiculo = {
         "unique": true,
         "indexed": true,
         "title": "Placa",
-        "description": "Placa do veículo (padrão antigo ou Mercosul); é por ela que o gestor e o motorista localizam o veículo.",
+        "description": "Placa do veículo (padrão antigo ou Mercosul), usada para localizar o veículo e exibida como identificação dele nas listas.",
         "pattern": "^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$",
         "maxLength": 8
+      },
+      "modelo": {
+        "type": "string",
+        "required": true,
+        "indexed": true,
+        "title": "Modelo",
+        "description": "Modelo do veículo; o gestor e o motorista também localizam o veículo por ele.",
+        "maxLength": 80
       },
       "motoristaId": {
         "type": "record",
@@ -112,29 +115,14 @@ export const manutencaoFrotaEntityVeiculo = {
           "Motorista"
         ],
         "title": "Motorista atribuído",
-        "description": "Motorista a quem o veículo está atribuído; define quais veículos o motorista pode ver e abastecer."
-      },
-      "quilometragemAtual": {
-        "type": "integer",
-        "required": true,
-        "indexed": true,
-        "title": "Quilometragem atual",
-        "description": "Km atual do veículo; informado no cadastro e atualizado pelo km no painel de cada abastecimento. Usado para comparar com o km previsto da próxima preventiva.",
-        "min": 0
+        "description": "Motorista que dirige o veículo; define quais veículos o motorista vê e para quais pode registrar abastecimentos."
       },
       "details": {
         "type": "object",
         "required": true,
         "title": "Dados do veículo",
-        "description": "Demais dados do veículo da frota.",
+        "description": "Demais dados do veículo que não são usados como filtro.",
         "fields": {
-          "modelo": {
-            "type": "string",
-            "required": true,
-            "title": "Modelo",
-            "description": "Modelo do veículo, como aparece na frota (ex.: Volvo FH 540).",
-            "maxLength": 120
-          },
           "ano": {
             "type": "integer",
             "required": true,
@@ -143,28 +131,24 @@ export const manutencaoFrotaEntityVeiculo = {
             "min": 1950,
             "max": 2100
           },
-          "observacoes": {
-            "type": "text",
-            "title": "Observações",
-            "description": "Anotações livres do gestor sobre o veículo."
+          "quilometragemAtual": {
+            "type": "integer",
+            "required": true,
+            "title": "Quilometragem atual",
+            "description": "Quilometragem atual do veículo, informada no cadastro e atualizada pelo km no painel de cada abastecimento; base do aviso de preventiva vencida.",
+            "min": 0
           },
           "preventivaVencida": {
             "type": "boolean",
             "derived": true,
-            "title": "Preventiva vencida",
-            "description": "Verdadeiro quando a quilometragem atual do veículo passou do km previsto para a próxima preventiva de algum plano de manutenção dele, ou quando a data prevista desse plano já passou."
+            "title": "Preventiva vencida por km",
+            "description": "Verdadeiro quando a quilometragem atual do veículo passou do km previsto para a próxima preventiva em algum dos planos de manutenção do veículo."
           },
-          "emManutencao": {
-            "type": "boolean",
+          "kmProximaPreventiva": {
+            "type": "integer",
             "derived": true,
-            "title": "Em manutenção",
-            "description": "Verdadeiro quando existe ordem de manutenção do veículo com data de entrada na oficina e ainda sem data de saída."
-          },
-          "custoTotalManutencao": {
-            "type": "money",
-            "derived": true,
-            "title": "Custo total de manutenção",
-            "description": "Soma dos custos das ordens de manutenção registradas para este veículo."
+            "title": "Km da próxima preventiva",
+            "description": "Menor quilometragem prevista para a próxima preventiva entre os planos por quilometragem do veículo, contada a partir da última manutenção realizada de cada plano."
           }
         }
       }

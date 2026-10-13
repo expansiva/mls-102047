@@ -13,11 +13,24 @@ export const manutencaoFrotaIntegration = {
       "to": "any",
       "event": "ordemManutencaoConcluida",
       "on": "OrdemManutencao.concluir",
-      "description": "Publicado quando o gestor conclui uma ordem de manutenção (preventiva ou corretiva). O registro da ordem concluída inclui veículo, oficina, descrição, custo e datas de entrada e saída, para que outros módulos (por exemplo, o controle de custos ou o financeiro) possam usar esses dados.",
+      "description": "Publicado quando o gestor conclui uma ordem de manutenção (data de saída e custo registrados). Outros módulos, como o financeiro, podem usar o registro da ordem para lançar o custo da oficina.",
       "entityRefs": [
         "OrdemManutencao",
         "Veiculo",
         "Oficina"
+      ]
+    },
+    {
+      "id": "abastecimentoRegistrado",
+      "kind": "event",
+      "to": "any",
+      "event": "abastecimentoRegistrado",
+      "on": "Abastecimento.create",
+      "description": "Publicado quando o motorista registra um abastecimento (data, litros, valor, km no painel). Outros módulos podem usar o registro para controlar o gasto com combustível.",
+      "entityRefs": [
+        "Abastecimento",
+        "Veiculo",
+        "Motorista"
       ]
     }
   ],

@@ -7,8 +7,8 @@ export const cadastrarVeiculoJourney = {
   "journeyId": "cadastrarVeiculo",
   "business": {
     "actorRef": "gestor",
-    "title": "Cadastrar veículo",
-    "goal": "Cadastrar um veículo da frota e atribuí-lo a um motorista.",
+    "title": "Cadastrar veículo da frota",
+    "goal": "Cadastrar um veículo com placa, modelo, ano e quilometragem atual e atribuí-lo a um motorista.",
     "entry": {
       "mode": "coldStart"
     },
@@ -18,7 +18,7 @@ export const cadastrarVeiculoJourney = {
         "kind": "act",
         "entity": "Veiculo",
         "effect": "create",
-        "title": "Cadastrar novo veículo",
+        "title": "Cadastrar veículo",
         "description": "O gestor informa placa, modelo, ano e quilometragem atual do veículo."
       },
       {
@@ -27,18 +27,18 @@ export const cadastrarVeiculoJourney = {
         "entity": "Veiculo",
         "effect": "update",
         "title": "Atribuir motorista",
-        "description": "O gestor atribui o veículo ao motorista que irá dirigi-lo."
+        "description": "O gestor atribui o veículo ao motorista que vai dirigi-lo."
       }
     ],
     "outcome": {
       "statement": "O veículo está cadastrado na frota e atribuído a um motorista.",
       "evidence": [
-        "O veículo aparece na lista da frota com placa, modelo, ano e quilometragem",
+        "O veículo aparece na lista da frota com placa, modelo, ano e km atual",
         "O motorista atribuído passa a ver o veículo"
       ]
     }
   },
-  "businessHash": "sha256:47322fe58a4c5d9a47c91eda4a34333e5ae365b9deb9e1ece0155c3156a1f040"
+  "businessHash": "sha256:a493b4a4a3168a07804981f767a00e31ec2baf6b101b4104e24eb1d37f235cf3"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CadastrarVeiculoJourneyType = typeof cadastrarVeiculoJourney;

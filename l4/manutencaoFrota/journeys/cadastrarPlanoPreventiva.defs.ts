@@ -18,7 +18,14 @@ export const cadastrarPlanoPreventivaJourney = {
         "kind": "locate",
         "entity": "Veiculo",
         "title": "Localizar veículo",
-        "description": "O gestor localiza o veículo pela placa."
+        "description": "O gestor localiza o veículo pela placa ou modelo."
+      },
+      {
+        "stepId": "verVeiculoPlano",
+        "kind": "inspect",
+        "entity": "Veiculo",
+        "title": "Ver veículo e planos",
+        "description": "O gestor confere a quilometragem atual e os planos já existentes do veículo."
       },
       {
         "stepId": "criarPlano",
@@ -26,25 +33,18 @@ export const cadastrarPlanoPreventivaJourney = {
         "entity": "PlanoManutencao",
         "effect": "create",
         "title": "Criar plano preventivo",
-        "description": "O gestor informa o intervalo em km e/ou em meses e a referência da última preventiva."
-      },
-      {
-        "stepId": "conferirPlano",
-        "kind": "inspect",
-        "entity": "PlanoManutencao",
-        "title": "Conferir próxima preventiva",
-        "description": "O gestor confere o km e a data previstos para a próxima preventiva."
+        "description": "O gestor descreve a preventiva e define o intervalo em quilômetros ou em meses."
       }
     ],
     "outcome": {
-      "statement": "O veículo tem um plano preventivo ativo com a próxima preventiva prevista.",
+      "statement": "O veículo tem um plano preventivo ativo com o próximo vencimento previsto.",
       "evidence": [
-        "O plano aparece no veículo com intervalo em km ou meses",
-        "O km e a data previstos da próxima preventiva são exibidos"
+        "O plano aparece no veículo com seu intervalo em km ou meses",
+        "O km ou a data prevista da próxima preventiva é exibido"
       ]
     }
   },
-  "businessHash": "sha256:af1f883932cb5b15fd324c11862589cd530b660429a90eb5948806449732a2c3"
+  "businessHash": "sha256:444b8589627033e7ec6bb935da217c5c823fb417deba7b71bee14f0c25a40097"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CadastrarPlanoPreventivaJourneyType = typeof cadastrarPlanoPreventivaJourney;

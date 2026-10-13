@@ -208,73 +208,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-10-12T15:41:38.204Z"
     },
     {
-      "moduleName": "manutencaoFrota",
-      "actors": [
-        {
-          "actorId": "motorista",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gestor",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "manutencaoFrota.Motorista",
-          "namespace": "manutencaoFrota"
-        },
-        {
-          "subtype": "Company",
-          "roleTag": "manutencaoFrota.Oficina",
-          "namespace": "manutencaoFrota"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Motorista",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Oficina",
-          "kind": "role",
-          "mdmSubtype": "Company",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Veiculo",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Abastecimento",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "PlanoManutencao",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "OrdemManutencao",
-          "kind": "entity",
-          "class": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "ordemManutencaoConcluida",
-          "on": "OrdemManutencao.concluir"
-        }
-      ],
-      "updatedAt": "2026-10-12T19:38:44.675Z"
-    },
-    {
       "moduleName": "ordenServicio",
       "actors": [
         {
@@ -777,6 +710,77 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-13T01:01:52.979Z"
+    },
+    {
+      "moduleName": "manutencaoFrota",
+      "actors": [
+        {
+          "actorId": "motorista",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gestor",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "manutencaoFrota.Motorista",
+          "namespace": "manutencaoFrota"
+        },
+        {
+          "subtype": "Company",
+          "roleTag": "manutencaoFrota.Oficina",
+          "namespace": "manutencaoFrota"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Veiculo",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Motorista",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Oficina",
+          "kind": "role",
+          "mdmSubtype": "Company",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Abastecimento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PlanoManutencao",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "OrdemManutencao",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "ordemManutencaoConcluida",
+          "on": "OrdemManutencao.concluir"
+        },
+        {
+          "eventId": "abastecimentoRegistrado",
+          "on": "Abastecimento.create"
+        }
+      ],
+      "updatedAt": "2026-10-13T01:05:14.988Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

@@ -7,7 +7,7 @@ export const manutencaoFrotaEntityOficina = {
   "moduleName": "manutencaoFrota",
   "entityId": "Oficina",
   "title": "Oficina",
-  "description": "Empresa que executa as manutenções dos veículos, indicada em cada ordem de manutenção.",
+  "description": "Empresa que executa as ordens de manutenção dos veículos.",
   "displayField": "details.identification.name",
   "relationships": {
     "ordens": {
@@ -16,23 +16,24 @@ export const manutencaoFrotaEntityOficina = {
       "via": "OrdemManutencao.oficinaId",
       "cardinality": "1:N",
       "title": "Ordens de manutenção executadas",
-      "description": "Ordens de manutenção em que esta oficina executa o serviço.",
+      "description": "Ordens de manutenção executadas nesta oficina.",
       "mode": "fk",
       "direction": "to",
       "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Lê a oficina pelo id para exibir seu nome nas ordens de manutenção; usado pelo gestor.",
-    "locate.byName": "Busca a oficina pelo nome ao abrir uma ordem de manutenção; usado pelo gestor.",
+    "read.byId": "Lê a oficina pelo id para exibir seu nome nas ordens de manutenção; usado pelas telas do gestor.",
+    "locate.byName": "Localiza a oficina pelo nome ao escolher onde a ordem de manutenção será executada; usado pelo gestor.",
     "locate.byDocument": "Localiza a oficina pelo CNPJ antes de cadastrar, evitando duplicidade; usado pelo gestor.",
-    "register.createOrAttach": "Cadastra a oficina ou vincula uma empresa existente ao papel de oficina da frota; usado pelo gestor.",
+    "register.createOrAttach": "Cadastra a oficina ou vincula uma empresa já existente com o papel manutencaoFrota.Oficina; usado pelo gestor.",
     "edit.platformFields": "Altera nome, razão social, CNPJ e endereço da oficina; usado pelo gestor.",
-    "inactivate": "Inativa a oficina que deixou de atender a frota, sem apagar o histórico de ordens; usado pelo gestor.",
-    "link.contact": "Registra telefone, WhatsApp ou e-mail da oficina como canal de contato; usado pelo gestor.",
-    "listLinks": "Mostra os vínculos da oficina, como contatos, na ficha dela; usado pelo gestor.",
-    "attach.document": "Anexa contratos ou documentos da oficina ao cadastro; usado pelo gestor.",
-    "comment": "Deixa observações sobre a qualidade do atendimento da oficina; usado pelo gestor."
+    "inactivate": "Inativa a oficina que deixou de atender a frota, sem apagar o histórico de ordens, e a reativa quando volta a atender; usado pelo gestor.",
+    "link.contact": "Registra telefone, WhatsApp ou e-mail da oficina como canal de contato vinculado por HasContact; usado pelo gestor.",
+    "listLinks": "Mostra os contatos e vínculos da oficina na sua ficha; usado pelo gestor.",
+    "comment": "Registra observações sobre o atendimento da oficina; usado pelo gestor.",
+    "attach.document": "Anexa contratos ou orçamentos à ficha da oficina; usado pelo gestor.",
+    "audit": "Mostra quem alterou o cadastro da oficina e quando; usado pelo administrador."
   },
   "rules": [
     "rule-foreign-namespace-refused",
@@ -42,6 +43,7 @@ export const manutencaoFrotaEntityOficina = {
     "rule-delete-blocked-by-relationships",
     "oficinaInativaSemNovasOrdens"
   ],
+  "writer": "crud",
   "kind": "role",
   "subtype": "Company",
   "roleTag": "manutencaoFrota.Oficina",
@@ -65,7 +67,7 @@ export const manutencaoFrotaEntityOficina = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Registro mestre da empresa que executa manutenções da frota.",
+        "description": "Documento mestre da oficina, ramo a ramo.",
         "fields": {
           "identification": {
             "type": "object",
@@ -82,7 +84,7 @@ export const manutencaoFrotaEntityOficina = {
                     "title": "Empresa"
                   }
                 ],
-                "description": "Sempre Company para uma oficina.",
+                "description": "Sempre Company: a oficina é uma empresa.",
                 "title": "Subtipo"
               },
               "name": {
@@ -90,7 +92,7 @@ export const manutencaoFrotaEntityOficina = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 200,
-                "description": "Nome pelo qual o gestor reconhece a oficina ao abrir uma ordem de manutenção.",
+                "description": "Nome pelo qual o gestor de frota reconhece a oficina ao abrir uma ordem de manutenção.",
                 "title": "Nome da oficina"
               },
               "status": {
@@ -117,7 +119,7 @@ export const manutencaoFrotaEntityOficina = {
                   }
                 ],
                 "title": "Situação",
-                "description": "Situação do cadastro; oficina inativa não recebe novas ordens."
+                "description": "Situação do cadastro mestre; oficina inativa não recebe novas ordens de manutenção."
               },
               "docType": {
                 "type": "enum",
@@ -128,17 +130,25 @@ export const manutencaoFrotaEntityOficina = {
                     "title": "CNPJ"
                   },
                   {
+                    "value": "EIN",
+                    "title": "EIN"
+                  },
+                  {
+                    "value": "VAT",
+                    "title": "VAT"
+                  },
+                  {
                     "value": "Other",
                     "title": "Outro"
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento da oficina, normalmente CNPJ."
+                "description": "Documento nacional da oficina, normalmente CNPJ."
               },
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "CNPJ da oficina, usado para evitar cadastro duplicado.",
+                "description": "Número do CNPJ da oficina, usado para evitar cadastro duplicado.",
                 "title": "Número do documento"
               },
               "countryCode": {
@@ -148,35 +158,11 @@ export const manutencaoFrotaEntityOficina = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "País da oficina (ISO 3166-1 alfa-2), normalmente BR.",
+                "description": "País da oficina (ISO 3166-1 alfa-2), em geral BR.",
                 "title": "País"
-              },
-              "tags": {
-                "type": "string",
-                "required": true,
-                "collection": true,
-                "derived": true,
-                "description": "Papéis de módulo do registro, incluindo manutencaoFrota.Oficina.",
-                "title": "Papéis"
-              },
-              "createdAt": {
-                "type": "string",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "title": "Criado em",
-                "description": "Data de criação do registro."
-              },
-              "updatedAt": {
-                "type": "string",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "title": "Atualizado em",
-                "description": "Data da última alteração do registro."
               }
             },
-            "description": "Identificação da oficina no cadastro mestre."
+            "description": "Identificação da oficina no cadastro mestre da organização."
           },
           "base": {
             "type": "object",
@@ -186,7 +172,7 @@ export const manutencaoFrotaEntityOficina = {
                 "type": "string",
                 "required": true,
                 "collection": true,
-                "description": "Nome fantasia ou apelidos pelos quais a oficina é conhecida.",
+                "description": "Nomes fantasia ou apelidos pelos quais a oficina também é conhecida.",
                 "title": "Outros nomes"
               },
               "addresses": {
@@ -195,7 +181,7 @@ export const manutencaoFrotaEntityOficina = {
                 "collection": true,
                 "of": "Address",
                 "title": "Endereços",
-                "description": "Endereço onde os veículos são entregues para manutenção."
+                "description": "Endereço onde os veículos são levados para manutenção."
               },
               "contacts": {
                 "type": "object",
@@ -203,15 +189,8 @@ export const manutencaoFrotaEntityOficina = {
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Resumo dos canais de contato da oficina (telefone, WhatsApp, e-mail).",
+                "description": "Resumo dos canais de contato da oficina (telefone, WhatsApp, e-mail), vinculados por HasContact.",
                 "title": "Contatos"
-              },
-              "relationshipRefs": {
-                "type": "object",
-                "required": true,
-                "derived": true,
-                "description": "Chaves compactas dos vínculos, mantidas pela plataforma.",
-                "title": "Vínculos"
               },
               "notes": {
                 "type": "string",
@@ -220,7 +199,7 @@ export const manutencaoFrotaEntityOficina = {
                 "description": "Observações gerais sobre a oficina."
               }
             },
-            "description": "Dados comuns do registro mestre."
+            "description": "Dados comuns do cadastro mestre usados pelo gestor para localizar e visitar a oficina."
           },
           "company": {
             "type": "object",
@@ -237,10 +216,14 @@ export const manutencaoFrotaEntityOficina = {
                   {
                     "value": "Branch",
                     "title": "Filial"
+                  },
+                  {
+                    "value": "Franchise",
+                    "title": "Franquia"
                   }
                 ],
-                "description": "Oficina é uma pessoa jurídica ou filial.",
-                "title": "Tipo de empresa"
+                "description": "A oficina é uma pessoa jurídica, uma filial ou uma franquia de uma rede.",
+                "title": "Tipo de organização"
               },
               "legalName": {
                 "type": "string",
@@ -254,13 +237,13 @@ export const manutencaoFrotaEntityOficina = {
                 "title": "Nome fantasia"
               }
             },
-            "description": "Dados empresariais da oficina."
+            "description": "Dados da oficina como pessoa jurídica."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Campos promovidos pela organização; lidos pelo módulo."
+            "description": "Campos promovidos pela organização; lidos, não declarados aqui."
           },
           "manutencaoFrota": {
             "type": "object",

@@ -4,7 +4,7 @@
     "moduleName": "manutencaoFrota",
     "entityId": "OrdemManutencao",
     "title": "Ordem de manutenção",
-    "description": "Ordem de manutenção preventiva ou por defeito de um veículo, com oficina, descrição, custo e datas de entrada e saída.",
+    "description": "Ordem de manutenção preventiva ou corretiva de um veículo em uma oficina, com descrição, custo e datas de entrada e saída.",
     "displayField": "numero",
     "relationships": {
       "veiculo": {
@@ -13,7 +13,7 @@
         "via": "OrdemManutencao.veiculoId",
         "cardinality": "N:1",
         "title": "Veículo da ordem",
-        "description": "Veículo que entra em manutenção.",
+        "description": "A ordem de manutenção é aberta para um veículo.",
         "mode": "fk",
         "required": true
       },
@@ -22,10 +22,10 @@
         "to": "PlanoManutencao",
         "via": "OrdemManutencao.planoId",
         "cardinality": "N:1",
-        "title": "Plano de preventiva",
-        "description": "Plano de preventiva que originou a ordem.",
+        "title": "Plano que venceu",
+        "description": "A ordem preventiva é vinculada ao plano que venceu; a corretiva não tem plano.",
         "mode": "fk",
-        "required": "quando a ordem é do tipo preventiva"
+        "required": "quando a ordem é preventiva"
       },
       "oficina": {
         "relationshipId": "ordemOficina",
@@ -33,37 +33,38 @@
         "via": "OrdemManutencao.oficinaId",
         "cardinality": "N:1",
         "title": "Oficina executora",
-        "description": "Oficina que executa a manutenção.",
+        "description": "A ordem é executada em uma oficina.",
         "mode": "fk",
         "required": true
       }
     },
     "capabilities": {
-      "read.byId": "Abre a ordem de manutenção pelo id para o gestor conferir oficina, descrição, datas e custo.",
-      "locate.byColumn": "Lista as ordens filtradas por veículo, oficina, tipo, situação ou datas de entrada e saída, para o gestor localizar as ordens abertas.",
-      "locate.byText": "Busca a ordem pelo número digitado pelo gestor na caixa de pesquisa.",
-      "count": "Conta as ordens abertas por veículo ou oficina para os totais da lista do gestor.",
-      "listByForeignKey": "Lista as ordens de um veículo, de um plano ou de uma oficina na tela desse registro.",
-      "create": "O gestor abre a ordem preventiva (vinculada ao plano vencido) ou por defeito, com oficina, descrição e data de entrada.",
-      "update": "O gestor corrige a descrição, a oficina ou a data de entrada de uma ordem ainda aberta.",
-      "transition": "O gestor conclui a ordem, passando de aberta para concluída ao informar custo e data de saída.",
-      "uniqueKey": "O motor recusa duas ordens com o mesmo número.",
-      "transaction": "Na conclusão de uma ordem preventiva, grava a ordem e atualiza a próxima preventiva do plano tudo ou nada.",
-      "read.mdmRecord": "Lê na plataforma o nome da oficina apontada pela ordem para exibir na lista e na ficha.",
-      "sequence.next": "Emite o número sequencial da ordem na abertura, pela chave manutencaoFrota.OrdemManutencao.",
+      "read.byId": "Abre a ordem pelo id para o gestor conferir oficina, descrição, datas e custo.",
+      "locate.byColumn": "Lista as ordens filtradas por veículo, oficina, tipo, situação ou datas de entrada e saída, para o gestor localizar a ordem aberta a concluir.",
+      "locate.byText": "Busca a ordem pelo número digitado pelo gestor.",
+      "count": "Conta as ordens abertas para o painel do gestor.",
+      "listByForeignKey": "Lista as ordens de um veículo, de um plano ou de uma oficina na ficha correspondente.",
+      "create": "O gestor abre a ordem preventiva a partir do aviso de plano vencido ou a corretiva por defeito, informando veículo, oficina, descrição e data de entrada.",
+      "update": "O gestor corrige descrição, oficina ou data de entrada enquanto a ordem está aberta.",
+      "transition": "O gestor conclui a ordem, registrando data de saída e custo.",
+      "uniqueKey": "O motor recusa uma segunda ordem com o mesmo número.",
+      "transaction": "Na conclusão de uma preventiva, grava a ordem concluída e o novo vencimento do plano juntos, tudo ou nada.",
+      "read.mdmRecord": "Lê no cadastro mestre o nome e os contatos da oficina para exibir na ordem.",
+      "sequence.next": "Emite o número da ordem na abertura, pela sequência manutencaoFrota.OrdemManutencao.",
       "attach.document": "O gestor anexa à ordem a nota fiscal ou o orçamento da oficina.",
       "comment": "O gestor registra observações sobre o andamento da manutenção na ordem."
     },
     "rules": [
-      "numeroOrdemSequencial",
       "ordemPreventivaExigePlano",
-      "ordemDefeitoSemPlano",
-      "concluirExigeCustoEDataSaida",
+      "ordemCorretivaSemPlano",
+      "conclusaoExigeSaidaECusto",
       "dataSaidaNaoAnteriorEntrada",
-      "concluirPreventivaAtualizaPlano"
+      "conclusaoRecalculaPlano",
+      "ordemConcluidaNaoEditavel",
+      "numeroOrdemUnico"
     ],
     "kind": "entity",
-    "class": "core",
+    "class": "event",
     "storage": {
       "target": "moduleDatabase",
       "table": "manutencaoFrota_ordemmanutencao",
@@ -88,9 +89,9 @@
           "required": true,
           "unique": true,
           "indexed": true,
+          "derived": true,
           "title": "Número da ordem",
-          "description": "Número sequencial da ordem de manutenção, emitido pela plataforma na abertura e citado pelo gestor e pela oficina.",
-          "maxLength": 30
+          "description": "Número da ordem de manutenção emitido pela sequência do módulo na abertura; é por ele que o gestor e a oficina se referem à ordem."
         },
         "veiculoId": {
           "type": "record",
@@ -100,7 +101,7 @@
             "Veiculo"
           ],
           "title": "Veículo",
-          "description": "Veículo que entra em manutenção."
+          "description": "Veículo que entra na oficina por esta ordem."
         },
         "planoId": {
           "type": "record",
@@ -108,8 +109,8 @@
           "to": [
             "PlanoManutencao"
           ],
-          "title": "Plano de preventiva",
-          "description": "Plano de manutenção preventiva que originou a ordem; preenchido apenas quando a ordem é preventiva."
+          "title": "Plano de manutenção",
+          "description": "Plano preventivo que venceu e motivou a ordem; vazio quando a ordem é corretiva."
         },
         "oficinaId": {
           "type": "record",
@@ -119,7 +120,7 @@
             "Oficina"
           ],
           "title": "Oficina",
-          "description": "Oficina que executa a manutenção."
+          "description": "Oficina que executa a manutenção; nome e contatos são lidos do cadastro mestre."
         },
         "tipo": {
           "type": "enum",
@@ -131,12 +132,12 @@
               "title": "Preventiva"
             },
             {
-              "value": "defect",
-              "title": "Defeito"
+              "value": "corrective",
+              "title": "Corretiva"
             }
           ],
           "title": "Tipo da ordem",
-          "description": "Motivo da abertura: preventiva por plano vencido ou corretiva por defeito."
+          "description": "Se a ordem é preventiva (aberta por plano vencido) ou corretiva (aberta por defeito)."
         },
         "status": {
           "type": "enum",
@@ -153,7 +154,7 @@
             }
           ],
           "title": "Situação",
-          "description": "Situação da ordem: aberta enquanto o veículo está na oficina, concluída após a saída."
+          "description": "Situação da ordem: aberta enquanto o veículo está na oficina, concluída após a saída e o custo registrados."
         },
         "dataEntrada": {
           "type": "date",
@@ -172,19 +173,25 @@
           "type": "object",
           "required": true,
           "title": "Detalhes",
-          "description": "Dados descritivos da ordem de manutenção.",
+          "description": "Dados da ordem que só são exibidos.",
           "fields": {
             "descricao": {
               "type": "text",
               "required": true,
               "title": "Descrição",
-              "description": "Descrição do serviço a executar ou do defeito apresentado pelo veículo.",
+              "description": "Descrição do serviço preventivo a executar ou do defeito apresentado pelo veículo.",
               "maxLength": 4000
             },
             "custo": {
               "type": "money",
               "title": "Custo",
-              "description": "Custo total da manutenção, informado pelo gestor ao concluir a ordem.",
+              "description": "Custo final da manutenção cobrado pela oficina, informado na conclusão.",
+              "min": 0
+            },
+            "kmEntrada": {
+              "type": "integer",
+              "title": "Km na entrada",
+              "description": "Quilometragem do veículo no momento da entrada na oficina, usada para recalcular a próxima preventiva.",
               "min": 0
             },
             "diasNaOficina": {
@@ -222,15 +229,15 @@
         "by": [
           "gestor"
         ],
-        "description": "O gestor informa o custo e a data de saída e conclui a ordem; se a ordem é preventiva, o plano de origem passa a prever a próxima preventiva.",
+        "description": "O gestor informa a data de saída e o custo final e conclui a ordem; se for preventiva, o próximo vencimento do plano é recalculado.",
         "payload": [
-          "details.custo",
-          "dataSaida"
+          "dataSaida",
+          "details.custo"
         ],
         "ruleRefs": [
-          "concluirExigeCustoEDataSaida",
+          "conclusaoExigeSaidaECusto",
           "dataSaidaNaoAnteriorEntrada",
-          "concluirPreventivaAtualizaPlano"
+          "conclusaoRecalculaPlano"
         ]
       }
     ]

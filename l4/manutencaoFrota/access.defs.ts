@@ -11,7 +11,7 @@ export const manutencaoFrotaAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Motorista",
-      "description": "Motorista da transportadora que registra os abastecimentos (data, litros, valor, km no painel) do veículo que dirige e vê apenas os veículos atribuídos a ele.",
+      "description": "Motorista da transportadora que registra os abastecimentos (data, litros, valor, km no painel) do veículo que dirige e só vê os veículos atribuídos a ele.",
       "personEntity": "Motorista"
     },
     {
@@ -19,7 +19,7 @@ export const manutencaoFrotaAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Gestor de frota",
-      "description": "Gestor de frota que cadastra os veículos e os planos de manutenção preventiva por veículo (a cada N km ou N meses), abre ordens de manutenção quando o plano vence ou há defeito e acompanha os avisos de preventiva vencida por km.",
+      "description": "Gestor de frota que cadastra os veículos e os planos de manutenção preventiva por veículo, abre ordens de manutenção quando o plano vence ou quando há defeito, e acompanha os avisos de preventiva vencida por quilometragem.",
       "personEntity": ""
     }
   ],
@@ -28,7 +28,7 @@ export const manutencaoFrotaAccess = {
       "grantId": "motoristaVeiculosAtribuidos",
       "actorRef": "motorista",
       "title": "Veículos atribuídos ao motorista",
-      "description": "O motorista localiza e consulta apenas os veículos atribuídos a ele (placa, modelo, ano e quilometragem atual) para registrar abastecimentos.",
+      "description": "O motorista localiza e confere apenas os veículos atribuídos a ele, vendo placa, modelo, ano e quilometragem atual.",
       "entityRefs": [
         "Veiculo"
       ],
@@ -39,18 +39,21 @@ export const manutencaoFrotaAccess = {
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Vê os dados do veículo, exceto as anotações do gestor e o custo total de manutenção.",
-        "deniedFields": [
-          "Veiculo.details.observacoes",
-          "Veiculo.details.custoTotalManutencao"
+        "description": "Placa, modelo, motorista atribuído, ano e quilometragem atual; os indicadores de preventiva ficam com o gestor.",
+        "allowedFields": [
+          "Veiculo.placa",
+          "Veiculo.modelo",
+          "Veiculo.motoristaId",
+          "Veiculo.details.ano",
+          "Veiculo.details.quilometragemAtual"
         ]
       }
     },
     {
-      "grantId": "motoristaAbastecimentos",
+      "grantId": "motoristaMeusAbastecimentos",
       "actorRef": "motorista",
       "title": "Meus abastecimentos",
-      "description": "O motorista registra e consulta os abastecimentos que ele lançou, com data, litros, valor e km no painel.",
+      "description": "O motorista registra e consulta os abastecimentos que ele mesmo lançou, com data, litros, valor e km no painel.",
       "entityRefs": [
         "Abastecimento"
       ],
@@ -61,52 +64,68 @@ export const manutencaoFrotaAccess = {
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Vê o registro completo dos seus abastecimentos."
+        "description": "O motorista vê o registro completo dos seus abastecimentos."
       }
     },
     {
       "grantId": "motoristaProprioCadastro",
       "actorRef": "motorista",
       "title": "Meu cadastro de motorista",
-      "description": "O motorista vê o próprio nome e situação do cadastro, exibidos nos veículos atribuídos.",
+      "description": "O motorista vê o próprio nome e a situação do seu cadastro, exibidos na atribuição de veículos e nos abastecimentos.",
       "entityRefs": [
         "Motorista"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Somente o registro do próprio motorista da sessão.",
+        "description": "Somente o registro mestre do próprio motorista da sessão.",
         "anchorEntity": "Motorista"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Vê nome, situação e contatos do próprio cadastro.",
+        "description": "Nome, situação e apelidos do próprio motorista.",
         "allowedFields": [
           "Motorista.details.identification.name",
           "Motorista.details.identification.status",
-          "Motorista.details.base.contacts"
+          "Motorista.details.base.aliases"
         ]
       }
     },
     {
       "grantId": "gestorFrota",
       "actorRef": "gestor",
-      "title": "Gestão da frota",
-      "description": "O gestor de frota cadastra motoristas, oficinas e veículos, atribui veículos, define planos de preventiva, abre e conclui ordens de manutenção e acompanha abastecimentos e preventivas vencidas de toda a frota.",
+      "title": "Gestão da frota e da manutenção",
+      "description": "O gestor cadastra veículos e os atribui a motoristas, define planos de preventiva, abre e conclui ordens de manutenção, acompanha preventivas vencidas e consulta os abastecimentos.",
       "entityRefs": [
-        "Motorista",
-        "Oficina",
         "Veiculo",
-        "Abastecimento",
         "PlanoManutencao",
-        "OrdemManutencao"
+        "OrdemManutencao",
+        "Abastecimento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Todos os registros da transportadora."
+        "description": "Todos os veículos, planos, ordens e abastecimentos da transportadora."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "Vê os registros completos."
+        "description": "O gestor vê os registros completos, incluindo os valores calculados de vencimento e custo."
+      }
+    },
+    {
+      "grantId": "gestorCadastrosMestres",
+      "actorRef": "gestor",
+      "title": "Cadastro de motoristas e oficinas",
+      "description": "O gestor mantém os motoristas da transportadora e as oficinas que executam as ordens de manutenção.",
+      "entityRefs": [
+        "Motorista",
+        "Oficina"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os motoristas e oficinas da organização com papel neste módulo."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O gestor vê o registro mestre completo de motoristas e oficinas."
       }
     }
   ]

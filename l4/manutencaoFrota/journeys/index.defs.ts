@@ -12,14 +12,14 @@ export const manutencaoFrotaJourneyIndex = {
       "title": "Registrar abastecimento"
     },
     {
-      "journeyId": "consultarMeusVeiculos",
+      "journeyId": "consultarMeusAbastecimentos",
       "actorRef": "motorista",
-      "title": "Consultar meus veículos"
+      "title": "Consultar meus abastecimentos"
     },
     {
       "journeyId": "cadastrarVeiculo",
       "actorRef": "gestor",
-      "title": "Cadastrar veículo"
+      "title": "Cadastrar veículo da frota"
     },
     {
       "journeyId": "cadastrarPlanoPreventiva",
@@ -27,12 +27,12 @@ export const manutencaoFrotaJourneyIndex = {
       "title": "Cadastrar plano de preventiva"
     },
     {
-      "journeyId": "abrirOrdemPorAviso",
+      "journeyId": "abrirOrdemPlanoVencido",
       "actorRef": "gestor",
       "title": "Abrir ordem por preventiva vencida"
     },
     {
-      "journeyId": "abrirOrdemPorDefeito",
+      "journeyId": "abrirOrdemDefeito",
       "actorRef": "gestor",
       "title": "Abrir ordem por defeito"
     },
@@ -42,9 +42,9 @@ export const manutencaoFrotaJourneyIndex = {
       "title": "Concluir ordem de manutenção"
     },
     {
-      "journeyId": "acompanharFrota",
+      "journeyId": "acompanharPreventivasVencidas",
       "actorRef": "gestor",
-      "title": "Acompanhar preventivas da frota"
+      "title": "Acompanhar preventivas vencidas"
     }
   ],
   "systemDecisions": []

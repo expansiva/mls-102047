@@ -1,13 +1,27 @@
 {
   "moduleName": "manutencaoFrota",
-  "businessDomain": "Manutenção de frota de transportadora: veículos atribuídos a motoristas, abastecimentos, planos de manutenção preventiva por km ou meses e ordens de manutenção em oficinas.",
+  "businessDomain": "Manutenção de frota de transportadora: veículos, abastecimentos registrados pelos motoristas, planos de manutenção preventiva e ordens de manutenção em oficinas.",
   "entities": [
+    {
+      "entityId": "Veiculo",
+      "kind": "entity",
+      "family": "tdm",
+      "title": "Veículo",
+      "description": "Veículo da frota operado por este módulo, com placa, modelo, ano e quilometragem atual, atribuído a um motorista; a quilometragem é atualizada pelos abastecimentos.",
+      "displayField": "placa",
+      "class": "core",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "manutencaoFrota_veiculo",
+        "kind": "relational"
+      }
+    },
     {
       "entityId": "Motorista",
       "kind": "role",
       "family": "mdm",
       "title": "Motorista",
-      "description": "Pessoa que dirige os veículos da transportadora, registra abastecimentos e vê apenas os veículos atribuídos a ela.",
+      "description": "Pessoa que dirige os veículos da transportadora; vê apenas os veículos atribuídos a ela e registra seus abastecimentos.",
       "displayField": "details.identification.name",
       "writer": "crud",
       "subtype": "Person",
@@ -19,25 +33,12 @@
       "kind": "role",
       "family": "mdm",
       "title": "Oficina",
-      "description": "Empresa que executa as manutenções dos veículos, indicada em cada ordem de manutenção.",
+      "description": "Empresa que executa as ordens de manutenção dos veículos.",
       "displayField": "details.identification.name",
+      "writer": "crud",
       "subtype": "Company",
       "roleTag": "manutencaoFrota.Oficina",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "entityId": "Veiculo",
-      "kind": "entity",
-      "family": "tdm",
-      "title": "Veículo",
-      "description": "Veículo da frota operado por este módulo, com placa, modelo, ano, quilometragem atual e o motorista a quem está atribuído.",
-      "displayField": "placa",
-      "class": "core",
-      "storage": {
-        "target": "moduleDatabase",
-        "table": "manutencaoFrota_veiculo",
-        "kind": "relational"
-      }
     },
     {
       "entityId": "Abastecimento",
@@ -45,7 +46,7 @@
       "family": "tdm",
       "title": "Abastecimento",
       "description": "Registro de abastecimento de um veículo feito pelo motorista, com data, litros, valor e km no painel.",
-      "displayField": "dataAbastecimento",
+      "displayField": "data",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
@@ -58,7 +59,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Plano de manutenção preventiva",
-      "description": "Plano de preventiva de um veículo, a cada N km e/ou N meses, com a referência da última preventiva e o km e a data previstos para a próxima; indica quando o veículo passou do previsto.",
+      "description": "Plano de preventiva de um veículo, a cada N km ou a cada N meses; o km previsto da próxima preventiva e a situação de vencido são derivados.",
       "displayField": "descricao",
       "class": "core",
       "storage": {
@@ -72,9 +73,9 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Ordem de manutenção",
-      "description": "Ordem de manutenção preventiva ou por defeito de um veículo, com oficina, descrição, custo e datas de entrada e saída.",
+      "description": "Ordem de manutenção preventiva ou corretiva de um veículo em uma oficina, com descrição, custo e datas de entrada e saída.",
       "displayField": "numero",
-      "class": "core",
+      "class": "event",
       "storage": {
         "target": "moduleDatabase",
         "table": "manutencaoFrota_ordemmanutencao",
@@ -90,7 +91,7 @@
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Motorista a quem o veículo está atribuído; define os veículos que o motorista pode ver.",
+      "description": "O veículo é atribuído ao motorista que o dirige; é o caminho do escopo do motorista.",
       "field": "Veiculo.motoristaId"
     },
     {
@@ -100,7 +101,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Veículo abastecido.",
+      "description": "O abastecimento pertence a um veículo.",
       "field": "Abastecimento.veiculoId"
     },
     {
@@ -110,7 +111,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Motorista que registrou o abastecimento.",
+      "description": "O abastecimento foi registrado pelo motorista que dirigia o veículo.",
       "field": "Abastecimento.motoristaId"
     },
     {
@@ -120,7 +121,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Veículo ao qual o plano de preventiva se aplica.",
+      "description": "O plano de preventiva é definido para um veículo.",
       "field": "PlanoManutencao.veiculoId"
     },
     {
@@ -130,7 +131,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Veículo que entra em manutenção.",
+      "description": "A ordem de manutenção é aberta para um veículo.",
       "field": "OrdemManutencao.veiculoId"
     },
     {
@@ -140,7 +141,7 @@
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Plano de preventiva que originou a ordem, quando ela é preventiva.",
+      "description": "A ordem preventiva é vinculada ao plano que venceu; a corretiva não tem plano.",
       "field": "OrdemManutencao.planoId"
     },
     {
@@ -150,11 +151,16 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Oficina que executa a manutenção.",
+      "description": "A ordem é executada em uma oficina.",
       "field": "OrdemManutencao.oficinaId"
     }
   ],
   "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Veiculo",
+      "detail": "storage.table manutencaoFrota_veiculo"
+    },
     {
       "kind": "derivedFromPlatform",
       "entityId": "Motorista",
@@ -164,11 +170,6 @@
       "kind": "derivedFromPlatform",
       "entityId": "Oficina",
       "detail": "roleTag manutencaoFrota.Oficina; source /_102034_/l4/ontology/mdm.defs.ts"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "Veiculo",
-      "detail": "storage.table manutencaoFrota_veiculo"
     },
     {
       "kind": "derivedFromPlatform",

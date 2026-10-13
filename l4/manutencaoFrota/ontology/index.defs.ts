@@ -5,13 +5,18 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const manutencaoFrotaOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "manutencaoFrota",
-  "businessDomain": "Manutenção de frota de transportadora: veículos atribuídos a motoristas, abastecimentos, planos de manutenção preventiva por km ou meses e ordens de manutenção em oficinas.",
+  "businessDomain": "Manutenção de frota de transportadora: veículos, abastecimentos registrados pelos motoristas, planos de manutenção preventiva e ordens de manutenção em oficinas.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "manutencaoFrota",
     "description": "Branch details.manutencaoFrota of the master records this module has a role on; only this module writes it."
   },
   "entities": [
+    {
+      "entityId": "Veiculo",
+      "kind": "entity",
+      "class": "core"
+    },
     {
       "entityId": "Motorista",
       "kind": "role",
@@ -21,11 +26,6 @@ export const manutencaoFrotaOntologyIndex = {
       "entityId": "Oficina",
       "kind": "role",
       "subtype": "Company"
-    },
-    {
-      "entityId": "Veiculo",
-      "kind": "entity",
-      "class": "core"
     },
     {
       "entityId": "Abastecimento",
@@ -40,7 +40,7 @@ export const manutencaoFrotaOntologyIndex = {
     {
       "entityId": "OrdemManutencao",
       "kind": "entity",
-      "class": "core"
+      "class": "event"
     }
   ],
   "relationships": [
@@ -51,7 +51,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Motorista a quem o veículo está atribuído; define os veículos que o motorista pode ver.",
+      "description": "O veículo é atribuído ao motorista que o dirige; é o caminho do escopo do motorista.",
       "field": "Veiculo.motoristaId"
     },
     {
@@ -61,7 +61,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Veículo abastecido.",
+      "description": "O abastecimento pertence a um veículo.",
       "field": "Abastecimento.veiculoId"
     },
     {
@@ -71,7 +71,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Motorista que registrou o abastecimento.",
+      "description": "O abastecimento foi registrado pelo motorista que dirigia o veículo.",
       "field": "Abastecimento.motoristaId"
     },
     {
@@ -81,7 +81,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Veículo ao qual o plano de preventiva se aplica.",
+      "description": "O plano de preventiva é definido para um veículo.",
       "field": "PlanoManutencao.veiculoId"
     },
     {
@@ -91,7 +91,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Veículo que entra em manutenção.",
+      "description": "A ordem de manutenção é aberta para um veículo.",
       "field": "OrdemManutencao.veiculoId"
     },
     {
@@ -101,7 +101,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Plano de preventiva que originou a ordem, quando ela é preventiva.",
+      "description": "A ordem preventiva é vinculada ao plano que venceu; a corretiva não tem plano.",
       "field": "OrdemManutencao.planoId"
     },
     {
@@ -111,7 +111,7 @@ export const manutencaoFrotaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Oficina que executa a manutenção.",
+      "description": "A ordem é executada em uma oficina.",
       "field": "OrdemManutencao.oficinaId"
     }
   ]

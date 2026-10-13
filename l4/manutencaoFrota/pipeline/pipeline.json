@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:35:20.611Z",
+      "updatedAt": "2026-10-13T01:02:46.258Z",
       "artifactPaths": [
         "l4/manutencaoFrota/module.defs.ts"
       ],
@@ -20,29 +20,29 @@
           "kind": "internal",
           "origin": "named",
           "title": "Motorista",
-          "description": "Motorista da transportadora que registra os abastecimentos (data, litros, valor, km no painel) do veículo que dirige e vê apenas os veículos atribuídos a ele."
+          "description": "Motorista da transportadora que registra os abastecimentos (data, litros, valor, km no painel) do veículo que dirige e só vê os veículos atribuídos a ele."
         },
         {
           "actorId": "gestor",
           "kind": "internal",
           "origin": "named",
           "title": "Gestor de frota",
-          "description": "Gestor de frota que cadastra os veículos e os planos de manutenção preventiva por veículo (a cada N km ou N meses), abre ordens de manutenção quando o plano vence ou há defeito e acompanha os avisos de preventiva vencida por km."
+          "description": "Gestor de frota que cadastra os veículos e os planos de manutenção preventiva por veículo, abre ordens de manutenção quando o plano vence ou quando há defeito, e acompanha os avisos de preventiva vencida por quilometragem."
         }
       ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:35:48.003Z",
+      "updatedAt": "2026-10-13T01:03:19.088Z",
       "artifactPaths": [
         "l4/manutencaoFrota/journeys/registrarAbastecimento.defs.ts",
-        "l4/manutencaoFrota/journeys/consultarMeusVeiculos.defs.ts",
+        "l4/manutencaoFrota/journeys/consultarMeusAbastecimentos.defs.ts",
         "l4/manutencaoFrota/journeys/cadastrarVeiculo.defs.ts",
         "l4/manutencaoFrota/journeys/cadastrarPlanoPreventiva.defs.ts",
-        "l4/manutencaoFrota/journeys/abrirOrdemPorAviso.defs.ts",
-        "l4/manutencaoFrota/journeys/abrirOrdemPorDefeito.defs.ts",
+        "l4/manutencaoFrota/journeys/abrirOrdemPlanoVencido.defs.ts",
+        "l4/manutencaoFrota/journeys/abrirOrdemDefeito.defs.ts",
         "l4/manutencaoFrota/journeys/concluirOrdem.defs.ts",
-        "l4/manutencaoFrota/journeys/acompanharFrota.defs.ts",
+        "l4/manutencaoFrota/journeys/acompanharPreventivasVencidas.defs.ts",
         "l4/manutencaoFrota/journeys/index.defs.ts"
       ],
       "decideStepCount": 0,
@@ -54,7 +54,7 @@
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:35:59.220Z",
+      "updatedAt": "2026-10-13T01:03:30.460Z",
       "artifactPaths": [
         "l4/manutencaoFrota/workflows.defs.ts"
       ],
@@ -65,11 +65,11 @@
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:37:52.274Z",
+      "updatedAt": "2026-10-13T01:04:46.445Z",
       "artifactPaths": [
+        "l4/manutencaoFrota/ontology/Veiculo.defs.ts",
         "l4/manutencaoFrota/ontology/Motorista.defs.ts",
         "l4/manutencaoFrota/ontology/Oficina.defs.ts",
-        "l4/manutencaoFrota/ontology/Veiculo.defs.ts",
         "l4/manutencaoFrota/ontology/Abastecimento.defs.ts",
         "l4/manutencaoFrota/ontology/PlanoManutencao.defs.ts",
         "l4/manutencaoFrota/ontology/OrdemManutencao.defs.ts",
@@ -87,6 +87,11 @@
       "normalizations": [
         {
           "kind": "derivedFromPlatform",
+          "entityId": "Veiculo",
+          "detail": "storage.table manutencaoFrota_veiculo"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "Motorista",
           "detail": "roleTag manutencaoFrota.Motorista; source /_102034_/l4/ontology/mdm.defs.ts"
         },
@@ -94,11 +99,6 @@
           "kind": "derivedFromPlatform",
           "entityId": "Oficina",
           "detail": "roleTag manutencaoFrota.Oficina; source /_102034_/l4/ontology/mdm.defs.ts"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Veiculo",
-          "detail": "storage.table manutencaoFrota_veiculo"
         },
         {
           "kind": "derivedFromPlatform",
@@ -114,6 +114,21 @@
           "kind": "derivedFromPlatform",
           "entityId": "OrdemManutencao",
           "detail": "storage.table manutencaoFrota_ordemmanutencao"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Veiculo",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Veiculo",
+          "detail": "record.fields.details.fields.preventivaVencida.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Veiculo",
+          "detail": "record.fields.details.fields.kmProximaPreventiva.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -144,11 +159,6 @@
           "kind": "tightened",
           "entityId": "Motorista",
           "detail": "Motorista.details.identification.docId.pattern"
-        },
-        {
-          "kind": "tightened",
-          "entityId": "Motorista",
-          "detail": "Motorista.details.person.privacyConsent.required"
         },
         {
           "kind": "namespaceEmpty",
@@ -182,26 +192,6 @@
         },
         {
           "kind": "derivedFromPlatform",
-          "entityId": "Veiculo",
-          "detail": "record.fields.id, record.fields.version"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Veiculo",
-          "detail": "record.fields.details.fields.preventivaVencida.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Veiculo",
-          "detail": "record.fields.details.fields.emManutencao.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Veiculo",
-          "detail": "record.fields.details.fields.custoTotalManutencao.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
           "entityId": "Abastecimento",
           "detail": "record.fields.id, record.fields.version"
         },
@@ -218,32 +208,42 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "PlanoManutencao",
+          "detail": "record.fields.details.fields.kmUltimaPreventiva.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PlanoManutencao",
+          "detail": "record.fields.details.fields.dataUltimaPreventiva.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PlanoManutencao",
+          "detail": "record.fields.details.fields.kmPrevisto.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PlanoManutencao",
+          "detail": "record.fields.details.fields.dataPrevista.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PlanoManutencao",
           "detail": "record.fields.details.fields.vencidoPorKm.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "PlanoManutencao",
-          "detail": "record.fields.details.fields.vencidoPorPrazo.derived (derived[])"
+          "detail": "record.fields.details.fields.vencidoPorTempo.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "PlanoManutencao",
-          "detail": "record.fields.details.fields.vencido.derived (derived[])"
+          "detail": "record.fields.details.fields.kmExcedido.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "PlanoManutencao",
-          "detail": "record.fields.details.fields.kmExcedente.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PlanoManutencao",
-          "detail": "record.fields.details.fields.kmRestante.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PlanoManutencao",
-          "detail": "record.fields.details.fields.possuiOrdemAberta.derived (derived[])"
+          "detail": "record.fields.details.fields.temOrdemAberta.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -257,53 +257,34 @@
         }
       ],
       "citedRules": [
+        "placaUnica",
+        "quilometragemNaoRegride",
+        "motoristaVeSomenteVeiculosAtribuidos",
+        "avisoPreventivaVencidaKm",
         "rule-foreign-namespace-refused",
-        "rule-delete-blocked-by-relationships",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
         "rule-person-privacy-consent-required-br-eu",
-        "motoristaVeApenasVeiculosAtribuidos",
-        "motoristaInativoNaoRegistraAbastecimento",
+        "rule-delete-blocked-by-relationships",
         "rule-company-legal-name-required",
         "oficinaInativaSemNovasOrdens",
-        "placaUnicaNaFrota",
-        "motoristaVeSoVeiculosAtribuidos",
-        "quilometragemNaoRegride",
-        "avisoPreventivaVencidaPorKm",
-        "motoristaSoVeiculoAtribuido",
+        "abastecimentoSomenteVeiculoAtribuido",
         "kmPainelNaoMenorQueAtual",
-        "abastecimentoAtualizaKmVeiculo",
-        "litrosPositivos",
-        "valorAbastecimentoPositivo",
+        "kmPainelAtualizaQuilometragemVeiculo",
+        "motoristaVeSomenteSeusAbastecimentos",
+        "litrosEValorPositivos",
         "planoIntervaloObrigatorio",
-        "proximaPreventivaCalculada",
-        "avisoPreventivaVencidaKm",
-        "recalcularAposPreventiva",
-        "planoInativoSemAviso",
-        "numeroOrdemSequencial",
+        "planoUmaOrdemAberta",
         "ordemPreventivaExigePlano",
-        "ordemDefeitoSemPlano",
-        "concluirExigeCustoEDataSaida",
+        "ordemCorretivaSemPlano",
+        "conclusaoExigeSaidaECusto",
         "dataSaidaNaoAnteriorEntrada",
-        "concluirPreventivaAtualizaPlano"
+        "conclusaoRecalculaPlano",
+        "ordemConcluidaNaoEditavel",
+        "numeroOrdemUnico"
       ],
       "citedCapabilities": [
         "read.byId",
-        "locate.byName",
-        "locate.byDocument",
-        "register.createOrAttach",
-        "edit.platformFields",
-        "edit.moduleNamespace",
-        "inactivate",
-        "link.contact",
-        "listLinks",
-        "invite.login",
-        "locate.byLogin",
-        "attach.document",
-        "comment",
-        "statusHistory.read",
-        "audit",
-        "manutencaoFrota.veiculosAtribuidos",
         "locate.byColumn",
         "locate.byText",
         "count",
@@ -313,40 +294,37 @@
         "uniqueKey",
         "transaction",
         "read.mdmRecord",
-        "manutencaoFrota.avisoPreventivaVencida",
+        "manutencaoFrota.avisoPreventivaKm",
+        "locate.byName",
+        "locate.byDocument",
+        "register.createOrAttach",
+        "edit.platformFields",
+        "edit.moduleNamespace",
+        "inactivate",
+        "link.contact",
+        "listLinks",
+        "invite.login",
+        "attach.document",
+        "comment",
+        "tag",
+        "audit",
         "delete",
-        "manutencaoFrota.atualizarKmVeiculo",
+        "manutencaoFrota.avisoPreventivaVencida",
         "transition",
         "sequence.next"
       ]
     },
     "judge35": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:38:21.236Z",
+      "updatedAt": "2026-10-13T01:04:46.639Z",
       "artifactPaths": [
         "l4/manutencaoFrota/pipeline/judge35-draft.json"
       ],
-      "normalizations": [
-        {
-          "kind": "judgeComment",
-          "detail": "NS5_JUDGE_ORPHAN_PERSISTS switch:PlanoManutencao.ativo: judge35: written switches still need a lifecycle after ontology repair: PlanoManutencao.ativo."
-        }
-      ]
-    },
-    "access60": {
-      "status": "approved",
-      "updatedAt": "2026-10-12T19:38:38.258Z",
-      "artifactPaths": [
-        "l4/manutencaoFrota/access.defs.ts"
-      ],
-      "compile": {
-        "status": "clean",
-        "files": 1
-      }
+      "noJudgeSignal": true
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:38:38.480Z",
+      "updatedAt": "2026-10-13T01:05:03.737Z",
       "artifactPaths": [
         "l4/manutencaoFrota/rules.defs.ts"
       ],
@@ -357,13 +335,28 @@
       "normalizations": [
         {
           "kind": "citedIdSpellingAdopted",
-          "detail": "concluirExigeCustoEdataSaida -> concluirExigeCustoEDataSaida"
+          "detail": "litrosEvalorPositivos -> litrosEValorPositivos"
+        },
+        {
+          "kind": "citedIdSpellingAdopted",
+          "detail": "conclusaoExigeSaidaEcusto -> conclusaoExigeSaidaECusto"
         }
       ]
     },
+    "access60": {
+      "status": "approved",
+      "updatedAt": "2026-10-13T01:05:03.778Z",
+      "artifactPaths": [
+        "l4/manutencaoFrota/access.defs.ts"
+      ],
+      "compile": {
+        "status": "clean",
+        "files": 1
+      }
+    },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:38:44.500Z",
+      "updatedAt": "2026-10-13T01:05:14.804Z",
       "artifactPaths": [
         "l4/manutencaoFrota/integration.defs.ts"
       ],
@@ -374,7 +367,7 @@
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:38:44.683Z",
+      "updatedAt": "2026-10-13T01:05:15.001Z",
       "artifactPaths": [
         "l4/manutencaoFrota/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -389,115 +382,41 @@
     "module": "manutencaoFrota",
     "rebuildAll": true
   },
-  "updatedAt": "2026-10-12T19:39:38.624Z",
+  "updatedAt": "2026-10-13T01:05:56.308Z",
   "rebuildAll": {
     "deleted": [
-      "l1/manutencaoFrota/pipeline/pipeline.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/drafts/cadastros_operacionais.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/drafts/gestor_inicio.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/drafts/meus_abastecimentos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/drafts/meus_veiculos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/drafts/motorista_inicio.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/drafts/ordens_manutencao.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/drafts/planos_preventivos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/drafts/veiculos_frota.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/results/cadastros_operacionais.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/results/gestor_inicio.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/results/meus_abastecimentos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/results/meus_veiculos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/results/motorista_inicio.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/results/ordens_manutencao.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/results/planos_preventivos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/contracts30/results/veiculos_frota.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/finalize60/ownership.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/finalize60/report.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/input.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/inputReport.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages50/results/cadastros_operacionais.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages50/results/gestor_inicio.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages50/results/meus_abastecimentos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages50/results/meus_veiculos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages50/results/motorista_inicio.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages50/results/ordens_manutencao.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages50/results/planos_preventivos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pages50/results/veiculos_frota.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/pipeline.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared40/results/cadastros_operacionais.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared40/results/gestor_inicio.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared40/results/meus_abastecimentos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared40/results/meus_veiculos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared40/results/motorista_inicio.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared40/results/ordens_manutencao.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared40/results/planos_preventivos.json",
-      "l2/manutencaoFrota/pipeline/agentDefsL2/shared40/results/veiculos_frota.json",
-      "l2/manutencaoFrota/pipeline/menu20-draft.json",
-      "l2/manutencaoFrota/pipeline/pipeline.json",
-      "l2/manutencaoFrota/web/contracts/cadastros_operacionais.defs.ts",
-      "l2/manutencaoFrota/web/contracts/gestor_inicio.defs.ts",
-      "l2/manutencaoFrota/web/contracts/meus_abastecimentos.defs.ts",
-      "l2/manutencaoFrota/web/contracts/meus_veiculos.defs.ts",
-      "l2/manutencaoFrota/web/contracts/motorista_inicio.defs.ts",
-      "l2/manutencaoFrota/web/contracts/ordens_manutencao.defs.ts",
-      "l2/manutencaoFrota/web/contracts/planos_preventivos.defs.ts",
-      "l2/manutencaoFrota/web/contracts/veiculos_frota.defs.ts",
-      "l2/manutencaoFrota/web/desktop/page11/cadastros_operacionais.defs.ts",
-      "l2/manutencaoFrota/web/desktop/page11/gestor_inicio.defs.ts",
-      "l2/manutencaoFrota/web/desktop/page11/meus_abastecimentos.defs.ts",
-      "l2/manutencaoFrota/web/desktop/page11/meus_veiculos.defs.ts",
-      "l2/manutencaoFrota/web/desktop/page11/motorista_inicio.defs.ts",
-      "l2/manutencaoFrota/web/desktop/page11/ordens_manutencao.defs.ts",
-      "l2/manutencaoFrota/web/desktop/page11/planos_preventivos.defs.ts",
-      "l2/manutencaoFrota/web/desktop/page11/veiculos_frota.defs.ts",
-      "l2/manutencaoFrota/web/mobile/page11/cadastros_operacionais.defs.ts",
-      "l2/manutencaoFrota/web/mobile/page11/gestor_inicio.defs.ts",
-      "l2/manutencaoFrota/web/mobile/page11/meus_abastecimentos.defs.ts",
-      "l2/manutencaoFrota/web/mobile/page11/meus_veiculos.defs.ts",
-      "l2/manutencaoFrota/web/mobile/page11/motorista_inicio.defs.ts",
-      "l2/manutencaoFrota/web/mobile/page11/ordens_manutencao.defs.ts",
-      "l2/manutencaoFrota/web/mobile/page11/planos_preventivos.defs.ts",
-      "l2/manutencaoFrota/web/mobile/page11/veiculos_frota.defs.ts",
-      "l2/manutencaoFrota/web/shared/cadastros_operacionais.defs.ts",
-      "l2/manutencaoFrota/web/shared/gestor_inicio.defs.ts",
-      "l2/manutencaoFrota/web/shared/meus_abastecimentos.defs.ts",
-      "l2/manutencaoFrota/web/shared/meus_veiculos.defs.ts",
-      "l2/manutencaoFrota/web/shared/motorista_inicio.defs.ts",
-      "l2/manutencaoFrota/web/shared/ordens_manutencao.defs.ts",
-      "l2/manutencaoFrota/web/shared/planos_preventivos.defs.ts",
-      "l2/manutencaoFrota/web/shared/veiculos_frota.defs.ts",
       "l4/manutencaoFrota/access.defs.ts",
       "l4/manutencaoFrota/integration.defs.ts",
+      "l4/manutencaoFrota/journeys/abrirOrdemPorAviso.defs.ts",
       "l4/manutencaoFrota/journeys/abrirOrdemPorDefeito.defs.ts",
-      "l4/manutencaoFrota/journeys/atualizarOrdemManutencao.defs.ts",
-      "l4/manutencaoFrota/journeys/cadastrarPlanoPreventivo.defs.ts",
-      "l4/manutencaoFrota/journeys/consultarVeiculosAtribuidos.defs.ts",
+      "l4/manutencaoFrota/journeys/acompanharFrota.defs.ts",
+      "l4/manutencaoFrota/journeys/cadastrarPlanoPreventiva.defs.ts",
+      "l4/manutencaoFrota/journeys/cadastrarVeiculo.defs.ts",
+      "l4/manutencaoFrota/journeys/concluirOrdem.defs.ts",
+      "l4/manutencaoFrota/journeys/consultarMeusVeiculos.defs.ts",
       "l4/manutencaoFrota/journeys/index.defs.ts",
       "l4/manutencaoFrota/journeys/registrarAbastecimento.defs.ts",
-      "l4/manutencaoFrota/journeys/tratarAlertaPreventivaVencida.defs.ts",
       "l4/manutencaoFrota/module.defs.ts",
-      "l4/manutencaoFrota/ontology/Driver.defs.ts",
-      "l4/manutencaoFrota/ontology/Fueling.defs.ts",
-      "l4/manutencaoFrota/ontology/MaintenanceOrder.defs.ts",
-      "l4/manutencaoFrota/ontology/MaintenancePlan.defs.ts",
-      "l4/manutencaoFrota/ontology/Vehicle.defs.ts",
-      "l4/manutencaoFrota/ontology/VehicleAssignment.defs.ts",
-      "l4/manutencaoFrota/ontology/Workshop.defs.ts",
+      "l4/manutencaoFrota/ontology/Abastecimento.defs.ts",
+      "l4/manutencaoFrota/ontology/Motorista.defs.ts",
+      "l4/manutencaoFrota/ontology/Oficina.defs.ts",
+      "l4/manutencaoFrota/ontology/OrdemManutencao.defs.ts",
+      "l4/manutencaoFrota/ontology/PlanoManutencao.defs.ts",
+      "l4/manutencaoFrota/ontology/Veiculo.defs.ts",
       "l4/manutencaoFrota/ontology/index.defs.ts",
       "l4/manutencaoFrota/pipeline/access60-draft.json",
       "l4/manutencaoFrota/pipeline/finalize-report.json",
       "l4/manutencaoFrota/pipeline/integration70-draft.json",
       "l4/manutencaoFrota/pipeline/journeys20-draft.json",
+      "l4/manutencaoFrota/pipeline/judge35-draft.json",
       "l4/manutencaoFrota/pipeline/module10-draft.json",
       "l4/manutencaoFrota/pipeline/ontology30-draft.json",
-      "l4/manutencaoFrota/pipeline/ontology30-entity-Driver-draft.json",
-      "l4/manutencaoFrota/pipeline/ontology30-entity-Fueling-draft.json",
-      "l4/manutencaoFrota/pipeline/ontology30-entity-MaintenanceOrder-draft.json",
-      "l4/manutencaoFrota/pipeline/ontology30-entity-MaintenancePlan-draft.json",
-      "l4/manutencaoFrota/pipeline/ontology30-entity-Vehicle-draft.json",
-      "l4/manutencaoFrota/pipeline/ontology30-entity-VehicleAssignment-draft.json",
-      "l4/manutencaoFrota/pipeline/ontology30-entity-Workshop-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-entity-Abastecimento-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-entity-Motorista-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-entity-Oficina-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-entity-OrdemManutencao-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-entity-PlanoManutencao-draft.json",
+      "l4/manutencaoFrota/pipeline/ontology30-entity-Veiculo-draft.json",
       "l4/manutencaoFrota/pipeline/ontology30-plan-draft.json",
       "l4/manutencaoFrota/pipeline/pipeline.json",
       "l4/manutencaoFrota/pipeline/rules40-draft.json",
@@ -510,6 +429,7 @@
       "l4/manutencaoFrota/pool/l2/menu20-draft.json",
       "l4/manutencaoFrota/pool/l2/needs30-draft.json",
       "l4/manutencaoFrota/pool/l2/pipeline.json",
+      "l4/manutencaoFrota/pool/l2/responses/menu20/menu-1.json",
       "l4/manutencaoFrota/pool/l2/web/backend.json",
       "l4/manutencaoFrota/pool/l2/web/effort.json",
       "l4/manutencaoFrota/pool/l2/web/l4diff.json",
@@ -522,46 +442,46 @@
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-10-12T19:35:20.383Z"
+    "at": "2026-10-13T01:02:46.040Z"
   },
   "poolWiped": [],
   "pool": [
     {
-      "at": "2026-10-12T19:39:03.920Z",
-      "file": "l4/manutencaoFrota/pool/l2/20261012193903_manutencaoFrota-20261012193903_1.json",
+      "at": "2026-10-13T01:05:26.491Z",
+      "file": "l4/manutencaoFrota/pool/l2/20261013010526_manutencaoFrota-20261013010526_1.json",
       "from": "l4",
       "to": "l2",
-      "thread": "manutencaoFrota-20261012193903",
+      "thread": "manutencaoFrota-20261013010526",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T19:39:37.307Z",
-      "file": "l4/manutencaoFrota/pool/l1/20261012193937_manutencaoFrota-20261012193903_1.json",
+      "at": "2026-10-13T01:05:55.011Z",
+      "file": "l4/manutencaoFrota/pool/l1/20261013010554_manutencaoFrota-20261013010526_1.json",
       "from": "l2",
       "to": "l1",
-      "thread": "manutencaoFrota-20261012193903",
+      "thread": "manutencaoFrota-20261013010526",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T19:39:37.991Z",
-      "file": "l4/manutencaoFrota/pool/l2/20261012193937_manutencaoFrota-20261012193903_1.json",
+      "at": "2026-10-13T01:05:55.686Z",
+      "file": "l4/manutencaoFrota/pool/l2/20261013010555_manutencaoFrota-20261013010526_1.json",
       "from": "l1",
       "to": "l2",
-      "thread": "manutencaoFrota-20261012193903",
+      "thread": "manutencaoFrota-20261013010526",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T19:39:38.583Z",
-      "file": "l4/manutencaoFrota/pool/l4/20261012193938_manutencaoFrota-20261012193903_1.json",
+      "at": "2026-10-13T01:05:56.271Z",
+      "file": "l4/manutencaoFrota/pool/l4/20261013010556_manutencaoFrota-20261013010526_1.json",
       "from": "l2",
       "to": "l4",
-      "thread": "manutencaoFrota-20261012193903",
+      "thread": "manutencaoFrota-20261013010526",
       "round": 1,
       "mode": "estimate",
       "outcome": "processed"

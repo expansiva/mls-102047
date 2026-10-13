@@ -7,7 +7,7 @@ export const manutencaoFrotaEntityMotorista = {
   "moduleName": "manutencaoFrota",
   "entityId": "Motorista",
   "title": "Motorista",
-  "description": "Pessoa que dirige os veículos da transportadora, registra abastecimentos e vê apenas os veículos atribuídos a ela.",
+  "description": "Pessoa que dirige os veículos da transportadora; vê apenas os veículos atribuídos a ela e registra seus abastecimentos.",
   "displayField": "details.identification.name",
   "relationships": {
     "veiculos": {
@@ -16,7 +16,7 @@ export const manutencaoFrotaEntityMotorista = {
       "via": "Veiculo.motoristaId",
       "cardinality": "1:N",
       "title": "Veículos atribuídos",
-      "description": "Veículos atribuídos ao motorista; são os únicos que ele pode ver.",
+      "description": "Veículos atribuídos ao motorista; é o caminho do escopo que limita o que ele vê.",
       "mode": "fk",
       "direction": "to"
     },
@@ -26,38 +26,34 @@ export const manutencaoFrotaEntityMotorista = {
       "via": "Abastecimento.motoristaId",
       "cardinality": "1:N",
       "title": "Abastecimentos registrados",
-      "description": "Abastecimentos que o motorista registrou.",
+      "description": "Abastecimentos que o motorista registrou dos veículos que dirige.",
       "mode": "fk",
       "direction": "to",
       "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Lê o motorista pelo id para mostrar seu nome no veículo atribuído e nos abastecimentos; usado por gestor e motorista.",
-    "locate.byName": "O gestor procura o motorista pelo nome ao atribuir um veículo.",
-    "locate.byDocument": "O gestor localiza o motorista pelo CPF antes de cadastrar, evitando duplicidade.",
-    "register.createOrAttach": "O gestor cadastra o motorista: a pessoa é localizada pelo CPF, criada se ausente, e recebe o papel manutencaoFrota.Motorista.",
-    "edit.platformFields": "O gestor corrige nome, CPF, endereços e consentimento do motorista.",
-    "edit.moduleNamespace": "O módulo grava apenas seu namespace manutencaoFrota no registro do motorista.",
-    "inactivate": "O gestor inativa o motorista que deixou a transportadora e pode reativá-lo depois.",
-    "link.contact": "O gestor adiciona telefone, WhatsApp ou e-mail do motorista como canal de contato ligado por HasContact.",
-    "listLinks": "A ficha do motorista mostra seus vínculos com validade e papel.",
-    "invite.login": "O gestor convida o motorista para entrar no sistema e registrar seus abastecimentos.",
-    "locate.byLogin": "A plataforma resolve o motorista da sessão pelo e-mail de login para restringir os veículos aos atribuídos a ele.",
-    "attach.document": "O gestor anexa à ficha do motorista a cópia da CNH ou outros documentos.",
-    "comment": "O gestor deixa observações na ficha do motorista.",
-    "statusHistory.read": "O gestor consulta quando o motorista foi ativado ou inativado.",
-    "audit": "Mostra quem alterou o cadastro do motorista e quando.",
-    "manutencaoFrota.veiculosAtribuidos": "Lista os veículos atribuídos ao motorista da sessão, pela chave do motorista no veículo; usado pelo motorista ao registrar abastecimento."
+    "read.byId": "Lê o motorista pelo mdmId para exibir o nome nas listas de veículos e de abastecimentos; usado pelo gestor e pelo motorista.",
+    "locate.byName": "Localiza o motorista pelo nome digitado ao atribuir um veículo; usado pelo gestor.",
+    "locate.byDocument": "Localiza o motorista pelo CPF antes de cadastrá-lo, evitando duplicidade; usado pelo gestor.",
+    "register.createOrAttach": "Cadastra o motorista ou, se a pessoa já existe pelo CPF, apenas anexa o papel manutencaoFrota.Motorista; usado pelo gestor.",
+    "edit.platformFields": "Corrige nome, CPF e consentimento do motorista; usado pelo gestor.",
+    "edit.moduleNamespace": "Altera apenas o namespace manutencaoFrota do motorista, hoje vazio; usado pelo próprio módulo.",
+    "inactivate": "Inativa o motorista que deixou a transportadora sem apagar seu histórico de abastecimentos, e o reativa se voltar; usado pelo gestor.",
+    "link.contact": "Adiciona telefone, WhatsApp ou e-mail do motorista como canal vinculado por HasContact; usado pelo gestor.",
+    "listLinks": "Mostra os vínculos do motorista, como contatos, na ficha dele; usado pelo gestor.",
+    "invite.login": "Dá ao motorista um login para registrar abastecimentos e ver os veículos atribuídos a ele; usado pelo gestor.",
+    "attach.document": "Anexa à ficha do motorista a cópia da CNH ou outros documentos digitalizados; usado pelo gestor.",
+    "comment": "Registra observações sobre o motorista na ficha; usado pelo gestor.",
+    "tag": "Marca o motorista com rótulos livres do módulo, como turno ou base; usado pelo gestor.",
+    "audit": "Mostra quem alterou o cadastro do motorista e quando; usado pelo gestor."
   },
   "rules": [
     "rule-foreign-namespace-refused",
-    "rule-delete-blocked-by-relationships",
-    "rule-document-shape-validated",
     "rule-identity-never-in-namespace",
+    "rule-document-shape-validated",
     "rule-person-privacy-consent-required-br-eu",
-    "motoristaVeApenasVeiculosAtribuidos",
-    "motoristaInativoNaoRegistraAbastecimento"
+    "rule-delete-blocked-by-relationships"
   ],
   "writer": "crud",
   "kind": "role",
@@ -108,7 +104,7 @@ export const manutencaoFrotaEntityMotorista = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 200,
-                "description": "Nome do motorista, como aparece na lista de motoristas e no veículo atribuído.",
+                "description": "Nome do motorista como aparece na atribuição de veículos e nos abastecimentos.",
                 "title": "Nome"
               },
               "status": {
@@ -135,7 +131,7 @@ export const manutencaoFrotaEntityMotorista = {
                   }
                 ],
                 "title": "Situação",
-                "description": "Situação do cadastro mestre; um motorista inativo deixa de dirigir e de registrar abastecimentos."
+                "description": "Situação do cadastro mestre; um motorista inativo deixa de receber veículos e de registrar abastecimentos."
               },
               "docType": {
                 "type": "enum",
@@ -147,13 +143,13 @@ export const manutencaoFrotaEntityMotorista = {
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Documento nacional usado para não cadastrar o mesmo motorista duas vezes.",
+                "description": "Documento nacional usado para deduplicar o motorista; na transportadora, o CPF.",
                 "required": true
               },
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do CPF do motorista.",
+                "description": "Número do CPF do motorista, usado para localizar antes de cadastrar.",
                 "title": "CPF",
                 "required": true,
                 "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$"
@@ -165,7 +161,7 @@ export const manutencaoFrotaEntityMotorista = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "País do documento e das regras de privacidade (BR para motoristas da transportadora).",
+                "description": "País do documento e das regras de privacidade (BR para motoristas brasileiros).",
                 "title": "País"
               },
               "tags": {
@@ -173,7 +169,7 @@ export const manutencaoFrotaEntityMotorista = {
                 "required": true,
                 "collection": true,
                 "derived": true,
-                "description": "Papéis dos módulos sobre a pessoa; inclui manutencaoFrota.Motorista.",
+                "description": "Papéis do registro nos módulos; inclui manutencaoFrota.Motorista.",
                 "title": "Papéis"
               },
               "createdAt": {
@@ -182,7 +178,7 @@ export const manutencaoFrotaEntityMotorista = {
                 "indexed": true,
                 "derived": true,
                 "title": "Criado em",
-                "description": "Quando o registro foi criado."
+                "description": "Momento em que o registro mestre foi criado."
               },
               "updatedAt": {
                 "type": "string",
@@ -190,10 +186,10 @@ export const manutencaoFrotaEntityMotorista = {
                 "indexed": true,
                 "derived": true,
                 "title": "Atualizado em",
-                "description": "Última alteração do registro."
+                "description": "Momento da última alteração do registro mestre."
               }
             },
-            "description": "Colunas de índice da plataforma usadas para localizar e listar os motoristas."
+            "description": "Colunas de índice da plataforma usadas para localizar e deduplicar o motorista."
           },
           "base": {
             "type": "object",
@@ -203,16 +199,8 @@ export const manutencaoFrotaEntityMotorista = {
                 "type": "string",
                 "required": true,
                 "collection": true,
-                "description": "Outros nomes pelos quais o motorista é conhecido na transportadora.",
+                "description": "Outros nomes pelos quais o motorista é conhecido na frota.",
                 "title": "Apelidos"
-              },
-              "addresses": {
-                "type": "object",
-                "required": true,
-                "collection": true,
-                "of": "Address",
-                "title": "Endereços",
-                "description": "Endereços do motorista."
               },
               "contacts": {
                 "type": "object",
@@ -220,24 +208,18 @@ export const manutencaoFrotaEntityMotorista = {
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Resumo dos canais de contato (telefone, WhatsApp, e-mail) ligados por HasContact.",
+                "description": "Resumo dos canais de contato do motorista (telefone, WhatsApp, e-mail), vinculados por HasContact.",
                 "title": "Contatos"
               },
               "relationshipRefs": {
                 "type": "object",
                 "required": true,
                 "derived": true,
-                "description": "Chaves compactas dos vínculos, recalculadas pela plataforma.",
+                "description": "Chaves compactas dos vínculos do motorista, recalculadas pela plataforma.",
                 "title": "Vínculos"
-              },
-              "notes": {
-                "type": "string",
-                "maxLength": 1000,
-                "title": "Observações",
-                "description": "Observações gerais sobre o motorista."
               }
             },
-            "description": "Dados comuns a todo registro mestre."
+            "description": "Dados comuns a todo registro mestre que o módulo lê do motorista."
           },
           "person": {
             "type": "object",
@@ -251,18 +233,17 @@ export const manutencaoFrotaEntityMotorista = {
               "privacyConsent": {
                 "type": "object",
                 "of": "PrivacyConsent",
-                "description": "Consentimento de privacidade exigido pela LGPD para motoristas residentes no Brasil.",
-                "title": "Consentimento LGPD",
-                "required": true
+                "description": "Consentimento LGPD do motorista para o tratamento dos seus dados pela transportadora.",
+                "title": "Consentimento de privacidade"
               }
             },
-            "description": "Dados de pessoa física do motorista."
+            "description": "Dados de pessoa física que o módulo lê do motorista."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Campos promovidos pela organização; lidos por este módulo, não declarados aqui."
+            "description": "Campos promovidos pela organização; o módulo apenas lê."
           },
           "manutencaoFrota": {
             "type": "object",

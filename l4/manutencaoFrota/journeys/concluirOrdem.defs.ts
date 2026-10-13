@@ -8,7 +8,7 @@ export const concluirOrdemJourney = {
   "business": {
     "actorRef": "gestor",
     "title": "Concluir ordem de manutenção",
-    "goal": "Registrar a saída do veículo da oficina e o custo da manutenção.",
+    "goal": "Registrar a saída do veículo da oficina e o custo final da ordem de manutenção.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -21,31 +21,31 @@ export const concluirOrdemJourney = {
         "description": "O gestor localiza a ordem aberta pelo veículo ou pela oficina."
       },
       {
-        "stepId": "conferirOrdem",
+        "stepId": "verOrdem",
         "kind": "inspect",
         "entity": "OrdemManutencao",
         "title": "Conferir ordem",
-        "description": "O gestor confere oficina, descrição e data de entrada."
+        "description": "O gestor confere oficina, descrição e data de entrada da ordem."
       },
       {
-        "stepId": "fecharOrdem",
+        "stepId": "registrarConclusao",
         "kind": "act",
         "entity": "OrdemManutencao",
         "effect": "transition",
         "transitionRef": "concluir",
-        "title": "Concluir ordem",
-        "description": "O gestor informa custo e data de saída e conclui a ordem; se for preventiva, o plano passa a prever a próxima preventiva."
+        "title": "Registrar saída e custo",
+        "description": "O gestor informa a data de saída e o custo e conclui a ordem; se for preventiva, o próximo vencimento do plano é recalculado."
       }
     ],
     "outcome": {
-      "statement": "A ordem está concluída com custo e data de saída registrados.",
+      "statement": "A ordem está concluída com data de saída e custo registrados.",
       "evidence": [
-        "A ordem aparece como concluída com custo e data de saída",
-        "A próxima preventiva do plano é recalculada quando a ordem é preventiva"
+        "A ordem aparece como concluída com data de saída e custo",
+        "O plano preventivo vinculado exibe o novo km ou data prevista"
       ]
     }
   },
-  "businessHash": "sha256:d5d67a3e8762814b940e1705fc5d3801cc70adeff5e8ccaf1c82e8cead44d018"
+  "businessHash": "sha256:925c1f266f72ddfde070bae3679feb883707f268eaf3c81a541d29102db29437"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConcluirOrdemJourneyType = typeof concluirOrdemJourney;

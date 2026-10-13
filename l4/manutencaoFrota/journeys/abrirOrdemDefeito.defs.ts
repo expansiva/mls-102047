@@ -1,10 +1,10 @@
-/// <mls fileReference="_102047_/l4/manutencaoFrota/journeys/abrirOrdemPorDefeito.defs.ts" enhancement="_blank"/>
+/// <mls fileReference="_102047_/l4/manutencaoFrota/journeys/abrirOrdemDefeito.defs.ts" enhancement="_blank"/>
 
 import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
-export const abrirOrdemPorDefeitoJourney = {
+export const abrirOrdemDefeitoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
-  "journeyId": "abrirOrdemPorDefeito",
+  "journeyId": "abrirOrdemDefeito",
   "business": {
     "actorRef": "gestor",
     "title": "Abrir ordem por defeito",
@@ -26,19 +26,19 @@ export const abrirOrdemPorDefeitoJourney = {
         "entity": "OrdemManutencao",
         "effect": "create",
         "title": "Abrir ordem corretiva",
-        "description": "O gestor abre a ordem do tipo defeito com oficina, descrição e data de entrada."
+        "description": "O gestor abre a ordem informando oficina, descrição do defeito e data de entrada."
       }
     ],
     "outcome": {
-      "statement": "Existe uma ordem corretiva aberta para o veículo.",
+      "statement": "O veículo com defeito tem uma ordem de manutenção aberta.",
       "evidence": [
-        "A ordem aparece aberta com tipo defeito, oficina, descrição e data de entrada"
+        "A ordem aparece aberta no veículo com oficina, descrição e data de entrada"
       ]
     }
   },
-  "businessHash": "sha256:a5a77d087056263a82f8ceede6fd94b080398a46846318a5b8a4b2b7deda7d90"
+  "businessHash": "sha256:d46d4407234d4974bbce80564a1d8567bf6ec85ea02dfe769c5dc6afeebee0a3"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
-export type AbrirOrdemPorDefeitoJourneyType = typeof abrirOrdemPorDefeitoJourney;
+export type AbrirOrdemDefeitoJourneyType = typeof abrirOrdemDefeitoJourney;
 
-export default abrirOrdemPorDefeitoJourney;
+export default abrirOrdemDefeitoJourney;
