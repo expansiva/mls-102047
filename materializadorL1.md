@@ -157,3 +157,24 @@ Decisões de 04/10, registradas em `todo/gerarApp/l4/docs/como-deve-ser-o-l2.md`
 - Formatos e specs do L1: `todo/gerarApp/l1/agents/planner/STATE.md` e `todo/gerarApp/l1/doc/` (`agentDefsL1.md`, `agentMaterializeL1.md`).
 - Contratos entre sub-projetos: `todo/gerarApp/contratos.md`.
 - O desenho do BFF por página: `todo/gerarApp/l4/docs/como-deve-ser-o-l2.md`.
+
+## 9. Página de vários papéis: o backend filtra por quem chama (Wagner, 13/10/2026)
+
+*"na tela pode ter seções hidden ou sem mostrar campos, seria da responsabilidade do materializador fazer isto"*; *"no defs colocamos o que deve
+ser feito (how), o materializador tem as informações e irá fazer a página, ele deve resolver, só não pode o defs estar errado"*.
+
+O L2 passa a aceitar numa página o campo que **algum** dos seus papéis vê (`l2_d2_93`). Hoje o backend gerado não suporta isso (medido em 13/10):
+- `authorize` exige que quem chama tenha **todos** os papéis dos grants da rota (`mls-102021/l2/agentMaterializeL1/emitters/emit.ts:559-583`;
+  `emitters/gate.ts:92-113` `decideRoute`): fora do alpha, quem tem um papel só leva **403** numa rota compartilhada. O alpha
+  (`alphaAllAuthorities`, `mls-102034/l1/server/layer_2_controllers/execBff.ts:160-178`) dá todos os papéis a todos e esconde isso.
+- A projeção da rota é uma só, fixa na materialização, pela interseção (`emit.ts:750-764`, `:1010-1019`); `emitAccess`/`grantsOf` descartam
+  `entityRefs` e `allowedFields` (`:141-176`, `:1061-1072`).
+- `scopeParams` força o escopo `own` para todo mundo quando a rota tem um grant `own` (`:541-557`).
+
+O que precisa mudar no materializador L1 (mesma coisa na cópia `handlers/structure/emit.ts` e `gate.ts`):
+1. `authorize` por **qualquer** papel que a pessoa tem entre os da rota;
+2. a resposta projetada pelos grants **de quem chama** (o `accessScope` já tem `actorRef`, `entityRefs` e `allowedFields` por grant;
+   `sessionContext.actorScope` já chega ao handler em `execBff.ts:263`); sem papel, fecha;
+3. `scopeParams` aplica `own` só para o grant do papel que a pessoa tem;
+4. testes com quem chama tendo **um** papel só (`testing/obligations.ts:298` hoje dá todos).
+Depois disso o D1 passa a decidir por papel (`l1_d1_70`, que espera esta mudança: antes dela, a união vazaria campos para quem não tem grant).
