@@ -1,0 +1,97 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { DespesaLoad, ColaboradorLoad } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.js';
+export type { Despesas_da_equipeContracts, DespesaLoad, ColaboradorLoad, DespesaApproveExpense } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+/** Draft of the approve/reject decision input; every leaf is null until filled. */
+export type DecisionDraft = {
+    details: {
+        motivoRejeicao: string | null;
+    };
+    colaboradorId: string | null;
+    id: string | null;
+    version: number | null;
+};
+export type ApproveExpenseDraft = DecisionDraft;
+export type RejectExpenseDraft = DecisionDraft;
+export declare class ReembolsoDespesasDespesas_da_equipeShared extends StateLitElement {
+    /** state despesasDaEquipe — pending expenses of the team (already filtered and paged by the backend); source load.despesasDaEquipe; organism pendingTeamExpenses */
+    despesasDaEquipe: DespesaLoad[];
+    /** state colaborador — collaborators of the team expenses, to show who owns the selected expense; source load.colaborador; organism expenseReview */
+    colaborador: ColaboradorLoad[];
+    /** state despesaSelecionada — id of the expense selected for review (null when none); the record is read through the expenseReview getter; source entry.params.despesaId; organism expenseReview; persisted */
+    despesaSelecionada: string | null;
+    /** state colaboradorId — collaborator filter of the pending list (null when no filter); source entry.params.colaboradorId; organism pendingTeamExpenses; persisted */
+    colaboradorId: string | null;
+    /** state page — current page of the pending expenses list (null until known); source entry.params.page; organism pendingTeamExpenses; persisted */
+    page: number | null;
+    /** state pageSizePendingTeamExpenses — page size used by the pending expenses list; source load.pageSizePendingTeamExpenses */
+    pageSizePendingTeamExpenses: number;
+    /** state hasMorePendingTeamExpenses — true when the backend says there is a next page of pending expenses; source load.hasMorePendingTeamExpenses */
+    hasMorePendingTeamExpenses: boolean;
+    /** state approveExpenseInput — draft of the approve decision (reason leaf; id, collaborator and version are taken from the selected expense when null); source approveExpense.input; organism approvalDecision */
+    approveExpenseInput: ApproveExpenseDraft;
+    /** state rejectExpenseInput — draft of the reject decision (the rejection reason is required; id, collaborator and version are taken from the selected expense when null); source rejectExpense.input; organism approvalDecision */
+    rejectExpenseInput: RejectExpenseDraft;
+    /** state pageStatus — overall status of the page load: idle, loading, empty, success or error */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state loadStatus — status of the initial load request */
+    loadStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state loadError — error of the initial load request (also client.selectionInvalid when the selected id resolves to no loaded row); null when none */
+    loadError: ErrorState;
+    /** state loadDespesasDaEquipeStatus — status of the filter / next page request of the pending list */
+    loadDespesasDaEquipeStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state loadDespesasDaEquipeError — error of the filter / next page request; null when none */
+    loadDespesasDaEquipeError: ErrorState;
+    /** state approveExpenseStatus — status of the approve command */
+    approveExpenseStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state approveExpenseError — error of the approve command; null when none */
+    approveExpenseError: ErrorState;
+    /** state rejectExpenseStatus — status of the reject command */
+    rejectExpenseStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state rejectExpenseError — error of the reject command; null when none */
+    rejectExpenseError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private subscribed;
+    private publish;
+    private assignState;
+    /** getter expenseReview — the selected expense record: the loaded row whose id is despesaSelecionada, or null */
+    get expenseReview(): DespesaLoad | null;
+    /** getter expenseReviewColaborador — the collaborator of the selected expense (the loaded collaborator whose id is the expense colaboradorId), or null */
+    get expenseReviewColaborador(): ColaboradorLoad | null;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private hydrateData;
+    private resetVisit;
+    private resetCommandResults;
+    private readParam;
+    private applyEntryParams;
+    private unexpected;
+    private finishPageStatus;
+    /** setScenario — publishes the visible scene of the page; redraws scenary (replace); value is the scene id ('' for none) */
+    setScenario(value: string): void;
+    /** draft — replaces the approve decision draft; redraws approveExpenseInput (replace); value is the whole draft (only details.motivoRejeicao is typed by the person) */
+    setApproveExpenseInput(value: ApproveExpenseDraft): void;
+    /** draft — replaces the reject decision draft; redraws rejectExpenseInput (replace); value is the whole draft (details.motivoRejeicao is the required rejection reason) */
+    setRejectExpenseInput(value: RejectExpenseDraft): void;
+    /** select — selects the expense to review (organism expenseReview); redraws despesaSelecionada (replace) and, when the id resolves to no loaded row, loadError with client.selectionInvalid; id is the expense id or null to clear the selection; read the record through the expenseReview getter */
+    selectExpenseReview(id: string | null): void;
+    /** function load — loads the pending expenses of the team and the collaborators of the expenses, using the current colaboradorId filter and page; redraws despesasDaEquipe (replace), colaborador (replace), page, pageSizePendingTeamExpenses and hasMorePendingTeamExpenses; no arguments; runs on page entry */
+    load(): Promise<void>;
+    private runLoadDespesas;
+    /** function filterPendingTeamExpenses — filters the pending team expenses by collaborator and reloads from the first page; redraws colaboradorId and page (replace) and despesasDaEquipe (replace), pageSizePendingTeamExpenses, hasMorePendingTeamExpenses; colaboradorId is the collaborator id to filter by, or null to clear the filter */
+    filterPendingTeamExpenses(colaboradorId: string | null): Promise<void>;
+    /** function loadMorePendingTeamExpenses — loads the next page of pending team expenses with the current filter; does nothing when hasMorePendingTeamExpenses is false; redraws despesasDaEquipe (append), page and hasMorePendingTeamExpenses; no arguments */
+    loadMorePendingTeamExpenses(): Promise<void>;
+    private buildDecisionInput;
+    private applyDecision;
+    /** function approveExpense — approves the selected expense for payment (form approveExpense, organism approvalDecision); redraws despesasDaEquipe (remove: the decided expense leaves the pending list) and despesaSelecionada (cleared); reads id, collaborator and version from the selected expense and details from approveExpenseInput; no arguments; error client.preconditionMissing when nothing is selected */
+    approveExpense(): Promise<void>;
+    /** function rejectExpense — rejects the selected expense recording the reason (form rejectExpense, organism approvalDecision); redraws despesasDaEquipe (remove: the decided expense leaves the pending list) and despesaSelecionada (cleared); reads id, collaborator and version from the selected expense and the required reason from rejectExpenseInput.details.motivoRejeicao; no arguments; error client.requiredMissing when the reason is empty, client.preconditionMissing when nothing is selected */
+    rejectExpense(): Promise<void>;
+}

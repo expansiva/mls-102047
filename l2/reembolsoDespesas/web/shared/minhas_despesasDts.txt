@@ -1,0 +1,120 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { DespesaLoad } from '/_102047_/l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.js';
+export type { Minhas_despesasContracts, DespesaLoad, DespesaRegistrarDespesa } from '/_102047_/l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+/** Draft of the expense form: the details of the write, every leaf null until typed. */
+export type DespesaDraft = {
+    details: {
+        dataDespesa: string | null;
+        categoria: string | null;
+        valor: string | null;
+        descricao: string | null;
+    };
+};
+export declare function createEmptyDespesaDraft(): DespesaDraft;
+export declare class ReembolsoDespesasMinhas_despesasShared extends StateLitElement {
+    /** state minhasDespesas — paginated list of the collaborator's expenses; source load.minhasDespesas; organism listaMinhasDespesas */
+    minhasDespesas: DespesaLoad[];
+    /** state hasMoreListaMinhasDespesas — true when the backend said there is a next page of the expense list; source load (list paging metadata, added by the shared) */
+    hasMoreListaMinhasDespesas: boolean;
+    /** state colaboradorId — id of the collaborator used to filter the expenses; source entry.params.colaboradorId; organism listaMinhasDespesas; persisted */
+    colaboradorId: string | null;
+    /** state page — page of the expense list last requested/loaded; source entry.params.page; organism listaMinhasDespesas; persisted */
+    page: number | null;
+    /** state detalheDespesa — id of the expense selected in the list for consulting, correcting or sending (the record is the getter detalheDespesaItem); source entry.params.despesaId; organism detalheDespesa; persisted */
+    detalheDespesa: string | null;
+    /** state registrarDespesaInput — draft of the form that registers a new expense; source registrarDespesa.input; organism formularioDespesa */
+    registrarDespesaInput: DespesaDraft;
+    /** state corrigirDespesaInput — draft of the form that corrects the selected expense; source corrigirDespesa.input; organism formularioDespesa */
+    corrigirDespesaInput: DespesaDraft;
+    /** state enviarParaAprovacaoInput — draft of the expense data sent along when sending the selected expense for approval; source enviarParaAprovacao.input; organism formularioDespesa */
+    enviarParaAprovacaoInput: DespesaDraft;
+    /** state reenviarParaAprovacaoInput — draft of the expense data sent along when resubmitting the selected rejected expense; source reenviarParaAprovacao.input; organism formularioDespesa */
+    reenviarParaAprovacaoInput: DespesaDraft;
+    /** state pageStatus — overall status of the page: loading while the initial load runs, error if it failed, empty when the list is empty, success otherwise */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    /** state loadStatus — status of the initial load request */
+    loadStatus: RequestStatus;
+    /** state loadError — error of the initial load request (also receives client.selectionInvalid for an entry selection that matches no row) */
+    loadError: ErrorState;
+    /** state loadMinhasDespesasStatus — status of the filter / next-page request of the expense list */
+    loadMinhasDespesasStatus: RequestStatus;
+    /** state loadMinhasDespesasError — error of the filter / next-page request (also receives client.selectionInvalid when a selected id matches no loaded row) */
+    loadMinhasDespesasError: ErrorState;
+    /** state registrarDespesaStatus — status of the register-expense command */
+    registrarDespesaStatus: RequestStatus;
+    /** state registrarDespesaError — error of the register-expense command */
+    registrarDespesaError: ErrorState;
+    /** state corrigirDespesaStatus — status of the correct-expense command */
+    corrigirDespesaStatus: RequestStatus;
+    /** state corrigirDespesaError — error of the correct-expense command */
+    corrigirDespesaError: ErrorState;
+    /** state enviarParaAprovacaoStatus — status of the send-for-approval command */
+    enviarParaAprovacaoStatus: RequestStatus;
+    /** state enviarParaAprovacaoError — error of the send-for-approval command */
+    enviarParaAprovacaoError: ErrorState;
+    /** state reenviarParaAprovacaoStatus — status of the resubmit-for-approval command */
+    reenviarParaAprovacaoStatus: RequestStatus;
+    /** state reenviarParaAprovacaoError — error of the resubmit-for-approval command */
+    reenviarParaAprovacaoError: ErrorState;
+    private subscribed;
+    private entrySelection;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private hydrateData;
+    private resetVisit;
+    private resetCommandResults;
+    private readParam;
+    private applyEntryParams;
+    /** scene — publishes the visible scene of the page; resets every command result (status idle, error null). Argument: the scene name. */
+    setScenario(value: string): void;
+    /** draft — replaces the draft of the register-expense form (details of the new expense); resets command results. Argument: the whole draft. */
+    setRegistrarDespesaInput(value: DespesaDraft): void;
+    /** draft — replaces the draft of the correct-expense form (details of the selected expense); resets command results. Argument: the whole draft. */
+    setCorrigirDespesaInput(value: DespesaDraft): void;
+    /** draft — replaces the draft of the data sent when sending the selected expense for approval; resets command results. Argument: the whole draft. */
+    setEnviarParaAprovacaoInput(value: DespesaDraft): void;
+    /** draft — replaces the draft of the data sent when resubmitting the selected rejected expense; resets command results. Argument: the whole draft. */
+    setReenviarParaAprovacaoInput(value: DespesaDraft): void;
+    /** getter detalheDespesaItem — the selected expense record (the loaded row whose id is in detalheDespesa), or null when nothing is selected or the row is not loaded; organism detalheDespesa */
+    get detalheDespesaItem(): DespesaLoad | null;
+    /** select — selects the expense to consult, correct or send, or clears the selection; redraws detalheDespesa (replace). Argument: the expense id from the loaded list, or null to clear. An id with no loaded row publishes client.selectionInvalid in loadMinhasDespesasError. */
+    selectDetalheDespesa(id: string | null): void;
+    private resolveSelection;
+    private setListStatus;
+    private setListError;
+    private listStatusOf;
+    private runList;
+    /** function load — initial load of the collaborator's expenses (uses the entry filters colaboradorId and page); redraws minhasDespesas (replace), hasMoreListaMinhasDespesas and page, then applies the entry selection to detalheDespesa and sets pageStatus. No arguments. */
+    load(): Promise<void>;
+    /** function filterListaMinhasDespesas — reloads the first page of the expense list with the given filter; redraws colaboradorId (replace), minhasDespesas (replace), hasMoreListaMinhasDespesas and page. Argument: the collaborator id to filter by, or null/'' for no filter. */
+    filterListaMinhasDespesas(colaboradorId: string | null): Promise<void>;
+    /** function loadMoreListaMinhasDespesas — appends the next page of expenses to the list, keeping the current filter; does nothing unless hasMoreListaMinhasDespesas is true; redraws minhasDespesas (append), hasMoreListaMinhasDespesas and page. No arguments. */
+    loadMoreListaMinhasDespesas(): Promise<void>;
+    private commandStatusOf;
+    private setCommandStatus;
+    private setCommandError;
+    private draftOf;
+    private clearDraft;
+    private collectDetails;
+    private upsertDespesa;
+    private runCommand;
+    /** function registrarDespesa — registers a new expense from the registrarDespesaInput draft (date, category, amount, description) for the collaborator in colaboradorId; redraws minhasDespesas (upsert of the returned expense), detalheDespesa (replace, selects the new expense) and clears the draft; result in registrarDespesaStatus/Error. No arguments. */
+    registrarDespesa(): Promise<void>;
+    /** function corrigirDespesa — corrects the selected expense (detalheDespesa) with the corrigirDespesaInput draft; redraws minhasDespesas (upsert of the returned expense), detalheDespesa (replace) and clears the draft; result in corrigirDespesaStatus/Error. No arguments; requires a selected expense. */
+    corrigirDespesa(): Promise<void>;
+    /** function enviarParaAprovacao — sends the selected registered expense (detalheDespesa) for approval with the enviarParaAprovacaoInput draft; redraws minhasDespesas (upsert of the returned expense), detalheDespesa (replace) and clears the draft; result in enviarParaAprovacaoStatus/Error. No arguments; requires a selected expense. */
+    enviarParaAprovacao(): Promise<void>;
+    /** function reenviarParaAprovacao — resubmits the selected rejected expense (detalheDespesa) for approval with the reenviarParaAprovacaoInput draft; redraws minhasDespesas (upsert of the returned expense), detalheDespesa (replace) and clears the draft; result in reenviarParaAprovacaoStatus/Error. No arguments; requires a selected expense. */
+    reenviarParaAprovacao(): Promise<void>;
+}
