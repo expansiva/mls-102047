@@ -1,0 +1,484 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 143217,
+  "receivedAt": "2026-10-13T06:38:15.700Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "A página gira em torno da manutenção preventiva de ativos da frota (veículos): o gestor acompanha os planos por veículo, identifica vencimentos por km ou por tempo, cadastra novos planos e abre a ordem de manutenção do plano vencido. Isso corresponde à gestão de ativos com foco em manutenção (assetManagement), igual no desktop e no mobile.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "assetManagement"
+            },
+            "intent": "Permitir ao gestor acompanhar os planos de preventiva de cada veículo, identificar rapidamente os vencidos por km ou por tempo, conferir quanto o veículo já passou do previsto e se já há ordem aberta, definir novos planos e abrir a ordem de manutenção da preventiva vencida.",
+            "sections": [
+              {
+                "id": "planosVencimentos",
+                "priority": "primary",
+                "purpose": "Mostrar todos os planos de preventiva por veículo e destacar os vencidos por km ou por tempo, para o gestor saber onde agir primeiro.",
+                "organisms": [
+                  "planosLista"
+                ]
+              },
+              {
+                "id": "planoSelecionado",
+                "priority": "main",
+                "purpose": "Detalhar o plano escolhido na lista — última preventiva, próxima prevista, km além do previsto e ordem aberta — e permitir abrir a ordem quando a preventiva venceu.",
+                "organisms": [
+                  "planoDetalhe",
+                  "abrirOrdemAcoes"
+                ]
+              },
+              {
+                "id": "novoPlano",
+                "priority": "secondary",
+                "purpose": "Definir o plano de preventiva de um veículo, com intervalo em km ou em meses.",
+                "organisms": [
+                  "planoFormulario"
+                ]
+              }
+            ],
+            "organisms": {
+              "planosLista": {
+                "kind": "list",
+                "text": "Planos de preventiva por veículo, com descrição, placa, km e data previstos da próxima preventiva e indicação de vencido; filtro para ver só os vencidos por km ou por tempo.",
+                "intents": []
+              },
+              "planoDetalhe": {
+                "kind": "detail",
+                "text": "O plano selecionado: km e data da última preventiva, km e data previstos da próxima, quilometragem atual do veículo, km além do previsto e se já existe ordem aberta para ele.",
+                "intents": []
+              },
+              "planoFormulario": {
+                "kind": "form",
+                "text": "Definir o plano de preventiva do veículo: escolher o veículo, descrever a preventiva e informar o intervalo a cada N km ou a cada N meses, com km e data de referência.",
+                "intents": [
+                  {
+                    "id": "salvarPlano",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "abrirOrdemAcoes": {
+                "kind": "actions",
+                "text": "Abrir ordem de manutenção preventiva para o plano vencido, informando oficina, descrição e data de entrada; depois acompanhar a ordem em Ordens de manutenção.",
+                "intents": [
+                  {
+                    "id": "abrirOrdemPreventiva",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "verOrdens",
+                    "kind": "navigate",
+                    "to": "ordens_manutencao"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "planosLista": [
+                {
+                  "role": "tabela de planos com vencimento",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewtable--ml-advanced-data-table"
+                },
+                {
+                  "role": "filtro de vencidos por km ou por tempo",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-select"
+                },
+                {
+                  "role": "busca por placa ou descrição",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": "groupsearchcontent--ml-search-filters"
+                }
+              ],
+              "planoDetalhe": [
+                {
+                  "role": "ficha do plano",
+                  "preferred": "groupviewcard--ml-view-card-horizontal",
+                  "alternative": "groupviewcard--ml-vertical-card"
+                },
+                {
+                  "role": "km além do previsto",
+                  "preferred": "groupviewmetric--ml-metric-card",
+                  "alternative": "groupviewmetric--ml-metric-big-number"
+                }
+              ],
+              "planoFormulario": [
+                {
+                  "role": "escolha do veículo",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "tipo de intervalo (km ou meses)",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "intervalo e km de referência",
+                  "preferred": "groupenternumber--ml-number-input",
+                  "alternative": "groupenternumber--ml-number-stepper"
+                },
+                {
+                  "role": "salvar plano",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                }
+              ],
+              "abrirOrdemAcoes": [
+                {
+                  "role": "abrir ordem preventiva",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-split-button"
+                },
+                {
+                  "role": "confirmação da ordem aberta",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "planosLista": {
+                "reads": [
+                  "PlanoManutencao.id",
+                  "PlanoManutencao.descricao",
+                  "PlanoManutencao.veiculoId",
+                  "Veiculo.placa",
+                  "Veiculo.modelo",
+                  "PlanoManutencao.details.kmPrevisto",
+                  "PlanoManutencao.details.dataPrevista",
+                  "PlanoManutencao.details.vencidoPorKm",
+                  "PlanoManutencao.details.vencidoPorTempo",
+                  "PlanoManutencao.details.kmExcedido",
+                  "PlanoManutencao.details.temOrdemAberta"
+                ],
+                "edits": [],
+                "selects": "planoDetalhe",
+                "submits": []
+              },
+              "planoDetalhe": {
+                "reads": [
+                  "PlanoManutencao.descricao",
+                  "Veiculo.placa",
+                  "Veiculo.details.quilometragemAtual",
+                  "PlanoManutencao.details.intervaloKm",
+                  "PlanoManutencao.details.intervaloMeses",
+                  "PlanoManutencao.details.kmUltimaPreventiva",
+                  "PlanoManutencao.details.dataUltimaPreventiva",
+                  "PlanoManutencao.details.kmPrevisto",
+                  "PlanoManutencao.details.dataPrevista",
+                  "PlanoManutencao.details.kmExcedido",
+                  "PlanoManutencao.details.vencidoPorKm",
+                  "PlanoManutencao.details.vencidoPorTempo",
+                  "PlanoManutencao.details.temOrdemAberta",
+                  "PlanoManutencao.details.observacoes",
+                  "OrdemManutencao.numero",
+                  "OrdemManutencao.status",
+                  "OrdemManutencao.details.diasNaOficina"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "planoFormulario": {
+                "reads": [
+                  "Veiculo.id",
+                  "Veiculo.placa",
+                  "Veiculo.modelo",
+                  "Veiculo.details.quilometragemAtual"
+                ],
+                "edits": [
+                  "PlanoManutencao.veiculoId",
+                  "PlanoManutencao.descricao",
+                  "PlanoManutencao.details.intervaloKm",
+                  "PlanoManutencao.details.intervaloMeses",
+                  "PlanoManutencao.details.kmReferencia",
+                  "PlanoManutencao.details.dataReferencia",
+                  "PlanoManutencao.details.observacoes"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "salvarPlano",
+                    "write": "PlanoManutencao.create"
+                  }
+                ]
+              },
+              "abrirOrdemAcoes": {
+                "reads": [
+                  "PlanoManutencao.id",
+                  "PlanoManutencao.veiculoId",
+                  "PlanoManutencao.details.temOrdemAberta",
+                  "Oficina.id",
+                  "Oficina.details.identification.name",
+                  "Oficina.details.identification.status"
+                ],
+                "edits": [
+                  "OrdemManutencao.planoId",
+                  "OrdemManutencao.veiculoId",
+                  "OrdemManutencao.tipo",
+                  "OrdemManutencao.oficinaId",
+                  "OrdemManutencao.details.descricao",
+                  "OrdemManutencao.dataEntrada",
+                  "OrdemManutencao.details.kmEntrada"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "abrirOrdemPreventiva",
+                    "write": "OrdemManutencao.create"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "assetManagement"
+            },
+            "intent": "No celular, em conteúdo fluido estreito (referência de 390px, utilizável de 360px a 430px), o gestor vê primeiro os planos vencidos, abre um plano para conferir o vencimento e abre a ordem da preventiva vencida; o cadastro de novo plano fica ao final.",
+            "sections": [
+              {
+                "id": "planosVencimentos",
+                "priority": "primary",
+                "purpose": "Lista empilhada dos planos por veículo, com o filtro de vencidos por km ou por tempo no topo para leitura rápida.",
+                "organisms": [
+                  "planosLista"
+                ]
+              },
+              {
+                "id": "planoSelecionado",
+                "priority": "main",
+                "purpose": "Ficha do plano escolhido com o km além do previsto em destaque e a ação de abrir ordem logo abaixo, ao alcance do polegar.",
+                "organisms": [
+                  "planoDetalhe",
+                  "abrirOrdemAcoes"
+                ]
+              },
+              {
+                "id": "novoPlano",
+                "priority": "secondary",
+                "purpose": "Formulário curto, em uma coluna, para definir o plano de preventiva do veículo.",
+                "organisms": [
+                  "planoFormulario"
+                ]
+              }
+            ],
+            "organisms": {
+              "planosLista": {
+                "kind": "list",
+                "text": "Planos de preventiva por veículo em itens empilhados: descrição, placa, próxima preventiva prevista e marca de vencido; filtro dos vencidos por km ou por tempo.",
+                "intents": []
+              },
+              "planoDetalhe": {
+                "kind": "detail",
+                "text": "O plano selecionado: última preventiva (km e data), próxima prevista (km e data), km além do previsto e se já há ordem aberta.",
+                "intents": []
+              },
+              "planoFormulario": {
+                "kind": "form",
+                "text": "Definir o plano de preventiva do veículo: veículo, descrição e intervalo a cada N km ou a cada N meses, com km e data de referência.",
+                "intents": [
+                  {
+                    "id": "salvarPlano",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "abrirOrdemAcoes": {
+                "kind": "actions",
+                "text": "Abrir ordem de manutenção para a preventiva vencida, informando oficina, descrição e data de entrada; acompanhar depois em Ordens de manutenção.",
+                "intents": [
+                  {
+                    "id": "abrirOrdemPreventiva",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "verOrdens",
+                    "kind": "navigate",
+                    "to": "ordens_manutencao"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "planosLista": [
+                {
+                  "role": "lista empilhada de planos",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-table"
+                },
+                {
+                  "role": "filtro de vencidos por km ou por tempo",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-select"
+                },
+                {
+                  "role": "busca por placa ou descrição",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": ""
+                }
+              ],
+              "planoDetalhe": [
+                {
+                  "role": "ficha do plano",
+                  "preferred": "groupviewcard--ml-vertical-card",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                },
+                {
+                  "role": "km além do previsto",
+                  "preferred": "groupviewmetric--ml-metric-big-number",
+                  "alternative": "groupviewmetric--ml-metric-card"
+                }
+              ],
+              "planoFormulario": [
+                {
+                  "role": "escolha do veículo",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "tipo de intervalo (km ou meses)",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "intervalo e km de referência",
+                  "preferred": "groupenternumber--ml-number-stepper",
+                  "alternative": "groupenternumber--ml-number-input"
+                },
+                {
+                  "role": "salvar plano",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                }
+              ],
+              "abrirOrdemAcoes": [
+                {
+                  "role": "abrir ordem preventiva",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "confirmação da ordem aberta",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "planosLista": {
+                "reads": [
+                  "PlanoManutencao.id",
+                  "PlanoManutencao.descricao",
+                  "PlanoManutencao.veiculoId",
+                  "Veiculo.placa",
+                  "PlanoManutencao.details.kmPrevisto",
+                  "PlanoManutencao.details.dataPrevista",
+                  "PlanoManutencao.details.vencidoPorKm",
+                  "PlanoManutencao.details.vencidoPorTempo",
+                  "PlanoManutencao.details.temOrdemAberta"
+                ],
+                "edits": [],
+                "selects": "planoDetalhe",
+                "submits": []
+              },
+              "planoDetalhe": {
+                "reads": [
+                  "PlanoManutencao.descricao",
+                  "Veiculo.placa",
+                  "Veiculo.details.quilometragemAtual",
+                  "PlanoManutencao.details.kmUltimaPreventiva",
+                  "PlanoManutencao.details.dataUltimaPreventiva",
+                  "PlanoManutencao.details.kmPrevisto",
+                  "PlanoManutencao.details.dataPrevista",
+                  "PlanoManutencao.details.kmExcedido",
+                  "PlanoManutencao.details.vencidoPorKm",
+                  "PlanoManutencao.details.vencidoPorTempo",
+                  "PlanoManutencao.details.temOrdemAberta",
+                  "OrdemManutencao.numero",
+                  "OrdemManutencao.status"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "planoFormulario": {
+                "reads": [
+                  "Veiculo.id",
+                  "Veiculo.placa",
+                  "Veiculo.modelo",
+                  "Veiculo.details.quilometragemAtual"
+                ],
+                "edits": [
+                  "PlanoManutencao.veiculoId",
+                  "PlanoManutencao.descricao",
+                  "PlanoManutencao.details.intervaloKm",
+                  "PlanoManutencao.details.intervaloMeses",
+                  "PlanoManutencao.details.kmReferencia",
+                  "PlanoManutencao.details.dataReferencia",
+                  "PlanoManutencao.details.observacoes"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "salvarPlano",
+                    "write": "PlanoManutencao.create"
+                  }
+                ]
+              },
+              "abrirOrdemAcoes": {
+                "reads": [
+                  "PlanoManutencao.id",
+                  "PlanoManutencao.veiculoId",
+                  "PlanoManutencao.details.temOrdemAberta",
+                  "Oficina.id",
+                  "Oficina.details.identification.name",
+                  "Oficina.details.identification.status"
+                ],
+                "edits": [
+                  "OrdemManutencao.planoId",
+                  "OrdemManutencao.veiculoId",
+                  "OrdemManutencao.tipo",
+                  "OrdemManutencao.oficinaId",
+                  "OrdemManutencao.details.descricao",
+                  "OrdemManutencao.dataEntrada",
+                  "OrdemManutencao.details.kmEntrada"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "abrirOrdemPreventiva",
+                    "write": "OrdemManutencao.create"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 20,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

@@ -1,0 +1,539 @@
+{
+  "types": [
+    {
+      "name": "AbastecimentoValores",
+      "description": "Valores do abastecimento (details): litros, valor, km no painel e preço por litro calculado.",
+      "fields": [
+        {
+          "name": "details.litros",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.litros"
+            ]
+          }
+        },
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.kmPainel",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.kmPainel"
+            ]
+          }
+        },
+        {
+          "name": "precoPorLitro",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Abastecimento.details.precoPorLitro",
+              "Abastecimento.details.valor",
+              "Abastecimento.details.litros"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AbastecimentoItem",
+      "description": "Linha da lista de meus abastecimentos.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.id"
+            ]
+          }
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.data"
+            ]
+          }
+        },
+        {
+          "name": "veiculoId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.veiculoId"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "AbastecimentoValores"
+        }
+      ]
+    },
+    {
+      "name": "PrecoPorLitroValor",
+      "description": "Preço por litro de um abastecimento.",
+      "fields": [
+        {
+          "name": "precoPorLitro",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Abastecimento.details.precoPorLitro",
+              "Abastecimento.details.valor",
+              "Abastecimento.details.litros"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PrecoPorLitroPonto",
+      "description": "Ponto da série de preço por litro ao longo das datas.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.id"
+            ]
+          }
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.data"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "PrecoPorLitroValor"
+        }
+      ]
+    },
+    {
+      "name": "MotoristaIdentificacao",
+      "description": "Identificação do motorista visível ao próprio motorista.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MotoristaDetalhes",
+      "description": "Detalhes do motorista com a identificação.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "MotoristaIdentificacao"
+        }
+      ]
+    },
+    {
+      "name": "MotoristaResumo",
+      "description": "Motorista do abastecimento, apenas o nome.",
+      "fields": [
+        {
+          "name": "details",
+          "type": "MotoristaDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "AbastecimentoDetalhe",
+      "description": "Abastecimento completo com o nome do motorista.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.id"
+            ]
+          }
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.data"
+            ]
+          }
+        },
+        {
+          "name": "veiculoId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.veiculoId"
+            ]
+          }
+        },
+        {
+          "name": "motoristaId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.motoristaId"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "AbastecimentoValores"
+        },
+        {
+          "name": "motorista",
+          "type": "MotoristaResumo"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "carregarMeusAbastecimentos",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "motoristaId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.motoristaId"
+            ]
+          }
+        },
+        {
+          "name": "precosPorLitro",
+          "type": "PrecoPorLitroPonto[]"
+        }
+      ],
+      "rules": [
+        "motoristaVeSomenteSeusAbastecimentos",
+        "precoPorLitroCalculado"
+      ],
+      "jsdoc": {
+        "purpose": "Abre a página: identifica o motorista logado para o formulário de lançamento e entrega a série de preço por litro dos seus abastecimentos.",
+        "input": "Sem entrada; o motorista vem da sessão.",
+        "processing": "Resolve o motorista da sessão. Busca os abastecimentos com motoristaId do motorista, somente de veículos atribuídos a ele (motoristaVeSomenteSeusAbastecimentos), ordenados por data crescente, limitados aos mais recentes (ex.: 12 meses). O preço por litro é calculado como valor / litros (precoPorLitroCalculado), nunca lido de campo gravado.",
+        "output": "motoristaId para o formulário lancarAbastecimento e precosPorLitro (data e preço por litro) para o resumo de variação."
+      }
+    },
+    {
+      "id": "listarMeusAbastecimentos",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "dataInicio",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "dataFim",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "veiculoId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "abastecimentos",
+          "type": "AbastecimentoItem[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "motoristaVeSomenteSeusAbastecimentos",
+        "precoPorLitroCalculado"
+      ],
+      "jsdoc": {
+        "purpose": "Lista, paginada, os abastecimentos do motorista logado, com filtro por período e veículo; roda ao abrir e novamente quando o motorista muda o filtro ou pede a próxima página.",
+        "input": "page e pageSize: página pedida; dataInicio e dataFim: período opcional sobre a data; veiculoId: veículo opcional entre os atribuídos.",
+        "processing": "Filtra por motoristaId da sessão e somente veículos atribuídos a ele (motoristaVeSomenteSeusAbastecimentos), aplica período e veículo, ordena por data decrescente. Calcula precoPorLitro = valor / litros de cada item (precoPorLitroCalculado).",
+        "output": "Página { items, page, pageSize, hasMore } com id, data, veículo, litros, valor, km no painel e preço por litro de cada abastecimento."
+      }
+    },
+    {
+      "id": "obterAbastecimento",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "abastecimentoId",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "abastecimento",
+          "type": "AbastecimentoDetalhe"
+        }
+      ],
+      "rules": [
+        "motoristaVeSomenteSeusAbastecimentos",
+        "precoPorLitroCalculado"
+      ],
+      "jsdoc": {
+        "purpose": "Abre o abastecimento escolhido na lista para o motorista conferir os dados completos.",
+        "input": "abastecimentoId: id do abastecimento selecionado na lista.",
+        "processing": "Lê o abastecimento pelo id e recusa se não for do motorista da sessão ou de veículo não atribuído (motoristaVeSomenteSeusAbastecimentos). Lê no cadastro mestre o nome do motorista. Calcula precoPorLitro = valor / litros (precoPorLitroCalculado).",
+        "output": "O abastecimento com data, veículo, litros, valor, km no painel, preço por litro e nome do motorista."
+      }
+    },
+    {
+      "id": "registrarAbastecimento",
+      "kind": "cmd",
+      "when": "registrarAbastecimento",
+      "writes": "Abastecimento.create",
+      "input": [
+        {
+          "name": "motoristaId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.motoristaId"
+            ]
+          }
+        },
+        {
+          "name": "veiculoId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.veiculoId"
+            ]
+          }
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.data"
+            ]
+          }
+        },
+        {
+          "name": "details.litros",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.litros"
+            ]
+          }
+        },
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.kmPainel",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.kmPainel"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "abastecimento",
+          "type": "AbastecimentoItem"
+        }
+      ],
+      "rules": [
+        "abastecimentoSomenteVeiculoAtribuido",
+        "litrosEValorPositivos",
+        "kmPainelNaoMenorQueAtual",
+        "kmPainelAtualizaQuilometragemVeiculo",
+        "precoPorLitroCalculado"
+      ],
+      "jsdoc": {
+        "purpose": "Registra o abastecimento lançado pelo motorista e atualiza a quilometragem do veículo.",
+        "input": "motoristaId: motorista logado (conferido com a sessão); veiculoId: veículo abastecido; data: data do abastecimento; litros, valor e kmPainel: valores informados no posto.",
+        "processing": "Numa só transação: recusa se motoristaId difere da sessão ou se o veículo não está atribuído ao motorista (abastecimentoSomenteVeiculoAtribuido); recusa litros ou valor <= 0 (litrosEValorPositivos); recusa kmPainel menor que a quilometragem atual do veículo (kmPainelNaoMenorQueAtual); grava o abastecimento e define a quilometragem atual do veículo como kmPainel (kmPainelAtualizaQuilometragemVeiculo). O preço por litro não é gravado: é calculado como valor / litros na resposta (precoPorLitroCalculado).",
+        "output": "O abastecimento criado no formato da linha da lista, para inserir no histórico sem nova consulta; o formulário é limpo."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "lancarAbastecimento",
+        "reads": "carregarMeusAbastecimentos.motoristaId"
+      },
+      {
+        "organism": "precoPorLitroResumo",
+        "reads": "carregarMeusAbastecimentos.precosPorLitro"
+      },
+      {
+        "organism": "meusAbastecimentosLista",
+        "reads": "listarMeusAbastecimentos.abastecimentos"
+      },
+      {
+        "organism": "abastecimentoDetalhe",
+        "reads": "obterAbastecimento.abastecimento"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "registrarAbastecimento",
+        "refreshes": [
+          "carregarMeusAbastecimentos"
+        ]
+      }
+    ],
+    "selections": [
+      {
+        "organism": "meusAbastecimentosLista",
+        "via": {
+          "query": "obterAbastecimento"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "consultarMeusAbastecimentos/listarAbastecimentos",
+        "organisms": [
+          "meusAbastecimentosLista",
+          "precoPorLitroResumo"
+        ],
+        "endpoints": [
+          "listarMeusAbastecimentos",
+          "carregarMeusAbastecimentos"
+        ]
+      },
+      {
+        "step": "consultarMeusAbastecimentos/verAbastecimento",
+        "organisms": [
+          "abastecimentoDetalhe"
+        ],
+        "endpoints": [
+          "obterAbastecimento"
+        ]
+      },
+      {
+        "step": "registrarAbastecimento/localizarVeiculo",
+        "organisms": [
+          "lancarAbastecimento"
+        ],
+        "endpoints": [
+          "carregarMeusAbastecimentos"
+        ],
+        "continuesIn": "meus_veiculos"
+      },
+      {
+        "step": "registrarAbastecimento/conferirVeiculo",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "meus_veiculos"
+      },
+      {
+        "step": "registrarAbastecimento/lancarAbastecimento",
+        "organisms": [
+          "lancarAbastecimento"
+        ],
+        "endpoints": [
+          "registrarAbastecimento"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "registrarAbastecimento",
+        "state": "listarMeusAbastecimentos.abastecimentos",
+        "mode": "upsert"
+      }
+    ]
+  }
+}

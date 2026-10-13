@@ -1,0 +1,550 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 154638,
+  "receivedAt": "2026-10-13T06:38:16.261Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "A página é uma fila de execução de ordens de manutenção: o gestor acompanha as ordens por situação (aberta ou concluída) e dias na oficina, abre novas ordens e leva cada ordem aberta à conclusão pela transição concluir. Itens com situação e ações de transição são a marca de operationsQueue, e a mesma categoria vale para desktop e mobile.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "operationsQueue"
+            },
+            "intent": "Acompanhar as ordens de manutenção da frota, ver há quantos dias cada veículo está na oficina, abrir ordens preventivas ou corretivas e concluir as ordens abertas registrando a saída e o custo final.",
+            "sections": [
+              {
+                "id": "filaOrdens",
+                "priority": "primary",
+                "purpose": "Localizar rapidamente a ordem pelo número, veículo ou oficina e ver quais ainda estão abertas e há quantos dias.",
+                "organisms": [
+                  "ordensLista"
+                ]
+              },
+              {
+                "id": "ordemSelecionada",
+                "priority": "main",
+                "purpose": "Conferir a ordem escolhida e agir sobre ela: ver veículo, oficina, motivo, entrada, dias na oficina e custo, e concluir ou abrir uma nova ordem.",
+                "organisms": [
+                  "ordemDetalhe",
+                  "ordemAcoes"
+                ]
+              },
+              {
+                "id": "registroOrdem",
+                "priority": "secondary",
+                "purpose": "Preencher a abertura de uma ordem preventiva ou corretiva, ou registrar a data de saída e o custo final na conclusão.",
+                "organisms": [
+                  "ordemFormulario"
+                ]
+              }
+            ],
+            "organisms": {
+              "ordensLista": {
+                "kind": "list",
+                "text": "Ordens de manutenção por número, veículo, oficina, situação e dias na oficina, para encontrar a ordem aberta a acompanhar ou concluir.",
+                "intents": []
+              },
+              "ordemDetalhe": {
+                "kind": "detail",
+                "text": "A ordem selecionada: veículo, oficina, tipo e motivo, data de entrada, dias na oficina e custo, para conferir antes de concluir.",
+                "intents": []
+              },
+              "ordemFormulario": {
+                "kind": "form",
+                "text": "Abrir ordem preventiva vinculada ao plano vencido ou corretiva por defeito, informando veículo, oficina, descrição e data de entrada; na conclusão, registrar data de saída e custo final.",
+                "intents": [
+                  {
+                    "id": "salvarAberturaOrdem",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "registrarConclusaoOrdem",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "ordemAcoes": {
+                "kind": "actions",
+                "text": "Abrir ordem corretiva por defeito e concluir a ordem aberta selecionada; atalho para os planos de preventiva vencidos.",
+                "intents": [
+                  {
+                    "id": "abrirOrdemCorretiva",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "concluirOrdem",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "verPlanosVencidos",
+                    "kind": "navigate",
+                    "to": "planos_manutencao"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "ordensLista": [
+                {
+                  "role": "Buscar ordem pelo número, placa ou oficina",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": "groupsearchcontent--ml-search-filters"
+                },
+                {
+                  "role": "Filtrar por situação da ordem",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-select"
+                },
+                {
+                  "role": "Tabela de ordens com ordenação por dias na oficina",
+                  "preferred": "groupviewtable--ml-advanced-data-table",
+                  "alternative": "groupviewtable--ml-side-detail-table"
+                }
+              ],
+              "ordemDetalhe": [
+                {
+                  "role": "Ficha da ordem selecionada",
+                  "preferred": "groupviewcard--ml-view-card-horizontal",
+                  "alternative": "groupviewcard--ml-vertical-card"
+                },
+                {
+                  "role": "Dias na oficina e custo em destaque",
+                  "preferred": "groupviewmetric--ml-metric-card",
+                  "alternative": "groupviewmetric--ml-metric-big-number"
+                }
+              ],
+              "ordemFormulario": [
+                {
+                  "role": "Escolher o veículo pela placa",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "Escolher a oficina",
+                  "preferred": "groupselectone--ml-combobox",
+                  "alternative": "groupselectone--ml-select"
+                },
+                {
+                  "role": "Tipo da ordem: preventiva ou corretiva",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "Data de entrada e data de saída",
+                  "preferred": "groupenterdate--ml-date-picker",
+                  "alternative": "groupenterdate--ml-date-shortcut-picker"
+                },
+                {
+                  "role": "Descrição do serviço ou do defeito",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Custo final da manutenção",
+                  "preferred": "groupentermoney--ml-enter-money-br",
+                  "alternative": "groupentermoney--ml-currency-input"
+                },
+                {
+                  "role": "Confirmar abertura ou conclusão",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "Confirmação do registro salvo",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ],
+              "ordemAcoes": [
+                {
+                  "role": "Abrir corretiva e concluir ordem",
+                  "preferred": "grouptriggeraction--ml-button-group",
+                  "alternative": "grouptriggeraction--ml-split-button"
+                },
+                {
+                  "role": "Resultado da ação",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-notify-banner"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "ordensLista": {
+                "reads": [
+                  "OrdemManutencao.numero",
+                  "OrdemManutencao.veiculoId",
+                  "OrdemManutencao.oficinaId",
+                  "OrdemManutencao.tipo",
+                  "OrdemManutencao.status",
+                  "OrdemManutencao.dataEntrada",
+                  "OrdemManutencao.details.diasNaOficina",
+                  "Veiculo.placa",
+                  "Oficina.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "ordemDetalhe",
+                "submits": []
+              },
+              "ordemDetalhe": {
+                "reads": [
+                  "OrdemManutencao.numero",
+                  "OrdemManutencao.tipo",
+                  "OrdemManutencao.status",
+                  "OrdemManutencao.dataEntrada",
+                  "OrdemManutencao.dataSaida",
+                  "OrdemManutencao.details.descricao",
+                  "OrdemManutencao.details.kmEntrada",
+                  "OrdemManutencao.details.diasNaOficina",
+                  "OrdemManutencao.details.custo",
+                  "Veiculo.placa",
+                  "Veiculo.modelo",
+                  "Veiculo.details.quilometragemAtual",
+                  "Oficina.details.identification.name",
+                  "PlanoManutencao.descricao",
+                  "PlanoManutencao.details.kmPrevisto",
+                  "PlanoManutencao.details.dataPrevista"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "ordemFormulario": {
+                "reads": [
+                  "Veiculo.placa",
+                  "Veiculo.details.quilometragemAtual",
+                  "Oficina.details.identification.name",
+                  "Oficina.details.identification.status",
+                  "PlanoManutencao.descricao",
+                  "PlanoManutencao.details.kmPrevisto",
+                  "PlanoManutencao.details.vencidoPorKm",
+                  "PlanoManutencao.details.temOrdemAberta",
+                  "OrdemManutencao.status"
+                ],
+                "edits": [
+                  "OrdemManutencao.veiculoId",
+                  "OrdemManutencao.oficinaId",
+                  "OrdemManutencao.tipo",
+                  "OrdemManutencao.planoId",
+                  "OrdemManutencao.dataEntrada",
+                  "OrdemManutencao.details.descricao",
+                  "OrdemManutencao.details.kmEntrada",
+                  "OrdemManutencao.dataSaida",
+                  "OrdemManutencao.details.custo"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "salvarAberturaOrdem",
+                    "write": "OrdemManutencao.create"
+                  },
+                  {
+                    "intentId": "registrarConclusaoOrdem",
+                    "write": "OrdemManutencao.concluir"
+                  }
+                ]
+              },
+              "ordemAcoes": {
+                "reads": [
+                  "OrdemManutencao.status",
+                  "OrdemManutencao.numero"
+                ],
+                "edits": [],
+                "selects": "ordemFormulario",
+                "submits": [
+                  {
+                    "intentId": "abrirOrdemCorretiva",
+                    "write": "OrdemManutencao.create"
+                  },
+                  {
+                    "intentId": "concluirOrdem",
+                    "write": "OrdemManutencao.concluir"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "operationsQueue"
+            },
+            "intent": "No celular, encontrar a ordem de manutenção, conferir há quantos dias o veículo está na oficina e concluir ou abrir ordens em um fluxo vertical fluido, com conteúdo estreito em torno de 390px e utilizável entre 360px e 430px.",
+            "sections": [
+              {
+                "id": "filaOrdens",
+                "priority": "primary",
+                "purpose": "Lista compacta das ordens com busca, para achar a ordem aberta pelo número, placa ou oficina.",
+                "organisms": [
+                  "ordensLista"
+                ]
+              },
+              {
+                "id": "ordemSelecionada",
+                "priority": "main",
+                "purpose": "Ao tocar uma ordem, ver seus dados principais e as ações de concluir ou abrir corretiva logo abaixo.",
+                "organisms": [
+                  "ordemDetalhe",
+                  "ordemAcoes"
+                ]
+              },
+              {
+                "id": "registroOrdem",
+                "priority": "secondary",
+                "purpose": "Formulário em coluna única para abrir a ordem ou registrar saída e custo final.",
+                "organisms": [
+                  "ordemFormulario"
+                ]
+              }
+            ],
+            "organisms": {
+              "ordensLista": {
+                "kind": "list",
+                "text": "Ordens de manutenção por número, veículo, oficina, situação e dias na oficina, em itens empilhados fáceis de tocar.",
+                "intents": []
+              },
+              "ordemDetalhe": {
+                "kind": "detail",
+                "text": "A ordem selecionada: veículo, oficina, motivo, entrada, dias na oficina e custo, em leitura vertical.",
+                "intents": []
+              },
+              "ordemFormulario": {
+                "kind": "form",
+                "text": "Abrir ordem preventiva ou corretiva com veículo, oficina, descrição e data de entrada; na conclusão, registrar data de saída e custo final.",
+                "intents": [
+                  {
+                    "id": "salvarAberturaOrdem",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "registrarConclusaoOrdem",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "ordemAcoes": {
+                "kind": "actions",
+                "text": "Abrir ordem corretiva e concluir a ordem selecionada; atalho para os planos de preventiva vencidos.",
+                "intents": [
+                  {
+                    "id": "abrirOrdemCorretiva",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "concluirOrdem",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "verPlanosVencidos",
+                    "kind": "navigate",
+                    "to": "planos_manutencao"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "ordensLista": [
+                {
+                  "role": "Buscar ordem pelo número, placa ou oficina",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": ""
+                },
+                {
+                  "role": "Filtrar por situação da ordem",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-select-dropdown"
+                },
+                {
+                  "role": "Lista empilhada de ordens",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                }
+              ],
+              "ordemDetalhe": [
+                {
+                  "role": "Ficha da ordem selecionada",
+                  "preferred": "groupviewcard--ml-vertical-card",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                },
+                {
+                  "role": "Dias na oficina em destaque",
+                  "preferred": "groupviewmetric--ml-metric-big-number",
+                  "alternative": "groupviewmetric--ml-metric-card"
+                }
+              ],
+              "ordemFormulario": [
+                {
+                  "role": "Escolher o veículo pela placa",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "Escolher a oficina",
+                  "preferred": "groupselectone--ml-combobox",
+                  "alternative": "groupselectone--ml-select-dropdown"
+                },
+                {
+                  "role": "Tipo da ordem: preventiva ou corretiva",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "Data de entrada e data de saída",
+                  "preferred": "groupenterdate--ml-date-shortcut-picker",
+                  "alternative": "groupenterdate--ml-date-picker"
+                },
+                {
+                  "role": "Descrição do serviço ou do defeito",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Custo final da manutenção",
+                  "preferred": "groupentermoney--ml-enter-money-br",
+                  "alternative": "groupentermoney--ml-currency-input"
+                },
+                {
+                  "role": "Confirmar abertura ou conclusão",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "Confirmação do registro salvo",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ],
+              "ordemAcoes": [
+                {
+                  "role": "Concluir ordem com alternativa de abrir corretiva",
+                  "preferred": "grouptriggeraction--ml-split-button",
+                  "alternative": "grouptriggeraction--ml-button-standard"
+                },
+                {
+                  "role": "Resultado da ação",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": ""
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "ordensLista": {
+                "reads": [
+                  "OrdemManutencao.numero",
+                  "OrdemManutencao.veiculoId",
+                  "OrdemManutencao.oficinaId",
+                  "OrdemManutencao.tipo",
+                  "OrdemManutencao.status",
+                  "OrdemManutencao.dataEntrada",
+                  "OrdemManutencao.details.diasNaOficina",
+                  "Veiculo.placa",
+                  "Oficina.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "ordemDetalhe",
+                "submits": []
+              },
+              "ordemDetalhe": {
+                "reads": [
+                  "OrdemManutencao.numero",
+                  "OrdemManutencao.tipo",
+                  "OrdemManutencao.status",
+                  "OrdemManutencao.dataEntrada",
+                  "OrdemManutencao.dataSaida",
+                  "OrdemManutencao.details.descricao",
+                  "OrdemManutencao.details.kmEntrada",
+                  "OrdemManutencao.details.diasNaOficina",
+                  "OrdemManutencao.details.custo",
+                  "Veiculo.placa",
+                  "Veiculo.modelo",
+                  "Veiculo.details.quilometragemAtual",
+                  "Oficina.details.identification.name",
+                  "PlanoManutencao.descricao",
+                  "PlanoManutencao.details.kmPrevisto",
+                  "PlanoManutencao.details.dataPrevista"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "ordemFormulario": {
+                "reads": [
+                  "Veiculo.placa",
+                  "Veiculo.details.quilometragemAtual",
+                  "Oficina.details.identification.name",
+                  "Oficina.details.identification.status",
+                  "PlanoManutencao.descricao",
+                  "PlanoManutencao.details.kmPrevisto",
+                  "PlanoManutencao.details.vencidoPorKm",
+                  "PlanoManutencao.details.temOrdemAberta",
+                  "OrdemManutencao.status"
+                ],
+                "edits": [
+                  "OrdemManutencao.veiculoId",
+                  "OrdemManutencao.oficinaId",
+                  "OrdemManutencao.tipo",
+                  "OrdemManutencao.planoId",
+                  "OrdemManutencao.dataEntrada",
+                  "OrdemManutencao.details.descricao",
+                  "OrdemManutencao.details.kmEntrada",
+                  "OrdemManutencao.dataSaida",
+                  "OrdemManutencao.details.custo"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "salvarAberturaOrdem",
+                    "write": "OrdemManutencao.create"
+                  },
+                  {
+                    "intentId": "registrarConclusaoOrdem",
+                    "write": "OrdemManutencao.concluir"
+                  }
+                ]
+              },
+              "ordemAcoes": {
+                "reads": [
+                  "OrdemManutencao.status",
+                  "OrdemManutencao.numero"
+                ],
+                "edits": [],
+                "selects": "ordemFormulario",
+                "submits": [
+                  {
+                    "intentId": "abrirOrdemCorretiva",
+                    "write": "OrdemManutencao.create"
+                  },
+                  {
+                    "intentId": "concluirOrdem",
+                    "write": "OrdemManutencao.concluir"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 24,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "D2_PAGE11_WRITE_DUPLICATE: Write OrdemManutencao.create has a submit in ordemFormulario and ordemAcoes. Keep one submit, in the organism that edits OrdemManutencao (ordemFormulario); the actions organism does not repeat it. | D2_PAGE11_WRITE_DUPLICATE: Write OrdemManutencao.concluir has a submit in ordemFormulario and ordemAcoes. Keep one submit, in the organism that edits OrdemManutencao (ordemFormulario); the actions organism does not repeat it. | D2_PAGE11_WRITE_DUPLICATE: Write OrdemManutencao.create has a submit in ordemFormulario and ordemAcoes. Keep one submit, in the organism that edits OrdemManutencao (ordemFormulario); the actions organism does not repeat it. | D2_PAGE11_WRITE_DUPLICATE: Write OrdemManutencao.concluir has a submit in ordemFormulario and ordemAcoes. Keep one submit, in the organism that edits OrdemManutencao (ordemFormulario); the actions organism does not repeat it."
+}

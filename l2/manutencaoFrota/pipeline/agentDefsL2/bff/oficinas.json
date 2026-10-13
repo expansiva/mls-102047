@@ -1,0 +1,631 @@
+{
+  "types": [
+    {
+      "name": "OficinaIdentificacao",
+      "description": "Identificação da oficina no cadastro mestre.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.status",
+          "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.status"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CNPJ' | 'EIN' | 'VAT' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.countryCode"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OficinaEmpresa",
+      "description": "Dados de pessoa jurídica da oficina.",
+      "fields": [
+        {
+          "name": "details.company.companyKind",
+          "type": "'LegalEntity' | 'Branch' | 'Franchise'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.companyKind"
+            ]
+          }
+        },
+        {
+          "name": "details.company.legalName",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.legalName"
+            ]
+          }
+        },
+        {
+          "name": "details.company.tradeName",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.tradeName"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OficinaBase",
+      "description": "Outros nomes, endereço, contatos e observações da oficina.",
+      "fields": [
+        {
+          "name": "details.base.aliases",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.aliases"
+            ]
+          }
+        },
+        {
+          "name": "details.base.addresses",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.addresses"
+            ]
+          }
+        },
+        {
+          "name": "details.base.contacts",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.contacts"
+            ]
+          }
+        },
+        {
+          "name": "details.base.notes",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.notes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OficinaResumoDetalhes",
+      "description": "Detalhes mostrados em cada linha da lista de oficinas.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "OficinaIdentificacao"
+        },
+        {
+          "name": "company",
+          "type": "OficinaEmpresa"
+        }
+      ]
+    },
+    {
+      "name": "OficinaResumo",
+      "description": "Linha da lista de oficinas.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.id"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "OficinaResumoDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "OficinaDetalhes",
+      "description": "Detalhes completos da oficina para o formulário.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "OficinaIdentificacao"
+        },
+        {
+          "name": "company",
+          "type": "OficinaEmpresa"
+        },
+        {
+          "name": "base",
+          "type": "OficinaBase"
+        }
+      ]
+    },
+    {
+      "name": "OficinaFicha",
+      "description": "Oficina completa com id e versão, aberta no formulário e devolvida pelos comandos.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.version"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "OficinaDetalhes"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "listarOficinas",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "busca",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "oficinas",
+          "type": "OficinaResumo[]",
+          "paginated": true
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Lista as oficinas da transportadora para o gestor localizar e escolher qual abrir no formulário; é chamada ao abrir a página e novamente ao buscar ou pedir a próxima página.",
+        "input": "busca: texto opcional comparado ao nome da oficina ou ao número do documento (CNPJ); page e pageSize: página solicitada e tamanho da página.",
+        "processing": "Filtra as oficinas da organização do gestor (escopo organization). Com busca, localiza por nome (locate.byName) ou por documento (locate.byDocument), ignorando pontuação do CNPJ. Ordena por nome. A situação (status) é lida do cadastro mestre, nunca calculada aqui.",
+        "output": "Página { items, page, pageSize, hasMore } de oficinas com id, nome, tipo e número do documento, situação, razão social e nome fantasia, já no formato das linhas da lista."
+      }
+    },
+    {
+      "id": "obterOficina",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "oficina",
+          "type": "OficinaFicha"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega a ficha completa da oficina selecionada na lista para edição no formulário.",
+        "input": "id: identificador da oficina selecionada na lista.",
+        "processing": "Lê a oficina pelo id (read.byId) dentro da organização do gestor e devolve identificação, dados de pessoa jurídica, outros nomes, endereço, contatos e observações. Contatos é um resumo derivado dos vínculos HasContact, apenas lido. Devolve a versão para controle de concorrência na atualização.",
+        "output": "A oficina com id, versão e detalhes, para preencher o formulário."
+      }
+    },
+    {
+      "id": "cadastrarOficina",
+      "kind": "cmd",
+      "when": "cadastrarOficina",
+      "writes": "Oficina.create",
+      "input": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CNPJ' | 'EIN' | 'VAT' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.company.companyKind",
+          "type": "'LegalEntity' | 'Branch' | 'Franchise'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.companyKind"
+            ]
+          }
+        },
+        {
+          "name": "details.company.legalName",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.legalName"
+            ]
+          }
+        },
+        {
+          "name": "details.company.tradeName",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.tradeName"
+            ]
+          }
+        },
+        {
+          "name": "details.base.aliases",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.aliases"
+            ]
+          }
+        },
+        {
+          "name": "details.base.addresses",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.addresses"
+            ]
+          }
+        },
+        {
+          "name": "details.base.notes",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.notes"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "oficina",
+          "type": "OficinaFicha"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Cadastra uma nova oficina da frota (ou vincula uma empresa já existente com o papel de oficina).",
+        "input": "Nome, tipo e número do documento, país, tipo de organização, razão social, nome fantasia, outros nomes, endereço e observações informados no formulário.",
+        "processing": "Antes de criar, procura empresa com o mesmo documento (locate.byDocument) para evitar duplicidade e, se existir, vincula-a (register.createOrAttach). Valida o formato do documento conforme o tipo e exige a razão social. O subtipo é sempre Company; id, versão e situação inicial são definidos pelo motor, nunca recebidos.",
+        "output": "A oficina criada com id, versão e detalhes, para o formulário passar ao modo de atualização sem nova chamada."
+      }
+    },
+    {
+      "id": "atualizarOficina",
+      "kind": "cmd",
+      "when": "atualizarOficina",
+      "writes": "Oficina.update",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.version"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CNPJ' | 'EIN' | 'VAT' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.company.companyKind",
+          "type": "'LegalEntity' | 'Branch' | 'Franchise'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.companyKind"
+            ]
+          }
+        },
+        {
+          "name": "details.company.legalName",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.legalName"
+            ]
+          }
+        },
+        {
+          "name": "details.company.tradeName",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.company.tradeName"
+            ]
+          }
+        },
+        {
+          "name": "details.base.aliases",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.aliases"
+            ]
+          }
+        },
+        {
+          "name": "details.base.addresses",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.addresses"
+            ]
+          }
+        },
+        {
+          "name": "details.base.notes",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.base.notes"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "oficina",
+          "type": "OficinaFicha"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Corrige os dados de uma oficina existente.",
+        "input": "id e version da oficina aberta (concorrência otimista) e os valores editados de nome, documento, país, tipo de organização, razão social, nome fantasia, outros nomes, endereço e observações.",
+        "processing": "Recusa se a versão diverge da gravada. Valida o formato do documento e exige a razão social; ao mudar o documento, verifica duplicidade (locate.byDocument). Altera apenas campos editáveis (edit.platformFields); situação e contatos não são alterados por este comando.",
+        "output": "A oficina atualizada com nova versão e detalhes, para o formulário redesenhar sem nova chamada."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "oficinasList",
+        "reads": "listarOficinas.oficinas"
+      },
+      {
+        "organism": "oficinaForm",
+        "reads": "obterOficina.oficina"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "cadastrarOficina",
+        "refreshes": [
+          "listarOficinas"
+        ]
+      },
+      {
+        "endpoint": "atualizarOficina",
+        "refreshes": [
+          "listarOficinas"
+        ]
+      }
+    ],
+    "selections": [
+      {
+        "organism": "oficinasList",
+        "via": {
+          "query": "obterOficina"
+        }
+      }
+    ],
+    "journeys": [],
+    "updates": [
+      {
+        "endpoint": "listarOficinas",
+        "state": "listarOficinas.oficinas",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "obterOficina",
+        "state": "obterOficina.oficina",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cadastrarOficina",
+        "state": "obterOficina.oficina",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "atualizarOficina",
+        "state": "obterOficina.oficina",
+        "mode": "replace"
+      }
+    ]
+  }
+}

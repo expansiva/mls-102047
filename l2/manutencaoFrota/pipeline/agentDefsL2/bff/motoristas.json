@@ -1,0 +1,536 @@
+{
+  "types": [
+    {
+      "name": "MotoristaResumoIdentification",
+      "description": "Identificação do motorista mostrada na linha da lista.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.status",
+          "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.status"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.updatedAt",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.updatedAt"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MotoristaResumoDetails",
+      "description": "Detalhes do motorista na linha da lista.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "MotoristaResumoIdentification"
+        }
+      ]
+    },
+    {
+      "name": "MotoristaResumo",
+      "description": "Linha da lista de motoristas: nome, CPF, situação e última atualização.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.id"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "MotoristaResumoDetails"
+        }
+      ]
+    },
+    {
+      "name": "MotoristaFichaIdentification",
+      "description": "Identificação editável do motorista no formulário.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CPF'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.status",
+          "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.status"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MotoristaFichaBase",
+      "description": "Dados base do motorista no formulário.",
+      "fields": [
+        {
+          "name": "details.base.aliases",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.base.aliases"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MotoristaFichaPerson",
+      "description": "Dados de pessoa física do motorista no formulário.",
+      "fields": [
+        {
+          "name": "details.person.birthDate",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.person.birthDate"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MotoristaFichaDetails",
+      "description": "Detalhes do motorista exibidos e editados no formulário.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "MotoristaFichaIdentification"
+        },
+        {
+          "name": "base",
+          "type": "MotoristaFichaBase"
+        },
+        {
+          "name": "person",
+          "type": "MotoristaFichaPerson"
+        }
+      ]
+    },
+    {
+      "name": "MotoristaFicha",
+      "description": "Motorista completo para o formulário de cadastro/atualização, com versão para concorrência otimista.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.version"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "MotoristaFichaDetails"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "listarMotoristas",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "search",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "motoristas",
+          "type": "MotoristaResumo[]",
+          "paginated": true
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega, ao abrir a página, os motoristas da transportadora com nome, CPF e situação do cadastro, para o gestor localizar quem precisa ser atualizado.",
+        "input": "search: texto opcional para filtrar por nome ou CPF; page e pageSize: página solicitada e tamanho da página.",
+        "processing": "Lista os motoristas da organização (grant gestorCadastrosMestres), excluindo registros com status Merged; aplica o filtro por nome ou CPF quando informado; ordena por nome e pagina. status e updatedAt são lidos do cadastro mestre, nunca calculados ou gravados aqui.",
+        "output": "Página de motoristas { items, page, pageSize, hasMore } com id, nome, CPF, situação e data da última atualização, já no formato da lista."
+      }
+    },
+    {
+      "id": "obterMotorista",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.id"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "motorista",
+          "type": "MotoristaFicha"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega os dados do motorista escolhido na lista para preencher o formulário de atualização.",
+        "input": "id: mdmId do motorista selecionado na lista.",
+        "processing": "Lê o motorista pelo id (read.byId) dentro da organização e compõe a ficha com identificação, apelidos, data de nascimento e versão.",
+        "output": "Ficha do motorista com id, versão, nome, tipo e número do documento, país, situação, data de nascimento e apelidos; a versão é usada no salvar."
+      }
+    },
+    {
+      "id": "cadastrarMotorista",
+      "kind": "cmd",
+      "when": "cadastrarMotorista",
+      "writes": "Motorista.create",
+      "input": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CPF'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.person.birthDate",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.person.birthDate"
+            ]
+          }
+        },
+        {
+          "name": "details.base.aliases",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.base.aliases"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "motorista",
+          "type": "MotoristaFicha"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Cadastra um novo motorista ou, se a pessoa já existe pelo CPF, anexa o papel de motorista ao registro existente.",
+        "input": "name, docType, docId, countryCode, birthDate (opcional) e aliases digitados no formulário.",
+        "processing": "Localiza pelo CPF (locate.byDocument) para evitar duplicidade e executa register.createOrAttach; valida o formato do documento conforme o país. id, versão, situação e datas de criação/atualização são gerados pela plataforma, não pelo endpoint.",
+        "output": "Ficha do motorista gravado, com id e versão, para o formulário passar a exibir o registro salvo sem nova chamada."
+      }
+    },
+    {
+      "id": "atualizarMotorista",
+      "kind": "cmd",
+      "when": "atualizarMotorista",
+      "writes": "Motorista.update",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.version"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CPF'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.person.birthDate",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.person.birthDate"
+            ]
+          }
+        },
+        {
+          "name": "details.base.aliases",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.base.aliases"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "motorista",
+          "type": "MotoristaFicha"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Corrige os dados do motorista escolhido: nome, CPF, país, data de nascimento e apelidos.",
+        "input": "id e version do motorista carregado (concorrência otimista) e os campos editados no formulário.",
+        "processing": "Recusa a gravação se a versão não for a atual; valida o formato do documento; aplica edit.platformFields. A versão e updatedAt são incrementados/atualizados pela plataforma, não pelo endpoint.",
+        "output": "Ficha atualizada do motorista com a nova versão, para o formulário se redesenhar sem nova chamada."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "motoristasList",
+        "reads": "listarMotoristas.motoristas"
+      },
+      {
+        "organism": "motoristaForm",
+        "reads": "obterMotorista.motorista"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "cadastrarMotorista",
+        "refreshes": [
+          "listarMotoristas"
+        ]
+      },
+      {
+        "endpoint": "atualizarMotorista",
+        "refreshes": [
+          "listarMotoristas"
+        ]
+      }
+    ],
+    "selections": [
+      {
+        "organism": "motoristasList",
+        "via": {
+          "query": "obterMotorista"
+        }
+      }
+    ],
+    "journeys": [],
+    "updates": [
+      {
+        "endpoint": "listarMotoristas",
+        "state": "listarMotoristas.motoristas",
+        "mode": "append"
+      },
+      {
+        "endpoint": "obterMotorista",
+        "state": "obterMotorista.motorista",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cadastrarMotorista",
+        "state": "obterMotorista.motorista",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "atualizarMotorista",
+        "state": "obterMotorista.motorista",
+        "mode": "replace"
+      }
+    ]
+  }
+}

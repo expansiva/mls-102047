@@ -1,0 +1,640 @@
+{
+  "types": [
+    {
+      "name": "VeiculoKmDetalhes",
+      "description": "Detalhes do veículo usados no alerta de preventiva.",
+      "fields": [
+        {
+          "name": "details.quilometragemAtual",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Veiculo.details.quilometragemAtual"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VeiculoAlerta",
+      "description": "Veículo do plano vencido: placa, modelo e quilometragem atual.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Veiculo.id"
+            ]
+          }
+        },
+        {
+          "name": "placa",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Veiculo.placa"
+            ]
+          }
+        },
+        {
+          "name": "modelo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Veiculo.modelo"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "VeiculoKmDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "PlanoVencidoDetalhes",
+      "description": "Situação calculada do vencimento do plano.",
+      "fields": [
+        {
+          "name": "details.kmUltimaPreventiva",
+          "type": "number",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.details.kmUltimaPreventiva"
+            ]
+          }
+        },
+        {
+          "name": "details.dataUltimaPreventiva",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.details.dataUltimaPreventiva"
+            ]
+          }
+        },
+        {
+          "name": "details.kmPrevisto",
+          "type": "number",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.details.kmPrevisto"
+            ]
+          }
+        },
+        {
+          "name": "details.dataPrevista",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.details.dataPrevista"
+            ]
+          }
+        },
+        {
+          "name": "details.vencidoPorKm",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.details.vencidoPorKm"
+            ]
+          }
+        },
+        {
+          "name": "details.vencidoPorTempo",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.details.vencidoPorTempo"
+            ]
+          }
+        },
+        {
+          "name": "details.kmExcedido",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.details.kmExcedido"
+            ]
+          }
+        },
+        {
+          "name": "details.temOrdemAberta",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.details.temOrdemAberta"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PreventivaVencida",
+      "description": "Plano de manutenção vencido por km ou por tempo, com o veículo.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.id"
+            ]
+          }
+        },
+        {
+          "name": "descricao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.descricao"
+            ]
+          }
+        },
+        {
+          "name": "veiculoId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PlanoManutencao.veiculoId"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "PlanoVencidoDetalhes"
+        },
+        {
+          "name": "veiculo",
+          "type": "VeiculoAlerta"
+        }
+      ]
+    },
+    {
+      "name": "ResumoPreventivas",
+      "description": "Contadores das preventivas vencidas, calculados no servidor.",
+      "fields": [
+        {
+          "name": "totalVencidas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PlanoManutencao.details.vencidoPorKm",
+              "PlanoManutencao.details.vencidoPorTempo"
+            ]
+          }
+        },
+        {
+          "name": "vencidasPorKm",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PlanoManutencao.details.vencidoPorKm"
+            ]
+          }
+        },
+        {
+          "name": "vencidasPorTempo",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PlanoManutencao.details.vencidoPorTempo"
+            ]
+          }
+        },
+        {
+          "name": "semOrdemAberta",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PlanoManutencao.details.vencidoPorKm",
+              "PlanoManutencao.details.vencidoPorTempo",
+              "PlanoManutencao.details.temOrdemAberta"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VeiculoPlaca",
+      "description": "Identificação do veículo pela placa.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Veiculo.id"
+            ]
+          }
+        },
+        {
+          "name": "placa",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Veiculo.placa"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OficinaIdentificacao",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OficinaDetalhes",
+      "description": "",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "OficinaIdentificacao"
+        }
+      ]
+    },
+    {
+      "name": "OficinaNome",
+      "description": "Oficina da ordem pelo nome do cadastro mestre.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Oficina.id"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "OficinaDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "OrdemAndamentoDetalhes",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.diasNaOficina",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdemManutencao.details.diasNaOficina"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OrdemEmAndamento",
+      "description": "Ordem de manutenção aberta com veículo, oficina e dias na oficina.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdemManutencao.id"
+            ]
+          }
+        },
+        {
+          "name": "numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdemManutencao.numero"
+            ]
+          }
+        },
+        {
+          "name": "veiculoId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdemManutencao.veiculoId"
+            ]
+          }
+        },
+        {
+          "name": "oficinaId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdemManutencao.oficinaId"
+            ]
+          }
+        },
+        {
+          "name": "tipo",
+          "type": "'preventive' | 'corrective'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdemManutencao.tipo"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'open' | 'completed'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdemManutencao.status"
+            ]
+          }
+        },
+        {
+          "name": "dataEntrada",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdemManutencao.dataEntrada"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "OrdemAndamentoDetalhes"
+        },
+        {
+          "name": "veiculo",
+          "type": "VeiculoPlaca"
+        },
+        {
+          "name": "oficina",
+          "type": "OficinaNome"
+        }
+      ]
+    },
+    {
+      "name": "MotoristaIdentificacao",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MotoristaDetalhes",
+      "description": "",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "MotoristaIdentificacao"
+        }
+      ]
+    },
+    {
+      "name": "MotoristaNome",
+      "description": "",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Motorista.id"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "MotoristaDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "AbastecimentoValores",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.litros",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.litros"
+            ]
+          }
+        },
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.precoPorLitro",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.details.precoPorLitro"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AbastecimentoRecente",
+      "description": "Abastecimento recente com veículo, motorista e preço por litro.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.id"
+            ]
+          }
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.data"
+            ]
+          }
+        },
+        {
+          "name": "veiculoId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.veiculoId"
+            ]
+          }
+        },
+        {
+          "name": "motoristaId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Abastecimento.motoristaId"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "AbastecimentoValores"
+        },
+        {
+          "name": "veiculo",
+          "type": "VeiculoPlaca"
+        },
+        {
+          "name": "motorista",
+          "type": "MotoristaNome"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "carregarPainelFrota",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "resumoPreventivas",
+          "type": "ResumoPreventivas"
+        },
+        {
+          "name": "preventivasVencidas",
+          "type": "PreventivaVencida[]"
+        },
+        {
+          "name": "ordensEmAndamento",
+          "type": "OrdemEmAndamento[]"
+        },
+        {
+          "name": "abastecimentosRecentes",
+          "type": "AbastecimentoRecente[]"
+        }
+      ],
+      "rules": [
+        "avisoPreventivaVencidaKm",
+        "planoVencimentoCalculado",
+        "precoPorLitroCalculado"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega em uma única chamada tudo o que o painel da frota mostra ao abrir: os contadores e a lista das preventivas vencidas, as ordens em andamento e os abastecimentos recentes com preço por litro.",
+        "input": "Sem parâmetros; o escopo é a organização do gestor autenticado (grant gestorFrota e gestorCadastrosMestres).",
+        "processing": "Preventivas: lê os planos de manutenção da organização com seus veículos (listByForeignKey por veiculoId, em lote) e as ordens abertas; calcula kmUltimaPreventiva, dataUltimaPreventiva, kmPrevisto e dataPrevista conforme planoVencimentoCalculado (última preventiva concluída ou referência + intervalo em km/meses); vencidoPorKm quando a quilometragem atual passa do km previsto (avisoPreventivaVencidaKm), vencidoPorTempo quando hoje passa da data prevista, kmExcedido = quilometragem atual − km previsto (mínimo zero), temOrdemAberta quando há ordem do plano sem data de saída. Todos são derivados em tempo de leitura, nunca gravados. Filtra apenas os planos vencidos por km ou por tempo e ordena primeiro os sem ordem aberta, depois por kmExcedido decrescente e data prevista mais antiga. Os contadores (total, por km, por tempo, sem ordem aberta) são calculados no servidor. Ordens: filtra status = open, junta placa do veículo e nome da oficina do cadastro mestre (read.mdmRecord), calcula diasNaOficina de dataEntrada até hoje e ordena por diasNaOficina decrescente. Abastecimentos: últimos 30 dias, no máximo 20, ordenados por data decrescente, com placa e nome do motorista; precoPorLitro = valor ÷ litros (precoPorLitroCalculado).",
+        "output": "resumoPreventivas com os números do topo do alerta; preventivasVencidas já filtrada e ordenada para destacar as que pedem ação; ordensEmAndamento ordenada pelos veículos parados há mais tempo; abastecimentosRecentes com o preço por litro para acompanhar o custo do combustível. Listas limitadas ao que o painel exibe, sem paginação."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "preventivasVencidas",
+        "reads": "carregarPainelFrota.resumoPreventivas"
+      },
+      {
+        "organism": "preventivasVencidas",
+        "reads": "carregarPainelFrota.preventivasVencidas"
+      },
+      {
+        "organism": "ordensEAbastecimentos",
+        "reads": "carregarPainelFrota.ordensEmAndamento"
+      },
+      {
+        "organism": "ordensEAbastecimentos",
+        "reads": "carregarPainelFrota.abastecimentosRecentes"
+      }
+    ],
+    "commands": [],
+    "selections": [],
+    "journeys": [
+      {
+        "step": "acompanharPreventivasVencidas/listarVencidos",
+        "organisms": [
+          "preventivasVencidas"
+        ],
+        "endpoints": [
+          "carregarPainelFrota"
+        ]
+      },
+      {
+        "step": "acompanharPreventivasVencidas/verPlanoVencido",
+        "organisms": [
+          "preventivasVencidas"
+        ],
+        "endpoints": [
+          "carregarPainelFrota"
+        ],
+        "continuesIn": "planos_manutencao"
+      }
+    ],
+    "updates": []
+  }
+}
