@@ -7,7 +7,7 @@ export const comprasEntityContatoFornecedor = {
   "moduleName": "compras",
   "entityId": "ContatoFornecedor",
   "title": "Contato do fornecedor",
-  "description": "Canal de contato (telefone, e-mail) do fornecedor, registrado como canal próprio e vinculado por HasContact.",
+  "description": "Telefone ou e-mail do fornecedor, mantido como canal de contato do cadastro mestre e vinculado por HasContact.",
   "displayField": "details.identification.name",
   "relationships": {
     "fornecedor": {
@@ -16,21 +16,21 @@ export const comprasEntityContatoFornecedor = {
       "via": "HasContact",
       "cardinality": "N:1",
       "title": "Fornecedor do contato",
-      "description": "Fornecedor ao qual este canal de contato está vinculado por HasContact.",
+      "description": "Fornecedor ao qual o canal de contato pertence, vinculado por HasContact.",
       "direction": "to",
       "role": "HasContact"
     }
   },
   "capabilities": {
-    "read.byId": "Lê o canal de contato pelo mdmId para exibir o telefone ou e-mail na ficha do fornecedor e no pedido de compra; usado pelo comprador e pelo gerente de compras.",
-    "locate.byContact": "Localiza o canal pelo telefone ou e-mail antes de cadastrar, evitando duplicar o contato; usado pelo comprador.",
-    "locate.byName": "Busca canais de contato pelo nome digitado; usado pelo comprador.",
-    "register.createOrAttach": "Cria o canal quando não existe e marca com o papel compras.ContatoFornecedor; usado pelo comprador ao cadastrar o fornecedor.",
-    "edit.platformFields": "Corrige o tipo, o valor ou o nome do canal de contato; usado pelo comprador.",
-    "inactivate": "Retira de uso um telefone ou e-mail que o fornecedor deixou de usar, sem apagá-lo; usado pelo comprador.",
-    "link": "Vincula o canal ao fornecedor por HasContact; usado pelo comprador.",
+    "read.byId": "Lê o canal de contato pelo id para exibi-lo na ficha do fornecedor e no pedido de compra; usado pelo comprador e pelo gerente de compras.",
+    "locate.byContact": "Encontra o fornecedor dono de um telefone ou e-mail recebido; usado pelo comprador ao receber contato de um fornecedor.",
+    "locate.byName": "Procura canais de contato pelo nome digitado; usado pelo comprador.",
+    "register.createOrAttach": "Cria o canal de contato quando ainda não existe e o marca com o papel compras.ContatoFornecedor; usado pelo comprador ao cadastrar o fornecedor.",
+    "edit.platformFields": "Corrige o tipo, o valor e as observações do canal; usado pelo comprador.",
+    "inactivate": "Inativa um telefone ou e-mail que o fornecedor deixou de usar, sem apagá-lo, e permite reativar; usado pelo comprador.",
+    "link": "Vincula o canal ao fornecedor por HasContact; usado pelo comprador no cadastro do fornecedor.",
     "unlink": "Encerra o vínculo do canal com o fornecedor mantendo o histórico; usado pelo comprador.",
-    "listLinks": "Mostra a qual fornecedor o canal pertence; usado pelo comprador e pelo gerente de compras.",
+    "listLinks": "Mostra a qual fornecedor o canal está vinculado; usado na ficha do fornecedor pelo comprador e pelo gerente de compras.",
     "comment": "Registra observações sobre o contato, como melhor horário para ligar; usado pelo comprador.",
     "audit": "Mostra quem alterou o canal de contato e quando; usado pelo gerente de compras."
   },
@@ -38,8 +38,8 @@ export const comprasEntityContatoFornecedor = {
     "rule-foreign-namespace-refused",
     "rule-identity-never-in-namespace",
     "rule-contact-value-unique-per-type",
-    "rule-delete-blocked-by-relationships",
-    "rule-document-shape-validated"
+    "rule-document-shape-validated",
+    "rule-delete-blocked-by-relationships"
   ],
   "kind": "role",
   "subtype": "ContactChannel",
@@ -81,7 +81,7 @@ export const comprasEntityContatoFornecedor = {
                     "title": "Canal de contato"
                   }
                 ],
-                "description": "Sempre ContactChannel: o contato do fornecedor é um canal próprio.",
+                "description": "Sempre canal de contato (ContactChannel).",
                 "title": "Subtipo"
               },
               "name": {
@@ -98,25 +98,13 @@ export const comprasEntityContatoFornecedor = {
                 "indexed": true,
                 "derived": true,
                 "values": [
-                  {
-                    "value": "Active",
-                    "title": "Ativo"
-                  },
-                  {
-                    "value": "Inactive",
-                    "title": "Inativo"
-                  },
-                  {
-                    "value": "Merged",
-                    "title": "Mesclado"
-                  },
-                  {
-                    "value": "Blocked",
-                    "title": "Bloqueado"
-                  }
+                  "Active",
+                  "Inactive",
+                  "Merged",
+                  "Blocked"
                 ],
                 "title": "Situação",
-                "description": "Situação do canal no cadastro mestre; um contato inativo não é usado para enviar pedidos."
+                "description": "Situação do canal no cadastro mestre; inativo deixa de ser usado pelo comprador."
               },
               "countryCode": {
                 "type": "string",
@@ -125,16 +113,8 @@ export const comprasEntityContatoFornecedor = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "País do canal (ISO 3166-1 alfa-2), normalmente BR.",
+                "description": "País do canal de contato (ISO 3166-1 alfa-2), normalmente BR.",
                 "title": "País"
-              },
-              "tags": {
-                "type": "string",
-                "required": true,
-                "collection": true,
-                "derived": true,
-                "description": "Papéis de módulo do registro; inclui compras.ContatoFornecedor.",
-                "title": "Papéis"
               },
               "createdAt": {
                 "type": "string",
@@ -142,7 +122,7 @@ export const comprasEntityContatoFornecedor = {
                 "indexed": true,
                 "derived": true,
                 "title": "Criado em",
-                "description": "Quando o canal foi cadastrado."
+                "description": "Momento em que o canal foi registrado."
               },
               "updatedAt": {
                 "type": "string",
@@ -150,7 +130,7 @@ export const comprasEntityContatoFornecedor = {
                 "indexed": true,
                 "derived": true,
                 "title": "Atualizado em",
-                "description": "Última alteração do canal."
+                "description": "Momento da última alteração do canal."
               }
             },
             "description": "Identificação do canal de contato do fornecedor no cadastro mestre."
@@ -163,17 +143,10 @@ export const comprasEntityContatoFornecedor = {
                 "type": "string",
                 "maxLength": 1000,
                 "title": "Observações",
-                "description": "Observação sobre o uso do canal, como horário de atendimento do fornecedor."
-              },
-              "relationshipRefs": {
-                "type": "object",
-                "required": true,
-                "derived": true,
-                "description": "Chaves compactas recalculadas pela plataforma, incluindo o fornecedor ao qual o contato pertence.",
-                "title": "Vínculos"
+                "description": "Observação sobre o canal, como horário de atendimento ou setor do fornecedor."
               }
             },
-            "description": "Dados comuns do registro mestre usados pelo módulo."
+            "description": "Dados comuns do registro mestre usados pelo módulo compras."
           },
           "contactChannel": {
             "type": "object",
@@ -194,14 +167,10 @@ export const comprasEntityContatoFornecedor = {
                   {
                     "value": "WhatsApp",
                     "title": "WhatsApp"
-                  },
-                  {
-                    "value": "Other",
-                    "title": "Outro"
                   }
                 ],
                 "title": "Tipo de contato",
-                "description": "Tipo do canal usado pelo comprador para falar com o fornecedor."
+                "description": "Tipo do canal de contato do fornecedor: telefone, e-mail ou WhatsApp."
               },
               "value": {
                 "type": "string",
@@ -213,7 +182,7 @@ export const comprasEntityContatoFornecedor = {
                 "type": "boolean",
                 "required": true,
                 "title": "Verificado",
-                "description": "Indica se o canal já foi confirmado como do fornecedor."
+                "description": "Indica se o canal já foi confirmado como válido."
               },
               "verifiedAt": {
                 "type": "timestamp",
@@ -221,7 +190,7 @@ export const comprasEntityContatoFornecedor = {
                 "description": "Quando o canal foi confirmado."
               }
             },
-            "description": "O telefone ou e-mail do fornecedor como registro próprio."
+            "description": "O telefone ou e-mail do fornecedor usado pelo comprador para negociar e enviar pedidos."
           },
           "general": {
             "type": "object",

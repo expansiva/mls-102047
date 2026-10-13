@@ -4,8 +4,8 @@
     "moduleName": "compras",
     "entityId": "ItemPedido",
     "title": "Item do pedido",
-    "description": "Produto do pedido de compra com quantidade e preço; a quantidade já recebida é derivada dos recebimentos.",
-    "displayField": "produtoId",
+    "description": "Produto incluído no pedido de compra com quantidade e preço; a quantidade pendente de recebimento é derivada das entradas.",
+    "displayField": "numeroItem",
     "relationships": {
       "pedidoCompra": {
         "relationshipId": "itemPedidoPedido",
@@ -13,7 +13,7 @@
         "via": "ItemPedido.pedidoCompraId",
         "cardinality": "N:1",
         "title": "Pedido de compra",
-        "description": "Cada item pertence a um pedido de compra, que tem um ou mais itens.",
+        "description": "Pedido ao qual o item pertence.",
         "mode": "fk",
         "required": true
       },
@@ -23,30 +23,50 @@
         "via": "ItemPedido.produtoId",
         "cardinality": "N:1",
         "title": "Produto",
-        "description": "Cada item do pedido é de um produto.",
+        "description": "Produto comprado no item.",
         "mode": "fk",
+        "required": true
+      },
+      "produtoFornecido": {
+        "relationshipId": "itemPedidoProdutoFornecido",
+        "to": "ProdutoFornecido",
+        "via": "ItemPedido.produtoFornecidoId",
+        "cardinality": "N:1",
+        "title": "Preço combinado",
+        "description": "Preço combinado que sugeriu o preço do item.",
+        "mode": "fk"
+      },
+      "entradasEstoque": {
+        "relationshipId": "entradaItemPedido",
+        "to": "EntradaEstoque",
+        "via": "EntradaEstoque.itemPedidoId",
+        "cardinality": "1:N",
+        "title": "Entradas de estoque",
+        "description": "Entradas de estoque que registram o recebimento deste item.",
+        "mode": "fk",
+        "direction": "to",
         "required": true
       }
     },
     "capabilities": {
-      "read.byId": "Lê um item do pedido pelo id, usado na tela do pedido e ao registrar o recebimento.",
-      "listByForeignKey": "Lista os itens de um pedido de compra (ou de vários pedidos de uma vez) por pedidoCompraId, para o comprador revisar o pedido, o gerente decidir a aprovação e o almoxarife conferir o recebimento.",
-      "locate.byColumn": "Lista itens filtrados por produto (produtoId), para o comprador ver o histórico de compras de um produto.",
-      "count": "Conta os itens de um pedido, exibido no cabeçalho do pedido e usado para impedir o envio de pedido sem itens.",
-      "create": "O comprador inclui um produto no pedido em rascunho com quantidade e preço, sugerido pelo preço combinado com o fornecedor.",
-      "update": "O comprador altera quantidade, preço ou observação do item enquanto o pedido está em rascunho.",
-      "delete": "O comprador remove um item do pedido enquanto o pedido está em rascunho.",
-      "uniqueKey": "O motor recusa o mesmo produto duas vezes no mesmo pedido (pedidoCompraId + produtoId); a quantidade é ajustada no item existente.",
-      "transaction": "Grava os itens junto com o pedido e o valor total em uma única operação, tudo ou nada.",
-      "read.mdmRecord": "Lê no cadastro mestre o nome, SKU e unidade de medida do produto de cada item para exibir no pedido e no recebimento.",
-      "comment": "O comprador ou o almoxarife deixa uma nota sobre o item, como divergência de especificação na entrega."
+      "read.byId": "Lê um item do pedido pelo id, usado ao conferir o item no recebimento e na revisão do pedido.",
+      "locate.byColumn": "Lista itens filtrando por pedido, produto ou preço combinado de origem, ordenados pelo número do item; usado pelo comprador e pelo gerente.",
+      "listByForeignKey": "Lista os itens de um pedido de compra (ou de vários pedidos de uma vez) na revisão, aprovação e recebimento.",
+      "count": "Conta os itens de um pedido para exibir o total de linhas na lista e na aprovação.",
+      "create": "Inclui um item no pedido em rascunho com produto, quantidade e preço, usado pelo comprador.",
+      "update": "Altera quantidade, preço ou observação do item enquanto o pedido ainda está em rascunho, usado pelo comprador.",
+      "delete": "Remove um item do pedido em rascunho, usado pelo comprador antes do envio.",
+      "uniqueKey": "Impede dois itens com o mesmo número dentro do mesmo pedido, pela chave pedido de compra mais número do item.",
+      "transaction": "Grava o pedido e seus itens de forma atômica ao abrir ou revisar o pedido de compra.",
+      "read.mdmRecord": "Lê o registro mestre do produto e do fornecedor apontados pelo item para exibir nome, SKU e unidade de medida.",
+      "comment": "Permite registrar uma nota sobre o item, como acordo de entrega, usada pelo comprador e pelo almoxarife.",
+      "compras.sugerirPrecoCombinado": "Sugere o preço unitário do item a partir do preço combinado do produto fornecido pelo fornecedor do pedido, usado pelo comprador ao incluir o item."
     },
     "rules": [
-      "itemSomenteEmRascunho",
-      "produtoUnicoPorPedido",
-      "quantidadePositiva",
-      "produtoDeveSerFornecidoPeloFornecedor",
-      "recebimentoNaoExcedePedido"
+      "itemPedidoQuantidadePositiva",
+      "itemPedidoProdutoDoFornecedor",
+      "itemPedidoSomenteEmRascunho",
+      "precoCombinadoSugerePreco"
     ],
     "kind": "entity",
     "class": "supporting",
@@ -77,7 +97,7 @@
             "PedidoCompra"
           ],
           "title": "Pedido de compra",
-          "description": "Pedido de compra ao qual este item pertence."
+          "description": "Pedido de compra ao qual o item pertence."
         },
         "produtoId": {
           "type": "record",
@@ -87,39 +107,49 @@
             "Produto"
           ],
           "title": "Produto",
-          "description": "Produto comprado neste item; nome, SKU e unidade vêm do cadastro mestre do produto."
+          "description": "Produto comprado neste item."
+        },
+        "produtoFornecidoId": {
+          "type": "record",
+          "indexed": true,
+          "to": [
+            "ProdutoFornecido"
+          ],
+          "title": "Preço combinado de origem",
+          "description": "Produto fornecido cujo preço combinado sugeriu o preço do item; vazio quando o preço foi digitado livremente."
+        },
+        "numeroItem": {
+          "type": "integer",
+          "required": true,
+          "indexed": true,
+          "title": "Número do item",
+          "description": "Posição sequencial do item dentro do pedido, usada para identificá-lo na tela e no recebimento.",
+          "min": 1
         },
         "details": {
           "type": "object",
           "required": true,
-          "title": "Dados do item",
+          "title": "Detalhes do item",
           "description": "Quantidade, preço e observações do item do pedido.",
           "fields": {
             "quantidade": {
               "type": "number",
               "required": true,
-              "title": "Quantidade",
-              "description": "Quantidade do produto pedida ao fornecedor, na unidade de medida do produto.",
-              "min": 0.0001
+              "title": "Quantidade pedida",
+              "description": "Quantidade do produto que o comprador está pedindo ao fornecedor; deve ser maior que zero.",
+              "min": 0
             },
             "precoUnitario": {
               "type": "money",
               "required": true,
               "title": "Preço unitário",
-              "description": "Preço por unidade acertado neste pedido; sugerido a partir do preço combinado com o fornecedor para o produto, podendo ser ajustado pelo comprador.",
-              "min": 0
-            },
-            "precoCombinadoReferencia": {
-              "type": "money",
-              "title": "Preço combinado de referência",
-              "description": "Preço combinado com o fornecedor vigente no momento em que o item foi incluído, guardado para comparar com o preço praticado no pedido.",
+              "description": "Preço unitário negociado para este item, sugerido pelo preço combinado do fornecedor e editável pelo comprador.",
               "min": 0
             },
             "observacao": {
               "type": "text",
               "title": "Observação",
-              "description": "Instruções ou especificações do item para o fornecedor.",
-              "maxLength": 1000
+              "description": "Observação livre do comprador sobre o item."
             },
             "valorTotalItem": {
               "type": "money",
@@ -131,25 +161,19 @@
               "type": "number",
               "derived": true,
               "title": "Quantidade recebida",
-              "description": "Soma das quantidades deste item registradas nos recebimentos do pedido pelo almoxarife."
+              "description": "Soma das quantidades das entradas de estoque registradas para este item do pedido."
             },
-            "saldoAReceber": {
+            "quantidadePendente": {
               "type": "number",
               "derived": true,
-              "title": "Saldo a receber",
-              "description": "Quantidade pedida menos a quantidade já recebida deste item, nunca menor que zero."
+              "title": "Quantidade pendente",
+              "description": "Quantidade pedida menos a quantidade recebida, nunca abaixo de zero."
             },
-            "totalmenteRecebido": {
+            "recebidoTotalmente": {
               "type": "boolean",
               "derived": true,
-              "title": "Totalmente recebido",
-              "description": "Verdadeiro quando a quantidade já recebida nos recebimentos alcança a quantidade pedida do item."
-            },
-            "precoDivergeDoCombinado": {
-              "type": "boolean",
-              "derived": true,
-              "title": "Preço diverge do combinado",
-              "description": "Verdadeiro quando o preço unitário do item é diferente do preço combinado com o fornecedor para este produto."
+              "title": "Recebido totalmente",
+              "description": "Verdadeiro quando a quantidade recebida alcança ou supera a quantidade pedida do item."
             }
           }
         }
@@ -158,7 +182,7 @@
     "uniqueKeys": [
       [
         "pedidoCompraId",
-        "produtoId"
+        "numeroItem"
       ]
     ]
   },
@@ -181,17 +205,12 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "ItemPedido",
-      "detail": "record.fields.details.fields.saldoAReceber.derived (derived[])"
+      "detail": "record.fields.details.fields.quantidadePendente.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
       "entityId": "ItemPedido",
-      "detail": "record.fields.details.fields.totalmenteRecebido.derived (derived[])"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "ItemPedido",
-      "detail": "record.fields.details.fields.precoDivergeDoCombinado.derived (derived[])"
+      "detail": "record.fields.details.fields.recebidoTotalmente.derived (derived[])"
     }
   ]
 }

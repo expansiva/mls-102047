@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const comprasOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "compras",
-  "businessDomain": "Compras: cadastro de fornecedores e produtos fornecidos com preço combinado, pedidos de compra com aprovação acima de valor limite, recebimento total ou parcial com entrada no estoque e painel de acompanhamento.",
+  "businessDomain": "Compras: cadastro de fornecedores e preços combinados, pedidos de compra com aprovação acima de valor limite, recebimento total ou parcial com entrada no estoque e painel gerencial.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "compras",
@@ -53,6 +53,11 @@ export const comprasOntologyIndex = {
       "class": "event"
     },
     {
+      "entityId": "EntradaEstoque",
+      "kind": "entity",
+      "class": "event"
+    },
+    {
       "entityId": "PainelCompras",
       "kind": "entity",
       "class": "supporting"
@@ -66,8 +71,18 @@ export const comprasOntologyIndex = {
       "type": "oneToMany",
       "required": false,
       "mode": "mdmRelationship",
-      "description": "O fornecedor possui canais de contato (telefone, e-mail) vinculados.",
+      "description": "Canais de contato (telefone, e-mail) do fornecedor.",
       "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "fornecedorFornecePoduto",
+      "from": "Fornecedor",
+      "to": "Produto",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "O fornecedor fornece o produto, registrado no cadastro mestre.",
+      "catalogType": "SuppliesProduct"
     },
     {
       "relationshipId": "produtoFornecidoFornecedor",
@@ -76,7 +91,7 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada produto fornecido pertence a um fornecedor.",
+      "description": "Fornecedor que fornece o produto com o preço combinado.",
       "field": "ProdutoFornecido.fornecedorId"
     },
     {
@@ -86,7 +101,7 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada produto fornecido aponta para o produto do catálogo.",
+      "description": "Produto fornecido pelo fornecedor.",
       "field": "ProdutoFornecido.produtoId"
     },
     {
@@ -96,20 +111,8 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Comprador responsável pelo cadastro e pela negociação do preço combinado.",
+      "description": "Comprador que cadastrou e mantém o preço combinado.",
       "field": "ProdutoFornecido.compradorId"
-    },
-    {
-      "relationshipId": "fornecedorProdutos",
-      "from": "Fornecedor",
-      "to": "Produto",
-      "type": "manyToMany",
-      "required": false,
-      "mode": "throughTable",
-      "description": "Produtos que o fornecedor fornece, obtidos pelos produtos fornecidos cadastrados.",
-      "through": "ProdutoFornecido",
-      "path": "Fornecedor <- ProdutoFornecido.fornecedorId -> ProdutoFornecido.produtoId -> Produto",
-      "derived": true
     },
     {
       "relationshipId": "pedidoFornecedor",
@@ -118,7 +121,7 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada pedido de compra é feito para um fornecedor.",
+      "description": "Fornecedor para o qual o pedido de compra é feito.",
       "field": "PedidoCompra.fornecedorId"
     },
     {
@@ -128,7 +131,7 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Comprador que abriu e enviou o pedido.",
+      "description": "Comprador que abriu o pedido.",
       "field": "PedidoCompra.compradorId"
     },
     {
@@ -138,7 +141,7 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item pertence a um pedido de compra, que tem um ou mais itens.",
+      "description": "Pedido de compra ao qual o item pertence.",
       "field": "ItemPedido.pedidoCompraId"
     },
     {
@@ -148,8 +151,18 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item do pedido é de um produto.",
+      "description": "Produto comprado no item.",
       "field": "ItemPedido.produtoId"
+    },
+    {
+      "relationshipId": "itemPedidoProdutoFornecido",
+      "from": "ItemPedido",
+      "to": "ProdutoFornecido",
+      "type": "manyToOne",
+      "required": false,
+      "mode": "fk",
+      "description": "Preço combinado que sugeriu o preço do item.",
+      "field": "ItemPedido.produtoFornecidoId"
     },
     {
       "relationshipId": "recebimentoPedido",
@@ -158,8 +171,50 @@ export const comprasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento registra a chegada, total ou parcial, de um pedido de compra.",
+      "description": "Pedido de compra cuja chegada foi registrada.",
       "field": "Recebimento.pedidoCompraId"
+    },
+    {
+      "relationshipId": "entradaRecebimento",
+      "from": "EntradaEstoque",
+      "to": "Recebimento",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Recebimento que gerou a entrada no estoque.",
+      "field": "EntradaEstoque.recebimentoId"
+    },
+    {
+      "relationshipId": "entradaItemPedido",
+      "from": "EntradaEstoque",
+      "to": "ItemPedido",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Item do pedido cuja quantidade foi recebida.",
+      "field": "EntradaEstoque.itemPedidoId"
+    },
+    {
+      "relationshipId": "entradaProduto",
+      "from": "EntradaEstoque",
+      "to": "Produto",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Produto que teve entrada no estoque.",
+      "field": "EntradaEstoque.produtoId"
+    },
+    {
+      "relationshipId": "fornecedorPedidosPainel",
+      "from": "PainelCompras",
+      "to": "Fornecedor",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "Total comprado no mês agrupado por fornecedor, apurado pelos pedidos de compra.",
+      "through": "PedidoCompra",
+      "path": "PainelCompras -> PedidoCompra.fornecedorId -> Fornecedor",
+      "derived": true
     }
   ]
 } as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;

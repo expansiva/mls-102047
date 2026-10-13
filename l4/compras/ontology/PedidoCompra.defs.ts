@@ -7,7 +7,7 @@ export const comprasEntityPedidoCompra = {
   "moduleName": "compras",
   "entityId": "PedidoCompra",
   "title": "Pedido de compra",
-  "description": "Pedido aberto pelo comprador para um fornecedor, enviado, aprovado ou rejeitado pelo gerente quando acima do valor limite, e recebido total ou parcialmente.",
+  "description": "Pedido aberto pelo comprador para um fornecedor, enviado, aprovado ou rejeitado pelo gerente quando acima do limite, e recebido total ou parcialmente.",
   "displayField": "numero",
   "relationships": {
     "fornecedor": {
@@ -16,6 +16,7 @@ export const comprasEntityPedidoCompra = {
       "via": "PedidoCompra.fornecedorId",
       "cardinality": "N:1",
       "title": "Fornecedor do pedido",
+      "description": "Fornecedor para o qual o pedido de compra é feito.",
       "mode": "fk",
       "required": true
     },
@@ -25,6 +26,7 @@ export const comprasEntityPedidoCompra = {
       "via": "PedidoCompra.compradorId",
       "cardinality": "N:1",
       "title": "Comprador do pedido",
+      "description": "Comprador que abriu o pedido.",
       "mode": "fk",
       "required": true
     },
@@ -34,6 +36,7 @@ export const comprasEntityPedidoCompra = {
       "via": "ItemPedido.pedidoCompraId",
       "cardinality": "1:N",
       "title": "Itens do pedido",
+      "description": "Produtos, quantidades e preços do pedido.",
       "mode": "fk",
       "direction": "to",
       "required": true
@@ -44,35 +47,37 @@ export const comprasEntityPedidoCompra = {
       "via": "Recebimento.pedidoCompraId",
       "cardinality": "1:N",
       "title": "Recebimentos do pedido",
+      "description": "Chegadas totais ou parciais registradas pelo almoxarife.",
       "mode": "fk",
       "direction": "to",
       "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Lê um pedido de compra pelo id ao abrir a tela do pedido; usado por comprador, gerente de compras e almoxarife.",
-    "locate.byColumn": "Lista pedidos filtrando por situação, fornecedor, comprador, data do pedido e previsão de entrega, como pendentes de aprovação, em aberto e atrasados; usado pelo gerente e pelo almoxarife.",
-    "locate.byText": "Busca pedidos pelo número digitado na caixa de pesquisa; usado pelo almoxarife ao localizar o pedido que chegou.",
-    "count": "Conta pedidos por situação e filtro para os indicadores de em aberto e atrasados do painel do gerente.",
-    "listByForeignKey": "Lista os pedidos de um fornecedor ou de um comprador, e hidrata itens e recebimentos de um pedido; usado na tela do pedido.",
-    "create": "O comprador abre um novo pedido em rascunho para um fornecedor.",
-    "update": "O comprador altera observações e previsão de entrega enquanto o pedido é rascunho.",
-    "transition": "Move o pedido entre rascunho, aguardando aprovação, enviado, rejeitado e recebido; comprador envia, gerente aprova ou rejeita e o recebimento move o resto.",
-    "uniqueKey": "Garante que o número do pedido nunca se repete, por índice único sobre a coluna numero.",
-    "transaction": "Grava o recebimento, a mudança de situação do pedido e a entrada no estoque juntos, tudo ou nada.",
-    "read.mdmRecord": "Lê o cadastro mestre do fornecedor (razão social, CNPJ, contato) e do comprador para mostrar no pedido.",
-    "sequence.next": "Emite o número sequencial do pedido de compra ao abri-lo, pela sequência do módulo compras.",
-    "comment": "Registra notas sobre o pedido, como justificativa de aprovação ou combinados com o fornecedor; usado pelo comprador e pelo gerente.",
-    "attach.document": "Anexa ao pedido a nota fiscal, a confirmação do fornecedor ou o canhoto de entrega; usado pelo comprador e pelo almoxarife.",
-    "compras.calcularTotal": "Calcula o valor total do pedido a partir dos itens e o compara com o valor limite para decidir se exige aprovação do gerente."
+    "read.byId": "Abre o pedido pelo id para o comprador revisar, o gerente analisar e o almoxarife conferir itens e situação.",
+    "locate.byColumn": "Lista pedidos por situação, fornecedor, comprador, data de abertura ou entrega prevista: pendentes de aprovação para o gerente, aprovados para o almoxarife, em aberto e atrasados no painel.",
+    "locate.byText": "Busca o pedido pelo número digitado, usada pelo almoxarife ao localizar o pedido que chegou.",
+    "count": "Conta pedidos aguardando aprovação, em aberto e atrasados para os indicadores do gerente de compras.",
+    "listByForeignKey": "Lista os pedidos de um fornecedor ou de um comprador na ficha do cadastro.",
+    "create": "O comprador abre o pedido em rascunho para o fornecedor escolhido.",
+    "update": "O comprador ajusta entrega prevista, condição de pagamento e observações enquanto o pedido está em rascunho.",
+    "transition": "Move o pedido: o comprador envia, o gerente aprova ou rejeita acima do limite e o almoxarife marca recebido parcial ou total ao registrar o recebimento.",
+    "uniqueKey": "Garante que o número do pedido não se repete.",
+    "transaction": "Grava juntos o recebimento, a entrada no estoque e a nova situação do pedido, tudo ou nada.",
+    "read.mdmRecord": "Lê razão social, CNPJ e contatos do fornecedor e o nome do comprador para exibir no pedido e nas listas.",
+    "sequence.next": "Emite o número do pedido de compra na abertura, pela sequência compras.PedidoCompra.",
+    "attach.document": "Anexa ao pedido a proposta do fornecedor ou o pedido assinado, pelo comprador.",
+    "comment": "Permite ao comprador, ao gerente e ao almoxarife deixar notas sobre o pedido.",
+    "statusHistory.read": "Mostra quando o pedido foi enviado, aprovado, rejeitado e recebido, e por quem.",
+    "audit": "Registra quem alterou o pedido e quando, para consulta do administrador."
   },
   "rules": [
-    "pedidoExigeItem",
-    "aprovacaoAcimaLimite",
+    "valorLimiteAprovacao",
+    "pedidoExigeItens",
     "rejeicaoExigeMotivo",
-    "recebimentoSomenteEnviado",
-    "recebimentoNaoExcedePedido",
-    "numeroPedidoSequencial"
+    "recebimentoSomenteLiberado",
+    "edicaoSomenteRascunho",
+    "numeroPedidoUnico"
   ],
   "kind": "entity",
   "class": "core",
@@ -100,9 +105,9 @@ export const comprasEntityPedidoCompra = {
         "required": true,
         "unique": true,
         "indexed": true,
+        "derived": true,
         "title": "Número do pedido",
-        "description": "Número do pedido citado pelas pessoas, emitido pela sequência numérica do módulo ao abrir o pedido.",
-        "maxLength": 30
+        "description": "Número do pedido de compra emitido pela sequência do módulo na abertura; é o número que o comprador, o gerente e o almoxarife citam e pelo qual localizam o pedido."
       },
       "fornecedorId": {
         "type": "record",
@@ -112,7 +117,7 @@ export const comprasEntityPedidoCompra = {
           "Fornecedor"
         ],
         "title": "Fornecedor",
-        "description": "Fornecedor (empresa) para o qual o pedido é feito. Nome, CNPJ e contato são lidos do cadastro mestre."
+        "description": "Fornecedor para o qual o pedido é feito; razão social, CNPJ e contatos são lidos do cadastro mestre."
       },
       "compradorId": {
         "type": "record",
@@ -122,7 +127,7 @@ export const comprasEntityPedidoCompra = {
           "Comprador"
         ],
         "title": "Comprador",
-        "description": "Comprador que abriu e enviou o pedido."
+        "description": "Comprador que abriu o pedido."
       },
       "status": {
         "type": "enum",
@@ -132,17 +137,17 @@ export const comprasEntityPedidoCompra = {
           {
             "value": "rascunho",
             "title": "Rascunho",
-            "description": "Pedido em montagem pelo comprador."
-          },
-          {
-            "value": "aguardandoAprovacao",
-            "title": "Aguardando aprovação",
-            "description": "Enviado pelo comprador; aguarda decisão do gerente quando acima do valor limite."
+            "description": "Aberto pelo comprador, ainda recebendo itens."
           },
           {
             "value": "enviado",
-            "title": "Enviado ao fornecedor",
-            "description": "Liberado (abaixo do limite ou aprovado) e enviado ao fornecedor; aguarda a chegada."
+            "title": "Enviado",
+            "description": "Enviado pelo comprador; abaixo do limite segue ao fornecedor, acima aguarda decisão do gerente."
+          },
+          {
+            "value": "aprovado",
+            "title": "Aprovado",
+            "description": "Aprovado pelo gerente de compras e liberado ao fornecedor."
           },
           {
             "value": "rejeitado",
@@ -150,62 +155,73 @@ export const comprasEntityPedidoCompra = {
             "description": "Rejeitado pelo gerente de compras, com motivo."
           },
           {
-            "value": "recebidoParcialmente",
+            "value": "recebidoParcial",
             "title": "Recebido parcialmente",
-            "description": "Parte das quantidades já chegou e deu entrada no estoque."
+            "description": "Parte dos itens já foi recebida pelo almoxarife."
           },
           {
             "value": "recebido",
             "title": "Recebido",
-            "description": "Todas as quantidades pedidas foram recebidas."
+            "description": "Todos os itens foram recebidos."
           }
         ],
         "title": "Situação",
-        "description": "Situação do pedido no ciclo de compra: de rascunho até recebido."
+        "description": "Etapa do pedido no ciclo de compra."
       },
-      "dataPedido": {
-        "type": "date",
+      "dataEmissao": {
+        "type": "timestamp",
         "required": true,
         "indexed": true,
-        "title": "Data do pedido",
-        "description": "Data em que o pedido foi aberto; base do total comprado por fornecedor no mês."
+        "derived": true,
+        "title": "Data de abertura",
+        "description": "Momento em que o pedido foi aberto; ordena as listas e situa o pedido no mês."
       },
-      "previsaoEntrega": {
+      "dataPrevistaEntrega": {
         "type": "date",
         "indexed": true,
-        "title": "Previsão de entrega",
-        "description": "Data prevista para a chegada; pedido em aberto após essa data é considerado atrasado."
+        "title": "Entrega prevista",
+        "description": "Data combinada com o fornecedor para a chegada do pedido; serve para identificar pedidos atrasados."
       },
       "details": {
         "type": "object",
         "required": true,
         "title": "Detalhes",
-        "description": "Dados complementares do pedido.",
+        "description": "Dados do pedido que não são filtrados.",
         "fields": {
           "observacoes": {
             "type": "text",
             "title": "Observações",
-            "description": "Observações do comprador para o fornecedor ou para a aprovação."
+            "description": "Instruções ao fornecedor ou anotações do comprador sobre o pedido.",
+            "maxLength": 2000
           },
-          "enviadoEm": {
+          "condicaoPagamento": {
+            "type": "string",
+            "title": "Condição de pagamento",
+            "description": "Condição de pagamento combinada com o fornecedor para este pedido.",
+            "maxLength": 200
+          },
+          "dataEnvio": {
             "type": "timestamp",
-            "title": "Enviado em",
+            "derived": true,
+            "title": "Data de envio",
             "description": "Momento em que o comprador enviou o pedido."
           },
           "decisao": {
             "type": "object",
             "title": "Decisão do gerente",
-            "description": "Registro da decisão do gerente de compras sobre pedido acima do limite.",
+            "description": "Registro da aprovação ou rejeição do pedido acima do valor limite.",
             "fields": {
               "decididoEm": {
                 "type": "timestamp",
+                "derived": true,
                 "title": "Decidido em",
                 "description": "Momento da aprovação ou rejeição."
               },
               "motivoRejeicao": {
                 "type": "text",
                 "title": "Motivo da rejeição",
-                "description": "Motivo informado pelo gerente ao rejeitar; obrigatório na rejeição."
+                "description": "Motivo informado pelo gerente de compras ao rejeitar o pedido.",
+                "maxLength": 1000
               }
             }
           },
@@ -213,37 +229,37 @@ export const comprasEntityPedidoCompra = {
             "type": "money",
             "derived": true,
             "title": "Valor total",
-            "description": "Soma, sobre os itens do pedido, de quantidade pedida vezes preço unitário."
+            "description": "Soma de quantidade vezes preço de todos os itens do pedido."
           },
-          "acimaDoLimite": {
+          "aguardandoAprovacao": {
             "type": "boolean",
             "derived": true,
-            "title": "Acima do valor limite",
-            "description": "Valor total do pedido maior que o valor limite de aprovação do gerente de compras."
+            "title": "Aguardando aprovação",
+            "description": "Pedido enviado cujo valor total está acima do valor limite e que o gerente de compras ainda não aprovou nem rejeitou."
+          },
+          "liberadoAoFornecedor": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Liberado ao fornecedor",
+            "description": "Pedido aprovado pelo gerente, ou enviado com valor total até o valor limite, e portanto pronto para ser recebido."
           },
           "emAberto": {
             "type": "boolean",
             "derived": true,
             "title": "Em aberto",
-            "description": "Pedido enviado ou recebido apenas parcialmente, ou seja, ainda com quantidade a receber."
+            "description": "Pedido enviado, aprovado ou recebido parcialmente, que ainda não chegou por inteiro nem foi rejeitado."
           },
           "atrasado": {
             "type": "boolean",
             "derived": true,
             "title": "Atrasado",
-            "description": "Pedido em aberto com previsão de entrega anterior a hoje."
-          },
-          "quantidadeRecebida": {
-            "type": "number",
-            "derived": true,
-            "title": "Quantidade recebida",
-            "description": "Soma das quantidades recebidas de todos os itens nos recebimentos do pedido."
+            "description": "Pedido em aberto cuja entrega prevista é anterior a hoje."
           },
           "quantidadePendente": {
             "type": "number",
             "derived": true,
             "title": "Quantidade pendente",
-            "description": "Quantidade total pedida nos itens menos a quantidade já recebida nos recebimentos."
+            "description": "Soma das quantidades pedidas nos itens menos o que já foi registrado nos recebimentos deste pedido."
           }
         }
       }
@@ -260,11 +276,11 @@ export const comprasEntityPedidoCompra = {
       "reachedBy": "actor"
     },
     {
-      "state": "aguardandoAprovacao",
+      "state": "enviado",
       "reachedBy": "actor"
     },
     {
-      "state": "enviado",
+      "state": "aprovado",
       "reachedBy": "actor"
     },
     {
@@ -272,12 +288,12 @@ export const comprasEntityPedidoCompra = {
       "reachedBy": "actor"
     },
     {
-      "state": "recebidoParcialmente",
-      "reachedBy": "command"
+      "state": "recebidoParcial",
+      "reachedBy": "actor"
     },
     {
       "state": "recebido",
-      "reachedBy": "command"
+      "reachedBy": "actor"
     }
   ],
   "transitions": [
@@ -286,63 +302,49 @@ export const comprasEntityPedidoCompra = {
       "from": [
         "rascunho"
       ],
-      "to": "aguardandoAprovacao",
+      "to": "enviado",
       "by": [
         "comprador"
       ],
-      "description": "O comprador envia o pedido com ao menos um item; ele segue para a decisão de liberação conforme o valor limite.",
+      "description": "O comprador envia o pedido; até o valor limite ele segue ao fornecedor, acima aguarda a decisão do gerente de compras.",
       "payload": [
-        "details.observacoes",
-        "previsaoEntrega"
+        "dataPrevistaEntrega"
       ],
       "ruleRefs": [
-        "pedidoExigeItem",
-        "aprovacaoAcimaLimite"
-      ]
-    },
-    {
-      "transitionId": "liberarAbaixoLimite",
-      "from": [
-        "aguardandoAprovacao"
-      ],
-      "to": "enviado",
-      "by": [],
-      "description": "Pedido cujo valor total não passa do limite é liberado automaticamente ao fornecedor, sem decisão do gerente.",
-      "payload": [],
-      "ruleRefs": [
-        "aprovacaoAcimaLimite"
+        "pedidoExigeItens",
+        "valorLimiteAprovacao"
       ]
     },
     {
       "transitionId": "aprovar",
       "from": [
-        "aguardandoAprovacao"
+        "enviado"
       ],
-      "to": "enviado",
+      "to": "aprovado",
       "by": [
         "gerenteCompras"
       ],
-      "description": "O gerente aprova o pedido acima do limite e ele segue ao fornecedor.",
+      "description": "O gerente de compras aprova o pedido acima do valor limite, liberando-o ao fornecedor.",
       "payload": [],
       "ruleRefs": [
-        "aprovacaoAcimaLimite"
+        "valorLimiteAprovacao"
       ]
     },
     {
       "transitionId": "rejeitar",
       "from": [
-        "aguardandoAprovacao"
+        "enviado"
       ],
       "to": "rejeitado",
       "by": [
         "gerenteCompras"
       ],
-      "description": "O gerente rejeita o pedido acima do limite, informando o motivo.",
+      "description": "O gerente de compras rejeita o pedido acima do valor limite, informando o motivo.",
       "payload": [
         "details.decisao.motivoRejeicao"
       ],
       "ruleRefs": [
-        "aprovacaoAcimaLimite",
+        "valorLimiteAprovacao",
         "rejeicaoExigeMotivo"
       ]
     },
@@ -350,30 +352,34 @@ export const comprasEntityPedidoCompra = {
       "transitionId": "receberParcial",
       "from": [
         "enviado",
-        "recebidoParcialmente"
+        "aprovado",
+        "recebidoParcial"
       ],
-      "to": "recebidoParcialmente",
-      "by": [],
-      "description": "Um recebimento registrado pelo almoxarife deixa quantidade pendente; o pedido passa a recebido parcialmente.",
+      "to": "recebidoParcial",
+      "by": [
+        "almoxarife"
+      ],
+      "description": "Ao registrar um recebimento que não completa todos os itens, o pedido fica recebido parcialmente.",
       "payload": [],
       "ruleRefs": [
-        "recebimentoSomenteEnviado",
-        "recebimentoNaoExcedePedido"
+        "recebimentoSomenteLiberado"
       ]
     },
     {
       "transitionId": "receberTotal",
       "from": [
         "enviado",
-        "recebidoParcialmente"
+        "aprovado",
+        "recebidoParcial"
       ],
       "to": "recebido",
-      "by": [],
-      "description": "Um recebimento registrado completa as quantidades pedidas de todos os itens; o pedido passa a recebido.",
+      "by": [
+        "almoxarife"
+      ],
+      "description": "Ao registrar o recebimento que completa todos os itens, o pedido fica recebido.",
       "payload": [],
       "ruleRefs": [
-        "recebimentoSomenteEnviado",
-        "recebimentoNaoExcedePedido"
+        "recebimentoSomenteLiberado"
       ]
     }
   ]

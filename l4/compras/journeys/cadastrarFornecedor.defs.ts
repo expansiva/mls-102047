@@ -7,36 +7,52 @@ export const cadastrarFornecedorJourney = {
   "journeyId": "cadastrarFornecedor",
   "business": {
     "actorRef": "comprador",
-    "title": "Cadastrar fornecedor",
-    "goal": "Registrar uma empresa fornecedora com CNPJ, razão social e contato para poder comprar dela.",
+    "title": "Cadastrar fornecedor e produtos fornecidos",
+    "goal": "Registrar um fornecedor e os produtos que ele fornece com o preço combinado.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "buscarFornecedor",
+        "stepId": "localizarFornecedor",
         "kind": "locate",
         "entity": "Fornecedor",
-        "title": "Buscar fornecedor por CNPJ",
-        "description": "O comprador procura pelo CNPJ se a empresa já existe como fornecedor."
+        "title": "Buscar fornecedor existente",
+        "description": "O comprador busca o fornecedor por CNPJ ou razão social para evitar duplicidade."
       },
       {
-        "stepId": "registrarFornecedor",
+        "stepId": "cadastrarFornecedor",
         "kind": "act",
         "entity": "Fornecedor",
         "effect": "create",
-        "title": "Registrar fornecedor",
-        "description": "O comprador informa CNPJ, razão social e contato e salva o fornecedor."
+        "title": "Cadastrar fornecedor",
+        "description": "O comprador registra a empresa com CNPJ, razão social e contato como fornecedor."
+      },
+      {
+        "stepId": "incluirProdutoFornecido",
+        "kind": "act",
+        "entity": "ProdutoFornecido",
+        "effect": "create",
+        "title": "Incluir produto fornecido",
+        "description": "O comprador associa um produto ao fornecedor informando o preço combinado."
+      },
+      {
+        "stepId": "conferirProdutosFornecidos",
+        "kind": "inspect",
+        "entity": "ProdutoFornecido",
+        "title": "Conferir produtos do fornecedor",
+        "description": "O comprador revisa a lista de produtos e preços combinados do fornecedor."
       }
     ],
     "outcome": {
-      "statement": "A empresa passa a ser fornecedor da organização.",
+      "statement": "O fornecedor está cadastrado com os produtos que fornece e seus preços combinados.",
       "evidence": [
-        "O fornecedor aparece na lista de fornecedores com CNPJ e razão social."
+        "Fornecedor aparece na busca por CNPJ",
+        "Lista de produtos fornecidos exibe o preço combinado de cada produto"
       ]
     }
   },
-  "businessHash": "sha256:ba4350cff58e1cdc5fe1f703f4c2bf1bf2f400b800eb94ca7000d3995f200af3"
+  "businessHash": "sha256:ec463ef2ecc26ce4a16fcb9a3069e852134794380864be588866dc4ca17779b9"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CadastrarFornecedorJourneyType = typeof cadastrarFornecedorJourney;

@@ -14,35 +14,36 @@ export const acompanharPainelJourney = {
     },
     "steps": [
       {
-        "stepId": "verPainel",
+        "stepId": "abrirPainel",
         "kind": "inspect",
         "entity": "PainelCompras",
-        "title": "Ver painel de compras",
-        "description": "O gerente vê a quantidade de pedidos em aberto, atrasados e o total comprado por fornecedor no mês."
+        "title": "Abrir painel de compras",
+        "description": "O gerente vê os indicadores de pedidos em aberto, atrasados e total comprado por fornecedor no mês."
       },
       {
         "stepId": "listarAtrasados",
         "kind": "locate",
         "entity": "PedidoCompra",
         "title": "Listar pedidos atrasados",
-        "description": "O gerente abre os pedidos em aberto ou atrasados a partir do painel."
+        "description": "O gerente filtra os pedidos em aberto ou atrasados."
       },
       {
-        "stepId": "verPedido",
+        "stepId": "detalharPedido",
         "kind": "inspect",
         "entity": "PedidoCompra",
-        "title": "Ver detalhes do pedido",
-        "description": "O gerente consulta fornecedor, itens, previsão de entrega e recebimentos."
+        "title": "Detalhar pedido",
+        "description": "O gerente abre um pedido para ver itens, fornecedor e recebimentos."
       }
     ],
     "outcome": {
-      "statement": "O gerente conhece a situação das compras do mês.",
+      "statement": "O gerente conhece a situação dos pedidos e o volume comprado por fornecedor no mês.",
       "evidence": [
-        "O painel exibe pedidos em aberto, atrasados e total por fornecedor no mês."
+        "Contagem de pedidos em aberto e atrasados exibida",
+        "Total comprado no mês por fornecedor exibido"
       ]
     }
   },
-  "businessHash": "sha256:e17f32b0a20883a0e4a6c183739cd8c7e4eabb33c5e074134df8e77afc0fc3d2"
+  "businessHash": "sha256:ba482c6dcb5050deac9986961d3d337b72207b17804f3caf82eb9b9472613b3e"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharPainelJourneyType = typeof acompanharPainelJourney;

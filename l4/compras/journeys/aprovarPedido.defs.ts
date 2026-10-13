@@ -17,15 +17,15 @@ export const aprovarPedidoJourney = {
         "stepId": "localizarPendentes",
         "kind": "locate",
         "entity": "PedidoCompra",
-        "title": "Ver pedidos aguardando aprovação",
-        "description": "O gerente abre a lista de pedidos acima do limite aguardando aprovação."
+        "title": "Ver pedidos pendentes",
+        "description": "O gerente abre a lista de pedidos aguardando aprovação."
       },
       {
         "stepId": "analisarPedido",
         "kind": "inspect",
         "entity": "PedidoCompra",
         "title": "Analisar pedido",
-        "description": "O gerente confere fornecedor, itens, quantidades, preços e valor total."
+        "description": "O gerente examina fornecedor, itens, preços e valor total do pedido."
       },
       {
         "stepId": "decidirPedido",
@@ -41,7 +41,7 @@ export const aprovarPedidoJourney = {
         "effect": "transition",
         "transitionRef": "aprovar",
         "title": "Aprovar pedido",
-        "description": "O pedido aprovado segue para o fornecedor."
+        "description": "O gerente aprova o pedido, que fica liberado ao fornecedor."
       },
       {
         "stepId": "rejeitar",
@@ -54,13 +54,14 @@ export const aprovarPedidoJourney = {
       }
     ],
     "outcome": {
-      "statement": "O pedido foi aprovado ou rejeitado.",
+      "statement": "O pedido acima do limite está aprovado ou rejeitado.",
       "evidence": [
-        "O pedido aparece com situação aprovado ou rejeitado e data da decisão."
+        "Situação do pedido aprovado ou rejeitado",
+        "Pedido sai da lista de pendentes de aprovação"
       ]
     }
   },
-  "businessHash": "sha256:5a541218aa38f186a6ab1c6340d18382192233fd1f81db003eb87e20581690a0"
+  "businessHash": "sha256:186a121333c83e52ec02e633ffc1cafddb4d3997e7b672078d8598b7cd947b30"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AprovarPedidoJourneyType = typeof aprovarPedidoJourney;

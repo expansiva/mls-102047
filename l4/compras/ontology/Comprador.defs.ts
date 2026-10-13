@@ -7,7 +7,7 @@ export const comprasEntityComprador = {
   "moduleName": "compras",
   "entityId": "Comprador",
   "title": "Comprador",
-  "description": "Pessoa que atua como comprador; responsável pelos produtos fornecidos e pedidos de compra que cadastra.",
+  "description": "Pessoa que atua como comprador; seus pedidos e produtos fornecidos cadastrados formam o seu escopo pessoal.",
   "displayField": "details.identification.name",
   "relationships": {
     "produtosFornecidos": {
@@ -15,8 +15,8 @@ export const comprasEntityComprador = {
       "to": "ProdutoFornecido",
       "via": "ProdutoFornecido.compradorId",
       "cardinality": "1:N",
-      "title": "Produtos fornecidos cadastrados",
-      "description": "Produtos fornecidos com preço combinado que este comprador cadastrou e negociou.",
+      "title": "Produtos fornecidos mantidos",
+      "description": "Produtos fornecidos com preço combinado que este comprador cadastrou e mantém.",
       "mode": "fk",
       "direction": "to",
       "required": true
@@ -26,36 +26,37 @@ export const comprasEntityComprador = {
       "to": "PedidoCompra",
       "via": "PedidoCompra.compradorId",
       "cardinality": "1:N",
-      "title": "Pedidos de compra",
-      "description": "Pedidos de compra que este comprador abriu e enviou.",
+      "title": "Pedidos de compra abertos",
+      "description": "Pedidos de compra abertos por este comprador; formam o seu escopo pessoal.",
       "mode": "fk",
       "direction": "to",
       "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Lê o comprador pelo id para exibir seu nome nos pedidos de compra e produtos fornecidos; usado por todas as telas do módulo.",
-    "locate.byName": "Localiza compradores pelo nome para filtrar pedidos e produtos fornecidos; usado pelo gerente de compras.",
-    "locate.byDocument": "Localiza a pessoa pelo CPF antes de registrá-la como comprador, evitando duplicidade; usado por quem mantém o cadastro.",
-    "register.createOrAttach": "Cria a pessoa quando não existe e anexa o papel compras.Comprador, inclusive automaticamente quando ela abre seu primeiro pedido.",
-    "edit.platformFields": "Corrige nome, documento e consentimento do comprador; usado por quem mantém o cadastro.",
-    "inactivate": "Inativa o comprador que deixou a função sem apagar seus pedidos e produtos fornecidos; pode ser reativado.",
-    "link.contact": "Vincula telefone ou e-mail do comprador como canal de contato (HasContact), para o fornecedor e o gerente falarem com ele.",
-    "listLinks": "Mostra os vínculos do comprador com validade e papel na ficha da pessoa.",
-    "locate.byLogin": "Resolve o comprador da sessão pelo e-mail de login, para que seus pedidos fiquem associados a ele.",
-    "invite.login": "Dá acesso ao sistema a uma pessoa cadastrada como comprador; a plataforma emite o convite.",
+    "read.byId": "Lê o comprador pelo id para exibir seu nome nos pedidos de compra e nos produtos fornecidos; usado por todas as telas do módulo.",
+    "locate.byName": "Localiza o comprador pelo nome no índice de pessoas; usado pelo gerente de compras ao filtrar pedidos por comprador.",
+    "locate.byDocument": "Localiza a pessoa pelo CPF antes de cadastrá-la como compradora, evitando duplicidade; usado por quem mantém o cadastro de compradores.",
+    "register.createOrAttach": "Cria a pessoa quando não existe e anexa o papel compras.Comprador; usado por quem mantém o cadastro de compradores.",
+    "edit.platformFields": "Altera nome, documento e consentimento do comprador no registro mestre; usado por quem mantém o cadastro.",
+    "inactivate": "Inativa o comprador que deixou a função, mantendo seus pedidos e produtos fornecidos; pode ser reativado pelo gerente de compras.",
+    "link.contact": "Vincula telefone ou e-mail do comprador como canal de contato por HasContact; usado por quem mantém o cadastro.",
+    "listLinks": "Lista os vínculos do comprador, como contatos e equipe, na ficha da pessoa; usado pelo gerente de compras.",
+    "locate.byLogin": "Resolve o comprador da sessão a partir do e-mail de login, base do escopo 'meus pedidos' e 'meus produtos fornecidos'; usado pelo resolvedor de sessão.",
+    "invite.login": "Dá acesso de login ao comprador para que abra e acompanhe seus próprios pedidos; executado pela plataforma ao cadastrar.",
     "comment": "Registra observações sobre o comprador na sua ficha; usado pelo gerente de compras.",
-    "tag": "Marca o comprador com rótulos livres do módulo compras, como categoria de compra que atende.",
-    "statusHistory.read": "Mostra quando o comprador foi ativado ou inativado e por quem.",
-    "audit": "Informa quem alterou o cadastro do comprador e quando, para auditoria."
+    "statusHistory.read": "Mostra quando o comprador foi inativado ou reativado e por quem; consultado pelo gerente de compras.",
+    "audit": "Mostra quem alterou o cadastro do comprador e quando; consultado por um administrador."
   },
   "rules": [
     "rule-foreign-namespace-refused",
     "rule-identity-never-in-namespace",
     "rule-document-shape-validated",
+    "rule-delete-blocked-by-relationships",
     "rule-person-privacy-consent-required-br-eu",
-    "rule-delete-blocked-by-relationships"
+    "compradorInativoNaoAbrePedido"
   ],
+  "writer": "crud",
   "kind": "role",
   "subtype": "Person",
   "roleTag": "compras.Comprador",
@@ -96,7 +97,7 @@ export const comprasEntityComprador = {
                     "title": "Pessoa"
                   }
                 ],
-                "description": "Sempre pessoa física: o comprador é uma pessoa.",
+                "description": "Sempre pessoa física para o comprador.",
                 "title": "Subtipo"
               },
               "name": {
@@ -104,7 +105,7 @@ export const comprasEntityComprador = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 200,
-                "description": "Nome do comprador, como aparece nos pedidos de compra e nos produtos fornecidos que ele cadastra.",
+                "description": "Nome do comprador, exibido nos pedidos de compra que abriu e nos produtos fornecidos que mantém.",
                 "title": "Nome"
               },
               "status": {
@@ -131,7 +132,7 @@ export const comprasEntityComprador = {
                   }
                 ],
                 "title": "Situação",
-                "description": "Situação do registro mestre; um comprador inativo deixa de abrir pedidos."
+                "description": "Situação do cadastro do comprador; comprador inativo não abre novos pedidos de compra."
               },
               "docType": {
                 "type": "enum",
@@ -140,17 +141,28 @@ export const comprasEntityComprador = {
                   {
                     "value": "CPF",
                     "title": "CPF"
+                  },
+                  {
+                    "value": "Passport",
+                    "title": "Passaporte"
+                  },
+                  {
+                    "value": "NationalId",
+                    "title": "Documento de identidade"
+                  },
+                  {
+                    "value": "Other",
+                    "title": "Outro"
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Documento nacional do comprador, usado para evitar cadastro duplicado."
+                "description": "Tipo do documento nacional do comprador."
               },
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do CPF do comprador.",
-                "title": "Número do documento",
-                "pattern": "^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$"
+                "description": "Número do documento nacional do comprador, usado para evitar cadastro duplicado.",
+                "title": "Número do documento"
               },
               "countryCode": {
                 "type": "string",
@@ -159,7 +171,7 @@ export const comprasEntityComprador = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "País do documento e das regras legais aplicáveis ao comprador (BR).",
+                "description": "País (ISO 3166-1 alfa-2) a que pertencem o documento e as regras legais do comprador.",
                 "title": "País"
               },
               "tags": {
@@ -167,34 +179,57 @@ export const comprasEntityComprador = {
                 "required": true,
                 "collection": true,
                 "derived": true,
-                "description": "Papéis de módulo da pessoa; inclui compras.Comprador.",
+                "description": "Papéis de módulo do registro; inclui compras.Comprador.",
                 "title": "Papéis"
+              },
+              "createdAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Criado em",
+                "description": "Momento em que o registro da pessoa foi criado."
+              },
+              "updatedAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Atualizado em",
+                "description": "Momento da última alteração do registro da pessoa."
               }
             },
-            "description": "Dados de identificação da pessoa comprador, mantidos pela organização."
+            "description": "Identificação da pessoa que atua como comprador."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {
+              "aliases": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "description": "Apelidos ou nomes pelos quais o comprador também é conhecido.",
+                "title": "Outros nomes"
+              },
               "contacts": {
                 "type": "object",
                 "required": true,
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Resumo dos canais de contato do comprador (telefone, e-mail), mantidos como registros vinculados.",
+                "description": "Resumo dos canais de contato do comprador (telefone, e-mail) vinculados por HasContact.",
                 "title": "Contatos"
               },
               "relationshipRefs": {
                 "type": "object",
                 "required": true,
                 "derived": true,
-                "description": "Chaves compactas dos vínculos da pessoa, recalculadas pela plataforma.",
+                "description": "Chaves compactas dos vínculos do comprador, recalculadas pela plataforma.",
                 "title": "Vínculos"
               }
             },
-            "description": "Dados comuns a todo registro mestre."
+            "description": "Dados comuns do registro da pessoa."
           },
           "person": {
             "type": "object",
@@ -213,7 +248,7 @@ export const comprasEntityComprador = {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Campos promovidos pela organização; o módulo compras apenas lê."
+            "description": "Campos promovidos pela organização; lidos pelo módulo, não declarados aqui."
           },
           "compras": {
             "type": "object",

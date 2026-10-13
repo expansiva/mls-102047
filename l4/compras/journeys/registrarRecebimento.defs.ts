@@ -7,7 +7,7 @@ export const registrarRecebimentoJourney = {
   "journeyId": "registrarRecebimento",
   "business": {
     "actorRef": "almoxarife",
-    "title": "Registrar recebimento do pedido",
+    "title": "Registrar recebimento de pedido",
     "goal": "Registrar a chegada total ou parcial de um pedido e dar entrada no estoque.",
     "entry": {
       "mode": "contextOrLookup"
@@ -17,34 +17,42 @@ export const registrarRecebimentoJourney = {
         "stepId": "localizarPedido",
         "kind": "locate",
         "entity": "PedidoCompra",
-        "title": "Localizar pedido a receber",
-        "description": "O almoxarife encontra o pedido enviado ou aprovado que chegou."
+        "title": "Localizar pedido",
+        "description": "O almoxarife localiza o pedido aprovado pelo número ou fornecedor."
       },
       {
-        "stepId": "conferirPedido",
+        "stepId": "conferirItens",
         "kind": "inspect",
         "entity": "PedidoCompra",
-        "title": "Conferir itens pendentes",
-        "description": "O almoxarife confere as quantidades pedidas e ainda não recebidas."
+        "title": "Conferir itens pedidos",
+        "description": "O almoxarife confere os itens e quantidades pendentes de recebimento."
       },
       {
-        "stepId": "registrarEntrada",
+        "stepId": "registrarRecebimento",
         "kind": "act",
         "entity": "Recebimento",
         "effect": "create",
-        "title": "Registrar quantidades recebidas",
-        "description": "O almoxarife informa a quantidade recebida de cada item; isso dá entrada no estoque dos produtos e marca o pedido como recebido total ou parcialmente."
+        "title": "Registrar recebimento",
+        "description": "O almoxarife informa as quantidades recebidas de cada item, o que dá entrada no estoque dos produtos e marca o pedido como recebido parcial ou totalmente."
+      },
+      {
+        "stepId": "verSituacao",
+        "kind": "inspect",
+        "entity": "PedidoCompra",
+        "title": "Ver situação do pedido",
+        "description": "O almoxarife confere se o pedido ficou recebido total ou parcialmente."
       }
     ],
     "outcome": {
-      "statement": "O recebimento foi registrado e o estoque dos produtos aumentou.",
+      "statement": "O recebimento está registrado e o estoque dos produtos recebidos foi acrescido.",
       "evidence": [
-        "O pedido aparece como recebido ou parcialmente recebido.",
-        "O estoque dos produtos recebidos mostra a nova quantidade."
+        "Recebimento listado no pedido com quantidades recebidas",
+        "Pedido exibe situação recebido parcial ou total",
+        "Estoque dos produtos aumentado nas quantidades recebidas"
       ]
     }
   },
-  "businessHash": "sha256:3aed431c54547ff2b2f50e3b62f90dd76bdaa9f81340b01e32a3926d5de0d99e"
+  "businessHash": "sha256:d68f33ffb7caee955d1247b1d73afc4f112a844b41295bcaa02205d6aabd13be"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarRecebimentoJourneyType = typeof registrarRecebimentoJourney;

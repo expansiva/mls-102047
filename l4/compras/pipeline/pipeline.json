@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:30:58.019Z",
+      "updatedAt": "2026-10-13T00:43:56.839Z",
       "artifactPaths": [
         "l4/compras/module.defs.ts"
       ],
@@ -20,7 +20,7 @@
           "kind": "internal",
           "origin": "named",
           "title": "Comprador",
-          "description": "Cadastra fornecedores e os produtos que cada um fornece com preço combinado, abre pedidos de compra com produtos, quantidades e preços e os envia ao fornecedor."
+          "description": "Cadastra fornecedores e os produtos que cada um fornece com preço combinado, abre pedidos de compra com itens, quantidades e preços e os envia."
         },
         {
           "actorId": "gerenteCompras",
@@ -40,10 +40,10 @@
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:31:25.579Z",
+      "updatedAt": "2026-10-13T00:44:24.231Z",
       "artifactPaths": [
         "l4/compras/journeys/cadastrarFornecedor.defs.ts",
-        "l4/compras/journeys/cadastrarProdutoFornecido.defs.ts",
+        "l4/compras/journeys/atualizarPrecoCombinado.defs.ts",
         "l4/compras/journeys/abrirEnviarPedido.defs.ts",
         "l4/compras/journeys/aprovarPedido.defs.ts",
         "l4/compras/journeys/registrarRecebimento.defs.ts",
@@ -59,7 +59,7 @@
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:31:42.520Z",
+      "updatedAt": "2026-10-13T00:44:40.930Z",
       "artifactPaths": [
         "l4/compras/workflows.defs.ts"
       ],
@@ -70,7 +70,7 @@
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:33:33.276Z",
+      "updatedAt": "2026-10-13T00:46:33.162Z",
       "artifactPaths": [
         "l4/compras/ontology/Fornecedor.defs.ts",
         "l4/compras/ontology/ContatoFornecedor.defs.ts",
@@ -80,18 +80,20 @@
         "l4/compras/ontology/PedidoCompra.defs.ts",
         "l4/compras/ontology/ItemPedido.defs.ts",
         "l4/compras/ontology/Recebimento.defs.ts",
+        "l4/compras/ontology/EntradaEstoque.defs.ts",
         "l4/compras/ontology/PainelCompras.defs.ts",
         "l4/compras/ontology/index.defs.ts"
       ],
       "uncitedEntities": [
         "ContatoFornecedor",
         "Produto",
-        "Comprador"
+        "Comprador",
+        "EntradaEstoque"
       ],
       "liftedAggregateEntities": [],
       "compile": {
         "status": "clean",
-        "files": 10
+        "files": 11
       },
       "normalizations": [
         {
@@ -136,6 +138,11 @@
         },
         {
           "kind": "derivedFromPlatform",
+          "entityId": "EntradaEstoque",
+          "detail": "storage.table compras_entradaestoque"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "PainelCompras",
           "detail": "storage.table compras_painelcompras"
         },
@@ -168,11 +175,6 @@
           "kind": "tightened",
           "entityId": "Fornecedor",
           "detail": "Fornecedor.details.identification.docId.pattern"
-        },
-        {
-          "kind": "tightened",
-          "entityId": "Fornecedor",
-          "detail": "Fornecedor.details.identification.countryCode.pattern"
         },
         {
           "kind": "tightened",
@@ -215,6 +217,11 @@
           "detail": "Produto.details.identification.subtype.values"
         },
         {
+          "kind": "tightened",
+          "entityId": "Produto",
+          "detail": "Produto.details.product.unitOfMeasure.required"
+        },
+        {
           "kind": "namespaceEmpty",
           "entityId": "Produto",
           "detail": "details.compras"
@@ -235,11 +242,6 @@
           "detail": "Comprador.details.identification.docType.values"
         },
         {
-          "kind": "tightened",
-          "entityId": "Comprador",
-          "detail": "Comprador.details.identification.docId.pattern"
-        },
-        {
           "kind": "namespaceEmpty",
           "entityId": "Comprador",
           "detail": "details.compras"
@@ -248,6 +250,11 @@
           "kind": "derivedFromPlatform",
           "entityId": "ProdutoFornecido",
           "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "ProdutoFornecido",
+          "detail": "record.fields.details.fields.usadoEmPedidos.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -262,7 +269,12 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "PedidoCompra",
-          "detail": "record.fields.details.fields.acimaDoLimite.derived (derived[])"
+          "detail": "record.fields.details.fields.aguardandoAprovacao.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "PedidoCompra",
+          "detail": "record.fields.details.fields.liberadoAoFornecedor.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -273,11 +285,6 @@
           "kind": "derivedFromPlatform",
           "entityId": "PedidoCompra",
           "detail": "record.fields.details.fields.atrasado.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PedidoCompra",
-          "detail": "record.fields.details.fields.quantidadeRecebida.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -302,27 +309,17 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "ItemPedido",
-          "detail": "record.fields.details.fields.saldoAReceber.derived (derived[])"
+          "detail": "record.fields.details.fields.quantidadePendente.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "ItemPedido",
-          "detail": "record.fields.details.fields.totalmenteRecebido.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "ItemPedido",
-          "detail": "record.fields.details.fields.precoDivergeDoCombinado.derived (derived[])"
+          "detail": "record.fields.details.fields.recebidoTotalmente.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "Recebimento",
           "detail": "record.fields.id, record.fields.version"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Recebimento",
-          "detail": "record.fields.details.fields.quantidadeTotalRecebida.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -331,77 +328,75 @@
         },
         {
           "kind": "derivedFromPlatform",
+          "entityId": "Recebimento",
+          "detail": "record.fields.details.fields.quantidadeTotalRecebida.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "EntradaEstoque",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "EntradaEstoque",
+          "detail": "record.fields.details.fields.valorTotal.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "EntradaEstoque",
+          "detail": "record.fields.details.fields.publicada.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
           "entityId": "PainelCompras",
           "detail": "record.fields.id, record.fields.version"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "PainelCompras",
-          "detail": "record.fields.periodo.derived (ddm)"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PainelCompras",
-          "detail": "record.fields.fornecedorId.derived (ddm)"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PainelCompras",
           "detail": "record.fields.details.derived (ddm)"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PainelCompras",
-          "detail": "record.fields.details.fields.pedidosEmAberto.derived (ddm)"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PainelCompras",
-          "detail": "record.fields.details.fields.pedidosAtrasados.derived (ddm)"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PainelCompras",
-          "detail": "record.fields.details.fields.totalComprado.derived (ddm)"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "PainelCompras",
-          "detail": "record.fields.details.fields.pedidosNoMes.derived (ddm)"
         }
       ],
       "citedRules": [
         "rule-foreign-namespace-refused",
-        "rule-identity-never-in-namespace",
-        "rule-document-shape-validated",
         "rule-delete-blocked-by-relationships",
+        "rule-document-shape-validated",
+        "rule-identity-never-in-namespace",
         "rule-company-legal-name-required",
-        "fornecedorCnpjUnico",
+        "fornecedorCnpjObrigatorio",
         "fornecedorInativoSemNovoPedido",
         "rule-contact-value-unique-per-type",
-        "produtoInativoNaoEntraEmPedido",
+        "inactiveProductCannotBeOrdered",
         "rule-person-privacy-consent-required-br-eu",
+        "compradorInativoNaoAbrePedido",
+        "produtoFornecidoUnicoPorFornecedor",
         "precoCombinadoPositivo",
-        "produtoUnicoPorFornecedor",
-        "produtoFornecidoInativoNaoSugerido",
-        "pedidoExigeItem",
-        "aprovacaoAcimaLimite",
+        "produtoFornecidoSomenteFornecedorAtivo",
+        "precoSugeridoNoItemPedido",
+        "valorLimiteAprovacao",
+        "pedidoExigeItens",
         "rejeicaoExigeMotivo",
-        "recebimentoSomenteEnviado",
-        "recebimentoNaoExcedePedido",
-        "numeroPedidoSequencial",
-        "itemSomenteEmRascunho",
-        "produtoUnicoPorPedido",
-        "quantidadePositiva",
-        "produtoDeveSerFornecidoPeloFornecedor",
-        "recebimentoSomentePedidoEnviadoOuAprovado",
+        "recebimentoSomenteLiberado",
+        "edicaoSomenteRascunho",
+        "numeroPedidoUnico",
+        "itemPedidoQuantidadePositiva",
+        "itemPedidoProdutoDoFornecedor",
+        "itemPedidoSomenteEmRascunho",
+        "precoCombinadoSugerePreco",
+        "recebimentoSomentePedidoAprovado",
         "quantidadeRecebidaNaoExcedePendente",
-        "recebimentoItemPertenceAoPedido",
-        "recebimentoDaEntradaEstoque",
+        "recebimentoGeraEntradaEstoque",
         "recebimentoAtualizaSituacaoPedido",
+        "numeroRecebimentoUnico",
+        "entradaGeradaPeloRecebimento",
+        "quantidadeEntradaPositiva",
+        "entradaUnicaPorItemRecebimento",
+        "entradaProdutoDoItemPedido",
+        "quantidadeRecebidaNaoExcedePedido",
+        "entradaPublicadaAoEstoque",
         "pedidoAtrasadoPrevisaoVencida",
-        "totalCompradoConsideraPedidosEnviados",
-        "painelSomenteLeitura"
+        "totalCompradoConsideraPedidosAprovados",
+        "pedidoEmAbertoAteRecebimentoTotal"
       ],
       "citedCapabilities": [
         "read.byId",
@@ -409,8 +404,11 @@
         "locate.byDocument",
         "register.createOrAttach",
         "edit.platformFields",
+        "edit.moduleNamespace",
         "inactivate",
         "link.contact",
+        "link",
+        "unlink",
         "listLinks",
         "attach.document",
         "comment",
@@ -418,37 +416,32 @@
         "statusHistory.read",
         "audit",
         "locate.byContact",
-        "link",
-        "unlink",
         "locate.byTag",
         "locate.byLogin",
         "invite.login",
         "locate.byColumn",
-        "listByForeignKey",
+        "locate.byText",
         "count",
+        "listByForeignKey",
         "create",
         "update",
-        "delete",
         "uniqueKey",
         "read.mdmRecord",
-        "locate.byText",
+        "sequence.next",
         "transition",
         "transaction",
-        "sequence.next",
-        "compras.calcularTotal",
-        "compras.darEntradaEstoque",
-        "compras.atualizarSituacaoPedido",
+        "delete",
+        "compras.sugerirPrecoCombinado",
+        "compras.publicarEntradaEstoque",
         "aggregate.byWindow",
         "read.window",
         "refresh",
-        "rebuild",
-        "retain",
-        "compras.abrirPedidosDoIndicador"
+        "rebuild"
       ]
     },
     "judge35": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:33:44.286Z",
+      "updatedAt": "2026-10-13T00:46:44.153Z",
       "artifactPaths": [
         "l4/compras/pipeline/judge35-draft.json"
       ],
@@ -460,13 +453,21 @@
         },
         {
           "kind": "judgeComment",
-          "detail": "NS5_JUDGE_COVERED_KIND decide:PedidoCompra.aguardandoAprovacao: coveredByAct applies only to an uncited human transition."
+          "detail": "NS5_JUDGE_COVERED_TRANSITION uncited:PedidoCompra.receberParcial: Step registrarRecebimento.registrarRecebimento has no transitionRef."
+        },
+        {
+          "kind": "judgeComment",
+          "detail": "NS5_JUDGE_COVERED_TRANSITION uncited:PedidoCompra.receberTotal: Step registrarRecebimento.registrarRecebimento has no transitionRef."
+        },
+        {
+          "kind": "judgeComment",
+          "detail": "NS5_JUDGE_COVERED_KIND decide:PedidoCompra.enviado: coveredByAct applies only to an uncited human transition."
         }
       ]
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:34:01.971Z",
+      "updatedAt": "2026-10-13T00:47:08.031Z",
       "artifactPaths": [
         "l4/compras/rules.defs.ts"
       ],
@@ -477,7 +478,7 @@
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:34:18.554Z",
+      "updatedAt": "2026-10-13T00:47:13.895Z",
       "artifactPaths": [
         "l4/compras/access.defs.ts"
       ],
@@ -488,7 +489,7 @@
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:34:35.126Z",
+      "updatedAt": "2026-10-13T00:47:30.440Z",
       "artifactPaths": [
         "l4/compras/integration.defs.ts"
       ],
@@ -499,7 +500,7 @@
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-10-12T20:34:35.317Z",
+      "updatedAt": "2026-10-13T00:47:30.645Z",
       "artifactPaths": [
         "l4/compras/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -514,29 +515,28 @@
     "module": "compras",
     "rebuildAll": true
   },
-  "updatedAt": "2026-10-12T20:35:28.352Z",
+  "updatedAt": "2026-10-13T00:48:23.492Z",
   "rebuildAll": {
     "deleted": [
-      "l1/compras/pipeline/pipeline.json",
-      "l2/compras/pipeline/menu20-draft.json",
-      "l2/compras/pipeline/pipeline.json",
       "l4/compras/access.defs.ts",
       "l4/compras/integration.defs.ts",
-      "l4/compras/journeys/abrirEenviarPedidoCompra.defs.ts",
-      "l4/compras/journeys/acompanharIndicadoresDeCompras.defs.ts",
+      "l4/compras/journeys/abrirEnviarPedido.defs.ts",
+      "l4/compras/journeys/acompanharPainel.defs.ts",
+      "l4/compras/journeys/aprovarPedido.defs.ts",
       "l4/compras/journeys/cadastrarFornecedor.defs.ts",
-      "l4/compras/journeys/decidirPedidoAcimaDoLimite.defs.ts",
+      "l4/compras/journeys/cadastrarProdutoFornecido.defs.ts",
       "l4/compras/journeys/index.defs.ts",
-      "l4/compras/journeys/registrarRecebimentoPedido.defs.ts",
+      "l4/compras/journeys/registrarRecebimento.defs.ts",
       "l4/compras/module.defs.ts",
-      "l4/compras/ontology/Buyer.defs.ts",
-      "l4/compras/ontology/GoodsReceipt.defs.ts",
-      "l4/compras/ontology/Product.defs.ts",
-      "l4/compras/ontology/PurchaseOrder.defs.ts",
-      "l4/compras/ontology/PurchaseOrderDashboard.defs.ts",
-      "l4/compras/ontology/Supplier.defs.ts",
-      "l4/compras/ontology/SupplierContact.defs.ts",
-      "l4/compras/ontology/SupplierOffering.defs.ts",
+      "l4/compras/ontology/Comprador.defs.ts",
+      "l4/compras/ontology/ContatoFornecedor.defs.ts",
+      "l4/compras/ontology/Fornecedor.defs.ts",
+      "l4/compras/ontology/ItemPedido.defs.ts",
+      "l4/compras/ontology/PainelCompras.defs.ts",
+      "l4/compras/ontology/PedidoCompra.defs.ts",
+      "l4/compras/ontology/Produto.defs.ts",
+      "l4/compras/ontology/ProdutoFornecido.defs.ts",
+      "l4/compras/ontology/Recebimento.defs.ts",
       "l4/compras/ontology/index.defs.ts",
       "l4/compras/pipeline/access60-draft.json",
       "l4/compras/pipeline/finalize-report.json",
@@ -545,16 +545,15 @@
       "l4/compras/pipeline/judge35-draft.json",
       "l4/compras/pipeline/module10-draft.json",
       "l4/compras/pipeline/ontology30-draft.json",
-      "l4/compras/pipeline/ontology30-entity-Buyer-draft.json",
-      "l4/compras/pipeline/ontology30-entity-GoodsReceipt-draft.json",
-      "l4/compras/pipeline/ontology30-entity-Product-draft.json",
-      "l4/compras/pipeline/ontology30-entity-PurchaseIndicators-draft.json",
-      "l4/compras/pipeline/ontology30-entity-PurchaseOrder-draft.json",
-      "l4/compras/pipeline/ontology30-entity-PurchaseOrderDashboard-draft.json",
-      "l4/compras/pipeline/ontology30-entity-Supplier-draft.json",
-      "l4/compras/pipeline/ontology30-entity-SupplierContact-draft.json",
-      "l4/compras/pipeline/ontology30-entity-SupplierOffering-draft.json",
-      "l4/compras/pipeline/ontology30-entity-SupplierProduct-draft.json",
+      "l4/compras/pipeline/ontology30-entity-Comprador-draft.json",
+      "l4/compras/pipeline/ontology30-entity-ContatoFornecedor-draft.json",
+      "l4/compras/pipeline/ontology30-entity-Fornecedor-draft.json",
+      "l4/compras/pipeline/ontology30-entity-ItemPedido-draft.json",
+      "l4/compras/pipeline/ontology30-entity-PainelCompras-draft.json",
+      "l4/compras/pipeline/ontology30-entity-PedidoCompra-draft.json",
+      "l4/compras/pipeline/ontology30-entity-Produto-draft.json",
+      "l4/compras/pipeline/ontology30-entity-ProdutoFornecido-draft.json",
+      "l4/compras/pipeline/ontology30-entity-Recebimento-draft.json",
       "l4/compras/pipeline/ontology30-plan-draft.json",
       "l4/compras/pipeline/pipeline.json",
       "l4/compras/pipeline/rules40-draft.json",
@@ -567,6 +566,7 @@
       "l4/compras/pool/l2/menu20-draft.json",
       "l4/compras/pool/l2/needs30-draft.json",
       "l4/compras/pool/l2/pipeline.json",
+      "l4/compras/pool/l2/responses/menu20/menu-1.json",
       "l4/compras/pool/l2/web/backend.json",
       "l4/compras/pool/l2/web/effort.json",
       "l4/compras/pool/l2/web/l4diff.json",
@@ -575,49 +575,50 @@
       "l4/compras/workflows.defs.ts"
     ],
     "edited": [
+      "l4/organization/registry.defs.ts",
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-10-12T20:30:57.796Z"
+    "at": "2026-10-13T00:43:56.616Z"
   },
   "poolWiped": [],
   "pool": [
     {
-      "at": "2026-10-12T20:34:53.299Z",
-      "file": "l4/compras/pool/l2/20261012203453_compras-20261012203453_1.json",
+      "at": "2026-10-13T00:47:43.543Z",
+      "file": "l4/compras/pool/l2/20261013004743_compras-20261013004743_1.json",
       "from": "l4",
       "to": "l2",
-      "thread": "compras-20261012203453",
+      "thread": "compras-20261013004743",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T20:35:27.079Z",
-      "file": "l4/compras/pool/l1/20261012203526_compras-20261012203453_1.json",
+      "at": "2026-10-13T00:48:22.220Z",
+      "file": "l4/compras/pool/l1/20261013004821_compras-20261013004743_1.json",
       "from": "l2",
       "to": "l1",
-      "thread": "compras-20261012203453",
+      "thread": "compras-20261013004743",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T20:35:27.736Z",
-      "file": "l4/compras/pool/l2/20261012203527_compras-20261012203453_1.json",
+      "at": "2026-10-13T00:48:22.874Z",
+      "file": "l4/compras/pool/l2/20261013004822_compras-20261013004743_1.json",
       "from": "l1",
       "to": "l2",
-      "thread": "compras-20261012203453",
+      "thread": "compras-20261013004743",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T20:35:28.309Z",
-      "file": "l4/compras/pool/l4/20261012203528_compras-20261012203453_1.json",
+      "at": "2026-10-13T00:48:23.451Z",
+      "file": "l4/compras/pool/l4/20261013004823_compras-20261013004743_1.json",
       "from": "l2",
       "to": "l4",
-      "thread": "compras-20261012203453",
+      "thread": "compras-20261013004743",
       "round": 1,
       "mode": "estimate",
       "outcome": "processed"

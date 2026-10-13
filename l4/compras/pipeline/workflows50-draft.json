@@ -5,50 +5,60 @@
     {
       "processId": "cicloPedidoCompra",
       "title": "Ciclo do pedido de compra",
-      "description": "Do pedido montado e enviado pelo comprador, passando pela aprovação do gerente de compras quando acima do valor limite, até o recebimento total ou parcial registrado pelo almoxarife.",
+      "description": "Do pedido aberto e enviado pelo comprador, passando pela aprovação do gerente de compras quando acima do valor limite, até o recebimento total ou parcial pelo almoxarife com entrada no estoque.",
       "trigger": {
         "kind": "manual",
         "actorRef": "comprador"
       },
       "tasks": [
         {
-          "taskId": "montarEnviarPedido",
+          "taskId": "abrirEnviarPedido",
           "kind": "human",
           "actorRef": "comprador",
           "journeyRef": "abrirEnviarPedido",
           "next": [
-            "decidirAprovacao",
+            "aprovarPedido",
             "aguardarChegada"
           ],
-          "description": "O comprador monta o pedido para o fornecedor e o envia; acima do valor limite o pedido segue para o gerente de compras, senão vai direto ao fornecedor."
+          "description": "O comprador abre o pedido para o fornecedor com os itens e o envia; acima do valor limite segue para aprovação, senão segue ao fornecedor."
         },
         {
-          "taskId": "decidirAprovacao",
+          "taskId": "aprovarPedido",
           "kind": "human",
           "actorRef": "gerenteCompras",
           "journeyRef": "aprovarPedido",
           "next": [
             "aguardarChegada"
           ],
-          "description": "O gerente de compras aprova ou rejeita o pedido acima do valor limite; o pedido rejeitado encerra o ciclo."
+          "description": "O gerente de compras aprova ou rejeita o pedido acima do valor limite; se rejeitado, o processo termina."
         },
         {
           "taskId": "aguardarChegada",
           "kind": "wait",
           "next": [
-            "receberPedido"
+            "registrarRecebimento"
           ],
-          "description": "Aguarda a chegada dos produtos do pedido enviado ou aprovado ao almoxarifado."
+          "description": "Aguarda a chegada da mercadoria do pedido aprovado ou dos itens ainda pendentes."
         },
         {
-          "taskId": "receberPedido",
+          "taskId": "registrarRecebimento",
           "kind": "human",
           "actorRef": "almoxarife",
           "journeyRef": "registrarRecebimento",
           "next": [
+            "darEntradaEstoque"
+          ],
+          "description": "O almoxarife registra as quantidades recebidas de cada item, total ou parcialmente."
+        },
+        {
+          "taskId": "darEntradaEstoque",
+          "kind": "mechanical",
+          "entityRef": "EntradaEstoque",
+          "effect": "create",
+          "next": [
             "aguardarChegada"
           ],
-          "description": "O almoxarife registra o recebimento total ou parcial, dando entrada no estoque; se ficar saldo pendente, volta a aguardar a próxima entrega."
+          "description": "O sistema dá entrada no estoque dos produtos recebidos e, se o recebimento foi parcial, volta a aguardar os itens pendentes."
         }
       ]
     }
@@ -59,7 +69,7 @@
       "inProcess": false
     },
     {
-      "journeyId": "cadastrarProdutoFornecido",
+      "journeyId": "atualizarPrecoCombinado",
       "inProcess": false
     },
     {

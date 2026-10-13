@@ -11,35 +11,23 @@
         "Produto"
       ],
       "effect": "create",
-      "description": "produtoCadastrado: quando o controleEstoque cadastra um Produto (Produto.create), o módulo compras cria a referência local do Produto com o mesmo identificador, nome e unidade. Assim o comprador pode vinculá-lo a fornecedores (ProdutoFornecido) e incluí-lo em itens de pedido. O módulo compras não cadastra produtos: só os lê.",
+      "description": "Quando o controle de estoque cadastra um produto (registro Produto.create de controleEstoque), o módulo compras cria a referência local em Produto com o mesmo identificador, nome e unidade. Assim o produto fica disponível para vincular a fornecedores (ProdutoFornecido) e para incluir em itens de pedido de compra.",
       "entityRefs": []
     }
   ],
   "outbound": [
     {
-      "id": "recebimentoCompraRegistrado",
+      "id": "entradaEstoqueRegistrada",
       "kind": "event",
       "to": "controleEstoque",
-      "event": "recebimentoCompraRegistrado",
-      "on": "Recebimento.create",
-      "description": "Publicado quando o almoxarife registra um recebimento, total ou parcial, de um pedido de compra. O controleEstoque usa o registro do Recebimento, com os produtos e as quantidades recebidas, para registrar uma Movimentacao de entrada no estoque.",
+      "event": "entradaEstoqueRegistrada",
+      "on": "EntradaEstoque.create",
+      "description": "Ao registrar o recebimento total ou parcial, o módulo compras gera uma entrada de estoque para cada produto recebido e publica o registro EntradaEstoque. O controle de estoque usa esse registro para lançar uma Movimentacao de entrada com o produto, a quantidade recebida e a referência ao pedido de compra.",
       "entityRefs": [
+        "EntradaEstoque",
         "Recebimento",
         "PedidoCompra",
-        "ItemPedido",
         "Produto"
-      ]
-    },
-    {
-      "id": "pedidoCompraRecebidoTotal",
-      "kind": "event",
-      "to": "any",
-      "event": "pedidoCompraRecebidoTotal",
-      "on": "PedidoCompra.receberTotal",
-      "description": "Publicado quando um pedido de compra é recebido por completo e encerrado. Outros módulos, como um futuro contas a pagar, podem usar esse evento para iniciar o pagamento ao fornecedor.",
-      "entityRefs": [
-        "PedidoCompra",
-        "Fornecedor"
       ]
     },
     {
@@ -48,7 +36,19 @@
       "to": "any",
       "event": "pedidoCompraAprovado",
       "on": "PedidoCompra.aprovar",
-      "description": "Publicado quando o gerente de compras aprova um pedido de compra acima do valor limite. Serve para módulos interessados no compromisso financeiro do pedido com o fornecedor.",
+      "description": "Publica o pedido de compra aprovado pelo gerente de compras, com o fornecedor e o valor total, para os módulos que precisam saber dos compromissos de compra, por exemplo o financeiro para a programação de pagamentos.",
+      "entityRefs": [
+        "PedidoCompra",
+        "Fornecedor"
+      ]
+    },
+    {
+      "id": "pedidoCompraRecebidoTotal",
+      "kind": "event",
+      "to": "any",
+      "event": "pedidoCompraRecebidoTotal",
+      "on": "PedidoCompra.receberTotal",
+      "description": "Publica o pedido de compra quando todos os itens foram recebidos, encerrando o ciclo de compra para os módulos interessados.",
       "entityRefs": [
         "PedidoCompra",
         "Fornecedor"
