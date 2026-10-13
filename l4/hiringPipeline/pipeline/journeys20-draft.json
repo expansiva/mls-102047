@@ -6,7 +6,7 @@
       "business": {
         "actorRef": "recruiter",
         "title": "Open a job position",
-        "goal": "Publish a new job position with its hiring manager and headcount so candidates can apply.",
+        "goal": "Publish a new job position with its title, department, description, headcount and hiring manager so candidates can apply to it.",
         "entry": {
           "mode": "coldStart"
         },
@@ -17,105 +17,70 @@
             "entity": "JobPosition",
             "effect": "create",
             "title": "Open job position",
-            "description": "The recruiter enters title, department, description, headcount and the hiring manager of the position, and opens it."
+            "description": "The recruiter enters the title, department, description, headcount and hiring manager, and the position opens."
           },
           {
             "stepId": "reviewPosition",
             "kind": "inspect",
             "entity": "JobPosition",
-            "title": "Review opened position",
-            "description": "The recruiter checks the position details and confirms it is open with zero hires."
+            "title": "Review open position",
+            "description": "The recruiter checks the opened position and its remaining headcount."
           }
         ],
         "outcome": {
-          "statement": "A job position is open and ready to receive applications.",
+          "statement": "A new job position is open and ready to receive applications.",
           "evidence": [
-            "The position appears in the open positions list with its title, department and headcount",
-            "The position shows its hiring manager"
+            "The position appears in the list of open positions",
+            "The position shows its hiring manager and headcount"
           ]
         }
       },
-      "businessHash": "sha256:e304868e184cb22c5d71f0481e107e28ca1142df795d4925dfe67f25edccbabc"
+      "businessHash": "sha256:40e908a76119a039efb7ffb15fcbbb04d00bccbf0f995621711478eb9b8ad7aa"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "registerCandidate",
+      "journeyId": "registerCandidateApplication",
       "business": {
         "actorRef": "recruiter",
-        "title": "Register a candidate",
-        "goal": "Record a candidate with name, email, resume link and source.",
+        "title": "Register a candidate and an application",
+        "goal": "Register a candidate with name, email, resume link and source, and record the candidate's application to an open position.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "searchCandidate",
-            "kind": "locate",
-            "entity": "Candidate",
-            "title": "Search existing candidates",
-            "description": "The recruiter searches by name or email to avoid registering the same person twice."
-          },
-          {
-            "stepId": "createCandidate",
+            "stepId": "registerCandidate",
             "kind": "act",
             "entity": "Candidate",
             "effect": "create",
             "title": "Register candidate",
-            "description": "The recruiter enters the candidate's name, email, resume link and source and saves the record."
-          }
-        ],
-        "outcome": {
-          "statement": "The candidate is registered and available to apply to positions.",
-          "evidence": [
-            "The candidate appears in the candidate list with email, resume link and source"
-          ]
-        }
-      },
-      "businessHash": "sha256:fb8922e90ff49bf5ff7235dc39c4496810b1a7892ba85620b1a50e77610ede95"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "recordApplication",
-      "business": {
-        "actorRef": "recruiter",
-        "title": "Record an application",
-        "goal": "Register that a candidate applies to an open position, starting in screening.",
-        "entry": {
-          "mode": "contextOrLookup"
-        },
-        "steps": [
-          {
-            "stepId": "findCandidate",
-            "kind": "locate",
-            "entity": "Candidate",
-            "title": "Find the candidate",
-            "description": "The recruiter opens the candidate in hand or searches for them."
+            "description": "The recruiter registers the candidate with name, email, resume link and source; an existing candidate is reused instead of duplicated."
           },
           {
             "stepId": "findPosition",
             "kind": "locate",
             "entity": "JobPosition",
-            "title": "Choose open position",
-            "description": "The recruiter selects the open job position the candidate applies to."
+            "title": "Find open position",
+            "description": "The recruiter searches for the open position the candidate is applying to."
           },
           {
             "stepId": "createApplication",
             "kind": "act",
             "entity": "Application",
             "effect": "create",
-            "title": "Create application",
-            "description": "The recruiter records the application, which starts in the screening stage."
+            "title": "Record application",
+            "description": "The recruiter records the candidate's application to the position, which starts in the screening stage."
           }
         ],
         "outcome": {
-          "statement": "The candidate has an application in screening for the chosen position.",
+          "statement": "The candidate is registered and has an application in screening for the chosen position.",
           "evidence": [
-            "The application appears in the position's pipeline under screening",
-            "The candidate's record lists the application"
+            "The candidate appears in the candidate list",
+            "The application appears in the position's pipeline in the screening stage"
           ]
         }
       },
-      "businessHash": "sha256:8eb78b40a12b0a1711cbb7e9c27ff483703b2c1edbab1e64f9f53cdf2bd8bd57"
+      "businessHash": "sha256:5bc2ba5be1d9d7542d023a0480e47a3290269e61a101485c1833157498c0175c"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -123,60 +88,7 @@
       "business": {
         "actorRef": "recruiter",
         "title": "Move an application to interview",
-        "goal": "Advance a screened application to the interview stage and pass it to the hiring manager when ready.",
-        "entry": {
-          "mode": "contextOrLookup"
-        },
-        "steps": [
-          {
-            "stepId": "findScreening",
-            "kind": "locate",
-            "entity": "Application",
-            "title": "Find screening applications",
-            "description": "The recruiter lists applications in screening for a position."
-          },
-          {
-            "stepId": "inspectApplication",
-            "kind": "inspect",
-            "entity": "Application",
-            "title": "Review application",
-            "description": "The recruiter reviews the candidate's resume link, source and application history."
-          },
-          {
-            "stepId": "moveToInterview",
-            "kind": "act",
-            "entity": "Application",
-            "effect": "transition",
-            "transitionRef": "advanceToInterview",
-            "title": "Move to interview",
-            "description": "The recruiter moves the application from screening to interview."
-          },
-          {
-            "stepId": "handToManager",
-            "kind": "handoff",
-            "entity": "Application",
-            "title": "Notify hiring manager",
-            "description": "The application in interview is passed to the position's hiring manager to decide on an offer.",
-            "handoffTo": "hiringManager"
-          }
-        ],
-        "outcome": {
-          "statement": "The application is in the interview stage and the hiring manager can decide on an offer.",
-          "evidence": [
-            "The application shows stage interview",
-            "The application appears in the hiring manager's pipeline"
-          ]
-        }
-      },
-      "businessHash": "sha256:437f0d8296ebbfa6a9ec1589a4811f2c6a920e88cf373411b2ab7a78ab71032f"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "rejectApplication",
-      "business": {
-        "actorRef": "recruiter",
-        "title": "Reject an application",
-        "goal": "Close an application that will not move forward, recording the reason.",
+        "goal": "Advance a screened application to the interview stage and hand it to the hiring manager once the interview is done.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -185,15 +97,68 @@
             "stepId": "findApplication",
             "kind": "locate",
             "entity": "Application",
-            "title": "Find the application",
-            "description": "The recruiter opens the application in hand or searches it in the position's pipeline."
+            "title": "Find application",
+            "description": "The recruiter finds the application in screening by candidate or position."
           },
           {
-            "stepId": "inspectApplication",
+            "stepId": "reviewApplication",
+            "kind": "inspect",
+            "entity": "Application",
+            "title": "Review screening",
+            "description": "The recruiter reviews the candidate's resume link, source and the position requirements."
+          },
+          {
+            "stepId": "moveToInterview",
+            "kind": "act",
+            "entity": "Application",
+            "effect": "transition",
+            "transitionRef": "advanceToInterview",
+            "title": "Move to interview",
+            "description": "The recruiter moves the application from screening to the interview stage."
+          },
+          {
+            "stepId": "handToManager",
+            "kind": "handoff",
+            "entity": "Application",
+            "title": "Send to hiring manager",
+            "description": "The interviewed application is handed to the position's hiring manager to decide on an offer.",
+            "handoffTo": "hiringManager"
+          }
+        ],
+        "outcome": {
+          "statement": "The application is in the interview stage and awaits the hiring manager's offer decision.",
+          "evidence": [
+            "The application shows the interview stage",
+            "The application appears in the hiring manager's pending decisions"
+          ]
+        }
+      },
+      "businessHash": "sha256:ca576286724c628ae88221cb25ef24dbcdf945cc9dec85a73ddea75c507f7df2"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "rejectApplication",
+      "business": {
+        "actorRef": "recruiter",
+        "title": "Reject an application",
+        "goal": "Close an application that will not move forward, recording the reason for rejection.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "findApplication",
+            "kind": "locate",
+            "entity": "Application",
+            "title": "Find application",
+            "description": "The recruiter finds the active application to be rejected."
+          },
+          {
+            "stepId": "reviewApplication",
             "kind": "inspect",
             "entity": "Application",
             "title": "Review application",
-            "description": "The recruiter checks the current stage and history before rejecting."
+            "description": "The recruiter reviews the application's current stage and history before rejecting it."
           },
           {
             "stepId": "reject",
@@ -202,18 +167,18 @@
             "effect": "transition",
             "transitionRef": "reject",
             "title": "Reject with reason",
-            "description": "The recruiter enters the rejection reason and moves the application to rejected."
+            "description": "The recruiter rejects the application and records the rejection reason."
           }
         ],
         "outcome": {
-          "statement": "The application is rejected with a recorded reason.",
+          "statement": "The application is rejected with a recorded reason and leaves the active pipeline.",
           "evidence": [
-            "The application shows stage rejected",
+            "The application shows the rejected stage",
             "The rejection reason is visible on the application"
           ]
         }
       },
-      "businessHash": "sha256:caec38bf9b3fca4abf123b00404f65dbb54eb2a8500ef48611680ac00526856a"
+      "businessHash": "sha256:87608e04429c132464b33b1abf2742cf3d120a15037b35aa017239073eae66d5"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -221,31 +186,31 @@
       "business": {
         "actorRef": "hiringManager",
         "title": "Decide on an offer",
-        "goal": "Decide whether an interviewed candidate receives an offer for my position.",
+        "goal": "Decide whether an interviewed candidate for one of my positions receives an offer.",
         "entry": {
-          "mode": "fromNotification"
+          "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "openApplication",
+            "stepId": "findApplication",
             "kind": "locate",
             "entity": "Application",
-            "title": "Open interviewed application",
-            "description": "The hiring manager opens the application from the notification or from the interview list of their positions."
+            "title": "Find interviewed application",
+            "description": "The hiring manager finds an application in the interview stage among the positions she manages."
           },
           {
-            "stepId": "inspectCandidate",
+            "stepId": "reviewCandidate",
             "kind": "inspect",
             "entity": "Application",
             "title": "Review candidate",
-            "description": "The hiring manager reviews the candidate, resume link and application history."
+            "description": "The hiring manager reviews the candidate's resume link, source and application history."
           },
           {
             "stepId": "chooseOffer",
             "kind": "decide",
             "entity": "Application",
-            "title": "Offer or send back",
-            "description": "The hiring manager chooses to extend an offer or to return the application to the recruiter for rejection."
+            "title": "Offer or decline",
+            "description": "The hiring manager chooses between extending an offer or declining the candidate."
           },
           {
             "stepId": "extendOffer",
@@ -254,51 +219,65 @@
             "effect": "transition",
             "transitionRef": "extendOffer",
             "title": "Move to offer",
-            "description": "When the choice is to offer, the hiring manager moves the application from interview to offer."
+            "description": "When she chooses to offer, the hiring manager moves the application to the offer stage."
           },
           {
             "stepId": "returnToRecruiter",
             "kind": "handoff",
             "entity": "Application",
             "title": "Return to recruiter",
-            "description": "When the choice is not to offer, the application goes back to the recruiter to reject it with a reason.",
+            "description": "When she declines, the application goes back to the recruiter to be rejected with a reason.",
             "handoffTo": "recruiter"
           }
         ],
         "outcome": {
-          "statement": "The interviewed application either moves to offer or returns to the recruiter for rejection.",
+          "statement": "The application is either in the offer stage or returned to the recruiter for rejection.",
           "evidence": [
-            "The application shows stage offer, or",
+            "The application shows the offer stage, or",
             "The recruiter sees the application flagged for rejection"
           ]
         }
       },
-      "businessHash": "sha256:61d5f1835f56f9ebb436d87e3e6586110fcd2228d3db3650c765ed662d138b90"
+      "businessHash": "sha256:1c66b35ec085084fd368eafbffa6e0d404690f20ca310517e6f9d7e6e471a3e9"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "confirmHire",
+      "journeyId": "decideHire",
       "business": {
         "actorRef": "hiringManager",
-        "title": "Confirm a hire",
-        "goal": "Mark an accepted offer as hired, filling the position's headcount.",
+        "title": "Decide on hiring",
+        "goal": "Decide whether a candidate in the offer stage is hired for one of my positions, taking the position's remaining headcount into account.",
         "entry": {
           "mode": "contextOrLookup"
         },
         "steps": [
           {
-            "stepId": "findOffer",
+            "stepId": "findApplication",
             "kind": "locate",
             "entity": "Application",
-            "title": "Find offer applications",
-            "description": "The hiring manager lists applications in offer for their positions."
+            "title": "Find application in offer",
+            "description": "The hiring manager finds an application in the offer stage among her positions."
           },
           {
-            "stepId": "inspectOffer",
+            "stepId": "reviewOffer",
             "kind": "inspect",
             "entity": "Application",
             "title": "Review offer",
-            "description": "The hiring manager checks the candidate and the position's remaining headcount."
+            "description": "The hiring manager reviews the application and the offer extended to the candidate."
+          },
+          {
+            "stepId": "checkHeadcount",
+            "kind": "inspect",
+            "entity": "JobPosition",
+            "title": "Check remaining headcount",
+            "description": "The hiring manager checks the position's headcount, hires so far and remaining openings."
+          },
+          {
+            "stepId": "chooseHire",
+            "kind": "decide",
+            "entity": "Application",
+            "title": "Hire or decline",
+            "description": "The hiring manager chooses between hiring the candidate or declining."
           },
           {
             "stepId": "hire",
@@ -307,19 +286,27 @@
             "effect": "transition",
             "transitionRef": "hire",
             "title": "Mark as hired",
-            "description": "The hiring manager moves the application to hired; when the hires reach the headcount the position closes automatically."
+            "description": "When she chooses to hire, the application moves to hired; if the position's headcount is now filled, the position closes automatically."
+          },
+          {
+            "stepId": "returnToRecruiter",
+            "kind": "handoff",
+            "entity": "Application",
+            "title": "Return to recruiter",
+            "description": "When she declines, the application goes back to the recruiter to be rejected with a reason.",
+            "handoffTo": "recruiter"
           }
         ],
         "outcome": {
-          "statement": "The candidate is hired and the position's filled count is updated, closing the position when headcount is reached.",
+          "statement": "The candidate is hired, or the application is returned to the recruiter for rejection; a position with filled headcount is closed.",
           "evidence": [
-            "The application shows stage hired",
-            "The position shows the updated hires count",
-            "A position with headcount filled shows status closed"
+            "The application shows the hired stage",
+            "The position shows as closed when its headcount is filled",
+            "The recruiter sees declined applications to reject"
           ]
         }
       },
-      "businessHash": "sha256:d71f44508f85f6d23b2bc3dfcb72cf211ca1e6dc98707e914936b3bf1fa9af27"
+      "businessHash": "sha256:5a48310270575173b7c014125ad21258b4e0cb563a905d2ce13b072612ec9df8"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -327,35 +314,42 @@
       "business": {
         "actorRef": "hiringManager",
         "title": "Review my positions' pipeline",
-        "goal": "See the applications of the positions I manage by stage.",
+        "goal": "Follow the progress of applications across the job positions I manage.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
-            "stepId": "listMyPositions",
+            "stepId": "findMyPositions",
             "kind": "locate",
             "entity": "JobPosition",
-            "title": "List my positions",
-            "description": "The hiring manager lists the job positions where they are the hiring manager."
+            "title": "Find my positions",
+            "description": "The hiring manager lists the job positions she manages."
           },
           {
             "stepId": "inspectPosition",
             "kind": "inspect",
             "entity": "JobPosition",
-            "title": "View position pipeline",
-            "description": "The hiring manager sees headcount, hires so far and applications grouped by stage."
+            "title": "View position status",
+            "description": "The hiring manager sees headcount, hires so far and whether the position is open or closed."
+          },
+          {
+            "stepId": "inspectApplications",
+            "kind": "inspect",
+            "entity": "Application",
+            "title": "View applications by stage",
+            "description": "The hiring manager views the position's applications grouped by stage."
           }
         ],
         "outcome": {
-          "statement": "The hiring manager knows where each application of their positions stands.",
+          "statement": "The hiring manager knows where each application of her positions stands.",
           "evidence": [
-            "Applications are shown per stage for each managed position",
-            "Headcount and hires count are visible per position"
+            "Applications are shown by stage for each managed position",
+            "Each position shows its filled and remaining headcount"
           ]
         }
       },
-      "businessHash": "sha256:e01a14be7ea66639fbe393995d0bd82ba33adf4b1677cee7b6f9dd0828de22c5"
+      "businessHash": "sha256:9f7a55fa88e41fcdf9ca5b9681194a64f5568b06842f8ea5d3fe384e877aa876"
     }
   ],
   "systemDecisions": [],

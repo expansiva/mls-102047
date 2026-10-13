@@ -8,24 +8,24 @@ export const advanceToInterviewJourney = {
   "business": {
     "actorRef": "recruiter",
     "title": "Move an application to interview",
-    "goal": "Advance a screened application to the interview stage and pass it to the hiring manager when ready.",
+    "goal": "Advance a screened application to the interview stage and hand it to the hiring manager once the interview is done.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "findScreening",
+        "stepId": "findApplication",
         "kind": "locate",
         "entity": "Application",
-        "title": "Find screening applications",
-        "description": "The recruiter lists applications in screening for a position."
+        "title": "Find application",
+        "description": "The recruiter finds the application in screening by candidate or position."
       },
       {
-        "stepId": "inspectApplication",
+        "stepId": "reviewApplication",
         "kind": "inspect",
         "entity": "Application",
-        "title": "Review application",
-        "description": "The recruiter reviews the candidate's resume link, source and application history."
+        "title": "Review screening",
+        "description": "The recruiter reviews the candidate's resume link, source and the position requirements."
       },
       {
         "stepId": "moveToInterview",
@@ -34,26 +34,26 @@ export const advanceToInterviewJourney = {
         "effect": "transition",
         "transitionRef": "advanceToInterview",
         "title": "Move to interview",
-        "description": "The recruiter moves the application from screening to interview."
+        "description": "The recruiter moves the application from screening to the interview stage."
       },
       {
         "stepId": "handToManager",
         "kind": "handoff",
         "entity": "Application",
-        "title": "Notify hiring manager",
-        "description": "The application in interview is passed to the position's hiring manager to decide on an offer.",
+        "title": "Send to hiring manager",
+        "description": "The interviewed application is handed to the position's hiring manager to decide on an offer.",
         "handoffTo": "hiringManager"
       }
     ],
     "outcome": {
-      "statement": "The application is in the interview stage and the hiring manager can decide on an offer.",
+      "statement": "The application is in the interview stage and awaits the hiring manager's offer decision.",
       "evidence": [
-        "The application shows stage interview",
-        "The application appears in the hiring manager's pipeline"
+        "The application shows the interview stage",
+        "The application appears in the hiring manager's pending decisions"
       ]
     }
   },
-  "businessHash": "sha256:437f0d8296ebbfa6a9ec1589a4811f2c6a920e88cf373411b2ab7a78ab71032f"
+  "businessHash": "sha256:ca576286724c628ae88221cb25ef24dbcdf945cc9dec85a73ddea75c507f7df2"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AdvanceToInterviewJourneyType = typeof advanceToInterviewJourney;

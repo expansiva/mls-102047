@@ -5,23 +5,13 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const hiringPipelineOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "hiringPipeline",
-  "businessDomain": "Recruitment pipeline: job positions opened by recruiters, candidates registered and their applications moved through screening, interview, offer, hired or rejected, with hiring managers deciding offer and hire on their own positions.",
+  "businessDomain": "Hiring pipeline: job positions opened by recruiters, candidates and their applications moving through screening, interview, offer, hired or rejected, with the position closing automatically when its headcount is filled.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "hiringPipeline",
     "description": "Branch details.hiringPipeline of the master records this module has a role on; only this module writes it."
   },
   "entities": [
-    {
-      "entityId": "JobPosition",
-      "kind": "entity",
-      "class": "core"
-    },
-    {
-      "entityId": "Application",
-      "kind": "entity",
-      "class": "event"
-    },
     {
       "entityId": "Candidate",
       "kind": "role",
@@ -36,6 +26,16 @@ export const hiringPipelineOntologyIndex = {
       "entityId": "HiringManager",
       "kind": "role",
       "subtype": "Person"
+    },
+    {
+      "entityId": "JobPosition",
+      "kind": "entity",
+      "class": "core"
+    },
+    {
+      "entityId": "Application",
+      "kind": "entity",
+      "class": "event"
     }
   ],
   "relationships": [
@@ -74,21 +74,21 @@ export const hiringPipelineOntologyIndex = {
       "from": "Candidate",
       "to": "CandidateEmail",
       "type": "oneToMany",
-      "required": false,
+      "required": true,
       "mode": "mdmRelationship",
-      "description": "The candidate's e-mail addresses are contact channels linked to the candidate.",
+      "description": "The candidate's e-mail address is a contact channel linked to the candidate.",
       "catalogType": "HasContact"
     },
     {
-      "relationshipId": "jobPositionCandidates",
-      "from": "JobPosition",
-      "to": "Candidate",
+      "relationshipId": "candidatePositions",
+      "from": "Candidate",
+      "to": "JobPosition",
       "type": "manyToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "The candidates who applied to a job position, read through its applications.",
+      "description": "The job positions a candidate has applied to, read through the candidate's applications.",
       "through": "Application",
-      "path": "JobPosition.id <- Application.jobPositionId, Application.candidateId -> Candidate.id",
+      "path": "Candidate -> Application.candidateId -> Application.jobPositionId -> JobPosition",
       "derived": true
     }
   ]

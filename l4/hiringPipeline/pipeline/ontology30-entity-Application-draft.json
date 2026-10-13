@@ -4,8 +4,8 @@
     "moduleName": "hiringPipeline",
     "entityId": "Application",
     "title": "Application",
-    "description": "A candidate applying to a job position. It moves through screening, interview, offer, then hired or rejected; a rejection records its reason.",
-    "displayField": "applicationNumber",
+    "description": "A candidate's application to a job position, moving through the stages screening, interview, offer, then hired or rejected with a rejection reason.",
+    "displayField": "code",
     "relationships": {
       "jobPosition": {
         "relationshipId": "applicationJobPosition",
@@ -29,32 +29,29 @@
       }
     },
     "capabilities": {
-      "read.byId": "Opens one application by its id when the recruiter or hiring manager follows a notification or a link from the pipeline.",
-      "locate.byColumn": "Lists applications filtered by position, candidate and stage, ordered by applied date, so the recruiter sees screening lists and the hiring manager sees interview and offer lists of their positions.",
-      "locate.byText": "Finds an application by typing part of its application number in the pipeline search box.",
-      "count": "Counts applications per stage of a position for the pipeline header and counts hires against the headcount.",
-      "listByForeignKey": "Lists all applications of a job position or of a candidate on their record screens, hydrating many at once.",
-      "create": "The recruiter records a new application of a candidate to an open position, starting in screening.",
-      "update": "The recruiter corrects the application details while it is still active.",
-      "transition": "Moves the stage column: the recruiter advances to interview and rejects with a reason, the position's hiring manager extends the offer and confirms the hire.",
-      "uniqueKey": "The engine refuses a second application with the same application number.",
-      "transaction": "Confirming a hire writes the application as hired and closes the job position in one all-or-nothing operation when the headcount is filled.",
-      "read.mdmRecord": "Reads the candidate master record behind each application to show name, e-mail, resume link and source to the recruiter and hiring manager.",
-      "sequence.next": "Issues the application number from the platform sequence hiringPipeline.Application when the recruiter records the application.",
-      "comment": "Recruiter and hiring manager leave notes on the application while discussing interviews and offers.",
-      "statusHistory.read": "Shows when the application changed stage and who moved it, reviewed before advancing, offering or rejecting.",
-      "audit": "Lets an administrator see who changed an application and when."
+      "read.byId": "Opens one application by its id so the recruiter or the hiring manager can review it before acting.",
+      "locate.byColumn": "Lists applications filtered by stage, position or candidate and ordered by applied or stage-change date, for the recruiter's work queue and the hiring manager's pipeline of her positions.",
+      "locate.byText": "Finds an application by typing part of its application number in the search box of the recruiter's list.",
+      "count": "Counts applications per stage for a position, showing the hiring manager how her pipeline is distributed.",
+      "listByForeignKey": "Lists the applications of one job position or of one candidate, so a position screen shows its applicants grouped by stage and a candidate screen shows her applications.",
+      "create": "Records a candidate's application to an open position, starting in screening; used by the recruiter.",
+      "update": "Lets the recruiter correct the notes of an active application.",
+      "transition": "Moves the application between stages: the recruiter advances to interview or rejects with a reason, the hiring manager extends the offer and hires.",
+      "uniqueKey": "Refuses a second application of the same candidate to the same position and a repeated application number.",
+      "transaction": "Hires the candidate and closes the job position together when its headcount is filled, all or nothing.",
+      "read.mdmRecord": "Reads the candidate's name, email, resume link and source from the master record behind the candidate column, for every list and review screen.",
+      "sequence.next": "Issues the application number when the recruiter records the application.",
+      "comment": "Lets the recruiter and the hiring manager leave notes on the application while discussing interview and offer.",
+      "statusHistory.read": "Shows when the application changed stage and who moved it, for the review of its history by recruiter and hiring manager."
     },
     "rules": [
-      "applicationNumberFromSequence",
-      "applicationStartsInScreening",
       "applicationOnlyToOpenPosition",
-      "oneActiveApplicationPerCandidateAndPosition",
-      "recruiterMovesScreeningAndInterview",
-      "onlyPositionHiringManagerDecides",
+      "onePerCandidatePerPosition",
       "rejectionRequiresReason",
-      "hireWithinRemainingHeadcount",
-      "positionClosesWhenHeadcountFilled"
+      "onlyPositionManagerDecides",
+      "hireRequiresRemainingHeadcount",
+      "closePositionWhenHeadcountFilled",
+      "finalStagesAreTerminal"
     ],
     "kind": "entity",
     "class": "event",
@@ -77,13 +74,14 @@
           "required": true,
           "derived": true
         },
-        "applicationNumber": {
+        "code": {
           "type": "string",
           "required": true,
           "unique": true,
           "indexed": true,
+          "derived": true,
           "title": "Application number",
-          "description": "Number people quote for the application, issued by the platform number sequence when the application is recorded.",
+          "description": "Number people quote to refer to the application, issued by the platform sequence when the application is recorded.",
           "maxLength": 30
         },
         "jobPositionId": {
@@ -94,7 +92,7 @@
             "JobPosition"
           ],
           "title": "Job position",
-          "description": "The job position the candidate applies to; used to list a position's pipeline."
+          "description": "The job position the candidate applies to; it also defines the hiring manager who decides offer and hire."
         },
         "candidateId": {
           "type": "record",
@@ -104,7 +102,7 @@
             "Candidate"
           ],
           "title": "Candidate",
-          "description": "The candidate who applies; name, e-mail, resume link and source are read from the candidate record."
+          "description": "The candidate who applies; name, email, resume link and source are read from the candidate's master record."
         },
         "status": {
           "type": "enum",
@@ -113,82 +111,149 @@
           "values": [
             {
               "value": "screening",
-              "title": "Screening",
-              "description": "Recorded and being screened by the recruiter."
+              "title": "Screening"
             },
             {
               "value": "interview",
-              "title": "Interview",
-              "description": "In interviews; the hiring manager decides on an offer."
+              "title": "Interview"
             },
             {
               "value": "offer",
-              "title": "Offer",
-              "description": "An offer was extended to the candidate."
+              "title": "Offer"
             },
             {
               "value": "hired",
-              "title": "Hired",
-              "description": "The candidate was hired; counts towards the position's headcount."
+              "title": "Hired"
             },
             {
               "value": "rejected",
-              "title": "Rejected",
-              "description": "The application was closed with a reason."
+              "title": "Rejected"
             }
           ],
           "title": "Stage",
           "description": "Current stage of the application in the hiring pipeline."
         },
         "appliedAt": {
-          "type": "date",
+          "type": "timestamp",
           "required": true,
           "indexed": true,
-          "title": "Applied on",
-          "description": "Date the application was recorded; lists are ordered by it."
+          "derived": true,
+          "title": "Applied at",
+          "description": "Moment the application was recorded; lists are ordered by it."
+        },
+        "stageChangedAt": {
+          "type": "timestamp",
+          "required": true,
+          "indexed": true,
+          "derived": true,
+          "title": "Stage changed at",
+          "description": "Moment the application last entered its current stage; used to sort the pipeline and find stalled applications."
         },
         "details": {
           "type": "object",
           "required": true,
-          "title": "Application details",
-          "description": "Everything about the application that nobody filters by.",
+          "title": "Details",
+          "description": "Everything else about the application.",
           "fields": {
-            "interviewStartedAt": {
-              "type": "timestamp",
-              "title": "Moved to interview at",
-              "description": "When the recruiter moved the application from screening to interview."
+            "notes": {
+              "type": "text",
+              "title": "Notes",
+              "description": "Free notes the recruiter records when registering or reviewing the application.",
+              "maxLength": 4000
             },
-            "offerExtendedAt": {
-              "type": "timestamp",
-              "title": "Offer extended at",
-              "description": "When the hiring manager moved the application to offer."
+            "interview": {
+              "type": "object",
+              "title": "Interview",
+              "description": "What happened when the application moved to interview.",
+              "fields": {
+                "movedAt": {
+                  "type": "timestamp",
+                  "derived": true,
+                  "title": "Moved to interview at",
+                  "description": "Moment the recruiter moved the application to interview."
+                },
+                "movedBy": {
+                  "type": "record",
+                  "derived": true,
+                  "to": [
+                    "Person"
+                  ],
+                  "title": "Moved by",
+                  "description": "The recruiter who moved the application to interview."
+                }
+              }
             },
-            "hiredAt": {
-              "type": "timestamp",
-              "title": "Hired at",
-              "description": "When the hiring manager confirmed the hire."
+            "offer": {
+              "type": "object",
+              "title": "Offer",
+              "description": "The offer extended by the hiring manager.",
+              "fields": {
+                "extendedAt": {
+                  "type": "timestamp",
+                  "derived": true,
+                  "title": "Offer extended at",
+                  "description": "Moment the hiring manager moved the application to offer."
+                },
+                "decidedBy": {
+                  "type": "record",
+                  "derived": true,
+                  "to": [
+                    "HiringManager"
+                  ],
+                  "title": "Offer decided by",
+                  "description": "The hiring manager who extended the offer."
+                },
+                "notes": {
+                  "type": "text",
+                  "title": "Offer notes",
+                  "description": "What the hiring manager wants recorded about the offer.",
+                  "maxLength": 2000
+                }
+              }
+            },
+            "hire": {
+              "type": "object",
+              "title": "Hire",
+              "description": "The hiring decision.",
+              "fields": {
+                "hiredAt": {
+                  "type": "timestamp",
+                  "derived": true,
+                  "title": "Hired at",
+                  "description": "Moment the hiring manager hired the candidate."
+                },
+                "decidedBy": {
+                  "type": "record",
+                  "derived": true,
+                  "to": [
+                    "HiringManager"
+                  ],
+                  "title": "Hire decided by",
+                  "description": "The hiring manager who hired the candidate."
+                }
+              }
             },
             "rejection": {
               "type": "object",
               "title": "Rejection",
-              "description": "Filled when the application is rejected.",
+              "description": "Why and when the application was rejected; filled when it is rejected.",
               "fields": {
                 "reason": {
                   "type": "text",
                   "required": true,
                   "title": "Rejection reason",
-                  "description": "Why the application will not move forward; required to reject.",
-                  "maxLength": 2000
+                  "description": "The reason the application did not move forward, required to reject.",
+                  "maxLength": 1000
                 },
                 "rejectedAt": {
                   "type": "timestamp",
-                  "required": true,
+                  "derived": true,
                   "title": "Rejected at",
-                  "description": "When the application was moved to rejected."
+                  "description": "Moment the application was rejected."
                 },
                 "stageAtRejection": {
                   "type": "enum",
-                  "required": true,
+                  "derived": true,
                   "values": [
                     {
                       "value": "screening",
@@ -204,7 +269,7 @@
                     }
                   ],
                   "title": "Stage at rejection",
-                  "description": "The stage the application was in when it was rejected."
+                  "description": "Stage the application was in when it was rejected."
                 }
               }
             },
@@ -212,13 +277,19 @@
               "type": "boolean",
               "derived": true,
               "title": "Active",
-              "description": "True while the application is still in screening, interview or offer, that is, not yet hired nor rejected."
+              "description": "The application is still in screening, interview or offer, neither hired nor rejected."
             },
-            "daysInPipeline": {
+            "daysInStage": {
               "type": "integer",
               "derived": true,
-              "title": "Days in pipeline",
-              "description": "Days from the application date until today, or until the day it was hired or rejected."
+              "title": "Days in current stage",
+              "description": "Number of days since the application entered its current stage, counted up to today."
+            },
+            "remainingOpenings": {
+              "type": "integer",
+              "derived": true,
+              "title": "Remaining openings of the position",
+              "description": "Headcount of the application's job position minus the applications already hired for that position."
             }
           }
         }
@@ -226,7 +297,11 @@
     },
     "uniqueKeys": [
       [
-        "applicationNumber"
+        "code"
+      ],
+      [
+        "jobPositionId",
+        "candidateId"
       ]
     ],
     "lifecycleStates": [
@@ -261,10 +336,10 @@
         "by": [
           "recruiter"
         ],
-        "description": "The recruiter moves a screened application to interview, handing it to the position's hiring manager.",
+        "description": "The recruiter moves a screened application to the interview stage.",
         "payload": [],
         "ruleRefs": [
-          "recruiterMovesScreeningAndInterview"
+          "finalStagesAreTerminal"
         ]
       },
       {
@@ -276,10 +351,12 @@
         "by": [
           "hiringManager"
         ],
-        "description": "The position's hiring manager decides to extend an offer to the interviewed candidate.",
-        "payload": [],
+        "description": "The hiring manager of the position decides to extend an offer to the interviewed candidate.",
+        "payload": [
+          "details.offer.notes"
+        ],
         "ruleRefs": [
-          "onlyPositionHiringManagerDecides"
+          "onlyPositionManagerDecides"
         ]
       },
       {
@@ -291,12 +368,12 @@
         "by": [
           "hiringManager"
         ],
-        "description": "The position's hiring manager confirms the hire; when hires reach the headcount the position closes automatically.",
+        "description": "The hiring manager of the position hires the candidate; when the position's headcount is filled the position closes automatically in the same operation.",
         "payload": [],
         "ruleRefs": [
-          "onlyPositionHiringManagerDecides",
-          "hireWithinRemainingHeadcount",
-          "positionClosesWhenHeadcountFilled"
+          "onlyPositionManagerDecides",
+          "hireRequiresRemainingHeadcount",
+          "closePositionWhenHeadcountFilled"
         ]
       },
       {
@@ -311,12 +388,13 @@
           "recruiter",
           "hiringManager"
         ],
-        "description": "The application is closed with a reason; normally the recruiter records it, and the hiring manager may decline at interview instead of returning it.",
+        "description": "The application is closed with a rejection reason; normally recorded by the recruiter, including when the hiring manager declines an offer or a hire and hands it back.",
         "payload": [
           "details.rejection.reason"
         ],
         "ruleRefs": [
-          "rejectionRequiresReason"
+          "rejectionRequiresReason",
+          "finalStagesAreTerminal"
         ]
       }
     ]
@@ -335,7 +413,12 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Application",
-      "detail": "record.fields.details.fields.daysInPipeline.derived (derived[])"
+      "detail": "record.fields.details.fields.daysInStage.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Application",
+      "detail": "record.fields.details.fields.remainingOpenings.derived (derived[])"
     }
   ]
 }

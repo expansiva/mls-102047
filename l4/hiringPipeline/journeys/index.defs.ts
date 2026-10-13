@@ -12,14 +12,9 @@ export const hiringPipelineJourneyIndex = {
       "title": "Open a job position"
     },
     {
-      "journeyId": "registerCandidate",
+      "journeyId": "registerCandidateApplication",
       "actorRef": "recruiter",
-      "title": "Register a candidate"
-    },
-    {
-      "journeyId": "recordApplication",
-      "actorRef": "recruiter",
-      "title": "Record an application"
+      "title": "Register a candidate and an application"
     },
     {
       "journeyId": "advanceToInterview",
@@ -37,9 +32,9 @@ export const hiringPipelineJourneyIndex = {
       "title": "Decide on an offer"
     },
     {
-      "journeyId": "confirmHire",
+      "journeyId": "decideHire",
       "actorRef": "hiringManager",
-      "title": "Confirm a hire"
+      "title": "Decide on hiring"
     },
     {
       "journeyId": "reviewMyPipeline",

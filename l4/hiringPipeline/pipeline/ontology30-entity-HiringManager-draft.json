@@ -4,7 +4,7 @@
     "moduleName": "hiringPipeline",
     "entityId": "HiringManager",
     "title": "Hiring Manager",
-    "description": "The person responsible for a job position who decides offers and hires; the positions and applications they see are scoped to the positions that point at them.",
+    "description": "The person who manages a job position and decides offers and hires for its applications. Her positions and their applications are scoped to her through the position's hiring manager.",
     "displayField": "details.identification.name",
     "relationships": {
       "jobPositions": {
@@ -12,33 +12,32 @@
         "to": "JobPosition",
         "via": "JobPosition.hiringManagerId",
         "cardinality": "1:N",
-        "title": "Job positions managed",
-        "description": "The job positions for which this person decides offers and hires; scopes what the hiring manager sees.",
+        "title": "Managed job positions",
+        "description": "The job positions this person manages; each position has exactly one hiring manager, and her positions and their applications are scoped to her through it.",
         "mode": "fk",
         "direction": "to",
         "required": true
       }
     },
     "capabilities": {
-      "read.byId": "Reads the hiring manager by mdmId to show the name on job positions and applications; used by recruiters and hiring managers.",
-      "locate.byName": "Finds a hiring manager by typed name when a recruiter opens or edits a job position.",
-      "locate.byContact": "Finds the hiring manager behind a work e-mail before registering, so the same person is not created twice; used by the recruiter.",
-      "locate.byLogin": "Resolves the signed-in hiring manager from the login e-mail so the platform can scope positions and applications to the ones pointing at her.",
-      "register.createOrAttach": "Creates the person when absent, or attaches the hiringPipeline.HiringManager role to an existing person, when a recruiter assigns a hiring manager to a position.",
-      "edit.platformFields": "Corrects the hiring manager's name or other platform fields; used by the recruiter.",
-      "inactivate": "Takes a hiring manager out of use so new positions cannot be assigned to her, keeping past positions intact; used by the recruiter.",
-      "link.contact": "Adds the work e-mail or phone of the hiring manager as a ContactChannel linked by HasContact; used by the recruiter.",
-      "listLinks": "Shows the hiring manager's related records, such as contacts and reporting lines, on the record screen.",
-      "invite.login": "Gives the hiring manager a login so she can see and decide on the applications of her positions; triggered by the recruiter.",
-      "comment": "Leaves notes on the hiring manager record, such as availability for interviews; used by recruiters."
+      "read.byId": "Reads the hiring manager by mdmId to show her name on job positions and applications, for recruiters and hiring managers.",
+      "locate.byName": "Finds a hiring manager by typed name when a recruiter assigns the manager of a job position.",
+      "locate.byLogin": "Resolves the signed-in hiring manager from her login e-mail so her positions and applications are scoped to her.",
+      "register.createOrAttach": "Creates the person when absent and attaches the hiringPipeline.HiringManager role, when a recruiter names a manager for a position.",
+      "edit.platformFields": "Lets a recruiter correct the hiring manager's name and other platform fields.",
+      "inactivate": "Takes a hiring manager out of use so she is no longer offered for new positions, and reactivates her when needed; used by recruiters.",
+      "link.contact": "Adds an e-mail or phone of the hiring manager as a ContactChannel linked by HasContact, maintained by recruiters.",
+      "listLinks": "Shows the hiring manager's level-1 relationships and contacts on her record screen.",
+      "invite.login": "Gives the hiring manager a login so she can decide offers and hires on her own positions; issued by a recruiter.",
+      "comment": "Lets recruiters leave notes on the hiring manager's record.",
+      "audit": "Shows who changed the hiring manager's record and when, for an administrator."
     },
     "rules": [
       "rule-foreign-namespace-refused",
       "rule-identity-never-in-namespace",
       "rule-document-shape-validated",
       "rule-delete-blocked-by-relationships",
-      "rule-person-privacy-consent-required-br-eu",
-      "inactiveHiringManagerCannotBeAssigned"
+      "rule-person-privacy-consent-required-br-eu"
     ],
     "kind": "role",
     "subtype": "Person",
@@ -63,7 +62,7 @@
         "details": {
           "type": "object",
           "required": true,
-          "description": "The master record of the person who manages a job position, as the MDM stores it.",
+          "description": "The master record of the person who manages job positions, as the platform stores it.",
           "fields": {
             "identification": {
               "type": "object",
@@ -88,7 +87,7 @@
                   "required": true,
                   "indexed": true,
                   "maxLength": 200,
-                  "description": "Full name of the hiring manager, shown on job positions and when assigning a position.",
+                  "description": "Full name of the hiring manager, shown when choosing the manager of a job position.",
                   "title": "Name"
                 },
                 "status": {
@@ -115,7 +114,7 @@
                     }
                   ],
                   "title": "Status",
-                  "description": "Platform status; only active hiring managers can be assigned to new positions."
+                  "description": "Whether this manager is active; an inactive manager is not offered for new positions."
                 },
                 "countryCode": {
                   "type": "string",
@@ -124,7 +123,7 @@
                   "pattern": "^[A-Z]{2}$",
                   "maxLength": 2,
                   "default": "US",
-                  "description": "Country whose legal rules apply to this person's data.",
+                  "description": "Country whose legal rules apply to this person (ISO 3166-1 alpha-2).",
                   "title": "Country"
                 },
                 "tags": {
@@ -132,8 +131,8 @@
                   "required": true,
                   "collection": true,
                   "derived": true,
-                  "description": "Module roles of the record; carries hiringPipeline.HiringManager.",
-                  "title": "Roles"
+                  "description": "Module roles of the record, including hiringPipeline.HiringManager.",
+                  "title": "Module roles"
                 },
                 "createdAt": {
                   "type": "string",
@@ -152,7 +151,7 @@
                   "description": "When the record was last changed."
                 }
               },
-              "description": "Index columns of the platform record."
+              "description": "Platform identification of the hiring manager."
             },
             "base": {
               "type": "object",
@@ -164,7 +163,7 @@
                   "collection": true,
                   "of": "ContactSummary",
                   "derived": true,
-                  "description": "Summary of the contact channels linked to the hiring manager, such as the work e-mail.",
+                  "description": "Summary of the contact channels linked to the hiring manager, used to reach her about decisions.",
                   "title": "Contacts"
                 },
                 "relationshipRefs": {
@@ -175,20 +174,13 @@
                   "title": "Relationship keys"
                 }
               },
-              "description": "What every record has, whatever its subtype."
+              "description": "What every record carries; here only the derived contact summary is read."
             },
             "person": {
               "type": "object",
               "owner": "platform",
-              "fields": {
-                "privacyConsent": {
-                  "type": "object",
-                  "of": "PrivacyConsent",
-                  "description": "Consent to process this person's data, required for residents of Brazil and the EU.",
-                  "title": "Privacy consent"
-                }
-              },
-              "description": "Natural-person data of the platform; this role uses none beyond what the platform keeps."
+              "fields": {},
+              "description": "Natural-person branch; nothing in it is needed by this module."
             },
             "general": {
               "type": "object",

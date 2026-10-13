@@ -6,31 +6,32 @@ export const hiringPipelineEntityCandidateEmail = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "hiringPipeline",
   "entityId": "CandidateEmail",
-  "title": "Candidate E-mail",
-  "description": "The candidate's e-mail address as a contact channel record, linked to the candidate by HasContact and used to find duplicates.",
-  "displayField": "details.contactChannel.value",
+  "title": "Candidate e-mail",
+  "description": "The e-mail address of a candidate, kept as a contact channel record linked to the candidate and used to find an existing candidate.",
+  "displayField": "details.identification.name",
   "relationships": {
     "candidate": {
       "relationshipId": "candidateEmail",
       "to": "Candidate",
       "via": "HasContact",
       "cardinality": "N:1",
-      "title": "Candidate",
-      "description": "The candidate who owns this e-mail address, linked by HasContact.",
+      "title": "Candidate who owns this e-mail",
+      "description": "HasContact link from the candidate to this e-mail record.",
       "direction": "to",
-      "role": "HasContact"
+      "required": true,
+      "role": "email"
     }
   },
   "capabilities": {
-    "read.byId": "Reads the candidate's e-mail record by id so the candidate screen and application lists can show the address.",
-    "locate.byContact": "Finds the e-mail record holding a typed address so the recruiter detects an already registered candidate before creating a new one.",
-    "register.createOrAttach": "Creates the e-mail record when the address is new, or attaches the hiringPipeline.CandidateEmail role to the existing one, when the recruiter registers a candidate.",
-    "edit.platformFields": "Lets the recruiter correct a mistyped address or mark it verified.",
-    "inactivate": "Lets the recruiter take an address the candidate no longer uses out of service without deleting it, and reactivate it later.",
-    "link": "Links the e-mail to its candidate through HasContact when the recruiter registers or updates the candidate.",
-    "unlink": "Closes the HasContact link when the recruiter removes an address from a candidate, keeping its history.",
-    "listLinks": "Shows on the e-mail record which candidate it belongs to, for the recruiter and the hiring manager.",
-    "audit": "Shows an administrator who changed a candidate's e-mail and when."
+    "read.byId": "Reads the candidate's e-mail record by id when the candidate screen shows its contacts; used by recruiters and hiring managers.",
+    "locate.byContact": "Finds the candidate who already owns a typed e-mail address, so the recruiter does not register the same candidate twice.",
+    "register.createOrAttach": "Creates the e-mail record when the address is new, or attaches the hiringPipeline role to the existing one, when the recruiter registers a candidate.",
+    "edit.platformFields": "Lets the recruiter correct the candidate's e-mail address or its verification flag.",
+    "inactivate": "Takes an e-mail address the candidate no longer uses out of use without deleting it; the recruiter can reactivate it.",
+    "link": "Links the e-mail record to its candidate with HasContact when the recruiter registers the candidate.",
+    "unlink": "Closes the HasContact link when the address no longer belongs to the candidate, keeping its history.",
+    "listLinks": "Shows which candidate the e-mail belongs to, on the candidate screen.",
+    "audit": "Shows who changed the candidate's e-mail address and when."
   },
   "rules": [
     "rule-foreign-namespace-refused",
@@ -87,8 +88,8 @@ export const hiringPipelineEntityCandidateEmail = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 200,
-                "description": "How recruiters recognise this e-mail record in a list, usually the address itself.",
-                "title": "Name"
+                "description": "How recruiters recognise this e-mail record, usually the address itself.",
+                "title": "Label"
               },
               "status": {
                 "type": "enum",
@@ -125,47 +126,15 @@ export const hiringPipelineEntityCandidateEmail = {
                 "default": "US",
                 "description": "ISO 3166-1 alpha-2 country the record belongs to.",
                 "title": "Country"
-              },
-              "tags": {
-                "type": "string",
-                "required": true,
-                "collection": true,
-                "derived": true,
-                "description": "Module roles of the record, including hiringPipeline.CandidateEmail.",
-                "title": "Module roles"
-              },
-              "createdAt": {
-                "type": "string",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "title": "Created at",
-                "description": "When the e-mail record was created."
-              },
-              "updatedAt": {
-                "type": "string",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "title": "Updated at",
-                "description": "When the e-mail record was last changed."
               }
             },
-            "description": "Index columns of the platform for the candidate's e-mail record."
+            "description": "Index columns of the contact channel record."
           },
           "base": {
             "type": "object",
             "owner": "platform",
-            "fields": {
-              "relationshipRefs": {
-                "type": "object",
-                "required": true,
-                "derived": true,
-                "description": "Compact keys recomputed by the engine, including the candidate this e-mail belongs to.",
-                "title": "Relationship references"
-              }
-            },
-            "description": "What every record has; nothing of it is used by this role beyond the engine-derived references."
+            "fields": {},
+            "description": "Platform base data of the record; nothing kept for this role."
           },
           "contactChannel": {
             "type": "object",
@@ -181,12 +150,12 @@ export const hiringPipelineEntityCandidateEmail = {
                   }
                 ],
                 "title": "Contact type",
-                "description": "Always Email for a candidate e-mail."
+                "description": "Always an e-mail for a candidate e-mail."
               },
               "value": {
                 "type": "string",
                 "required": true,
-                "description": "The candidate's e-mail address, used by recruiters to reach the candidate and to detect duplicate registrations.",
+                "description": "The candidate's e-mail address, used to find an existing candidate before registering a new one.",
                 "title": "E-mail address",
                 "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
                 "maxLength": 254
@@ -195,21 +164,21 @@ export const hiringPipelineEntityCandidateEmail = {
                 "type": "boolean",
                 "required": true,
                 "title": "Verified",
-                "description": "Whether the address has been confirmed as belonging to the candidate."
+                "description": "Whether the candidate's e-mail address has been verified."
               },
               "verifiedAt": {
                 "type": "timestamp",
                 "title": "Verified at",
-                "description": "When the address was confirmed."
+                "description": "When the e-mail address was verified."
               }
             },
-            "description": "The candidate's e-mail as a contact channel record."
+            "description": "The candidate's e-mail address as a contact channel."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Fields promoted by the organization; read only for this module."
+            "description": "Fields promoted by the organization; read only."
           },
           "hiringPipeline": {
             "type": "object",

@@ -208,78 +208,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-10-12T15:41:38.204Z"
     },
     {
-      "moduleName": "hiringPipeline",
-      "actors": [
-        {
-          "actorId": "recruiter",
-          "kind": "internal"
-        },
-        {
-          "actorId": "hiringManager",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "hiringPipeline.Candidate",
-          "namespace": "hiringPipeline"
-        },
-        {
-          "subtype": "ContactChannel",
-          "roleTag": "hiringPipeline.CandidateEmail",
-          "namespace": "hiringPipeline"
-        },
-        {
-          "subtype": "Person",
-          "roleTag": "hiringPipeline.HiringManager",
-          "namespace": "hiringPipeline"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "JobPosition",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Application",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "Candidate",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "CandidateEmail",
-          "kind": "role",
-          "mdmSubtype": "ContactChannel",
-          "class": "mdm"
-        },
-        {
-          "entityId": "HiringManager",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "candidateHired",
-          "on": "Application.hire"
-        },
-        {
-          "eventId": "positionClosed",
-          "on": "JobPosition.closePosition"
-        }
-      ],
-      "updatedAt": "2026-10-12T19:26:48.918Z"
-    },
-    {
       "moduleName": "locacaoEquipamentos",
       "actors": [
         {
@@ -777,6 +705,78 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-13T00:51:10.149Z"
+    },
+    {
+      "moduleName": "hiringPipeline",
+      "actors": [
+        {
+          "actorId": "recruiter",
+          "kind": "internal"
+        },
+        {
+          "actorId": "hiringManager",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "hiringPipeline.Candidate",
+          "namespace": "hiringPipeline"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "hiringPipeline.CandidateEmail",
+          "namespace": "hiringPipeline"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "hiringPipeline.HiringManager",
+          "namespace": "hiringPipeline"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Candidate",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "CandidateEmail",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        },
+        {
+          "entityId": "HiringManager",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "JobPosition",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Application",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "candidateHired",
+          "on": "Application.hire"
+        },
+        {
+          "eventId": "jobPositionClosed",
+          "on": "JobPosition.close"
+        }
+      ],
+      "updatedAt": "2026-10-13T00:55:16.386Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

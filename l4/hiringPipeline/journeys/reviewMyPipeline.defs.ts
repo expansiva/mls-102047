@@ -8,35 +8,42 @@ export const reviewMyPipelineJourney = {
   "business": {
     "actorRef": "hiringManager",
     "title": "Review my positions' pipeline",
-    "goal": "See the applications of the positions I manage by stage.",
+    "goal": "Follow the progress of applications across the job positions I manage.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "listMyPositions",
+        "stepId": "findMyPositions",
         "kind": "locate",
         "entity": "JobPosition",
-        "title": "List my positions",
-        "description": "The hiring manager lists the job positions where they are the hiring manager."
+        "title": "Find my positions",
+        "description": "The hiring manager lists the job positions she manages."
       },
       {
         "stepId": "inspectPosition",
         "kind": "inspect",
         "entity": "JobPosition",
-        "title": "View position pipeline",
-        "description": "The hiring manager sees headcount, hires so far and applications grouped by stage."
+        "title": "View position status",
+        "description": "The hiring manager sees headcount, hires so far and whether the position is open or closed."
+      },
+      {
+        "stepId": "inspectApplications",
+        "kind": "inspect",
+        "entity": "Application",
+        "title": "View applications by stage",
+        "description": "The hiring manager views the position's applications grouped by stage."
       }
     ],
     "outcome": {
-      "statement": "The hiring manager knows where each application of their positions stands.",
+      "statement": "The hiring manager knows where each application of her positions stands.",
       "evidence": [
-        "Applications are shown per stage for each managed position",
-        "Headcount and hires count are visible per position"
+        "Applications are shown by stage for each managed position",
+        "Each position shows its filled and remaining headcount"
       ]
     }
   },
-  "businessHash": "sha256:e01a14be7ea66639fbe393995d0bd82ba33adf4b1677cee7b6f9dd0828de22c5"
+  "businessHash": "sha256:9f7a55fa88e41fcdf9ca5b9681194a64f5568b06842f8ea5d3fe384e877aa876"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ReviewMyPipelineJourneyType = typeof reviewMyPipelineJourney;

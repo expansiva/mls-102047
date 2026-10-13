@@ -8,7 +8,7 @@ export const rejectApplicationJourney = {
   "business": {
     "actorRef": "recruiter",
     "title": "Reject an application",
-    "goal": "Close an application that will not move forward, recording the reason.",
+    "goal": "Close an application that will not move forward, recording the reason for rejection.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,15 +17,15 @@ export const rejectApplicationJourney = {
         "stepId": "findApplication",
         "kind": "locate",
         "entity": "Application",
-        "title": "Find the application",
-        "description": "The recruiter opens the application in hand or searches it in the position's pipeline."
+        "title": "Find application",
+        "description": "The recruiter finds the active application to be rejected."
       },
       {
-        "stepId": "inspectApplication",
+        "stepId": "reviewApplication",
         "kind": "inspect",
         "entity": "Application",
         "title": "Review application",
-        "description": "The recruiter checks the current stage and history before rejecting."
+        "description": "The recruiter reviews the application's current stage and history before rejecting it."
       },
       {
         "stepId": "reject",
@@ -34,18 +34,18 @@ export const rejectApplicationJourney = {
         "effect": "transition",
         "transitionRef": "reject",
         "title": "Reject with reason",
-        "description": "The recruiter enters the rejection reason and moves the application to rejected."
+        "description": "The recruiter rejects the application and records the rejection reason."
       }
     ],
     "outcome": {
-      "statement": "The application is rejected with a recorded reason.",
+      "statement": "The application is rejected with a recorded reason and leaves the active pipeline.",
       "evidence": [
-        "The application shows stage rejected",
+        "The application shows the rejected stage",
         "The rejection reason is visible on the application"
       ]
     }
   },
-  "businessHash": "sha256:caec38bf9b3fca4abf123b00404f65dbb54eb2a8500ef48611680ac00526856a"
+  "businessHash": "sha256:87608e04429c132464b33b1abf2742cf3d120a15037b35aa017239073eae66d5"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RejectApplicationJourneyType = typeof rejectApplicationJourney;

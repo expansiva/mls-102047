@@ -11,7 +11,7 @@ export const hiringPipelineAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Recruiter",
-      "description": "Opens job positions, registers candidates, records applications and moves them through screening and interview, and rejects them with a reason.",
+      "description": "Opens job positions, registers candidates and their applications, and moves applications through screening and interview stages or rejects them with a reason.",
       "personEntity": ""
     },
     {
@@ -19,16 +19,16 @@ export const hiringPipelineAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Hiring Manager",
-      "description": "Hiring manager of a position; decides when an application moves to offer and when it is hired.",
+      "description": "The manager of a job position, who decides whether an application moves to offer and whether the candidate is hired.",
       "personEntity": "HiringManager"
     }
   ],
   "grants": [
     {
-      "grantId": "recruiterPipeline",
+      "grantId": "recruiterPositionsAndApplications",
       "actorRef": "recruiter",
-      "title": "Manage positions and applications",
-      "description": "The recruiter opens job positions, records applications and moves them through screening, interview and rejection for every position of the organization.",
+      "title": "Manage job positions and applications",
+      "description": "The recruiter opens job positions, records applications, moves them through screening and interview, and rejects them with a reason, across the whole organization.",
       "entityRefs": [
         "JobPosition",
         "Application"
@@ -39,32 +39,32 @@ export const hiringPipelineAccess = {
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "The recruiter reads the whole position and application, including rejection details and derived counts."
+        "description": "The recruiter reads every field of positions and applications."
       }
     },
     {
       "grantId": "recruiterCandidates",
       "actorRef": "recruiter",
-      "title": "Register and search candidates",
-      "description": "The recruiter searches for candidates to avoid duplicates, registers them with name, e-mail and source, and maintains their e-mail records.",
+      "title": "Register and review candidates",
+      "description": "The recruiter registers candidates with name, e-mail, resume link and source, reusing an existing candidate instead of duplicating it.",
       "entityRefs": [
         "Candidate",
         "CandidateEmail"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "All candidates and candidate e-mail records of the organization."
+        "description": "All candidates and their e-mail records in the organization."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "The recruiter reads the whole candidate record, including the document used for deduplication, and the e-mail record."
+        "description": "The recruiter reads the whole candidate record and its e-mail contact channel."
       }
     },
     {
       "grantId": "recruiterHiringManagers",
       "actorRef": "recruiter",
       "title": "Choose the hiring manager of a position",
-      "description": "The recruiter sees hiring managers to assign one when opening a position.",
+      "description": "The recruiter looks up hiring managers to assign one to each job position and to hand interviewed applications to her.",
       "entityRefs": [
         "HiringManager"
       ],
@@ -74,7 +74,7 @@ export const hiringPipelineAccess = {
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Name, status and contact summary of the hiring manager; no consent or other personal data.",
+        "description": "Only the manager's name, status and contact summary.",
         "allowedFields": [
           "HiringManager.details.identification.name",
           "HiringManager.details.identification.status",
@@ -83,93 +83,81 @@ export const hiringPipelineAccess = {
       }
     },
     {
-      "grantId": "managerOwnPipeline",
+      "grantId": "hiringManagerMyPositions",
       "actorRef": "hiringManager",
-      "title": "My positions and their applications",
-      "description": "The hiring manager sees the positions they manage and their applications, extends offers and confirms hires.",
+      "title": "My job positions",
+      "description": "The hiring manager sees the job positions she manages, with headcount, hires so far and remaining openings.",
       "entityRefs": [
-        "JobPosition",
-        "Application"
+        "JobPosition"
       ],
       "dataScope": {
-        "mode": "own",
-        "description": "Positions whose hiring manager is the signed-in person, and the applications to those positions.",
+        "mode": "assigned",
+        "description": "Job positions whose hiring manager is the signed-in manager.",
         "anchorEntity": "HiringManager"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "The whole position and application, including stage history, rejection details and derived counts."
+        "description": "Every field of her positions."
       }
     },
     {
-      "grantId": "managerCandidates",
+      "grantId": "hiringManagerMyApplications",
+      "actorRef": "hiringManager",
+      "title": "Applications to my positions",
+      "description": "The hiring manager reviews applications to her positions and decides offer and hire.",
+      "entityRefs": [
+        "Application"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Applications whose job position is managed by the signed-in manager.",
+        "anchorEntity": "HiringManager"
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Every field of the applications to her positions."
+      }
+    },
+    {
+      "grantId": "hiringManagerCandidates",
       "actorRef": "hiringManager",
       "title": "Candidates of my positions",
-      "description": "The hiring manager reviews the candidates who applied to the positions they manage.",
+      "description": "The hiring manager reviews the name, resume link and source of candidates who applied to her positions.",
       "entityRefs": [
         "Candidate"
       ],
       "dataScope": {
         "mode": "related",
-        "description": "Candidates with at least one application to a job position whose hiring manager is the signed-in person.",
+        "description": "Candidates who have an application to a job position managed by the signed-in manager.",
         "anchorEntity": "Candidate"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Name, contacts and source of the candidate; the national document and consent data stay hidden.",
+        "description": "Name, status, contact summary, resume link and source; national document and privacy data are not shown.",
         "allowedFields": [
           "Candidate.details.identification.name",
           "Candidate.details.identification.status",
-          "Candidate.details.identification.countryCode",
-          "Candidate.details.base.aliases",
           "Candidate.details.base.contacts",
           "Candidate.details.hiringPipeline"
-        ],
-        "deniedFields": [
-          "Candidate.details.identification.docType",
-          "Candidate.details.identification.docId",
-          "Candidate.details.person.privacyConsent"
         ]
       }
     },
     {
-      "grantId": "managerCandidateEmails",
+      "grantId": "hiringManagerOwnRecord",
       "actorRef": "hiringManager",
-      "title": "E-mail of candidates of my positions",
-      "description": "The hiring manager sees the e-mail address of candidates who applied to their positions.",
-      "entityRefs": [
-        "CandidateEmail"
-      ],
-      "dataScope": {
-        "mode": "custom",
-        "description": "E-mail records linked to candidates that have an application to a position managed by the signed-in person."
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "The e-mail address and whether it is verified.",
-        "allowedFields": [
-          "CandidateEmail.details.identification.name",
-          "CandidateEmail.details.contactChannel.value",
-          "CandidateEmail.details.contactChannel.isVerified"
-        ]
-      }
-    },
-    {
-      "grantId": "managerSelf",
-      "actorRef": "hiringManager",
-      "title": "My hiring manager record",
-      "description": "The hiring manager sees their own record as shown on their positions.",
+      "title": "My manager record",
+      "description": "The hiring manager sees her own record in the hiring pipeline.",
       "entityRefs": [
         "HiringManager"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Only the record of the signed-in hiring manager.",
+        "description": "Only the signed-in manager's own record.",
         "anchorEntity": "HiringManager"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "The whole own record."
+        "description": "Her whole record."
       }
     }
   ]

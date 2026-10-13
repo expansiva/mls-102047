@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:24:13.630Z",
+      "updatedAt": "2026-10-13T00:52:02.845Z",
       "artifactPaths": [
         "l4/hiringPipeline/module.defs.ts"
       ],
@@ -20,41 +20,40 @@
           "kind": "internal",
           "origin": "named",
           "title": "Recruiter",
-          "description": "Opens job positions, registers candidates, records applications and moves them through screening and interview, and rejects them with a reason."
+          "description": "Opens job positions, registers candidates and their applications, and moves applications through screening and interview stages or rejects them with a reason."
         },
         {
           "actorId": "hiringManager",
           "kind": "internal",
           "origin": "named",
           "title": "Hiring Manager",
-          "description": "Hiring manager of a position; decides when an application moves to offer and when it is hired."
+          "description": "The manager of a job position, who decides whether an application moves to offer and whether the candidate is hired."
         }
       ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:24:46.465Z",
+      "updatedAt": "2026-10-13T00:53:08.212Z",
       "artifactPaths": [
         "l4/hiringPipeline/journeys/openJobPosition.defs.ts",
-        "l4/hiringPipeline/journeys/registerCandidate.defs.ts",
-        "l4/hiringPipeline/journeys/recordApplication.defs.ts",
+        "l4/hiringPipeline/journeys/registerCandidateApplication.defs.ts",
         "l4/hiringPipeline/journeys/advanceToInterview.defs.ts",
         "l4/hiringPipeline/journeys/rejectApplication.defs.ts",
         "l4/hiringPipeline/journeys/decideOffer.defs.ts",
-        "l4/hiringPipeline/journeys/confirmHire.defs.ts",
+        "l4/hiringPipeline/journeys/decideHire.defs.ts",
         "l4/hiringPipeline/journeys/reviewMyPipeline.defs.ts",
         "l4/hiringPipeline/journeys/index.defs.ts"
       ],
-      "decideStepCount": 1,
+      "decideStepCount": 2,
       "droppedActors": [],
       "compile": {
         "status": "clean",
-        "files": 9
+        "files": 8
       }
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:24:57.712Z",
+      "updatedAt": "2026-10-13T00:53:24.697Z",
       "artifactPaths": [
         "l4/hiringPipeline/workflows.defs.ts"
       ],
@@ -65,13 +64,13 @@
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:25:57.417Z",
+      "updatedAt": "2026-10-13T00:54:30.210Z",
       "artifactPaths": [
-        "l4/hiringPipeline/ontology/JobPosition.defs.ts",
-        "l4/hiringPipeline/ontology/Application.defs.ts",
         "l4/hiringPipeline/ontology/Candidate.defs.ts",
         "l4/hiringPipeline/ontology/CandidateEmail.defs.ts",
         "l4/hiringPipeline/ontology/HiringManager.defs.ts",
+        "l4/hiringPipeline/ontology/JobPosition.defs.ts",
+        "l4/hiringPipeline/ontology/Application.defs.ts",
         "l4/hiringPipeline/ontology/index.defs.ts"
       ],
       "uncitedEntities": [
@@ -84,16 +83,6 @@
         "files": 6
       },
       "normalizations": [
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "JobPosition",
-          "detail": "storage.table hiringPipeline_jobposition"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Application",
-          "detail": "storage.table hiringPipeline_application"
-        },
         {
           "kind": "derivedFromPlatform",
           "entityId": "Candidate",
@@ -112,42 +101,12 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "JobPosition",
-          "detail": "record.fields.id, record.fields.version"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "JobPosition",
-          "detail": "record.fields.details.fields.hiresSoFar.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "JobPosition",
-          "detail": "record.fields.details.fields.remainingOpenings.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "JobPosition",
-          "detail": "record.fields.details.fields.applicationsByStage.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "JobPosition",
-          "detail": "record.fields.details.fields.isFilled.derived (derived[])"
+          "detail": "storage.table hiringPipeline_jobposition"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "Application",
-          "detail": "record.fields.id, record.fields.version"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Application",
-          "detail": "record.fields.details.fields.isActive.derived (derived[])"
-        },
-        {
-          "kind": "derivedFromPlatform",
-          "entityId": "Application",
-          "detail": "record.fields.details.fields.daysInPipeline.derived (derived[])"
+          "detail": "storage.table hiringPipeline_application"
         },
         {
           "kind": "derivedFromPlatform",
@@ -158,11 +117,6 @@
           "kind": "tightened",
           "entityId": "Candidate",
           "detail": "Candidate.details.identification.subtype.values"
-        },
-        {
-          "kind": "tightened",
-          "entityId": "Candidate",
-          "detail": "Candidate.details.identification.docType.values"
         },
         {
           "kind": "derivedFromPlatform",
@@ -203,48 +157,71 @@
           "kind": "namespaceEmpty",
           "entityId": "HiringManager",
           "detail": "details.hiringPipeline"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "JobPosition",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "JobPosition",
+          "detail": "record.fields.details.fields.hiresSoFar.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "JobPosition",
+          "detail": "record.fields.details.fields.remainingOpenings.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "JobPosition",
+          "detail": "record.fields.details.fields.headcountFilled.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Application",
+          "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Application",
+          "detail": "record.fields.details.fields.isActive.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Application",
+          "detail": "record.fields.details.fields.daysInStage.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Application",
+          "detail": "record.fields.details.fields.remainingOpenings.derived (derived[])"
         }
       ],
       "citedRules": [
-        "closePositionWhenHeadcountFilled",
-        "applicationOnlyToOpenPosition",
-        "headcountAtLeastOne",
-        "hiringManagerSeesOwnPositions",
-        "applicationNumberFromSequence",
-        "applicationStartsInScreening",
-        "oneActiveApplicationPerCandidateAndPosition",
-        "recruiterMovesScreeningAndInterview",
-        "onlyPositionHiringManagerDecides",
-        "rejectionRequiresReason",
-        "hireWithinRemainingHeadcount",
-        "positionClosesWhenHeadcountFilled",
         "rule-foreign-namespace-refused",
         "rule-identity-never-in-namespace",
         "rule-document-shape-validated",
         "rule-delete-blocked-by-relationships",
         "rule-person-privacy-consent-required-br-eu",
-        "candidateRequiresEmail",
-        "candidateSourceRequired",
+        "candidateEmailRequired",
+        "candidateReusedNotDuplicated",
         "rule-contact-value-unique-per-type",
-        "inactiveHiringManagerCannotBeAssigned"
+        "positionHeadcountPositive",
+        "closePositionWhenHeadcountFilled",
+        "closedPositionAcceptsNoApplications",
+        "hireRequiresRemainingOpening",
+        "positionRequiresHiringManager",
+        "applicationOnlyToOpenPosition",
+        "onePerCandidatePerPosition",
+        "rejectionRequiresReason",
+        "onlyPositionManagerDecides",
+        "hireRequiresRemainingHeadcount",
+        "finalStagesAreTerminal"
       ],
       "citedCapabilities": [
         "read.byId",
-        "locate.byColumn",
-        "locate.byText",
-        "count",
-        "listByForeignKey",
-        "create",
-        "update",
-        "transition",
-        "read.mdmRecord",
-        "comment",
-        "attach.document",
-        "uniqueKey",
-        "transaction",
-        "sequence.next",
-        "statusHistory.read",
-        "audit",
         "locate.byName",
         "locate.byContact",
         "locate.byDocument",
@@ -254,16 +231,31 @@
         "link.contact",
         "listLinks",
         "inactivate",
+        "attach.document",
+        "comment",
         "tag",
+        "statusHistory.read",
+        "audit",
         "link",
         "unlink",
         "locate.byLogin",
-        "invite.login"
+        "invite.login",
+        "locate.byColumn",
+        "locate.byText",
+        "count",
+        "listByForeignKey",
+        "create",
+        "update",
+        "transition",
+        "transaction",
+        "read.mdmRecord",
+        "uniqueKey",
+        "sequence.next"
       ]
     },
     "judge35": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:25:57.582Z",
+      "updatedAt": "2026-10-13T00:54:30.381Z",
       "artifactPaths": [
         "l4/hiringPipeline/pipeline/judge35-draft.json"
       ],
@@ -271,7 +263,7 @@
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:26:14.919Z",
+      "updatedAt": "2026-10-13T00:54:42.182Z",
       "artifactPaths": [
         "l4/hiringPipeline/rules.defs.ts"
       ],
@@ -282,7 +274,7 @@
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:26:37.706Z",
+      "updatedAt": "2026-10-13T00:55:05.028Z",
       "artifactPaths": [
         "l4/hiringPipeline/access.defs.ts"
       ],
@@ -293,7 +285,7 @@
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:26:48.739Z",
+      "updatedAt": "2026-10-13T00:55:16.129Z",
       "artifactPaths": [
         "l4/hiringPipeline/integration.defs.ts"
       ],
@@ -304,7 +296,7 @@
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-10-12T19:26:48.923Z",
+      "updatedAt": "2026-10-13T00:55:16.397Z",
       "artifactPaths": [
         "l4/hiringPipeline/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -319,90 +311,130 @@
     "module": "hiringPipeline",
     "rebuildAll": true
   },
-  "updatedAt": "2026-10-12T19:27:36.122Z",
+  "updatedAt": "2026-10-13T00:55:52.802Z",
   "rebuildAll": {
     "deleted": [
-      "l1/hiringPipeline/pipeline/pipeline.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/drafts/applications.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/drafts/candidates.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/drafts/hiring_manager_home.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/drafts/job_positions.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/drafts/managed_applications.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/drafts/managed_positions.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/drafts/recruiter_home.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/results/applications.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/results/candidates.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/results/hiring_manager_home.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/results/job_positions.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/results/managed_applications.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/results/managed_positions.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/contracts30/results/recruiter_home.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/finalize60/ownership.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/finalize60/report.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff/applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff/candidates.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff/job_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff/my_applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff/my_pipeline_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff/my_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff/recruiter_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/candidates.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/job_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/my_applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/my_pipeline_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/my_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/recruiter_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/applications-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/applications-2.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/candidates-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/job_positions-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/my_applications-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/my_pipeline_home-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/my_pipeline_home-2.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/my_positions-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/recruiter_home-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/bff55/responses/recruiter_home-2.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/contracts70/applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/contracts70/candidates.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/contracts70/job_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/contracts70/my_applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/contracts70/my_pipeline_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/contracts70/my_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/contracts70/recruiter_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/finalize80/ownership.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/finalize80/report.json",
       "l2/hiringPipeline/pipeline/agentDefsL2/input.json",
       "l2/hiringPipeline/pipeline/agentDefsL2/inputReport.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/pages.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/results/applications.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/results/candidates.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/results/hiring_manager_home.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/results/job_positions.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/results/managed_applications.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/results/managed_positions.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/results/recruiter_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/applicationsDesktop.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/applicationsMobile.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/candidatesDesktop.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/candidatesMobile.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/job_positionsDesktop.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/job_positionsMobile.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/my_applicationsDesktop.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/my_applicationsMobile.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/my_pipeline_homeDesktop.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/my_pipeline_homeMobile.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/my_positionsDesktop.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/my_positionsMobile.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/recruiter_homeDesktop.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/page11Needs/recruiter_homeMobile.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/candidates.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/job_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/my_applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/my_pipeline_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/my_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/recruiter_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/applications-decision-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/applications-groups-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/candidates-decision-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/candidates-groups-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/job_positions-decision-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/job_positions-groups-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/my_applications-decision-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/my_applications-groups-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/my_pipeline_home-decision-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/my_pipeline_home-groups-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/my_positions-decision-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/my_positions-groups-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/recruiter_home-decision-1.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/pages50/responses/recruiter_home-groups-1.json",
       "l2/hiringPipeline/pipeline/agentDefsL2/pipeline.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/shared.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/shared40/results/applications.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/shared40/results/candidates.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/shared40/results/hiring_manager_home.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/shared40/results/job_positions.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/shared40/results/managed_applications.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/shared40/results/managed_positions.json",
-      "l2/hiringPipeline/pipeline/agentDefsL2/shared40/results/recruiter_home.json",
-      "l2/hiringPipeline/pipeline/menu20-draft.json",
-      "l2/hiringPipeline/pipeline/pipeline.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/shared60/applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/shared60/candidates.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/shared60/job_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/shared60/my_applications.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/shared60/my_pipeline_home.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/shared60/my_positions.json",
+      "l2/hiringPipeline/pipeline/agentDefsL2/shared60/recruiter_home.json",
       "l2/hiringPipeline/web/contracts/applications.defs.ts",
       "l2/hiringPipeline/web/contracts/candidates.defs.ts",
-      "l2/hiringPipeline/web/contracts/hiring_manager_home.defs.ts",
       "l2/hiringPipeline/web/contracts/job_positions.defs.ts",
-      "l2/hiringPipeline/web/contracts/managed_applications.defs.ts",
-      "l2/hiringPipeline/web/contracts/managed_positions.defs.ts",
+      "l2/hiringPipeline/web/contracts/my_applications.defs.ts",
+      "l2/hiringPipeline/web/contracts/my_pipeline_home.defs.ts",
+      "l2/hiringPipeline/web/contracts/my_positions.defs.ts",
       "l2/hiringPipeline/web/contracts/recruiter_home.defs.ts",
       "l2/hiringPipeline/web/desktop/page11/applications.defs.ts",
       "l2/hiringPipeline/web/desktop/page11/candidates.defs.ts",
-      "l2/hiringPipeline/web/desktop/page11/hiring_manager_home.defs.ts",
       "l2/hiringPipeline/web/desktop/page11/job_positions.defs.ts",
-      "l2/hiringPipeline/web/desktop/page11/managed_applications.defs.ts",
-      "l2/hiringPipeline/web/desktop/page11/managed_positions.defs.ts",
+      "l2/hiringPipeline/web/desktop/page11/my_applications.defs.ts",
+      "l2/hiringPipeline/web/desktop/page11/my_pipeline_home.defs.ts",
+      "l2/hiringPipeline/web/desktop/page11/my_positions.defs.ts",
       "l2/hiringPipeline/web/desktop/page11/recruiter_home.defs.ts",
       "l2/hiringPipeline/web/mobile/page11/applications.defs.ts",
       "l2/hiringPipeline/web/mobile/page11/candidates.defs.ts",
-      "l2/hiringPipeline/web/mobile/page11/hiring_manager_home.defs.ts",
       "l2/hiringPipeline/web/mobile/page11/job_positions.defs.ts",
-      "l2/hiringPipeline/web/mobile/page11/managed_applications.defs.ts",
-      "l2/hiringPipeline/web/mobile/page11/managed_positions.defs.ts",
+      "l2/hiringPipeline/web/mobile/page11/my_applications.defs.ts",
+      "l2/hiringPipeline/web/mobile/page11/my_pipeline_home.defs.ts",
+      "l2/hiringPipeline/web/mobile/page11/my_positions.defs.ts",
       "l2/hiringPipeline/web/mobile/page11/recruiter_home.defs.ts",
       "l2/hiringPipeline/web/shared/applications.defs.ts",
       "l2/hiringPipeline/web/shared/candidates.defs.ts",
-      "l2/hiringPipeline/web/shared/hiring_manager_home.defs.ts",
       "l2/hiringPipeline/web/shared/job_positions.defs.ts",
-      "l2/hiringPipeline/web/shared/managed_applications.defs.ts",
-      "l2/hiringPipeline/web/shared/managed_positions.defs.ts",
+      "l2/hiringPipeline/web/shared/my_applications.defs.ts",
+      "l2/hiringPipeline/web/shared/my_pipeline_home.defs.ts",
+      "l2/hiringPipeline/web/shared/my_positions.defs.ts",
       "l2/hiringPipeline/web/shared/recruiter_home.defs.ts",
       "l4/hiringPipeline/access.defs.ts",
       "l4/hiringPipeline/integration.defs.ts",
-      "l4/hiringPipeline/journeys/advanceApplicationToInterview.defs.ts",
-      "l4/hiringPipeline/journeys/decideHiringOutcome.defs.ts",
+      "l4/hiringPipeline/journeys/advanceToInterview.defs.ts",
+      "l4/hiringPipeline/journeys/confirmHire.defs.ts",
       "l4/hiringPipeline/journeys/decideOffer.defs.ts",
       "l4/hiringPipeline/journeys/index.defs.ts",
       "l4/hiringPipeline/journeys/openJobPosition.defs.ts",
-      "l4/hiringPipeline/journeys/recordApplicationRejection.defs.ts",
+      "l4/hiringPipeline/journeys/recordApplication.defs.ts",
       "l4/hiringPipeline/journeys/registerCandidate.defs.ts",
-      "l4/hiringPipeline/journeys/startApplicationScreening.defs.ts",
+      "l4/hiringPipeline/journeys/rejectApplication.defs.ts",
+      "l4/hiringPipeline/journeys/reviewMyPipeline.defs.ts",
       "l4/hiringPipeline/module.defs.ts",
       "l4/hiringPipeline/ontology/Application.defs.ts",
       "l4/hiringPipeline/ontology/Candidate.defs.ts",
-      "l4/hiringPipeline/ontology/CandidateContact.defs.ts",
+      "l4/hiringPipeline/ontology/CandidateEmail.defs.ts",
       "l4/hiringPipeline/ontology/HiringManager.defs.ts",
       "l4/hiringPipeline/ontology/JobPosition.defs.ts",
       "l4/hiringPipeline/ontology/index.defs.ts",
@@ -410,11 +442,12 @@
       "l4/hiringPipeline/pipeline/finalize-report.json",
       "l4/hiringPipeline/pipeline/integration70-draft.json",
       "l4/hiringPipeline/pipeline/journeys20-draft.json",
+      "l4/hiringPipeline/pipeline/judge35-draft.json",
       "l4/hiringPipeline/pipeline/module10-draft.json",
       "l4/hiringPipeline/pipeline/ontology30-draft.json",
       "l4/hiringPipeline/pipeline/ontology30-entity-Application-draft.json",
       "l4/hiringPipeline/pipeline/ontology30-entity-Candidate-draft.json",
-      "l4/hiringPipeline/pipeline/ontology30-entity-CandidateContact-draft.json",
+      "l4/hiringPipeline/pipeline/ontology30-entity-CandidateEmail-draft.json",
       "l4/hiringPipeline/pipeline/ontology30-entity-HiringManager-draft.json",
       "l4/hiringPipeline/pipeline/ontology30-entity-JobPosition-draft.json",
       "l4/hiringPipeline/pipeline/ontology30-plan-draft.json",
@@ -429,6 +462,7 @@
       "l4/hiringPipeline/pool/l2/menu20-draft.json",
       "l4/hiringPipeline/pool/l2/needs30-draft.json",
       "l4/hiringPipeline/pool/l2/pipeline.json",
+      "l4/hiringPipeline/pool/l2/responses/menu20/menu-1.json",
       "l4/hiringPipeline/pool/l2/web/backend.json",
       "l4/hiringPipeline/pool/l2/web/effort.json",
       "l4/hiringPipeline/pool/l2/web/l4diff.json",
@@ -441,46 +475,46 @@
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-10-12T19:24:13.370Z"
+    "at": "2026-10-13T00:52:02.622Z"
   },
   "poolWiped": [],
   "pool": [
     {
-      "at": "2026-10-12T19:27:11.918Z",
-      "file": "l4/hiringPipeline/pool/l2/20261012192711_hiringPipeline-20261012192711_1.json",
+      "at": "2026-10-13T00:55:28.951Z",
+      "file": "l4/hiringPipeline/pool/l2/20261013005528_hiringPipeline-20261013005528_1.json",
       "from": "l4",
       "to": "l2",
-      "thread": "hiringPipeline-20261012192711",
+      "thread": "hiringPipeline-20261013005528",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T19:27:34.801Z",
-      "file": "l4/hiringPipeline/pool/l1/20261012192734_hiringPipeline-20261012192711_1.json",
+      "at": "2026-10-13T00:55:51.577Z",
+      "file": "l4/hiringPipeline/pool/l1/20261013005551_hiringPipeline-20261013005528_1.json",
       "from": "l2",
       "to": "l1",
-      "thread": "hiringPipeline-20261012192711",
+      "thread": "hiringPipeline-20261013005528",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T19:27:35.507Z",
-      "file": "l4/hiringPipeline/pool/l2/20261012192735_hiringPipeline-20261012192711_1.json",
+      "at": "2026-10-13T00:55:52.214Z",
+      "file": "l4/hiringPipeline/pool/l2/20261013005552_hiringPipeline-20261013005528_1.json",
       "from": "l1",
       "to": "l2",
-      "thread": "hiringPipeline-20261012192711",
+      "thread": "hiringPipeline-20261013005528",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T19:27:36.088Z",
-      "file": "l4/hiringPipeline/pool/l4/20261012192735_hiringPipeline-20261012192711_1.json",
+      "at": "2026-10-13T00:55:52.767Z",
+      "file": "l4/hiringPipeline/pool/l4/20261013005552_hiringPipeline-20261013005528_1.json",
       "from": "l2",
       "to": "l4",
-      "thread": "hiringPipeline-20261012192711",
+      "thread": "hiringPipeline-20261013005528",
       "round": 1,
       "mode": "estimate",
       "outcome": "processed"

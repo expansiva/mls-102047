@@ -8,31 +8,31 @@ export const decideOfferJourney = {
   "business": {
     "actorRef": "hiringManager",
     "title": "Decide on an offer",
-    "goal": "Decide whether an interviewed candidate receives an offer for my position.",
+    "goal": "Decide whether an interviewed candidate for one of my positions receives an offer.",
     "entry": {
-      "mode": "fromNotification"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "openApplication",
+        "stepId": "findApplication",
         "kind": "locate",
         "entity": "Application",
-        "title": "Open interviewed application",
-        "description": "The hiring manager opens the application from the notification or from the interview list of their positions."
+        "title": "Find interviewed application",
+        "description": "The hiring manager finds an application in the interview stage among the positions she manages."
       },
       {
-        "stepId": "inspectCandidate",
+        "stepId": "reviewCandidate",
         "kind": "inspect",
         "entity": "Application",
         "title": "Review candidate",
-        "description": "The hiring manager reviews the candidate, resume link and application history."
+        "description": "The hiring manager reviews the candidate's resume link, source and application history."
       },
       {
         "stepId": "chooseOffer",
         "kind": "decide",
         "entity": "Application",
-        "title": "Offer or send back",
-        "description": "The hiring manager chooses to extend an offer or to return the application to the recruiter for rejection."
+        "title": "Offer or decline",
+        "description": "The hiring manager chooses between extending an offer or declining the candidate."
       },
       {
         "stepId": "extendOffer",
@@ -41,26 +41,26 @@ export const decideOfferJourney = {
         "effect": "transition",
         "transitionRef": "extendOffer",
         "title": "Move to offer",
-        "description": "When the choice is to offer, the hiring manager moves the application from interview to offer."
+        "description": "When she chooses to offer, the hiring manager moves the application to the offer stage."
       },
       {
         "stepId": "returnToRecruiter",
         "kind": "handoff",
         "entity": "Application",
         "title": "Return to recruiter",
-        "description": "When the choice is not to offer, the application goes back to the recruiter to reject it with a reason.",
+        "description": "When she declines, the application goes back to the recruiter to be rejected with a reason.",
         "handoffTo": "recruiter"
       }
     ],
     "outcome": {
-      "statement": "The interviewed application either moves to offer or returns to the recruiter for rejection.",
+      "statement": "The application is either in the offer stage or returned to the recruiter for rejection.",
       "evidence": [
-        "The application shows stage offer, or",
+        "The application shows the offer stage, or",
         "The recruiter sees the application flagged for rejection"
       ]
     }
   },
-  "businessHash": "sha256:61d5f1835f56f9ebb436d87e3e6586110fcd2228d3db3650c765ed662d138b90"
+  "businessHash": "sha256:1c66b35ec085084fd368eafbffa6e0d404690f20ca310517e6f9d7e6e471a3e9"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type DecideOfferJourneyType = typeof decideOfferJourney;

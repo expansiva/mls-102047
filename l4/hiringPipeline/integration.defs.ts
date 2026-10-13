@@ -13,7 +13,7 @@ export const hiringPipelineIntegration = {
       "to": "any",
       "event": "candidateHired",
       "on": "Application.hire",
-      "description": "Published when the hiring manager confirms a hire, so other modules (for example onboarding or payroll) can start working with the new hire and the position they were hired for.",
+      "description": "Published when the hiring manager hires the candidate on an application. Other modules can use the hired application record, with its candidate and job position, to start their own work (for example, onboarding or payroll).",
       "entityRefs": [
         "Application",
         "Candidate",
@@ -21,12 +21,12 @@ export const hiringPipelineIntegration = {
       ]
     },
     {
-      "id": "positionClosed",
+      "id": "jobPositionClosed",
       "kind": "event",
       "to": "any",
-      "event": "positionClosed",
-      "on": "JobPosition.closePosition",
-      "description": "Published when a job position closes automatically after its headcount is filled, so other modules know the opening is no longer available.",
+      "event": "jobPositionClosed",
+      "on": "JobPosition.close",
+      "description": "Published when a job position closes automatically because its headcount is filled. Other modules can use it to know the position is no longer open.",
       "entityRefs": [
         "JobPosition"
       ]

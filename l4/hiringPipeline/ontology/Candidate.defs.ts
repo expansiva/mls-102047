@@ -7,7 +7,7 @@ export const hiringPipelineEntityCandidate = {
   "moduleName": "hiringPipeline",
   "entityId": "Candidate",
   "title": "Candidate",
-  "description": "A person who applies to job positions. Name lives in the master record, the e-mail is a linked contact channel, the resume is a platform attachment; the module namespace keeps only the candidate's source.",
+  "description": "A person who applies to job positions. The name is the platform record; the e-mail is a linked contact channel; the resume link and the source of the candidate are kept in the module namespace. An existing person is reused instead of duplicated.",
   "displayField": "details.identification.name",
   "relationships": {
     "applications": {
@@ -26,39 +26,39 @@ export const hiringPipelineEntityCandidate = {
       "to": "CandidateEmail",
       "via": "HasContact",
       "cardinality": "1:N",
-      "title": "E-mails",
-      "description": "The candidate's e-mail addresses, linked as contact channels (HasContact).",
+      "title": "E-mail",
+      "description": "The candidate's e-mail address, a contact channel linked by HasContact.",
+      "required": true,
       "role": "HasContact"
     },
-    "jobPositions": {
-      "relationshipId": "jobPositionCandidates",
+    "positions": {
+      "relationshipId": "candidatePositions",
       "to": "JobPosition",
       "via": "Application",
       "cardinality": "N:N",
       "title": "Positions applied to",
-      "description": "The job positions this candidate applied to, read through their applications.",
+      "description": "The job positions the candidate applied to, read through the applications.",
       "mode": "throughTable",
-      "path": "JobPosition.id <- Application.jobPositionId, Application.candidateId -> Candidate.id",
-      "derived": true,
-      "direction": "to"
+      "path": "Candidate -> Application.candidateId -> Application.jobPositionId -> JobPosition",
+      "derived": true
     }
   },
   "capabilities": {
-    "read.byId": "Reads the candidate by mdmId to show them on the application list and the application screen; used by recruiters and hiring managers.",
-    "locate.byName": "Finds candidates whose name contains the typed text, filtered to the hiringPipeline.Candidate role; used by the recruiter before registering and when recording an application.",
-    "locate.byContact": "Finds the candidate who owns a given e-mail address so the recruiter does not register the same person twice.",
-    "locate.byDocument": "Finds the person holding a national document, when the recruiter has one, to deduplicate before registering.",
-    "register.createOrAttach": "Registers the candidate: looks the person up, creates the master record only when absent, attaches the hiringPipeline.Candidate role and writes the source; used by the recruiter.",
-    "edit.platformFields": "Lets the recruiter correct the candidate's name, other names and privacy consent on the master record.",
-    "edit.moduleNamespace": "Lets the recruiter change the candidate's source in the hiringPipeline namespace.",
-    "link.contact": "Adds the candidate's e-mail as a ContactChannel linked by HasContact when the recruiter registers or updates the candidate.",
-    "attach.document": "Stores the candidate's resume (file or link) against the record under the resume category; uploaded by the recruiter and opened by recruiters and hiring managers.",
-    "listLinks": "Shows the candidate's linked e-mails and other relationships on the candidate screen for recruiters.",
-    "inactivate": "Takes a candidate out of use without deleting them, and reactivates them later; done by the recruiter.",
-    "comment": "Lets recruiters and hiring managers leave notes about the candidate.",
-    "tag": "Lets the recruiter label candidates with free tags (skills, talent pool) inside the hiringPipeline namespace.",
-    "statusHistory.read": "Shows recruiters when the candidate record was inactivated or reactivated, and by whom.",
-    "audit": "Tells an administrator who changed the candidate record and when."
+    "read.byId": "Loads the candidate by id so the recruiter and the hiring manager see name, e-mail, resume link and source on an application.",
+    "locate.byName": "The recruiter searches candidates by name before registering, to reuse an existing one.",
+    "locate.byContact": "The recruiter finds an existing candidate by e-mail during registration, so the same person is not duplicated.",
+    "locate.byDocument": "When a national document is known, the recruiter finds the candidate by it to deduplicate.",
+    "register.createOrAttach": "The recruiter registers a candidate: the person is reused when found by document or e-mail, created otherwise, and tagged hiringPipeline.Candidate.",
+    "edit.platformFields": "The recruiter corrects the candidate's name, aliases or privacy consent.",
+    "edit.moduleNamespace": "The recruiter updates the candidate's resume link and source.",
+    "link.contact": "The recruiter records the candidate's e-mail as a contact channel linked with HasContact.",
+    "listLinks": "The candidate screen lists the candidate's e-mail and linked records.",
+    "inactivate": "The recruiter inactivates a candidate who should no longer be considered, keeping the history; it can be reactivated.",
+    "attach.document": "The recruiter stores a resume file or other document against the candidate when it is not a published link.",
+    "comment": "Recruiters and hiring managers leave notes about the candidate.",
+    "tag": "The recruiter labels candidates (for example by skill) inside the hiringPipeline namespace.",
+    "statusHistory.read": "Shows when the candidate record was inactivated or reactivated, and by whom.",
+    "audit": "Shows who changed the candidate's data and when."
   },
   "rules": [
     "rule-foreign-namespace-refused",
@@ -66,8 +66,8 @@ export const hiringPipelineEntityCandidate = {
     "rule-document-shape-validated",
     "rule-delete-blocked-by-relationships",
     "rule-person-privacy-consent-required-br-eu",
-    "candidateRequiresEmail",
-    "candidateSourceRequired"
+    "candidateEmailRequired",
+    "candidateReusedNotDuplicated"
   ],
   "kind": "role",
   "subtype": "Person",
@@ -92,7 +92,7 @@ export const hiringPipelineEntityCandidate = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "The master Person record of the candidate as the platform stores it, plus this module's namespace.",
+        "description": "The platform record of the person who applies to job positions, with the hiringPipeline namespace.",
         "fields": {
           "identification": {
             "type": "object",
@@ -117,8 +117,8 @@ export const hiringPipelineEntityCandidate = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 200,
-                "description": "Full name of the candidate, used to search for them before registering and shown on every application.",
-                "title": "Name"
+                "description": "The candidate's name as the recruiter registers it; the name shown in application lists.",
+                "title": "Full name"
               },
               "status": {
                 "type": "enum",
@@ -143,45 +143,30 @@ export const hiringPipelineEntityCandidate = {
                     "title": "Blocked"
                   }
                 ],
-                "title": "Status",
-                "description": "Platform status of the record; an inactive candidate is no longer offered when recording applications."
+                "title": "Record status",
+                "description": "Whether the candidate record is in use; an inactive candidate is kept for history."
               },
               "docType": {
                 "type": "enum",
                 "indexed": true,
                 "values": [
-                  {
-                    "value": "SSN",
-                    "title": "SSN"
-                  },
-                  {
-                    "value": "Passport",
-                    "title": "Passport"
-                  },
-                  {
-                    "value": "DriversLicense",
-                    "title": "Driver's license"
-                  },
-                  {
-                    "value": "NationalId",
-                    "title": "National ID"
-                  },
-                  {
-                    "value": "CPF",
-                    "title": "CPF"
-                  },
-                  {
-                    "value": "Other",
-                    "title": "Other"
-                  }
+                  "SSN",
+                  "EIN",
+                  "Passport",
+                  "DriversLicense",
+                  "NationalId",
+                  "CPF",
+                  "CNPJ",
+                  "VAT",
+                  "Other"
                 ],
                 "title": "Document type",
-                "description": "Type of national document, when the recruiter has it; used only to deduplicate."
+                "description": "Type of national document, when the recruiter has it; used to avoid duplicate candidates."
               },
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "National document number of the candidate, when known; used only to deduplicate.",
+                "description": "National document number of the candidate, when known; used for deduplication.",
                 "title": "Document number"
               },
               "countryCode": {
@@ -191,8 +176,16 @@ export const hiringPipelineEntityCandidate = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "Country of the candidate (ISO 3166-1 alpha-2); decides the privacy rules that apply.",
+                "description": "Country of the candidate, which decides the document and privacy rules that apply.",
                 "title": "Country"
+              },
+              "tags": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "derived": true,
+                "description": "Roles of the record; carries hiringPipeline.Candidate once registered.",
+                "title": "Module roles"
               },
               "createdAt": {
                 "type": "string",
@@ -200,7 +193,7 @@ export const hiringPipelineEntityCandidate = {
                 "indexed": true,
                 "derived": true,
                 "title": "Registered at",
-                "description": "When the candidate record was created."
+                "description": "When the person record was created."
               },
               "updatedAt": {
                 "type": "string",
@@ -208,10 +201,10 @@ export const hiringPipelineEntityCandidate = {
                 "indexed": true,
                 "derived": true,
                 "title": "Updated at",
-                "description": "When the candidate record was last changed."
+                "description": "When the person record was last changed."
               }
             },
-            "description": "Platform identification of the candidate; the name is what recruiters search and see."
+            "description": "How the candidate is recognised and filtered across the organization."
           },
           "base": {
             "type": "object",
@@ -221,7 +214,7 @@ export const hiringPipelineEntityCandidate = {
                 "type": "string",
                 "required": true,
                 "collection": true,
-                "description": "Other names the candidate is known by, such as a nickname or maiden name, which help find them.",
+                "description": "Other names the candidate goes by, such as a maiden name or nickname, helping recruiters find an existing candidate.",
                 "title": "Other names"
               },
               "contacts": {
@@ -230,18 +223,24 @@ export const hiringPipelineEntityCandidate = {
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Summary of the candidate's linked contact channels; the candidate's e-mail appears here.",
+                "description": "Summary of the candidate's contact channels; the candidate's e-mail appears here once linked.",
                 "title": "Contacts"
               },
               "relationshipRefs": {
                 "type": "object",
                 "required": true,
                 "derived": true,
-                "description": "Compact keys the platform keeps for the candidate's links.",
+                "description": "Compact keys kept by the platform for the candidate's links, including contacts.",
                 "title": "Relationship keys"
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 1000,
+                "title": "Notes",
+                "description": "General remarks about the candidate."
               }
             },
-            "description": "Platform base data of the candidate."
+            "description": "What every record has, whatever its subtype."
           },
           "person": {
             "type": "object",
@@ -250,29 +249,37 @@ export const hiringPipelineEntityCandidate = {
               "privacyConsent": {
                 "type": "object",
                 "of": "PrivacyConsent",
-                "description": "Candidate's consent to have their personal data processed for recruiting; required for residents of Brazil or the EU.",
+                "description": "The candidate's consent to having personal data processed, required for residents of Brazil and the EU.",
                 "title": "Privacy consent"
               }
             },
-            "description": "Platform person data; the hiring pipeline does not use any of it besides consent."
+            "description": "Natural-person data of the platform; the hiring pipeline asks for none of it."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Fields promoted by the organization; read only in this module."
+            "description": "Fields promoted by the organization; read only by this module."
           },
           "hiringPipeline": {
             "type": "object",
             "owner": "module",
             "fields": {
+              "resumeLink": {
+                "type": "string",
+                "required": true,
+                "title": "Resume link",
+                "description": "Web address where the candidate's resume is published (for example an online profile or a shared document), as given at registration.",
+                "pattern": "^https?://\\S+$",
+                "maxLength": 2048
+              },
               "source": {
                 "type": "enum",
                 "required": true,
                 "values": [
                   {
-                    "value": "referral",
-                    "title": "Referral"
+                    "value": "careerSite",
+                    "title": "Career site"
                   },
                   {
                     "value": "jobBoard",
@@ -283,8 +290,8 @@ export const hiringPipelineEntityCandidate = {
                     "title": "LinkedIn"
                   },
                   {
-                    "value": "careerSite",
-                    "title": "Career site"
+                    "value": "referral",
+                    "title": "Referral"
                   },
                   {
                     "value": "agency",
@@ -300,10 +307,10 @@ export const hiringPipelineEntityCandidate = {
                   }
                 ],
                 "title": "Source",
-                "description": "Channel through which the candidate reached the organization, recorded by the recruiter at registration."
+                "description": "Where the candidate came from, as recorded by the recruiter."
               }
             },
-            "description": "What the hiring pipeline knows about the candidate: only where the candidate came from."
+            "description": "What the hiring pipeline knows about the candidate and nobody else needs."
           }
         }
       }
