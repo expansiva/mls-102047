@@ -1,0 +1,88 @@
+{
+  "organisms": {
+    "pedidosAguardandoChegada": {
+      "reads": [
+        "PedidoCompra.numero",
+        "PedidoCompra.dataPrevistaEntrega",
+        "PedidoCompra.status",
+        "PedidoCompra.details.liberadoAoFornecedor",
+        "PedidoCompra.details.quantidadePendente",
+        "PedidoCompra.fornecedorId",
+        "Fornecedor.details.identification.name"
+      ],
+      "edits": [],
+      "selects": "conferenciaItens",
+      "submits": []
+    },
+    "situacaoPendencias": {
+      "reads": [
+        "PedidoCompra.numero",
+        "PedidoCompra.details.emAberto",
+        "PedidoCompra.details.atrasado",
+        "PedidoCompra.details.quantidadePendente"
+      ],
+      "edits": [],
+      "selects": "conferenciaItens",
+      "submits": []
+    },
+    "conferenciaItens": {
+      "reads": [
+        "PedidoCompra.numero",
+        "ItemPedido.numeroItem",
+        "ItemPedido.details.quantidade",
+        "ItemPedido.details.quantidadeRecebida",
+        "ItemPedido.details.quantidadePendente",
+        "ItemPedido.details.recebidoTotalmente",
+        "Produto.details.identification.name",
+        "Produto.details.product.sku",
+        "Produto.details.product.unitOfMeasure",
+        "Fornecedor.details.identification.name"
+      ],
+      "edits": [],
+      "selects": "registroRecebimento",
+      "submits": []
+    },
+    "registroRecebimento": {
+      "reads": [
+        "PedidoCompra.numero",
+        "ItemPedido.numeroItem",
+        "ItemPedido.details.quantidadePendente",
+        "Produto.details.identification.name",
+        "Produto.details.product.unitOfMeasure"
+      ],
+      "edits": [
+        "Recebimento.pedidoCompraId",
+        "Recebimento.dataRecebimento",
+        "Recebimento.details.itens.itemPedidoId",
+        "Recebimento.details.itens.produtoId",
+        "Recebimento.details.itens.quantidadeRecebida",
+        "Recebimento.details.itens.observacao",
+        "Recebimento.details.observacoes"
+      ],
+      "selects": "",
+      "submits": [
+        {
+          "intentId": "registrarRecebimento",
+          "write": "Recebimento.create"
+        }
+      ]
+    },
+    "historicoRecebimentos": {
+      "reads": [
+        "Recebimento.numero",
+        "Recebimento.dataRecebimento",
+        "Recebimento.registradoEm",
+        "Recebimento.details.tipoRecebimento",
+        "Recebimento.details.quantidadeTotalRecebida",
+        "EntradaEstoque.numero",
+        "EntradaEstoque.dataEntrada",
+        "EntradaEstoque.details.valorTotal",
+        "EntradaEstoque.details.publicada",
+        "PedidoCompra.status"
+      ],
+      "edits": [],
+      "selects": "",
+      "submits": []
+    }
+  }
+}

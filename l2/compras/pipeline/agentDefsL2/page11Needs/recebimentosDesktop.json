@@ -1,0 +1,96 @@
+{
+  "organisms": {
+    "pedidosAguardandoChegada": {
+      "reads": [
+        "PedidoCompra.numero",
+        "PedidoCompra.dataEmissao",
+        "PedidoCompra.dataPrevistaEntrega",
+        "PedidoCompra.status",
+        "PedidoCompra.details.liberadoAoFornecedor",
+        "PedidoCompra.details.quantidadePendente",
+        "PedidoCompra.details.dataEnvio",
+        "PedidoCompra.fornecedorId",
+        "Fornecedor.details.identification.name",
+        "Fornecedor.details.company.legalName"
+      ],
+      "edits": [],
+      "selects": "conferenciaItens",
+      "submits": []
+    },
+    "situacaoPendencias": {
+      "reads": [
+        "PedidoCompra.numero",
+        "PedidoCompra.dataPrevistaEntrega",
+        "PedidoCompra.details.emAberto",
+        "PedidoCompra.details.atrasado",
+        "PedidoCompra.details.quantidadePendente",
+        "Fornecedor.details.identification.name"
+      ],
+      "edits": [],
+      "selects": "conferenciaItens",
+      "submits": []
+    },
+    "conferenciaItens": {
+      "reads": [
+        "PedidoCompra.numero",
+        "PedidoCompra.status",
+        "ItemPedido.numeroItem",
+        "ItemPedido.details.quantidade",
+        "ItemPedido.details.quantidadeRecebida",
+        "ItemPedido.details.quantidadePendente",
+        "ItemPedido.details.recebidoTotalmente",
+        "Produto.details.identification.name",
+        "Produto.details.product.sku",
+        "Produto.details.product.unitOfMeasure",
+        "Fornecedor.details.identification.name"
+      ],
+      "edits": [],
+      "selects": "registroRecebimento",
+      "submits": []
+    },
+    "registroRecebimento": {
+      "reads": [
+        "PedidoCompra.numero",
+        "ItemPedido.numeroItem",
+        "ItemPedido.details.quantidadePendente",
+        "Produto.details.identification.name",
+        "Produto.details.product.unitOfMeasure"
+      ],
+      "edits": [
+        "Recebimento.pedidoCompraId",
+        "Recebimento.dataRecebimento",
+        "Recebimento.details.itens.itemPedidoId",
+        "Recebimento.details.itens.produtoId",
+        "Recebimento.details.itens.quantidadeRecebida",
+        "Recebimento.details.itens.observacao",
+        "Recebimento.details.observacoes"
+      ],
+      "selects": "",
+      "submits": [
+        {
+          "intentId": "registrarRecebimento",
+          "write": "Recebimento.create"
+        }
+      ]
+    },
+    "historicoRecebimentos": {
+      "reads": [
+        "Recebimento.numero",
+        "Recebimento.dataRecebimento",
+        "Recebimento.registradoEm",
+        "Recebimento.details.tipoRecebimento",
+        "Recebimento.details.quantidadeTotalRecebida",
+        "EntradaEstoque.numero",
+        "EntradaEstoque.dataEntrada",
+        "EntradaEstoque.details.quantidade",
+        "EntradaEstoque.details.valorTotal",
+        "EntradaEstoque.details.publicada",
+        "Produto.details.identification.name",
+        "PedidoCompra.status"
+      ],
+      "edits": [],
+      "selects": "",
+      "submits": []
+    }
+  }
+}

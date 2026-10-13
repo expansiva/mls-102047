@@ -1,0 +1,341 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 131893,
+  "receivedAt": "2026-10-13T07:50:29.601Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "Produto é um cadastro mestre compartilhado (registro mestre com papel compras.Produto) mantido por listagem, busca, criação e alteração. Não tem preço de venda próprio, por isso productCatalog não se aplica. masterDataManagement descreve melhor a manutenção de dados de base usados por pedidos, preços combinados e entradas no estoque.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "masterDataManagement"
+            },
+            "intent": "Manter o catálogo de produtos que a organização compra: localizar um produto pelo nome ou código, conferir situação, unidade e categoria e cadastrar ou corrigir o produto sem criar duplicidade, para que pedidos e recebimentos usem dados corretos.",
+            "sections": [
+              {
+                "id": "catalogo",
+                "priority": "primary",
+                "purpose": "Mostrar os produtos do catálogo com nome, código interno, categoria, unidade de medida e situação, para localizar rapidamente o produto e escolher qual alterar.",
+                "organisms": [
+                  "catalogoProdutos"
+                ]
+              },
+              {
+                "id": "cadastroProduto",
+                "priority": "main",
+                "purpose": "Cadastrar um novo produto ou alterar o produto escolhido: nome, código, tipo, categoria, marca, unidade de medida e se controla estoque.",
+                "organisms": [
+                  "produtoForm"
+                ]
+              }
+            ],
+            "organisms": {
+              "catalogoProdutos": {
+                "kind": "list",
+                "text": "Produtos do catálogo comprados pela organização, com nome, código interno, categoria, marca, unidade de medida, situação e data da última alteração; busca pelo nome para evitar cadastro duplicado.",
+                "intents": []
+              },
+              "produtoForm": {
+                "kind": "form",
+                "text": "Cadastrar ou alterar um produto do catálogo: nome, outros nomes, código interno, tipo, categoria, marca, unidade em que é comprado e recebido, se dá entrada no estoque e observações.",
+                "intents": [
+                  {
+                    "id": "cadastrarProduto",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "salvarAlteracaoProduto",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "catalogoProdutos": [
+                {
+                  "role": "Buscar produto pelo nome",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": "groupsearchcontent--ml-search-filters"
+                },
+                {
+                  "role": "Tabela de produtos do catálogo",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewtable--ml-side-detail-table"
+                },
+                {
+                  "role": "Paginação do catálogo",
+                  "preferred": "grouptriggeraction--ml-pagination-control",
+                  "alternative": ""
+                }
+              ],
+              "produtoForm": [
+                {
+                  "role": "Nome, código, categoria, marca e unidade",
+                  "preferred": "groupentertext--ml-enter-text",
+                  "alternative": "groupentertext--ml-floating-text-input"
+                },
+                {
+                  "role": "Outros nomes do produto",
+                  "preferred": "groupentertext--ml-tag-input",
+                  "alternative": ""
+                },
+                {
+                  "role": "Observações",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Tipo de produto",
+                  "preferred": "groupselectone--ml-select",
+                  "alternative": "groupselectone--ml-segmented-control"
+                },
+                {
+                  "role": "Controla estoque",
+                  "preferred": "groupenterboolean--ml-toggle-switch",
+                  "alternative": "groupenterboolean--ml-checkbox-preference"
+                },
+                {
+                  "role": "Salvar produto",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "Confirmação ou erro ao salvar",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "catalogoProdutos": {
+                "reads": [
+                  "id",
+                  "details.identification.name",
+                  "details.product.sku",
+                  "details.product.category",
+                  "details.product.brand",
+                  "details.product.unitOfMeasure",
+                  "details.identification.status",
+                  "details.identification.updatedAt"
+                ],
+                "edits": [],
+                "selects": "produtoForm",
+                "submits": []
+              },
+              "produtoForm": {
+                "reads": [
+                  "id",
+                  "version",
+                  "details.identification.name",
+                  "details.identification.status",
+                  "details.base.aliases",
+                  "details.base.notes",
+                  "details.product.sku",
+                  "details.product.productType",
+                  "details.product.category",
+                  "details.product.brand",
+                  "details.product.unitOfMeasure",
+                  "details.product.isInventoried"
+                ],
+                "edits": [
+                  "details.identification.name",
+                  "details.base.aliases",
+                  "details.base.notes",
+                  "details.product.sku",
+                  "details.product.productType",
+                  "details.product.category",
+                  "details.product.brand",
+                  "details.product.unitOfMeasure",
+                  "details.product.isInventoried"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "cadastrarProduto",
+                    "write": "Produto.create"
+                  },
+                  {
+                    "intentId": "salvarAlteracaoProduto",
+                    "write": "Produto.update"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "masterDataManagement"
+            },
+            "intent": "No celular, localizar rapidamente um produto do catálogo pelo nome e cadastrar ou corrigir seus dados de compra em uma coluna única e fluida (cerca de 390px, usável de 360px a 430px).",
+            "sections": [
+              {
+                "id": "catalogo",
+                "priority": "primary",
+                "purpose": "Buscar e percorrer os produtos em lista empilhada com nome, código, unidade e situação; tocar em um produto abre o cadastro para alteração.",
+                "organisms": [
+                  "catalogoProdutos"
+                ]
+              },
+              {
+                "id": "cadastroProduto",
+                "priority": "main",
+                "purpose": "Formulário em uma coluna para cadastrar um novo produto ou alterar o escolhido, com o botão de salvar sempre ao alcance.",
+                "organisms": [
+                  "produtoForm"
+                ]
+              }
+            ],
+            "organisms": {
+              "catalogoProdutos": {
+                "kind": "list",
+                "text": "Produtos do catálogo comprados pela organização, em lista compacta com nome, código interno, unidade de medida e situação; busca pelo nome para evitar cadastro duplicado.",
+                "intents": []
+              },
+              "produtoForm": {
+                "kind": "form",
+                "text": "Cadastrar ou alterar um produto do catálogo: nome, outros nomes, código interno, tipo, categoria, marca, unidade de medida, se controla estoque e observações.",
+                "intents": [
+                  {
+                    "id": "cadastrarProduto",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "salvarAlteracaoProduto",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "catalogoProdutos": [
+                {
+                  "role": "Buscar produto pelo nome",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": ""
+                },
+                {
+                  "role": "Lista de produtos em tela estreita",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                },
+                {
+                  "role": "Paginação do catálogo",
+                  "preferred": "grouptriggeraction--ml-pagination-control",
+                  "alternative": ""
+                }
+              ],
+              "produtoForm": [
+                {
+                  "role": "Nome, código, categoria, marca e unidade",
+                  "preferred": "groupentertext--ml-floating-text-input",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "Outros nomes do produto",
+                  "preferred": "groupentertext--ml-tag-input",
+                  "alternative": ""
+                },
+                {
+                  "role": "Observações",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Tipo de produto",
+                  "preferred": "groupselectone--ml-select",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "Controla estoque",
+                  "preferred": "groupenterboolean--ml-toggle-switch",
+                  "alternative": "groupenterboolean--ml-boolean-segmented"
+                },
+                {
+                  "role": "Salvar produto",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "Confirmação ou erro ao salvar",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": ""
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "catalogoProdutos": {
+                "reads": [
+                  "id",
+                  "details.identification.name",
+                  "details.product.sku",
+                  "details.product.unitOfMeasure",
+                  "details.identification.status"
+                ],
+                "edits": [],
+                "selects": "produtoForm",
+                "submits": []
+              },
+              "produtoForm": {
+                "reads": [
+                  "id",
+                  "version",
+                  "details.identification.name",
+                  "details.identification.status",
+                  "details.base.aliases",
+                  "details.base.notes",
+                  "details.product.sku",
+                  "details.product.productType",
+                  "details.product.category",
+                  "details.product.brand",
+                  "details.product.unitOfMeasure",
+                  "details.product.isInventoried"
+                ],
+                "edits": [
+                  "details.identification.name",
+                  "details.base.aliases",
+                  "details.base.notes",
+                  "details.product.sku",
+                  "details.product.productType",
+                  "details.product.category",
+                  "details.product.brand",
+                  "details.product.unitOfMeasure",
+                  "details.product.isInventoried"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "cadastrarProduto",
+                    "write": "Produto.create"
+                  },
+                  {
+                    "intentId": "salvarAlteracaoProduto",
+                    "write": "Produto.update"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 19,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

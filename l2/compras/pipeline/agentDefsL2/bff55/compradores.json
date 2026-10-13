@@ -1,0 +1,542 @@
+{
+  "schemaVersion": "2026-10-04-agent-defs-l2-bff-v2",
+  "project": 102047,
+  "module": "compras",
+  "pageId": "compradores",
+  "attempt": 2,
+  "diagnostic": "D2_BFF_BINDING_SELECTION: bindings.selections.compradoresList: organism compradoresList selects and has no row in bindings.selections.",
+  "previous": {
+    "types": [
+      {
+        "name": "CompradorIdentificacao",
+        "description": "Dados de identificação do comprador exibidos na lista e no formulário.",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.name"
+              ]
+            }
+          },
+          {
+            "name": "docType",
+            "type": "'CPF' | 'Passport' | 'NationalId' | 'Other'",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.docType"
+              ]
+            }
+          },
+          {
+            "name": "docId",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.docId"
+              ]
+            }
+          },
+          {
+            "name": "countryCode",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.countryCode"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.status"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "CompradorListaDetails",
+        "description": "Detalhes do comprador mostrados em cada linha da lista.",
+        "fields": [
+          {
+            "name": "identification",
+            "type": "CompradorIdentificacao",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "CompradorListaItem",
+        "description": "Linha da lista de compradores.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.id"
+              ]
+            }
+          },
+          {
+            "name": "details",
+            "type": "CompradorListaDetails",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "CompradorPessoa",
+        "description": "Dados de pessoa física do comprador.",
+        "fields": [
+          {
+            "name": "privacyConsent",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.person.privacyConsent"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "CompradorFichaDetails",
+        "description": "Detalhes do comprador carregados no formulário.",
+        "fields": [
+          {
+            "name": "identification",
+            "type": "CompradorIdentificacao",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification"
+              ]
+            }
+          },
+          {
+            "name": "person",
+            "type": "CompradorPessoa",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.person"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "CompradorFicha",
+        "description": "Comprador completo para edição no formulário, com versão para concorrência otimista.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.version"
+              ]
+            }
+          },
+          {
+            "name": "details",
+            "type": "CompradorFichaDetails",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "listarCompradores",
+        "kind": "qry",
+        "when": "onLoad",
+        "input": [
+          {
+            "name": "busca",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          },
+          {
+            "name": "status",
+            "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.status"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "type": "number",
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          },
+          {
+            "name": "pageSize",
+            "type": "number",
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "compradores",
+            "type": "CompradorListaItem[]",
+            "paginated": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.id"
+              ]
+            }
+          }
+        ],
+        "rules": [],
+        "jsdoc": {
+          "purpose": "Lista os compradores da organização para o gerente de compras localizar quem está ativo e escolher quem alterar.",
+          "input": "busca: trecho do nome (ou número do documento) digitado para localizar o comprador; status: filtro opcional pela situação; page e pageSize: paginação da lista.",
+          "processing": "Filtra pelo escopo da organização (grant gerenteCadastros), aplica a busca por nome (locate.byName) ou documento (locate.byDocument) e o filtro de situação, ordena por nome e pagina. A situação é campo derivado mantido pela plataforma, apenas lido.",
+          "output": "Página de compradores com id, nome, tipo e número do documento, país e situação, no formato { items, page, pageSize, hasMore }; a busca substitui a lista e a próxima página é anexada."
+        }
+      },
+      {
+        "id": "obterComprador",
+        "kind": "qry",
+        "when": "interaction",
+        "input": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.id"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "comprador",
+            "type": "CompradorFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.id"
+              ]
+            }
+          }
+        ],
+        "rules": [],
+        "jsdoc": {
+          "purpose": "Carrega os dados do comprador escolhido na lista para alteração no formulário.",
+          "input": "id: identificador do comprador selecionado na lista.",
+          "processing": "Lê o comprador pelo id (read.byId) dentro do escopo da organização e devolve identificação, consentimento de privacidade e a versão atual para concorrência otimista.",
+          "output": "Ficha do comprador com id, versão, nome, documento, país, situação e consentimento de privacidade, que preenche o formulário."
+        }
+      },
+      {
+        "id": "cadastrarComprador",
+        "kind": "cmd",
+        "when": "cadastrarComprador",
+        "writes": "Comprador.create",
+        "input": [
+          {
+            "name": "name",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.name"
+              ]
+            }
+          },
+          {
+            "name": "docType",
+            "type": "'CPF' | 'Passport' | 'NationalId' | 'Other'",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.docType"
+              ]
+            }
+          },
+          {
+            "name": "docId",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.docId"
+              ]
+            }
+          },
+          {
+            "name": "countryCode",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.countryCode"
+              ]
+            }
+          },
+          {
+            "name": "privacyConsent",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.person.privacyConsent"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "comprador",
+            "type": "CompradorFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.id"
+              ]
+            }
+          }
+        ],
+        "rules": [],
+        "jsdoc": {
+          "purpose": "Cadastra um novo comprador na organização.",
+          "input": "name: nome do comprador; docType e docId: tipo e número do documento nacional; countryCode: país ISO 3166-1 alfa-2; privacyConsent: consentimento LGPD, exigido para residentes no Brasil.",
+          "processing": "Valida o formato do documento conforme o país, localiza a pessoa pelo documento para evitar duplicidade (locate.byDocument) e cria a pessoa ou anexa o papel compras.Comprador (register.createOrAttach). Recusa sem consentimento de privacidade quando o país exige (Brasil). id, versão, situação e datas são calculados pela plataforma, nunca gravados pelo endpoint.",
+          "output": "O comprador criado, com id, versão e situação, para o formulário passar ao modo de alteração e a lista inseri-lo sem nova consulta."
+        }
+      },
+      {
+        "id": "salvarAlteracaoComprador",
+        "kind": "cmd",
+        "when": "salvarAlteracaoComprador",
+        "writes": "Comprador.update",
+        "input": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.version"
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.name"
+              ]
+            }
+          },
+          {
+            "name": "docType",
+            "type": "'CPF' | 'Passport' | 'NationalId' | 'Other'",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.docType"
+              ]
+            }
+          },
+          {
+            "name": "docId",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.docId"
+              ]
+            }
+          },
+          {
+            "name": "countryCode",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.identification.countryCode"
+              ]
+            }
+          },
+          {
+            "name": "privacyConsent",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.details.person.privacyConsent"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "comprador",
+            "type": "CompradorFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Comprador.id"
+              ]
+            }
+          }
+        ],
+        "rules": [],
+        "jsdoc": {
+          "purpose": "Salva as alterações de nome, documento, país e consentimento do comprador escolhido.",
+          "input": "id e version: comprador alterado e versão lida, para concorrência otimista; name, docType, docId, countryCode, privacyConsent: novos valores editados.",
+          "processing": "Confere a versão (recusa se o registro mudou), valida o formato do documento conforme o país, impede duplicidade de documento com outra pessoa e exige consentimento de privacidade para residentes no Brasil; grava pelo registro mestre (edit.platformFields). Versão e situação são calculadas pela plataforma.",
+          "output": "O comprador atualizado com a nova versão, para redesenhar o formulário e atualizar a linha na lista sem nova consulta."
+        }
+      }
+    ],
+    "bindings": {
+      "organisms": [
+        {
+          "organism": "compradoresList",
+          "reads": "listarCompradores.compradores"
+        },
+        {
+          "organism": "compradorForm",
+          "reads": "obterComprador.comprador"
+        }
+      ],
+      "commands": [
+        {
+          "endpoint": "cadastrarComprador",
+          "refreshes": []
+        },
+        {
+          "endpoint": "salvarAlteracaoComprador",
+          "refreshes": []
+        }
+      ],
+      "selections": [
+        {
+          "organism": "compradorForm",
+          "via": {
+            "kind": "query",
+            "ref": "obterComprador"
+          }
+        }
+      ],
+      "journeys": [],
+      "updates": [
+        {
+          "endpoint": "listarCompradores",
+          "state": "listarCompradores.compradores",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "obterComprador",
+          "state": "obterComprador.comprador",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "cadastrarComprador",
+          "state": "obterComprador.comprador",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "cadastrarComprador",
+          "state": "listarCompradores.compradores",
+          "mode": "upsert"
+        },
+        {
+          "endpoint": "salvarAlteracaoComprador",
+          "state": "obterComprador.comprador",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "salvarAlteracaoComprador",
+          "state": "listarCompradores.compradores",
+          "mode": "upsert"
+        }
+      ]
+    }
+  },
+  "inputHash": "sha256:f7893e57206ebf1c36a7083c40c60c9a9984cc48e264e15ce7eb077db9be7273",
+  "unitInputHash": "sha256:79a38680f03193fe4911468251fd6aa32c7d134c0839dbcf6566d5ebdd7dfa85",
+  "promptHash": "sha256:9ac1b3808a2b31640ec7ef6ce5a103aaeec04fb77aa3fa45c761ed3120dfa2b3",
+  "promptChars": 26308,
+  "repairPromptChars": 26308,
+  "designHash": "sha256:0203a254b1c2ae63c5a8a384fbba57ead290384319dbe63f831fdc3771d64e61"
+}

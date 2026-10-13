@@ -1,0 +1,107 @@
+{
+  "organisms": {
+    "listaPedidos": {
+      "reads": [
+        "PedidoCompra.numero",
+        "PedidoCompra.fornecedorId",
+        "Fornecedor.details.identification.name",
+        "PedidoCompra.dataEmissao",
+        "PedidoCompra.details.dataEnvio",
+        "PedidoCompra.details.valorTotal",
+        "PedidoCompra.status",
+        "PedidoCompra.details.emAberto",
+        "PedidoCompra.details.aguardandoAprovacao",
+        "PedidoCompra.details.liberadoAoFornecedor",
+        "PedidoCompra.details.atrasado"
+      ],
+      "edits": [],
+      "selects": "revisaoPedido",
+      "submits": []
+    },
+    "abrirPedido": {
+      "reads": [
+        "Fornecedor.details.identification.name",
+        "Fornecedor.details.identification.docId",
+        "Produto.details.identification.name",
+        "Produto.details.product.unitOfMeasure",
+        "ProdutoFornecido.codigo",
+        "ProdutoFornecido.details.precoCombinado",
+        "ItemPedido.numeroItem",
+        "ItemPedido.details.valorTotalItem",
+        "PedidoCompra.numero",
+        "PedidoCompra.details.valorTotal"
+      ],
+      "edits": [
+        "PedidoCompra.fornecedorId",
+        "ItemPedido.produtoId",
+        "ItemPedido.produtoFornecidoId",
+        "ItemPedido.details.quantidade",
+        "ItemPedido.details.precoUnitario",
+        "ItemPedido.details.observacao"
+      ],
+      "selects": "",
+      "submits": [
+        {
+          "intentId": "abrirPedidoCompra",
+          "write": "PedidoCompra.create"
+        },
+        {
+          "intentId": "incluirItemPedido",
+          "write": "ItemPedido.create"
+        }
+      ]
+    },
+    "revisaoPedido": {
+      "reads": [
+        "PedidoCompra.numero",
+        "Fornecedor.details.identification.name",
+        "ItemPedido.numeroItem",
+        "Produto.details.identification.name",
+        "ItemPedido.details.quantidade",
+        "ItemPedido.details.precoUnitario",
+        "ItemPedido.details.valorTotalItem",
+        "ItemPedido.details.quantidadeRecebida",
+        "ItemPedido.details.quantidadePendente",
+        "ItemPedido.details.recebidoTotalmente",
+        "PedidoCompra.details.valorTotal",
+        "PedidoCompra.details.quantidadePendente"
+      ],
+      "edits": [],
+      "selects": "",
+      "submits": []
+    },
+    "envioPedido": {
+      "reads": [
+        "PedidoCompra.numero",
+        "PedidoCompra.status",
+        "PedidoCompra.details.valorTotal"
+      ],
+      "edits": [
+        "PedidoCompra.dataPrevistaEntrega"
+      ],
+      "selects": "",
+      "submits": [
+        {
+          "intentId": "enviarPedido",
+          "write": "PedidoCompra.enviar"
+        }
+      ]
+    },
+    "historicoPedido": {
+      "reads": [
+        "PedidoCompra.status",
+        "PedidoCompra.details.dataEnvio",
+        "PedidoCompra.details.decisao.decididoEm",
+        "PedidoCompra.details.aguardandoAprovacao",
+        "PedidoCompra.details.liberadoAoFornecedor",
+        "Recebimento.numero",
+        "Recebimento.registradoEm",
+        "Recebimento.details.tipoRecebimento",
+        "Recebimento.details.quantidadeTotalRecebida"
+      ],
+      "edits": [],
+      "selects": "",
+      "submits": []
+    }
+  }
+}

@@ -1,0 +1,431 @@
+{
+  "types": [
+    {
+      "name": "ResumoMeusPedidos",
+      "description": "Indicadores dos pedidos do comprador da sessão, já calculados no servidor.",
+      "fields": [
+        {
+          "name": "emAberto",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PedidoCompra.details.emAberto",
+              "PedidoCompra.status"
+            ]
+          }
+        },
+        {
+          "name": "aguardandoAprovacao",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PedidoCompra.details.aguardandoAprovacao",
+              "PedidoCompra.status"
+            ]
+          }
+        },
+        {
+          "name": "liberadoAoFornecedor",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PedidoCompra.details.liberadoAoFornecedor",
+              "PedidoCompra.status"
+            ]
+          }
+        },
+        {
+          "name": "atrasado",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PedidoCompra.details.atrasado",
+              "PedidoCompra.status"
+            ]
+          }
+        },
+        {
+          "name": "valorTotal",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PedidoCompra.details.valorTotal",
+              "PedidoCompra.details.emAberto"
+            ]
+          }
+        },
+        {
+          "name": "quantidadePendente",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PedidoCompra.details.quantidadePendente",
+              "PedidoCompra.details.emAberto"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FornecedorIdentificacaoNome",
+      "description": "Identificação do fornecedor reduzida ao nome.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Fornecedor.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FornecedorNomeDetails",
+      "description": "Detalhes do fornecedor usados na linha do rascunho.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "FornecedorIdentificacaoNome"
+        }
+      ]
+    },
+    {
+      "name": "FornecedorNome",
+      "description": "Fornecedor do pedido, apenas id e nome.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Fornecedor.id"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "FornecedorNomeDetails"
+        }
+      ]
+    },
+    {
+      "name": "RascunhoPedidoDetails",
+      "description": "Detalhes do rascunho exibidos na lista.",
+      "fields": [
+        {
+          "name": "details.valorTotal",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PedidoCompra.details.valorTotal"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "RascunhoPedido",
+      "description": "Linha de um pedido em rascunho do comprador, com fornecedor e valor até agora.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PedidoCompra.id"
+            ]
+          }
+        },
+        {
+          "name": "numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PedidoCompra.numero"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'rascunho' | 'enviado' | 'aprovado' | 'rejeitado' | 'recebidoParcial' | 'recebido'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PedidoCompra.status"
+            ]
+          }
+        },
+        {
+          "name": "dataEmissao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PedidoCompra.dataEmissao"
+            ]
+          }
+        },
+        {
+          "name": "fornecedorId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PedidoCompra.fornecedorId"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "RascunhoPedidoDetails"
+        },
+        {
+          "name": "fornecedor",
+          "type": "FornecedorNome"
+        },
+        {
+          "name": "quantidadeItens",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "ItemPedido.pedidoCompraId"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ContatoComprador",
+      "description": "Um canal de contato do comprador, extraído do resumo de contatos.",
+      "fields": [
+        {
+          "name": "details.base.contacts",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Comprador.details.base.contacts"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CompradorIdentificacao",
+      "description": "Identificação do comprador da sessão.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Comprador.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.status",
+          "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Comprador.details.identification.status"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CPF' | 'Passport' | 'NationalId' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Comprador.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Comprador.details.identification.docId"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CompradorBase",
+      "description": "Dados base do comprador: contatos.",
+      "fields": [
+        {
+          "name": "contacts",
+          "type": "ContatoComprador[]"
+        }
+      ]
+    },
+    {
+      "name": "CadastroCompradorDetails",
+      "description": "Detalhes do cadastro do comprador.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "CompradorIdentificacao"
+        },
+        {
+          "name": "base",
+          "type": "CompradorBase"
+        }
+      ]
+    },
+    {
+      "name": "CadastroComprador",
+      "description": "Cadastro do comprador da sessão, com indicação de aptidão para abrir pedidos.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Comprador.id"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "CadastroCompradorDetails"
+        },
+        {
+          "name": "aptoAbrirPedido",
+          "type": "boolean",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Comprador.details.identification.status"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "qryInicioComprador",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "resumo",
+          "type": "ResumoMeusPedidos"
+        },
+        {
+          "name": "rascunhos",
+          "type": "RascunhoPedido[]"
+        },
+        {
+          "name": "comprador",
+          "type": "CadastroComprador"
+        }
+      ],
+      "rules": [
+        "valorLimiteAprovacao",
+        "valorTotalPedidoCalculado",
+        "compradorInativoNaoAbrePedido"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega em uma única chamada tudo o que a página inicial do comprador mostra ao abrir: os indicadores dos seus pedidos, os rascunhos que ainda precisa completar e enviar, e o seu cadastro de comprador.",
+        "input": "Sem parâmetros: o comprador é resolvido pela sessão (locate.byLogin), e todo o escopo é 'meus pedidos' (PedidoCompra.compradorId = comprador da sessão).",
+        "processing": "1) Resolve o comprador da sessão e lê seu cadastro (nome, situação, documento, contatos); aptoAbrirPedido é verdadeiro apenas quando a situação é Active (regra compradorInativoNaoAbrePedido: comprador inativo não abre novos pedidos). 2) Resumo: conta, entre os pedidos do comprador, os em aberto (emAberto), aguardando aprovação (aguardandoAprovacao), liberados ao fornecedor (liberadoAoFornecedor) e atrasados (atrasado); soma o valorTotal e a quantidadePendente dos pedidos em aberto. Esses campos são derivados e calculados na leitura, nunca gravados: aguardando/liberado seguem a regra valorLimiteAprovacao (acima do limite aguarda o gerente, até o limite segue liberado) e o valor total segue valorTotalPedidoCalculado (soma de quantidade × preço unitário dos itens). 3) Rascunhos: lista os pedidos do comprador com status rascunho, ordenados por dataEmissao decrescente, compondo o nome do fornecedor (read.mdmRecord em lote pelos fornecedorId) e a contagem de itens de cada pedido (count de ItemPedido por pedidoCompraId, em lote). Lista não paginada: os rascunhos abertos de um comprador cabem em uma tela.",
+        "output": "resumo com os números já calculados para os indicadores; rascunhos com número, fornecedor, data de abertura, valor até agora e quantidade de itens, para o comprador retomar cada pedido em pedidos_comprador; comprador com os dados para conferir o cadastro e se está apto a abrir pedidos."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "resumoMeusPedidos",
+        "reads": "qryInicioComprador.resumo"
+      },
+      {
+        "organism": "rascunhosAEnviar",
+        "reads": "qryInicioComprador.rascunhos"
+      },
+      {
+        "organism": "cadastroComprador",
+        "reads": "qryInicioComprador.comprador"
+      }
+    ],
+    "commands": [],
+    "selections": [],
+    "journeys": [
+      {
+        "step": "abrirEnviarPedido/selecionarFornecedor",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "pedidos_comprador"
+      },
+      {
+        "step": "abrirEnviarPedido/abrirPedido",
+        "organisms": [
+          "rascunhosAEnviar",
+          "cadastroComprador"
+        ],
+        "endpoints": [
+          "qryInicioComprador"
+        ],
+        "continuesIn": "pedidos_comprador"
+      },
+      {
+        "step": "abrirEnviarPedido/incluirItem",
+        "organisms": [
+          "rascunhosAEnviar"
+        ],
+        "endpoints": [
+          "qryInicioComprador"
+        ],
+        "continuesIn": "pedidos_comprador"
+      },
+      {
+        "step": "abrirEnviarPedido/revisarPedido",
+        "organisms": [
+          "rascunhosAEnviar"
+        ],
+        "endpoints": [
+          "qryInicioComprador"
+        ],
+        "continuesIn": "pedidos_comprador"
+      },
+      {
+        "step": "abrirEnviarPedido/enviarPedido",
+        "organisms": [
+          "resumoMeusPedidos"
+        ],
+        "endpoints": [
+          "qryInicioComprador"
+        ],
+        "continuesIn": "pedidos_comprador"
+      }
+    ],
+    "updates": []
+  }
+}
