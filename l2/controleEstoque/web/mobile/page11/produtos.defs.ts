@@ -5,71 +5,71 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/inventoryControl/page21.md",
     "experience": "splitViewOperations"
   },
-  "intent": "Ajudar o estoquista, em conteúdo estreito e fluido em torno de 390px e ainda usável em 360px e 430px, a ver primeiro os avisos de saldo baixo, conferir saldos, localizar e consultar produtos e cadastrar um novo item com quantidade mínima.",
+  "intent": "Em tela estreita (cerca de 390px, usável de 360px a 430px), o estoquista vê primeiro o aviso de produtos abaixo do mínimo e o saldo, localiza um produto em lista empilhada, abre seu saldo e cadastra produtos em formulário de uma coluna.",
   "sections": [
     {
       "id": "visaoEstoque",
       "priority": "primary",
-      "purpose": "Empilhar em coluna estreita e fluida os avisos de saldo abaixo do mínimo e, em seguida, o panorama de saldos, cabendo em cerca de 390px e permanecendo usável em 360px e 430px.",
+      "purpose": "Mostrar no topo o aviso de produtos abaixo do mínimo e o resumo do saldo em blocos que se empilham.",
       "organisms": [
-        "alertasSaldoBaixo",
-        "saldosResumo"
+        "produtosAbaixoMinimo",
+        "saldoResumo"
       ]
     },
     {
-      "id": "consultaItens",
+      "id": "consultaProdutos",
       "priority": "main",
-      "purpose": "Seguir na mesma coluna fluida com a lista para localizar o produto e o detalhe com saldo e mínimo, sem grade fixa.",
+      "purpose": "Buscar o produto na lista e, ao tocar, ver abaixo o saldo atual, o mínimo e a situação.",
       "organisms": [
         "listaProdutos",
         "detalheProduto"
       ]
     },
     {
-      "id": "novoProduto",
+      "id": "cadastroProdutoSecao",
       "priority": "secondary",
-      "purpose": "Encerrar a coluna estreita com o formulário e a ação de cadastrar o produto e a quantidade mínima.",
+      "purpose": "Cadastrar um produto com o saldo mínimo em campos de largura total.",
       "organisms": [
-        "formularioCadastro",
+        "cadastroProduto",
         "acoesCadastro"
       ]
     }
   ],
   "organisms": {
-    "saldosResumo": {
+    "saldoResumo": {
       "kind": "summary",
-      "text": "Mostra o saldo atual de cada produto do estoque para o estoquista enxergar rapidamente a disponibilidade na largura estreita.",
+      "text": "Vejo o saldo atual dos produtos do estoque em um resumo rápido.",
       "intents": []
     },
-    "alertasSaldoBaixo": {
+    "produtosAbaixoMinimo": {
       "kind": "highlights",
-      "text": "Destaca no topo os produtos com saldo abaixo da quantidade mínima para o estoquista priorizar a reposição no telefone.",
+      "text": "Vejo quais produtos estão abaixo do mínimo para conferir o aviso.",
       "intents": []
     },
     "listaProdutos": {
       "kind": "list",
-      "text": "Lista os produtos cadastrados no estoque para o estoquista localizar o item que deseja acompanhar, em leitura vertical contínua.",
+      "text": "Localizo os produtos do estoque pelo nome e vejo o saldo de cada um.",
       "intents": []
     },
     "detalheProduto": {
       "kind": "detail",
-      "text": "Apresenta o produto escolhido, o saldo atual e a quantidade mínima para o estoquista confirmar a situação e, se precisar repor, seguir para registrar uma movimentação.",
+      "text": "Vejo o produto escolhido, o saldo atual, o saldo mínimo e se está abaixo do mínimo; daqui sigo para registrar uma entrada ou saída.",
       "intents": [
         {
-          "id": "abrirMovimentacoes",
+          "id": "registrarMovimentacao",
           "kind": "navigate",
           "to": "movimentacoes"
         }
       ]
     },
-    "formularioCadastro": {
+    "cadastroProduto": {
       "kind": "form",
-      "text": "Recebe o produto, a unidade de medida e a quantidade mínima para iniciar o acompanhamento do estoque no fluxo estreito.",
+      "text": "Informo os dados do produto e defino o saldo mínimo para aviso.",
       "intents": []
     },
     "acoesCadastro": {
       "kind": "actions",
-      "text": "Confirma o cadastro do produto no estoque com a quantidade mínima informada.",
+      "text": "Cadastro o produto no estoque e recebo a confirmação.",
       "intents": [
         {
           "id": "cadastrarProduto",
@@ -79,51 +79,71 @@ export const definition = {
     }
   },
   "molecules": {
-    "saldosResumo": [
+    "saldoResumo": [
       {
-        "role": "display",
-        "preferred": "groupviewtable--ml-responsive-table",
-        "alternative": "groupviewtable--ml-responsive-data-table"
+        "role": "indicador de saldo atual",
+        "preferred": "groupviewmetric--ml-metric-card",
+        "alternative": "groupviewmetric--ml-compact-metric-sparkline"
       }
     ],
-    "alertasSaldoBaixo": [
+    "produtosAbaixoMinimo": [
       {
-        "role": "display",
-        "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-card-grid"
+        "role": "aviso de produtos abaixo do mínimo",
+        "preferred": "groupnotifyuser--ml-notify-banner",
+        "alternative": "groupnotifyuser--ml-contextual-feedback"
+      },
+      {
+        "role": "cartão de produto avisado",
+        "preferred": "groupviewcard--ml-view-card-horizontal"
       }
     ],
     "listaProdutos": [
       {
-        "role": "display",
-        "preferred": "groupviewtable--ml-responsive-data-table",
+        "role": "busca por nome",
+        "preferred": "groupsearchcontent--ml-search-bar"
+      },
+      {
+        "role": "lista de produtos",
+        "preferred": "groupviewdata--ml-vertical-record-list",
         "alternative": "groupviewtable--ml-responsive-table"
       }
     ],
     "detalheProduto": [
       {
-        "role": "record",
-        "preferred": "groupviewcard--ml-view-card-horizontal",
-        "alternative": "groupviewcard--ml-vertical-card"
+        "role": "cartão do produto",
+        "preferred": "groupviewcard--ml-vertical-card",
+        "alternative": "groupviewcard--ml-view-card-horizontal"
       },
       {
-        "role": "metric",
-        "preferred": "groupviewmetric--ml-metric-big-number",
-        "alternative": "groupviewmetric--ml-metric-card"
+        "role": "saldo atual contra o mínimo",
+        "preferred": "groupviewmetric--ml-metric-card",
+        "alternative": "groupviewmetric--ml-metric-gauge"
+      },
+      {
+        "role": "indicação de abaixo do mínimo",
+        "preferred": "groupnotifyuser--ml-contextual-feedback"
       }
     ],
-    "formularioCadastro": [
+    "cadastroProduto": [
       {
-        "role": "quantity",
+        "role": "nome, SKU, unidade e categoria",
+        "preferred": "groupentertext--ml-floating-text-input",
+        "alternative": "groupentertext--ml-enter-text"
+      },
+      {
+        "role": "saldo mínimo",
         "preferred": "groupenternumber--ml-number-stepper",
-        "alternative": "groupenternumber--ml-number-input"
+        "alternative": "groupenternumber--ml-floating-number-input"
       }
     ],
     "acoesCadastro": [
       {
-        "role": "action",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-icon-button"
+        "role": "cadastrar produto",
+        "preferred": "grouptriggeraction--ml-button-standard"
+      },
+      {
+        "role": "confirmação do cadastro",
+        "preferred": "groupnotifyuser--ml-toast-notification"
       }
     ]
   }

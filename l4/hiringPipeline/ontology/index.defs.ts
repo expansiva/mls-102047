@@ -1,11 +1,11 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const hiringPipelineOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "hiringPipeline",
-  "businessDomain": "Hiring pipeline management for job positions and candidate applications.",
+  "businessDomain": "Hiring pipeline: job positions opened by recruiters, candidates and their applications moving through screening, interview, offer, hired or rejected, with the position closing automatically when its headcount is filled.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "hiringPipeline",
@@ -18,7 +18,7 @@ export const hiringPipelineOntologyIndex = {
       "subtype": "Person"
     },
     {
-      "entityId": "CandidateContact",
+      "entityId": "CandidateEmail",
       "kind": "role",
       "subtype": "ContactChannel"
     },
@@ -40,34 +40,14 @@ export const hiringPipelineOntologyIndex = {
   ],
   "relationships": [
     {
-      "relationshipId": "candidateHasContact",
-      "from": "Candidate",
-      "to": "CandidateContact",
-      "type": "oneToMany",
-      "required": true,
-      "mode": "mdmRelationship",
-      "description": "A candidate has one or more contact channels, including the email used for identification and communication.",
-      "catalogType": "HasContact"
-    },
-    {
       "relationshipId": "jobPositionHiringManager",
       "from": "JobPosition",
       "to": "HiringManager",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Each job position is assigned to one responsible hiring manager, who decides offers and hiring outcomes.",
+      "description": "Each job position has one hiring manager who decides offers and hires for it.",
       "field": "JobPosition.hiringManagerId"
-    },
-    {
-      "relationshipId": "applicationCandidate",
-      "from": "Application",
-      "to": "Candidate",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Each application belongs to the candidate who applied for the position.",
-      "field": "Application.candidateId"
     },
     {
       "relationshipId": "applicationJobPosition",
@@ -76,11 +56,43 @@ export const hiringPipelineOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Each application is submitted for one job position.",
+      "description": "Each application is made to one job position.",
       "field": "Application.jobPositionId"
+    },
+    {
+      "relationshipId": "applicationCandidate",
+      "from": "Application",
+      "to": "Candidate",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Each application belongs to one candidate.",
+      "field": "Application.candidateId"
+    },
+    {
+      "relationshipId": "candidateEmail",
+      "from": "Candidate",
+      "to": "CandidateEmail",
+      "type": "oneToMany",
+      "required": true,
+      "mode": "mdmRelationship",
+      "description": "The candidate's e-mail address is a contact channel linked to the candidate.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "candidatePositions",
+      "from": "Candidate",
+      "to": "JobPosition",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "The job positions a candidate has applied to, read through the candidate's applications.",
+      "through": "Application",
+      "path": "Candidate -> Application.candidateId -> Application.jobPositionId -> JobPosition",
+      "derived": true
     }
   ]
-} as const satisfies Ns5OntologyIndexV3;
+} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
 
 export type HiringPipelineOntologyIndexType = typeof hiringPipelineOntologyIndex;
 

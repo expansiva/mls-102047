@@ -1,51 +1,51 @@
 /// <mls fileReference="_102047_/l4/manutencaoFrota/journeys/registrarAbastecimento.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const registrarAbastecimentoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "journeyId": "registrarAbastecimento",
   "business": {
     "actorRef": "motorista",
-    "title": "Registrar abastecimento do veículo dirigido",
-    "goal": "Registrar o abastecimento de um veículo atribuído para manter o consumo e a quilometragem da frota atualizados.",
+    "title": "Registrar abastecimento",
+    "goal": "Registrar o abastecimento do veículo que o motorista dirige, com data, litros, valor e km no painel.",
     "entry": {
-      "mode": "coldStart"
+      "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarVeiculoAtribuido",
+        "stepId": "localizarVeiculo",
         "kind": "locate",
-        "entity": "Vehicle",
-        "title": "x",
-        "description": "Localiza um veículo atribuído ao próprio motorista."
+        "entity": "Veiculo",
+        "title": "Localizar meu veículo",
+        "description": "O motorista localiza, entre os veículos atribuídos a ele, o veículo que abasteceu."
       },
       {
-        "stepId": "inspecionarVeiculo",
+        "stepId": "conferirVeiculo",
         "kind": "inspect",
-        "entity": "Vehicle",
-        "title": "x",
-        "description": "Confere a placa e a quilometragem atual do veículo antes de registrar o abastecimento."
+        "entity": "Veiculo",
+        "title": "Conferir dados do veículo",
+        "description": "O motorista confere placa, modelo e quilometragem atual do veículo antes de registrar."
       },
       {
-        "stepId": "registrarAbastecimento",
+        "stepId": "lancarAbastecimento",
         "kind": "act",
-        "entity": "Fueling",
+        "entity": "Abastecimento",
         "effect": "create",
-        "title": "x",
-        "description": "Registra a data, os litros, o valor e a quilometragem indicada no painel para o veículo selecionado."
+        "title": "Lançar abastecimento",
+        "description": "O motorista informa data, litros, valor e km no painel; o km informado atualiza a quilometragem atual do veículo."
       }
     ],
     "outcome": {
-      "statement": "O abastecimento do veículo atribuído é registrado.",
+      "statement": "O abastecimento fica registrado no veículo e a quilometragem atual do veículo é atualizada.",
       "evidence": [
-        "Há um registro de abastecimento com data, litros, valor e quilometragem do painel vinculado ao veículo.",
-        "A quilometragem atual do veículo reflete a leitura registrada quando ela for mais recente."
+        "O abastecimento aparece no histórico do veículo com data, litros, valor e km no painel",
+        "A quilometragem atual do veículo passa a refletir o km informado"
       ]
     }
   },
-  "businessHash": "sha256:19515bd4930b4271afc54f8ae31e7ad94b7690eb069835fb308c4873e0adc027"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:6b44f45394ad782c9feb0c3c1ac77c37992437a1f76427d4ee68619ab0dd4251"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarAbastecimentoJourneyType = typeof registrarAbastecimentoJourney;
 

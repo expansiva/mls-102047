@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/ordenServicio/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const ordenServicioJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -9,41 +9,36 @@ export const ordenServicioJourneyIndex = {
     {
       "journeyId": "abrirOrdenServicio",
       "actorRef": "recepcionista",
-      "title": "Abrir una orden al recibir un aparato"
+      "title": "Abrir orden de servicio"
     },
     {
-      "journeyId": "prepararPresupuesto",
+      "journeyId": "diagnosticarYpresupuestar",
       "actorRef": "tecnico",
-      "title": "Analizar el aparato y preparar el presupuesto"
+      "title": "Diagnosticar y presupuestar"
     },
     {
-      "journeyId": "aprobarPresupuesto",
+      "journeyId": "responderPresupuesto",
       "actorRef": "cliente",
-      "title": "Aprobar un presupuesto"
+      "title": "Responder presupuesto"
     },
     {
-      "journeyId": "rechazarPresupuesto",
-      "actorRef": "cliente",
-      "title": "Rechazar un presupuesto"
-    },
-    {
-      "journeyId": "repararYmarcarLista",
+      "journeyId": "realizarReparacion",
       "actorRef": "tecnico",
-      "title": "Reparar el aparato y marcar la orden como lista"
+      "title": "Realizar reparación"
     },
     {
-      "journeyId": "entregarAparatoYfinalizar",
+      "journeyId": "entregarYfinalizar",
       "actorRef": "recepcionista",
-      "title": "Entregar el aparato reparado y finalizar la orden"
+      "title": "Entregar y finalizar orden"
     },
     {
       "journeyId": "consultarMisOrdenes",
       "actorRef": "cliente",
-      "title": "Consultar mis órdenes de servicio"
+      "title": "Consultar mis órdenes"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type OrdenServicioJourneyIndexType = typeof ordenServicioJourneyIndex;
 

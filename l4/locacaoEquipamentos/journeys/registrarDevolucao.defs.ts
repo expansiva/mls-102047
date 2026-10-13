@@ -1,14 +1,14 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/journeys/registrarDevolucao.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const registrarDevolucaoJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "journeyId": "registrarDevolucao",
   "business": {
     "actorRef": "atendente",
-    "title": "Registrar devolução de equipamentos",
-    "goal": "Registrar a data real de devolução e concluir a locação.",
+    "title": "Registrar devolução",
+    "goal": "Encerrar o contrato registrando a data real de devolução e a multa por atraso, se houver.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,36 +17,44 @@ export const registrarDevolucaoJourney = {
         "stepId": "localizarContrato",
         "kind": "locate",
         "entity": "ContratoLocacao",
-        "title": "x",
-        "description": "Localiza o contrato de locação em aberto, usando o contrato já em contexto quando disponível."
+        "title": "Localizar contrato ativo",
+        "description": "O atendente busca o contrato ativo pelo cliente ou pelo código do equipamento."
       },
       {
-        "stepId": "inspecionarContrato",
+        "stepId": "conferirContrato",
         "kind": "inspect",
         "entity": "ContratoLocacao",
-        "title": "x",
-        "description": "Confere os equipamentos locados e a data prevista de devolução."
+        "title": "Conferir contrato",
+        "description": "O atendente confere os equipamentos, a data de retirada e a data prevista de devolução."
       },
       {
-        "stepId": "registrarDevolucao",
+        "stepId": "registrarDataReal",
         "kind": "act",
         "entity": "ContratoLocacao",
         "effect": "transition",
         "transitionRef": "registrarDevolucao",
-        "title": "x",
-        "description": "Registra a data real de devolução, conclui a locação e permite o cálculo da multa quando houver atraso."
+        "title": "Registrar data real",
+        "description": "O atendente informa a data real de devolução; se houve atraso, o sistema calcula a multa (diária × dias de atraso × 1,5) e os equipamentos voltam a ficar disponíveis."
+      },
+      {
+        "stepId": "conferirMulta",
+        "kind": "inspect",
+        "entity": "ContratoLocacao",
+        "title": "Conferir multa calculada",
+        "description": "O atendente visualiza os dias de atraso e o valor da multa para informar ao cliente."
       }
     ],
     "outcome": {
-      "statement": "A devolução é registrada e a multa por atraso, quando aplicável, fica calculada no contrato.",
+      "statement": "O contrato fica encerrado com a data real de devolução e a multa calculada quando houve atraso.",
       "evidence": [
-        "Data real de devolução registrada no contrato.",
-        "Multa calculada quando a devolução ocorre após a data prevista."
+        "Contrato com situação devolvido e data real registrada",
+        "Valor da multa exibido quando a devolução foi após a data prevista",
+        "Equipamentos exibidos como disponíveis"
       ]
     }
   },
-  "businessHash": "sha256:9a4f219495ee6e76edd98cfc455d1a7cebebb604d94db515c44f92ca41a207a3"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:f3a8b3816f66c96f8fec4bcbece189f86cb7ad2d937bc11454ab936402aa7ff2"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarDevolucaoJourneyType = typeof registrarDevolucaoJourney;
 

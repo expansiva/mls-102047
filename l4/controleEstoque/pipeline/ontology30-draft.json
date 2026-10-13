@@ -1,44 +1,44 @@
 {
   "plan": {
     "moduleName": "controleEstoque",
-    "businessDomain": "Controle de estoque",
+    "businessDomain": "Controle de estoque: cadastro de produtos, registro permanente de entradas e saídas, saldo atual por produto e aviso quando o saldo fica abaixo do mínimo.",
     "entities": [
       {
         "entityId": "Produto",
         "kind": "role",
         "family": "mdm",
         "title": "Produto",
-        "description": "Produto acompanhado pelo estoque, com quantidade mínima definida para sinalizar saldo abaixo do mínimo.",
+        "description": "Item de estoque compartilhado da organização. Neste módulo recebe o saldo mínimo para aviso; o saldo atual e a situação abaixo do mínimo são derivados das movimentações.",
         "displayField": "details.identification.name",
         "subtype": "Product",
         "roleTag": "controleEstoque.Produto",
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
       },
       {
-        "entityId": "MovimentacaoEstoque",
+        "entityId": "Movimentacao",
         "kind": "entity",
         "family": "tdm",
         "title": "Movimentação de estoque",
-        "description": "Registro imutável de entrada ou saída de unidades de um produto, usado para calcular seu saldo atual.",
-        "displayField": "id",
+        "description": "Registro permanente de uma entrada ou saída de quantidade de um produto. Depois de registrada não pode ser alterada; o saldo do produto é recalculado a partir destas movimentações.",
+        "displayField": "numero",
         "class": "event",
         "storage": {
           "target": "moduleDatabase",
-          "table": "controleEstoque_movimentacaoestoque",
+          "table": "controleEstoque_movimentacao",
           "kind": "relational"
         }
       }
     ],
     "relationships": [
       {
-        "relationshipId": "movimentacaoEstoqueProduto",
-        "from": "MovimentacaoEstoque",
+        "relationshipId": "produtoDaMovimentacao",
+        "from": "Movimentacao",
         "to": "Produto",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada movimentação de estoque registra uma entrada ou saída para um único produto.",
-        "field": "MovimentacaoEstoque.produtoId"
+        "description": "Produto cujo estoque recebe a entrada ou a saída registrada nesta movimentação.",
+        "field": "Movimentacao.produtoId"
       }
     ],
     "normalizations": [
@@ -49,8 +49,8 @@
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "MovimentacaoEstoque",
-        "detail": "storage.table controleEstoque_movimentacaoestoque"
+        "entityId": "Movimentacao",
+        "detail": "storage.table controleEstoque_movimentacao"
       }
     ]
   },
@@ -60,39 +60,41 @@
       "moduleName": "controleEstoque",
       "entityId": "Produto",
       "title": "Produto",
-      "description": "Produto acompanhado pelo estoque, com quantidade mínima definida para sinalizar saldo abaixo do mínimo.",
+      "description": "Item de estoque compartilhado da organização. Neste módulo recebe o saldo mínimo para aviso; o saldo atual e a situação abaixo do mínimo são derivados das movimentações.",
       "displayField": "details.identification.name",
       "relationships": {
-        "movimentacoesEstoque": {
-          "relationshipId": "movimentacaoEstoqueProduto",
-          "to": "MovimentacaoEstoque",
-          "via": "MovimentacaoEstoque.produtoId",
+        "movimentacoes": {
+          "relationshipId": "produtoDaMovimentacao",
+          "to": "Movimentacao",
+          "via": "Movimentacao.produtoId",
           "cardinality": "1:N",
           "title": "Movimentações de estoque",
-          "description": "Movimentações de entrada ou saída registradas para este produto.",
+          "description": "Entradas e saídas registradas para este produto; o saldo atual é calculado a partir delas.",
           "mode": "fk",
           "direction": "to",
-          "required": true,
-          "role": "produto movimentado"
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um produto pelo identificador mestre; lê o registro pelo id no índice e documento; usado pelo estoquista ao abrir um produto localizado ou referenciado por uma movimentação.",
-        "locate.byName": "Localiza produtos pelo nome; pesquisa o texto informado entre os produtos ativos no índice mestre; usado pelo estoquista para cadastrar movimentações e acompanhar saldos.",
-        "register.createOrAttach": "Cadastra ou associa um produto ao controle de estoque; localiza o registro mestre e cria ou anexa a função do módulo, gravando a quantidade mínima; usado pelo estoquista no cadastro de produto.",
-        "edit.platformFields": "Altera os dados de catálogo usados pelo estoque, como nome e unidade de medida; atualiza os campos da plataforma no registro mestre; usado pelo estoquista na manutenção do produto.",
-        "edit.moduleNamespace": "Altera a quantidade mínima do produto; atualiza somente o espaço controleEstoque do registro mestre; usado pelo estoquista para ajustar o acompanhamento do saldo.",
-        "inactivate": "Inativa ou reativa um produto sem removê-lo do cadastro mestre; altera a situação do registro; usado pelo estoquista quando o produto deixa ou volta a ser controlado.",
-        "statusHistory.read": "Mostra as mudanças de situação do produto; consulta o histórico de status do registro mestre; usado pelo estoquista ao verificar a disponibilidade do cadastro.",
-        "audit": "Mostra quem alterou dados do produto e quando; consulta a auditoria do registro mestre; usado pelo estoquista para conferir a manutenção do cadastro."
+        "read.byId": "Lê um produto já identificado para exibir nome, saldo mínimo, saldo atual e se está abaixo do mínimo · busca pelo mdmId no índice e no documento · estoquista nas telas de saldo, aviso e movimentação",
+        "locate.byName": "Encontra produtos pelo nome para escolher o item a cadastrar, movimentar, consultar o saldo ou conferir o aviso · filtra pelo subtipo Product e pelo texto do nome · estoquista",
+        "register.createOrAttach": "Cadastra o produto no estoque ou anexa o papel deste módulo a um produto já existente, gravando o saldo mínimo · cria o registro se não houver e marca a tag controleEstoque.Produto · estoquista no cadastro de produto",
+        "edit.platformFields": "Altera o nome, o SKU, a unidade de medida e os demais dados de catálogo do produto · atualiza os campos de plataforma e o índice · estoquista",
+        "edit.moduleNamespace": "Altera o saldo mínimo que dispara o aviso de estoque baixo · grava apenas a chave controleEstoque do documento · estoquista",
+        "inactivate": "Inativa o produto no estoque sem apagá-lo, e permite reativá-lo depois · troca a situação para Inactive · estoquista",
+        "comment": "Deixa um comentário no cadastro do produto · nota ancorada no registro e neste módulo · estoquista",
+        "tag": "Marca o produto com etiquetas livres deste módulo · índice de tags do MDM · estoquista",
+        "statusHistory.read": "Mostra quando o produto foi ativado ou inativado e por quem · histórico de situação do MDM · estoquista",
+        "audit": "Mostra quem alterou o cadastro do produto e quando · log de auditoria do MDM · estoquista",
+        "controleEstoque.consultarSaldo": "Consulta o saldo atual do produto, o saldo mínimo e se ficou abaixo do mínimo · leitura dos valores derivados e do namespace do módulo · estoquista nas jornadas de saldo e de aviso",
+        "controleEstoque.listarAbaixoDoMinimo": "Lista os produtos com saldo atual abaixo do mínimo para o estoquista conferir o aviso · filtro sobre a condição derivada abaixo do mínimo · estoquista"
       },
       "rules": [
         "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "quantidadeMinimaValida",
-        "saldoAtualProduto",
-        "avisoSaldoMinimoProduto"
+        "rule-document-shape-validated",
+        "saldoMinimoNaoNegativo",
+        "avisoSaldoAbaixoDoMinimo"
       ],
       "kind": "role",
       "subtype": "Product",
@@ -117,7 +119,7 @@
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre do produto acompanhado pelo controle de estoque.",
+            "description": "Documento mestre do item de estoque: identificação e catálogo da organização, mais o saldo mínimo que só este módulo grava.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -131,25 +133,19 @@
                     "values": [
                       {
                         "value": "Product",
-                        "title": "Produto",
-                        "description": "Item de catálogo ou estoque."
+                        "title": "Produto"
                       }
                     ],
-                    "description": "Identifica este cadastro mestre como um produto.",
-                    "title": "Tipo de cadastro",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Subtipo mestre deste registro; neste módulo é sempre produto.",
+                    "title": "Subtipo"
                   },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "maxLength": 0,
-                    "description": "Nome usado pelo estoquista para localizar e reconhecer o produto controlado.",
-                    "title": "Nome do produto",
-                    "min": 0,
-                    "max": 0
+                    "maxLength": 200,
+                    "description": "Nome pelo qual o estoquista reconhece e localiza o produto no estoque.",
+                    "title": "Nome"
                   },
                   "status": {
                     "type": "enum",
@@ -159,90 +155,144 @@
                     "values": [
                       {
                         "value": "Active",
-                        "title": "Ativo",
-                        "description": "Cadastro disponível para uso."
+                        "title": "Ativo"
                       },
                       {
                         "value": "Inactive",
-                        "title": "Inativo",
-                        "description": "Cadastro fora de uso."
+                        "title": "Inativo"
                       },
                       {
                         "value": "Merged",
-                        "title": "Mesclado",
-                        "description": "Cadastro unido a outro registro mestre."
+                        "title": "Mesclado"
                       },
                       {
                         "value": "Blocked",
-                        "title": "Bloqueado",
-                        "description": "Cadastro bloqueado pela plataforma."
+                        "title": "Bloqueado"
                       }
                     ],
-                    "title": "Situação do cadastro",
-                    "description": "Situação do produto no cadastro mestre, usada para indicar se ele está ativo para o controle de estoque.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "title": "Situação",
+                    "description": "Se o produto está em uso no estoque, inativo, mesclado ou bloqueado."
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "País ao qual o cadastro do produto se refere.",
+                    "title": "País"
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Papéis de módulo deste registro, inclusive o de produto de estoque.",
+                    "title": "Papéis"
                   }
                 },
-                "description": "Dados de identificação do produto no cadastro mestre."
+                "description": "Como o estoquista reconhece o produto no cadastro mestre e se ele está em uso no estoque."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {},
-                "description": "Dados básicos comuns do registro mestre; nenhum campo desta camada é necessário neste controle."
+                "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Outros nomes pelos quais o mesmo produto é conhecido no estoque.",
+                    "title": "Nomes alternativos"
+                  }
+                },
+                "description": "Dados comuns a qualquer registro mestre; neste módulo, os outros nomes do produto."
               },
               "product": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {
+                  "sku": {
+                    "type": "string",
+                    "description": "Código interno com o qual o estoquista identifica o item no estoque.",
+                    "title": "SKU"
+                  },
+                  "productType": {
+                    "type": "enum",
+                    "values": [
+                      {
+                        "value": "Physical",
+                        "title": "Físico"
+                      },
+                      {
+                        "value": "Digital",
+                        "title": "Digital"
+                      },
+                      {
+                        "value": "Bundle",
+                        "title": "Combo"
+                      },
+                      {
+                        "value": "Consumable",
+                        "title": "Consumível"
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro"
+                      }
+                    ],
+                    "title": "Tipo de produto",
+                    "description": "Natureza do item no catálogo, para distinguir o que o estoque controla."
+                  },
+                  "category": {
+                    "type": "string",
+                    "title": "Categoria",
+                    "description": "Agrupamento do produto para organizar o estoque."
+                  },
+                  "brand": {
+                    "type": "string",
+                    "title": "Marca",
+                    "description": "Marca comercial do produto no catálogo."
+                  },
                   "unitOfMeasure": {
                     "type": "string",
-                    "description": "Unidade em que o estoquista registra entradas, saídas, saldo e quantidade mínima do produto.",
-                    "title": "Unidade de medida",
-                    "required": true,
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Unidade em que as entradas, as saídas e o saldo deste produto são contados, como unidade, caixa, kg ou litro.",
+                    "title": "Unidade de medida"
                   }
                 },
-                "description": "Dados de catálogo do produto utilizados para interpretar as quantidades movimentadas."
+                "description": "Dados de catálogo do item cujas entradas, saídas e saldo este módulo controla."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização, somente para leitura neste módulo."
+                "description": "Campos promovidos pela organização quando mais de um módulo precisou deles; este módulo apenas lê."
               },
               "controleEstoque": {
                 "type": "object",
                 "owner": "module",
                 "fields": {
-                  "quantidadeMinima": {
+                  "saldoMinimo": {
                     "type": "number",
                     "required": true,
-                    "of": "Address",
-                    "title": "Quantidade mínima",
-                    "description": "Quantidade mínima em estoque a partir da qual o produto deve ser acompanhado por aviso.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "title": "Saldo mínimo",
+                    "description": "Quantidade mínima em estoque; abaixo dela o estoquista recebe aviso.",
+                    "min": 0
                   },
                   "saldoAtual": {
                     "type": "number",
                     "derived": true,
                     "title": "Saldo atual",
-                    "description": "Quantidade disponível do produto, calculada pelas entradas menos as saídas registradas para este produto."
+                    "description": "Soma das quantidades das entradas menos a soma das quantidades das saídas deste produto."
                   },
-                  "saldoAbaixoDoMinimo": {
+                  "abaixoDoMinimo": {
                     "type": "boolean",
                     "derived": true,
-                    "title": "Saldo abaixo do mínimo",
-                    "description": "Indica que o saldo atual do produto está menor que a quantidade mínima definida para seu acompanhamento."
+                    "title": "Abaixo do mínimo",
+                    "description": "O saldo atual do produto é menor que o saldo mínimo definido para aviso."
                   }
                 },
-                "description": "Dados próprios deste módulo para acompanhar o nível mínimo do produto."
+                "description": "O que só este módulo grava sobre o produto: o saldo mínimo que dispara o aviso."
               }
             }
           }
@@ -252,43 +302,42 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "controleEstoque",
-      "entityId": "MovimentacaoEstoque",
+      "entityId": "Movimentacao",
       "title": "Movimentação de estoque",
-      "description": "Registro imutável de entrada ou saída de unidades de um produto, usado para calcular seu saldo atual.",
-      "displayField": "id",
+      "description": "Registro permanente de uma entrada ou saída de quantidade de um produto. Depois de registrada não pode ser alterada; o saldo do produto é recalculado a partir destas movimentações.",
+      "displayField": "numero",
       "relationships": {
         "produto": {
-          "relationshipId": "movimentacaoEstoqueProduto",
+          "relationshipId": "produtoDaMovimentacao",
           "to": "Produto",
-          "via": "MovimentacaoEstoque.produtoId",
+          "via": "Movimentacao.produtoId",
           "cardinality": "N:1",
-          "title": "Produto movimentado",
-          "description": "Cada movimentação registra uma entrada ou saída de unidades para um único produto.",
+          "title": "Produto",
+          "description": "Produto cujo estoque recebe a entrada ou a saída registrada nesta movimentação.",
           "mode": "fk",
-          "required": "Sempre",
-          "role": "produto"
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Consulta uma movimentação pelo identificador da linha, usando a busca por id na tela de acompanhamento do estoquista.",
-        "locate.byColumn": "Lista movimentações por produto e por data e hora de registro, com ordenação e paginação para o estoquista acompanhar o histórico.",
-        "count": "Conta as movimentações correspondentes ao produto ou período consultado, usando os filtros da lista para o cabeçalho do estoquista.",
-        "listByForeignKey": "Lista as movimentações vinculadas a um produto por produtoId, para o estoquista consultar o histórico daquele produto.",
-        "create": "Grava uma nova movimentação de entrada ou saída com produto, data, tipo e quantidade informados pelo estoquista.",
-        "transaction": "Confirma a gravação da movimentação e a atualização do saldo do produto na mesma transação, quando o estoquista registra a operação.",
-        "read.mdmRecord": "Lê o registro mestre apontado por produtoId para exibir o nome e os dados cadastrais do produto ao estoquista.",
-        "controleEstoque.registrarMovimentacao": "Registra uma entrada ou saída e aplica seu efeito ao saldo atual do produto, validando a operação para o estoquista."
+        "read.byId": "Lê uma movimentação pelo identificador já conhecido · busca na tabela por id · o estoquista conferindo o registro permanente.",
+        "locate.byColumn": "Lista movimentações filtradas por produto, tipo ou data, ordenadas e paginadas · igualdade nas colunas indexadas produtoId, tipo e registradoEm · o estoquista no histórico de estoque.",
+        "locate.byText": "Encontra movimentações cujo número contém o texto digitado · busca textual na coluna numero · o estoquista localizando um registro citado.",
+        "count": "Conta as movimentações que atendem ao filtro, sem paginar · a mesma restrição da lista · total no cabeçalho da lista do estoquista.",
+        "listByForeignKey": "Lista as movimentações que apontam para um produto · filtro pela coluna produtoId · o estoquista na ficha do produto vendo entradas e saídas.",
+        "create": "Grava uma nova entrada ou saída de quantidade; depois de gravada a linha não muda · insert na tabela, com número emitido na hora · o estoquista no passo de registrar movimentação.",
+        "uniqueKey": "Recusa uma segunda movimentação com o mesmo número · índice único na coluna numero · o motor na gravação.",
+        "read.mdmRecord": "Lê o produto mestre apontado por produtoId · leitura do registro MDM pelo identificador · telas que mostram o nome e o saldo do produto da movimentação.",
+        "sequence.next": "Emite o próximo número da movimentação · contador da plataforma na criação da linha · o módulo ao registrar a entrada ou a saída."
       },
       "rules": [
-        "movimentacaoEstoqueImutavel",
-        "quantidadeMovimentadaPositiva",
-        "registroMovimentacaoAtualizaSaldo"
+        "movimentacaoImutavel",
+        "quantidadePositiva"
       ],
       "kind": "entity",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
-        "table": "controleEstoque_movimentacaoestoque",
+        "table": "controleEstoque_movimentacao",
         "kind": "relational"
       },
       "record": {
@@ -309,85 +358,79 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
             "to": [
               "Produto"
             ],
             "title": "Produto",
-            "description": "Produto mestre ao qual a entrada ou saída de estoque se refere.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Produto cujo estoque recebe a entrada ou a saída registrada nesta movimentação."
           },
-          "movimentadoEm": {
+          "numero": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "indexed": true,
+            "title": "Número",
+            "description": "Número sequencial da movimentação, emitido na gravação e usado pelo estoquista para localizar o registro."
+          },
+          "tipo": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "values": [
+              {
+                "value": "inbound",
+                "title": "Entrada",
+                "description": "Quantidade que entra no estoque do produto."
+              },
+              {
+                "value": "outbound",
+                "title": "Saída",
+                "description": "Quantidade que sai do estoque do produto."
+              }
+            ],
+            "title": "Tipo",
+            "description": "Indica se a quantidade entra no estoque ou sai do estoque."
+          },
+          "registradoEm": {
             "type": "timestamp",
             "required": true,
             "indexed": true,
-            "of": "Address",
-            "title": "Data e hora da movimentação",
-            "description": "Data e hora em que a entrada ou saída foi registrada, usada para ordenar e consultar o histórico do produto.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Registrado em",
+            "description": "Data e hora em que a movimentação foi gravada; ordena o histórico de entradas e saídas."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
-            "title": "Dados da movimentação",
-            "description": "Dados imutáveis que caracterizam a entrada ou saída registrada para o produto.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Detalhes da movimentação",
+            "description": "Quantidade movimentada na unidade de medida do produto; não serve de filtro nem de ordenação.",
             "fields": {
-              "tipo": {
-                "type": "enum",
-                "required": true,
-                "of": "Address",
-                "values": [
-                  {
-                    "value": "entrada",
-                    "title": "Entrada",
-                    "description": "Adiciona unidades ao saldo do produto."
-                  },
-                  {
-                    "value": "saida",
-                    "title": "Saída",
-                    "description": "Retira unidades do saldo do produto."
-                  }
-                ],
-                "title": "Tipo de movimentação",
-                "description": "Indica se as unidades foram adicionadas ao estoque ou retiradas dele.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
               "quantidade": {
-                "type": "integer",
+                "type": "number",
                 "required": true,
-                "of": "Address",
                 "title": "Quantidade",
-                "description": "Quantidade positiva de unidades que entra ou sai do estoque.",
-                "maxLength": 0,
-                "min": 1,
-                "max": 0
+                "description": "Quantidade que entra ou sai do estoque nesta movimentação, na unidade de medida do produto. Deve ser maior que zero."
               }
             }
           }
         }
-      }
+      },
+      "uniqueKeys": [
+        [
+          "numero"
+        ]
+      ]
     }
   ],
   "relationships": [
     {
-      "relationshipId": "movimentacaoEstoqueProduto",
-      "from": "MovimentacaoEstoque",
+      "relationshipId": "produtoDaMovimentacao",
+      "from": "Movimentacao",
       "to": "Produto",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada movimentação de estoque registra uma entrada ou saída para um único produto.",
-      "field": "MovimentacaoEstoque.produtoId"
+      "description": "Produto cujo estoque recebe a entrada ou a saída registrada nesta movimentação.",
+      "field": "Movimentacao.produtoId"
     }
   ],
   "removedOrphans": [],
@@ -400,8 +443,8 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "MovimentacaoEstoque",
-      "detail": "storage.table controleEstoque_movimentacaoestoque"
+      "entityId": "Movimentacao",
+      "detail": "storage.table controleEstoque_movimentacao"
     },
     {
       "kind": "derivedFromPlatform",
@@ -414,11 +457,6 @@
       "detail": "Produto.details.identification.subtype.values"
     },
     {
-      "kind": "tightened",
-      "entityId": "Produto",
-      "detail": "Produto.details.product.unitOfMeasure.required"
-    },
-    {
       "kind": "derivedFromPlatform",
       "entityId": "Produto",
       "detail": "record.fields.details.controleEstoque.fields.saldoAtual.derived (derived[])"
@@ -426,11 +464,11 @@
     {
       "kind": "derivedFromPlatform",
       "entityId": "Produto",
-      "detail": "record.fields.details.controleEstoque.fields.saldoAbaixoDoMinimo.derived (derived[])"
+      "detail": "record.fields.details.controleEstoque.fields.abaixoDoMinimo.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "MovimentacaoEstoque",
+      "entityId": "Movimentacao",
       "detail": "record.fields.id, record.fields.version"
     }
   ]

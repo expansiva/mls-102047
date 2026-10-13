@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/manutencaoFrota/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const manutencaoFrotaJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -9,36 +9,46 @@ export const manutencaoFrotaJourneyIndex = {
     {
       "journeyId": "registrarAbastecimento",
       "actorRef": "motorista",
-      "title": "Registrar abastecimento do veículo dirigido"
+      "title": "Registrar abastecimento"
     },
     {
-      "journeyId": "consultarVeiculosAtribuidos",
+      "journeyId": "consultarMeusAbastecimentos",
       "actorRef": "motorista",
-      "title": "Consultar veículos atribuídos"
+      "title": "Consultar meus abastecimentos"
     },
     {
-      "journeyId": "cadastrarPlanoPreventivo",
+      "journeyId": "cadastrarVeiculo",
       "actorRef": "gestor",
-      "title": "Cadastrar plano de manutenção preventiva"
+      "title": "Cadastrar veículo da frota"
     },
     {
-      "journeyId": "abrirOrdemPorDefeito",
+      "journeyId": "cadastrarPlanoPreventiva",
       "actorRef": "gestor",
-      "title": "Abrir ordem de manutenção por defeito"
+      "title": "Cadastrar plano de preventiva"
     },
     {
-      "journeyId": "tratarAlertaPreventivaVencida",
+      "journeyId": "abrirOrdemPlanoVencido",
       "actorRef": "gestor",
-      "title": "Tratar alerta de manutenção preventiva vencida"
+      "title": "Abrir ordem por preventiva vencida"
     },
     {
-      "journeyId": "atualizarOrdemManutencao",
+      "journeyId": "abrirOrdemDefeito",
       "actorRef": "gestor",
-      "title": "Atualizar ordem de manutenção"
+      "title": "Abrir ordem por defeito"
+    },
+    {
+      "journeyId": "concluirOrdem",
+      "actorRef": "gestor",
+      "title": "Concluir ordem de manutenção"
+    },
+    {
+      "journeyId": "acompanharPreventivasVencidas",
+      "actorRef": "gestor",
+      "title": "Acompanhar preventivas vencidas"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type ManutencaoFrotaJourneyIndexType = typeof manutencaoFrotaJourneyIndex;
 

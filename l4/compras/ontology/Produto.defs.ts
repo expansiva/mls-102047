@@ -1,0 +1,302 @@
+/// <mls fileReference="_102047_/l4/compras/ontology/Produto.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const comprasEntityProduto = {
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+  "moduleName": "compras",
+  "entityId": "Produto",
+  "title": "Produto",
+  "description": "Item do catálogo da organização que é comprado de fornecedores e recebe entrada no estoque.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "fornecedores": {
+      "relationshipId": "fornecedorFornecePoduto",
+      "to": "Fornecedor",
+      "via": "SuppliesProduct",
+      "cardinality": "N:N",
+      "title": "Fornecedores do produto",
+      "description": "Fornecedores que fornecem o produto, vínculo SuppliesProduct no cadastro mestre.",
+      "direction": "to"
+    },
+    "produtosFornecidos": {
+      "relationshipId": "produtoFornecidoProduto",
+      "to": "ProdutoFornecido",
+      "via": "ProdutoFornecido.produtoId",
+      "cardinality": "1:N",
+      "title": "Ofertas com preço combinado",
+      "description": "Registros de fornecimento com preço combinado por fornecedor.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
+    },
+    "itensPedido": {
+      "relationshipId": "itemPedidoProduto",
+      "to": "ItemPedido",
+      "via": "ItemPedido.produtoId",
+      "cardinality": "1:N",
+      "title": "Itens de pedido",
+      "description": "Itens de pedidos de compra que compram o produto.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
+    },
+    "entradasEstoque": {
+      "relationshipId": "entradaProduto",
+      "to": "EntradaEstoque",
+      "via": "EntradaEstoque.produtoId",
+      "cardinality": "1:N",
+      "title": "Entradas no estoque",
+      "description": "Entradas de estoque geradas pelos recebimentos do produto.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
+    }
+  },
+  "capabilities": {
+    "read.byId": "Lê o produto pelo id para preencher itens de pedido, ofertas de fornecedor e entradas de estoque; usado por comprador, gerente e almoxarife.",
+    "locate.byName": "Localiza produtos pelo nome digitado ao montar o pedido de compra ou ao vincular um produto a um fornecedor; usado pelo comprador.",
+    "locate.byTag": "Localiza o produto pelo código interno registrado como etiqueta do módulo, no índice de tags; usado pelo almoxarife ao conferir o recebimento.",
+    "register.createOrAttach": "Cadastra o produto no catálogo mestre quando ainda não existe e o marca com o papel compras.Produto; usado pelo comprador.",
+    "edit.platformFields": "Altera nome, SKU, categoria, marca e unidade de medida do produto; usado pelo comprador.",
+    "edit.moduleNamespace": "Atualiza o espaço compras do produto pela chave do módulo; usado pelo próprio módulo.",
+    "inactivate": "Retira de uso um produto que não é mais comprado, sem apagá-lo, e permite reativá-lo; usado pelo comprador.",
+    "link": "Vincula o produto a um fornecedor com o tipo SuppliesProduct; usado pelo comprador ao registrar quem fornece o produto.",
+    "unlink": "Encerra o vínculo de fornecimento com um fornecedor mantendo o histórico; usado pelo comprador.",
+    "listLinks": "Mostra os fornecedores vinculados ao produto com validade; usado pelo comprador e pelo gerente na tela do produto.",
+    "attach.document": "Anexa ficha técnica ou foto do produto por categoria; usado pelo comprador.",
+    "comment": "Registra observações sobre o produto, como especificação de compra; usado pelo comprador e pelo almoxarife.",
+    "tag": "Marca o produto com etiquetas livres do módulo compras, como código interno ou grupo de compra; usado pelo comprador.",
+    "statusHistory.read": "Mostra quando o produto foi ativado ou inativado e por quem; usado pelo gerente de compras.",
+    "audit": "Informa quem alterou o cadastro do produto e quando, pelo módulo de auditoria da plataforma; usado pelo gerente de compras."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-identity-never-in-namespace",
+    "rule-document-shape-validated",
+    "rule-delete-blocked-by-relationships",
+    "inactiveProductCannotBeOrdered"
+  ],
+  "writer": "crud",
+  "kind": "role",
+  "subtype": "Product",
+  "roleTag": "compras.Produto",
+  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true,
+        "writePrecondition": true,
+        "description": "Bumped by the engine on every write; optimistic concurrency."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "description": "Registro mestre do produto como a plataforma o guarda, com o que o módulo compras usa.",
+        "fields": {
+          "identification": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "subtype": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Product",
+                    "title": "Produto"
+                  }
+                ],
+                "description": "Sempre Product para os produtos comprados pelo módulo.",
+                "title": "Subtipo"
+              },
+              "name": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "maxLength": 200,
+                "description": "Nome pelo qual o comprador e o almoxarife reconhecem o produto no catálogo, nos pedidos e nos recebimentos.",
+                "title": "Nome do produto"
+              },
+              "status": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Active",
+                    "title": "Ativo"
+                  },
+                  {
+                    "value": "Inactive",
+                    "title": "Inativo"
+                  },
+                  {
+                    "value": "Merged",
+                    "title": "Mesclado"
+                  },
+                  {
+                    "value": "Blocked",
+                    "title": "Bloqueado"
+                  }
+                ],
+                "title": "Situação",
+                "description": "Situação do produto no cadastro mestre; produto inativo não entra em novos pedidos de compra."
+              },
+              "countryCode": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "pattern": "^[A-Z]{2}$",
+                "maxLength": 2,
+                "default": "US",
+                "description": "País (ISO 3166-1 alfa-2) a que o cadastro do produto pertence; normalmente BR.",
+                "title": "País"
+              },
+              "tags": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "derived": true,
+                "description": "Papéis de módulo do registro; compras.Produto indica que o produto é comprado pelo módulo.",
+                "title": "Papéis"
+              },
+              "createdAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Criado em",
+                "description": "Momento em que o produto foi cadastrado."
+              },
+              "updatedAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Atualizado em",
+                "description": "Momento da última alteração do cadastro do produto."
+              }
+            },
+            "description": "Colunas de índice da plataforma usadas para localizar e listar produtos nas compras."
+          },
+          "base": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "aliases": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "description": "Nomes alternativos do produto, como o nome usado pelo fornecedor ou um nome comercial.",
+                "title": "Outros nomes"
+              },
+              "relationshipRefs": {
+                "type": "object",
+                "required": true,
+                "derived": true,
+                "description": "Chaves compactas mantidas pelo motor, entre elas os fornecedores que fornecem o produto.",
+                "title": "Vínculos"
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 1000,
+                "title": "Observações",
+                "description": "Observações gerais sobre o produto."
+              }
+            },
+            "description": "Dados comuns a todo registro mestre que o módulo lê."
+          },
+          "product": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "sku": {
+                "type": "string",
+                "description": "Código interno do produto usado para identificá-lo nos pedidos e nas entradas de estoque.",
+                "title": "Código interno (SKU)"
+              },
+              "productType": {
+                "type": "enum",
+                "values": [
+                  {
+                    "value": "Physical",
+                    "title": "Físico"
+                  },
+                  {
+                    "value": "Consumable",
+                    "title": "Consumível"
+                  },
+                  {
+                    "value": "Bundle",
+                    "title": "Kit"
+                  },
+                  {
+                    "value": "Digital",
+                    "title": "Digital"
+                  },
+                  {
+                    "value": "Other",
+                    "title": "Outro"
+                  }
+                ],
+                "title": "Tipo de produto",
+                "description": "Natureza do item comprado."
+              },
+              "category": {
+                "type": "string",
+                "title": "Categoria",
+                "description": "Categoria do produto no catálogo de compras."
+              },
+              "brand": {
+                "type": "string",
+                "title": "Marca",
+                "description": "Marca do produto."
+              },
+              "unitOfMeasure": {
+                "type": "string",
+                "description": "Unidade em que o produto é comprado, recebido e entra no estoque (unidade, caixa, kg, litro).",
+                "title": "Unidade de medida",
+                "required": true
+              },
+              "isInventoried": {
+                "type": "boolean",
+                "description": "Verdadeiro quando o recebimento do produto dá entrada no estoque.",
+                "title": "Controla estoque"
+              }
+            },
+            "description": "Ramo do subtipo Product com os dados de catálogo usados nas compras e no estoque."
+          },
+          "general": {
+            "type": "object",
+            "owner": "organization",
+            "open": true,
+            "description": "Campos promovidos pela organização; o módulo apenas lê."
+          },
+          "compras": {
+            "type": "object",
+            "owner": "module",
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
+          }
+        }
+      }
+    }
+  }
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+
+export type ComprasEntityProdutoType = typeof comprasEntityProduto;
+
+export default comprasEntityProduto;

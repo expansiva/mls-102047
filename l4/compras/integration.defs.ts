@@ -1,26 +1,66 @@
 /// <mls fileReference="_102047_/l4/compras/integration.defs.ts" enhancement="_blank"/>
 
-import type { Ns5IntegrationArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5IntegrationArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const comprasIntegration = {
   "schemaVersion": "2026-09-12-ns5-integration-v2",
   "moduleName": "compras",
-  "inbound": [],
+  "inbound": [
+    {
+      "id": "produtoCadastrado",
+      "kind": "event",
+      "from": "controleEstoque",
+      "event": "produtoCadastrado",
+      "writes": [
+        "Produto"
+      ],
+      "effect": "create",
+      "description": "Quando o controle de estoque cadastra um produto (registro Produto.create de controleEstoque), o módulo compras cria a referência local em Produto com o mesmo identificador, nome e unidade. Assim o produto fica disponível para vincular a fornecedores (ProdutoFornecido) e para incluir em itens de pedido de compra.",
+      "entityRefs": []
+    }
+  ],
   "outbound": [
     {
-      "id": "recebimentoRegistrado",
+      "id": "entradaEstoqueRegistrada",
       "kind": "event",
       "to": "controleEstoque",
-      "event": "recebimentoRegistrado",
-      "on": "GoodsReceipt.create",
-      "description": "Publica o recebimento registrado para que o controle de estoque dê entrada nos produtos recebidos.",
+      "event": "entradaEstoqueRegistrada",
+      "on": "EntradaEstoque.create",
+      "description": "Ao registrar o recebimento total ou parcial, o módulo compras gera uma entrada de estoque para cada produto recebido e publica o registro EntradaEstoque. O controle de estoque usa esse registro para lançar uma Movimentacao de entrada com o produto, a quantidade recebida e a referência ao pedido de compra.",
       "entityRefs": [
-        "GoodsReceipt"
+        "EntradaEstoque",
+        "Recebimento",
+        "PedidoCompra",
+        "Produto"
+      ]
+    },
+    {
+      "id": "pedidoCompraAprovado",
+      "kind": "event",
+      "to": "any",
+      "event": "pedidoCompraAprovado",
+      "on": "PedidoCompra.aprovar",
+      "description": "Publica o pedido de compra aprovado pelo gerente de compras, com o fornecedor e o valor total, para os módulos que precisam saber dos compromissos de compra, por exemplo o financeiro para a programação de pagamentos.",
+      "entityRefs": [
+        "PedidoCompra",
+        "Fornecedor"
+      ]
+    },
+    {
+      "id": "pedidoCompraRecebidoTotal",
+      "kind": "event",
+      "to": "any",
+      "event": "pedidoCompraRecebidoTotal",
+      "on": "PedidoCompra.receberTotal",
+      "description": "Publica o pedido de compra quando todos os itens foram recebidos, encerrando o ciclo de compra para os módulos interessados.",
+      "entityRefs": [
+        "PedidoCompra",
+        "Fornecedor"
       ]
     }
   ],
   "plugins": []
-} as const satisfies Ns5IntegrationArtifact;
+} as const satisfies Ns5Readonly<Ns5IntegrationArtifact>;
 
 export type ComprasIntegrationType = typeof comprasIntegration;
 

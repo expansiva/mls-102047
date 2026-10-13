@@ -2,35 +2,101 @@
   "candidates": [
     {
       "kind": "uncitedHumanTransition",
-      "candidateId": "uncited:PurchaseOrder.rejectPurchaseOrder",
-      "entityId": "PurchaseOrder",
-      "transitionId": "rejectPurchaseOrder",
+      "candidateId": "uncited:PedidoCompra.receberParcial",
+      "entityId": "PedidoCompra",
+      "transitionId": "receberParcial",
       "by": [
-        "gerenteCompras"
+        "almoxarife"
       ],
       "from": [
-        "pendingApproval"
+        "enviado",
+        "aprovado",
+        "recebidoParcial"
       ],
-      "to": "rejected",
-      "description": "Rejeita o pedido submetido, impedindo seu envio ao fornecedor.",
+      "to": "recebidoParcial",
+      "description": "Ao registrar um recebimento que não completa todos os itens, o pedido fica recebido parcialmente.",
+      "likelyCoveredBy": []
+    },
+    {
+      "kind": "uncitedHumanTransition",
+      "candidateId": "uncited:PedidoCompra.receberTotal",
+      "entityId": "PedidoCompra",
+      "transitionId": "receberTotal",
+      "by": [
+        "almoxarife"
+      ],
+      "from": [
+        "enviado",
+        "aprovado",
+        "recebidoParcial"
+      ],
+      "to": "recebido",
+      "description": "Ao registrar o recebimento que completa todos os itens, o pedido fica recebido.",
       "likelyCoveredBy": []
     },
     {
       "kind": "incompleteDecide",
-      "candidateId": "decide:PurchaseOrder.pendingApproval",
-      "entityId": "PurchaseOrder",
-      "origin": "pendingApproval",
-      "journeyId": "decidirPedidoSubmetido",
-      "stepId": "decidirAprovarOuRejeitar",
+      "candidateId": "decide:PedidoCompra.enviado",
+      "entityId": "PedidoCompra",
+      "origin": "enviado",
+      "journeyId": "aprovarPedido",
+      "stepId": "decidirPedido",
       "transitionIds": [
-        "decidePurchaseOrder",
-        "rejectPurchaseOrder"
+        "aprovar",
+        "rejeitar",
+        "receberParcial",
+        "receberTotal"
       ],
       "citedTransitionIds": [
-        "decidePurchaseOrder"
+        "aprovar",
+        "rejeitar"
+      ]
+    },
+    {
+      "kind": "writtenSwitch",
+      "candidateId": "switch:ProdutoFornecido.ativo",
+      "entityId": "ProdutoFornecido",
+      "fieldId": "ativo",
+      "title": "Ativo",
+      "type": "boolean",
+      "citedBy": [
+        "derived:Fornecedor.status",
+        "derived:ContatoFornecedor.status",
+        "derived:Produto.status",
+        "derived:Comprador.status"
       ]
     }
   ],
-  "verdicts": [],
-  "rounds": 0
+  "verdicts": [
+    {
+      "candidateId": "switch:ProdutoFornecido.ativo",
+      "verdict": "transitionUnjustified",
+      "journeyBrief": {
+        "actor": "",
+        "title": "",
+        "goal": "",
+        "transitionRef": ""
+      },
+      "coveredBy": "",
+      "states": []
+    }
+  ],
+  "rounds": 0,
+  "comments": [
+    {
+      "code": "NS5_JUDGE_COVERED_TRANSITION",
+      "message": "Step registrarRecebimento.registrarRecebimento has no transitionRef.",
+      "candidateId": "uncited:PedidoCompra.receberParcial"
+    },
+    {
+      "code": "NS5_JUDGE_COVERED_TRANSITION",
+      "message": "Step registrarRecebimento.registrarRecebimento has no transitionRef.",
+      "candidateId": "uncited:PedidoCompra.receberTotal"
+    },
+    {
+      "code": "NS5_JUDGE_COVERED_KIND",
+      "message": "coveredByAct applies only to an uncited human transition.",
+      "candidateId": "decide:PedidoCompra.enviado"
+    }
+  ]
 }

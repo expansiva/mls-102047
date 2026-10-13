@@ -1,221 +1,343 @@
 {
   "plan": {
     "moduleName": "compras",
-    "businessDomain": "Compras",
+    "businessDomain": "Compras: cadastro de fornecedores e preços combinados, pedidos de compra com aprovação acima de valor limite, recebimento total ou parcial com entrada no estoque e painel gerencial.",
     "entities": [
       {
-        "entityId": "Supplier",
+        "entityId": "Fornecedor",
         "kind": "role",
         "family": "mdm",
         "title": "Fornecedor",
-        "description": "Empresa fornecedora cadastrada ou vinculada para disponibilizar produtos e condições de compra.",
+        "description": "Empresa (CNPJ, razão social) da qual a organização compra; papel do módulo compras sobre o cadastro mestre de empresas.",
         "displayField": "details.identification.name",
         "subtype": "Company",
-        "roleTag": "compras.Supplier",
+        "roleTag": "compras.Fornecedor",
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
       },
       {
-        "entityId": "SupplierContact",
+        "entityId": "ContatoFornecedor",
         "kind": "role",
         "family": "mdm",
         "title": "Contato do fornecedor",
-        "description": "Canal de contato vinculado ao fornecedor para comunicação comercial.",
+        "description": "Telefone ou e-mail do fornecedor, mantido como canal de contato do cadastro mestre e vinculado por HasContact.",
         "displayField": "details.identification.name",
         "subtype": "ContactChannel",
-        "roleTag": "compras.SupplierContact",
+        "roleTag": "compras.ContatoFornecedor",
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
       },
       {
-        "entityId": "Product",
+        "entityId": "Produto",
         "kind": "role",
         "family": "mdm",
         "title": "Produto",
-        "description": "Produto do cadastro mestre que pode ser fornecido, pedido e recebido nas compras.",
+        "description": "Item do catálogo da organização que é comprado de fornecedores e recebe entrada no estoque.",
         "displayField": "details.identification.name",
+        "writer": "crud",
         "subtype": "Product",
-        "roleTag": "compras.Product",
+        "roleTag": "compras.Produto",
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
       },
       {
-        "entityId": "Buyer",
+        "entityId": "Comprador",
         "kind": "role",
         "family": "mdm",
         "title": "Comprador",
-        "description": "Pessoa compradora vinculada às condições de fornecimento que cadastra para sustentar o escopo pessoal de seu trabalho.",
+        "description": "Pessoa que atua como comprador; seus pedidos e produtos fornecidos cadastrados formam o seu escopo pessoal.",
         "displayField": "details.identification.name",
+        "writer": "crud",
         "subtype": "Person",
-        "roleTag": "compras.Buyer",
+        "roleTag": "compras.Comprador",
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
       },
       {
-        "entityId": "SupplierOffering",
+        "entityId": "ProdutoFornecido",
         "kind": "entity",
         "family": "tdm",
-        "title": "Condição de fornecimento",
-        "description": "Condição comercial de um produto fornecido por um fornecedor, incluindo o preço combinado.",
-        "displayField": "productId",
+        "title": "Produto fornecido",
+        "description": "Produto que um fornecedor fornece à organização, com o preço combinado vigente.",
+        "displayField": "codigo",
         "class": "supporting",
         "storage": {
           "target": "moduleDatabase",
-          "table": "compras_supplieroffering",
+          "table": "compras_produtofornecido",
           "kind": "relational"
         }
       },
       {
-        "entityId": "PurchaseOrder",
+        "entityId": "PedidoCompra",
         "kind": "entity",
         "family": "tdm",
         "title": "Pedido de compra",
-        "description": "Pedido de compra aberto para um fornecedor, com itens, quantidades, preços e decisão de aprovação quando necessária.",
-        "displayField": "orderNumber",
+        "description": "Pedido aberto pelo comprador para um fornecedor, enviado, aprovado ou rejeitado pelo gerente quando acima do limite, e recebido total ou parcialmente.",
+        "displayField": "numero",
         "class": "core",
         "storage": {
           "target": "moduleDatabase",
-          "table": "compras_purchaseorder",
+          "table": "compras_pedidocompra",
           "kind": "relational"
         }
       },
       {
-        "entityId": "GoodsReceipt",
+        "entityId": "ItemPedido",
         "kind": "entity",
         "family": "tdm",
-        "title": "Recebimento de mercadorias",
-        "description": "Registro do recebimento total ou parcial dos itens de um pedido de compra, que origina a entrada no estoque.",
-        "displayField": "receiptNumber",
-        "class": "event",
-        "storage": {
-          "target": "moduleDatabase",
-          "table": "compras_goodsreceipt",
-          "kind": "relational"
-        }
-      },
-      {
-        "entityId": "PurchaseOrderDashboard",
-        "kind": "entity",
-        "family": "ddm",
-        "title": "Painel de pedidos de compra",
-        "description": "Resumo recalculado de pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês.",
-        "displayField": "period",
+        "title": "Item do pedido",
+        "description": "Produto incluído no pedido de compra com quantidade e preço; a quantidade pendente de recebimento é derivada das entradas.",
+        "displayField": "numeroItem",
         "class": "supporting",
         "storage": {
           "target": "moduleDatabase",
-          "table": "compras_purchaseorderdashboard",
+          "table": "compras_itempedido",
+          "kind": "relational"
+        }
+      },
+      {
+        "entityId": "Recebimento",
+        "kind": "entity",
+        "family": "tdm",
+        "title": "Recebimento",
+        "description": "Registro da chegada total ou parcial de um pedido de compra feito pelo almoxarife.",
+        "displayField": "numero",
+        "class": "event",
+        "storage": {
+          "target": "moduleDatabase",
+          "table": "compras_recebimento",
+          "kind": "relational"
+        }
+      },
+      {
+        "entityId": "EntradaEstoque",
+        "kind": "entity",
+        "family": "tdm",
+        "title": "Entrada no estoque",
+        "description": "Entrada de estoque de um produto recebido, gerada pelo recebimento para cada item, com a quantidade recebida; publicada ao controle de estoque.",
+        "displayField": "numero",
+        "class": "event",
+        "storage": {
+          "target": "moduleDatabase",
+          "table": "compras_entradaestoque",
+          "kind": "relational"
+        }
+      },
+      {
+        "entityId": "PainelCompras",
+        "kind": "entity",
+        "family": "ddm",
+        "title": "Painel de compras",
+        "description": "Indicadores recalculados: pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês.",
+        "displayField": "mesReferencia",
+        "class": "supporting",
+        "storage": {
+          "target": "moduleDatabase",
+          "table": "compras_painelcompras",
           "kind": "relational"
         }
       }
     ],
     "relationships": [
       {
-        "relationshipId": "supplierHasContact",
-        "from": "Supplier",
-        "to": "SupplierContact",
+        "relationshipId": "fornecedorContato",
+        "from": "Fornecedor",
+        "to": "ContatoFornecedor",
         "type": "oneToMany",
         "required": false,
         "mode": "mdmRelationship",
-        "description": "Um fornecedor pode ter canais de contato vinculados para sua comunicação comercial.",
+        "description": "Canais de contato (telefone, e-mail) do fornecedor.",
         "catalogType": "HasContact"
       },
       {
-        "relationshipId": "supplierSuppliesProduct",
-        "from": "Supplier",
-        "to": "Product",
+        "relationshipId": "fornecedorFornecePoduto",
+        "from": "Fornecedor",
+        "to": "Produto",
         "type": "manyToMany",
         "required": false,
         "mode": "mdmRelationship",
-        "description": "Um fornecedor pode fornecer diversos produtos, e um produto pode ser fornecido por diversos fornecedores.",
+        "description": "O fornecedor fornece o produto, registrado no cadastro mestre.",
         "catalogType": "SuppliesProduct"
       },
       {
-        "relationshipId": "supplierOfferingSupplier",
-        "from": "SupplierOffering",
-        "to": "Supplier",
+        "relationshipId": "produtoFornecidoFornecedor",
+        "from": "ProdutoFornecido",
+        "to": "Fornecedor",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada condição de fornecimento pertence a um fornecedor.",
-        "field": "SupplierOffering.supplierId"
+        "description": "Fornecedor que fornece o produto com o preço combinado.",
+        "field": "ProdutoFornecido.fornecedorId"
       },
       {
-        "relationshipId": "supplierOfferingProduct",
-        "from": "SupplierOffering",
-        "to": "Product",
+        "relationshipId": "produtoFornecidoProduto",
+        "from": "ProdutoFornecido",
+        "to": "Produto",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada condição de fornecimento define o preço combinado para um produto.",
-        "field": "SupplierOffering.productId"
+        "description": "Produto fornecido pelo fornecedor.",
+        "field": "ProdutoFornecido.produtoId"
       },
       {
-        "relationshipId": "supplierOfferingBuyer",
-        "from": "SupplierOffering",
-        "to": "Buyer",
+        "relationshipId": "produtoFornecidoComprador",
+        "from": "ProdutoFornecido",
+        "to": "Comprador",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada condição de fornecimento é cadastrada por um comprador para permitir o escopo pessoal do cadastro.",
-        "field": "SupplierOffering.buyerId"
+        "description": "Comprador que cadastrou e mantém o preço combinado.",
+        "field": "ProdutoFornecido.compradorId"
       },
       {
-        "relationshipId": "purchaseOrderSupplier",
-        "from": "PurchaseOrder",
-        "to": "Supplier",
+        "relationshipId": "pedidoFornecedor",
+        "from": "PedidoCompra",
+        "to": "Fornecedor",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada pedido de compra é aberto para um fornecedor.",
-        "field": "PurchaseOrder.supplierId"
+        "description": "Fornecedor para o qual o pedido de compra é feito.",
+        "field": "PedidoCompra.fornecedorId"
       },
       {
-        "relationshipId": "goodsReceiptPurchaseOrder",
-        "from": "GoodsReceipt",
-        "to": "PurchaseOrder",
+        "relationshipId": "pedidoComprador",
+        "from": "PedidoCompra",
+        "to": "Comprador",
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada recebimento registra a entrega total ou parcial de um pedido de compra.",
-        "field": "GoodsReceipt.purchaseOrderId"
+        "description": "Comprador que abriu o pedido.",
+        "field": "PedidoCompra.compradorId"
+      },
+      {
+        "relationshipId": "itemPedidoPedido",
+        "from": "ItemPedido",
+        "to": "PedidoCompra",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Pedido de compra ao qual o item pertence.",
+        "field": "ItemPedido.pedidoCompraId"
+      },
+      {
+        "relationshipId": "itemPedidoProduto",
+        "from": "ItemPedido",
+        "to": "Produto",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Produto comprado no item.",
+        "field": "ItemPedido.produtoId"
+      },
+      {
+        "relationshipId": "itemPedidoProdutoFornecido",
+        "from": "ItemPedido",
+        "to": "ProdutoFornecido",
+        "type": "manyToOne",
+        "required": false,
+        "mode": "fk",
+        "description": "Preço combinado que sugeriu o preço do item.",
+        "field": "ItemPedido.produtoFornecidoId"
+      },
+      {
+        "relationshipId": "recebimentoPedido",
+        "from": "Recebimento",
+        "to": "PedidoCompra",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Pedido de compra cuja chegada foi registrada.",
+        "field": "Recebimento.pedidoCompraId"
+      },
+      {
+        "relationshipId": "entradaRecebimento",
+        "from": "EntradaEstoque",
+        "to": "Recebimento",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Recebimento que gerou a entrada no estoque.",
+        "field": "EntradaEstoque.recebimentoId"
+      },
+      {
+        "relationshipId": "entradaItemPedido",
+        "from": "EntradaEstoque",
+        "to": "ItemPedido",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Item do pedido cuja quantidade foi recebida.",
+        "field": "EntradaEstoque.itemPedidoId"
+      },
+      {
+        "relationshipId": "entradaProduto",
+        "from": "EntradaEstoque",
+        "to": "Produto",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "fk",
+        "description": "Produto que teve entrada no estoque.",
+        "field": "EntradaEstoque.produtoId"
+      },
+      {
+        "relationshipId": "fornecedorPedidosPainel",
+        "from": "PainelCompras",
+        "to": "Fornecedor",
+        "type": "manyToMany",
+        "required": false,
+        "mode": "throughTable",
+        "description": "Total comprado no mês agrupado por fornecedor, apurado pelos pedidos de compra.",
+        "through": "PedidoCompra",
+        "path": "PainelCompras -> PedidoCompra.fornecedorId -> Fornecedor",
+        "derived": true
       }
     ],
     "normalizations": [
       {
         "kind": "derivedFromPlatform",
-        "entityId": "Supplier",
-        "detail": "roleTag compras.Supplier; source /_102034_/l4/ontology/mdm.defs.ts"
+        "entityId": "Fornecedor",
+        "detail": "roleTag compras.Fornecedor; source /_102034_/l4/ontology/mdm.defs.ts"
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "SupplierContact",
-        "detail": "roleTag compras.SupplierContact; source /_102034_/l4/ontology/mdm.defs.ts"
+        "entityId": "ContatoFornecedor",
+        "detail": "roleTag compras.ContatoFornecedor; source /_102034_/l4/ontology/mdm.defs.ts"
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "Product",
-        "detail": "roleTag compras.Product; source /_102034_/l4/ontology/mdm.defs.ts"
+        "entityId": "Produto",
+        "detail": "roleTag compras.Produto; source /_102034_/l4/ontology/mdm.defs.ts"
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "Buyer",
-        "detail": "roleTag compras.Buyer; source /_102034_/l4/ontology/mdm.defs.ts"
+        "entityId": "Comprador",
+        "detail": "roleTag compras.Comprador; source /_102034_/l4/ontology/mdm.defs.ts"
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "SupplierOffering",
-        "detail": "storage.table compras_supplieroffering"
+        "entityId": "ProdutoFornecido",
+        "detail": "storage.table compras_produtofornecido"
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "PurchaseOrder",
-        "detail": "storage.table compras_purchaseorder"
+        "entityId": "PedidoCompra",
+        "detail": "storage.table compras_pedidocompra"
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "GoodsReceipt",
-        "detail": "storage.table compras_goodsreceipt"
+        "entityId": "ItemPedido",
+        "detail": "storage.table compras_itempedido"
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "PurchaseOrderDashboard",
-        "detail": "storage.table compras_purchaseorderdashboard"
+        "entityId": "Recebimento",
+        "detail": "storage.table compras_recebimento"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "EntradaEstoque",
+        "detail": "storage.table compras_entradaestoque"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "PainelCompras",
+        "detail": "storage.table compras_painelcompras"
       }
     ]
   },
@@ -223,74 +345,92 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "compras",
-      "entityId": "Supplier",
+      "entityId": "Fornecedor",
       "title": "Fornecedor",
-      "description": "Empresa fornecedora cadastrada ou vinculada para disponibilizar produtos e condições de compra.",
+      "description": "Empresa (CNPJ, razão social) da qual a organização compra; papel do módulo compras sobre o cadastro mestre de empresas.",
       "displayField": "details.identification.name",
       "relationships": {
-        "supplierContacts": {
-          "relationshipId": "supplierHasContact",
-          "to": "SupplierContact",
+        "contatos": {
+          "relationshipId": "fornecedorContato",
+          "to": "ContatoFornecedor",
           "via": "HasContact",
           "cardinality": "1:N",
-          "title": "Canais de contato do fornecedor",
-          "description": "Canais de contato vinculados ao fornecedor para sua comunicação comercial."
+          "title": "Contatos do fornecedor",
+          "description": "Canais de contato (telefone, e-mail) do fornecedor, vínculo HasContact."
         },
-        "suppliedProducts": {
-          "relationshipId": "supplierSuppliesProduct",
-          "to": "Product",
+        "produtosFornecidos": {
+          "relationshipId": "fornecedorFornecePoduto",
+          "to": "Produto",
           "via": "SuppliesProduct",
           "cardinality": "N:N",
-          "title": "Produtos fornecidos",
-          "description": "Produtos que o fornecedor disponibiliza para compra."
+          "title": "Produtos que fornece",
+          "description": "O fornecedor fornece o produto, registrado no cadastro mestre (SuppliesProduct)."
         },
-        "supplierOfferings": {
-          "relationshipId": "supplierOfferingSupplier",
-          "to": "SupplierOffering",
-          "via": "SupplierOffering.supplierId",
+        "precosCombinados": {
+          "relationshipId": "produtoFornecidoFornecedor",
+          "to": "ProdutoFornecido",
+          "via": "ProdutoFornecido.fornecedorId",
           "cardinality": "1:N",
-          "title": "Condições de fornecimento",
-          "description": "Condições de preço combinado dos produtos pertencentes ao fornecedor.",
+          "title": "Produtos com preço combinado",
+          "description": "Produtos fornecidos por este fornecedor com o preço combinado.",
           "mode": "fk",
           "direction": "to",
           "required": true
         },
-        "purchaseOrders": {
-          "relationshipId": "purchaseOrderSupplier",
-          "to": "PurchaseOrder",
-          "via": "PurchaseOrder.supplierId",
+        "pedidos": {
+          "relationshipId": "pedidoFornecedor",
+          "to": "PedidoCompra",
+          "via": "PedidoCompra.fornecedorId",
           "cardinality": "1:N",
           "title": "Pedidos de compra",
-          "description": "Pedidos de compra abertos para este fornecedor.",
+          "description": "Pedidos de compra feitos a este fornecedor.",
           "mode": "fk",
           "direction": "to",
           "required": true
+        },
+        "painel": {
+          "relationshipId": "fornecedorPedidosPainel",
+          "to": "PainelCompras",
+          "via": "PedidoCompra",
+          "cardinality": "N:N",
+          "title": "Total comprado no mês",
+          "description": "Total comprado no mês por fornecedor, apurado pelos pedidos de compra.",
+          "mode": "throughTable",
+          "path": "PainelCompras -> PedidoCompra.fornecedorId -> Fornecedor",
+          "derived": true,
+          "direction": "to"
         }
       },
       "capabilities": {
-        "read.byId": "Lê o fornecedor pelo identificador mestre para exibi-lo nos pedidos e nas condições de fornecimento; usado pelo comprador e pelo gerente de compras.",
-        "locate.byName": "Localiza fornecedores pelo nome para selecionar a empresa ao cadastrar condições e abrir pedidos; usado pelo comprador.",
-        "locate.byDocument": "Localiza o fornecedor pelo CNPJ para evitar duplicidade antes de cadastrá-lo ou vinculá-lo; usado pelo comprador.",
-        "locate.byContact": "Localiza o fornecedor a partir de um canal de contato vinculado; usado pelo comprador na comunicação comercial.",
-        "register.createOrAttach": "Cria a empresa fornecedora quando não existe ou vincula o cadastro mestre existente pelo CNPJ, aplicando o papel de fornecedor; usado pelo comprador.",
-        "edit.platformFields": "Atualiza os dados cadastrais da empresa fornecedora, como razão social e nome fantasia, no cadastro mestre; usado pelo comprador.",
-        "edit.moduleNamespace": "Atualiza somente o espaço do módulo de compras do fornecedor, que permanece sem dados exclusivos nesta definição; usado pelo módulo de compras.",
-        "inactivate": "Inativa ou reativa um fornecedor sem apagar seu histórico de pedidos e condições; usado pelo comprador.",
-        "link": "Vincula o fornecedor a produtos que fornece e a seus canais de contato por relacionamentos versionados; usado pelo comprador.",
-        "unlink": "Encerra o vínculo de um produto ou canal de contato com o fornecedor, preservando o histórico do relacionamento; usado pelo comprador.",
-        "link.contact": "Cria e vincula um canal de contato comercial ao fornecedor por HasContact; usado pelo comprador.",
-        "listLinks": "Lista produtos fornecidos, contatos e demais vínculos do fornecedor com sua vigência; usado pelo comprador.",
-        "audit": "Consulta quem alterou os dados e vínculos do fornecedor e quando; usado pelo gerente de compras para acompanhamento."
+        "read.byId": "Lê o fornecedor pelo id para exibir razão social e CNPJ no pedido de compra, no produto fornecido e no painel do gerente de compras.",
+        "locate.byName": "O comprador busca o fornecedor pela razão social ou nome ao cadastrar, atualizar preço ou abrir um pedido.",
+        "locate.byDocument": "O comprador busca o fornecedor pelo CNPJ antes de cadastrar, para evitar duplicidade.",
+        "register.createOrAttach": "O comprador cadastra o fornecedor: a empresa é criada pelo CNPJ quando não existe e recebe o papel compras.Fornecedor.",
+        "edit.platformFields": "O comprador corrige razão social, nome fantasia e endereços do fornecedor.",
+        "edit.moduleNamespace": "O módulo compras mantém seu espaço próprio sobre o fornecedor, hoje vazio.",
+        "inactivate": "O comprador inativa o fornecedor com quem a organização deixou de comprar, e pode reativá-lo.",
+        "link.contact": "O comprador registra telefone e e-mail do fornecedor como canais de contato vinculados por HasContact.",
+        "link": "O comprador registra no cadastro mestre que o fornecedor fornece um produto (SuppliesProduct).",
+        "unlink": "O comprador encerra o vínculo de fornecimento de um produto mantendo o histórico.",
+        "listLinks": "A ficha do fornecedor mostra seus contatos e os produtos que fornece.",
+        "attach.document": "O comprador anexa contratos e documentos do fornecedor.",
+        "comment": "Comprador e gerente de compras deixam observações sobre o fornecedor.",
+        "tag": "O comprador marca fornecedores com etiquetas livres, como categoria de compra.",
+        "statusHistory.read": "A ficha mostra quando o fornecedor foi inativado ou reativado e por quem.",
+        "audit": "Registra quem alterou os dados do fornecedor e quando."
       },
       "rules": [
         "rule-foreign-namespace-refused",
+        "rule-delete-blocked-by-relationships",
         "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-company-legal-name-required"
+        "rule-company-legal-name-required",
+        "fornecedorCnpjObrigatorio",
+        "fornecedorInativoSemNovoPedido"
       ],
       "kind": "role",
       "subtype": "Company",
-      "roleTag": "compras.Supplier",
+      "roleTag": "compras.Fornecedor",
       "source": "/_102034_/l4/ontology/mdm.defs.ts",
       "record": {
         "fields": {
@@ -305,12 +445,13 @@
             "type": "integer",
             "required": true,
             "derived": true,
+            "writePrecondition": true,
             "description": "Bumped by the engine on every write; optimistic concurrency."
           },
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da empresa fornecedora, com dados cadastrais da plataforma e informações específicas do módulo de compras.",
+            "description": "Documento mestre da empresa da qual a organização compra, visto pelo módulo compras.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -324,25 +465,19 @@
                     "values": [
                       {
                         "value": "Company",
-                        "title": "Empresa",
-                        "description": "Empresa cadastrada no cadastro mestre."
+                        "title": "Empresa"
                       }
                     ],
-                    "description": "Identifica este registro mestre como uma empresa.",
-                    "title": "Subtipo",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Sempre empresa: o fornecedor é um papel sobre o cadastro mestre de empresas.",
+                    "title": "Subtipo"
                   },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "maxLength": 0,
-                    "description": "Nome pelo qual o fornecedor é reconhecido nas buscas e nos pedidos de compra.",
-                    "title": "Nome",
-                    "min": 0,
-                    "max": 0
+                    "maxLength": 200,
+                    "description": "Nome pelo qual o comprador reconhece o fornecedor nas buscas e no pedido de compra.",
+                    "title": "Nome do fornecedor"
                   },
                   "status": {
                     "type": "enum",
@@ -352,30 +487,23 @@
                     "values": [
                       {
                         "value": "Active",
-                        "title": "Ativo",
-                        "description": "Fornecedor disponível para uso."
+                        "title": "Ativo"
                       },
                       {
                         "value": "Inactive",
-                        "title": "Inativo",
-                        "description": "Fornecedor fora de uso."
+                        "title": "Inativo"
                       },
                       {
                         "value": "Merged",
-                        "title": "Unificado",
-                        "description": "Registro unificado a outro cadastro mestre."
+                        "title": "Mesclado"
                       },
                       {
                         "value": "Blocked",
-                        "title": "Bloqueado",
-                        "description": "Registro bloqueado pela plataforma."
+                        "title": "Bloqueado"
                       }
                     ],
-                    "title": "Situação",
-                    "description": "Situação do registro mestre do fornecedor para uso nas compras.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "title": "Situação no cadastro",
+                    "description": "Situação do registro mestre; um fornecedor inativo não recebe novos pedidos de compra."
                   },
                   "docType": {
                     "type": "enum",
@@ -383,71 +511,77 @@
                     "values": [
                       {
                         "value": "CNPJ",
-                        "title": "CNPJ",
-                        "description": "Cadastro Nacional da Pessoa Jurídica."
+                        "title": "CNPJ"
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional usado para identificar o fornecedor.",
-                    "required": true,
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Os fornecedores são identificados pelo CNPJ.",
+                    "required": true
                   },
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do CNPJ da empresa fornecedora.",
+                    "description": "Número do CNPJ do fornecedor, usado pelo comprador para localizar e evitar cadastro duplicado.",
                     "title": "CNPJ",
                     "required": true,
-                    "pattern": "^\\d{14}$",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "pattern": "^\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2}$"
                   },
                   "countryCode": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "pattern": "^BR$",
-                    "maxLength": 0,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
                     "default": "US",
-                    "description": "País do cadastro e das regras documentais do fornecedor.",
-                    "title": "País",
-                    "min": 0,
-                    "max": 0
+                    "description": "País do documento do fornecedor (BR para CNPJ).",
+                    "title": "País"
                   }
                 },
-                "description": "Dados de identificação e situação da empresa fornecedora no cadastro mestre."
+                "description": "Colunas de índice da plataforma usadas para localizar o fornecedor e evitar duplicidade."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
                 "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Nome fantasia e outros nomes pelos quais o fornecedor é conhecido, consultados na busca.",
+                    "title": "Outros nomes"
+                  },
+                  "addresses": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "Address",
+                    "title": "Endereços",
+                    "description": "Endereços do fornecedor, como sede e local de expedição das mercadorias."
+                  },
                   "contacts": {
                     "type": "object",
                     "required": true,
                     "collection": true,
                     "of": "ContactSummary",
                     "derived": true,
-                    "description": "Resumo derivado dos canais de contato vinculados ao fornecedor para comunicação comercial.",
-                    "title": "Contatos",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Resumo dos canais de contato (telefone, e-mail) vinculados ao fornecedor; mantidos como registros próprios.",
+                    "title": "Contatos"
                   },
                   "relationshipRefs": {
                     "type": "object",
                     "required": true,
                     "derived": true,
-                    "description": "Referências derivadas aos relacionamentos do fornecedor, incluindo produtos fornecidos e canais de contato.",
-                    "title": "Referências de relacionamentos",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Chaves compactas dos vínculos do fornecedor, como contatos e produtos fornecidos, recalculadas pela plataforma.",
+                    "title": "Vínculos"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "title": "Observações",
+                    "description": "Observações gerais sobre o fornecedor."
                   }
                 },
-                "description": "Dados comuns do cadastro mestre usados para identificar e contatar o fornecedor."
+                "description": "Dados comuns a todo registro mestre que o módulo compras lê."
               },
               "company": {
                 "type": "object",
@@ -459,41 +593,35 @@
                     "values": [
                       {
                         "value": "LegalEntity",
-                        "title": "Pessoa jurídica",
-                        "description": "Empresa legalmente constituída."
+                        "title": "Pessoa jurídica"
+                      },
+                      {
+                        "value": "Branch",
+                        "title": "Filial"
                       }
                     ],
-                    "description": "Classifica o fornecedor como uma entidade jurídica.",
-                    "title": "Natureza da empresa",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Fornecedor é sempre uma pessoa jurídica (ou filial dela).",
+                    "title": "Natureza"
                   },
                   "legalName": {
                     "type": "string",
                     "required": true,
-                    "description": "Razão social oficial da empresa fornecedora.",
-                    "title": "Razão social",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Razão social registrada do fornecedor, que aparece no pedido de compra.",
+                    "title": "Razão social"
                   },
                   "tradeName": {
                     "type": "string",
-                    "description": "Nome fantasia pelo qual o fornecedor também pode ser conhecido.",
-                    "title": "Nome fantasia",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Nome comercial do fornecedor.",
+                    "title": "Nome fantasia"
                   }
                 },
-                "description": "Dados corporativos da empresa que atua como fornecedora."
+                "description": "Dados de pessoa jurídica do fornecedor."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização, apenas para leitura pelo módulo de compras."
+                "description": "Campos promovidos pela organização; o módulo compras apenas lê."
               },
               "compras": {
                 "type": "object",
@@ -509,43 +637,45 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "compras",
-      "entityId": "SupplierContact",
+      "entityId": "ContatoFornecedor",
       "title": "Contato do fornecedor",
-      "description": "Canal de contato vinculado ao fornecedor para comunicação comercial.",
+      "description": "Telefone ou e-mail do fornecedor, mantido como canal de contato do cadastro mestre e vinculado por HasContact.",
       "displayField": "details.identification.name",
       "relationships": {
-        "supplier": {
-          "relationshipId": "supplierHasContact",
-          "to": "Supplier",
+        "fornecedor": {
+          "relationshipId": "fornecedorContato",
+          "to": "Fornecedor",
           "via": "HasContact",
           "cardinality": "N:1",
-          "title": "Fornecedor",
-          "description": "Fornecedor ao qual este canal de contato está vinculado para comunicação comercial.",
+          "title": "Fornecedor do contato",
+          "description": "Fornecedor ao qual o canal de contato pertence, vinculado por HasContact.",
           "direction": "to",
           "role": "HasContact"
         }
       },
       "capabilities": {
-        "read.byId": "Lê o canal de contato pelo identificador do MDM para exibi-lo ao consultar um fornecedor, usado por comprador e gerente de compras.",
-        "locate.byName": "Localiza canais de contato pelo nome reconhecível no cadastro mestre para o comprador encontrar um contato comercial.",
-        "locate.byContact": "Localiza o canal pelo telefone, e-mail ou outro valor de contato para identificar o fornecedor relacionado, usado pelo comprador.",
-        "register.createOrAttach": "Cria ou vincula ao módulo o canal de contato já existente no MDM durante o cadastro do fornecedor, usado pelo comprador.",
-        "edit.platformFields": "Atualiza nome, valor, tipo e verificação do canal de contato no cadastro mestre, usado pelo comprador.",
-        "inactivate": "Inativa ou reativa um canal que não deve mais ser usado na comunicação comercial, usado pelo comprador.",
-        "link": "Vincula este canal de contato ao fornecedor por meio do relacionamento HasContact, usado pelo comprador.",
-        "unlink": "Encerra o vínculo deste canal com o fornecedor preservando o histórico do relacionamento, usado pelo comprador.",
-        "listLinks": "Lista o fornecedor vinculado e a vigência do vínculo deste canal de contato, usado pelo comprador.",
-        "audit": "Consulta quem alterou o canal de contato e quando, usado pelo gerente de compras para acompanhamento."
+        "read.byId": "Lê o canal de contato pelo id para exibi-lo na ficha do fornecedor e no pedido de compra; usado pelo comprador e pelo gerente de compras.",
+        "locate.byContact": "Encontra o fornecedor dono de um telefone ou e-mail recebido; usado pelo comprador ao receber contato de um fornecedor.",
+        "locate.byName": "Procura canais de contato pelo nome digitado; usado pelo comprador.",
+        "register.createOrAttach": "Cria o canal de contato quando ainda não existe e o marca com o papel compras.ContatoFornecedor; usado pelo comprador ao cadastrar o fornecedor.",
+        "edit.platformFields": "Corrige o tipo, o valor e as observações do canal; usado pelo comprador.",
+        "inactivate": "Inativa um telefone ou e-mail que o fornecedor deixou de usar, sem apagá-lo, e permite reativar; usado pelo comprador.",
+        "link": "Vincula o canal ao fornecedor por HasContact; usado pelo comprador no cadastro do fornecedor.",
+        "unlink": "Encerra o vínculo do canal com o fornecedor mantendo o histórico; usado pelo comprador.",
+        "listLinks": "Mostra a qual fornecedor o canal está vinculado; usado na ficha do fornecedor pelo comprador e pelo gerente de compras.",
+        "comment": "Registra observações sobre o contato, como melhor horário para ligar; usado pelo comprador.",
+        "audit": "Mostra quem alterou o canal de contato e quando; usado pelo gerente de compras."
       },
       "rules": [
         "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-contact-value-unique-per-type"
+        "rule-contact-value-unique-per-type",
+        "rule-document-shape-validated",
+        "rule-delete-blocked-by-relationships"
       ],
       "kind": "role",
       "subtype": "ContactChannel",
-      "roleTag": "compras.SupplierContact",
+      "roleTag": "compras.ContatoFornecedor",
       "source": "/_102034_/l4/ontology/mdm.defs.ts",
       "record": {
         "fields": {
@@ -560,12 +690,13 @@
             "type": "integer",
             "required": true,
             "derived": true,
+            "writePrecondition": true,
             "description": "Bumped by the engine on every write; optimistic concurrency."
           },
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento do cadastro mestre do canal de contato usado na comunicação comercial com fornecedores.",
+            "description": "The JSONB document, as a map of groups (see groups).",
             "fields": {
               "identification": {
                 "type": "object",
@@ -579,25 +710,19 @@
                     "values": [
                       {
                         "value": "ContactChannel",
-                        "title": "Canal de contato",
-                        "description": "Canal de contato cadastrado no MDM."
+                        "title": "Canal de contato"
                       }
                     ],
-                    "description": "Subtipo do cadastro mestre, mantido como canal de contato.",
-                    "title": "Subtipo",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Sempre canal de contato (ContactChannel).",
+                    "title": "Subtipo"
                   },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "maxLength": 0,
-                    "description": "Nome pelo qual o comprador reconhece o canal de contato do fornecedor.",
-                    "title": "Nome",
-                    "min": 0,
-                    "max": 0
+                    "maxLength": 200,
+                    "description": "Como o comprador reconhece o canal, por exemplo 'Comercial - telefone' ou o nome da pessoa de contato no fornecedor.",
+                    "title": "Nome do contato"
                   },
                   "status": {
                     "type": "enum",
@@ -605,32 +730,13 @@
                     "indexed": true,
                     "derived": true,
                     "values": [
-                      {
-                        "value": "Active",
-                        "title": "Ativo",
-                        "description": "Canal disponível para uso."
-                      },
-                      {
-                        "value": "Inactive",
-                        "title": "Inativo",
-                        "description": "Canal fora de uso."
-                      },
-                      {
-                        "value": "Merged",
-                        "title": "Mesclado",
-                        "description": "Canal incorporado a outro cadastro."
-                      },
-                      {
-                        "value": "Blocked",
-                        "title": "Bloqueado",
-                        "description": "Canal impedido de uso."
-                      }
+                      "Active",
+                      "Inactive",
+                      "Merged",
+                      "Blocked"
                     ],
                     "title": "Situação",
-                    "description": "Situação do canal de contato no cadastro mestre.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Situação do canal no cadastro mestre; inativo deixa de ser usado pelo comprador."
                   },
                   "countryCode": {
                     "type": "string",
@@ -639,19 +745,40 @@
                     "pattern": "^[A-Z]{2}$",
                     "maxLength": 2,
                     "default": "US",
-                    "description": "País ao qual se aplicam as regras do canal de contato.",
-                    "title": "País",
-                    "min": 0,
-                    "max": 0
+                    "description": "País do canal de contato (ISO 3166-1 alfa-2), normalmente BR.",
+                    "title": "País"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Criado em",
+                    "description": "Momento em que o canal foi registrado."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Atualizado em",
+                    "description": "Momento da última alteração do canal."
                   }
                 },
-                "description": "Dados de identificação e situação do canal de contato no cadastro mestre."
+                "description": "Identificação do canal de contato do fornecedor no cadastro mestre."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {},
-                "description": "Dados comuns do cadastro mestre do canal de contato."
+                "fields": {
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "title": "Observações",
+                    "description": "Observação sobre o canal, como horário de atendimento ou setor do fornecedor."
+                  }
+                },
+                "description": "Dados comuns do registro mestre usados pelo módulo compras."
               },
               "contactChannel": {
                 "type": "object",
@@ -663,80 +790,45 @@
                     "values": [
                       {
                         "value": "Phone",
-                        "title": "Telefone",
-                        "description": "Número de telefone."
+                        "title": "Telefone"
                       },
                       {
                         "value": "Email",
-                        "title": "E-mail",
-                        "description": "Endereço de e-mail."
+                        "title": "E-mail"
                       },
                       {
                         "value": "WhatsApp",
-                        "title": "WhatsApp",
-                        "description": "Contato por WhatsApp."
-                      },
-                      {
-                        "value": "Instagram",
-                        "title": "Instagram",
-                        "description": "Perfil do Instagram."
-                      },
-                      {
-                        "value": "LinkedIn",
-                        "title": "LinkedIn",
-                        "description": "Perfil do LinkedIn."
-                      },
-                      {
-                        "value": "X",
-                        "title": "X",
-                        "description": "Perfil na rede X."
-                      },
-                      {
-                        "value": "Other",
-                        "title": "Outro",
-                        "description": "Outro meio de contato."
+                        "title": "WhatsApp"
                       }
                     ],
                     "title": "Tipo de contato",
-                    "description": "Tipo do canal usado para comunicação comercial com o fornecedor.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Tipo do canal de contato do fornecedor: telefone, e-mail ou WhatsApp."
                   },
                   "value": {
                     "type": "string",
                     "required": true,
-                    "description": "Valor não mascarado do canal de contato comercial do fornecedor.",
-                    "title": "Contato",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "O número de telefone ou o endereço de e-mail do fornecedor, sem máscara.",
+                    "title": "Contato"
                   },
                   "isVerified": {
                     "type": "boolean",
                     "required": true,
                     "title": "Verificado",
-                    "description": "Indica se o canal de contato foi verificado.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Indica se o canal já foi confirmado como válido."
                   },
                   "verifiedAt": {
                     "type": "timestamp",
                     "title": "Verificado em",
-                    "description": "Data e hora em que o canal de contato foi verificado.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Quando o canal foi confirmado."
                   }
                 },
-                "description": "Meio de contato comercial que pode ser vinculado a um fornecedor."
+                "description": "O telefone ou e-mail do fornecedor usado pelo comprador para negociar e enviar pedidos."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização, somente para leitura pelo módulo de compras."
+                "description": "Campos promovidos pela organização; o módulo apenas lê."
               },
               "compras": {
                 "type": "object",
@@ -752,48 +844,82 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "compras",
-      "entityId": "Product",
+      "entityId": "Produto",
       "title": "Produto",
-      "description": "Produto do cadastro mestre que pode ser fornecido, pedido e recebido nas compras.",
+      "description": "Item do catálogo da organização que é comprado de fornecedores e recebe entrada no estoque.",
       "displayField": "details.identification.name",
       "relationships": {
-        "suppliers": {
-          "relationshipId": "supplierSuppliesProduct",
-          "to": "Supplier",
+        "fornecedores": {
+          "relationshipId": "fornecedorFornecePoduto",
+          "to": "Fornecedor",
           "via": "SuppliesProduct",
           "cardinality": "N:N",
           "title": "Fornecedores do produto",
-          "description": "Fornecedores que podem fornecer este produto para a organização.",
+          "description": "Fornecedores que fornecem o produto, vínculo SuppliesProduct no cadastro mestre.",
           "direction": "to"
         },
-        "supplierOfferings": {
-          "relationshipId": "supplierOfferingProduct",
-          "to": "SupplierOffering",
-          "via": "SupplierOffering.productId",
+        "produtosFornecidos": {
+          "relationshipId": "produtoFornecidoProduto",
+          "to": "ProdutoFornecido",
+          "via": "ProdutoFornecido.produtoId",
           "cardinality": "1:N",
-          "title": "Condições de fornecimento",
-          "description": "Condições de fornecimento que definem preços combinados deste produto por fornecedor.",
+          "title": "Ofertas com preço combinado",
+          "description": "Registros de fornecimento com preço combinado por fornecedor.",
           "mode": "fk",
           "direction": "to",
-          "required": "Sempre que uma condição de fornecimento for cadastrada."
+          "required": true
+        },
+        "itensPedido": {
+          "relationshipId": "itemPedidoProduto",
+          "to": "ItemPedido",
+          "via": "ItemPedido.produtoId",
+          "cardinality": "1:N",
+          "title": "Itens de pedido",
+          "description": "Itens de pedidos de compra que compram o produto.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
+        },
+        "entradasEstoque": {
+          "relationshipId": "entradaProduto",
+          "to": "EntradaEstoque",
+          "via": "EntradaEstoque.produtoId",
+          "cardinality": "1:N",
+          "title": "Entradas no estoque",
+          "description": "Entradas de estoque geradas pelos recebimentos do produto.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Lê o produto mestre pelo identificador · consulta o registro mestre pelo mdmId · usado pelo comprador e pelo almoxarife ao exibir produtos vinculados a condições, pedidos e recebimentos.",
-        "locate.byName": "Localiza produtos pelo nome · pesquisa o índice de produtos ativos pelo texto informado · usada pelo comprador ao adicionar um produto às condições de fornecimento.",
-        "register.createOrAttach": "Cria ou vincula o papel de produto nas compras · localiza o cadastro mestre existente e anexa a tag compras.Product, criando-o somente se estiver ausente · executado pelo mecanismo ao registrar uma condição de fornecimento.",
-        "link": "Vincula um fornecedor a este produto · cria o relacionamento mestre SuppliesProduct com histórico de vigência · usado pelo comprador ao disponibilizar o produto para compra daquele fornecedor.",
-        "unlink": "Encerra o vínculo de fornecimento do produto · inativa o relacionamento mestre SuppliesProduct preservando seu histórico · usado pelo comprador quando o fornecedor deixa de fornecer o produto.",
-        "listLinks": "Lista fornecedores e condições relacionados ao produto · consulta os relacionamentos ativos e seu histórico de vigência · usada pelo comprador para conferir as fontes de fornecimento do produto."
+        "read.byId": "Lê o produto pelo id para preencher itens de pedido, ofertas de fornecedor e entradas de estoque; usado por comprador, gerente e almoxarife.",
+        "locate.byName": "Localiza produtos pelo nome digitado ao montar o pedido de compra ou ao vincular um produto a um fornecedor; usado pelo comprador.",
+        "locate.byTag": "Localiza o produto pelo código interno registrado como etiqueta do módulo, no índice de tags; usado pelo almoxarife ao conferir o recebimento.",
+        "register.createOrAttach": "Cadastra o produto no catálogo mestre quando ainda não existe e o marca com o papel compras.Produto; usado pelo comprador.",
+        "edit.platformFields": "Altera nome, SKU, categoria, marca e unidade de medida do produto; usado pelo comprador.",
+        "edit.moduleNamespace": "Atualiza o espaço compras do produto pela chave do módulo; usado pelo próprio módulo.",
+        "inactivate": "Retira de uso um produto que não é mais comprado, sem apagá-lo, e permite reativá-lo; usado pelo comprador.",
+        "link": "Vincula o produto a um fornecedor com o tipo SuppliesProduct; usado pelo comprador ao registrar quem fornece o produto.",
+        "unlink": "Encerra o vínculo de fornecimento com um fornecedor mantendo o histórico; usado pelo comprador.",
+        "listLinks": "Mostra os fornecedores vinculados ao produto com validade; usado pelo comprador e pelo gerente na tela do produto.",
+        "attach.document": "Anexa ficha técnica ou foto do produto por categoria; usado pelo comprador.",
+        "comment": "Registra observações sobre o produto, como especificação de compra; usado pelo comprador e pelo almoxarife.",
+        "tag": "Marca o produto com etiquetas livres do módulo compras, como código interno ou grupo de compra; usado pelo comprador.",
+        "statusHistory.read": "Mostra quando o produto foi ativado ou inativado e por quem; usado pelo gerente de compras.",
+        "audit": "Informa quem alterou o cadastro do produto e quando, pelo módulo de auditoria da plataforma; usado pelo gerente de compras."
       },
       "rules": [
         "rule-foreign-namespace-refused",
+        "rule-identity-never-in-namespace",
         "rule-document-shape-validated",
-        "rule-identity-never-in-namespace"
+        "rule-delete-blocked-by-relationships",
+        "inactiveProductCannotBeOrdered"
       ],
+      "writer": "crud",
       "kind": "role",
       "subtype": "Product",
-      "roleTag": "compras.Product",
+      "roleTag": "compras.Produto",
       "source": "/_102034_/l4/ontology/mdm.defs.ts",
       "record": {
         "fields": {
@@ -808,12 +934,13 @@
             "type": "integer",
             "required": true,
             "derived": true,
+            "writePrecondition": true,
             "description": "Bumped by the engine on every write; optimistic concurrency."
           },
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre do produto lido pelo módulo de compras, incluindo somente os dados necessários para fornecimento, pedido e recebimento.",
+            "description": "Registro mestre do produto como a plataforma o guarda, com o que o módulo compras usa.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -827,25 +954,19 @@
                     "values": [
                       {
                         "value": "Product",
-                        "title": "Produto",
-                        "description": "Item de catálogo ou estoque que pode ser comprado e recebido."
+                        "title": "Produto"
                       }
                     ],
-                    "description": "Subtipo mestre do registro, mantido como Produto.",
-                    "title": "Subtipo",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Sempre Product para os produtos comprados pelo módulo.",
+                    "title": "Subtipo"
                   },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "maxLength": 0,
-                    "description": "Nome pelo qual o comprador localiza o produto para incluí-lo nas condições de fornecimento e nos pedidos de compra.",
-                    "title": "Nome do produto",
-                    "min": 0,
-                    "max": 0
+                    "maxLength": 200,
+                    "description": "Nome pelo qual o comprador e o almoxarife reconhecem o produto no catálogo, nos pedidos e nos recebimentos.",
+                    "title": "Nome do produto"
                   },
                   "status": {
                     "type": "enum",
@@ -855,39 +976,87 @@
                     "values": [
                       {
                         "value": "Active",
-                        "title": "Ativo",
-                        "description": "Produto disponível no cadastro mestre."
+                        "title": "Ativo"
                       },
                       {
                         "value": "Inactive",
-                        "title": "Inativo",
-                        "description": "Produto inativado no cadastro mestre."
+                        "title": "Inativo"
                       },
                       {
                         "value": "Merged",
-                        "title": "Mesclado",
-                        "description": "Produto incorporado a outro registro mestre."
+                        "title": "Mesclado"
                       },
                       {
                         "value": "Blocked",
-                        "title": "Bloqueado",
-                        "description": "Produto bloqueado no cadastro mestre."
+                        "title": "Bloqueado"
                       }
                     ],
-                    "title": "Situação do cadastro mestre",
-                    "description": "Situação mestre que indica se o produto pode continuar sendo utilizado nas compras.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "title": "Situação",
+                    "description": "Situação do produto no cadastro mestre; produto inativo não entra em novos pedidos de compra."
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "País (ISO 3166-1 alfa-2) a que o cadastro do produto pertence; normalmente BR.",
+                    "title": "País"
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Papéis de módulo do registro; compras.Produto indica que o produto é comprado pelo módulo.",
+                    "title": "Papéis"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Criado em",
+                    "description": "Momento em que o produto foi cadastrado."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Atualizado em",
+                    "description": "Momento da última alteração do cadastro do produto."
                   }
                 },
-                "description": "Dados de identificação do cadastro mestre usados para localizar e verificar a situação do produto nas compras."
+                "description": "Colunas de índice da plataforma usadas para localizar e listar produtos nas compras."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {},
-                "description": "Dados comuns do cadastro mestre do produto que este módulo não precisa declarar."
+                "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Nomes alternativos do produto, como o nome usado pelo fornecedor ou um nome comercial.",
+                    "title": "Outros nomes"
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Chaves compactas mantidas pelo motor, entre elas os fornecedores que fornecem o produto.",
+                    "title": "Vínculos"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "title": "Observações",
+                    "description": "Observações gerais sobre o produto."
+                  }
+                },
+                "description": "Dados comuns a todo registro mestre que o módulo lê."
               },
               "product": {
                 "type": "object",
@@ -895,36 +1064,65 @@
                 "fields": {
                   "sku": {
                     "type": "string",
-                    "description": "Código interno do produto usado pelo almoxarifado para reconhecer o item recebido.",
-                    "title": "SKU",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Código interno do produto usado para identificá-lo nos pedidos e nas entradas de estoque.",
+                    "title": "Código interno (SKU)"
+                  },
+                  "productType": {
+                    "type": "enum",
+                    "values": [
+                      {
+                        "value": "Physical",
+                        "title": "Físico"
+                      },
+                      {
+                        "value": "Consumable",
+                        "title": "Consumível"
+                      },
+                      {
+                        "value": "Bundle",
+                        "title": "Kit"
+                      },
+                      {
+                        "value": "Digital",
+                        "title": "Digital"
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro"
+                      }
+                    ],
+                    "title": "Tipo de produto",
+                    "description": "Natureza do item comprado."
+                  },
+                  "category": {
+                    "type": "string",
+                    "title": "Categoria",
+                    "description": "Categoria do produto no catálogo de compras."
+                  },
+                  "brand": {
+                    "type": "string",
+                    "title": "Marca",
+                    "description": "Marca do produto."
                   },
                   "unitOfMeasure": {
                     "type": "string",
-                    "description": "Unidade em que a quantidade do produto é pedida e recebida, como unidade, caixa, quilograma ou litro.",
+                    "description": "Unidade em que o produto é comprado, recebido e entra no estoque (unidade, caixa, kg, litro).",
                     "title": "Unidade de medida",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "required": true
                   },
                   "isInventoried": {
                     "type": "boolean",
-                    "description": "Indica se o recebimento deste produto deve gerar entrada no estoque.",
-                    "title": "Controla estoque",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Verdadeiro quando o recebimento do produto dá entrada no estoque.",
+                    "title": "Controla estoque"
                   }
                 },
-                "description": "Características do catálogo mestre necessárias para identificar o item e registrar seu recebimento no estoque."
+                "description": "Ramo do subtipo Product com os dados de catálogo usados nas compras e no estoque."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização, lidos pelo módulo de compras e declarados no registro organizacional."
+                "description": "Campos promovidos pela organização; o módulo apenas lê."
               },
               "compras": {
                 "type": "object",
@@ -940,42 +1138,61 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "compras",
-      "entityId": "Buyer",
+      "entityId": "Comprador",
       "title": "Comprador",
-      "description": "Pessoa compradora vinculada às condições de fornecimento que cadastra para sustentar o escopo pessoal de seu trabalho.",
+      "description": "Pessoa que atua como comprador; seus pedidos e produtos fornecidos cadastrados formam o seu escopo pessoal.",
       "displayField": "details.identification.name",
       "relationships": {
-        "supplierOfferings": {
-          "relationshipId": "supplierOfferingBuyer",
-          "to": "SupplierOffering",
-          "via": "SupplierOffering.buyerId",
+        "produtosFornecidos": {
+          "relationshipId": "produtoFornecidoComprador",
+          "to": "ProdutoFornecido",
+          "via": "ProdutoFornecido.compradorId",
           "cardinality": "1:N",
-          "title": "Condições de fornecimento cadastradas",
-          "description": "Condições de fornecimento cadastradas por esta pessoa compradora para fornecedores e produtos.",
+          "title": "Produtos fornecidos mantidos",
+          "description": "Produtos fornecidos com preço combinado que este comprador cadastrou e mantém.",
           "mode": "fk",
           "direction": "to",
-          "required": "quando a condição de fornecimento estiver cadastrada",
-          "role": "comprador"
+          "required": true
+        },
+        "pedidos": {
+          "relationshipId": "pedidoComprador",
+          "to": "PedidoCompra",
+          "via": "PedidoCompra.compradorId",
+          "cardinality": "1:N",
+          "title": "Pedidos de compra abertos",
+          "description": "Pedidos de compra abertos por este comprador; formam o seu escopo pessoal.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Lê a pessoa compradora pelo identificador mestre para exibir quem cadastrou uma condição de fornecimento; usado pelas telas de condições e pelo escopo pessoal do comprador.",
-        "locate.byName": "Localiza pessoas compradoras pelo nome no índice mestre para associá-las ao cadastro de condições de fornecimento; usado pela administração de compras.",
-        "register.createOrAttach": "Cria ou vincula a pessoa existente ao papel de Comprador no MDM e aplica a tag compras.Buyer; usado pela administração interna quando uma pessoa passa a cadastrar condições de fornecimento.",
-        "inactivate": "Inativa o papel da pessoa compradora no registro mestre sem excluir seu histórico; usado pela administração interna quando ela deixa de atuar em compras.",
-        "listLinks": "Lista as condições de fornecimento que referenciam a pessoa compradora, pelo vínculo de chave estrangeira; usado para consultar o cadastro sob sua responsabilidade.",
-        "audit": "Consulta quem alterou o registro mestre da pessoa compradora e quando; usado pela administração de compras para rastreabilidade."
+        "read.byId": "Lê o comprador pelo id para exibir seu nome nos pedidos de compra e nos produtos fornecidos; usado por todas as telas do módulo.",
+        "locate.byName": "Localiza o comprador pelo nome no índice de pessoas; usado pelo gerente de compras ao filtrar pedidos por comprador.",
+        "locate.byDocument": "Localiza a pessoa pelo CPF antes de cadastrá-la como compradora, evitando duplicidade; usado por quem mantém o cadastro de compradores.",
+        "register.createOrAttach": "Cria a pessoa quando não existe e anexa o papel compras.Comprador; usado por quem mantém o cadastro de compradores.",
+        "edit.platformFields": "Altera nome, documento e consentimento do comprador no registro mestre; usado por quem mantém o cadastro.",
+        "inactivate": "Inativa o comprador que deixou a função, mantendo seus pedidos e produtos fornecidos; pode ser reativado pelo gerente de compras.",
+        "link.contact": "Vincula telefone ou e-mail do comprador como canal de contato por HasContact; usado por quem mantém o cadastro.",
+        "listLinks": "Lista os vínculos do comprador, como contatos e equipe, na ficha da pessoa; usado pelo gerente de compras.",
+        "locate.byLogin": "Resolve o comprador da sessão a partir do e-mail de login, base do escopo 'meus pedidos' e 'meus produtos fornecidos'; usado pelo resolvedor de sessão.",
+        "invite.login": "Dá acesso de login ao comprador para que abra e acompanhe seus próprios pedidos; executado pela plataforma ao cadastrar.",
+        "comment": "Registra observações sobre o comprador na sua ficha; usado pelo gerente de compras.",
+        "statusHistory.read": "Mostra quando o comprador foi inativado ou reativado e por quem; consultado pelo gerente de compras.",
+        "audit": "Mostra quem alterou o cadastro do comprador e quando; consultado por um administrador."
       },
       "rules": [
         "rule-foreign-namespace-refused",
-        "rule-delete-blocked-by-relationships",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-person-privacy-consent-required-br-eu"
+        "rule-document-shape-validated",
+        "rule-delete-blocked-by-relationships",
+        "rule-person-privacy-consent-required-br-eu",
+        "compradorInativoNaoAbrePedido"
       ],
+      "writer": "crud",
       "kind": "role",
       "subtype": "Person",
-      "roleTag": "compras.Buyer",
+      "roleTag": "compras.Comprador",
       "source": "/_102034_/l4/ontology/mdm.defs.ts",
       "record": {
         "fields": {
@@ -990,12 +1207,13 @@
             "type": "integer",
             "required": true,
             "derived": true,
+            "writePrecondition": true,
             "description": "Bumped by the engine on every write; optimistic concurrency."
           },
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da pessoa que atua como compradora no módulo de compras.",
+            "description": "Registro mestre da pessoa que atua como comprador no módulo compras.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -1009,58 +1227,161 @@
                     "values": [
                       {
                         "value": "Person",
-                        "title": "Pessoa",
-                        "description": "Pessoa natural que exerce o papel de comprador."
+                        "title": "Pessoa"
                       }
                     ],
-                    "description": "Classifica este registro mestre como pessoa.",
-                    "title": "Subtipo",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Sempre pessoa física para o comprador.",
+                    "title": "Subtipo"
                   },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "maxLength": 0,
-                    "description": "Nome pelo qual a pessoa compradora é reconhecida nas condições de fornecimento que cadastrou.",
-                    "title": "Nome",
-                    "min": 0,
-                    "max": 0
+                    "maxLength": 200,
+                    "description": "Nome do comprador, exibido nos pedidos de compra que abriu e nos produtos fornecidos que mantém.",
+                    "title": "Nome"
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo"
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo"
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado"
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado"
+                      }
+                    ],
+                    "title": "Situação",
+                    "description": "Situação do cadastro do comprador; comprador inativo não abre novos pedidos de compra."
+                  },
+                  "docType": {
+                    "type": "enum",
+                    "indexed": true,
+                    "values": [
+                      {
+                        "value": "CPF",
+                        "title": "CPF"
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte"
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento de identidade"
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro"
+                      }
+                    ],
+                    "title": "Tipo de documento",
+                    "description": "Tipo do documento nacional do comprador."
+                  },
+                  "docId": {
+                    "type": "string",
+                    "indexed": true,
+                    "description": "Número do documento nacional do comprador, usado para evitar cadastro duplicado.",
+                    "title": "Número do documento"
                   },
                   "countryCode": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
                     "pattern": "^[A-Z]{2}$",
-                    "maxLength": 0,
+                    "maxLength": 2,
                     "default": "US",
-                    "description": "Código do país aplicável ao cadastro da pessoa compradora.",
-                    "title": "País",
-                    "min": 0,
-                    "max": 0
+                    "description": "País (ISO 3166-1 alfa-2) a que pertencem o documento e as regras legais do comprador.",
+                    "title": "País"
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Papéis de módulo do registro; inclui compras.Comprador.",
+                    "title": "Papéis"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Criado em",
+                    "description": "Momento em que o registro da pessoa foi criado."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Atualizado em",
+                    "description": "Momento da última alteração do registro da pessoa."
                   }
                 },
-                "description": "Dados de identificação da pessoa compradora mantidos pela plataforma."
+                "description": "Identificação da pessoa que atua como comprador."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {},
-                "description": "Dados base compartilhados do registro mestre, sem campos adicionais necessários para este papel."
+                "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Apelidos ou nomes pelos quais o comprador também é conhecido.",
+                    "title": "Outros nomes"
+                  },
+                  "contacts": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "ContactSummary",
+                    "derived": true,
+                    "description": "Resumo dos canais de contato do comprador (telefone, e-mail) vinculados por HasContact.",
+                    "title": "Contatos"
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Chaves compactas dos vínculos do comprador, recalculadas pela plataforma.",
+                    "title": "Vínculos"
+                  }
+                },
+                "description": "Dados comuns do registro da pessoa."
               },
               "person": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {},
-                "description": "Dados próprios de pessoa natural mantidos pela plataforma; nenhum campo adicional é necessário para o papel de comprador."
+                "fields": {
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consentimento LGPD do comprador, exigido para residentes no Brasil.",
+                    "title": "Consentimento de privacidade"
+                  }
+                },
+                "description": "Dados de pessoa física do comprador."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização, apenas para leitura pelo módulo de compras."
+                "description": "Campos promovidos pela organização; lidos pelo módulo, não declarados aqui."
               },
               "compras": {
                 "type": "object",
@@ -1076,60 +1397,76 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "compras",
-      "entityId": "SupplierOffering",
-      "title": "Condição de fornecimento",
-      "description": "Condição comercial de um produto fornecido por um fornecedor, incluindo o preço combinado.",
-      "displayField": "productId",
+      "entityId": "ProdutoFornecido",
+      "title": "Produto fornecido",
+      "description": "Produto que um fornecedor fornece à organização, com o preço combinado vigente.",
+      "displayField": "codigo",
       "relationships": {
-        "supplier": {
-          "relationshipId": "supplierOfferingSupplier",
-          "to": "Supplier",
-          "via": "SupplierOffering.supplierId",
+        "fornecedor": {
+          "relationshipId": "produtoFornecidoFornecedor",
+          "to": "Fornecedor",
+          "via": "ProdutoFornecido.fornecedorId",
           "cardinality": "N:1",
-          "title": "Fornecedor da condição",
-          "description": "A condição comercial pertence a um fornecedor.",
+          "title": "Fornecedor",
+          "description": "Fornecedor que fornece o produto com o preço combinado.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": true
         },
-        "product": {
-          "relationshipId": "supplierOfferingProduct",
-          "to": "Product",
-          "via": "SupplierOffering.productId",
+        "produto": {
+          "relationshipId": "produtoFornecidoProduto",
+          "to": "Produto",
+          "via": "ProdutoFornecido.produtoId",
           "cardinality": "N:1",
-          "title": "Produto fornecido",
-          "description": "A condição define o preço combinado de um produto.",
+          "title": "Produto",
+          "description": "Produto fornecido pelo fornecedor.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": true
         },
-        "buyer": {
-          "relationshipId": "supplierOfferingBuyer",
-          "to": "Buyer",
-          "via": "SupplierOffering.buyerId",
+        "comprador": {
+          "relationshipId": "produtoFornecidoComprador",
+          "to": "Comprador",
+          "via": "ProdutoFornecido.compradorId",
           "cardinality": "N:1",
           "title": "Comprador responsável",
-          "description": "A condição é cadastrada por um comprador para permitir o escopo pessoal do cadastro.",
+          "description": "Comprador que cadastrou e mantém o preço combinado.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": true
+        },
+        "itensPedido": {
+          "relationshipId": "itemPedidoProdutoFornecido",
+          "to": "ItemPedido",
+          "via": "ItemPedido.produtoFornecidoId",
+          "cardinality": "1:N",
+          "title": "Itens de pedido",
+          "description": "Itens de pedidos de compra cujo preço foi sugerido por este preço combinado.",
+          "mode": "fk",
+          "direction": "to"
         }
       },
       "capabilities": {
-        "read.byId": "Lê uma condição de fornecimento pelo identificador da linha no repositório, para o comprador consultar um cadastro já selecionado.",
-        "locate.byColumn": "Lista condições de fornecimento pelos fornecedores, produtos ou compradores indexados, com ordenação e paginação, para o comprador localizar preços combinados.",
-        "count": "Conta as condições de fornecimento que correspondem aos fornecedores, produtos ou compradores informados, para o comprador acompanhar os resultados do cadastro.",
-        "listByForeignKey": "Lista as condições que apontam para um fornecedor, produto ou comprador por chave estrangeira, para o comprador consultar os produtos e preços de um fornecedor.",
-        "create": "Cria uma condição com fornecedor, produto, comprador responsável e preço combinado, para o comprador disponibilizar a negociação para futuros pedidos.",
-        "update": "Atualiza o preço combinado de uma condição existente no repositório, para o comprador manter a negociação comercial do fornecedor.",
-        "uniqueKey": "Recusa outra condição com o mesmo fornecedor e produto pelo índice único, para o comprador manter apenas um preço combinado vigente por par.",
-        "read.mdmRecord": "Lê os registros mestres apontados por fornecedor, produto e comprador, para as telas de compras exibirem seus dados cadastrais sem copiá-los na condição."
+        "read.byId": "Abre um produto fornecido pelo id para o comprador ver o preço atual antes de alterá-lo.",
+        "locate.byColumn": "Lista os produtos fornecidos filtrando por fornecedor, produto, comprador ou ativo, para a conferência do comprador e a sugestão de preço no pedido.",
+        "locate.byText": "Busca produtos fornecidos pelo código digitado na caixa de pesquisa do comprador.",
+        "count": "Conta quantos produtos ativos cada fornecedor fornece, exibido no cabeçalho da lista do fornecedor.",
+        "listByForeignKey": "Lista todos os produtos e preços combinados de um fornecedor na tela do fornecedor, usada pelo comprador ao conferir o cadastro.",
+        "create": "O comprador associa um produto a um fornecedor informando o preço combinado.",
+        "update": "O comprador altera o preço combinado, a vigência ou desativa o produto fornecido.",
+        "uniqueKey": "Recusa um segundo preço combinado para o mesmo fornecedor e o mesmo produto, e garante código único.",
+        "read.mdmRecord": "Lê a razão social do fornecedor e o nome e unidade do produto no cadastro mestre para exibir na lista.",
+        "sequence.next": "Emite o código do produto fornecido no momento do cadastro pelo comprador.",
+        "comment": "O comprador registra notas sobre a negociação do preço com o fornecedor."
       },
       "rules": [
-        "supplierOfferingUniqueProduct"
+        "produtoFornecidoUnicoPorFornecedor",
+        "precoCombinadoPositivo",
+        "produtoFornecidoSomenteFornecedorAtivo",
+        "precoSugeridoNoItemPedido"
       ],
       "kind": "entity",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "compras_supplieroffering",
+        "table": "compras_produtofornecido",
         "kind": "relational"
       },
       "record": {
@@ -1146,67 +1483,96 @@
             "required": true,
             "derived": true
           },
-          "supplierId": {
+          "codigo": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "indexed": true,
+            "derived": true,
+            "title": "Código",
+            "description": "Número do produto fornecido, emitido pela numeração da plataforma no cadastro; é como o comprador cita este preço combinado.",
+            "maxLength": 20
+          },
+          "fornecedorId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "to": [
-              "Supplier"
+              "Fornecedor"
             ],
             "title": "Fornecedor",
-            "description": "Empresa fornecedora à qual esta condição comercial pertence.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Fornecedor que fornece o produto com este preço combinado."
           },
-          "productId": {
+          "produtoId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "to": [
-              "Product"
+              "Produto"
             ],
             "title": "Produto",
-            "description": "Produto fornecido sob esta condição comercial.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Produto do cadastro mestre que o fornecedor fornece."
           },
-          "buyerId": {
+          "compradorId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "to": [
-              "Buyer"
+              "Comprador"
             ],
             "title": "Comprador responsável",
-            "description": "Comprador que cadastrou a condição de fornecimento.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Comprador que cadastrou e mantém o preço combinado com o fornecedor."
+          },
+          "ativo": {
+            "type": "boolean",
+            "required": true,
+            "indexed": true,
+            "title": "Ativo",
+            "description": "Indica se o fornecedor ainda fornece este produto; só os ativos são sugeridos ao abrir um pedido de compra."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
-            "title": "Dados da condição de fornecimento",
-            "description": "Dados comerciais específicos do produto fornecido por este fornecedor.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Detalhes",
+            "description": "Dados do preço combinado entre a organização e o fornecedor para o produto.",
             "fields": {
-              "agreedPrice": {
+              "precoCombinado": {
                 "type": "money",
                 "required": true,
-                "of": "ContactSummary",
                 "title": "Preço combinado",
-                "description": "Preço unitário combinado entre a organização e o fornecedor para este produto.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "description": "Preço unitário combinado com o fornecedor para este produto, usado como sugestão do preço do item no pedido de compra.",
+                "min": 0
+              },
+              "vigenteDesde": {
+                "type": "date",
+                "required": true,
+                "title": "Vigente desde",
+                "description": "Data a partir da qual o preço combinado atual vale."
+              },
+              "precoAtualizadoEm": {
+                "type": "timestamp",
+                "required": true,
+                "derived": true,
+                "title": "Preço atualizado em",
+                "description": "Momento da última alteração do preço combinado, registrado pelo sistema."
+              },
+              "codigoNoFornecedor": {
+                "type": "string",
+                "title": "Código no fornecedor",
+                "description": "Código com que o fornecedor identifica o produto no catálogo dele, para constar no pedido.",
+                "maxLength": 60
+              },
+              "observacoes": {
+                "type": "text",
+                "title": "Observações",
+                "description": "Condições combinadas com o fornecedor para este produto (embalagem, quantidade mínima, prazo).",
+                "maxLength": 2000
+              },
+              "usadoEmPedidos": {
+                "type": "integer",
+                "derived": true,
+                "title": "Pedidos que usaram o preço",
+                "description": "Quantidade de itens de pedidos de compra cujo preço foi sugerido por este preço combinado."
               }
             }
           }
@@ -1214,69 +1580,96 @@
       },
       "uniqueKeys": [
         [
-          "supplierId",
-          "productId"
+          "fornecedorId",
+          "produtoId"
+        ],
+        [
+          "codigo"
         ]
       ]
     },
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "compras",
-      "entityId": "PurchaseOrder",
+      "entityId": "PedidoCompra",
       "title": "Pedido de compra",
-      "description": "Pedido de compra aberto para um fornecedor, com itens, quantidades, preços e decisão de aprovação quando necessária.",
-      "displayField": "orderNumber",
+      "description": "Pedido aberto pelo comprador para um fornecedor, enviado, aprovado ou rejeitado pelo gerente quando acima do limite, e recebido total ou parcialmente.",
+      "displayField": "numero",
       "relationships": {
-        "supplier": {
-          "relationshipId": "purchaseOrderSupplier",
-          "to": "Supplier",
-          "via": "PurchaseOrder.supplierId",
+        "fornecedor": {
+          "relationshipId": "pedidoFornecedor",
+          "to": "Fornecedor",
+          "via": "PedidoCompra.fornecedorId",
           "cardinality": "N:1",
           "title": "Fornecedor do pedido",
-          "description": "Fornecedor para o qual o pedido de compra foi aberto.",
+          "description": "Fornecedor para o qual o pedido de compra é feito.",
           "mode": "fk",
-          "required": "sempre"
+          "required": true
         },
-        "goodsReceipts": {
-          "relationshipId": "goodsReceiptPurchaseOrder",
-          "to": "GoodsReceipt",
-          "via": "GoodsReceipt.purchaseOrderId",
+        "comprador": {
+          "relationshipId": "pedidoComprador",
+          "to": "Comprador",
+          "via": "PedidoCompra.compradorId",
+          "cardinality": "N:1",
+          "title": "Comprador do pedido",
+          "description": "Comprador que abriu o pedido.",
+          "mode": "fk",
+          "required": true
+        },
+        "itens": {
+          "relationshipId": "itemPedidoPedido",
+          "to": "ItemPedido",
+          "via": "ItemPedido.pedidoCompraId",
           "cardinality": "1:N",
-          "title": "Recebimentos do pedido",
-          "description": "Recebimentos totais ou parciais registrados para os itens deste pedido.",
+          "title": "Itens do pedido",
+          "description": "Produtos, quantidades e preços do pedido.",
           "mode": "fk",
           "direction": "to",
-          "required": "quando houver itens recebidos"
+          "required": true
+        },
+        "recebimentos": {
+          "relationshipId": "recebimentoPedido",
+          "to": "Recebimento",
+          "via": "Recebimento.pedidoCompraId",
+          "cardinality": "1:N",
+          "title": "Recebimentos do pedido",
+          "description": "Chegadas totais ou parciais registradas pelo almoxarife.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Lê um pedido de compra pelo identificador da linha · consulta por id no repositório de pedidos · telas que já possuem o identificador do pedido.",
-        "locate.byColumn": "Lista pedidos por fornecedor, situação, data do pedido ou previsão de entrega · filtra e pagina as colunas indexadas · comprador, gerente de compras e almoxarife.",
-        "locate.byText": "Localiza pedidos pelo número informado · busca textual na coluna de número do pedido · comprador, gerente de compras e almoxarife.",
-        "count": "Conta pedidos que atendem aos critérios de acompanhamento · usa o mesmo filtro das listas sem paginação · gerente de compras.",
-        "listByForeignKey": "Lista os pedidos abertos para um fornecedor · consulta pela chave estrangeira do fornecedor · comprador e gerente de compras.",
-        "create": "Abre um pedido de compra em elaboração com seus itens · insere a linha do pedido e seu documento de detalhes · comprador.",
-        "update": "Altera os itens e as datas de um pedido ainda em elaboração · atualiza a linha identificada pelo id · comprador.",
-        "transition": "Envia, aprova ou rejeita o pedido alterando sua situação indexada · aplica a transição autorizada pelas regras do módulo · comprador e gerente de compras.",
-        "uniqueKey": "Impede a repetição do número de pedido · aplica índice único na coluna orderNumber · motor da plataforma ao gravar.",
-        "sequence.next": "Emite o próximo número sequencial do pedido de compra · usa a sequência do módulo e da entidade · comprador ao abrir o pedido.",
-        "read.mdmRecord": "Lê o cadastro mestre do fornecedor e dos produtos referenciados pelo pedido · hidrata os identificadores MDM dos registros relacionados · comprador, gerente de compras e almoxarife."
+        "read.byId": "Abre o pedido pelo id para o comprador revisar, o gerente analisar e o almoxarife conferir itens e situação.",
+        "locate.byColumn": "Lista pedidos por situação, fornecedor, comprador, data de abertura ou entrega prevista: pendentes de aprovação para o gerente, aprovados para o almoxarife, em aberto e atrasados no painel.",
+        "locate.byText": "Busca o pedido pelo número digitado, usada pelo almoxarife ao localizar o pedido que chegou.",
+        "count": "Conta pedidos aguardando aprovação, em aberto e atrasados para os indicadores do gerente de compras.",
+        "listByForeignKey": "Lista os pedidos de um fornecedor ou de um comprador na ficha do cadastro.",
+        "create": "O comprador abre o pedido em rascunho para o fornecedor escolhido.",
+        "update": "O comprador ajusta entrega prevista, condição de pagamento e observações enquanto o pedido está em rascunho.",
+        "transition": "Move o pedido: o comprador envia, o gerente aprova ou rejeita acima do limite e o almoxarife marca recebido parcial ou total ao registrar o recebimento.",
+        "uniqueKey": "Garante que o número do pedido não se repete.",
+        "transaction": "Grava juntos o recebimento, a entrada no estoque e a nova situação do pedido, tudo ou nada.",
+        "read.mdmRecord": "Lê razão social, CNPJ e contatos do fornecedor e o nome do comprador para exibir no pedido e nas listas.",
+        "sequence.next": "Emite o número do pedido de compra na abertura, pela sequência compras.PedidoCompra.",
+        "attach.document": "Anexa ao pedido a proposta do fornecedor ou o pedido assinado, pelo comprador.",
+        "comment": "Permite ao comprador, ao gerente e ao almoxarife deixar notas sobre o pedido.",
+        "statusHistory.read": "Mostra quando o pedido foi enviado, aprovado, rejeitado e recebido, e por quem.",
+        "audit": "Registra quem alterou o pedido e quando, para consulta do administrador."
       },
       "rules": [
-        "purchaseOrderMustHaveItems",
-        "purchaseOrderItemProductOfferedBySupplier",
-        "purchaseOrderItemQuantityPositive",
-        "purchaseOrderItemPriceNonnegative",
-        "purchaseOrderEditableOnlyDraft",
-        "purchaseOrderApprovalRequiredAboveLimit",
-        "purchaseOrderReceiptRequiresApprovalWhenRequired",
-        "goodsReceiptQuantityWithinOrderedQuantity"
+        "valorLimiteAprovacao",
+        "pedidoExigeItens",
+        "rejeicaoExigeMotivo",
+        "recebimentoSomenteLiberado",
+        "edicaoSomenteRascunho",
+        "numeroPedidoUnico"
       ],
       "kind": "entity",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
-        "table": "compras_purchaseorder",
+        "table": "compras_pedidocompra",
         "kind": "relational"
       },
       "record": {
@@ -1293,171 +1686,166 @@
             "required": true,
             "derived": true
           },
-          "supplierId": {
-            "type": "record",
-            "required": true,
-            "indexed": true,
-            "of": "ContactSummary",
-            "to": [
-              "Supplier"
-            ],
-            "title": "Fornecedor",
-            "description": "Fornecedor para o qual o pedido de compra foi aberto.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
-          },
-          "orderNumber": {
+          "numero": {
             "type": "string",
             "required": true,
             "unique": true,
             "indexed": true,
-            "of": "ContactSummary",
+            "derived": true,
             "title": "Número do pedido",
-            "description": "Número sequencial pelo qual o pedido de compra é identificado e consultado.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Número do pedido de compra emitido pela sequência do módulo na abertura; é o número que o comprador, o gerente e o almoxarife citam e pelo qual localizam o pedido."
+          },
+          "fornecedorId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "to": [
+              "Fornecedor"
+            ],
+            "title": "Fornecedor",
+            "description": "Fornecedor para o qual o pedido é feito; razão social, CNPJ e contatos são lidos do cadastro mestre."
+          },
+          "compradorId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "to": [
+              "Comprador"
+            ],
+            "title": "Comprador",
+            "description": "Comprador que abriu o pedido."
           },
           "status": {
             "type": "enum",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "values": [
               {
-                "value": "draft",
-                "title": "Em elaboração",
-                "description": "Pedido ainda em preparação pelo comprador."
+                "value": "rascunho",
+                "title": "Rascunho",
+                "description": "Aberto pelo comprador, ainda recebendo itens."
               },
               {
-                "value": "sent",
+                "value": "enviado",
                 "title": "Enviado",
-                "description": "Pedido enviado, aguardando recebimento ou decisão de aprovação quando exigida."
+                "description": "Enviado pelo comprador; abaixo do limite segue ao fornecedor, acima aguarda decisão do gerente."
               },
               {
-                "value": "approved",
+                "value": "aprovado",
                 "title": "Aprovado",
-                "description": "Pedido de valor acima do limite aprovado pelo gerente de compras."
+                "description": "Aprovado pelo gerente de compras e liberado ao fornecedor."
               },
               {
-                "value": "rejected",
+                "value": "rejeitado",
                 "title": "Rejeitado",
-                "description": "Pedido recusado pelo gerente de compras e impedido de seguir para recebimento."
+                "description": "Rejeitado pelo gerente de compras, com motivo."
+              },
+              {
+                "value": "recebidoParcial",
+                "title": "Recebido parcialmente",
+                "description": "Parte dos itens já foi recebida pelo almoxarife."
+              },
+              {
+                "value": "recebido",
+                "title": "Recebido",
+                "description": "Todos os itens foram recebidos."
               }
             ],
-            "title": "Situação do pedido",
-            "description": "Etapa operacional do pedido de compra, alterada pelo envio ou pela decisão do gerente.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Situação",
+            "description": "Etapa do pedido no ciclo de compra."
           },
-          "orderDate": {
-            "type": "date",
+          "dataEmissao": {
+            "type": "timestamp",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
-            "title": "Data do pedido",
-            "description": "Data em que o pedido de compra foi aberto.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "derived": true,
+            "title": "Data de abertura",
+            "description": "Momento em que o pedido foi aberto; ordena as listas e situa o pedido no mês."
           },
-          "expectedDeliveryDate": {
+          "dataPrevistaEntrega": {
             "type": "date",
             "indexed": true,
-            "of": "ContactSummary",
-            "title": "Previsão de entrega",
-            "description": "Data prevista para a chegada dos produtos, usada para acompanhar atrasos.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Entrega prevista",
+            "description": "Data combinada com o fornecedor para a chegada do pedido; serve para identificar pedidos atrasados."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
-            "title": "Detalhes do pedido",
-            "description": "Itens e valores acordados para a compra.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Detalhes",
+            "description": "Dados do pedido que não são filtrados.",
             "fields": {
-              "items": {
+              "observacoes": {
+                "type": "text",
+                "title": "Observações",
+                "description": "Instruções ao fornecedor ou anotações do comprador sobre o pedido.",
+                "maxLength": 2000
+              },
+              "condicaoPagamento": {
+                "type": "string",
+                "title": "Condição de pagamento",
+                "description": "Condição de pagamento combinada com o fornecedor para este pedido.",
+                "maxLength": 200
+              },
+              "dataEnvio": {
+                "type": "timestamp",
+                "derived": true,
+                "title": "Data de envio",
+                "description": "Momento em que o comprador enviou o pedido."
+              },
+              "decisao": {
                 "type": "object",
-                "required": true,
-                "collection": true,
-                "of": "ContactSummary",
-                "title": "Itens do pedido",
-                "description": "Produtos solicitados, com as quantidades e os preços acordados neste pedido.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
+                "title": "Decisão do gerente",
+                "description": "Registro da aprovação ou rejeição do pedido acima do valor limite.",
                 "fields": {
-                  "productId": {
-                    "type": "record",
-                    "required": true,
-                    "of": "ContactSummary",
-                    "to": [
-                      "Product"
-                    ],
-                    "title": "Produto",
-                    "description": "Produto solicitado no item do pedido.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                  "decididoEm": {
+                    "type": "timestamp",
+                    "derived": true,
+                    "title": "Decidido em",
+                    "description": "Momento da aprovação ou rejeição."
                   },
-                  "quantity": {
-                    "type": "number",
-                    "required": true,
-                    "of": "ContactSummary",
-                    "title": "Quantidade solicitada",
-                    "description": "Quantidade do produto solicitada neste item.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "unitPrice": {
-                    "type": "money",
-                    "required": true,
-                    "of": "ContactSummary",
-                    "title": "Preço unitário combinado",
-                    "description": "Preço unitário acordado com o fornecedor para este item do pedido.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                  "motivoRejeicao": {
+                    "type": "text",
+                    "title": "Motivo da rejeição",
+                    "description": "Motivo informado pelo gerente de compras ao rejeitar o pedido.",
+                    "maxLength": 1000
                   }
                 }
               },
-              "orderTotal": {
+              "valorTotal": {
                 "type": "money",
                 "derived": true,
-                "title": "Valor total do pedido",
-                "description": "Soma dos preços unitários multiplicados pelas quantidades de todos os itens deste pedido."
+                "title": "Valor total",
+                "description": "Soma de quantidade vezes preço de todos os itens do pedido."
               },
-              "requiresApproval": {
+              "aguardandoAprovacao": {
                 "type": "boolean",
                 "derived": true,
-                "title": "Exige aprovação",
-                "description": "O valor total do pedido excede o limite de aprovação definido para compras."
+                "title": "Aguardando aprovação",
+                "description": "Pedido enviado cujo valor total está acima do valor limite e que o gerente de compras ainda não aprovou nem rejeitou."
               },
-              "receiptSituation": {
-                "type": "string",
-                "derived": true,
-                "title": "Situação do recebimento",
-                "description": "Indica se nenhum item, parte dos itens ou todos os itens do pedido já foram recebidos, comparando as quantidades recebidas com as quantidades solicitadas."
-              },
-              "isOpen": {
+              "liberadoAoFornecedor": {
                 "type": "boolean",
                 "derived": true,
-                "title": "Pedido em aberto",
-                "description": "Pedido enviado ou aprovado que não foi rejeitado e ainda não teve todos os seus itens recebidos."
+                "title": "Liberado ao fornecedor",
+                "description": "Pedido aprovado pelo gerente, ou enviado com valor total até o valor limite, e portanto pronto para ser recebido."
               },
-              "isOverdue": {
+              "emAberto": {
                 "type": "boolean",
                 "derived": true,
-                "title": "Pedido atrasado",
-                "description": "Pedido em aberto cuja previsão de entrega é anterior à data de hoje e que ainda não teve todos os seus itens recebidos."
+                "title": "Em aberto",
+                "description": "Pedido enviado, aprovado ou recebido parcialmente, que ainda não chegou por inteiro nem foi rejeitado."
+              },
+              "atrasado": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Atrasado",
+                "description": "Pedido em aberto cuja entrega prevista é anterior a hoje."
+              },
+              "quantidadePendente": {
+                "type": "number",
+                "derived": true,
+                "title": "Quantidade pendente",
+                "description": "Soma das quantidades pedidas nos itens menos o que já foi registrado nos recebimentos deste pedido."
               }
             }
           }
@@ -1465,71 +1853,119 @@
       },
       "uniqueKeys": [
         [
-          "orderNumber"
+          "numero"
         ]
       ],
       "lifecycleStates": [
         {
-          "state": "draft",
+          "state": "rascunho",
           "reachedBy": "actor"
         },
         {
-          "state": "sent",
+          "state": "enviado",
           "reachedBy": "actor"
         },
         {
-          "state": "approved",
+          "state": "aprovado",
           "reachedBy": "actor"
         },
         {
-          "state": "rejected",
+          "state": "rejeitado",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "recebidoParcial",
+          "reachedBy": "actor"
+        },
+        {
+          "state": "recebido",
           "reachedBy": "actor"
         }
       ],
       "transitions": [
         {
-          "transitionId": "sendPurchaseOrder",
+          "transitionId": "enviar",
           "from": [
-            "draft"
+            "rascunho"
           ],
-          "to": "sent",
+          "to": "enviado",
           "by": [
             "comprador"
           ],
-          "description": "Envia o pedido ao fornecedor; pedidos acima do limite ficam sujeitos à aprovação antes do recebimento.",
+          "description": "O comprador envia o pedido; até o valor limite ele segue ao fornecedor, acima aguarda a decisão do gerente de compras.",
+          "payload": [
+            "dataPrevistaEntrega"
+          ],
           "ruleRefs": [
-            "purchaseOrderMustHaveItems",
-            "purchaseOrderItemProductOfferedBySupplier",
-            "purchaseOrderItemQuantityPositive",
-            "purchaseOrderItemPriceNonnegative"
+            "pedidoExigeItens",
+            "valorLimiteAprovacao"
           ]
         },
         {
-          "transitionId": "decidePurchaseOrder",
+          "transitionId": "aprovar",
           "from": [
-            "sent"
+            "enviado"
           ],
-          "to": "approved",
+          "to": "aprovado",
           "by": [
             "gerenteCompras"
           ],
-          "description": "Aprova um pedido enviado cujo valor exige decisão do gerente de compras.",
+          "description": "O gerente de compras aprova o pedido acima do valor limite, liberando-o ao fornecedor.",
+          "payload": [],
           "ruleRefs": [
-            "purchaseOrderApprovalRequiredAboveLimit"
+            "valorLimiteAprovacao"
           ]
         },
         {
-          "transitionId": "rejectPurchaseOrder",
+          "transitionId": "rejeitar",
           "from": [
-            "sent"
+            "enviado"
           ],
-          "to": "rejected",
+          "to": "rejeitado",
           "by": [
             "gerenteCompras"
           ],
-          "description": "Rejeita um pedido enviado cujo valor exige decisão do gerente de compras.",
+          "description": "O gerente de compras rejeita o pedido acima do valor limite, informando o motivo.",
+          "payload": [
+            "details.decisao.motivoRejeicao"
+          ],
           "ruleRefs": [
-            "purchaseOrderApprovalRequiredAboveLimit"
+            "valorLimiteAprovacao",
+            "rejeicaoExigeMotivo"
+          ]
+        },
+        {
+          "transitionId": "receberParcial",
+          "from": [
+            "enviado",
+            "aprovado",
+            "recebidoParcial"
+          ],
+          "to": "recebidoParcial",
+          "by": [
+            "almoxarife"
+          ],
+          "description": "Ao registrar um recebimento que não completa todos os itens, o pedido fica recebido parcialmente.",
+          "payload": [],
+          "ruleRefs": [
+            "recebimentoSomenteLiberado"
+          ]
+        },
+        {
+          "transitionId": "receberTotal",
+          "from": [
+            "enviado",
+            "aprovado",
+            "recebidoParcial"
+          ],
+          "to": "recebido",
+          "by": [
+            "almoxarife"
+          ],
+          "description": "Ao registrar o recebimento que completa todos os itens, o pedido fica recebido.",
+          "payload": [],
+          "ruleRefs": [
+            "recebimentoSomenteLiberado"
           ]
         }
       ]
@@ -1537,47 +1973,77 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "compras",
-      "entityId": "GoodsReceipt",
-      "title": "Recebimento de mercadorias",
-      "description": "Registro do recebimento total ou parcial dos itens de um pedido de compra, que origina a entrada no estoque.",
-      "displayField": "receiptNumber",
+      "entityId": "ItemPedido",
+      "title": "Item do pedido",
+      "description": "Produto incluído no pedido de compra com quantidade e preço; a quantidade pendente de recebimento é derivada das entradas.",
+      "displayField": "numeroItem",
       "relationships": {
-        "purchaseOrder": {
-          "relationshipId": "goodsReceiptPurchaseOrder",
-          "to": "PurchaseOrder",
-          "via": "GoodsReceipt.purchaseOrderId",
+        "pedidoCompra": {
+          "relationshipId": "itemPedidoPedido",
+          "to": "PedidoCompra",
+          "via": "ItemPedido.pedidoCompraId",
           "cardinality": "N:1",
           "title": "Pedido de compra",
-          "description": "Cada recebimento registra a entrega total ou parcial de um pedido de compra.",
+          "description": "Pedido ao qual o item pertence.",
           "mode": "fk",
-          "required": "sempre"
+          "required": true
+        },
+        "produto": {
+          "relationshipId": "itemPedidoProduto",
+          "to": "Produto",
+          "via": "ItemPedido.produtoId",
+          "cardinality": "N:1",
+          "title": "Produto",
+          "description": "Produto comprado no item.",
+          "mode": "fk",
+          "required": true
+        },
+        "produtoFornecido": {
+          "relationshipId": "itemPedidoProdutoFornecido",
+          "to": "ProdutoFornecido",
+          "via": "ItemPedido.produtoFornecidoId",
+          "cardinality": "N:1",
+          "title": "Preço combinado",
+          "description": "Preço combinado que sugeriu o preço do item.",
+          "mode": "fk"
+        },
+        "entradasEstoque": {
+          "relationshipId": "entradaItemPedido",
+          "to": "EntradaEstoque",
+          "via": "EntradaEstoque.itemPedidoId",
+          "cardinality": "1:N",
+          "title": "Entradas de estoque",
+          "description": "Entradas de estoque que registram o recebimento deste item.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um recebimento pelo identificador da linha no repositório de recebimentos, para telas que já possuem esse identificador.",
-        "locate.byColumn": "Lista recebimentos por pedido de compra, número ou data indexados, com ordenação e paginação, para o almoxarife e o comprador localizarem registros.",
-        "count": "Conta os recebimentos que atendem aos filtros aplicados, para totais das listas de recebimentos.",
-        "listByForeignKey": "Lista os recebimentos vinculados a um pedido de compra pela chave estrangeira, para acompanhar entregas parciais do pedido.",
-        "create": "Grava um novo recebimento com seus itens efetivamente entregues, para o almoxarife registrar a chegada das mercadorias.",
-        "uniqueKey": "Impede a emissão de dois recebimentos com o mesmo número sequencial, por meio da chave única do recebimento.",
-        "transaction": "Registra o recebimento, dá entrada dos itens no estoque e atualiza o pedido em uma única transação, para o almoxarife.",
-        "read.mdmRecord": "Lê os registros mestres dos produtos referenciados nos itens, para exibir sua identificação ao almoxarife e ao comprador.",
-        "sequence.next": "Emite o próximo número sequencial do recebimento no contador do módulo, ao criar o registro para o almoxarife.",
-        "compras.registerReceipt": "Registra o recebimento total ou parcial, valida as quantidades pendentes e aciona a entrada no estoque, para o almoxarife."
+        "read.byId": "Lê um item do pedido pelo id, usado ao conferir o item no recebimento e na revisão do pedido.",
+        "locate.byColumn": "Lista itens filtrando por pedido, produto ou preço combinado de origem, ordenados pelo número do item; usado pelo comprador e pelo gerente.",
+        "listByForeignKey": "Lista os itens de um pedido de compra (ou de vários pedidos de uma vez) na revisão, aprovação e recebimento.",
+        "count": "Conta os itens de um pedido para exibir o total de linhas na lista e na aprovação.",
+        "create": "Inclui um item no pedido em rascunho com produto, quantidade e preço, usado pelo comprador.",
+        "update": "Altera quantidade, preço ou observação do item enquanto o pedido ainda está em rascunho, usado pelo comprador.",
+        "delete": "Remove um item do pedido em rascunho, usado pelo comprador antes do envio.",
+        "uniqueKey": "Impede dois itens com o mesmo número dentro do mesmo pedido, pela chave pedido de compra mais número do item.",
+        "transaction": "Grava o pedido e seus itens de forma atômica ao abrir ou revisar o pedido de compra.",
+        "read.mdmRecord": "Lê o registro mestre do produto e do fornecedor apontados pelo item para exibir nome, SKU e unidade de medida.",
+        "comment": "Permite registrar uma nota sobre o item, como acordo de entrega, usada pelo comprador e pelo almoxarife.",
+        "compras.sugerirPrecoCombinado": "Sugere o preço unitário do item a partir do preço combinado do produto fornecido pelo fornecedor do pedido, usado pelo comprador ao incluir o item."
       },
       "rules": [
-        "goodsReceiptHasItems",
-        "goodsReceiptQuantityPositive",
-        "goodsReceiptProductsMatchOrder",
-        "goodsReceiptQuantityDoesNotExceedOutstanding",
-        "goodsReceiptAllowedForOpenOrder",
-        "goodsReceiptPostsStockAtomically"
+        "itemPedidoQuantidadePositiva",
+        "itemPedidoProdutoDoFornecedor",
+        "itemPedidoSomenteEmRascunho",
+        "precoCombinadoSugerePreco"
       ],
       "kind": "entity",
-      "class": "event",
+      "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "compras_goodsreceipt",
+        "table": "compras_itempedido",
         "kind": "relational"
       },
       "record": {
@@ -1594,102 +2060,91 @@
             "required": true,
             "derived": true
           },
-          "receiptNumber": {
-            "type": "string",
-            "required": true,
-            "indexed": true,
-            "of": "Address",
-            "title": "Número do recebimento",
-            "description": "Número sequencial que identifica o recebimento de mercadorias.",
-            "maxLength": 80,
-            "min": 0,
-            "max": 0
-          },
-          "purchaseOrderId": {
+          "pedidoCompraId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
             "to": [
-              "PurchaseOrder"
+              "PedidoCompra"
             ],
             "title": "Pedido de compra",
-            "description": "Pedido de compra ao qual pertencem as mercadorias recebidas.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Pedido de compra ao qual o item pertence."
           },
-          "receivedAt": {
-            "type": "timestamp",
+          "produtoId": {
+            "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
-            "title": "Data e hora do recebimento",
-            "description": "Data e hora em que as mercadorias foram efetivamente recebidas no almoxarifado.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "to": [
+              "Produto"
+            ],
+            "title": "Produto",
+            "description": "Produto comprado neste item."
+          },
+          "produtoFornecidoId": {
+            "type": "record",
+            "indexed": true,
+            "to": [
+              "ProdutoFornecido"
+            ],
+            "title": "Preço combinado de origem",
+            "description": "Produto fornecido cujo preço combinado sugeriu o preço do item; vazio quando o preço foi digitado livremente."
+          },
+          "numeroItem": {
+            "type": "integer",
+            "required": true,
+            "indexed": true,
+            "title": "Número do item",
+            "description": "Posição sequencial do item dentro do pedido, usada para identificá-lo na tela e no recebimento.",
+            "min": 1
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
-            "title": "Detalhes do recebimento",
-            "description": "Itens efetivamente recebidos e observações do lançamento.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Detalhes do item",
+            "description": "Quantidade, preço e observações do item do pedido.",
             "fields": {
-              "items": {
-                "type": "object",
+              "quantidade": {
+                "type": "number",
                 "required": true,
-                "collection": true,
-                "of": "Address",
-                "title": "Itens recebidos",
-                "description": "Produtos e quantidades efetivamente recebidos neste lançamento.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "fields": {
-                  "productId": {
-                    "type": "record",
-                    "required": true,
-                    "of": "Address",
-                    "to": [
-                      "Product"
-                    ],
-                    "title": "Produto",
-                    "description": "Produto do pedido de compra que foi recebido.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  },
-                  "receivedQuantity": {
-                    "type": "number",
-                    "required": true,
-                    "of": "Address",
-                    "title": "Quantidade recebida",
-                    "description": "Quantidade efetivamente recebida do produto, na unidade definida para ele.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
-                  }
-                }
+                "title": "Quantidade pedida",
+                "description": "Quantidade do produto que o comprador está pedindo ao fornecedor; deve ser maior que zero.",
+                "min": 0
               },
-              "notes": {
+              "precoUnitario": {
+                "type": "money",
+                "required": true,
+                "title": "Preço unitário",
+                "description": "Preço unitário negociado para este item, sugerido pelo preço combinado do fornecedor e editável pelo comprador.",
+                "min": 0
+              },
+              "observacao": {
                 "type": "text",
-                "of": "Address",
-                "title": "Observações",
-                "description": "Observações relevantes do almoxarife sobre a entrega.",
-                "maxLength": 2000,
-                "min": 0,
-                "max": 0
+                "title": "Observação",
+                "description": "Observação livre do comprador sobre o item."
               },
-              "receiptCompletion": {
-                "type": "string",
+              "valorTotalItem": {
+                "type": "money",
                 "derived": true,
-                "title": "Situação do recebimento",
-                "description": "Indica se, após este registro, as quantidades recebidas de todos os itens do pedido alcançam as quantidades pedidas; caso contrário, o recebimento é parcial."
+                "title": "Valor total do item",
+                "description": "Quantidade pedida multiplicada pelo preço unitário do item."
+              },
+              "quantidadeRecebida": {
+                "type": "number",
+                "derived": true,
+                "title": "Quantidade recebida",
+                "description": "Soma das quantidades das entradas de estoque registradas para este item do pedido."
+              },
+              "quantidadePendente": {
+                "type": "number",
+                "derived": true,
+                "title": "Quantidade pendente",
+                "description": "Quantidade pedida menos a quantidade recebida, nunca abaixo de zero."
+              },
+              "recebidoTotalmente": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Recebido totalmente",
+                "description": "Verdadeiro quando a quantidade recebida alcança ou supera a quantidade pedida do item."
               }
             }
           }
@@ -1697,30 +2152,66 @@
       },
       "uniqueKeys": [
         [
-          "receiptNumber"
+          "pedidoCompraId",
+          "numeroItem"
         ]
       ]
     },
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "compras",
-      "entityId": "PurchaseOrderDashboard",
-      "title": "Painel de pedidos de compra",
-      "description": "Resumo recalculado de pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês.",
-      "displayField": "period",
-      "relationships": {},
-      "capabilities": {
-        "aggregate.byWindow": "Resume os pedidos de compra por mês e por fornecedor, a partir dos dados transacionais, para compor os indicadores usados pelo gerente de compras.",
-        "read.window": "Lê os indicadores de pedidos em aberto, atrasados e total comprado em um período mensal e fornecedor, para o gerente de compras acompanhar o painel.",
-        "read.mdmRecord": "Lê o registro mestre apontado pelo fornecedor do resumo para identificar cada linha do painel ao gerente de compras.",
-        "compras.consultarPainelPedidos": "Apresenta o painel mensal de pedidos de compra por fornecedor, com pedidos em aberto, atrasados e total comprado, para o gerente de compras."
+      "entityId": "Recebimento",
+      "title": "Recebimento",
+      "description": "Registro da chegada total ou parcial de um pedido de compra feito pelo almoxarife.",
+      "displayField": "numero",
+      "relationships": {
+        "pedidoCompra": {
+          "relationshipId": "recebimentoPedido",
+          "to": "PedidoCompra",
+          "via": "Recebimento.pedidoCompraId",
+          "cardinality": "N:1",
+          "title": "Pedido de compra recebido",
+          "description": "Pedido de compra cuja chegada foi registrada.",
+          "mode": "fk",
+          "required": true
+        },
+        "entradasEstoque": {
+          "relationshipId": "entradaRecebimento",
+          "to": "EntradaEstoque",
+          "via": "EntradaEstoque.recebimentoId",
+          "cardinality": "1:N",
+          "title": "Entradas no estoque geradas",
+          "description": "Entradas no estoque dos produtos recebidos geradas por este recebimento.",
+          "mode": "fk",
+          "direction": "to",
+          "required": true
+        }
       },
-      "rules": [],
+      "capabilities": {
+        "read.byId": "Abre um recebimento pelo id para o almoxarife conferir os itens e quantidades recebidos.",
+        "locate.byColumn": "Lista os recebimentos filtrando por pedido, número ou data de recebimento, ordenados pela data, para o almoxarife e o gerente de compras.",
+        "count": "Conta os recebimentos de um filtro, como os registrados no dia, para o cabeçalho da lista do almoxarife.",
+        "listByForeignKey": "Lista todos os recebimentos de um pedido de compra, para o almoxarife ver o que já chegou e o que ainda está pendente.",
+        "create": "Registra uma nova chegada do pedido com as quantidades recebidas de cada item, feita pelo almoxarife.",
+        "transaction": "Grava o recebimento, as entradas no estoque de cada produto e a situação de recebimento do pedido de uma só vez, tudo ou nada, quando o almoxarife confirma.",
+        "uniqueKey": "Impede dois recebimentos com o mesmo número, garantido pelo índice único da coluna número.",
+        "sequence.next": "Emite o número sequencial do recebimento na criação, pelo contador compras.Recebimento.",
+        "read.mdmRecord": "Lê no cadastro mestre o nome e a unidade dos produtos recebidos para exibir nos itens do recebimento.",
+        "attach.document": "Anexa ao recebimento a nota fiscal ou o canhoto digitalizado da entrega, pelo almoxarife.",
+        "comment": "Permite ao almoxarife e ao gerente de compras deixar notas sobre divergências da entrega."
+      },
+      "rules": [
+        "recebimentoSomentePedidoAprovado",
+        "quantidadeRecebidaNaoExcedePendente",
+        "recebimentoGeraEntradaEstoque",
+        "recebimentoAtualizaSituacaoPedido",
+        "numeroRecebimentoUnico"
+      ],
       "kind": "entity",
-      "class": "supporting",
+      "class": "event",
       "storage": {
         "target": "moduleDatabase",
-        "table": "compras_purchaseorderdashboard",
+        "table": "compras_recebimento",
         "kind": "relational"
       },
       "record": {
@@ -1737,72 +2228,428 @@
             "required": true,
             "derived": true
           },
-          "period": {
+          "numero": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "indexed": true,
+            "derived": true,
+            "title": "Número do recebimento",
+            "description": "Número sequencial do recebimento emitido pelo sistema na criação, usado pelo almoxarife para citar e localizar o registro."
+          },
+          "pedidoCompraId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "to": [
+              "PedidoCompra"
+            ],
+            "title": "Pedido de compra",
+            "description": "Pedido de compra aprovado cuja chegada, total ou parcial, este recebimento registra."
+          },
+          "dataRecebimento": {
+            "type": "date",
+            "required": true,
+            "indexed": true,
+            "title": "Data do recebimento",
+            "description": "Data em que a mercadoria chegou ao almoxarifado, usada para listar e ordenar os recebimentos."
+          },
+          "registradoEm": {
             "type": "timestamp",
             "required": true,
             "indexed": true,
-            "of": "Address",
-            "title": "Período mensal",
-            "description": "Início do mês ao qual o resumo de pedidos de compra se refere, recalculado a partir dos pedidos de compra.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
-            "derived": true
-          },
-          "groupKey": {
-            "type": "string",
-            "required": true,
-            "indexed": true,
-            "of": "Address",
-            "title": "Fornecedor",
-            "description": "Identificador do fornecedor ao qual os indicadores mensais se referem; permite ler o painel por fornecedor.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
-            "derived": true
+            "derived": true,
+            "title": "Registrado em",
+            "description": "Momento em que o almoxarife registrou o recebimento no sistema, preenchido automaticamente."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
-            "title": "Indicadores de compras",
-            "description": "Medidas mensais recalculadas dos pedidos de compra do fornecedor.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Detalhes",
+            "description": "Itens recebidos e observações do recebimento.",
             "fields": {
-              "openPurchaseOrdersCount": {
+              "itens": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "title": "Itens recebidos",
+                "description": "Quantidade recebida de cada item do pedido nesta chegada; cada linha dá entrada no estoque do produto.",
+                "fields": {
+                  "itemPedidoId": {
+                    "type": "record",
+                    "required": true,
+                    "to": [
+                      "ItemPedido"
+                    ],
+                    "title": "Item do pedido",
+                    "description": "Item do pedido de compra ao qual esta quantidade recebida se refere."
+                  },
+                  "produtoId": {
+                    "type": "record",
+                    "required": true,
+                    "to": [
+                      "Produto"
+                    ],
+                    "title": "Produto",
+                    "description": "Produto recebido, o mesmo do item do pedido, que terá entrada no estoque."
+                  },
+                  "quantidadeRecebida": {
+                    "type": "number",
+                    "required": true,
+                    "title": "Quantidade recebida",
+                    "description": "Quantidade do produto que chegou nesta entrega, não maior que a quantidade ainda pendente do item.",
+                    "min": 0
+                  },
+                  "observacao": {
+                    "type": "text",
+                    "title": "Observação do item",
+                    "description": "Anotação do almoxarife sobre o item, como avaria ou divergência na conferência.",
+                    "maxLength": 500
+                  }
+                }
+              },
+              "observacoes": {
+                "type": "text",
+                "title": "Observações",
+                "description": "Observações gerais do almoxarife sobre a entrega.",
+                "maxLength": 2000
+              },
+              "tipoRecebimento": {
+                "type": "enum",
+                "derived": true,
+                "title": "Tipo de recebimento",
+                "description": "Total quando, com as quantidades deste recebimento, todos os itens do pedido ficam com a quantidade pedida recebida; parcial quando algum item ainda tem quantidade pendente."
+              },
+              "quantidadeTotalRecebida": {
+                "type": "number",
+                "derived": true,
+                "title": "Quantidade total recebida",
+                "description": "Soma das quantidades recebidas de todos os itens neste recebimento."
+              }
+            }
+          }
+        }
+      },
+      "uniqueKeys": [
+        [
+          "numero"
+        ]
+      ]
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "compras",
+      "entityId": "EntradaEstoque",
+      "title": "Entrada no estoque",
+      "description": "Entrada de estoque de um produto recebido, gerada pelo recebimento para cada item, com a quantidade recebida; publicada ao controle de estoque.",
+      "displayField": "numero",
+      "relationships": {
+        "recebimento": {
+          "relationshipId": "entradaRecebimento",
+          "to": "Recebimento",
+          "via": "EntradaEstoque.recebimentoId",
+          "cardinality": "N:1",
+          "title": "Recebimento que gerou a entrada",
+          "description": "Cada entrada no estoque nasce de um recebimento; um recebimento gera uma entrada por item recebido.",
+          "mode": "fk",
+          "required": true
+        },
+        "itemPedido": {
+          "relationshipId": "entradaItemPedido",
+          "to": "ItemPedido",
+          "via": "EntradaEstoque.itemPedidoId",
+          "cardinality": "N:1",
+          "title": "Item do pedido recebido",
+          "description": "Item do pedido cuja quantidade foi recebida; recebimentos parciais geram várias entradas para o mesmo item.",
+          "mode": "fk",
+          "required": true
+        },
+        "produto": {
+          "relationshipId": "entradaProduto",
+          "to": "Produto",
+          "via": "EntradaEstoque.produtoId",
+          "cardinality": "N:1",
+          "title": "Produto que entrou no estoque",
+          "description": "Produto do cadastro mestre que teve a entrada no estoque.",
+          "mode": "fk",
+          "required": true
+        }
+      },
+      "capabilities": {
+        "read.byId": "Lê uma entrada no estoque pelo id, na tela do recebimento ou do item do pedido, para o almoxarife e o gerente de compras.",
+        "locate.byColumn": "Lista as entradas filtradas por produto, recebimento ou período da data de entrada, ordenadas e paginadas, para o almoxarife conferir o que entrou no estoque.",
+        "count": "Conta as entradas de um filtro (por exemplo, do dia ou de um produto) para o cabeçalho da lista do almoxarife.",
+        "listByForeignKey": "Lista as entradas de um recebimento, de um item do pedido ou de um produto, preenchendo a lista de uma vez por findManyByValues, na tela do recebimento e do pedido.",
+        "create": "Grava a entrada no estoque para cada item recebido; quem escreve é o processo cicloPedidoCompra na etapa darEntradaEstoque, ao registrar o recebimento.",
+        "uniqueKey": "Recusa uma segunda entrada para o mesmo item no mesmo recebimento, pelo índice único de recebimento e item do pedido.",
+        "transaction": "Grava o recebimento e todas as suas entradas no estoque juntos, tudo ou nada, para que nenhum item recebido fique sem entrada.",
+        "read.mdmRecord": "Lê no cadastro mestre o nome, o SKU e a unidade do produto de cada entrada, hidratando a lista inteira de uma vez.",
+        "sequence.next": "Emite o número da entrada no estoque na criação, pela sequência compras.EntradaEstoque do módulo.",
+        "compras.publicarEntradaEstoque": "Publica cada entrada gerada ao controle de estoque, com produto e quantidade recebida, e registra o momento e o identificador devolvido; executado pelo processo do pedido de compra."
+      },
+      "rules": [
+        "entradaGeradaPeloRecebimento",
+        "quantidadeEntradaPositiva",
+        "entradaUnicaPorItemRecebimento",
+        "entradaProdutoDoItemPedido",
+        "quantidadeRecebidaNaoExcedePedido",
+        "entradaPublicadaAoEstoque"
+      ],
+      "kind": "entity",
+      "class": "event",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "compras_entradaestoque",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "numero": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "indexed": true,
+            "derived": true,
+            "title": "Número da entrada",
+            "description": "Número da entrada no estoque, emitido pelo sistema na criação a partir da sequência do módulo; é o número citado ao conferir o estoque."
+          },
+          "recebimentoId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "to": [
+              "Recebimento"
+            ],
+            "title": "Recebimento",
+            "description": "Recebimento registrado pelo almoxarife que gerou esta entrada no estoque."
+          },
+          "itemPedidoId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "to": [
+              "ItemPedido"
+            ],
+            "title": "Item do pedido",
+            "description": "Item do pedido de compra cuja quantidade recebida deu entrada no estoque."
+          },
+          "produtoId": {
+            "type": "record",
+            "required": true,
+            "indexed": true,
+            "to": [
+              "Produto"
+            ],
+            "title": "Produto",
+            "description": "Produto que teve entrada no estoque; o nome, o SKU e a unidade vêm do cadastro mestre do produto."
+          },
+          "dataEntrada": {
+            "type": "timestamp",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "title": "Data da entrada",
+            "description": "Momento em que a entrada foi gerada pelo processo de recebimento; usado para ordenar e filtrar as entradas por período."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "title": "Detalhes",
+            "description": "Dados da entrada no estoque que só são exibidos.",
+            "fields": {
+              "quantidade": {
+                "type": "number",
+                "required": true,
+                "title": "Quantidade recebida",
+                "description": "Quantidade do produto recebida neste recebimento para o item, que entra no estoque (na unidade de medida do produto).",
+                "min": 0
+              },
+              "valorUnitario": {
+                "type": "money",
+                "title": "Preço unitário",
+                "description": "Preço unitário do item no pedido de compra no momento da entrada, guardado para valorizar a entrada no estoque.",
+                "min": 0
+              },
+              "recebimentoParcial": {
+                "type": "boolean",
+                "title": "Recebimento parcial",
+                "description": "Indica que a quantidade recebida deste item foi menor que a quantidade pedida."
+              },
+              "publicacao": {
+                "type": "object",
+                "title": "Publicação ao estoque",
+                "description": "Registro do envio desta entrada ao controle de estoque.",
+                "fields": {
+                  "publicadaEm": {
+                    "type": "timestamp",
+                    "title": "Publicada em",
+                    "description": "Momento em que a entrada foi publicada ao controle de estoque."
+                  },
+                  "identificadorExterno": {
+                    "type": "string",
+                    "title": "Identificador no estoque",
+                    "description": "Identificador devolvido pelo controle de estoque ao aceitar a entrada.",
+                    "maxLength": 120
+                  }
+                }
+              },
+              "observacao": {
+                "type": "text",
+                "title": "Observação",
+                "description": "Observação sobre a entrada, como avarias ou diferenças notadas na conferência.",
+                "maxLength": 1000
+              },
+              "valorTotal": {
+                "type": "money",
+                "derived": true,
+                "title": "Valor da entrada",
+                "description": "Quantidade recebida desta entrada multiplicada pelo preço unitário do item no pedido."
+              },
+              "publicada": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Publicada ao estoque",
+                "description": "Verdadeiro quando a entrada já tem o momento de publicação ao controle de estoque registrado."
+              }
+            }
+          }
+        }
+      },
+      "uniqueKeys": [
+        [
+          "recebimentoId",
+          "itemPedidoId"
+        ]
+      ]
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "compras",
+      "entityId": "PainelCompras",
+      "title": "Painel de compras",
+      "description": "Indicadores recalculados: pedidos em aberto, pedidos atrasados e total comprado por fornecedor no mês.",
+      "displayField": "mesReferencia",
+      "relationships": {
+        "fornecedor": {
+          "relationshipId": "fornecedorPedidosPainel",
+          "to": "Fornecedor",
+          "via": "PedidoCompra",
+          "cardinality": "N:N",
+          "title": "Total comprado por fornecedor",
+          "description": "Total comprado no mês agrupado por fornecedor, apurado pelos pedidos de compra.",
+          "mode": "throughTable",
+          "path": "PainelCompras -> PedidoCompra.fornecedorId -> Fornecedor",
+          "derived": true
+        }
+      },
+      "capabilities": {
+        "aggregate.byWindow": "Resume os pedidos de compra e seus itens por mês e por fornecedor, contando pedidos em aberto e atrasados e somando o total comprado, por meio de um agregado declarado nas visões do módulo; alimenta o painel do gerente de compras.",
+        "read.window": "Lê os indicadores de um mês e, opcionalmente, de um fornecedor, filtrando pelo mês de referência e pelo fornecedor indexados; usado pelo gerente de compras ao abrir o painel.",
+        "refresh": "Mantém o painel atualizado à medida que pedidos são enviados, aprovados, rejeitados e recebidos, por política de atualização do agregado executada pela plataforma.",
+        "rebuild": "Recalcula todo o painel a partir dos pedidos de compra e recebimentos quando o módulo é publicado ou migrado.",
+        "read.mdmRecord": "Lê o registro mestre do fornecedor de cada linha para exibir a razão social no ranking do total comprado no mês; usado pela tela do gerente de compras."
+      },
+      "rules": [
+        "pedidoAtrasadoPrevisaoVencida",
+        "totalCompradoConsideraPedidosAprovados",
+        "pedidoEmAbertoAteRecebimentoTotal"
+      ],
+      "kind": "entity",
+      "class": "supporting",
+      "storage": {
+        "target": "moduleDatabase",
+        "table": "compras_painelcompras",
+        "kind": "relational"
+      },
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "derived": true,
+            "indexed": true,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true
+          },
+          "mesReferencia": {
+            "type": "timestamp",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "title": "Mês de referência",
+            "description": "Início do mês que esta linha resume, apurado a partir da data de emissão dos pedidos de compra."
+          },
+          "fornecedorId": {
+            "type": "record",
+            "indexed": true,
+            "derived": true,
+            "to": [
+              "Fornecedor"
+            ],
+            "title": "Fornecedor",
+            "description": "Fornecedor pelo qual os pedidos de compra do mês são agrupados; vazio na linha que totaliza a organização."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "title": "Indicadores",
+            "description": "Medidas recalculadas a partir dos pedidos de compra do mês e do fornecedor; ninguém as digita.",
+            "fields": {
+              "pedidosEmAberto": {
                 "type": "integer",
                 "required": true,
-                "of": "Address",
+                "derived": true,
                 "title": "Pedidos em aberto",
-                "description": "Quantidade recalculada de pedidos de compra do fornecedor que permanecem em aberto no período.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "derived": true
+                "description": "Quantidade de pedidos de compra enviados ou aprovados que ainda não foram recebidos por completo.",
+                "min": 0
               },
-              "overduePurchaseOrdersCount": {
+              "pedidosAtrasados": {
                 "type": "integer",
                 "required": true,
-                "of": "Address",
+                "derived": true,
                 "title": "Pedidos atrasados",
-                "description": "Quantidade recalculada de pedidos de compra do fornecedor em aberto cuja data prevista de entrega já passou.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "derived": true
+                "description": "Quantidade de pedidos em aberto cuja data prevista de entrega já passou sem recebimento total.",
+                "min": 0
               },
-              "totalPurchasedAmount": {
+              "quantidadePedidos": {
+                "type": "integer",
+                "required": true,
+                "derived": true,
+                "title": "Pedidos no mês",
+                "description": "Quantidade de pedidos de compra emitidos no mês para o fornecedor, excluídos os rejeitados e cancelados.",
+                "min": 0
+              },
+              "totalComprado": {
                 "type": "money",
                 "required": true,
-                "of": "Address",
-                "title": "Total comprado",
-                "description": "Valor total recalculado dos pedidos de compra do fornecedor no mês.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "derived": true
+                "derived": true,
+                "title": "Total comprado no mês",
+                "description": "Soma do valor dos pedidos de compra aprovados ou enviados no mês para o fornecedor (quantidade vezes preço de cada item).",
+                "min": 0
+              },
+              "totalRecebido": {
+                "type": "money",
+                "required": true,
+                "derived": true,
+                "title": "Total recebido no mês",
+                "description": "Soma do valor dos itens efetivamente recebidos pelo almoxarife no mês para o fornecedor.",
+                "min": 0
               }
             },
             "derived": true
@@ -1813,74 +2660,156 @@
   ],
   "relationships": [
     {
-      "relationshipId": "supplierHasContact",
-      "from": "Supplier",
-      "to": "SupplierContact",
+      "relationshipId": "fornecedorContato",
+      "from": "Fornecedor",
+      "to": "ContatoFornecedor",
       "type": "oneToMany",
       "required": false,
       "mode": "mdmRelationship",
-      "description": "Um fornecedor pode ter canais de contato vinculados para sua comunicação comercial.",
+      "description": "Canais de contato (telefone, e-mail) do fornecedor.",
       "catalogType": "HasContact"
     },
     {
-      "relationshipId": "supplierSuppliesProduct",
-      "from": "Supplier",
-      "to": "Product",
+      "relationshipId": "fornecedorFornecePoduto",
+      "from": "Fornecedor",
+      "to": "Produto",
       "type": "manyToMany",
       "required": false,
       "mode": "mdmRelationship",
-      "description": "Um fornecedor pode fornecer diversos produtos, e um produto pode ser fornecido por diversos fornecedores.",
+      "description": "O fornecedor fornece o produto, registrado no cadastro mestre.",
       "catalogType": "SuppliesProduct"
     },
     {
-      "relationshipId": "supplierOfferingSupplier",
-      "from": "SupplierOffering",
-      "to": "Supplier",
+      "relationshipId": "produtoFornecidoFornecedor",
+      "from": "ProdutoFornecido",
+      "to": "Fornecedor",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento pertence a um fornecedor.",
-      "field": "SupplierOffering.supplierId"
+      "description": "Fornecedor que fornece o produto com o preço combinado.",
+      "field": "ProdutoFornecido.fornecedorId"
     },
     {
-      "relationshipId": "supplierOfferingProduct",
-      "from": "SupplierOffering",
-      "to": "Product",
+      "relationshipId": "produtoFornecidoProduto",
+      "from": "ProdutoFornecido",
+      "to": "Produto",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento define o preço combinado para um produto.",
-      "field": "SupplierOffering.productId"
+      "description": "Produto fornecido pelo fornecedor.",
+      "field": "ProdutoFornecido.produtoId"
     },
     {
-      "relationshipId": "supplierOfferingBuyer",
-      "from": "SupplierOffering",
-      "to": "Buyer",
+      "relationshipId": "produtoFornecidoComprador",
+      "from": "ProdutoFornecido",
+      "to": "Comprador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada condição de fornecimento é cadastrada por um comprador para permitir o escopo pessoal do cadastro.",
-      "field": "SupplierOffering.buyerId"
+      "description": "Comprador que cadastrou e mantém o preço combinado.",
+      "field": "ProdutoFornecido.compradorId"
     },
     {
-      "relationshipId": "purchaseOrderSupplier",
-      "from": "PurchaseOrder",
-      "to": "Supplier",
+      "relationshipId": "pedidoFornecedor",
+      "from": "PedidoCompra",
+      "to": "Fornecedor",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada pedido de compra é aberto para um fornecedor.",
-      "field": "PurchaseOrder.supplierId"
+      "description": "Fornecedor para o qual o pedido de compra é feito.",
+      "field": "PedidoCompra.fornecedorId"
     },
     {
-      "relationshipId": "goodsReceiptPurchaseOrder",
-      "from": "GoodsReceipt",
-      "to": "PurchaseOrder",
+      "relationshipId": "pedidoComprador",
+      "from": "PedidoCompra",
+      "to": "Comprador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento registra a entrega total ou parcial de um pedido de compra.",
-      "field": "GoodsReceipt.purchaseOrderId"
+      "description": "Comprador que abriu o pedido.",
+      "field": "PedidoCompra.compradorId"
+    },
+    {
+      "relationshipId": "itemPedidoPedido",
+      "from": "ItemPedido",
+      "to": "PedidoCompra",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Pedido de compra ao qual o item pertence.",
+      "field": "ItemPedido.pedidoCompraId"
+    },
+    {
+      "relationshipId": "itemPedidoProduto",
+      "from": "ItemPedido",
+      "to": "Produto",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Produto comprado no item.",
+      "field": "ItemPedido.produtoId"
+    },
+    {
+      "relationshipId": "itemPedidoProdutoFornecido",
+      "from": "ItemPedido",
+      "to": "ProdutoFornecido",
+      "type": "manyToOne",
+      "required": false,
+      "mode": "fk",
+      "description": "Preço combinado que sugeriu o preço do item.",
+      "field": "ItemPedido.produtoFornecidoId"
+    },
+    {
+      "relationshipId": "recebimentoPedido",
+      "from": "Recebimento",
+      "to": "PedidoCompra",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Pedido de compra cuja chegada foi registrada.",
+      "field": "Recebimento.pedidoCompraId"
+    },
+    {
+      "relationshipId": "entradaRecebimento",
+      "from": "EntradaEstoque",
+      "to": "Recebimento",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Recebimento que gerou a entrada no estoque.",
+      "field": "EntradaEstoque.recebimentoId"
+    },
+    {
+      "relationshipId": "entradaItemPedido",
+      "from": "EntradaEstoque",
+      "to": "ItemPedido",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Item do pedido cuja quantidade foi recebida.",
+      "field": "EntradaEstoque.itemPedidoId"
+    },
+    {
+      "relationshipId": "entradaProduto",
+      "from": "EntradaEstoque",
+      "to": "Produto",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "fk",
+      "description": "Produto que teve entrada no estoque.",
+      "field": "EntradaEstoque.produtoId"
+    },
+    {
+      "relationshipId": "fornecedorPedidosPainel",
+      "from": "PainelCompras",
+      "to": "Fornecedor",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "Total comprado no mês agrupado por fornecedor, apurado pelos pedidos de compra.",
+      "through": "PedidoCompra",
+      "path": "PainelCompras -> PedidoCompra.fornecedorId -> Fornecedor",
+      "derived": true
     }
   ],
   "removedOrphans": [],
@@ -1888,213 +2817,263 @@
   "normalizations": [
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Supplier",
-      "detail": "roleTag compras.Supplier; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Fornecedor",
+      "detail": "roleTag compras.Fornecedor; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "SupplierContact",
-      "detail": "roleTag compras.SupplierContact; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "ContatoFornecedor",
+      "detail": "roleTag compras.ContatoFornecedor; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Product",
-      "detail": "roleTag compras.Product; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Produto",
+      "detail": "roleTag compras.Produto; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Buyer",
-      "detail": "roleTag compras.Buyer; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Comprador",
+      "detail": "roleTag compras.Comprador; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "SupplierOffering",
-      "detail": "storage.table compras_supplieroffering"
+      "entityId": "ProdutoFornecido",
+      "detail": "storage.table compras_produtofornecido"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrder",
-      "detail": "storage.table compras_purchaseorder"
+      "entityId": "PedidoCompra",
+      "detail": "storage.table compras_pedidocompra"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "GoodsReceipt",
-      "detail": "storage.table compras_goodsreceipt"
+      "entityId": "ItemPedido",
+      "detail": "storage.table compras_itempedido"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
-      "detail": "storage.table compras_purchaseorderdashboard"
+      "entityId": "Recebimento",
+      "detail": "storage.table compras_recebimento"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Supplier",
+      "entityId": "EntradaEstoque",
+      "detail": "storage.table compras_entradaestoque"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "storage.table compras_painelcompras"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Fornecedor",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "tightened",
-      "entityId": "Supplier",
-      "detail": "Supplier.details.identification.subtype.values"
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.subtype.values"
     },
     {
       "kind": "tightened",
-      "entityId": "Supplier",
-      "detail": "Supplier.details.identification.docType.values"
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.docType.values"
     },
     {
       "kind": "tightened",
-      "entityId": "Supplier",
-      "detail": "Supplier.details.identification.docType.required"
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.docType.required"
     },
     {
       "kind": "tightened",
-      "entityId": "Supplier",
-      "detail": "Supplier.details.identification.docId.required"
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.docId.required"
     },
     {
       "kind": "tightened",
-      "entityId": "Supplier",
-      "detail": "Supplier.details.identification.docId.pattern"
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.identification.docId.pattern"
     },
     {
       "kind": "tightened",
-      "entityId": "Supplier",
-      "detail": "Supplier.details.identification.countryCode.pattern"
-    },
-    {
-      "kind": "tightened",
-      "entityId": "Supplier",
-      "detail": "Supplier.details.company.companyKind.values"
+      "entityId": "Fornecedor",
+      "detail": "Fornecedor.details.company.companyKind.values"
     },
     {
       "kind": "namespaceEmpty",
-      "entityId": "Supplier",
+      "entityId": "Fornecedor",
       "detail": "details.compras"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "SupplierContact",
+      "entityId": "ContatoFornecedor",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "tightened",
-      "entityId": "SupplierContact",
-      "detail": "SupplierContact.details.identification.subtype.values"
+      "entityId": "ContatoFornecedor",
+      "detail": "ContatoFornecedor.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "ContatoFornecedor",
+      "detail": "ContatoFornecedor.details.contactChannel.contactType.values"
     },
     {
       "kind": "namespaceEmpty",
-      "entityId": "SupplierContact",
+      "entityId": "ContatoFornecedor",
       "detail": "details.compras"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Product",
+      "entityId": "Produto",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "tightened",
-      "entityId": "Product",
-      "detail": "Product.details.identification.subtype.values"
+      "entityId": "Produto",
+      "detail": "Produto.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Produto",
+      "detail": "Produto.details.product.unitOfMeasure.required"
     },
     {
       "kind": "namespaceEmpty",
-      "entityId": "Product",
+      "entityId": "Produto",
       "detail": "details.compras"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Buyer",
+      "entityId": "Comprador",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "tightened",
-      "entityId": "Buyer",
-      "detail": "Buyer.details.identification.subtype.values"
+      "entityId": "Comprador",
+      "detail": "Comprador.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Comprador",
+      "detail": "Comprador.details.identification.docType.values"
     },
     {
       "kind": "namespaceEmpty",
-      "entityId": "Buyer",
+      "entityId": "Comprador",
       "detail": "details.compras"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "SupplierOffering",
+      "entityId": "ProdutoFornecido",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrder",
+      "entityId": "ProdutoFornecido",
+      "detail": "record.fields.details.fields.usadoEmPedidos.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PedidoCompra",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.orderTotal.derived (derived[])"
+      "entityId": "PedidoCompra",
+      "detail": "record.fields.details.fields.valorTotal.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.requiresApproval.derived (derived[])"
+      "entityId": "PedidoCompra",
+      "detail": "record.fields.details.fields.aguardandoAprovacao.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.receiptSituation.derived (derived[])"
+      "entityId": "PedidoCompra",
+      "detail": "record.fields.details.fields.liberadoAoFornecedor.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.isOpen.derived (derived[])"
+      "entityId": "PedidoCompra",
+      "detail": "record.fields.details.fields.emAberto.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrder",
-      "detail": "record.fields.details.fields.isOverdue.derived (derived[])"
+      "entityId": "PedidoCompra",
+      "detail": "record.fields.details.fields.atrasado.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "GoodsReceipt",
+      "entityId": "PedidoCompra",
+      "detail": "record.fields.details.fields.quantidadePendente.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemPedido",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "GoodsReceipt",
-      "detail": "record.fields.details.fields.receiptCompletion.derived (derived[])"
+      "entityId": "ItemPedido",
+      "detail": "record.fields.details.fields.valorTotalItem.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
+      "entityId": "ItemPedido",
+      "detail": "record.fields.details.fields.quantidadeRecebida.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemPedido",
+      "detail": "record.fields.details.fields.quantidadePendente.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ItemPedido",
+      "detail": "record.fields.details.fields.recebidoTotalmente.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
-      "detail": "record.fields.period.derived (ddm)"
+      "entityId": "Recebimento",
+      "detail": "record.fields.details.fields.tipoRecebimento.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
-      "detail": "record.fields.groupKey.derived (ddm)"
+      "entityId": "Recebimento",
+      "detail": "record.fields.details.fields.quantidadeTotalRecebida.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
+      "entityId": "EntradaEstoque",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "EntradaEstoque",
+      "detail": "record.fields.details.fields.valorTotal.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "EntradaEstoque",
+      "detail": "record.fields.details.fields.publicada.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PainelCompras",
       "detail": "record.fields.details.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
-      "detail": "record.fields.details.fields.openPurchaseOrdersCount.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
-      "detail": "record.fields.details.fields.overduePurchaseOrdersCount.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "PurchaseOrderDashboard",
-      "detail": "record.fields.details.fields.totalPurchasedAmount.derived (ddm)"
     }
   ]
 }

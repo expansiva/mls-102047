@@ -1,17 +1,29 @@
 {
   "plan": {
     "moduleName": "mensalidadesAcademia",
-    "businessDomain": "Gestão de mensalidades de academia",
+    "businessDomain": "Gestão de mensalidades de academia: alunos, planos, matrículas, geração mensal de mensalidades, pagamentos, bloqueio por inadimplência e painel financeiro.",
     "entities": [
       {
         "entityId": "Aluno",
         "kind": "role",
         "family": "mdm",
         "title": "Aluno",
-        "description": "Pessoa cadastrada na academia que possui matrícula em plano e pode cancelar a própria matrícula.",
+        "description": "Pessoa matriculada na academia. O cadastro é o registro mestre de pessoa da organização; a situação de bloqueio é derivada das mensalidades vencidas da matrícula.",
         "displayField": "details.identification.name",
         "subtype": "Person",
         "roleTag": "mensalidadesAcademia.Aluno",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "entityId": "Recepcao",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Atendente da recepção",
+        "description": "Pessoa da recepção que registra matrículas; usada para delimitar as matrículas atribuídas a ela.",
+        "displayField": "details.identification.name",
+        "writer": "crud",
+        "subtype": "Person",
+        "roleTag": "mensalidadesAcademia.Recepcao",
         "source": "/_102034_/l4/ontology/mdm.defs.ts"
       },
       {
@@ -19,9 +31,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Plano",
-        "description": "Catálogo de planos da academia, com periodicidade, valor e dia de vencimento usados nas matrículas.",
-        "displayField": "name",
-        "writer": "crud",
+        "description": "Plano da academia (mensal, trimestral ou anual) com valor e dia de vencimento, oferecido nas matrículas.",
+        "displayField": "nome",
         "class": "supporting",
         "storage": {
           "target": "moduleDatabase",
@@ -34,8 +45,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Matrícula",
-        "description": "Vínculo do aluno a um plano a partir de uma data, cuja situação define a geração de mensalidades futuras.",
-        "displayField": "id",
+        "description": "Vínculo do aluno a um plano a partir de uma data de início; ativa até ser cancelada. O bloqueio por duas mensalidades vencidas é derivado, não digitado.",
+        "displayField": "numero",
         "class": "core",
         "storage": {
           "target": "moduleDatabase",
@@ -48,9 +59,9 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Mensalidade",
-        "description": "Cobrança mensal gerada para uma matrícula ativa, com valor, vencimento e situação de pagamento.",
-        "displayField": "id",
-        "class": "core",
+        "description": "Cobrança mensal gerada para uma matrícula ativa, com mês de referência, valor do plano e vencimento; única por matrícula e mês. Vencida é derivada: em aberto e com vencimento anterior a hoje.",
+        "displayField": "competencia",
+        "class": "event",
         "storage": {
           "target": "moduleDatabase",
           "table": "mensalidadesAcademia_mensalidade",
@@ -62,8 +73,8 @@
         "kind": "entity",
         "family": "tdm",
         "title": "Pagamento",
-        "description": "Registro de um pagamento recebido para regularizar uma mensalidade.",
-        "displayField": "id",
+        "description": "Pagamento recebido pela recepção para uma mensalidade, com data, valor e forma de pagamento.",
+        "displayField": "dataPagamento",
         "class": "event",
         "storage": {
           "target": "moduleDatabase",
@@ -72,17 +83,17 @@
         }
       },
       {
-        "entityId": "IndicadoresAcademia",
+        "entityId": "PainelMensalidades",
         "kind": "entity",
         "family": "ddm",
-        "title": "Indicadores da academia",
-        "description": "Resumo mensal recalculado dos valores a receber e recebidos e das quantidades de alunos ativos, bloqueados e inadimplentes.",
-        "displayField": "period",
+        "title": "Painel de mensalidades",
+        "description": "Resumo do mês recalculado: total a receber, total recebido e quantidade de alunos ativos, bloqueados e inadimplentes.",
+        "displayField": "mesReferencia",
         "class": "supporting",
         "storage": {
           "target": "moduleDatabase",
-          "table": "mensalidadesAcademia_indicadoresacademia",
-          "kind": "timeSeries"
+          "table": "mensalidadesAcademia_painelmensalidades",
+          "kind": "relational"
         }
       }
     ],
@@ -94,7 +105,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada matrícula pertence obrigatoriamente a um aluno.",
+        "description": "Cada matrícula pertence a um aluno; um aluno pode ter várias matrículas ao longo do tempo.",
         "field": "Matricula.alunoId"
       },
       {
@@ -104,8 +115,18 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada matrícula é realizada obrigatoriamente em um plano da academia.",
+        "description": "A matrícula é feita em um plano, de onde vêm o valor e o dia de vencimento.",
         "field": "Matricula.planoId"
+      },
+      {
+        "relationshipId": "matriculaRecepcao",
+        "from": "Matricula",
+        "to": "Recepcao",
+        "type": "manyToOne",
+        "required": false,
+        "mode": "fk",
+        "description": "Atendente da recepção que registrou a matrícula.",
+        "field": "Matricula.recepcaoId"
       },
       {
         "relationshipId": "mensalidadeMatricula",
@@ -114,7 +135,7 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada mensalidade é gerada obrigatoriamente para uma matrícula.",
+        "description": "Cada mensalidade é gerada para uma matrícula ativa, uma por mês de referência.",
         "field": "Mensalidade.matriculaId"
       },
       {
@@ -124,8 +145,20 @@
         "type": "manyToOne",
         "required": true,
         "mode": "fk",
-        "description": "Cada pagamento registrado pertence obrigatoriamente a uma mensalidade.",
+        "description": "O pagamento quita uma mensalidade.",
         "field": "Pagamento.mensalidadeId"
+      },
+      {
+        "relationshipId": "alunoMensalidades",
+        "from": "Aluno",
+        "to": "Mensalidade",
+        "type": "oneToMany",
+        "required": false,
+        "mode": "throughTable",
+        "description": "Mensalidades do aluno, obtidas pelas suas matrículas.",
+        "through": "Matricula",
+        "path": "Aluno <- Matricula.alunoId <- Mensalidade.matriculaId",
+        "derived": true
       }
     ],
     "normalizations": [
@@ -133,6 +166,11 @@
         "kind": "derivedFromPlatform",
         "entityId": "Aluno",
         "detail": "roleTag mensalidadesAcademia.Aluno; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Recepcao",
+        "detail": "roleTag mensalidadesAcademia.Recepcao; source /_102034_/l4/ontology/mdm.defs.ts"
       },
       {
         "kind": "derivedFromPlatform",
@@ -156,8 +194,8 @@
       },
       {
         "kind": "derivedFromPlatform",
-        "entityId": "IndicadoresAcademia",
-        "detail": "storage.table mensalidadesAcademia_indicadoresacademia"
+        "entityId": "PainelMensalidades",
+        "detail": "storage.table mensalidadesAcademia_painelmensalidades"
       }
     ]
   },
@@ -167,7 +205,7 @@
       "moduleName": "mensalidadesAcademia",
       "entityId": "Aluno",
       "title": "Aluno",
-      "description": "Pessoa cadastrada na academia que possui matrícula em plano e pode cancelar a própria matrícula.",
+      "description": "Pessoa matriculada na academia. O cadastro é o registro mestre de pessoa da organização; a situação de bloqueio é derivada das mensalidades vencidas da matrícula.",
       "displayField": "details.identification.name",
       "relationships": {
         "matriculas": {
@@ -176,29 +214,48 @@
           "via": "Matricula.alunoId",
           "cardinality": "1:N",
           "title": "Matrículas do aluno",
-          "description": "Matrículas da academia que pertencem a este aluno.",
+          "description": "Matrículas do aluno em planos ao longo do tempo.",
           "mode": "fk",
           "direction": "to",
-          "required": "Sempre que existir uma matrícula, ela deve referenciar este aluno.",
-          "role": "aluno"
+          "required": true
+        },
+        "mensalidades": {
+          "relationshipId": "alunoMensalidades",
+          "to": "Mensalidade",
+          "via": "Matricula",
+          "cardinality": "1:N",
+          "title": "Mensalidades do aluno",
+          "description": "Mensalidades geradas para as matrículas do aluno.",
+          "mode": "throughTable",
+          "path": "Aluno <- Matricula.alunoId <- Mensalidade.matriculaId",
+          "derived": true
         }
       },
       "capabilities": {
-        "read.byId": "Lê o cadastro mestre do aluno pelo identificador, para exibir seus dados nas matrículas e na área do aluno.",
-        "locate.byName": "Localiza alunos pelo nome no índice mestre, para a recepção selecionar ou iniciar o cadastro durante a matrícula.",
-        "locate.byDocument": "Localiza o aluno pelo CPF no índice mestre, para a recepção evitar cadastros duplicados antes da matrícula.",
-        "register.createOrAttach": "Cria a pessoa quando ela não existe ou anexa o papel de Aluno ao cadastro existente por documento, para a recepção matriculá-la na academia.",
-        "edit.platformFields": "Atualiza os dados pessoais e cadastrais mantidos pela plataforma, para a recepção corrigir o cadastro do aluno.",
-        "edit.moduleNamespace": "Atualiza somente o namespace do módulo do aluno, quando houver dado exclusivo da academia autorizado para manutenção.",
-        "inactivate": "Inativa ou reativa o cadastro mestre sem excluí-lo, para a recepção manter registros de alunos que não devem mais ser usados.",
-        "invite.login": "Convida o aluno para criar acesso de login vinculado ao seu cadastro mestre, para que ele possa cancelar a própria matrícula.",
-        "audit": "Consulta quem alterou o cadastro mestre do aluno e quando, para a gerência e a administração acompanharem alterações."
+        "read.byId": "Lê o cadastro do aluno pelo id quando a matrícula, a mensalidade ou o pagamento já apontam para ele; usado pela recepção e pela gerência.",
+        "locate.byName": "A recepção busca o aluno pelo nome ao iniciar a matrícula ou registrar um pagamento.",
+        "locate.byDocument": "A recepção busca o aluno pelo CPF para evitar cadastro duplicado antes de matricular.",
+        "locate.byContact": "A recepção encontra o aluno pelo telefone ou e-mail quando ele entra em contato sobre mensalidades.",
+        "register.createOrAttach": "Na matrícula, a recepção cria o cadastro da pessoa se ainda não existir e a marca como aluno da academia.",
+        "edit.platformFields": "A recepção corrige nome, documento, endereço e consentimento LGPD do aluno.",
+        "inactivate": "A recepção inativa o cadastro do aluno que deixou a academia, podendo reativá-lo numa nova matrícula.",
+        "link.contact": "A recepção registra telefone, WhatsApp ou e-mail do aluno como canais de contato vinculados, usados em avisos de cobrança.",
+        "listLinks": "A tela do aluno mostra seus vínculos e contatos com vigência.",
+        "attach.document": "A recepção anexa ao aluno documentos como a ficha de matrícula assinada ou a foto.",
+        "comment": "Recepção e gerência deixam observações no cadastro do aluno, como acordos de regularização.",
+        "statusHistory.read": "A gerência consulta quando o cadastro do aluno foi ativado ou inativado e por quem.",
+        "audit": "A gerência verifica quem alterou o cadastro do aluno e quando.",
+        "mensalidadesAcademia.consultarBloqueio": "A recepção consulta, na entrada, se o aluno está bloqueado por duas ou mais mensalidades vencidas, calculado a partir das mensalidades das suas matrículas."
       },
       "rules": [
         "rule-foreign-namespace-refused",
-        "rule-document-shape-validated",
         "rule-identity-never-in-namespace",
-        "rule-person-privacy-consent-required-br-eu"
+        "rule-document-shape-validated",
+        "rule-person-privacy-consent-required-br-eu",
+        "rule-delete-blocked-by-relationships",
+        "mensalidadeVencidaAposVencimento",
+        "alunoBloqueadoComDuasVencidas",
+        "alunoBloqueadoNaoEntra"
       ],
       "kind": "role",
       "subtype": "Person",
@@ -217,12 +274,13 @@
             "type": "integer",
             "required": true,
             "derived": true,
+            "writePrecondition": true,
             "description": "Bumped by the engine on every write; optimistic concurrency."
           },
           "details": {
             "type": "object",
             "required": true,
-            "description": "Documento mestre da pessoa usada como aluno pela academia.",
+            "description": "Registro mestre de pessoa da organização, visto pela academia como aluno.",
             "fields": {
               "identification": {
                 "type": "object",
@@ -236,25 +294,19 @@
                     "values": [
                       {
                         "value": "Person",
-                        "title": "Pessoa",
-                        "description": "Pessoa natural cadastrada como aluno."
+                        "title": "Pessoa"
                       }
                     ],
-                    "description": "Subtipo mestre da pessoa, mantido pela plataforma como Pessoa.",
-                    "title": "Subtipo",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Sempre pessoa: o aluno é uma pessoa física.",
+                    "title": "Subtipo"
                   },
                   "name": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "maxLength": 0,
-                    "description": "Nome pelo qual a recepção identifica o aluno ao realizar a matrícula.",
-                    "title": "Nome",
-                    "min": 0,
-                    "max": 0
+                    "maxLength": 200,
+                    "description": "Nome pelo qual a recepção localiza o aluno na matrícula e no registro de pagamentos.",
+                    "title": "Nome"
                   },
                   "status": {
                     "type": "enum",
@@ -264,30 +316,23 @@
                     "values": [
                       {
                         "value": "Active",
-                        "title": "Ativo",
-                        "description": "Cadastro mestre ativo."
+                        "title": "Ativo"
                       },
                       {
                         "value": "Inactive",
-                        "title": "Inativo",
-                        "description": "Cadastro mestre inativo."
+                        "title": "Inativo"
                       },
                       {
                         "value": "Merged",
-                        "title": "Mesclado",
-                        "description": "Cadastro mestre mesclado a outro registro."
+                        "title": "Mesclado"
                       },
                       {
                         "value": "Blocked",
-                        "title": "Bloqueado",
-                        "description": "Cadastro mestre bloqueado pela plataforma."
+                        "title": "Bloqueado"
                       }
                     ],
                     "title": "Situação do cadastro",
-                    "description": "Situação mestre do cadastro da pessoa, mantida pela plataforma.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Situação do registro mestre (ativo ou inativo); não é a situação de bloqueio por mensalidades, que é calculada."
                   },
                   "docType": {
                     "type": "enum",
@@ -295,45 +340,318 @@
                     "values": [
                       {
                         "value": "CPF",
-                        "title": "CPF",
-                        "description": "Cadastro de Pessoas Físicas."
+                        "title": "CPF"
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte"
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento de identidade"
                       }
                     ],
                     "title": "Tipo de documento",
-                    "description": "Tipo do documento nacional usado para localizar ou cadastrar o aluno.",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Tipo do documento nacional usado para não cadastrar o mesmo aluno duas vezes."
                   },
                   "docId": {
                     "type": "string",
                     "indexed": true,
-                    "description": "Número do CPF usado para evitar duplicidade no cadastro do aluno.",
-                    "title": "Número do documento",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Número do documento, usado pela recepção para buscar o aluno antes de criar o cadastro.",
+                    "title": "Número do documento"
                   },
                   "countryCode": {
                     "type": "string",
                     "required": true,
                     "indexed": true,
-                    "pattern": "^BR$",
+                    "pattern": "^[A-Z]{2}$",
                     "maxLength": 2,
                     "default": "US",
-                    "description": "Código do país do aluno e das regras aplicáveis ao seu cadastro.",
-                    "title": "País",
-                    "min": 0,
-                    "max": 0
+                    "description": "País do documento e das regras legais aplicáveis ao aluno (ISO 3166-1 alfa-2).",
+                    "title": "País"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Cadastrado em",
+                    "description": "Momento em que o cadastro foi criado."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Atualizado em",
+                    "description": "Momento da última alteração do cadastro."
                   }
                 },
-                "description": "Dados de identificação da pessoa cadastrada como aluno."
+                "description": "Dados de identificação do aluno, mantidos pela organização."
               },
               "base": {
                 "type": "object",
                 "owner": "platform",
-                "fields": {},
-                "description": "Dados básicos da pessoa mantidos pela plataforma."
+                "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Apelidos ou nomes sociais pelos quais o aluno também é conhecido na recepção.",
+                    "title": "Outros nomes"
+                  },
+                  "addresses": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "Address",
+                    "title": "Endereços",
+                    "description": "Endereços do aluno."
+                  },
+                  "contacts": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "ContactSummary",
+                    "derived": true,
+                    "description": "Resumo dos canais de contato (telefone, WhatsApp, e-mail) vinculados ao aluno, usado para avisos de cobrança.",
+                    "title": "Contatos"
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Chaves compactas dos vínculos do aluno, recalculadas pela plataforma.",
+                    "title": "Vínculos"
+                  }
+                },
+                "description": "Dados comuns a todo registro mestre."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "birthDate": {
+                    "type": "date",
+                    "title": "Data de nascimento",
+                    "description": "Data de nascimento do aluno."
+                  },
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consentimento de tratamento de dados do aluno, exigido pela LGPD para alunos residentes no Brasil.",
+                    "title": "Consentimento LGPD",
+                    "required": true
+                  }
+                },
+                "description": "Dados de pessoa física do aluno."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Campos promovidos pela organização; a academia apenas lê."
+              },
+              "mensalidadesAcademia": {
+                "type": "object",
+                "owner": "module",
+                "fields": {
+                  "inadimplente": {
+                    "type": "boolean",
+                    "derived": true,
+                    "title": "Inadimplente",
+                    "description": "Verdadeiro quando o aluno tem ao menos uma mensalidade em aberto com vencimento anterior a hoje, considerando as mensalidades das suas matrículas."
+                  },
+                  "bloqueado": {
+                    "type": "boolean",
+                    "derived": true,
+                    "title": "Bloqueado",
+                    "description": "Verdadeiro quando o aluno tem duas ou mais mensalidades vencidas (em aberto e com vencimento anterior a hoje); deixa de estar bloqueado assim que regulariza os pagamentos."
+                  },
+                  "quantidadeMensalidadesVencidas": {
+                    "type": "integer",
+                    "derived": true,
+                    "title": "Mensalidades vencidas",
+                    "description": "Quantidade de mensalidades do aluno em aberto com vencimento anterior a hoje."
+                  }
+                },
+                "description": "Espaço do módulo sobre o aluno; vazio, pois matrícula, mensalidades e pagamentos são registrados nas entidades próprias do módulo."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "mensalidadesAcademia",
+      "entityId": "Recepcao",
+      "title": "Atendente da recepção",
+      "description": "Pessoa da recepção que registra matrículas; usada para delimitar as matrículas atribuídas a ela.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "matriculas": {
+          "relationshipId": "matriculaRecepcao",
+          "to": "Matricula",
+          "via": "Matricula.recepcaoId",
+          "cardinality": "1:N",
+          "title": "Matrículas registradas",
+          "description": "Matrículas que este atendente da recepção registrou; delimita as matrículas atribuídas a ele.",
+          "mode": "fk",
+          "direction": "to"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Lê o atendente pelo id para exibir seu nome nas matrículas que ele registrou; usado pelas telas de matrícula.",
+        "locate.byName": "Busca o atendente pelo nome no índice, filtrando pessoas com o papel de recepção; usado pela gerência ao manter a equipe.",
+        "locate.byDocument": "Localiza o atendente pelo CPF antes de cadastrá-lo, evitando duplicidade; usado pela gerência.",
+        "locate.byLogin": "Resolve, pelo e-mail de login da sessão, qual atendente está registrando a matrícula; usado pela plataforma.",
+        "register.createOrAttach": "Cadastra o atendente ou anexa o papel de recepção a uma pessoa já existente no cadastro mestre; usado pela gerência.",
+        "edit.platformFields": "Atualiza nome, documento e consentimento do atendente; usado pela gerência.",
+        "inactivate": "Inativa o atendente que deixou a recepção, mantendo o histórico das matrículas que registrou; usado pela gerência.",
+        "link.contact": "Adiciona telefone ou e-mail do atendente como canal de contato vinculado; usado pela gerência.",
+        "listLinks": "Mostra os vínculos do atendente, como contatos e matrículas registradas; usado na ficha do atendente.",
+        "invite.login": "Concede login ao atendente para que acesse o módulo como recepção; usado pela gerência.",
+        "audit": "Mostra quem alterou o cadastro do atendente e quando; usado pela gerência."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
+        "rule-person-privacy-consent-required-br-eu",
+        "rule-delete-blocked-by-relationships"
+      ],
+      "writer": "crud",
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "mensalidadesAcademia.Recepcao",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "writePrecondition": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "The JSONB document, as a map of groups (see groups).",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Pessoa"
+                      }
+                    ],
+                    "description": "Sempre pessoa física para o atendente da recepção.",
+                    "title": "Subtipo"
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 200,
+                    "description": "Nome do atendente da recepção, mostrado nas matrículas que ele registrou.",
+                    "title": "Nome"
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      "Active",
+                      "Inactive",
+                      "Merged",
+                      "Blocked"
+                    ],
+                    "title": "Situação no cadastro",
+                    "description": "Situação do cadastro mestre do atendente (ativo ou inativo)."
+                  },
+                  "docType": {
+                    "type": "enum",
+                    "indexed": true,
+                    "values": [
+                      {
+                        "value": "CPF",
+                        "title": "CPF"
+                      },
+                      {
+                        "value": "Passport",
+                        "title": "Passaporte"
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento nacional"
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro"
+                      }
+                    ],
+                    "title": "Tipo de documento",
+                    "description": "Tipo do documento nacional do atendente, usado para evitar cadastro duplicado."
+                  },
+                  "docId": {
+                    "type": "string",
+                    "indexed": true,
+                    "description": "Número do documento nacional do atendente.",
+                    "title": "Número do documento"
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "País do documento e das regras legais aplicáveis ao atendente.",
+                    "title": "País"
+                  }
+                },
+                "description": "Identificação da pessoa que trabalha na recepção da academia."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Outros nomes pelos quais o atendente é conhecido na academia.",
+                    "title": "Apelidos"
+                  },
+                  "contacts": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "ContactSummary",
+                    "derived": true,
+                    "description": "Resumo dos canais de contato do atendente, vinculados como registros próprios.",
+                    "title": "Contatos"
+                  }
+                },
+                "description": "Dados comuns do cadastro mestre que a recepção consulta."
               },
               "person": {
                 "type": "object",
@@ -342,20 +660,17 @@
                   "privacyConsent": {
                     "type": "object",
                     "of": "PrivacyConsent",
-                    "description": "Consentimento de privacidade do aluno exigido para residentes no Brasil.",
-                    "title": "Consentimento de privacidade",
-                    "maxLength": 0,
-                    "min": 0,
-                    "max": 0
+                    "description": "Consentimento LGPD do atendente para tratamento dos seus dados pessoais.",
+                    "title": "Consentimento de privacidade"
                   }
                 },
-                "description": "Dados próprios de pessoa natural relevantes para o cadastro do aluno."
+                "description": "Dados de pessoa física do atendente."
               },
               "general": {
                 "type": "object",
                 "owner": "organization",
                 "open": true,
-                "description": "Dados promovidos pela organização e apenas lidos por este módulo."
+                "description": "Campos promovidos pela organização; apenas leitura neste módulo."
               },
               "mensalidadesAcademia": {
                 "type": "object",
@@ -373,34 +688,38 @@
       "moduleName": "mensalidadesAcademia",
       "entityId": "Plano",
       "title": "Plano",
-      "description": "Catálogo de planos da academia, com periodicidade, valor e dia de vencimento usados nas matrículas.",
-      "displayField": "name",
+      "description": "Plano da academia (mensal, trimestral ou anual) com valor e dia de vencimento, oferecido nas matrículas.",
+      "displayField": "nome",
       "relationships": {
         "matriculas": {
           "relationshipId": "matriculaPlano",
           "to": "Matricula",
           "via": "Matricula.planoId",
           "cardinality": "1:N",
-          "title": "Matrículas no plano",
-          "description": "Matrículas realizadas obrigatoriamente neste plano da academia.",
+          "title": "Matrículas do plano",
+          "description": "As matrículas feitas neste plano, de onde as mensalidades tiram valor e dia de vencimento.",
           "mode": "fk",
           "direction": "to",
-          "required": "Sempre"
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Consulta um plano pelo seu identificador no repositório de planos para a recepção ou a gerência que já possui a referência.",
-        "locate.byColumn": "Lista planos por nome, com ordenação e paginação, para a recepção ou a gerência localizar o plano escolhido.",
-        "locate.byText": "Pesquisa planos pelo trecho digitado no nome para a recepção ou a gerência encontrar rapidamente um plano.",
-        "count": "Conta os planos que atendem ao filtro informado para a gerência acompanhar o catálogo.",
-        "listByForeignKey": "Lista as matrículas vinculadas a um plano para a gerência consultar os alunos que o utilizam.",
-        "create": "Cadastra um novo plano com periodicidade, valor e dia de vencimento para a gerência manter o catálogo.",
-        "update": "Atualiza os dados comerciais de um plano para a gerência manter o catálogo vigente.",
-        "delete": "Remove fisicamente um plano do catálogo para a gerência quando ele não deve mais ser utilizado.",
-        "uniqueKey": "Impede o cadastro de dois planos com o mesmo nome por meio da chave única do catálogo, para a gerência."
+        "read.byId": "Abre um plano pelo identificador, quando a recepção confere valor e dia de vencimento na matrícula ou a gerência revê o plano.",
+        "locate.byColumn": "Lista os planos filtrados por periodicidade e ordenados pelo nome, para a gerência consultar o cadastro e a recepção escolher o plano da matrícula.",
+        "locate.byText": "Busca planos por parte do nome, para a gerência evitar duplicidade antes de cadastrar e a recepção achar o plano pedido pelo aluno.",
+        "count": "Conta os planos cadastrados por periodicidade, exibido no cabeçalho da lista de planos da gerência.",
+        "create": "Cadastra um novo plano com nome, periodicidade, valor e dia de vencimento; usado pela gerência.",
+        "update": "Altera valor, dia de vencimento ou descrição de um plano; usado pela gerência, valendo para as mensalidades geradas depois da alteração.",
+        "delete": "Remove um plano cadastrado por engano; usado pela gerência e recusado pelo módulo quando há matrícula apontando para ele.",
+        "uniqueKey": "Recusa um segundo plano com o mesmo nome, por índice único na coluna nome, ao gravar o cadastro da gerência.",
+        "comment": "Permite à gerência deixar anotações internas sobre o plano, como condições combinadas ou promoções."
       },
-      "rules": [],
-      "writer": "crud",
+      "rules": [
+        "planoNomeUnico",
+        "planoValorPositivo",
+        "planoDiaVencimentoValido",
+        "planoComMatriculaNaoPodeSerExcluido"
+      ],
       "kind": "entity",
       "class": "supporting",
       "storage": {
@@ -422,74 +741,68 @@
             "required": true,
             "derived": true
           },
-          "name": {
+          "nome": {
             "type": "string",
             "required": true,
             "unique": true,
             "indexed": true,
-            "of": "Address",
-            "title": "Nome",
-            "description": "Nome pelo qual o plano é identificado e localizado pela recepção e pela gerência.",
-            "maxLength": 120,
-            "min": 0,
-            "max": 0
+            "title": "Nome do plano",
+            "description": "Nome pelo qual a gerência e a recepção identificam o plano na hora de matricular o aluno. É único entre os planos da academia.",
+            "maxLength": 80
+          },
+          "periodicidade": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "values": [
+              {
+                "value": "monthly",
+                "title": "Mensal"
+              },
+              {
+                "value": "quarterly",
+                "title": "Trimestral"
+              },
+              {
+                "value": "yearly",
+                "title": "Anual"
+              }
+            ],
+            "title": "Periodicidade",
+            "description": "Período de cobrança do plano; a recepção filtra os planos por ela ao escolher o plano da matrícula."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
-            "title": "Detalhes do plano",
-            "description": "Características comerciais do plano da academia.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Dados do plano",
+            "description": "Valor, dia de vencimento e descrição do plano.",
             "fields": {
-              "periodicidade": {
-                "type": "enum",
-                "required": true,
-                "of": "Address",
-                "values": [
-                  {
-                    "value": "monthly",
-                    "title": "Mensal",
-                    "description": "Plano comercial mensal."
-                  },
-                  {
-                    "value": "quarterly",
-                    "title": "Trimestral",
-                    "description": "Plano comercial trimestral."
-                  },
-                  {
-                    "value": "annual",
-                    "title": "Anual",
-                    "description": "Plano comercial anual."
-                  }
-                ],
-                "title": "Periodicidade",
-                "description": "Periodicidade comercial do plano contratado pelo aluno.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
-              },
               "valor": {
                 "type": "money",
                 "required": true,
-                "of": "Address",
                 "title": "Valor",
-                "description": "Valor do plano usado para gerar a mensalidade do aluno.",
-                "maxLength": 0,
-                "min": 0.01,
-                "max": 0
+                "description": "Valor do plano, copiado para cada mensalidade gerada para os alunos matriculados nele.",
+                "min": 0.01
               },
               "diaVencimento": {
                 "type": "integer",
                 "required": true,
-                "of": "Address",
                 "title": "Dia de vencimento",
-                "description": "Dia do mês usado como vencimento das mensalidades geradas para este plano.",
-                "maxLength": 0,
+                "description": "Dia do mês em que vencem as mensalidades geradas para os alunos deste plano.",
                 "min": 1,
                 "max": 31
+              },
+              "descricao": {
+                "type": "text",
+                "title": "Descrição",
+                "description": "Observações da gerência sobre o plano, mostradas à recepção ao escolher o plano.",
+                "maxLength": 500
+              },
+              "quantidadeMatriculasAtivas": {
+                "type": "integer",
+                "derived": true,
+                "title": "Matrículas ativas",
+                "description": "Quantidade de matrículas ativas (não canceladas) feitas neste plano."
               }
             }
           }
@@ -497,7 +810,7 @@
       },
       "uniqueKeys": [
         [
-          "name"
+          "nome"
         ]
       ]
     },
@@ -506,30 +819,37 @@
       "moduleName": "mensalidadesAcademia",
       "entityId": "Matricula",
       "title": "Matrícula",
-      "description": "Vínculo do aluno a um plano a partir de uma data, cuja situação define a geração de mensalidades futuras.",
-      "displayField": "id",
+      "description": "Vínculo do aluno a um plano a partir de uma data de início; ativa até ser cancelada. O bloqueio por duas mensalidades vencidas é derivado, não digitado.",
+      "displayField": "numero",
       "relationships": {
         "aluno": {
           "relationshipId": "matriculaAluno",
           "to": "Aluno",
           "via": "Matricula.alunoId",
           "cardinality": "N:1",
-          "title": "Aluno matriculado",
-          "description": "Cada matrícula pertence obrigatoriamente a um aluno.",
+          "title": "Aluno da matrícula",
+          "description": "Cada matrícula pertence a um aluno; um aluno pode ter várias matrículas ao longo do tempo.",
           "mode": "fk",
-          "required": "sempre",
-          "role": "aluno matriculado"
+          "required": true
         },
         "plano": {
           "relationshipId": "matriculaPlano",
           "to": "Plano",
           "via": "Matricula.planoId",
           "cardinality": "N:1",
-          "title": "Plano contratado",
-          "description": "Cada matrícula é realizada obrigatoriamente em um plano da academia.",
+          "title": "Plano da matrícula",
+          "description": "Plano de onde vêm o valor e o dia de vencimento.",
           "mode": "fk",
-          "required": "sempre",
-          "role": "plano contratado"
+          "required": true
+        },
+        "recepcao": {
+          "relationshipId": "matriculaRecepcao",
+          "to": "Recepcao",
+          "via": "Matricula.recepcaoId",
+          "cardinality": "N:1",
+          "title": "Registrada por",
+          "description": "Atendente da recepção que registrou a matrícula.",
+          "mode": "fk"
         },
         "mensalidades": {
           "relationshipId": "mensalidadeMatricula",
@@ -537,26 +857,35 @@
           "via": "Mensalidade.matriculaId",
           "cardinality": "1:N",
           "title": "Mensalidades da matrícula",
-          "description": "Mensalidades geradas para esta matrícula.",
+          "description": "Mensalidades geradas para esta matrícula, uma por mês de referência.",
           "mode": "fk",
           "direction": "to",
-          "required": "quando houver mensalidades geradas",
-          "role": "origem da mensalidade"
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Lê uma matrícula pelo identificador para a recepção e o aluno consultarem seus dados.",
-        "locate.byColumn": "Lista matrículas por aluno, plano, situação ou data de início para a recepção e a gerência.",
-        "count": "Conta matrículas conforme a situação e os demais filtros para a gerência acompanhar a base de alunos.",
-        "listByForeignKey": "Lista as matrículas vinculadas a um aluno ou a um plano para as telas da recepção e da gerência.",
-        "create": "Cria a matrícula com aluno, plano e data de início quando a recepção efetiva a contratação.",
-        "transition": "Move a matrícula ativa para cancelada no cancelamento da própria matrícula pelo aluno.",
-        "read.mdmRecord": "Lê o cadastro mestre do aluno apontado pela matrícula para exibir sua identificação à recepção e à gerência."
+        "read.byId": "Abre a matrícula pelo id para a recepção consultar a situação do aluno e a gerência conferir antes de gerar mensalidades.",
+        "locate.byColumn": "Lista matrículas por situação, aluno, plano ou data de início; a gerência confere as ativas do mês e a recepção acha a matrícula do aluno que chegou.",
+        "locate.byText": "Busca a matrícula pelo número digitado na caixa de pesquisa da recepção.",
+        "count": "Conta as matrículas ativas que receberão mensalidade no mês, exibido para a gerência.",
+        "listByForeignKey": "Lista as matrículas de um aluno ou de um plano, e as mensalidades de cada matrícula, na tela da recepção.",
+        "create": "A recepção registra a matrícula do aluno no plano com a data de início, já ativa, criando ou vinculando o cadastro do aluno.",
+        "update": "A recepção corrige observações da matrícula.",
+        "transition": "A recepção cancela a matrícula a pedido do aluno, passando de ativa para cancelada e encerrando a geração de mensalidades futuras.",
+        "uniqueKey": "O sistema recusa dois números de matrícula iguais.",
+        "transaction": "Grava a matrícula e o vínculo do aluno juntos, tudo ou nada, no registro feito pela recepção.",
+        "read.mdmRecord": "Mostra nome e documento do aluno e o atendente da recepção nas listas e na tela da matrícula.",
+        "sequence.next": "Emite o número da matrícula na criação, pela chave mensalidadesAcademia.Matricula.",
+        "comment": "A recepção e a gerência deixam notas sobre a matrícula, como acordos de regularização.",
+        "mensalidadesAcademia.verificarLiberacao": "Informa à recepção se o aluno pode entrar: matrícula ativa e sem duas mensalidades vencidas, listando as vencidas quando bloqueado."
       },
       "rules": [
-        "matriculaAtivaUnicaPorAluno",
-        "cancelamentoSomenteMatriculaAtiva",
-        "cancelamentoInterrompeGeracao"
+        "matriculaExigeAlunoEPlano",
+        "alunoBloqueadoDuasVencidas",
+        "bloqueadoNaoEntra",
+        "mensalidadeVencidaAposVencimento",
+        "cancelamentoEncerraGeracao",
+        "somenteAtivaGeraMensalidade"
       ],
       "kind": "entity",
       "class": "core",
@@ -579,115 +908,159 @@
             "required": true,
             "derived": true
           },
+          "numero": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "indexed": true,
+            "derived": true,
+            "title": "Número da matrícula",
+            "description": "Número sequencial que a recepção informa ao aluno, emitido pelo sistema na criação da matrícula."
+          },
           "alunoId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "to": [
               "Aluno"
             ],
             "title": "Aluno",
-            "description": "Aluno ao qual esta matrícula pertence.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Aluno matriculado; nome e documento são lidos do cadastro mestre."
           },
           "planoId": {
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "to": [
               "Plano"
             ],
             "title": "Plano",
-            "description": "Plano da academia contratado nesta matrícula.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Plano escolhido (mensal, trimestral ou anual), de onde vêm o valor e o dia de vencimento das mensalidades."
           },
-          "status": {
-            "type": "enum",
-            "required": true,
+          "recepcaoId": {
+            "type": "record",
             "indexed": true,
-            "of": "ContactSummary",
-            "values": [
-              {
-                "value": "active",
-                "title": "Ativa",
-                "description": "Matrícula vigente, apta à geração de mensalidades."
-              },
-              {
-                "value": "canceled",
-                "title": "Cancelada",
-                "description": "Matrícula encerrada, sem geração de mensalidades futuras."
-              }
+            "to": [
+              "Recepcao"
             ],
-            "title": "Situação",
-            "description": "Situação da matrícula que determina se ela participa da geração de mensalidades futuras.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Atendente da recepção",
+            "description": "Atendente da recepção que registrou a matrícula."
           },
           "dataInicio": {
             "type": "date",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "title": "Data de início",
-            "description": "Data a partir da qual o aluno inicia a matrícula no plano e pode ter mensalidades geradas.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Data a partir da qual a matrícula vale e as mensalidades passam a ser geradas."
+          },
+          "status": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "values": [
+              {
+                "value": "ativa",
+                "title": "Ativa"
+              },
+              {
+                "value": "cancelada",
+                "title": "Cancelada"
+              }
+            ],
+            "title": "Situação",
+            "description": "Situação da matrícula: ativa até ser cancelada. O bloqueio por mensalidades vencidas não é uma situação digitada; é calculado."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
-            "title": "Dados da matrícula",
-            "description": "Informações próprias da matrícula que não são usadas em filtros ou ordenações.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Detalhes",
+            "description": "Demais informações da matrícula.",
             "fields": {
-              "dataCancelamento": {
-                "type": "date",
-                "of": "ContactSummary",
-                "title": "Data de cancelamento",
-                "description": "Data em que o aluno cancelou esta matrícula.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+              "observacoes": {
+                "type": "text",
+                "title": "Observações",
+                "description": "Anotações da recepção sobre a matrícula.",
+                "maxLength": 2000
+              },
+              "cancelamento": {
+                "type": "object",
+                "title": "Cancelamento",
+                "description": "Dados do cancelamento pedido pelo aluno; preenchido apenas quando a matrícula é cancelada.",
+                "fields": {
+                  "dataCancelamento": {
+                    "type": "date",
+                    "required": true,
+                    "title": "Data do cancelamento",
+                    "description": "Data em que a matrícula foi encerrada; a partir dela não se geram novas mensalidades."
+                  },
+                  "motivo": {
+                    "type": "text",
+                    "title": "Motivo",
+                    "description": "Motivo informado pelo aluno para cancelar.",
+                    "maxLength": 1000
+                  }
+                }
+              },
+              "mensalidadesVencidas": {
+                "type": "integer",
+                "derived": true,
+                "title": "Mensalidades vencidas",
+                "description": "Quantidade de mensalidades desta matrícula que não foram pagas e cujo vencimento já passou."
+              },
+              "bloqueada": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Bloqueada",
+                "description": "Matrícula ativa com duas ou mais mensalidades vencidas; o aluno não pode entrar até regularizar."
+              },
+              "inadimplente": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Inadimplente",
+                "description": "Matrícula com ao menos uma mensalidade vencida e não paga."
+              },
+              "entradaLiberada": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Entrada liberada",
+                "description": "Matrícula ativa e não bloqueada por mensalidades vencidas; é o que a recepção consulta quando o aluno chega."
               }
             }
           }
         }
       },
+      "uniqueKeys": [
+        [
+          "numero"
+        ]
+      ],
       "lifecycleStates": [
         {
-          "state": "active",
+          "state": "ativa",
           "reachedBy": "actor"
         },
         {
-          "state": "canceled",
+          "state": "cancelada",
           "reachedBy": "actor"
         }
       ],
       "transitions": [
         {
-          "transitionId": "cancelarMatricula",
+          "transitionId": "cancelar",
           "from": [
-            "active"
+            "ativa"
           ],
-          "to": "canceled",
+          "to": "cancelada",
           "by": [
-            "aluno"
+            "recepcao"
           ],
-          "description": "Cancela a própria matrícula ativa e interrompe a geração de mensalidades futuras.",
+          "description": "A recepção registra o cancelamento pedido pelo aluno, o que encerra a geração de mensalidades futuras.",
+          "payload": [
+            "details.cancelamento.dataCancelamento",
+            "details.cancelamento.motivo"
+          ],
           "ruleRefs": [
-            "cancelamentoSomenteMatriculaAtiva",
-            "cancelamentoInterrompeGeracao"
+            "cancelamentoEncerraGeracao"
           ]
         }
       ]
@@ -697,8 +1070,8 @@
       "moduleName": "mensalidadesAcademia",
       "entityId": "Mensalidade",
       "title": "Mensalidade",
-      "description": "Cobrança mensal gerada para uma matrícula ativa, com valor, vencimento e situação de pagamento.",
-      "displayField": "id",
+      "description": "Cobrança mensal gerada para uma matrícula ativa, com mês de referência, valor do plano e vencimento; única por matrícula e mês. Vencida é derivada: em aberto e com vencimento anterior a hoje.",
+      "displayField": "competencia",
       "relationships": {
         "matricula": {
           "relationshipId": "mensalidadeMatricula",
@@ -706,10 +1079,9 @@
           "via": "Mensalidade.matriculaId",
           "cardinality": "N:1",
           "title": "Matrícula da mensalidade",
-          "description": "Cada mensalidade pertence à matrícula para a qual foi gerada.",
+          "description": "Cada mensalidade pertence a uma matrícula ativa, uma por mês de referência.",
           "mode": "fk",
-          "required": "Sempre, ao gerar a mensalidade.",
-          "role": "cobrança da matrícula"
+          "required": true
         },
         "pagamentos": {
           "relationshipId": "pagamentoMensalidade",
@@ -717,29 +1089,49 @@
           "via": "Pagamento.mensalidadeId",
           "cardinality": "1:N",
           "title": "Pagamentos da mensalidade",
-          "description": "Pagamentos registrados para quitar total ou parcialmente esta mensalidade.",
+          "description": "Pagamentos registrados pela recepção que quitam esta mensalidade.",
           "mode": "fk",
           "direction": "to",
-          "required": "Quando houver pagamento registrado para esta mensalidade.",
-          "role": "quitação"
+          "required": true
+        },
+        "aluno": {
+          "relationshipId": "alunoMensalidades",
+          "to": "Aluno",
+          "via": "Matricula",
+          "cardinality": "N:1",
+          "title": "Aluno da mensalidade",
+          "description": "Aluno dono da mensalidade, alcançado pela matrícula.",
+          "mode": "throughTable",
+          "path": "Aluno <- Matricula.alunoId <- Mensalidade.matriculaId",
+          "derived": true,
+          "direction": "to"
         }
       },
       "capabilities": {
-        "read.byId": "Lê uma mensalidade pelo identificador da linha para a recepção ou a gerência conferir a cobrança selecionada.",
-        "locate.byColumn": "Lista mensalidades por matrícula, competência ou vencimento, com paginação, para a recepção e a gerência localizarem cobranças.",
-        "count": "Conta mensalidades conforme os filtros de matrícula, competência ou vencimento para exibir totais nas consultas da gerência.",
-        "listByForeignKey": "Lista as mensalidades vinculadas a uma matrícula pelo campo matriculaId para a recepção e a gerência consultarem o histórico de cobranças.",
-        "create": "Cria a mensalidade de uma matrícula ativa para a competência mensal, com valor do plano e vencimento, durante a geração feita pela gerência.",
-        "uniqueKey": "Impede uma segunda mensalidade para a mesma matrícula e competência pelo índice único, protegendo a geração mensal da gerência.",
-        "transaction": "Grava em uma única transação as mensalidades geradas para as matrículas ativas do mês pela gerência."
+        "read.byId": "Abre uma mensalidade pelo id para a recepção conferir valor, vencimento e situação antes de receber.",
+        "locate.byColumn": "Lista mensalidades por mês de referência, situação e vencimento, para a gerência revisar as geradas no mês e abrir as vencidas dos inadimplentes.",
+        "listByForeignKey": "Lista as mensalidades das matrículas do aluno, em aberto ou vencidas, para a recepção localizar a que vai receber.",
+        "count": "Conta as mensalidades geradas ou vencidas de um mês para os totais das listas da gerência.",
+        "create": "Grava cada mensalidade gerada pela gerência com o valor do plano e o vencimento no dia do plano.",
+        "uniqueKey": "Recusa uma segunda mensalidade para a mesma matrícula e o mesmo mês de referência, evitando duplicar na geração.",
+        "transaction": "Gera todas as mensalidades do mês de uma vez, tudo ou nada; e grava o pagamento junto com a quitação da mensalidade.",
+        "transition": "Passa a mensalidade de em aberto para paga quando o pagamento registrado pela recepção quita o valor.",
+        "read.mdmRecord": "Lê o nome do aluno por trás da matrícula para mostrar nas listas da recepção e da gerência.",
+        "comment": "Permite à recepção ou à gerência deixar uma observação sobre uma cobrança, como um acordo de pagamento.",
+        "mensalidadesAcademia.gerarMensalidadesMes": "Gera, para o mês de referência informado pela gerência, uma mensalidade por matrícula ativa com o valor do plano e o vencimento no dia do plano, ignorando as já geradas e as matrículas canceladas."
       },
       "rules": [
-        "mensalidadeUnicaPorMatriculaECompetencia",
-        "mensalidadeGeradaParaMatriculaAtiva",
-        "situacaoMensalidadeDerivada"
+        "mensalidadeUnicaPorMatriculaMes",
+        "gerarSomenteMatriculaAtiva",
+        "valorDoPlanoNaGeracao",
+        "vencimentoNoDiaDoPlano",
+        "mensalidadeVencida",
+        "quitacaoPorPagamento",
+        "alunoBloqueadoDuasVencidas",
+        "cancelamentoEncerraGeracao"
       ],
       "kind": "entity",
-      "class": "core",
+      "class": "event",
       "storage": {
         "target": "moduleDatabase",
         "table": "mensalidadesAcademia_mensalidade",
@@ -763,57 +1155,75 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "Address",
             "to": [
               "Matricula"
             ],
             "title": "Matrícula",
-            "description": "Matrícula ativa para a qual esta mensalidade foi gerada.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Matrícula ativa para a qual a mensalidade foi gerada; por ela se chega ao aluno e ao plano."
           },
           "competencia": {
-            "type": "date",
+            "type": "string",
             "required": true,
             "indexed": true,
-            "of": "Address",
-            "title": "Competência",
-            "description": "Mês de referência da cobrança mensal.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Mês de referência",
+            "description": "Mês de referência da cobrança (AAAA-MM), informado pela gerência na geração; com a matrícula, identifica a mensalidade.",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "maxLength": 7
           },
           "vencimento": {
             "type": "date",
             "required": true,
             "indexed": true,
-            "of": "Address",
             "title": "Vencimento",
-            "description": "Data em que a mensalidade deve ser paga, definida a partir do dia de vencimento do plano.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Data de vencimento no mês de referência, no dia de vencimento do plano; usada para listar e para saber se está vencida."
+          },
+          "status": {
+            "type": "enum",
+            "required": true,
+            "indexed": true,
+            "values": [
+              {
+                "value": "aberta",
+                "title": "Em aberto"
+              },
+              {
+                "value": "paga",
+                "title": "Paga"
+              }
+            ],
+            "title": "Situação de pagamento",
+            "description": "Em aberto desde a geração; passa a paga quando os pagamentos registrados quitam o valor. Vencida não é situação gravada: é derivada."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
-            "title": "Dados da mensalidade",
-            "description": "Informações próprias da cobrança mensal que não são usadas como filtro ou ordenação.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Detalhes",
+            "description": "Dados da cobrança que são apenas exibidos.",
             "fields": {
-              "valorCobranca": {
+              "valor": {
                 "type": "money",
                 "required": true,
-                "of": "Address",
-                "title": "Valor da cobrança",
-                "description": "Valor da mensalidade gerada conforme o plano vigente na matrícula.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "title": "Valor",
+                "description": "Valor cobrado, copiado do valor do plano da matrícula no momento da geração.",
+                "min": 0
+              },
+              "geradaEm": {
+                "type": "timestamp",
+                "required": true,
+                "derived": true,
+                "title": "Gerada em",
+                "description": "Momento em que a gerência gerou a mensalidade do mês."
+              },
+              "quitadaEm": {
+                "type": "date",
+                "title": "Quitada em",
+                "description": "Data do pagamento que quitou a mensalidade, preenchida quando ela passa a paga."
+              },
+              "vencida": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Vencida",
+                "description": "Em aberto e com vencimento anterior a hoje."
               },
               "totalPago": {
                 "type": "money",
@@ -825,13 +1235,7 @@
                 "type": "money",
                 "derived": true,
                 "title": "Saldo devedor",
-                "description": "Valor da cobrança menos a soma dos pagamentos registrados para esta mensalidade, nunca inferior a zero."
-              },
-              "situacao": {
-                "type": "string",
-                "derived": true,
-                "title": "Situação",
-                "description": "Paga quando os pagamentos registrados alcançam o valor da cobrança; vencida quando ainda há saldo devedor e o vencimento é anterior a hoje; em aberto nos demais casos."
+                "description": "Valor da mensalidade menos a soma dos pagamentos registrados para ela, nunca abaixo de zero."
               }
             }
           }
@@ -842,6 +1246,33 @@
           "matriculaId",
           "competencia"
         ]
+      ],
+      "lifecycleStates": [
+        {
+          "state": "aberta",
+          "reachedBy": "command"
+        },
+        {
+          "state": "paga",
+          "reachedBy": "command"
+        }
+      ],
+      "transitions": [
+        {
+          "transitionId": "quitar",
+          "from": [
+            "aberta"
+          ],
+          "to": "paga",
+          "by": [],
+          "description": "Quando o pagamento registrado pela recepção completa o valor da mensalidade, ela passa a paga automaticamente.",
+          "payload": [
+            "details.quitadaEm"
+          ],
+          "ruleRefs": [
+            "quitacaoPorPagamento"
+          ]
+        }
       ]
     },
     {
@@ -849,32 +1280,37 @@
       "moduleName": "mensalidadesAcademia",
       "entityId": "Pagamento",
       "title": "Pagamento",
-      "description": "Registro de um pagamento recebido para regularizar uma mensalidade.",
-      "displayField": "id",
+      "description": "Pagamento recebido pela recepção para uma mensalidade, com data, valor e forma de pagamento.",
+      "displayField": "dataPagamento",
       "relationships": {
         "mensalidade": {
           "relationshipId": "pagamentoMensalidade",
           "to": "Mensalidade",
           "via": "Pagamento.mensalidadeId",
           "cardinality": "N:1",
-          "title": "Mensalidade paga",
-          "description": "Cada pagamento registrado pertence à mensalidade que está sendo regularizada.",
+          "title": "Mensalidade quitada",
+          "description": "O pagamento quita uma mensalidade; uma mensalidade pode receber um ou mais pagamentos.",
           "mode": "fk",
-          "required": "Sempre"
+          "required": true
         }
       },
       "capabilities": {
-        "read.byId": "Lê um pagamento pelo identificador da linha para a recepção conferir o recebimento registrado.",
-        "locate.byColumn": "Lista pagamentos por mensalidade ou por data de pagamento, com ordenação e paginação, para a recepção consultar recebimentos.",
-        "count": "Conta os pagamentos que correspondem aos filtros de mensalidade ou data para a conferência da recepção.",
-        "listByForeignKey": "Lista os pagamentos vinculados a uma mensalidade pelo campo mensalidadeId para exibir os recebimentos que a regularizam.",
-        "create": "Registra um pagamento com data, valor e forma de pagamento para a recepção regularizar uma mensalidade.",
-        "transaction": "Grava o pagamento e atualiza a situação da mensalidade e a regularidade do aluno de forma atômica durante o registro pela recepção."
+        "create": "Registra um novo pagamento com data, valor e forma, lançado pela recepção ao receber a mensalidade do aluno.",
+        "transaction": "Grava o pagamento e marca a mensalidade como paga na mesma operação, tudo ou nada, quando a recepção lança o recebimento.",
+        "read.byId": "Lê um pagamento pelo id para a recepção ou a gerência conferirem o lançamento.",
+        "listByForeignKey": "Lista os pagamentos de uma mensalidade pela coluna mensalidadeId, usado pela recepção ao conferir a mensalidade antes de receber.",
+        "locate.byColumn": "Lista pagamentos filtrados e ordenados pela data do pagamento, usado pela gerência para acompanhar os recebimentos do mês.",
+        "count": "Conta os pagamentos de um período pela data do pagamento, para totais em listas da gerência.",
+        "read.mdmRecord": "Lê o registro mestre do aluno por trás da mensalidade paga, para a recepção ver o nome do aluno no pagamento.",
+        "update": "Corrige data, valor ou forma de um pagamento lançado com erro pela recepção.",
+        "attach.document": "Anexa ao pagamento o comprovante (Pix, recibo de cartão ou transferência) apresentado pelo aluno à recepção.",
+        "comment": "Permite à recepção e à gerência deixar notas sobre um pagamento, como acordos ou divergências de valor."
       },
       "rules": [
-        "paymentAmountPositive",
-        "paymentUpdatesMonthlyFee",
-        "paymentRegularizesStudentWhenApplicable"
+        "pagamentoValorPositivo",
+        "pagamentoSomenteMensalidadeEmAberto",
+        "pagamentoQuitaMensalidade",
+        "regularizacaoDesbloqueiaAluno"
       ],
       "kind": "entity",
       "class": "event",
@@ -901,83 +1337,77 @@
             "type": "record",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "to": [
               "Mensalidade"
             ],
             "title": "Mensalidade",
-            "description": "Mensalidade que está sendo regularizada por este pagamento.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Mensalidade que este pagamento quita. Usada para listar os pagamentos de uma mensalidade e calcular quanto já foi pago."
           },
           "dataPagamento": {
             "type": "date",
             "required": true,
             "indexed": true,
-            "of": "ContactSummary",
             "title": "Data do pagamento",
-            "description": "Data em que a academia recebeu o pagamento da mensalidade.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Data em que o aluno pagou, informada pela recepção. Usada para ordenar os pagamentos e somar o total recebido no mês."
+          },
+          "registradoEm": {
+            "type": "timestamp",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "title": "Registrado em",
+            "description": "Momento em que a recepção lançou o pagamento no sistema, preenchido automaticamente."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "ContactSummary",
-            "title": "Dados do pagamento",
-            "description": "Informações registradas pela recepção sobre o valor e a forma de recebimento.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Detalhes do pagamento",
+            "description": "Dados do pagamento que são apenas exibidos.",
             "fields": {
               "valor": {
                 "type": "money",
                 "required": true,
-                "of": "ContactSummary",
                 "title": "Valor pago",
-                "description": "Valor efetivamente recebido para a mensalidade.",
-                "maxLength": 0,
-                "min": 0.01,
-                "max": 0
+                "description": "Valor recebido pela recepção neste pagamento.",
+                "min": 0.01
               },
               "formaPagamento": {
                 "type": "enum",
                 "required": true,
-                "of": "ContactSummary",
                 "values": [
                   {
                     "value": "cash",
-                    "title": "Dinheiro",
-                    "description": "Pagamento recebido em dinheiro."
+                    "title": "Dinheiro"
                   },
                   {
                     "value": "pix",
-                    "title": "Pix",
-                    "description": "Pagamento recebido por Pix."
+                    "title": "Pix"
                   },
                   {
                     "value": "debitCard",
-                    "title": "Cartão de débito",
-                    "description": "Pagamento recebido por cartão de débito."
+                    "title": "Cartão de débito"
                   },
                   {
                     "value": "creditCard",
-                    "title": "Cartão de crédito",
-                    "description": "Pagamento recebido por cartão de crédito."
+                    "title": "Cartão de crédito"
                   },
                   {
                     "value": "bankTransfer",
-                    "title": "Transferência bancária",
-                    "description": "Pagamento recebido por transferência bancária."
+                    "title": "Transferência bancária"
+                  },
+                  {
+                    "value": "bankSlip",
+                    "title": "Boleto"
                   }
                 ],
                 "title": "Forma de pagamento",
-                "description": "Meio pelo qual o aluno realizou o pagamento.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0
+                "description": "Meio pelo qual o aluno pagou a mensalidade."
+              },
+              "observacao": {
+                "type": "text",
+                "title": "Observação",
+                "description": "Anotação livre da recepção sobre o recebimento.",
+                "maxLength": 500
               }
             }
           }
@@ -987,25 +1417,30 @@
     {
       "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
       "moduleName": "mensalidadesAcademia",
-      "entityId": "IndicadoresAcademia",
-      "title": "Indicadores da academia",
-      "description": "Resumo mensal recalculado dos valores a receber e recebidos e das quantidades de alunos ativos, bloqueados e inadimplentes.",
-      "displayField": "period",
+      "entityId": "PainelMensalidades",
+      "title": "Painel de mensalidades",
+      "description": "Resumo do mês recalculado: total a receber, total recebido e quantidade de alunos ativos, bloqueados e inadimplentes.",
+      "displayField": "mesReferencia",
       "relationships": {},
       "capabilities": {
-        "aggregate.byWindow": "Resume mensalmente as mensalidades, os pagamentos e as matrículas por período para calcular os indicadores financeiros e de alunos usados pela gerência.",
-        "store.timeSeries": "Mantém os indicadores mensais em série temporal pelo início do período, para a gerência consultar o painel sem ler todas as transações.",
-        "read.window": "Lê os indicadores pelo início do mês indexado, para a gerência acompanhar o painel mensal.",
-        "refresh": "Atualiza automaticamente o resumo mensal conforme mensalidades, pagamentos e matrículas são registrados, para manter o painel da gerência atualizado.",
-        "rebuild": "Recalcula toda a série de indicadores a partir de mensalidades, pagamentos e matrículas durante uma reconstrução ou publicação do módulo."
+        "aggregate.byWindow": "Resume as mensalidades e os pagamentos por mês (janela mensal sobre o vencimento e a data do pagamento) e conta os alunos ativos, bloqueados e inadimplentes, alimentando o painel da gerência.",
+        "read.window": "Lê os indicadores de um mês pelo mês de referência indexado; usado pela gerência na jornada acompanhar painel (ver painel).",
+        "refresh": "Mantém o painel atualizado à medida que mensalidades são geradas, pagamentos são registrados e matrículas são canceladas; executado pela plataforma, sem ação da gerência.",
+        "rebuild": "Recalcula todo o painel a partir das mensalidades, pagamentos e matrículas em uma migração ou publicação do módulo.",
+        "retain": "Descarta meses antigos do painel que já não interessam à gerência, para que a série não cresça indefinidamente."
       },
-      "rules": [],
+      "rules": [
+        "mensalidadeVencida",
+        "alunoBloqueadoDuasVencidas",
+        "alunoInadimplente",
+        "cancelamentoEncerraMensalidadesFuturas"
+      ],
       "kind": "entity",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "mensalidadesAcademia_indicadoresacademia",
-        "kind": "timeSeries"
+        "table": "mensalidadesAcademia_painelmensalidades",
+        "kind": "relational"
       },
       "record": {
         "fields": {
@@ -1021,82 +1456,57 @@
             "required": true,
             "derived": true
           },
-          "period": {
+          "mesReferencia": {
             "type": "timestamp",
             "required": true,
             "indexed": true,
-            "of": "Address",
-            "title": "Período",
-            "description": "Início do mês ao qual se referem os indicadores mensais da academia.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
-            "derived": true
+            "derived": true,
+            "title": "Mês de referência",
+            "description": "Início do mês que esta linha resume (janela mensal). Calculado a partir do vencimento das mensalidades e da data dos pagamentos; é por ele que o painel é lido."
           },
           "details": {
             "type": "object",
             "required": true,
-            "of": "Address",
-            "title": "Indicadores mensais",
-            "description": "Medidas mensais recalculadas a partir das mensalidades, dos pagamentos e das matrículas da academia.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0,
+            "title": "Indicadores do mês",
+            "description": "Medidas recalculadas a partir de Mensalidade, Pagamento e Matricula para o mês de referência. Ninguém digita nenhum destes valores.",
             "fields": {
               "totalAReceber": {
                 "type": "money",
                 "required": true,
-                "of": "Address",
-                "title": "Total a receber",
-                "description": "Soma dos valores das mensalidades geradas para o mês.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "derived": true
+                "derived": true,
+                "title": "Total a receber no mês",
+                "description": "Soma dos valores das mensalidades com vencimento no mês de referência, de todos os alunos."
               },
               "totalRecebido": {
                 "type": "money",
                 "required": true,
-                "of": "Address",
-                "title": "Total recebido",
-                "description": "Soma dos pagamentos registrados para mensalidades geradas no mês.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "derived": true
+                "derived": true,
+                "title": "Total recebido no mês",
+                "description": "Soma dos valores dos pagamentos registrados pela recepção com data dentro do mês de referência."
               },
-              "quantidadeAlunosAtivos": {
+              "alunosAtivos": {
                 "type": "integer",
                 "required": true,
-                "of": "Address",
-                "title": "Quantidade de alunos ativos",
-                "description": "Quantidade de alunos com matrícula ativa no período.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "derived": true
+                "derived": true,
+                "title": "Alunos ativos",
+                "description": "Quantidade de alunos com matrícula ativa (não cancelada) no mês de referência.",
+                "min": 0
               },
-              "quantidadeAlunosBloqueados": {
+              "alunosBloqueados": {
                 "type": "integer",
                 "required": true,
-                "of": "Address",
-                "title": "Quantidade de alunos bloqueados",
-                "description": "Quantidade de alunos bloqueados por terem duas ou mais mensalidades vencidas no período.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "derived": true
+                "derived": true,
+                "title": "Alunos bloqueados",
+                "description": "Quantidade de alunos com duas ou mais mensalidades vencidas, que ficam impedidos de entrar até regularizar.",
+                "min": 0
               },
-              "quantidadeAlunosInadimplentes": {
+              "alunosInadimplentes": {
                 "type": "integer",
                 "required": true,
-                "of": "Address",
-                "title": "Quantidade de alunos inadimplentes",
-                "description": "Quantidade de alunos com ao menos uma mensalidade vencida no período.",
-                "maxLength": 0,
-                "min": 0,
-                "max": 0,
-                "derived": true
+                "derived": true,
+                "title": "Alunos inadimplentes",
+                "description": "Quantidade de alunos com pelo menos uma mensalidade vencida (em aberto e com vencimento anterior a hoje).",
+                "min": 0
               }
             },
             "derived": true
@@ -1113,7 +1523,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada matrícula pertence obrigatoriamente a um aluno.",
+      "description": "Cada matrícula pertence a um aluno; um aluno pode ter várias matrículas ao longo do tempo.",
       "field": "Matricula.alunoId"
     },
     {
@@ -1123,8 +1533,18 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada matrícula é realizada obrigatoriamente em um plano da academia.",
+      "description": "A matrícula é feita em um plano, de onde vêm o valor e o dia de vencimento.",
       "field": "Matricula.planoId"
+    },
+    {
+      "relationshipId": "matriculaRecepcao",
+      "from": "Matricula",
+      "to": "Recepcao",
+      "type": "manyToOne",
+      "required": false,
+      "mode": "fk",
+      "description": "Atendente da recepção que registrou a matrícula.",
+      "field": "Matricula.recepcaoId"
     },
     {
       "relationshipId": "mensalidadeMatricula",
@@ -1133,7 +1553,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada mensalidade é gerada obrigatoriamente para uma matrícula.",
+      "description": "Cada mensalidade é gerada para uma matrícula ativa, uma por mês de referência.",
       "field": "Mensalidade.matriculaId"
     },
     {
@@ -1143,8 +1563,20 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada pagamento registrado pertence obrigatoriamente a uma mensalidade.",
+      "description": "O pagamento quita uma mensalidade.",
       "field": "Pagamento.mensalidadeId"
+    },
+    {
+      "relationshipId": "alunoMensalidades",
+      "from": "Aluno",
+      "to": "Mensalidade",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "Mensalidades do aluno, obtidas pelas suas matrículas.",
+      "through": "Matricula",
+      "path": "Aluno <- Matricula.alunoId <- Mensalidade.matriculaId",
+      "derived": true
     }
   ],
   "removedOrphans": [],
@@ -1154,6 +1586,11 @@
       "kind": "derivedFromPlatform",
       "entityId": "Aluno",
       "detail": "roleTag mensalidadesAcademia.Aluno; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recepcao",
+      "detail": "roleTag mensalidadesAcademia.Recepcao; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1177,8 +1614,8 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
-      "detail": "storage.table mensalidadesAcademia_indicadoresacademia"
+      "entityId": "PainelMensalidades",
+      "detail": "storage.table mensalidadesAcademia_painelmensalidades"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1198,11 +1635,41 @@
     {
       "kind": "tightened",
       "entityId": "Aluno",
-      "detail": "Aluno.details.identification.countryCode.pattern"
+      "detail": "Aluno.details.person.privacyConsent.required"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Aluno",
+      "detail": "record.fields.details.mensalidadesAcademia.fields.inadimplente.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Aluno",
+      "detail": "record.fields.details.mensalidadesAcademia.fields.bloqueado.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Aluno",
+      "detail": "record.fields.details.mensalidadesAcademia.fields.quantidadeMensalidadesVencidas.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recepcao",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Recepcao",
+      "detail": "Recepcao.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Recepcao",
+      "detail": "Recepcao.details.identification.docType.values"
     },
     {
       "kind": "namespaceEmpty",
-      "entityId": "Aluno",
+      "entityId": "Recepcao",
       "detail": "details.mensalidadesAcademia"
     },
     {
@@ -1212,13 +1679,43 @@
     },
     {
       "kind": "derivedFromPlatform",
+      "entityId": "Plano",
+      "detail": "record.fields.details.fields.quantidadeMatriculasAtivas.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
       "entityId": "Matricula",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.details.fields.mensalidadesVencidas.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.details.fields.bloqueada.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.details.fields.inadimplente.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.details.fields.entradaLiberada.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
       "entityId": "Mensalidade",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Mensalidade",
+      "detail": "record.fields.details.fields.vencida.derived (derived[])"
     },
     {
       "kind": "derivedFromPlatform",
@@ -1232,53 +1729,18 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Mensalidade",
-      "detail": "record.fields.details.fields.situacao.derived (derived[])"
-    },
-    {
-      "kind": "derivedFromPlatform",
       "entityId": "Pagamento",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
+      "entityId": "PainelMensalidades",
       "detail": "record.fields.id, record.fields.version"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
-      "detail": "record.fields.period.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
+      "entityId": "PainelMensalidades",
       "detail": "record.fields.details.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
-      "detail": "record.fields.details.fields.totalAReceber.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
-      "detail": "record.fields.details.fields.totalRecebido.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
-      "detail": "record.fields.details.fields.quantidadeAlunosAtivos.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
-      "detail": "record.fields.details.fields.quantidadeAlunosBloqueados.derived (ddm)"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "IndicadoresAcademia",
-      "detail": "record.fields.details.fields.quantidadeAlunosInadimplentes.derived (ddm)"
     }
   ]
 }

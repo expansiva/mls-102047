@@ -1,0 +1,198 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "compras",
+    "entityId": "Recebimento",
+    "title": "Recebimento",
+    "description": "Registro da chegada total ou parcial de um pedido de compra feito pelo almoxarife.",
+    "displayField": "numero",
+    "relationships": {
+      "pedidoCompra": {
+        "relationshipId": "recebimentoPedido",
+        "to": "PedidoCompra",
+        "via": "Recebimento.pedidoCompraId",
+        "cardinality": "N:1",
+        "title": "Pedido de compra recebido",
+        "description": "Pedido de compra cuja chegada foi registrada.",
+        "mode": "fk",
+        "required": true
+      },
+      "entradasEstoque": {
+        "relationshipId": "entradaRecebimento",
+        "to": "EntradaEstoque",
+        "via": "EntradaEstoque.recebimentoId",
+        "cardinality": "1:N",
+        "title": "Entradas no estoque geradas",
+        "description": "Entradas no estoque dos produtos recebidos geradas por este recebimento.",
+        "mode": "fk",
+        "direction": "to",
+        "required": true
+      }
+    },
+    "capabilities": {
+      "read.byId": "Abre um recebimento pelo id para o almoxarife conferir os itens e quantidades recebidos.",
+      "locate.byColumn": "Lista os recebimentos filtrando por pedido, número ou data de recebimento, ordenados pela data, para o almoxarife e o gerente de compras.",
+      "count": "Conta os recebimentos de um filtro, como os registrados no dia, para o cabeçalho da lista do almoxarife.",
+      "listByForeignKey": "Lista todos os recebimentos de um pedido de compra, para o almoxarife ver o que já chegou e o que ainda está pendente.",
+      "create": "Registra uma nova chegada do pedido com as quantidades recebidas de cada item, feita pelo almoxarife.",
+      "transaction": "Grava o recebimento, as entradas no estoque de cada produto e a situação de recebimento do pedido de uma só vez, tudo ou nada, quando o almoxarife confirma.",
+      "uniqueKey": "Impede dois recebimentos com o mesmo número, garantido pelo índice único da coluna número.",
+      "sequence.next": "Emite o número sequencial do recebimento na criação, pelo contador compras.Recebimento.",
+      "read.mdmRecord": "Lê no cadastro mestre o nome e a unidade dos produtos recebidos para exibir nos itens do recebimento.",
+      "attach.document": "Anexa ao recebimento a nota fiscal ou o canhoto digitalizado da entrega, pelo almoxarife.",
+      "comment": "Permite ao almoxarife e ao gerente de compras deixar notas sobre divergências da entrega."
+    },
+    "rules": [
+      "recebimentoSomentePedidoAprovado",
+      "quantidadeRecebidaNaoExcedePendente",
+      "recebimentoGeraEntradaEstoque",
+      "recebimentoAtualizaSituacaoPedido",
+      "numeroRecebimentoUnico"
+    ],
+    "kind": "entity",
+    "class": "event",
+    "storage": {
+      "target": "moduleDatabase",
+      "table": "compras_recebimento",
+      "kind": "relational"
+    },
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "derived": true,
+          "indexed": true,
+          "title": "Id"
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true
+        },
+        "numero": {
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "indexed": true,
+          "derived": true,
+          "title": "Número do recebimento",
+          "description": "Número sequencial do recebimento emitido pelo sistema na criação, usado pelo almoxarife para citar e localizar o registro."
+        },
+        "pedidoCompraId": {
+          "type": "record",
+          "required": true,
+          "indexed": true,
+          "to": [
+            "PedidoCompra"
+          ],
+          "title": "Pedido de compra",
+          "description": "Pedido de compra aprovado cuja chegada, total ou parcial, este recebimento registra."
+        },
+        "dataRecebimento": {
+          "type": "date",
+          "required": true,
+          "indexed": true,
+          "title": "Data do recebimento",
+          "description": "Data em que a mercadoria chegou ao almoxarifado, usada para listar e ordenar os recebimentos."
+        },
+        "registradoEm": {
+          "type": "timestamp",
+          "required": true,
+          "indexed": true,
+          "derived": true,
+          "title": "Registrado em",
+          "description": "Momento em que o almoxarife registrou o recebimento no sistema, preenchido automaticamente."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "title": "Detalhes",
+          "description": "Itens recebidos e observações do recebimento.",
+          "fields": {
+            "itens": {
+              "type": "object",
+              "required": true,
+              "collection": true,
+              "title": "Itens recebidos",
+              "description": "Quantidade recebida de cada item do pedido nesta chegada; cada linha dá entrada no estoque do produto.",
+              "fields": {
+                "itemPedidoId": {
+                  "type": "record",
+                  "required": true,
+                  "to": [
+                    "ItemPedido"
+                  ],
+                  "title": "Item do pedido",
+                  "description": "Item do pedido de compra ao qual esta quantidade recebida se refere."
+                },
+                "produtoId": {
+                  "type": "record",
+                  "required": true,
+                  "to": [
+                    "Produto"
+                  ],
+                  "title": "Produto",
+                  "description": "Produto recebido, o mesmo do item do pedido, que terá entrada no estoque."
+                },
+                "quantidadeRecebida": {
+                  "type": "number",
+                  "required": true,
+                  "title": "Quantidade recebida",
+                  "description": "Quantidade do produto que chegou nesta entrega, não maior que a quantidade ainda pendente do item.",
+                  "min": 0
+                },
+                "observacao": {
+                  "type": "text",
+                  "title": "Observação do item",
+                  "description": "Anotação do almoxarife sobre o item, como avaria ou divergência na conferência.",
+                  "maxLength": 500
+                }
+              }
+            },
+            "observacoes": {
+              "type": "text",
+              "title": "Observações",
+              "description": "Observações gerais do almoxarife sobre a entrega.",
+              "maxLength": 2000
+            },
+            "tipoRecebimento": {
+              "type": "enum",
+              "derived": true,
+              "title": "Tipo de recebimento",
+              "description": "Total quando, com as quantidades deste recebimento, todos os itens do pedido ficam com a quantidade pedida recebida; parcial quando algum item ainda tem quantidade pendente."
+            },
+            "quantidadeTotalRecebida": {
+              "type": "number",
+              "derived": true,
+              "title": "Quantidade total recebida",
+              "description": "Soma das quantidades recebidas de todos os itens neste recebimento."
+            }
+          }
+        }
+      }
+    },
+    "uniqueKeys": [
+      [
+        "numero"
+      ]
+    ]
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "record.fields.details.fields.tipoRecebimento.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "record.fields.details.fields.quantidadeTotalRecebida.derived (derived[])"
+    }
+  ]
+}

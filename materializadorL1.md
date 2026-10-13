@@ -67,6 +67,17 @@ E a fonte que manda em tudo isso: o **contrato da página**, `l2/<mod>/web/contr
   6. create aceitando o que o sistema define: o estado nasce no inicial, o número vem da sequência, o desconto e o pagamento são do fechamento, e o
      `precoUnitario` é copiado do cardápio, como diz a regra.
 
+### 2.2 Manutenção: regra alterada só no texto (Wagner, 08/10)
+*"Sobre uma mudança na rule, simples, o correto seria materializar novamente, porque irá pegar a rule alterada."*
+- Quando só o **texto** de uma regra do l4 muda (ex.: "exige anotação" → "exige anotação com pelo menos 20 caracteres"), **nenhum def muda**: os defs
+  guardam o id. O esforço calculado (`describeEffort`, `l2/helpers/effort/` em cada master) responde `materialize` para as unidades que **aplicam**
+  o id e nada a regerar.
+- Para isso funcionar, **a unidade rematerializada tem de ler o texto atual da regra no l4** (`l4/<mod>/rules.defs.ts`, pelo id que o def guarda) e
+  implementá-lo. Um caminho que gera a unidade só pelos campos do def, sem ler o texto da regra, não pega a mudança.
+- Medido em 08/10 no `agentMaterializeL1` de hoje (`mls-102021` `ccb1765`): o usecase de transição com uma porta e `transitionRef` é emitido sem LLM, só
+  pelos campos do def (`handlers/behavior/emitBehavior.ts:121-133`), e o contexto das dependências leva só o hash, não o texto
+  (`context/context.ts:68-77`). Hoje, rematerializar o `registrarAtendimento` depois de mudar o texto da regra gera o mesmo código.
+
 ## 3. O contrato: o que a página precisa, não de onde vem
 
 Decisões de 04/10, registradas em `todo/gerarApp/l4/docs/como-deve-ser-o-l2.md`:

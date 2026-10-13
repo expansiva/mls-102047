@@ -2,11 +2,11 @@
   "journeys": [
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "cadastrarEpublicarEvento",
+      "journeyId": "cadastrarPublicarEvento",
       "business": {
         "actorRef": "organizador",
         "title": "Cadastrar e publicar evento",
-        "goal": "Disponibilizar um evento com suas informações e capacidade para inscrições públicas.",
+        "goal": "Criar um evento com título, descrição, data, local e número de vagas e publicá-lo para receber inscrições.",
         "entry": {
           "mode": "coldStart"
         },
@@ -16,127 +16,43 @@
             "kind": "act",
             "entity": "Evento",
             "effect": "create",
-            "title": "Cadastrar evento",
-            "description": "Informa título, descrição, data, local e número de vagas do evento."
+            "title": "Cadastrar novo evento",
+            "description": "O organizador informa título, descrição, data, local e número de vagas e salva o evento como rascunho."
+          },
+          {
+            "stepId": "revisarEvento",
+            "kind": "inspect",
+            "entity": "Evento",
+            "title": "Revisar dados do evento",
+            "description": "O organizador confere os dados do evento antes de publicá-lo."
           },
           {
             "stepId": "publicarEvento",
             "kind": "act",
             "entity": "Evento",
             "effect": "transition",
-            "transitionRef": "publicarEvento",
+            "transitionRef": "publicar",
             "title": "Publicar evento",
-            "description": "Publica o evento para disponibilizar sua página pública de inscrição."
+            "description": "O organizador publica o evento, que passa a ter uma página pública aberta a inscrições."
           }
         ],
         "outcome": {
-          "statement": "O evento é publicado e fica disponível para inscrições públicas.",
+          "statement": "O evento está publicado e sua página pública aceita inscrições.",
           "evidence": [
-            "Evento com status publicado.",
-            "Página pública do evento disponível com título, data, local e vagas."
+            "Evento com situação publicado",
+            "Página pública do evento acessível"
           ]
         }
       },
-      "businessHash": "sha256:cac9effd8f825650081d93d9cd7362496fd50b20b8e9b534d21e6039afb27f92"
+      "businessHash": "sha256:8feca3ccd20729f6d5d95152a70b4a740cfb3854ef939f465a975bab8faf1938"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "inscreverSeEmEvento",
+      "journeyId": "inscreverEmEvento",
       "business": {
         "actorRef": "publico",
         "title": "Inscrever-se em evento",
-        "goal": "Registrar uma inscrição em um evento publicado.",
-        "entry": {
-          "mode": "contextOrLookup"
-        },
-        "steps": [
-          {
-            "stepId": "localizarEventoPublicado",
-            "kind": "locate",
-            "entity": "Evento",
-            "title": "Localizar evento publicado",
-            "description": "Acessa a página pública do evento ou localiza um evento publicado para inscrição."
-          },
-          {
-            "stepId": "consultarDetalhesDoEvento",
-            "kind": "inspect",
-            "entity": "Evento",
-            "title": "Consultar detalhes do evento",
-            "description": "Consulta título, descrição, data, local e disponibilidade de vagas."
-          },
-          {
-            "stepId": "registrarInscricao",
-            "kind": "act",
-            "entity": "Inscricao",
-            "effect": "create",
-            "title": "Registrar inscrição",
-            "description": "Informa nome e e-mail para se inscrever. O sistema impede mais de uma inscrição com o mesmo e-mail no mesmo evento e registra a inscrição como confirmada quando há vaga ou na lista de espera quando as vagas estão esgotadas."
-          }
-        ],
-        "outcome": {
-          "statement": "A pessoa tem uma inscrição única no evento, confirmada ou posicionada na lista de espera.",
-          "evidence": [
-            "Inscrição vinculada ao evento e ao e-mail informado.",
-            "Situação da inscrição indicada como confirmada ou lista de espera.",
-            "Posição de espera registrada quando não há vagas disponíveis."
-          ]
-        }
-      },
-      "businessHash": "sha256:3c52b4e559cc28ccf65c4f8d9f1c75084607652551ef964ca7b09a580f7057ed"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "cancelarInscricao",
-      "business": {
-        "actorRef": "publico",
-        "title": "Cancelar inscrição",
-        "goal": "Cancelar uma inscrição no evento e liberar a vaga quando aplicável.",
-        "entry": {
-          "mode": "contextOrLookup"
-        },
-        "steps": [
-          {
-            "stepId": "localizarInscricao",
-            "kind": "locate",
-            "entity": "Inscricao",
-            "title": "Localizar inscrição",
-            "description": "Acessa a inscrição a ser cancelada a partir do contexto do evento ou da confirmação recebida."
-          },
-          {
-            "stepId": "consultarInscricao",
-            "kind": "inspect",
-            "entity": "Inscricao",
-            "title": "Consultar inscrição",
-            "description": "Confere o evento e a situação atual da inscrição antes do cancelamento."
-          },
-          {
-            "stepId": "cancelarInscricao",
-            "kind": "act",
-            "entity": "Inscricao",
-            "effect": "transition",
-            "transitionRef": "cancelarInscricao",
-            "title": "Cancelar inscrição",
-            "description": "Cancela a inscrição. Quando a inscrição cancelada ocupava uma vaga, o primeiro inscrito da lista de espera é promovido automaticamente."
-          }
-        ],
-        "outcome": {
-          "statement": "A inscrição é cancelada e, se necessário, a próxima pessoa da lista de espera é promovida.",
-          "evidence": [
-            "Inscrição com situação cancelada.",
-            "Vaga liberada ou total de vagas ocupadas atualizado.",
-            "Primeira inscrição elegível da lista de espera marcada como confirmada, quando existir."
-          ]
-        }
-      },
-      "businessHash": "sha256:1c28983290e54ba50f3b01ec10f1eed72fd547730725e92155c43e3c9b65d3de"
-    },
-    {
-      "schemaVersion": "2026-09-10-ns5-journey-v1",
-      "journeyId": "acompanharEexportarInscricoes",
-      "business": {
-        "actorRef": "organizador",
-        "title": "Acompanhar e exportar inscrições",
-        "goal": "Consultar os inscritos e a ocupação do evento e obter a lista de inscrições em CSV.",
+        "goal": "Garantir uma vaga ou um lugar na lista de espera de um evento publicado.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -145,51 +61,132 @@
             "stepId": "localizarEvento",
             "kind": "locate",
             "entity": "Evento",
-            "title": "Localizar evento",
-            "description": "Localiza o evento cadastrado ou usa o evento já aberto no contexto."
+            "title": "Abrir página do evento",
+            "description": "A pessoa acessa a página pública de um evento publicado."
           },
           {
-            "stepId": "consultarInscritosEocupacao",
+            "stepId": "verEvento",
             "kind": "inspect",
             "entity": "Evento",
-            "title": "Consultar inscritos e ocupação",
-            "description": "Visualiza as inscrições do evento, suas situações e o total de vagas ocupadas."
+            "title": "Ver detalhes do evento",
+            "description": "A pessoa lê título, descrição, data, local e disponibilidade de vagas."
           },
           {
-            "stepId": "baixarListaCsv",
-            "kind": "inspect",
+            "stepId": "criarInscricao",
+            "kind": "act",
             "entity": "Inscricao",
-            "title": "Baixar lista de inscrições em CSV",
-            "description": "Obtém a lista de inscrições do evento no formato CSV, sem alterar as inscrições."
+            "effect": "create",
+            "title": "Inscrever-se com nome e e-mail",
+            "description": "A pessoa informa nome e e-mail; o mesmo e-mail só se inscreve uma vez por evento e, se as vagas acabaram, a inscrição entra na lista de espera por ordem de chegada."
           }
         ],
         "outcome": {
-          "statement": "O organizador consulta a ocupação do evento e obtém a lista de inscrições em CSV.",
+          "statement": "A pessoa está inscrita com vaga confirmada ou na lista de espera do evento.",
           "evidence": [
-            "Lista de inscritos e respectivas situações exibida.",
-            "Total de vagas ocupadas exibido.",
-            "Arquivo CSV da lista de inscrições disponibilizado para download."
+            "Inscrição registrada com situação confirmada ou em espera",
+            "Posição na lista de espera exibida quando não há vaga"
           ]
         }
       },
-      "businessHash": "sha256:870333f5ec002296b221f9d055dfe59b68986524cf1f5f1d6e35b66855cc8044"
+      "businessHash": "sha256:5598d75b0bf4a6daf686be3ad593cd3cbb7e4c9ebdc9b9202c50ffdb549d72b1"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "cancelarInscricao",
+      "business": {
+        "actorRef": "publico",
+        "title": "Cancelar inscrição",
+        "goal": "Cancelar a própria inscrição em um evento, liberando a vaga.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "localizarInscricao",
+            "kind": "locate",
+            "entity": "Inscricao",
+            "title": "Localizar minha inscrição",
+            "description": "A pessoa localiza a própria inscrição no evento."
+          },
+          {
+            "stepId": "verInscricao",
+            "kind": "inspect",
+            "entity": "Inscricao",
+            "title": "Ver minha inscrição",
+            "description": "A pessoa confere o evento e a situação da sua inscrição."
+          },
+          {
+            "stepId": "cancelar",
+            "kind": "act",
+            "entity": "Inscricao",
+            "effect": "transition",
+            "transitionRef": "cancelar",
+            "title": "Cancelar inscrição",
+            "description": "A pessoa cancela a inscrição; se ela ocupava vaga, o primeiro da lista de espera é promovido automaticamente."
+          }
+        ],
+        "outcome": {
+          "statement": "A inscrição está cancelada e a vaga liberada foi passada ao primeiro da lista de espera, quando houver.",
+          "evidence": [
+            "Inscrição com situação cancelada",
+            "Primeiro da lista de espera com situação confirmada"
+          ]
+        }
+      },
+      "businessHash": "sha256:cfb3890e0843f7a316c31eaceed2d58bc41b2b94f257eace62c8bd98239e5f55"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "acompanharInscritos",
+      "business": {
+        "actorRef": "organizador",
+        "title": "Acompanhar inscritos do evento",
+        "goal": "Ver os inscritos, o total de vagas ocupadas e baixar a lista em CSV.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "localizarEventoOrg",
+            "kind": "locate",
+            "entity": "Evento",
+            "title": "Localizar evento",
+            "description": "O organizador localiza o evento entre os eventos cadastrados."
+          },
+          {
+            "stepId": "verOcupacao",
+            "kind": "inspect",
+            "entity": "Evento",
+            "title": "Ver vagas ocupadas",
+            "description": "O organizador vê o total de vagas ocupadas, as vagas restantes e o tamanho da lista de espera."
+          },
+          {
+            "stepId": "verInscritos",
+            "kind": "inspect",
+            "entity": "Inscricao",
+            "title": "Ver lista de inscritos",
+            "description": "O organizador vê os inscritos com nome, e-mail, situação e ordem de chegada."
+          },
+          {
+            "stepId": "baixarCsv",
+            "kind": "inspect",
+            "entity": "Inscricao",
+            "title": "Baixar lista em CSV",
+            "description": "O organizador baixa a lista de inscritos do evento em arquivo CSV."
+          }
+        ],
+        "outcome": {
+          "statement": "O organizador conhece a ocupação do evento e tem a lista de inscritos em CSV.",
+          "evidence": [
+            "Total de vagas ocupadas exibido",
+            "Arquivo CSV com os inscritos baixado"
+          ]
+        }
+      },
+      "businessHash": "sha256:3fb13d9b3477d9f9a70e055b8a28154b03dc7e3d1374d29ad8f24e199d666f17"
     }
   ],
   "systemDecisions": [],
   "droppedActors": [],
-  "removedOrphans": [],
-  "normalizations": [
-    {
-      "kind": "dropTransitionRef",
-      "journeyId": "cadastrarEpublicarEvento",
-      "stepId": "criarEvento",
-      "detail": "transitionRef criarEvento dropped; effect is create."
-    },
-    {
-      "kind": "dropTransitionRef",
-      "journeyId": "inscreverSeEmEvento",
-      "stepId": "registrarInscricao",
-      "detail": "transitionRef registrarInscricao dropped; effect is create."
-    }
-  ]
+  "removedOrphans": []
 }

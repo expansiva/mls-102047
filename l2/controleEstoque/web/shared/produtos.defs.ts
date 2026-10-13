@@ -3,16 +3,7 @@
 export const definition = {
   "entry": {
     "params": {
-      "produtoId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:detalheProduto",
-        "persist": true
-      },
-      "search": {
+      "nome": {
         "type": "string",
         "sources": [
           "url",
@@ -29,28 +20,45 @@ export const definition = {
         ],
         "effect": "filter:listaProdutos",
         "persist": true
+      },
+      "produtoId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:detalheProduto",
+        "persist": true
       }
     }
   },
   "forms": {
-    "formularioCadastro": {
-      "organism": "formularioCadastro",
+    "cadastrarProduto": {
+      "organism": "cadastroProduto",
       "submit": "cadastrarProduto"
     }
   },
   "requests": {
-    "load": {
+    "carregarVisaoEstoque": {
+      "kind": "qry",
+      "trigger": "onLoad",
+      "returns": [
+        "resumo",
+        "produtosAbaixoMinimo"
+      ]
+    },
+    "buscarProdutos": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
         "produtos"
       ]
     },
-    "loadProdutos": {
+    "obterProduto": {
       "kind": "qry",
-      "trigger": "loadProdutos",
+      "trigger": "obterProduto",
       "returns": [
-        "produtos"
+        "produto"
       ]
     },
     "cadastrarProduto": {
@@ -63,89 +71,85 @@ export const definition = {
     }
   },
   "states": {
+    "resumo": {
+      "source": "carregarVisaoEstoque.resumo",
+      "description": "Indicadores do estoque já calculados no servidor.",
+      "organisms": [
+        "saldoResumo"
+      ]
+    },
+    "produtosAbaixoMinimo": {
+      "source": "carregarVisaoEstoque.produtosAbaixoMinimo",
+      "description": "Produto com nome, catálogo, saldo mínimo, saldo atual e situação abaixo do mínimo; usado nas listas, no detalhe e no retorno do cadastro.",
+      "organisms": [
+        "produtosAbaixoMinimo"
+      ]
+    },
     "produtos": {
-      "source": "load.produtos",
-      "description": "Produtos carregados para consulta, saldos e alertas."
+      "source": "buscarProdutos.produtos",
+      "description": "Produto com nome, catálogo, saldo mínimo, saldo atual e situação abaixo do mínimo; usado nas listas, no detalhe e no retorno do cadastro.",
+      "organisms": [
+        "listaProdutos"
+      ]
     },
-    "produtoSelecionado": {
+    "produto": {
+      "source": "obterProduto.produto",
+      "description": "Produto com nome, catálogo, saldo mínimo, saldo atual e situação abaixo do mínimo; usado nas listas, no detalhe e no retorno do cadastro.",
+      "organisms": [
+        "detalheProduto"
+      ]
+    },
+    "selectedProduto": {
       "source": "entry.params.produtoId",
-      "description": "Produto selecionado para detalhamento."
-    },
-    "buscaProdutos": {
-      "source": "entry.params.search",
-      "description": "Busca aplicada à lista de produtos."
-    },
-    "paginaProdutos": {
-      "source": "entry.params.page",
-      "description": "Página da lista de produtos."
-    },
-    "produtoCadastro": {
-      "source": "cadastrarProduto.input",
-      "description": "Dados do produto informados para cadastro."
-    },
-    "produtoCadastrado": {
-      "source": "cadastrarProduto.produto",
-      "description": "Produto retornado após o cadastro."
+      "description": "Produto com nome, catálogo, saldo mínimo, saldo atual e situação abaixo do mínimo; usado nas listas, no detalhe e no retorno do cadastro.",
+      "organisms": [
+        "detalheProduto",
+        "listaProdutos",
+        "produtosAbaixoMinimo"
+      ]
     }
   },
   "functions": {
-    "load": {
-      "description": "Carrega os produtos, saldos e alertas de estoque.",
-      "calls": "load",
-      "sets": "produtos"
-    },
-    "filterListaProdutos": {
-      "description": "Recarrega a primeira página de produtos conforme os filtros.",
-      "calls": "loadProdutos",
-      "sets": "produtos"
-    },
-    "loadMoreListaProdutos": {
-      "description": "Carrega a próxima página de produtos.",
-      "calls": "loadProdutos",
-      "sets": "produtos"
-    },
-    "cadastrarProduto": {
-      "description": "Cadastra o produto informado e atualiza a lista de produtos.",
-      "calls": "cadastrarProduto",
-      "sets": "produtoCadastrado",
+    "carregarVisaoEstoque": {
+      "description": "Carrega, na abertura da página, o panorama do estoque: indicadores do saldo e os produtos abaixo do mínimo que geram aviso.",
+      "calls": "carregarVisaoEstoque",
+      "sets": "resumo",
       "updates": [
-        "produtos"
+        "produtosAbaixoMinimo"
       ]
     },
-    "abrirMovimentacoes": {
-      "description": "Abre as movimentações do produto selecionado.",
+    "buscarProdutos": {
+      "description": "Lista os produtos do estoque, paginados, e localiza pelo nome o que o estoquista digita. (produtos.items: append)",
+      "calls": "buscarProdutos",
+      "sets": "produtos"
+    },
+    "obterProduto": {
+      "description": "Carrega o produto escolhido na lista, no destaque de aviso ou vindo de uma notificação, com o saldo atualizado.",
+      "calls": "obterProduto",
+      "sets": "produto"
+    },
+    "cadastrarProduto": {
+      "description": "Cadastra o produto no estoque com o saldo mínimo que dispara o aviso e devolve o produto gravado como confirmação. (produtos.items: upsert)",
+      "calls": "cadastrarProduto",
+      "updates": [
+        "produtos",
+        "resumo",
+        "produtosAbaixoMinimo"
+      ]
+    },
+    "registrarMovimentacao": {
+      "description": "Vejo o produto escolhido, o saldo atual, o saldo mínimo e se está abaixo do mínimo; daqui sigo para registrar uma entrada ou saída.",
       "navigate": "movimentacoes",
       "carries": {
-        "produtoId": "produtoSelecionado.id"
+        "produtoId": "selectedProduto.id"
       }
     }
   },
   "journeys": [
     {
-      "step": "acompanharSaldos/consultarSaldos",
+      "step": "cadastrarProduto/registrarProduto",
       "organisms": [
-        "saldosResumo",
-        "alertasSaldoBaixo",
-        "listaProdutos"
-      ],
-      "functions": [
-        "load"
-      ]
-    },
-    {
-      "step": "acompanharSaldos/localizarProdutos",
-      "organisms": [
-        "listaProdutos"
-      ],
-      "functions": [
-        "filterListaProdutos",
-        "loadMoreListaProdutos"
-      ]
-    },
-    {
-      "step": "cadastrarProduto/informarProduto",
-      "organisms": [
-        "formularioCadastro",
+        "cadastroProduto",
         "acoesCadastro"
       ],
       "functions": [
@@ -153,59 +157,74 @@ export const definition = {
       ]
     },
     {
-      "step": "registrarMovimentacaoEstoque/consultarSaldo",
+      "step": "conferirAvisoMinimo/verProdutoAvisado",
       "organisms": [
+        "produtosAbaixoMinimo",
         "detalheProduto"
       ],
       "functions": [
-        "abrirMovimentacoes"
-      ],
-      "continuesIn": "movimentacoes"
+        "carregarVisaoEstoque",
+        "obterProduto"
+      ]
     },
     {
-      "step": "registrarMovimentacaoEstoque/localizarProduto",
+      "step": "consultarSaldo/localizarProdutoSaldo",
       "organisms": [
-        "listaProdutos",
-        "detalheProduto"
+        "listaProdutos"
       ],
       "functions": [
-        "abrirMovimentacoes"
-      ],
-      "continuesIn": "movimentacoes"
+        "buscarProdutos"
+      ]
     },
     {
-      "step": "registrarMovimentacaoEstoque/registrarMovimentacao",
+      "step": "consultarSaldo/verSaldoProduto",
       "organisms": [
         "detalheProduto"
       ],
       "functions": [
-        "abrirMovimentacoes"
-      ],
-      "continuesIn": "movimentacoes"
+        "obterProduto"
+      ]
     },
     {
-      "step": "tratarAvisoSaldoBaixo/consultarProdutoAvisado",
+      "step": "registrarMovimentacao/localizarProdutoMovimentacao",
       "organisms": [
-        "alertasSaldoBaixo",
+        "listaProdutos"
+      ],
+      "functions": [
+        "buscarProdutos"
+      ]
+    },
+    {
+      "step": "registrarMovimentacao/verSaldoMovimentacao",
+      "organisms": [
         "detalheProduto"
       ],
       "functions": [
-        "abrirMovimentacoes"
+        "obterProduto"
+      ]
+    },
+    {
+      "step": "registrarMovimentacao/registrarMovimentacaoEstoque",
+      "organisms": [
+        "detalheProduto"
       ],
+      "functions": [],
       "continuesIn": "movimentacoes"
     }
   ],
   "rules": {
-    "load": [
-      "saldoAtualProduto",
-      "avisoSaldoMinimoProduto"
+    "carregarVisaoEstoque": [
+      "avisoSaldoAbaixoDoMinimo"
     ],
-    "loadProdutos": [
-      "saldoAtualProduto",
-      "avisoSaldoMinimoProduto"
+    "buscarProdutos": [
+      "avisoSaldoAbaixoDoMinimo"
+    ],
+    "obterProduto": [
+      "avisoSaldoAbaixoDoMinimo"
     ],
     "cadastrarProduto": [
-      "quantidadeMinimaValida"
+      "saldoMinimoNaoNegativo",
+      "avisoSaldoAbaixoDoMinimo"
     ]
   },
   "access": {
@@ -213,7 +232,47 @@ export const definition = {
       "estoquista"
     ],
     "grants": [
-      "gerenciarEstoque"
+      "gestaoCompletaEstoque"
+    ]
+  },
+  "fields": {
+    "Produto.details.controleEstoque.abaixoDoMinimo": [
+      "detalheProduto",
+      "listaProdutos",
+      "produtosAbaixoMinimo",
+      "saldoResumo"
+    ],
+    "Produto.details.controleEstoque.saldoAtual": [
+      "detalheProduto",
+      "listaProdutos",
+      "produtosAbaixoMinimo",
+      "saldoResumo"
+    ],
+    "Produto.details.controleEstoque.saldoMinimo": [
+      "cadastroProduto",
+      "detalheProduto",
+      "produtosAbaixoMinimo"
+    ],
+    "Produto.details.identification.name": [
+      "cadastroProduto",
+      "detalheProduto",
+      "listaProdutos",
+      "produtosAbaixoMinimo",
+      "saldoResumo"
+    ],
+    "Produto.details.product.category": [
+      "cadastroProduto",
+      "detalheProduto"
+    ],
+    "Produto.details.product.sku": [
+      "cadastroProduto",
+      "detalheProduto",
+      "listaProdutos"
+    ],
+    "Produto.details.product.unitOfMeasure": [
+      "cadastroProduto",
+      "detalheProduto",
+      "listaProdutos"
     ]
   }
 } as const;

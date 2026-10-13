@@ -1,43 +1,43 @@
 {
   "moduleName": "controleEstoque",
-  "businessDomain": "Controle de estoque",
+  "businessDomain": "Controle de estoque: cadastro de produtos, registro permanente de entradas e saídas, saldo atual por produto e aviso quando o saldo fica abaixo do mínimo.",
   "entities": [
     {
       "entityId": "Produto",
       "kind": "role",
       "family": "mdm",
       "title": "Produto",
-      "description": "Produto acompanhado pelo estoque, com quantidade mínima definida para sinalizar saldo abaixo do mínimo.",
+      "description": "Item de estoque compartilhado da organização. Neste módulo recebe o saldo mínimo para aviso; o saldo atual e a situação abaixo do mínimo são derivados das movimentações.",
       "displayField": "details.identification.name",
       "subtype": "Product",
       "roleTag": "controleEstoque.Produto",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "MovimentacaoEstoque",
+      "entityId": "Movimentacao",
       "kind": "entity",
       "family": "tdm",
       "title": "Movimentação de estoque",
-      "description": "Registro imutável de entrada ou saída de unidades de um produto, usado para calcular seu saldo atual.",
-      "displayField": "id",
+      "description": "Registro permanente de uma entrada ou saída de quantidade de um produto. Depois de registrada não pode ser alterada; o saldo do produto é recalculado a partir destas movimentações.",
+      "displayField": "numero",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
-        "table": "controleEstoque_movimentacaoestoque",
+        "table": "controleEstoque_movimentacao",
         "kind": "relational"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "movimentacaoEstoqueProduto",
-      "from": "MovimentacaoEstoque",
+      "relationshipId": "produtoDaMovimentacao",
+      "from": "Movimentacao",
       "to": "Produto",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada movimentação de estoque registra uma entrada ou saída para um único produto.",
-      "field": "MovimentacaoEstoque.produtoId"
+      "description": "Produto cujo estoque recebe a entrada ou a saída registrada nesta movimentação.",
+      "field": "Movimentacao.produtoId"
     }
   ],
   "normalizations": [
@@ -48,8 +48,8 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "MovimentacaoEstoque",
-      "detail": "storage.table controleEstoque_movimentacaoestoque"
+      "entityId": "Movimentacao",
+      "detail": "storage.table controleEstoque_movimentacao"
     }
   ]
 }

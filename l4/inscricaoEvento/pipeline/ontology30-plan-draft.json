@@ -1,14 +1,14 @@
 {
   "moduleName": "inscricaoEvento",
-  "businessDomain": "Inscrição e gestão de eventos",
+  "businessDomain": "Inscrição em eventos: cadastro e publicação de eventos com vagas limitadas, inscrição pública por nome e e-mail, lista de espera por ordem de chegada com promoção automática ao cancelar, e acompanhamento dos inscritos pelo organizador com exportação em CSV.",
   "entities": [
     {
       "entityId": "Evento",
       "kind": "entity",
       "family": "tdm",
       "title": "Evento",
-      "description": "Evento organizado e publicado para receber inscrições públicas, com informações, capacidade e situação de publicação.",
-      "displayField": "titulo",
+      "description": "Evento cadastrado pelo organizador com título, descrição, data, local e número de vagas; nasce como rascunho e, ao ser publicado, ganha uma página pública aberta a inscrições. Vagas ocupadas, vagas restantes e tamanho da lista de espera são campos derivados das inscrições.",
+      "displayField": "title",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
@@ -21,8 +21,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Inscrição",
-      "description": "Registro da inscrição de uma pessoa em um evento, incluindo sua situação de confirmação, espera ou cancelamento.",
-      "displayField": "id",
+      "description": "Inscrição de uma pessoa em um evento publicado, com ordem de chegada; fica confirmada enquanto houver vagas ou em lista de espera quando acabam, pode ser cancelada e é promovida da lista de espera quando uma vaga é liberada. Um mesmo participante (e-mail) só se inscreve uma vez por evento.",
+      "displayField": "registrationCode",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
@@ -35,7 +35,7 @@
       "kind": "role",
       "family": "mdm",
       "title": "Participante",
-      "description": "Pessoa participante identificada no cadastro mestre para realizar ou manter uma inscrição em evento.",
+      "description": "Pessoa do público que se inscreve em eventos informando nome e e-mail; é criada ou associada ao registro mestre pelo e-mail no momento da inscrição.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "inscricaoEvento.Participante",
@@ -46,8 +46,8 @@
       "kind": "role",
       "family": "mdm",
       "title": "E-mail do participante",
-      "description": "Canal de contato por e-mail do participante, usado para identificá-lo e impedir inscrição duplicada no mesmo evento.",
-      "displayField": "details.contactChannel.value",
+      "description": "Canal de contato de e-mail informado pelo participante na inscrição; é por ele que se identifica a pessoa e se garante uma única inscrição por evento.",
+      "displayField": "details.identification.name",
       "subtype": "ContactChannel",
       "roleTag": "inscricaoEvento.EmailParticipante",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
@@ -55,44 +55,46 @@
   ],
   "relationships": [
     {
-      "relationshipId": "inscricaoDoEvento",
+      "relationshipId": "inscricaoEvento",
       "from": "Inscricao",
       "to": "Evento",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada inscrição pertence obrigatoriamente a um evento.",
+      "description": "Cada inscrição pertence a um evento publicado; o evento reúne seus inscritos e sua lista de espera.",
       "field": "Inscricao.eventoId"
     },
     {
-      "relationshipId": "participanteDaInscricao",
+      "relationshipId": "inscricaoParticipante",
       "from": "Inscricao",
       "to": "Participante",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada inscrição identifica obrigatoriamente a pessoa participante.",
+      "description": "Cada inscrição é de um participante; o mesmo participante só pode ter uma inscrição por evento.",
       "field": "Inscricao.participanteId"
     },
     {
-      "relationshipId": "emailDaInscricao",
-      "from": "Inscricao",
-      "to": "EmailParticipante",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada inscrição referencia obrigatoriamente o e-mail informado pelo participante.",
-      "field": "Inscricao.emailParticipanteId"
-    },
-    {
-      "relationshipId": "contatoDoParticipante",
+      "relationshipId": "participanteEmail",
       "from": "Participante",
       "to": "EmailParticipante",
       "type": "oneToMany",
       "required": true,
       "mode": "mdmRelationship",
-      "description": "O participante possui um ou mais canais de contato, incluindo o e-mail usado na inscrição.",
+      "description": "O participante possui o e-mail com que se inscreve, registrado como canal de contato no cadastro mestre.",
       "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "eventosDoParticipante",
+      "from": "Participante",
+      "to": "Evento",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "Eventos em que o participante está inscrito, obtidos a partir das suas inscrições.",
+      "through": "Inscricao",
+      "path": "Participante <- Inscricao.participanteId -> Inscricao.eventoId -> Evento",
+      "derived": true
     }
   ],
   "normalizations": [

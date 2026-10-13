@@ -1,11 +1,11 @@
 /// <mls fileReference="_102047_/l4/financeiro/ontology/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyIndexV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const financeiroOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "financeiro",
-  "businessDomain": "Contas a receber e recebimentos financeiros",
+  "businessDomain": "Contas a receber da organização: títulos a receber originados em outros módulos (comanda do restaurante, mensalidade da academia, ordem de serviço da assistência técnica), recebimentos no caixa ou pelo portal com cartão via Stripe, baixas parciais, estornos no mesmo dia, painel de recebíveis e extrato por pagador.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "financeiro",
@@ -14,11 +14,6 @@ export const financeiroOntologyIndex = {
   "entities": [
     {
       "entityId": "Pagador",
-      "kind": "role",
-      "subtype": "Person"
-    },
-    {
-      "entityId": "GerenteFinanceiro",
       "kind": "role",
       "subtype": "Person"
     },
@@ -33,11 +28,6 @@ export const financeiroOntologyIndex = {
       "class": "event"
     },
     {
-      "entityId": "ExtratoPagador",
-      "kind": "entity",
-      "class": "supporting"
-    },
-    {
       "entityId": "PainelRecebiveis",
       "kind": "entity",
       "class": "supporting"
@@ -45,49 +35,39 @@ export const financeiroOntologyIndex = {
   ],
   "relationships": [
     {
-      "relationshipId": "tituloTemPagador",
+      "relationshipId": "tituloPagador",
       "from": "TituloReceber",
       "to": "Pagador",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada título a receber pertence obrigatoriamente a um pagador.",
+      "description": "Cada título a receber pertence a um pagador, que responde pelo pagamento.",
       "field": "TituloReceber.pagadorId"
     },
     {
-      "relationshipId": "recebimentoDoTitulo",
+      "relationshipId": "recebimentoTitulo",
       "from": "Recebimento",
       "to": "TituloReceber",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada recebimento é lançado obrigatoriamente para um título a receber.",
-      "field": "Recebimento.tituloReceberId"
+      "description": "Cada recebimento baixa, total ou parcialmente, um título a receber.",
+      "field": "Recebimento.tituloId"
     },
     {
-      "relationshipId": "extratoDoPagador",
-      "from": "ExtratoPagador",
-      "to": "Pagador",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Cada extrato emitido referencia obrigatoriamente o pagador a que se destina.",
-      "field": "ExtratoPagador.pagadorId"
-    },
-    {
-      "relationshipId": "pagadorTemRecebimentos",
+      "relationshipId": "pagadorRecebimentos",
       "from": "Pagador",
       "to": "Recebimento",
       "type": "oneToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Os recebimentos de um pagador são obtidos pelos títulos a receber vinculados a ele.",
-      "through": "Recebimento",
-      "path": "Pagador <- TituloReceber.pagadorId; Recebimento.tituloReceberId -> TituloReceber",
+      "description": "Os recebimentos de um pagador, obtidos pelos títulos dele, usados no portal e no extrato.",
+      "through": "TituloReceber",
+      "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
       "derived": true
     }
   ]
-} as const satisfies Ns5OntologyIndexV3;
+} as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;
 
 export type FinanceiroOntologyIndexType = typeof financeiroOntologyIndex;
 

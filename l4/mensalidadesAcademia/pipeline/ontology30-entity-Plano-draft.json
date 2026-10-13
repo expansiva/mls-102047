@@ -4,34 +4,38 @@
     "moduleName": "mensalidadesAcademia",
     "entityId": "Plano",
     "title": "Plano",
-    "description": "Catálogo de planos da academia, com periodicidade, valor e dia de vencimento usados nas matrículas.",
-    "displayField": "name",
+    "description": "Plano da academia (mensal, trimestral ou anual) com valor e dia de vencimento, oferecido nas matrículas.",
+    "displayField": "nome",
     "relationships": {
       "matriculas": {
         "relationshipId": "matriculaPlano",
         "to": "Matricula",
         "via": "Matricula.planoId",
         "cardinality": "1:N",
-        "title": "Matrículas no plano",
-        "description": "Matrículas realizadas obrigatoriamente neste plano da academia.",
+        "title": "Matrículas do plano",
+        "description": "As matrículas feitas neste plano, de onde as mensalidades tiram valor e dia de vencimento.",
         "mode": "fk",
         "direction": "to",
-        "required": "Sempre"
+        "required": true
       }
     },
     "capabilities": {
-      "read.byId": "Consulta um plano pelo seu identificador no repositório de planos para a recepção ou a gerência que já possui a referência.",
-      "locate.byColumn": "Lista planos por nome, com ordenação e paginação, para a recepção ou a gerência localizar o plano escolhido.",
-      "locate.byText": "Pesquisa planos pelo trecho digitado no nome para a recepção ou a gerência encontrar rapidamente um plano.",
-      "count": "Conta os planos que atendem ao filtro informado para a gerência acompanhar o catálogo.",
-      "listByForeignKey": "Lista as matrículas vinculadas a um plano para a gerência consultar os alunos que o utilizam.",
-      "create": "Cadastra um novo plano com periodicidade, valor e dia de vencimento para a gerência manter o catálogo.",
-      "update": "Atualiza os dados comerciais de um plano para a gerência manter o catálogo vigente.",
-      "delete": "Remove fisicamente um plano do catálogo para a gerência quando ele não deve mais ser utilizado.",
-      "uniqueKey": "Impede o cadastro de dois planos com o mesmo nome por meio da chave única do catálogo, para a gerência."
+      "read.byId": "Abre um plano pelo identificador, quando a recepção confere valor e dia de vencimento na matrícula ou a gerência revê o plano.",
+      "locate.byColumn": "Lista os planos filtrados por periodicidade e ordenados pelo nome, para a gerência consultar o cadastro e a recepção escolher o plano da matrícula.",
+      "locate.byText": "Busca planos por parte do nome, para a gerência evitar duplicidade antes de cadastrar e a recepção achar o plano pedido pelo aluno.",
+      "count": "Conta os planos cadastrados por periodicidade, exibido no cabeçalho da lista de planos da gerência.",
+      "create": "Cadastra um novo plano com nome, periodicidade, valor e dia de vencimento; usado pela gerência.",
+      "update": "Altera valor, dia de vencimento ou descrição de um plano; usado pela gerência, valendo para as mensalidades geradas depois da alteração.",
+      "delete": "Remove um plano cadastrado por engano; usado pela gerência e recusado pelo módulo quando há matrícula apontando para ele.",
+      "uniqueKey": "Recusa um segundo plano com o mesmo nome, por índice único na coluna nome, ao gravar o cadastro da gerência.",
+      "comment": "Permite à gerência deixar anotações internas sobre o plano, como condições combinadas ou promoções."
     },
-    "rules": [],
-    "writer": "crud",
+    "rules": [
+      "planoNomeUnico",
+      "planoValorPositivo",
+      "planoDiaVencimentoValido",
+      "planoComMatriculaNaoPodeSerExcluido"
+    ],
     "kind": "entity",
     "class": "supporting",
     "storage": {
@@ -53,74 +57,68 @@
           "required": true,
           "derived": true
         },
-        "name": {
+        "nome": {
           "type": "string",
           "required": true,
           "unique": true,
           "indexed": true,
-          "of": "Address",
-          "title": "Nome",
-          "description": "Nome pelo qual o plano é identificado e localizado pela recepção e pela gerência.",
-          "maxLength": 120,
-          "min": 0,
-          "max": 0
+          "title": "Nome do plano",
+          "description": "Nome pelo qual a gerência e a recepção identificam o plano na hora de matricular o aluno. É único entre os planos da academia.",
+          "maxLength": 80
+        },
+        "periodicidade": {
+          "type": "enum",
+          "required": true,
+          "indexed": true,
+          "values": [
+            {
+              "value": "monthly",
+              "title": "Mensal"
+            },
+            {
+              "value": "quarterly",
+              "title": "Trimestral"
+            },
+            {
+              "value": "yearly",
+              "title": "Anual"
+            }
+          ],
+          "title": "Periodicidade",
+          "description": "Período de cobrança do plano; a recepção filtra os planos por ela ao escolher o plano da matrícula."
         },
         "details": {
           "type": "object",
           "required": true,
-          "of": "Address",
-          "title": "Detalhes do plano",
-          "description": "Características comerciais do plano da academia.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "title": "Dados do plano",
+          "description": "Valor, dia de vencimento e descrição do plano.",
           "fields": {
-            "periodicidade": {
-              "type": "enum",
-              "required": true,
-              "of": "Address",
-              "values": [
-                {
-                  "value": "monthly",
-                  "title": "Mensal",
-                  "description": "Plano comercial mensal."
-                },
-                {
-                  "value": "quarterly",
-                  "title": "Trimestral",
-                  "description": "Plano comercial trimestral."
-                },
-                {
-                  "value": "annual",
-                  "title": "Anual",
-                  "description": "Plano comercial anual."
-                }
-              ],
-              "title": "Periodicidade",
-              "description": "Periodicidade comercial do plano contratado pelo aluno.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0
-            },
             "valor": {
               "type": "money",
               "required": true,
-              "of": "Address",
               "title": "Valor",
-              "description": "Valor do plano usado para gerar a mensalidade do aluno.",
-              "maxLength": 0,
-              "min": 0.01,
-              "max": 0
+              "description": "Valor do plano, copiado para cada mensalidade gerada para os alunos matriculados nele.",
+              "min": 0.01
             },
             "diaVencimento": {
               "type": "integer",
               "required": true,
-              "of": "Address",
               "title": "Dia de vencimento",
-              "description": "Dia do mês usado como vencimento das mensalidades geradas para este plano.",
-              "maxLength": 0,
+              "description": "Dia do mês em que vencem as mensalidades geradas para os alunos deste plano.",
               "min": 1,
               "max": 31
+            },
+            "descricao": {
+              "type": "text",
+              "title": "Descrição",
+              "description": "Observações da gerência sobre o plano, mostradas à recepção ao escolher o plano.",
+              "maxLength": 500
+            },
+            "quantidadeMatriculasAtivas": {
+              "type": "integer",
+              "derived": true,
+              "title": "Matrículas ativas",
+              "description": "Quantidade de matrículas ativas (não canceladas) feitas neste plano."
             }
           }
         }
@@ -128,7 +126,7 @@
     },
     "uniqueKeys": [
       [
-        "name"
+        "nome"
       ]
     ]
   },
@@ -137,6 +135,11 @@
       "kind": "derivedFromPlatform",
       "entityId": "Plano",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Plano",
+      "detail": "record.fields.details.fields.quantidadeMatriculasAtivas.derived (derived[])"
     }
   ]
 }

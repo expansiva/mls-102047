@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/locacaoEquipamentos/access.defs.ts" enhancement="_blank"/>
 
-import type { Ns5AccessArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5AccessArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const locacaoEquipamentosAccess = {
   "schemaVersion": "2026-09-12-ns5-access-v3",
@@ -11,101 +11,129 @@ export const locacaoEquipamentosAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Atendente",
-      "description": "Cria contratos de locação para clientes e registra a devolução dos equipamentos."
+      "description": "Cria contratos de locação para clientes com um ou mais equipamentos e período, e registra a devolução com a data real.",
+      "personEntity": ""
     },
     {
       "actorId": "gerente",
       "kind": "internal",
       "origin": "named",
       "title": "Gerente",
-      "description": "Acompanha a disponibilidade, a locação e a manutenção dos equipamentos."
+      "description": "Acompanha a situação dos equipamentos: disponíveis, locados ou em manutenção.",
+      "personEntity": ""
     }
   ],
   "grants": [
     {
-      "grantId": "atendenteLocalizarCliente",
+      "grantId": "atendenteClientes",
       "actorRef": "atendente",
-      "title": "Localizar clientes para locação",
-      "description": "Permite ao atendente identificar o cliente cadastrado ao preparar um contrato de locação.",
+      "title": "Localizar e cadastrar clientes",
+      "description": "O atendente busca clientes pelo nome ou documento e cadastra o cliente quando ainda não existe, para abrir contratos de locação.",
       "entityRefs": [
         "Cliente"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Clientes cadastrados na organização."
+        "description": "Todos os clientes da locadora."
       },
       "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Permite consultar a identificação do cliente necessária para sua localização; os demais dados do registro mestre permanecem restritos.",
-        "allowedFields": [
-          "Cliente.id",
-          "Cliente.details.identification",
-          "Cliente.details.locacaoEquipamentos"
-        ]
+        "mode": "fullRecord",
+        "description": "O atendente vê o cadastro completo do cliente: identificação, documento, endereços, contatos e consentimento."
       }
     },
     {
-      "grantId": "atendenteSelecionarEquipamentos",
+      "grantId": "atendenteContratos",
       "actorRef": "atendente",
-      "title": "Consultar equipamentos para locação",
-      "description": "Permite ao atendente consultar os equipamentos e suas condições comerciais e operacionais ao montar um contrato.",
+      "title": "Criar contratos e registrar devoluções",
+      "description": "O atendente cria contratos de locação, inclui equipamentos, confirma o contrato e registra a data real de devolução, conferindo dias de atraso e multa.",
+      "entityRefs": [
+        "ContratoLocacao",
+        "ItemContrato"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os contratos e itens de contrato da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O atendente vê todos os dados do contrato e de seus itens, incluindo valores calculados de atraso e multa."
+      }
+    },
+    {
+      "grantId": "atendenteEquipamentos",
+      "actorRef": "atendente",
+      "title": "Consultar equipamentos",
+      "description": "O atendente busca equipamentos pelo código ou descrição e confere a situação e o valor da diária antes de incluí-los no contrato.",
       "entityRefs": [
         "Equipamento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Equipamentos pertencentes à organização."
+        "description": "Todos os equipamentos da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O atendente vê código, descrição, situação, valor da diária e o contrato atual do equipamento."
+      }
+    },
+    {
+      "grantId": "gerenteEquipamentos",
+      "actorRef": "gerente",
+      "title": "Manter e acompanhar equipamentos",
+      "description": "O gerente cadastra os equipamentos, mantém a situação (disponível ou em manutenção) e acompanha quais estão disponíveis, locados ou em manutenção.",
+      "entityRefs": [
+        "Equipamento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os equipamentos da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O gerente vê todos os dados do equipamento, inclusive a situação atual e o contrato em que está locado."
+      }
+    },
+    {
+      "grantId": "gerenteContratos",
+      "actorRef": "gerente",
+      "title": "Consultar contratos dos equipamentos",
+      "description": "O gerente consulta o contrato e os itens em que um equipamento está locado.",
+      "entityRefs": [
+        "ContratoLocacao",
+        "ItemContrato"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os contratos e itens de contrato da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O gerente vê os dados dos contratos e itens, incluindo período, atraso e multa."
+      }
+    },
+    {
+      "grantId": "gerenteClientes",
+      "actorRef": "gerente",
+      "title": "Identificar o cliente do contrato",
+      "description": "O gerente vê o nome do cliente titular do contrato em que o equipamento está locado.",
+      "entityRefs": [
+        "Cliente"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Clientes da locadora."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Permite consultar o código, a descrição, a diária e a situação operacional de cada equipamento.",
+        "description": "O gerente vê apenas o nome e a situação do cadastro do cliente, sem documento, endereços ou contatos.",
         "allowedFields": [
-          "Equipamento.id",
-          "Equipamento.codigo",
-          "Equipamento.details.descricao",
-          "Equipamento.details.valorDiaria",
-          "Equipamento.details.situacaoOperacional"
+          "Cliente.details.identification.name",
+          "Cliente.details.identification.status"
         ]
-      }
-    },
-    {
-      "grantId": "atendenteGerirLocacoes",
-      "actorRef": "atendente",
-      "title": "Criar e concluir contratos de locação",
-      "description": "Permite ao atendente registrar contratos, seus equipamentos locados e a devolução efetiva, inclusive a multa calculada por atraso.",
-      "entityRefs": [
-        "ContratoLocacao",
-        "ItemLocacao"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Contratos e itens de locação da organização."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Permite consultar integralmente os contratos de locação e seus itens para criação, conferência e devolução."
-      }
-    },
-    {
-      "grantId": "gerenteGerirInventario",
-      "actorRef": "gerente",
-      "title": "Gerir equipamentos e manutenções",
-      "description": "Permite ao gerente administrar o cadastro de equipamentos e seus períodos de manutenção, acompanhando a situação operacional.",
-      "entityRefs": [
-        "Equipamento",
-        "ManutencaoEquipamento"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Equipamentos e manutenções de toda a organização."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Permite consultar integralmente os equipamentos e os registros de manutenção necessários para gerir a disponibilidade."
       }
     }
   ]
-} as const satisfies Ns5AccessArtifact;
+} as const satisfies Ns5Readonly<Ns5AccessArtifact>;
 
 export type LocacaoEquipamentosAccessType = typeof locacaoEquipamentosAccess;
 

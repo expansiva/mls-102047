@@ -7,39 +7,41 @@
       "kind": "internal",
       "origin": "named",
       "title": "Organizador",
-      "description": "Cadastra e publica eventos, acompanha inscritos e exporta a lista de inscrições."
+      "description": "Cadastra e publica eventos com título, descrição, data, local e número de vagas; acompanha os inscritos e as vagas ocupadas e baixa a lista de inscritos em CSV.",
+      "personEntity": ""
     },
     {
       "actorId": "publico",
       "kind": "external",
       "origin": "named",
       "title": "Público",
-      "description": "Acessa a página pública do evento e realiza sua inscrição."
+      "description": "Qualquer pessoa que acessa a página pública de um evento publicado e se inscreve com nome e e-mail, entrando na lista de espera quando as vagas acabam, e que pode cancelar a própria inscrição.",
+      "personEntity": "Participante"
     }
   ],
   "grants": [
     {
-      "grantId": "organizadorGerenciarEventos",
+      "grantId": "organizadorEventos",
       "actorRef": "organizador",
       "title": "Gerenciar eventos",
-      "description": "Permite ao organizador cadastrar, publicar e consultar todos os eventos da organização, incluindo capacidade e ocupação.",
+      "description": "O organizador cadastra, revisa e publica eventos e acompanha vagas ocupadas, vagas restantes e lista de espera.",
       "entityRefs": [
         "Evento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange todos os eventos da organização."
+        "description": "Todos os eventos da organização."
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "O organizador visualiza todas as informações do evento necessárias para seu cadastro, publicação e acompanhamento."
+        "description": "Registro completo do evento, incluindo os totais de ocupação."
       }
     },
     {
-      "grantId": "organizadorAcompanharInscricoes",
+      "grantId": "organizadorInscritos",
       "actorRef": "organizador",
-      "title": "Acompanhar inscrições",
-      "description": "Permite ao organizador consultar e exportar as inscrições dos eventos, com o nome e o e-mail dos participantes.",
+      "title": "Acompanhar inscritos",
+      "description": "O organizador vê os inscritos de cada evento com nome, e-mail, situação e ordem de chegada, e baixa a lista em CSV.",
       "entityRefs": [
         "Inscricao",
         "Participante",
@@ -47,60 +49,73 @@
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange todas as inscrições e os dados de participantes vinculados a eventos da organização."
+        "description": "Todas as inscrições dos eventos da organização e os participantes inscritos."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "O organizador visualiza a situação e a data das inscrições, o nome do participante e o endereço de e-mail informado para contato e exportação.",
+        "description": "Inscrição completa e, do participante, apenas nome e e-mail; consentimento e demais dados do cadastro mestre não são exibidos.",
         "allowedFields": [
-          "Inscricao.id",
-          "Inscricao.eventoId",
-          "Inscricao.participanteId",
-          "Inscricao.emailParticipanteId",
-          "Inscricao.status",
-          "Inscricao.createdAt",
-          "Participante.details.identification",
-          "EmailParticipante.details.contactChannel"
+          "Inscricao",
+          "Participante.details.identification.name",
+          "Participante.details.identification.status",
+          "Participante.details.base.contacts",
+          "EmailParticipante.details.identification.name",
+          "EmailParticipante.details.contactChannel.value",
+          "EmailParticipante.details.contactChannel.isVerified"
         ]
       }
     },
     {
-      "grantId": "publicoConsultarPropriaInscricao",
+      "grantId": "publicoMinhasInscricoes",
       "actorRef": "publico",
-      "title": "Consultar e cancelar a própria inscrição",
-      "description": "Permite ao público consultar a situação da própria inscrição e cancelá-la quando necessário.",
+      "title": "Minhas inscrições",
+      "description": "A pessoa se inscreve em um evento publicado, consulta a própria inscrição e o evento dela e pode cancelá-la.",
       "entityRefs": [
         "Inscricao",
-        "Participante"
+        "Evento"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Abrange somente inscrições vinculadas ao participante da sessão.",
+        "description": "Somente as inscrições da própria pessoa e os eventos dessas inscrições.",
         "anchorEntity": "Participante"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "O participante visualiza sua própria identificação e os dados necessários para conferir a situação de sua inscrição.",
-        "allowedFields": [
-          "Inscricao.id",
-          "Inscricao.eventoId",
-          "Inscricao.status",
-          "Inscricao.createdAt",
-          "Participante.details.identification"
+        "description": "Dados da inscrição e do evento visíveis ao público, sem campos internos de controle.",
+        "deniedFields": [
+          "Inscricao.version",
+          "Evento.version",
+          "Evento.status",
+          "Evento.details.publishedAt"
         ]
       }
-    }
-  ],
-  "normalizations": [
-    {
-      "kind": "dropAnchorEntity",
-      "grantId": "organizadorGerenciarEventos",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
-      "kind": "dropAnchorEntity",
-      "grantId": "organizadorAcompanharInscricoes",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
+      "grantId": "publicoMeuCadastro",
+      "actorRef": "publico",
+      "title": "Meu cadastro de participante",
+      "description": "A pessoa informa e confere o próprio nome, e-mail e consentimento de privacidade ao se inscrever.",
+      "entityRefs": [
+        "Participante",
+        "EmailParticipante"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Somente o próprio registro de participante e o próprio e-mail.",
+        "anchorEntity": "Participante"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "Nome, país, e-mail e consentimento da própria pessoa.",
+        "allowedFields": [
+          "Participante.details.identification.name",
+          "Participante.details.identification.countryCode",
+          "Participante.details.base.contacts",
+          "Participante.details.person.privacyConsent",
+          "EmailParticipante.details.identification.name",
+          "EmailParticipante.details.contactChannel"
+        ]
+      }
     }
   ]
 }

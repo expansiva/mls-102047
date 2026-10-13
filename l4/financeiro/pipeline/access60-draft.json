@@ -7,158 +7,179 @@
       "kind": "internal",
       "origin": "named",
       "title": "Caixa",
-      "description": "Recebe títulos por dinheiro, Pix ou cartão, registra baixas parciais e estorna recebimentos no mesmo dia."
+      "description": "Recebe títulos em dinheiro, pix ou cartão, registra baixas parciais e estorna recebimentos no mesmo dia.",
+      "personEntity": ""
     },
     {
       "actorId": "gerenteFinanceiro",
       "kind": "internal",
       "origin": "named",
       "title": "Gerente financeiro",
-      "description": "Acompanha os recebíveis, títulos vencidos e emite extratos por pagador."
+      "description": "Acompanha o painel de recebíveis por período e por origem, consulta os títulos vencidos e emite extrato por pagador.",
+      "personEntity": ""
     },
     {
       "actorId": "pagador",
       "kind": "external",
       "origin": "named",
       "title": "Pagador",
-      "description": "Acessa o portal para consultar os próprios títulos e recebimentos e pagar títulos em aberto com cartão."
+      "description": "Acessa o portal para ver só os próprios títulos e recebimentos e pagar com cartão um título em aberto.",
+      "personEntity": "Pagador"
     }
   ],
   "grants": [
     {
+      "grantId": "caixaTitulos",
+      "actorRef": "caixa",
+      "title": "Caixa: títulos a receber",
+      "description": "O caixa localiza e confere os títulos a receber da organização (pagador, valor, saldo, vencimento e origem) para registrar recebimentos.",
+      "entityRefs": [
+        "TituloReceber"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os títulos a receber da organização."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O caixa vê o título completo, incluindo saldo em aberto e situação derivada."
+      }
+    },
+    {
       "grantId": "caixaRecebimentos",
       "actorRef": "caixa",
-      "title": "Receber e estornar recebimentos",
-      "description": "Permite ao caixa consultar pagadores e títulos de toda a organização, registrar recebimentos totais ou parciais e conferir ou estornar recebimentos lançados no dia.",
+      "title": "Caixa: recebimentos e estornos",
+      "description": "O caixa registra recebimentos totais ou parciais em dinheiro, pix ou cartão via Stripe e estorna recebimentos do mesmo dia.",
       "entityRefs": [
-        "Pagador",
-        "TituloReceber",
         "Recebimento"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange os pagadores, títulos e recebimentos de toda a organização necessários ao atendimento do caixa."
+        "description": "Todos os recebimentos da organização; o estorno só é permitido no mesmo dia."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O caixa vê o recebimento completo, incluindo dados do estorno."
+      }
+    },
+    {
+      "grantId": "caixaPagadorIdentificacao",
+      "actorRef": "caixa",
+      "title": "Caixa: identificação do pagador",
+      "description": "O caixa vê o nome e o documento do pagador para localizar e conferir o título.",
+      "entityRefs": [
+        "Pagador"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Pagadores da organização."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "O caixa vê a identificação do pagador e os dados financeiros e operacionais necessários para receber, conferir e estornar títulos, sem acesso a documentos, dados pessoais, dados gerais ou dados de outros módulos.",
+        "description": "Apenas nome e documento do pagador; endereços, contatos e consentimento ficam ocultos.",
         "allowedFields": [
-          "Pagador.id",
-          "Pagador.details.identification",
-          "TituloReceber.id",
-          "TituloReceber.number",
-          "TituloReceber.pagadorId",
-          "TituloReceber.dueDate",
-          "TituloReceber.originModule",
-          "TituloReceber.details",
-          "Recebimento.id",
-          "Recebimento.number",
-          "Recebimento.tituloReceberId",
-          "Recebimento.receivedAt",
-          "Recebimento.stripePaymentId",
-          "Recebimento.status",
-          "Recebimento.details"
+          "Pagador.details.identification.name",
+          "Pagador.details.identification.docType",
+          "Pagador.details.identification.docId"
         ]
       }
     },
     {
-      "grantId": "gerenteFinanceiroRecebiveis",
+      "grantId": "gerenteRecebiveis",
       "actorRef": "gerenteFinanceiro",
-      "title": "Gerir recebíveis e emitir extratos",
-      "description": "Permite ao gerente financeiro acompanhar os recebíveis e vencidos de toda a organização, consultar pagadores e movimentações, emitir extratos e manter o papel de gerente financeiro.",
+      "title": "Gerente: títulos, recebimentos e painel",
+      "description": "O gerente financeiro acompanha o painel de recebíveis por período e origem, lista os títulos vencidos e consulta títulos e recebimentos para o extrato.",
       "entityRefs": [
-        "Pagador",
-        "GerenteFinanceiro",
         "TituloReceber",
         "Recebimento",
-        "ExtratoPagador",
         "PainelRecebiveis"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Abrange todos os registros financeiros e pagadores da organização para análise consolidada e emissão de extratos."
+        "description": "Todos os títulos, recebimentos e totais do painel da organização."
       },
       "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "O gerente financeiro vê os dados de identificação necessários para localizar pagadores e gerentes e todos os dados financeiros, extratos e indicadores necessários para gerir os recebíveis, sem acesso a documentos, dados pessoais, dados gerais ou dados de outros módulos.",
-        "allowedFields": [
-          "Pagador.id",
-          "Pagador.details.identification",
-          "GerenteFinanceiro.id",
-          "GerenteFinanceiro.details.identification",
-          "TituloReceber.id",
-          "TituloReceber.number",
-          "TituloReceber.pagadorId",
-          "TituloReceber.dueDate",
-          "TituloReceber.originModule",
-          "TituloReceber.originRecordId",
-          "TituloReceber.details",
-          "Recebimento.id",
-          "Recebimento.number",
-          "Recebimento.tituloReceberId",
-          "Recebimento.receivedAt",
-          "Recebimento.stripePaymentId",
-          "Recebimento.status",
-          "Recebimento.details",
-          "ExtratoPagador.id",
-          "ExtratoPagador.number",
-          "ExtratoPagador.pagadorId",
-          "ExtratoPagador.emitidoEm",
-          "ExtratoPagador.details",
-          "PainelRecebiveis.id",
-          "PainelRecebiveis.period",
-          "PainelRecebiveis.groupKey",
-          "PainelRecebiveis.details"
-        ]
+        "mode": "fullRecord",
+        "description": "O gerente vê os registros completos e os totais do painel."
+      }
+    },
+    {
+      "grantId": "gerentePagadores",
+      "actorRef": "gerenteFinanceiro",
+      "title": "Gerente: pagadores",
+      "description": "O gerente localiza o pagador por nome ou documento e emite o extrato com seus dados de cabeçalho e contatos para cobrança de vencidos.",
+      "entityRefs": [
+        "Pagador"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os pagadores da organização."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O gerente vê o registro do pagador visível ao módulo."
+      }
+    },
+    {
+      "grantId": "pagadorMeuCadastro",
+      "actorRef": "pagador",
+      "title": "Pagador: meu cadastro",
+      "description": "O pagador vê o próprio registro no portal.",
+      "entityRefs": [
+        "Pagador"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Somente o registro do próprio pagador da sessão.",
+        "anchorEntity": "Pagador"
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O pagador vê os próprios dados."
       }
     },
     {
       "grantId": "pagadorMeusTitulos",
       "actorRef": "pagador",
-      "title": "Consultar e pagar meus títulos",
-      "description": "Permite ao pagador consultar somente seus próprios títulos e recebimentos e pagar títulos em aberto com cartão.",
+      "title": "Pagador: meus títulos",
+      "description": "O pagador vê no portal somente os próprios títulos, em aberto e quitados, e escolhe um em aberto para pagar com cartão.",
       "entityRefs": [
-        "TituloReceber",
-        "Recebimento"
+        "TituloReceber"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Abrange exclusivamente títulos e recebimentos que alcançam o pagador autenticado como responsável pelo pagamento.",
+        "description": "Títulos cujo pagador é a pessoa da sessão.",
         "anchorEntity": "Pagador"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "O pagador vê somente valores, vencimentos, origem, situação e saldo de seus títulos, além de valores, datas, situação e formas de seus próprios recebimentos; não vê identificadores da Stripe nem dados de outros pagadores.",
-        "allowedFields": [
-          "TituloReceber.id",
-          "TituloReceber.number",
-          "TituloReceber.dueDate",
-          "TituloReceber.originModule",
-          "TituloReceber.details.amount",
-          "TituloReceber.details.totalReceived",
-          "TituloReceber.details.outstandingBalance",
-          "TituloReceber.details.situation",
-          "TituloReceber.details.overdue",
-          "Recebimento.id",
-          "Recebimento.number",
-          "Recebimento.tituloReceberId",
-          "Recebimento.receivedAt",
-          "Recebimento.status",
-          "Recebimento.details"
+        "description": "O pagador vê valor, vencimento, origem, saldo e situação; o identificador interno do documento de origem fica oculto.",
+        "deniedFields": [
+          "TituloReceber.origemReferencia"
         ]
       }
-    }
-  ],
-  "normalizations": [
-    {
-      "kind": "dropAnchorEntity",
-      "grantId": "caixaRecebimentos",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
-      "kind": "dropAnchorEntity",
-      "grantId": "gerenteFinanceiroRecebiveis",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
+      "grantId": "pagadorMeusRecebimentos",
+      "actorRef": "pagador",
+      "title": "Pagador: meus recebimentos",
+      "description": "O pagador vê os recebimentos dos próprios títulos e paga com cartão via Stripe um título em aberto.",
+      "entityRefs": [
+        "Recebimento"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Recebimentos de títulos cujo pagador é a pessoa da sessão.",
+        "anchorEntity": "Pagador"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "O pagador vê valor, data, forma de pagamento e situação; o identificador do Stripe e a anotação interna do caixa ficam ocultos.",
+        "deniedFields": [
+          "Recebimento.stripePaymentIntentId",
+          "Recebimento.details.observacao"
+        ]
+      }
     }
   ]
 }

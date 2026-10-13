@@ -7,125 +7,148 @@
       "kind": "internal",
       "origin": "named",
       "title": "Recepcionista",
-      "description": "Abre órdenes de servicio, registra la recepción del aparato, entrega el aparato reparado y finaliza la orden."
+      "description": "Recibe el aparato del cliente, abre la orden de servicio con los datos del cliente, el aparato, el defecto informado y fotos, y al final entrega el aparato y finaliza la orden.",
+      "personEntity": ""
     },
     {
       "actorId": "tecnico",
       "kind": "internal",
       "origin": "named",
       "title": "Técnico",
-      "description": "Analiza el aparato, registra el diagnóstico, las piezas y costos internos, prepara el presupuesto y realiza la reparación."
+      "description": "Analiza el aparato, registra el diagnóstico, las piezas necesarias con costo interno y el valor del presupuesto; si el cliente aprueba, realiza la reparación, registra lo que hizo y marca la orden como lista.",
+      "personEntity": ""
     },
     {
       "actorId": "cliente",
       "kind": "external",
       "origin": "named",
       "title": "Cliente",
-      "description": "Consulta sus propias órdenes en el portal y aprueba o rechaza el presupuesto."
+      "description": "Accede al portal, ve solamente sus propias órdenes con estado, diagnóstico y valor del presupuesto, y aprueba o rechaza el presupuesto.",
+      "personEntity": "Cliente"
     }
   ],
   "grants": [
     {
-      "grantId": "recepcionGestionaOrdenes",
+      "grantId": "recepcionistaClientes",
       "actorRef": "recepcionista",
-      "title": "Gestionar recepción y entrega de órdenes",
-      "description": "Permite registrar la recepción de aparatos, consultar los datos necesarios para la entrega y finalizar las órdenes de servicio de la organización.",
+      "title": "Clientes del servicio técnico",
+      "description": "El recepcionista busca, registra o reutiliza el registro del cliente al abrir una orden de servicio.",
       "entityRefs": [
-        "Cliente",
-        "Aparato",
+        "Cliente"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos los clientes de la organización, para localizarlos por documento o nombre."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Ve el registro completo del cliente: identificación, contactos y consentimiento."
+      }
+    },
+    {
+      "grantId": "recepcionistaOrdenes",
+      "actorRef": "recepcionista",
+      "title": "Apertura y entrega de órdenes",
+      "description": "El recepcionista abre las órdenes de servicio con el aparato, el defecto informado y las fotos, y entrega y finaliza las órdenes listas.",
+      "entityRefs": [
         "OrdenServicio"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Accede a las órdenes, clientes y aparatos de toda la organización necesarios para la recepción y la entrega."
+        "description": "Todas las órdenes de servicio de la organización."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Muestra los datos de cliente y aparato necesarios para atender la orden, además de la recepción, diagnóstico, presupuesto, reparación y disponibilidad para retiro; no expone costos internos ni anotaciones técnicas.",
-        "allowedFields": [
-          "Cliente.details.identification",
-          "Cliente.details.base",
-          "Aparato.details.identification",
-          "Aparato.details.assetEquipment",
-          "OrdenServicio.serviceOrderNumber",
-          "OrdenServicio.customerId",
-          "OrdenServicio.deviceId",
-          "OrdenServicio.status",
-          "OrdenServicio.details.reportedDefect",
-          "OrdenServicio.details.diagnosis",
-          "OrdenServicio.details.budgetAmount",
-          "OrdenServicio.details.repairPerformed",
-          "OrdenServicio.details.availableForPickup"
+        "description": "Ve la orden completa salvo las anotaciones internas del técnico y el costo interno de las piezas.",
+        "deniedFields": [
+          "OrdenServicio.details.anotacionesTecnico",
+          "OrdenServicio.details.costoInternoPiezas"
         ]
       }
     },
     {
-      "grantId": "tecnicoGestionaReparaciones",
+      "grantId": "tecnicoOrdenes",
       "actorRef": "tecnico",
-      "title": "Analizar, presupuestar y reparar órdenes",
-      "description": "Permite consultar las órdenes de la organización, registrar el análisis y los costos internos, preparar presupuestos y dejar constancia de las reparaciones realizadas.",
+      "title": "Diagnóstico, presupuesto y reparación",
+      "description": "El técnico analiza las órdenes, registra diagnóstico, anotaciones, piezas con costo interno y valor del presupuesto, y luego registra la reparación y marca la orden como lista.",
       "entityRefs": [
-        "Cliente",
-        "Aparato",
-        "OrdenServicio"
+        "OrdenServicio",
+        "PiezaOrden"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Accede a las órdenes, clientes y aparatos de toda la organización requeridos para el análisis y la reparación."
+        "description": "Todas las órdenes de servicio y sus piezas de la organización."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Ve el registro completo de las órdenes y de las piezas, incluidos los costos internos."
+      }
+    },
+    {
+      "grantId": "tecnicoClientes",
+      "actorRef": "tecnico",
+      "title": "Consulta del cliente de la orden",
+      "description": "El técnico ve quién es el cliente de la orden que analiza o repara.",
+      "entityRefs": [
+        "Cliente"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Clientes de la organización vinculados a las órdenes."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Muestra la identificación del cliente, la identificación técnica del aparato y toda la información de la orden, incluidos diagnóstico, piezas, costos internos y anotaciones técnicas.",
+        "description": "Solo el nombre y los contactos del cliente.",
         "allowedFields": [
-          "Cliente.details.identification",
-          "Aparato.details.identification",
-          "Aparato.details.assetEquipment",
-          "OrdenServicio.id",
-          "OrdenServicio.version",
-          "OrdenServicio.serviceOrderNumber",
-          "OrdenServicio.customerId",
-          "OrdenServicio.deviceId",
-          "OrdenServicio.status",
-          "OrdenServicio.details"
+          "Cliente.details.identification.name",
+          "Cliente.details.base.contacts"
         ]
       }
     },
     {
-      "grantId": "clienteConsultaYdecidePresupuesto",
+      "grantId": "clienteMisOrdenes",
       "actorRef": "cliente",
-      "title": "Consultar y decidir presupuestos propios",
-      "description": "Permite al cliente consultar únicamente sus órdenes de servicio y aprobar o rechazar el presupuesto recibido desde el portal.",
+      "title": "Mis órdenes en el portal",
+      "description": "El cliente ve solamente sus propias órdenes con estado, aparato, diagnóstico y valor del presupuesto, y aprueba o rechaza el presupuesto.",
       "entityRefs": [
         "OrdenServicio"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Accede solo a las órdenes cuyo cliente vinculado corresponde a la persona de la sesión.",
+        "description": "Solo las órdenes cuyo cliente es la persona que inició sesión.",
         "anchorEntity": "Cliente"
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Muestra el número, estado, diagnóstico, valor del presupuesto y disponibilidad para retiro de las órdenes propias, sin revelar costos internos de piezas ni anotaciones del técnico.",
-        "allowedFields": [
-          "OrdenServicio.serviceOrderNumber",
-          "OrdenServicio.status",
-          "OrdenServicio.details.diagnosis",
-          "OrdenServicio.details.budgetAmount",
-          "OrdenServicio.details.availableForPickup"
+        "description": "Nunca ve las anotaciones internas del técnico ni el costo interno de las piezas.",
+        "deniedFields": [
+          "OrdenServicio.details.anotacionesTecnico",
+          "OrdenServicio.details.costoInternoPiezas"
         ]
       }
-    }
-  ],
-  "normalizations": [
-    {
-      "kind": "dropAnchorEntity",
-      "grantId": "recepcionGestionaOrdenes",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
     },
     {
-      "kind": "dropAnchorEntity",
-      "grantId": "tecnicoGestionaReparaciones",
-      "detail": "anchorEntity removed; organization is not own/assigned/related."
+      "grantId": "clienteMiRegistro",
+      "actorRef": "cliente",
+      "title": "Mis datos",
+      "description": "El cliente ve su propio registro en el portal.",
+      "entityRefs": [
+        "Cliente"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Solo el registro de la persona que inició sesión.",
+        "anchorEntity": "Cliente"
+      },
+      "disclosure": {
+        "mode": "fieldsOnly",
+        "description": "Ve su nombre, sus contactos y su consentimiento de privacidad.",
+        "allowedFields": [
+          "Cliente.details.identification.name",
+          "Cliente.details.base.contacts",
+          "Cliente.details.person.privacyConsent"
+        ]
+      }
     }
   ]
 }

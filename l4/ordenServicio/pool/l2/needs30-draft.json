@@ -1,7 +1,7 @@
 {
-  "thread": "ordenServicio-20261002161417",
+  "thread": "ordenServicio-20261012202920",
   "round": 1,
-  "inputFile": "l4/ordenServicio/pool/l2/20261002161417_ordenServicio-20261002161417_1.json",
+  "inputFile": "l4/ordenServicio/pool/l2/20261012202920_ordenServicio-20261012202920_1.json",
   "needs": {
     "schemaVersion": "2026-09-21-p2-needs-v1",
     "moduleName": "ordenServicio",
@@ -9,26 +9,411 @@
     "menuSchema": "2026-09-20-p2-menu-v2.2",
     "pages": [
       {
+        "pageId": "inicio_taller",
+        "actors": [
+          "recepcionista",
+          "tecnico"
+        ],
+        "reads": [
+          {
+            "entity": "Cliente",
+            "family": "mdm",
+            "scope": "organization",
+            "derived": [],
+            "from": [
+              "grant:recepcionistaClientes",
+              "grant:tecnicoClientes",
+              "journey:abrirOrdenServicio/buscarCliente",
+              "journey:abrirOrdenServicio/crearOrden",
+              "journey:abrirOrdenServicio/registrarCliente",
+              "journey:diagnosticarYpresupuestar/buscarOrdenAbierta",
+              "journey:diagnosticarYpresupuestar/emitirPresupuesto",
+              "journey:diagnosticarYpresupuestar/registrarDiagnostico",
+              "journey:diagnosticarYpresupuestar/registrarPiezas",
+              "journey:diagnosticarYpresupuestar/revisarOrden",
+              "journey:entregarYfinalizar/buscarOrdenLista",
+              "journey:entregarYfinalizar/finalizarOrden",
+              "journey:entregarYfinalizar/revisarOrdenLista",
+              "journey:realizarReparacion/buscarOrdenAprobada",
+              "journey:realizarReparacion/marcarLista",
+              "journey:realizarReparacion/registrarTrabajo",
+              "journey:realizarReparacion/revisarOrdenAprobada",
+              "relationship:Cliente/ordenCliente",
+              "relationship:OrdenServicio/ordenCliente"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.costoInternoPiezas",
+              "details.disponibleParaRetiro"
+            ],
+            "from": [
+              "grant:recepcionistaOrdenes",
+              "grant:tecnicoOrdenes",
+              "journey:abrirOrdenServicio/buscarCliente",
+              "journey:abrirOrdenServicio/crearOrden",
+              "journey:abrirOrdenServicio/registrarCliente",
+              "journey:diagnosticarYpresupuestar/buscarOrdenAbierta",
+              "journey:diagnosticarYpresupuestar/emitirPresupuesto",
+              "journey:diagnosticarYpresupuestar/registrarDiagnostico",
+              "journey:diagnosticarYpresupuestar/registrarPiezas",
+              "journey:diagnosticarYpresupuestar/revisarOrden",
+              "journey:entregarYfinalizar/buscarOrdenLista",
+              "journey:entregarYfinalizar/finalizarOrden",
+              "journey:entregarYfinalizar/revisarOrdenLista",
+              "journey:realizarReparacion/buscarOrdenAprobada",
+              "journey:realizarReparacion/marcarLista",
+              "journey:realizarReparacion/registrarTrabajo",
+              "journey:realizarReparacion/revisarOrdenAprobada",
+              "relationship:Cliente/ordenCliente",
+              "relationship:OrdenServicio/ordenCliente",
+              "relationship:OrdenServicio/piezaOrden",
+              "relationship:PiezaOrden/piezaOrden"
+            ]
+          },
+          {
+            "entity": "PiezaOrden",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.costoTotal"
+            ],
+            "from": [
+              "grant:tecnicoOrdenes",
+              "journey:abrirOrdenServicio/buscarCliente",
+              "journey:abrirOrdenServicio/crearOrden",
+              "journey:abrirOrdenServicio/registrarCliente",
+              "journey:diagnosticarYpresupuestar/buscarOrdenAbierta",
+              "journey:diagnosticarYpresupuestar/emitirPresupuesto",
+              "journey:diagnosticarYpresupuestar/registrarDiagnostico",
+              "journey:diagnosticarYpresupuestar/registrarPiezas",
+              "journey:diagnosticarYpresupuestar/revisarOrden",
+              "journey:entregarYfinalizar/buscarOrdenLista",
+              "journey:entregarYfinalizar/finalizarOrden",
+              "journey:entregarYfinalizar/revisarOrdenLista",
+              "journey:realizarReparacion/buscarOrdenAprobada",
+              "journey:realizarReparacion/marcarLista",
+              "journey:realizarReparacion/registrarTrabajo",
+              "journey:realizarReparacion/revisarOrdenAprobada",
+              "relationship:OrdenServicio/piezaOrden",
+              "relationship:PiezaOrden/piezaOrden"
+            ]
+          }
+        ],
+        "writes": [
+          {
+            "entity": "Cliente",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:abrirOrdenServicio/registrarCliente"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:abrirOrdenServicio/crearOrden"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "transition",
+            "transitionRef": "emitirPresupuesto",
+            "from": [
+              "journey:diagnosticarYpresupuestar/emitirPresupuesto"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "transition",
+            "transitionRef": "finalizar",
+            "from": [
+              "journey:entregarYfinalizar/finalizarOrden"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "transition",
+            "transitionRef": "marcarLista",
+            "from": [
+              "journey:realizarReparacion/marcarLista"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "update",
+            "transitionRef": "",
+            "from": [
+              "journey:diagnosticarYpresupuestar/registrarDiagnostico",
+              "journey:realizarReparacion/registrarTrabajo"
+            ]
+          },
+          {
+            "entity": "PiezaOrden",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:diagnosticarYpresupuestar/registrarPiezas"
+            ]
+          }
+        ]
+      },
+      {
+        "pageId": "clientes",
+        "actors": [
+          "recepcionista"
+        ],
+        "reads": [
+          {
+            "entity": "Cliente",
+            "family": "mdm",
+            "scope": "organization",
+            "derived": [],
+            "from": [
+              "grant:recepcionistaClientes",
+              "journey:abrirOrdenServicio/buscarCliente",
+              "journey:abrirOrdenServicio/crearOrden",
+              "journey:abrirOrdenServicio/registrarCliente",
+              "relationship:Cliente/ordenCliente",
+              "relationship:OrdenServicio/ordenCliente"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.costoInternoPiezas",
+              "details.disponibleParaRetiro"
+            ],
+            "from": [
+              "grant:recepcionistaOrdenes",
+              "journey:abrirOrdenServicio/buscarCliente",
+              "journey:abrirOrdenServicio/crearOrden",
+              "journey:abrirOrdenServicio/registrarCliente",
+              "relationship:Cliente/ordenCliente",
+              "relationship:OrdenServicio/ordenCliente"
+            ]
+          }
+        ],
+        "writes": [
+          {
+            "entity": "Cliente",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:abrirOrdenServicio/registrarCliente"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:abrirOrdenServicio/crearOrden"
+            ]
+          }
+        ]
+      },
+      {
+        "pageId": "ordenes_servicio",
+        "actors": [
+          "recepcionista",
+          "tecnico"
+        ],
+        "reads": [
+          {
+            "entity": "Cliente",
+            "family": "mdm",
+            "scope": "organization",
+            "derived": [],
+            "from": [
+              "grant:recepcionistaClientes",
+              "grant:tecnicoClientes",
+              "journey:abrirOrdenServicio/buscarCliente",
+              "journey:abrirOrdenServicio/crearOrden",
+              "journey:abrirOrdenServicio/registrarCliente",
+              "journey:diagnosticarYpresupuestar/buscarOrdenAbierta",
+              "journey:diagnosticarYpresupuestar/emitirPresupuesto",
+              "journey:diagnosticarYpresupuestar/registrarDiagnostico",
+              "journey:diagnosticarYpresupuestar/registrarPiezas",
+              "journey:diagnosticarYpresupuestar/revisarOrden",
+              "journey:entregarYfinalizar/buscarOrdenLista",
+              "journey:entregarYfinalizar/finalizarOrden",
+              "journey:entregarYfinalizar/revisarOrdenLista",
+              "journey:realizarReparacion/buscarOrdenAprobada",
+              "journey:realizarReparacion/marcarLista",
+              "journey:realizarReparacion/registrarTrabajo",
+              "journey:realizarReparacion/revisarOrdenAprobada",
+              "relationship:Cliente/ordenCliente",
+              "relationship:OrdenServicio/ordenCliente"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.costoInternoPiezas",
+              "details.disponibleParaRetiro"
+            ],
+            "from": [
+              "grant:recepcionistaOrdenes",
+              "grant:tecnicoOrdenes",
+              "journey:abrirOrdenServicio/buscarCliente",
+              "journey:abrirOrdenServicio/crearOrden",
+              "journey:abrirOrdenServicio/registrarCliente",
+              "journey:diagnosticarYpresupuestar/buscarOrdenAbierta",
+              "journey:diagnosticarYpresupuestar/emitirPresupuesto",
+              "journey:diagnosticarYpresupuestar/registrarDiagnostico",
+              "journey:diagnosticarYpresupuestar/registrarPiezas",
+              "journey:diagnosticarYpresupuestar/revisarOrden",
+              "journey:entregarYfinalizar/buscarOrdenLista",
+              "journey:entregarYfinalizar/finalizarOrden",
+              "journey:entregarYfinalizar/revisarOrdenLista",
+              "journey:realizarReparacion/buscarOrdenAprobada",
+              "journey:realizarReparacion/marcarLista",
+              "journey:realizarReparacion/registrarTrabajo",
+              "journey:realizarReparacion/revisarOrdenAprobada",
+              "relationship:Cliente/ordenCliente",
+              "relationship:OrdenServicio/ordenCliente",
+              "relationship:OrdenServicio/piezaOrden",
+              "relationship:PiezaOrden/piezaOrden"
+            ]
+          },
+          {
+            "entity": "PiezaOrden",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.costoTotal"
+            ],
+            "from": [
+              "grant:tecnicoOrdenes",
+              "journey:abrirOrdenServicio/buscarCliente",
+              "journey:abrirOrdenServicio/crearOrden",
+              "journey:abrirOrdenServicio/registrarCliente",
+              "journey:diagnosticarYpresupuestar/buscarOrdenAbierta",
+              "journey:diagnosticarYpresupuestar/emitirPresupuesto",
+              "journey:diagnosticarYpresupuestar/registrarDiagnostico",
+              "journey:diagnosticarYpresupuestar/registrarPiezas",
+              "journey:diagnosticarYpresupuestar/revisarOrden",
+              "journey:entregarYfinalizar/buscarOrdenLista",
+              "journey:entregarYfinalizar/finalizarOrden",
+              "journey:entregarYfinalizar/revisarOrdenLista",
+              "journey:realizarReparacion/buscarOrdenAprobada",
+              "journey:realizarReparacion/marcarLista",
+              "journey:realizarReparacion/registrarTrabajo",
+              "journey:realizarReparacion/revisarOrdenAprobada",
+              "relationship:OrdenServicio/piezaOrden",
+              "relationship:PiezaOrden/piezaOrden"
+            ]
+          }
+        ],
+        "writes": [
+          {
+            "entity": "Cliente",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:abrirOrdenServicio/registrarCliente"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:abrirOrdenServicio/crearOrden"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "transition",
+            "transitionRef": "emitirPresupuesto",
+            "from": [
+              "journey:diagnosticarYpresupuestar/emitirPresupuesto"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "transition",
+            "transitionRef": "finalizar",
+            "from": [
+              "journey:entregarYfinalizar/finalizarOrden"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "transition",
+            "transitionRef": "marcarLista",
+            "from": [
+              "journey:realizarReparacion/marcarLista"
+            ]
+          },
+          {
+            "entity": "OrdenServicio",
+            "operation": "update",
+            "transitionRef": "",
+            "from": [
+              "journey:diagnosticarYpresupuestar/registrarDiagnostico",
+              "journey:realizarReparacion/registrarTrabajo"
+            ]
+          },
+          {
+            "entity": "PiezaOrden",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:diagnosticarYpresupuestar/registrarPiezas"
+            ]
+          }
+        ]
+      },
+      {
         "pageId": "mis_ordenes",
         "actors": [
           "cliente"
         ],
         "reads": [
           {
+            "entity": "Cliente",
+            "family": "mdm",
+            "scope": "own",
+            "derived": [],
+            "from": [
+              "grant:clienteMiRegistro",
+              "journey:consultarMisOrdenes/listarMisOrdenes",
+              "journey:consultarMisOrdenes/verDetalleOrden",
+              "journey:responderPresupuesto/abrirOrdenPresupuestada",
+              "journey:responderPresupuesto/aprobarPresupuesto",
+              "journey:responderPresupuesto/rechazarPresupuesto",
+              "relationship:Cliente/ordenCliente",
+              "relationship:OrdenServicio/ordenCliente"
+            ]
+          },
+          {
             "entity": "OrdenServicio",
             "family": "tdm",
             "scope": "own",
             "derived": [
-              "details.availableForPickup"
+              "details.costoInternoPiezas",
+              "details.disponibleParaRetiro"
             ],
             "from": [
-              "grant:clienteConsultaYdecidePresupuesto",
-              "journey:aprobarPresupuesto/confirmarAprobacion",
-              "journey:aprobarPresupuesto/revisarPresupuestoRecibido",
-              "journey:consultarMisOrdenes/consultarDetalleDeOrden",
-              "journey:consultarMisOrdenes/localizarMisOrdenes",
-              "journey:rechazarPresupuesto/confirmarRechazo",
-              "journey:rechazarPresupuesto/revisarPresupuestoParaRechazo"
+              "grant:clienteMisOrdenes",
+              "journey:consultarMisOrdenes/listarMisOrdenes",
+              "journey:consultarMisOrdenes/verDetalleOrden",
+              "journey:responderPresupuesto/abrirOrdenPresupuestada",
+              "journey:responderPresupuesto/aprobarPresupuesto",
+              "journey:responderPresupuesto/rechazarPresupuesto",
+              "relationship:Cliente/ordenCliente",
+              "relationship:OrdenServicio/ordenCliente"
             ]
           }
         ],
@@ -38,7 +423,7 @@
             "operation": "transition",
             "transitionRef": "aprobarPresupuesto",
             "from": [
-              "journey:aprobarPresupuesto/confirmarAprobacion"
+              "journey:responderPresupuesto/aprobarPresupuesto"
             ]
           },
           {
@@ -46,171 +431,7 @@
             "operation": "transition",
             "transitionRef": "rechazarPresupuesto",
             "from": [
-              "journey:rechazarPresupuesto/confirmarRechazo"
-            ]
-          }
-        ]
-      },
-      {
-        "pageId": "ordenes_servicio_recepcionista",
-        "actors": [
-          "recepcionista"
-        ],
-        "reads": [
-          {
-            "entity": "Aparato",
-            "family": "mdm",
-            "scope": "organization",
-            "derived": [],
-            "from": [
-              "grant:recepcionGestionaOrdenes",
-              "journey:abrirOrdenServicio/registrarRecepcion",
-              "journey:entregarAparatoYfinalizar/finalizarEntrega",
-              "journey:entregarAparatoYfinalizar/localizarOrdenLista",
-              "journey:entregarAparatoYfinalizar/verificarOrdenParaEntrega",
-              "relationship:Aparato/serviceOrderDevice",
-              "relationship:OrdenServicio/serviceOrderDevice"
-            ]
-          },
-          {
-            "entity": "Cliente",
-            "family": "mdm",
-            "scope": "organization",
-            "derived": [],
-            "from": [
-              "grant:recepcionGestionaOrdenes",
-              "journey:abrirOrdenServicio/registrarRecepcion",
-              "journey:entregarAparatoYfinalizar/finalizarEntrega",
-              "journey:entregarAparatoYfinalizar/localizarOrdenLista",
-              "journey:entregarAparatoYfinalizar/verificarOrdenParaEntrega",
-              "relationship:Cliente/serviceOrderCustomer",
-              "relationship:OrdenServicio/serviceOrderCustomer"
-            ]
-          },
-          {
-            "entity": "OrdenServicio",
-            "family": "tdm",
-            "scope": "organization",
-            "derived": [
-              "details.availableForPickup"
-            ],
-            "from": [
-              "grant:recepcionGestionaOrdenes",
-              "journey:abrirOrdenServicio/registrarRecepcion",
-              "journey:entregarAparatoYfinalizar/finalizarEntrega",
-              "journey:entregarAparatoYfinalizar/localizarOrdenLista",
-              "journey:entregarAparatoYfinalizar/verificarOrdenParaEntrega",
-              "relationship:Aparato/serviceOrderDevice",
-              "relationship:Cliente/serviceOrderCustomer",
-              "relationship:OrdenServicio/serviceOrderCustomer",
-              "relationship:OrdenServicio/serviceOrderDevice"
-            ]
-          }
-        ],
-        "writes": [
-          {
-            "entity": "OrdenServicio",
-            "operation": "create",
-            "transitionRef": "",
-            "from": [
-              "journey:abrirOrdenServicio/registrarRecepcion"
-            ]
-          },
-          {
-            "entity": "OrdenServicio",
-            "operation": "transition",
-            "transitionRef": "entregarYfinalizar",
-            "from": [
-              "journey:entregarAparatoYfinalizar/finalizarEntrega"
-            ]
-          }
-        ]
-      },
-      {
-        "pageId": "ordenes_servicio_tecnico",
-        "actors": [
-          "tecnico"
-        ],
-        "reads": [
-          {
-            "entity": "Aparato",
-            "family": "mdm",
-            "scope": "organization",
-            "derived": [],
-            "from": [
-              "grant:tecnicoGestionaReparaciones",
-              "journey:prepararPresupuesto/emitirPresupuesto",
-              "journey:prepararPresupuesto/localizarOrdenPendiente",
-              "journey:prepararPresupuesto/registrarAnalisis",
-              "journey:repararYmarcarLista/localizarOrdenAprobada",
-              "journey:repararYmarcarLista/registrarReparacionTerminada",
-              "journey:repararYmarcarLista/revisarDiagnosticoAprobado",
-              "relationship:Aparato/serviceOrderDevice",
-              "relationship:OrdenServicio/serviceOrderDevice"
-            ]
-          },
-          {
-            "entity": "Cliente",
-            "family": "mdm",
-            "scope": "organization",
-            "derived": [],
-            "from": [
-              "grant:tecnicoGestionaReparaciones",
-              "journey:prepararPresupuesto/emitirPresupuesto",
-              "journey:prepararPresupuesto/localizarOrdenPendiente",
-              "journey:prepararPresupuesto/registrarAnalisis",
-              "journey:repararYmarcarLista/localizarOrdenAprobada",
-              "journey:repararYmarcarLista/registrarReparacionTerminada",
-              "journey:repararYmarcarLista/revisarDiagnosticoAprobado",
-              "relationship:Cliente/serviceOrderCustomer",
-              "relationship:OrdenServicio/serviceOrderCustomer"
-            ]
-          },
-          {
-            "entity": "OrdenServicio",
-            "family": "tdm",
-            "scope": "organization",
-            "derived": [
-              "details.availableForPickup"
-            ],
-            "from": [
-              "grant:tecnicoGestionaReparaciones",
-              "journey:prepararPresupuesto/emitirPresupuesto",
-              "journey:prepararPresupuesto/localizarOrdenPendiente",
-              "journey:prepararPresupuesto/registrarAnalisis",
-              "journey:repararYmarcarLista/localizarOrdenAprobada",
-              "journey:repararYmarcarLista/registrarReparacionTerminada",
-              "journey:repararYmarcarLista/revisarDiagnosticoAprobado",
-              "relationship:Aparato/serviceOrderDevice",
-              "relationship:Cliente/serviceOrderCustomer",
-              "relationship:OrdenServicio/serviceOrderCustomer",
-              "relationship:OrdenServicio/serviceOrderDevice"
-            ]
-          }
-        ],
-        "writes": [
-          {
-            "entity": "OrdenServicio",
-            "operation": "transition",
-            "transitionRef": "emitirPresupuesto",
-            "from": [
-              "journey:prepararPresupuesto/emitirPresupuesto"
-            ]
-          },
-          {
-            "entity": "OrdenServicio",
-            "operation": "transition",
-            "transitionRef": "marcarLista",
-            "from": [
-              "journey:repararYmarcarLista/registrarReparacionTerminada"
-            ]
-          },
-          {
-            "entity": "OrdenServicio",
-            "operation": "update",
-            "transitionRef": "",
-            "from": [
-              "journey:prepararPresupuesto/registrarAnalisis"
+              "journey:responderPresupuesto/rechazarPresupuesto"
             ]
           }
         ]
@@ -218,7 +439,7 @@
     ],
     "meta": {
       "sourceMenu": "pool/l2/web/menu.json",
-      "generatedAt": "2026-10-02T16:16:56.994Z"
+      "generatedAt": "2026-10-12T20:29:43.060Z"
     }
   }
 }

@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/financeiro/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const financeiroJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -9,36 +9,36 @@ export const financeiroJourneyIndex = {
     {
       "journeyId": "receberTitulo",
       "actorRef": "caixa",
-      "title": "Receber um título"
+      "title": "Receber título no caixa"
     },
     {
-      "journeyId": "estornarRecebimentoNoMesmoDia",
+      "journeyId": "estornarRecebimento",
       "actorRef": "caixa",
-      "title": "Estornar um recebimento no mesmo dia"
+      "title": "Estornar recebimento do dia"
     },
     {
       "journeyId": "acompanharRecebiveis",
       "actorRef": "gerenteFinanceiro",
-      "title": "Acompanhar recebíveis e títulos vencidos"
+      "title": "Acompanhar recebíveis e vencidos"
     },
     {
-      "journeyId": "emitirExtratoPorPagador",
+      "journeyId": "emitirExtratoPagador",
       "actorRef": "gerenteFinanceiro",
       "title": "Emitir extrato por pagador"
     },
     {
-      "journeyId": "consultarMeusTitulosErecebimentos",
+      "journeyId": "consultarMeusTitulos",
       "actorRef": "pagador",
-      "title": "Consultar meus títulos e recebimentos"
+      "title": "Consultar meus títulos"
     },
     {
-      "journeyId": "pagarTituloComCartao",
+      "journeyId": "pagarTituloCartao",
       "actorRef": "pagador",
-      "title": "Pagar título em aberto com cartão"
+      "title": "Pagar título com cartão"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type FinanceiroJourneyIndexType = typeof financeiroJourneyIndex;
 

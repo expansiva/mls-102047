@@ -3,7 +3,34 @@
 export const definition = {
   "entry": {
     "params": {
-      "produtoId": {
+      "tipo": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:historicoMovimentacoes",
+        "persist": true
+      },
+      "registradoDe": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:historicoMovimentacoes",
+        "persist": true
+      },
+      "registradoAte": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:historicoMovimentacoes",
+        "persist": true
+      },
+      "numero": {
         "type": "string",
         "sources": [
           "url",
@@ -20,140 +47,165 @@ export const definition = {
         ],
         "effect": "filter:historicoMovimentacoes",
         "persist": true
+      },
+      "texto": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:registroMovimentacao",
+        "persist": true
+      },
+      "produtoId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:Produto",
+        "persist": true
       }
     }
   },
   "forms": {
-    "formularioMovimentacao": {
-      "organism": "formularioMovimentacao",
+    "registrarMovimentacao": {
+      "organism": "registroMovimentacao",
       "submit": "registrarMovimentacao"
     }
   },
   "requests": {
-    "load": {
+    "qryHistoricoMovimentacoes": {
       "kind": "qry",
       "trigger": "onLoad",
-      "returns": [
-        "movimentacoes",
-        "produtos"
-      ]
-    },
-    "loadMovimentacoes": {
-      "kind": "qry",
-      "trigger": "loadMovimentacoes",
       "returns": [
         "movimentacoes"
       ]
     },
-    "registrarMovimentacao": {
-      "kind": "cmd",
-      "trigger": "registrarMovimentacao",
+    "qryBuscarProdutos": {
+      "kind": "qry",
+      "trigger": "qryBuscarProdutos",
       "returns": [
-        "movimentacaoEstoque",
-        "produto"
-      ],
-      "writes": "MovimentacaoEstoque.create"
-    }
-  },
-  "states": {
-    "historicoMovimentacoes": {
-      "source": "load.movimentacoes",
-      "description": "Movimentações registradas do produto filtrado."
-    },
-    "produtos": {
-      "source": "load.produtos",
-      "description": "Produtos disponíveis com saldo e aviso de estoque."
-    },
-    "produtoId": {
-      "source": "entry.params.produtoId",
-      "description": "Identificador do produto usado no filtro do histórico."
-    },
-    "paginaHistorico": {
-      "source": "entry.params.page",
-      "description": "Página solicitada do histórico de movimentações."
-    },
-    "movimentacaoEmEdicao": {
-      "source": "registrarMovimentacao.input",
-      "description": "Dados da movimentação a registrar."
-    },
-    "movimentacaoRegistrada": {
-      "source": "registrarMovimentacao.movimentacaoEstoque",
-      "description": "Movimentação de estoque registrada."
-    }
-  },
-  "functions": {
-    "load": {
-      "description": "Carrega o histórico inicial de movimentações e os produtos.",
-      "calls": "load",
-      "sets": "historicoMovimentacoes",
-      "updates": [
         "produtos"
       ]
     },
-    "filterHistoricoMovimentacoes": {
-      "description": "Recarrega a primeira página do histórico conforme produto e página.",
-      "calls": "loadMovimentacoes",
-      "sets": "historicoMovimentacoes",
-      "updates": []
+    "qryProdutoSaldo": {
+      "kind": "qry",
+      "trigger": "qryProdutoSaldo",
+      "returns": [
+        "produto"
+      ]
     },
-    "loadMoreHistoricoMovimentacoes": {
-      "description": "Acrescenta a próxima página ao histórico de movimentações.",
-      "calls": "loadMovimentacoes",
-      "sets": "historicoMovimentacoes",
-      "updates": []
+    "cmdRegistrarMovimentacao": {
+      "kind": "cmd",
+      "trigger": "registrarMovimentacao",
+      "returns": [
+        "movimentacao",
+        "produto",
+        "avisoAbaixoDoMinimo"
+      ],
+      "writes": "Movimentacao.create"
+    }
+  },
+  "states": {
+    "movimentacoes": {
+      "source": "qryHistoricoMovimentacoes.movimentacoes",
+      "description": "Linha do histórico de movimentações, com o produto e sua unidade.",
+      "organisms": [
+        "historicoMovimentacoes"
+      ]
     },
-    "registrarMovimentacao": {
-      "description": "Registra a movimentação e atualiza os saldos do produto.",
-      "calls": "registrarMovimentacao",
-      "sets": "movimentacaoRegistrada",
+    "produtos": {
+      "source": "qryBuscarProdutos.produtos",
+      "description": "Produto encontrado na busca por nome, para o estoquista escolher o item da movimentação.",
+      "organisms": [
+        "registroMovimentacao"
+      ]
+    },
+    "produto": {
+      "source": "qryProdutoSaldo.produto",
+      "description": "Produto escolhido com seu saldo atual, saldo mínimo e situação abaixo do mínimo, já calculados.",
+      "organisms": [
+        "acoesRegistro",
+        "registroMovimentacao"
+      ]
+    },
+    "avisoAbaixoDoMinimo": {
+      "source": "cmdRegistrarMovimentacao.avisoAbaixoDoMinimo",
+      "description": "movimentacao: linha nova para inserir no histórico; produto: saldo atualizado para o formulário e as ações; avisoAbaixoDoMinimo: true quando o produto ficou abaixo do mínimo, para exibir o aviso.",
+      "organisms": [
+        "acoesRegistro"
+      ]
+    }
+  },
+  "functions": {
+    "qryHistoricoMovimentacoes": {
+      "description": "Carrega o histórico permanente de entradas e saídas do estoque, paginado, ao abrir a página e quando o estoquista filtra ou pede a próxima página.",
+      "calls": "qryHistoricoMovimentacoes",
+      "sets": "movimentacoes"
+    },
+    "qryBuscarProdutos": {
+      "description": "Busca produtos pelo nome enquanto o estoquista digita, para escolher o produto da movimentação.",
+      "calls": "qryBuscarProdutos",
+      "sets": "produtos"
+    },
+    "qryProdutoSaldo": {
+      "description": "Lê o produto escolhido com o saldo atual e o mínimo, para o estoquista conferir antes de registrar.",
+      "calls": "qryProdutoSaldo",
+      "sets": "produto"
+    },
+    "cmdRegistrarMovimentacao": {
+      "description": "Registra a entrada ou saída de quantidade do produto e devolve o que a página redesenha: a nova linha do histórico, o saldo atualizado e o aviso. (movimentacoes.items: upsert)",
+      "calls": "cmdRegistrarMovimentacao",
+      "sets": "produto",
       "updates": [
-        "historicoMovimentacoes",
-        "produtos"
+        "movimentacoes"
       ]
     }
   },
   "journeys": [
     {
-      "step": "registrarMovimentacaoEstoque/consultarSaldo",
+      "step": "registrarMovimentacao/localizarProdutoMovimentacao",
       "organisms": [
-        "formularioMovimentacao",
-        "confirmarMovimentacao"
+        "registroMovimentacao"
       ],
       "functions": [
-        "load"
+        "qryBuscarProdutos"
       ]
     },
     {
-      "step": "registrarMovimentacaoEstoque/localizarProduto",
+      "step": "registrarMovimentacao/verSaldoMovimentacao",
       "organisms": [
-        "formularioMovimentacao",
+        "registroMovimentacao",
+        "acoesRegistro"
+      ],
+      "functions": [
+        "qryProdutoSaldo"
+      ]
+    },
+    {
+      "step": "registrarMovimentacao/registrarMovimentacaoEstoque",
+      "organisms": [
+        "registroMovimentacao",
+        "acoesRegistro",
         "historicoMovimentacoes"
       ],
       "functions": [
-        "filterHistoricoMovimentacoes",
-        "loadMoreHistoricoMovimentacoes"
-      ]
-    },
-    {
-      "step": "registrarMovimentacaoEstoque/registrarMovimentacao",
-      "organisms": [
-        "formularioMovimentacao",
-        "confirmarMovimentacao"
-      ],
-      "functions": [
-        "registrarMovimentacao"
+        "cmdRegistrarMovimentacao",
+        "qryHistoricoMovimentacoes"
       ]
     }
   ],
   "rules": {
-    "load": [
-      "saldoAtualProduto",
-      "avisoSaldoMinimoProduto"
+    "qryHistoricoMovimentacoes": [],
+    "qryBuscarProdutos": [],
+    "qryProdutoSaldo": [
+      "avisoSaldoAbaixoDoMinimo"
     ],
-    "loadMovimentacoes": [],
-    "registrarMovimentacao": [
-      "quantidadeMovimentadaPositiva",
-      "registroMovimentacaoAtualizaSaldo"
+    "cmdRegistrarMovimentacao": [
+      "quantidadePositiva",
+      "movimentacaoImutavel",
+      "avisoSaldoAbaixoDoMinimo"
     ]
   },
   "access": {
@@ -161,7 +213,49 @@ export const definition = {
       "estoquista"
     ],
     "grants": [
-      "gerenciarEstoque"
+      "gestaoCompletaEstoque"
+    ]
+  },
+  "fields": {
+    "Movimentacao.details.quantidade": [
+      "historicoMovimentacoes",
+      "registroMovimentacao"
+    ],
+    "Movimentacao.numero": [
+      "historicoMovimentacoes"
+    ],
+    "Movimentacao.produtoId": [
+      "historicoMovimentacoes",
+      "registroMovimentacao"
+    ],
+    "Movimentacao.registradoEm": [
+      "historicoMovimentacoes"
+    ],
+    "Movimentacao.tipo": [
+      "historicoMovimentacoes",
+      "registroMovimentacao"
+    ],
+    "Produto.details.controleEstoque.abaixoDoMinimo": [
+      "acoesRegistro",
+      "registroMovimentacao"
+    ],
+    "Produto.details.controleEstoque.saldoAtual": [
+      "acoesRegistro",
+      "registroMovimentacao"
+    ],
+    "Produto.details.controleEstoque.saldoMinimo": [
+      "registroMovimentacao"
+    ],
+    "Produto.details.identification.name": [
+      "historicoMovimentacoes",
+      "registroMovimentacao"
+    ],
+    "Produto.details.product.sku": [
+      "registroMovimentacao"
+    ],
+    "Produto.details.product.unitOfMeasure": [
+      "historicoMovimentacoes",
+      "registroMovimentacao"
     ]
   }
 } as const;

@@ -1,13 +1,13 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/ontology/JobPosition.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const hiringPipelineEntityJobPosition = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "hiringPipeline",
   "entityId": "JobPosition",
   "title": "Job Position",
-  "description": "An approved hiring need opened for applications, with a responsible hiring manager and a defined headcount.",
+  "description": "An opening published by a recruiter with title, department, description, headcount and hiring manager. It is open while hires are below the headcount and closes automatically when the headcount is filled; hires so far and remaining openings are derived from its applications.",
   "displayField": "title",
   "relationships": {
     "hiringManager": {
@@ -15,10 +15,10 @@ export const hiringPipelineEntityJobPosition = {
       "to": "HiringManager",
       "via": "JobPosition.hiringManagerId",
       "cardinality": "N:1",
-      "title": "Responsible hiring manager",
-      "description": "The hiring manager assigned to this position and authorized to decide offers and hiring outcomes.",
+      "title": "Hiring manager",
+      "description": "The hiring manager who owns the position and decides offers and hires for it.",
       "mode": "fk",
-      "required": "when the job position is opened"
+      "required": true
     },
     "applications": {
       "relationshipId": "applicationJobPosition",
@@ -26,25 +26,43 @@ export const hiringPipelineEntityJobPosition = {
       "via": "Application.jobPositionId",
       "cardinality": "1:N",
       "title": "Applications",
-      "description": "The applications submitted for this job position.",
+      "description": "The applications candidates have made to this position.",
       "mode": "fk",
       "direction": "to",
       "required": true
+    },
+    "candidates": {
+      "relationshipId": "candidatePositions",
+      "to": "Candidate",
+      "via": "Application",
+      "cardinality": "N:N",
+      "title": "Candidates",
+      "description": "The candidates who applied to this position, found through its applications.",
+      "mode": "throughTable",
+      "path": "Candidate -> Application.candidateId -> Application.jobPositionId -> JobPosition",
+      "derived": true,
+      "direction": "to"
     }
   },
   "capabilities": {
-    "read.byId": "Reads a job position by its row id so recruiters and hiring managers can review its hiring need.",
-    "locate.byColumn": "Lists job positions by indexed status or responsible hiring manager so recruiters find open positions and hiring managers find positions they manage.",
-    "locate.byText": "Finds job positions by text in the indexed title so recruiters can locate a position by name.",
-    "count": "Counts job positions matching a status or responsible hiring manager filter for hiring pipeline lists.",
-    "listByForeignKey": "Lists job positions for a responsible hiring manager through the hiring manager foreign key.",
-    "create": "Creates an open job position with its title, department, description, headcount, and responsible hiring manager when a recruiter opens a hiring need.",
-    "update": "Updates the maintained details of an open job position when a recruiter needs to correct its hiring need information.",
-    "transition": "Moves an open job position to closed through the automatic filled-headcount process.",
-    "read.mdmRecord": "Reads the responsible hiring manager master record from the hiring manager foreign key for position review and decision scope."
+    "read.byId": "Opens one job position by its id, so the recruiter can review the position she just opened and the hiring manager can inspect it while deciding a hire.",
+    "locate.byColumn": "Lists positions filtered by status, department or hiring manager and sorted by opening date. The recruiter uses it to find open positions; the hiring manager uses it to list the positions she manages.",
+    "locate.byText": "Searches positions by part of the title or department, so the recruiter can find the open position a candidate is applying to.",
+    "count": "Counts the positions that match a filter, such as open positions per department or per hiring manager, for list headers.",
+    "listByForeignKey": "Lists every position of one hiring manager by hiringManagerId. This is what fills the hiring manager's pipeline view.",
+    "create": "The recruiter opens a new position with its title, department, description, headcount and hiring manager, and it starts as open.",
+    "update": "The recruiter corrects the title, department, description, headcount or hiring manager of a position.",
+    "transition": "The application pipeline moves a position from open to closed once its headcount is filled. The guard for this lives in the module.",
+    "transaction": "Writes the hire of an application and the closing of its position together, all or nothing, when that hire fills the headcount.",
+    "read.mdmRecord": "Reads the hiring manager's master record that hiringManagerId points at, so position screens can show her name.",
+    "comment": "Lets the recruiter and the hiring manager leave notes about a position."
   },
   "rules": [
-    "closePositionWhenHeadcountFilled"
+    "positionHeadcountPositive",
+    "closePositionWhenHeadcountFilled",
+    "closedPositionAcceptsNoApplications",
+    "hireRequiresRemainingOpening",
+    "positionRequiresHiringManager"
   ],
   "kind": "entity",
   "class": "core",
@@ -71,101 +89,91 @@ export const hiringPipelineEntityJobPosition = {
         "type": "string",
         "required": true,
         "indexed": true,
-        "of": "Address",
-        "title": "Job title",
-        "description": "The title used to identify the job position in lists and searches.",
-        "maxLength": 200,
-        "min": 0,
-        "max": 0
+        "title": "Title",
+        "description": "Title of the job position. Recruiters and hiring managers search and sort positions by it.",
+        "maxLength": 160
+      },
+      "department": {
+        "type": "string",
+        "required": true,
+        "indexed": true,
+        "title": "Department",
+        "description": "Department the position belongs to. Position lists are filtered by it.",
+        "maxLength": 120
       },
       "hiringManagerId": {
         "type": "record",
         "required": true,
         "indexed": true,
-        "of": "Address",
         "to": [
           "HiringManager"
         ],
-        "title": "Responsible hiring manager",
-        "description": "The hiring manager responsible for offers and hiring decisions for this position.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "title": "Hiring manager",
+        "description": "The hiring manager who decides offers and hires for this position. Her 'my positions' lists use this key."
       },
       "status": {
         "type": "enum",
         "required": true,
         "indexed": true,
-        "of": "Address",
         "values": [
           {
             "value": "open",
             "title": "Open",
-            "description": "The position is available for applications."
+            "description": "Taking applications. Hires are still below the headcount."
           },
           {
             "value": "closed",
             "title": "Closed",
-            "description": "The position is closed after its headcount is filled."
+            "description": "The headcount is filled, so no new applications are taken."
           }
         ],
-        "title": "Position status",
-        "description": "Whether the job position is open for applications or closed because its headcount has been filled.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "title": "Status",
+        "description": "Whether the position is still taking candidates. It opens when the recruiter creates it and closes automatically once the headcount is filled."
+      },
+      "openedAt": {
+        "type": "timestamp",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "title": "Opened at",
+        "description": "When the recruiter opened the position. Written by the system when the position is created, and used to sort position lists."
       },
       "details": {
         "type": "object",
         "required": true,
-        "of": "Address",
-        "title": "Job position details",
-        "description": "The descriptive information and hiring need for this job position.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0,
+        "title": "Details",
+        "description": "Everything else about the position that nobody filters by.",
         "fields": {
-          "department": {
-            "type": "string",
-            "required": true,
-            "of": "Address",
-            "title": "Department",
-            "description": "The department requesting this job position.",
-            "maxLength": 200,
-            "min": 0,
-            "max": 0
-          },
           "description": {
             "type": "text",
             "required": true,
-            "of": "Address",
-            "title": "Position description",
-            "description": "The responsibilities and requirements of the job position.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "title": "Description",
+            "description": "Full description of the job: responsibilities, requirements and context."
           },
           "headcount": {
             "type": "integer",
             "required": true,
-            "of": "Address",
             "title": "Headcount",
-            "description": "The number of candidates to hire for this position.",
-            "maxLength": 0,
-            "min": 1,
-            "max": 0
+            "description": "How many people this position will hire. The position closes automatically once this many applications have reached hired.",
+            "min": 1
           },
-          "filledHeadcount": {
+          "hiresSoFar": {
             "type": "integer",
             "derived": true,
-            "title": "Filled headcount",
-            "description": "The number of applications for this position that are in the hired stage."
+            "title": "Hires so far",
+            "description": "Number of applications to this position that have reached the hired stage."
           },
-          "remainingHeadcount": {
+          "remainingOpenings": {
             "type": "integer",
             "derived": true,
-            "title": "Remaining headcount",
-            "description": "The job position headcount minus the number of applications for this position that are in the hired stage."
+            "title": "Remaining openings",
+            "description": "The position's headcount minus its hires so far, never less than zero."
+          },
+          "headcountFilled": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Headcount filled",
+            "description": "True when the hires so far are equal to or greater than the position's headcount."
           }
         }
       }
@@ -183,19 +191,20 @@ export const hiringPipelineEntityJobPosition = {
   ],
   "transitions": [
     {
-      "transitionId": "closeFilledPosition",
+      "transitionId": "close",
       "from": [
         "open"
       ],
       "to": "closed",
       "by": [],
-      "description": "Close the job position automatically when the required headcount has been hired.",
+      "description": "The application pipeline closes the position automatically as soon as hires reach the headcount. No person makes this move.",
+      "payload": [],
       "ruleRefs": [
         "closePositionWhenHeadcountFilled"
       ]
     }
   ]
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type HiringPipelineEntityJobPositionType = typeof hiringPipelineEntityJobPosition;
 

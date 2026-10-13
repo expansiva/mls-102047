@@ -1,7 +1,7 @@
 {
-  "thread": "financeiro-20261002160520",
+  "thread": "financeiro-20261013005121",
   "round": 1,
-  "inputFile": "l4/financeiro/pool/l2/20261002160520_financeiro-20261002160520_1.json",
+  "inputFile": "l4/financeiro/pool/l2/20261013005121_financeiro-20261013005121_1.json",
   "needs": {
     "schemaVersion": "2026-09-21-p2-needs-v1",
     "moduleName": "financeiro",
@@ -9,9 +9,9 @@
     "menuSchema": "2026-09-20-p2-menu-v2.2",
     "pages": [
       {
-        "pageId": "caixa_recebimentos",
+        "pageId": "painel_recebiveis",
         "actors": [
-          "caixa"
+          "gerenteFinanceiro"
         ],
         "reads": [
           {
@@ -20,38 +20,60 @@
             "scope": "organization",
             "derived": [],
             "from": [
-              "grant:caixaRecebimentos",
-              "journey:estornarRecebimentoNoMesmoDia/conferirRecebimentoDoDia",
-              "journey:estornarRecebimentoNoMesmoDia/estornarRecebimento",
-              "journey:estornarRecebimentoNoMesmoDia/localizarRecebimentoDoDia",
-              "journey:receberTitulo/consultarTituloParaRecebimento",
-              "journey:receberTitulo/localizarTituloEmAberto",
-              "journey:receberTitulo/registrarRecebimento",
-              "relationship:Pagador/pagadorTemRecebimentos",
-              "relationship:Pagador/tituloTemPagador",
-              "relationship:Recebimento/pagadorTemRecebimentos",
-              "relationship:TituloReceber/recebimentoDoTitulo",
-              "relationship:TituloReceber/tituloTemPagador"
+              "grant:gerentePagadores",
+              "journey:acompanharRecebiveis/filtrarRecebiveis",
+              "journey:acompanharRecebiveis/listarVencidos",
+              "journey:acompanharRecebiveis/verPainel",
+              "journey:acompanharRecebiveis/verTituloVencido",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/pagadorRecebimentos",
+              "relationship:TituloReceber/recebimentoTitulo",
+              "relationship:TituloReceber/tituloPagador"
+            ]
+          },
+          {
+            "entity": "PainelRecebiveis",
+            "family": "ddm",
+            "scope": "organization",
+            "derived": [
+              "details.quantidadeRecebimentos",
+              "details.quantidadeTitulos",
+              "details.quantidadeVencidos",
+              "details.totalAReceber",
+              "details.totalEmAberto",
+              "details.totalRecebido",
+              "details.totalVencido",
+              "origem",
+              "periodo"
+            ],
+            "from": [
+              "grant:gerenteRecebiveis",
+              "organism:summary"
             ]
           },
           {
             "entity": "Recebimento",
             "family": "tdm",
             "scope": "organization",
-            "derived": [],
+            "derived": [
+              "details.baixaParcial",
+              "details.estornavel",
+              "details.estorno.estornadoEm",
+              "numero",
+              "recebidoEm"
+            ],
             "from": [
-              "grant:caixaRecebimentos",
-              "journey:estornarRecebimentoNoMesmoDia/conferirRecebimentoDoDia",
-              "journey:estornarRecebimentoNoMesmoDia/estornarRecebimento",
-              "journey:estornarRecebimentoNoMesmoDia/localizarRecebimentoDoDia",
-              "journey:receberTitulo/consultarTituloParaRecebimento",
-              "journey:receberTitulo/localizarTituloEmAberto",
-              "journey:receberTitulo/registrarRecebimento",
-              "relationship:Pagador/pagadorTemRecebimentos",
-              "relationship:Pagador/tituloTemPagador",
-              "relationship:Recebimento/pagadorTemRecebimentos",
-              "relationship:Recebimento/recebimentoDoTitulo",
-              "relationship:TituloReceber/recebimentoDoTitulo"
+              "grant:gerenteRecebiveis",
+              "journey:acompanharRecebiveis/filtrarRecebiveis",
+              "journey:acompanharRecebiveis/listarVencidos",
+              "journey:acompanharRecebiveis/verPainel",
+              "journey:acompanharRecebiveis/verTituloVencido",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/pagadorRecebimentos",
+              "relationship:Recebimento/recebimentoTitulo",
+              "relationship:TituloReceber/recebimentoTitulo"
             ]
           },
           {
@@ -59,24 +81,229 @@
             "family": "tdm",
             "scope": "organization",
             "derived": [
-              "details.outstandingBalance",
-              "details.overdue",
-              "details.situation",
-              "details.totalReceived"
+              "details.diasAtraso",
+              "details.parcialmenteRecebido",
+              "details.quitado",
+              "details.saldoAberto",
+              "details.totalRecebido",
+              "details.vencido",
+              "numero"
+            ],
+            "from": [
+              "grant:gerenteRecebiveis",
+              "journey:acompanharRecebiveis/filtrarRecebiveis",
+              "journey:acompanharRecebiveis/listarVencidos",
+              "journey:acompanharRecebiveis/verPainel",
+              "journey:acompanharRecebiveis/verTituloVencido",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/recebimentoTitulo",
+              "relationship:TituloReceber/recebimentoTitulo",
+              "relationship:TituloReceber/tituloPagador"
+            ]
+          }
+        ],
+        "writes": []
+      },
+      {
+        "pageId": "titulos_receber",
+        "actors": [
+          "caixa",
+          "gerenteFinanceiro"
+        ],
+        "reads": [
+          {
+            "entity": "Pagador",
+            "family": "mdm",
+            "scope": "organization",
+            "derived": [],
+            "from": [
+              "grant:caixaPagadorIdentificacao",
+              "grant:gerentePagadores",
+              "journey:acompanharRecebiveis/filtrarRecebiveis",
+              "journey:acompanharRecebiveis/listarVencidos",
+              "journey:acompanharRecebiveis/verPainel",
+              "journey:acompanharRecebiveis/verTituloVencido",
+              "journey:receberTitulo/conferirTitulo",
+              "journey:receberTitulo/localizarTitulo",
+              "journey:receberTitulo/registrarRecebimento",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/pagadorRecebimentos",
+              "relationship:TituloReceber/recebimentoTitulo",
+              "relationship:TituloReceber/tituloPagador"
+            ]
+          },
+          {
+            "entity": "PainelRecebiveis",
+            "family": "ddm",
+            "scope": "organization",
+            "derived": [
+              "details.quantidadeRecebimentos",
+              "details.quantidadeTitulos",
+              "details.quantidadeVencidos",
+              "details.totalAReceber",
+              "details.totalEmAberto",
+              "details.totalRecebido",
+              "details.totalVencido",
+              "origem",
+              "periodo"
+            ],
+            "from": [
+              "grant:gerenteRecebiveis",
+              "organism:summary"
+            ]
+          },
+          {
+            "entity": "Recebimento",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.baixaParcial",
+              "details.estornavel",
+              "details.estorno.estornadoEm",
+              "numero",
+              "recebidoEm"
             ],
             "from": [
               "grant:caixaRecebimentos",
-              "journey:estornarRecebimentoNoMesmoDia/conferirRecebimentoDoDia",
-              "journey:estornarRecebimentoNoMesmoDia/estornarRecebimento",
-              "journey:estornarRecebimentoNoMesmoDia/localizarRecebimentoDoDia",
-              "journey:receberTitulo/consultarTituloParaRecebimento",
-              "journey:receberTitulo/localizarTituloEmAberto",
+              "grant:gerenteRecebiveis",
+              "journey:acompanharRecebiveis/filtrarRecebiveis",
+              "journey:acompanharRecebiveis/listarVencidos",
+              "journey:acompanharRecebiveis/verPainel",
+              "journey:acompanharRecebiveis/verTituloVencido",
+              "journey:receberTitulo/conferirTitulo",
+              "journey:receberTitulo/localizarTitulo",
               "journey:receberTitulo/registrarRecebimento",
-              "relationship:Pagador/pagadorTemRecebimentos",
-              "relationship:Pagador/tituloTemPagador",
-              "relationship:Recebimento/recebimentoDoTitulo",
-              "relationship:TituloReceber/recebimentoDoTitulo",
-              "relationship:TituloReceber/tituloTemPagador"
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/pagadorRecebimentos",
+              "relationship:Recebimento/recebimentoTitulo",
+              "relationship:TituloReceber/recebimentoTitulo"
+            ]
+          },
+          {
+            "entity": "TituloReceber",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.diasAtraso",
+              "details.parcialmenteRecebido",
+              "details.quitado",
+              "details.saldoAberto",
+              "details.totalRecebido",
+              "details.vencido",
+              "numero"
+            ],
+            "from": [
+              "grant:caixaTitulos",
+              "grant:gerenteRecebiveis",
+              "journey:acompanharRecebiveis/filtrarRecebiveis",
+              "journey:acompanharRecebiveis/listarVencidos",
+              "journey:acompanharRecebiveis/verPainel",
+              "journey:acompanharRecebiveis/verTituloVencido",
+              "journey:receberTitulo/conferirTitulo",
+              "journey:receberTitulo/localizarTitulo",
+              "journey:receberTitulo/registrarRecebimento",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/recebimentoTitulo",
+              "relationship:TituloReceber/recebimentoTitulo",
+              "relationship:TituloReceber/tituloPagador"
+            ]
+          }
+        ],
+        "writes": [
+          {
+            "entity": "Recebimento",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:receberTitulo/registrarRecebimento"
+            ]
+          }
+        ]
+      },
+      {
+        "pageId": "recebimentos",
+        "actors": [
+          "caixa",
+          "gerenteFinanceiro"
+        ],
+        "reads": [
+          {
+            "entity": "Pagador",
+            "family": "mdm",
+            "scope": "organization",
+            "derived": [],
+            "from": [
+              "grant:caixaPagadorIdentificacao",
+              "grant:gerentePagadores",
+              "journey:estornarRecebimento/conferirRecebimento",
+              "journey:estornarRecebimento/estornar",
+              "journey:estornarRecebimento/localizarRecebimento",
+              "journey:receberTitulo/conferirTitulo",
+              "journey:receberTitulo/localizarTitulo",
+              "journey:receberTitulo/registrarRecebimento",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/pagadorRecebimentos",
+              "relationship:TituloReceber/recebimentoTitulo",
+              "relationship:TituloReceber/tituloPagador"
+            ]
+          },
+          {
+            "entity": "Recebimento",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.baixaParcial",
+              "details.estornavel",
+              "details.estorno.estornadoEm",
+              "numero",
+              "recebidoEm"
+            ],
+            "from": [
+              "grant:caixaRecebimentos",
+              "grant:gerenteRecebiveis",
+              "journey:estornarRecebimento/conferirRecebimento",
+              "journey:estornarRecebimento/estornar",
+              "journey:estornarRecebimento/localizarRecebimento",
+              "journey:receberTitulo/conferirTitulo",
+              "journey:receberTitulo/localizarTitulo",
+              "journey:receberTitulo/registrarRecebimento",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/pagadorRecebimentos",
+              "relationship:Recebimento/recebimentoTitulo",
+              "relationship:TituloReceber/recebimentoTitulo"
+            ]
+          },
+          {
+            "entity": "TituloReceber",
+            "family": "tdm",
+            "scope": "organization",
+            "derived": [
+              "details.diasAtraso",
+              "details.parcialmenteRecebido",
+              "details.quitado",
+              "details.saldoAberto",
+              "details.totalRecebido",
+              "details.vencido",
+              "numero"
+            ],
+            "from": [
+              "grant:caixaTitulos",
+              "grant:gerenteRecebiveis",
+              "journey:estornarRecebimento/conferirRecebimento",
+              "journey:estornarRecebimento/estornar",
+              "journey:estornarRecebimento/localizarRecebimento",
+              "journey:receberTitulo/conferirTitulo",
+              "journey:receberTitulo/localizarTitulo",
+              "journey:receberTitulo/registrarRecebimento",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/recebimentoTitulo",
+              "relationship:TituloReceber/recebimentoTitulo",
+              "relationship:TituloReceber/tituloPagador"
             ]
           }
         ],
@@ -92,59 +319,41 @@
           {
             "entity": "Recebimento",
             "operation": "transition",
-            "transitionRef": "estornarRecebimento",
+            "transitionRef": "estornar",
             "from": [
-              "journey:estornarRecebimentoNoMesmoDia/estornarRecebimento"
+              "journey:estornarRecebimento/estornar"
             ]
           }
         ]
       },
       {
-        "pageId": "gerente_recebiveis",
+        "pageId": "titulos_pagador",
         "actors": [
-          "gerenteFinanceiro"
+          "gerenteFinanceiro",
+          "pagador"
         ],
         "reads": [
-          {
-            "entity": "ExtratoPagador",
-            "family": "tdm",
-            "scope": "organization",
-            "derived": [
-              "details.saldoEmAberto",
-              "details.totalRecebido",
-              "details.totalTitulos"
-            ],
-            "from": [
-              "grant:gerenteFinanceiroRecebiveis",
-              "journey:acompanharRecebiveis/inspecionarRecebiveis",
-              "journey:acompanharRecebiveis/localizarTitulosParaAnalise",
-              "journey:emitirExtratoPorPagador/consultarMovimentacoesDoPagador",
-              "journey:emitirExtratoPorPagador/gerarExtratoDoPagador",
-              "journey:emitirExtratoPorPagador/localizarPagador",
-              "relationship:ExtratoPagador/extratoDoPagador",
-              "relationship:Pagador/extratoDoPagador",
-              "relationship:Pagador/tituloTemPagador"
-            ]
-          },
           {
             "entity": "Pagador",
             "family": "mdm",
             "scope": "organization",
             "derived": [],
             "from": [
-              "grant:gerenteFinanceiroRecebiveis",
-              "journey:acompanharRecebiveis/inspecionarRecebiveis",
-              "journey:acompanharRecebiveis/localizarTitulosParaAnalise",
-              "journey:emitirExtratoPorPagador/consultarMovimentacoesDoPagador",
-              "journey:emitirExtratoPorPagador/gerarExtratoDoPagador",
-              "journey:emitirExtratoPorPagador/localizarPagador",
-              "relationship:ExtratoPagador/extratoDoPagador",
-              "relationship:Pagador/extratoDoPagador",
-              "relationship:Pagador/pagadorTemRecebimentos",
-              "relationship:Pagador/tituloTemPagador",
-              "relationship:Recebimento/pagadorTemRecebimentos",
-              "relationship:TituloReceber/recebimentoDoTitulo",
-              "relationship:TituloReceber/tituloTemPagador"
+              "grant:gerentePagadores",
+              "grant:pagadorMeuCadastro",
+              "journey:consultarMeusTitulos/listarMeusTitulos",
+              "journey:consultarMeusTitulos/verMeuTitulo",
+              "journey:emitirExtratoPagador/emitirExtrato",
+              "journey:emitirExtratoPagador/localizarPagador",
+              "journey:emitirExtratoPagador/verExtrato",
+              "journey:pagarTituloCartao/conferirValor",
+              "journey:pagarTituloCartao/localizarTituloAberto",
+              "journey:pagarTituloCartao/pagarComCartao",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/pagadorRecebimentos",
+              "relationship:TituloReceber/recebimentoTitulo",
+              "relationship:TituloReceber/tituloPagador"
             ]
           },
           {
@@ -152,16 +361,18 @@
             "family": "ddm",
             "scope": "organization",
             "derived": [
-              "details.quantidadeTitulosEmAberto",
-              "details.quantidadeTitulosVencidos",
-              "details.valorEmAberto",
-              "details.valorRecebido",
-              "details.valorVencido",
-              "groupKey",
-              "period"
+              "details.quantidadeRecebimentos",
+              "details.quantidadeTitulos",
+              "details.quantidadeVencidos",
+              "details.totalAReceber",
+              "details.totalEmAberto",
+              "details.totalRecebido",
+              "details.totalVencido",
+              "origem",
+              "periodo"
             ],
             "from": [
-              "grant:gerenteFinanceiroRecebiveis",
+              "grant:gerenteRecebiveis",
               "organism:summary"
             ]
           },
@@ -169,19 +380,29 @@
             "entity": "Recebimento",
             "family": "tdm",
             "scope": "organization",
-            "derived": [],
+            "derived": [
+              "details.baixaParcial",
+              "details.estornavel",
+              "details.estorno.estornadoEm",
+              "numero",
+              "recebidoEm"
+            ],
             "from": [
-              "grant:gerenteFinanceiroRecebiveis",
-              "journey:acompanharRecebiveis/inspecionarRecebiveis",
-              "journey:acompanharRecebiveis/localizarTitulosParaAnalise",
-              "journey:emitirExtratoPorPagador/consultarMovimentacoesDoPagador",
-              "journey:emitirExtratoPorPagador/gerarExtratoDoPagador",
-              "journey:emitirExtratoPorPagador/localizarPagador",
-              "relationship:Pagador/pagadorTemRecebimentos",
-              "relationship:Pagador/tituloTemPagador",
-              "relationship:Recebimento/pagadorTemRecebimentos",
-              "relationship:Recebimento/recebimentoDoTitulo",
-              "relationship:TituloReceber/recebimentoDoTitulo"
+              "grant:gerenteRecebiveis",
+              "grant:pagadorMeusRecebimentos",
+              "journey:consultarMeusTitulos/listarMeusTitulos",
+              "journey:consultarMeusTitulos/verMeuTitulo",
+              "journey:emitirExtratoPagador/emitirExtrato",
+              "journey:emitirExtratoPagador/localizarPagador",
+              "journey:emitirExtratoPagador/verExtrato",
+              "journey:pagarTituloCartao/conferirValor",
+              "journey:pagarTituloCartao/localizarTituloAberto",
+              "journey:pagarTituloCartao/pagarComCartao",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/pagadorRecebimentos",
+              "relationship:Recebimento/recebimentoTitulo",
+              "relationship:TituloReceber/recebimentoTitulo"
             ]
           },
           {
@@ -189,118 +410,30 @@
             "family": "tdm",
             "scope": "organization",
             "derived": [
-              "details.outstandingBalance",
-              "details.overdue",
-              "details.situation",
-              "details.totalReceived"
+              "details.diasAtraso",
+              "details.parcialmenteRecebido",
+              "details.quitado",
+              "details.saldoAberto",
+              "details.totalRecebido",
+              "details.vencido",
+              "numero"
             ],
             "from": [
-              "grant:gerenteFinanceiroRecebiveis",
-              "journey:acompanharRecebiveis/inspecionarRecebiveis",
-              "journey:acompanharRecebiveis/localizarTitulosParaAnalise",
-              "journey:emitirExtratoPorPagador/consultarMovimentacoesDoPagador",
-              "journey:emitirExtratoPorPagador/gerarExtratoDoPagador",
-              "journey:emitirExtratoPorPagador/localizarPagador",
-              "relationship:Pagador/pagadorTemRecebimentos",
-              "relationship:Pagador/tituloTemPagador",
-              "relationship:Recebimento/recebimentoDoTitulo",
-              "relationship:TituloReceber/recebimentoDoTitulo",
-              "relationship:TituloReceber/tituloTemPagador"
-            ]
-          }
-        ],
-        "writes": [
-          {
-            "entity": "ExtratoPagador",
-            "operation": "create",
-            "transitionRef": "",
-            "from": [
-              "journey:emitirExtratoPorPagador/gerarExtratoDoPagador"
-            ]
-          }
-        ]
-      },
-      {
-        "pageId": "perfil_gerente_financeiro",
-        "actors": [
-          "gerenteFinanceiro"
-        ],
-        "reads": [
-          {
-            "entity": "GerenteFinanceiro",
-            "family": "mdm",
-            "scope": "organization",
-            "derived": [],
-            "from": [
-              "grant:gerenteFinanceiroRecebiveis",
-              "organism:form"
-            ]
-          }
-        ],
-        "writes": [
-          {
-            "entity": "GerenteFinanceiro",
-            "operation": "create",
-            "transitionRef": "",
-            "from": [
-              "organism:form"
-            ]
-          },
-          {
-            "entity": "GerenteFinanceiro",
-            "operation": "update",
-            "transitionRef": "",
-            "from": [
-              "organism:form"
-            ]
-          }
-        ]
-      },
-      {
-        "pageId": "meus_titulos_recebimentos",
-        "actors": [
-          "pagador"
-        ],
-        "reads": [
-          {
-            "entity": "Recebimento",
-            "family": "tdm",
-            "scope": "own",
-            "derived": [],
-            "from": [
+              "grant:gerenteRecebiveis",
               "grant:pagadorMeusTitulos",
-              "journey:consultarMeusTitulosErecebimentos/consultarMeusRecebimentos",
-              "journey:consultarMeusTitulosErecebimentos/consultarMeusTitulos",
-              "journey:consultarMeusTitulosErecebimentos/localizarMeusRecebimentos",
-              "journey:consultarMeusTitulosErecebimentos/localizarMeusTitulos",
-              "journey:pagarTituloComCartao/conferirMeuTituloParaPagamento",
-              "journey:pagarTituloComCartao/localizarMeuTituloEmAberto",
-              "journey:pagarTituloComCartao/pagarTituloComCartao",
-              "relationship:Recebimento/recebimentoDoTitulo",
-              "relationship:TituloReceber/recebimentoDoTitulo"
-            ]
-          },
-          {
-            "entity": "TituloReceber",
-            "family": "tdm",
-            "scope": "own",
-            "derived": [
-              "details.outstandingBalance",
-              "details.overdue",
-              "details.situation",
-              "details.totalReceived"
-            ],
-            "from": [
-              "grant:pagadorMeusTitulos",
-              "journey:consultarMeusTitulosErecebimentos/consultarMeusRecebimentos",
-              "journey:consultarMeusTitulosErecebimentos/consultarMeusTitulos",
-              "journey:consultarMeusTitulosErecebimentos/localizarMeusRecebimentos",
-              "journey:consultarMeusTitulosErecebimentos/localizarMeusTitulos",
-              "journey:pagarTituloComCartao/conferirMeuTituloParaPagamento",
-              "journey:pagarTituloComCartao/localizarMeuTituloEmAberto",
-              "journey:pagarTituloComCartao/pagarTituloComCartao",
-              "relationship:Recebimento/recebimentoDoTitulo",
-              "relationship:TituloReceber/recebimentoDoTitulo"
+              "journey:consultarMeusTitulos/listarMeusTitulos",
+              "journey:consultarMeusTitulos/verMeuTitulo",
+              "journey:emitirExtratoPagador/emitirExtrato",
+              "journey:emitirExtratoPagador/localizarPagador",
+              "journey:emitirExtratoPagador/verExtrato",
+              "journey:pagarTituloCartao/conferirValor",
+              "journey:pagarTituloCartao/localizarTituloAberto",
+              "journey:pagarTituloCartao/pagarComCartao",
+              "relationship:Pagador/pagadorRecebimentos",
+              "relationship:Pagador/tituloPagador",
+              "relationship:Recebimento/recebimentoTitulo",
+              "relationship:TituloReceber/recebimentoTitulo",
+              "relationship:TituloReceber/tituloPagador"
             ]
           }
         ],
@@ -310,7 +443,7 @@
             "operation": "create",
             "transitionRef": "",
             "from": [
-              "journey:pagarTituloComCartao/pagarTituloComCartao"
+              "journey:pagarTituloCartao/pagarComCartao"
             ]
           }
         ]
@@ -318,7 +451,7 @@
     ],
     "meta": {
       "sourceMenu": "pool/l2/web/menu.json",
-      "generatedAt": "2026-10-02T16:06:20.067Z"
+      "generatedAt": "2026-10-13T00:51:44.156Z"
     }
   }
 }

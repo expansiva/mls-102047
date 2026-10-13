@@ -1,0 +1,487 @@
+{
+  "types": [
+    {
+      "name": "ProdutoIdentificacao",
+      "description": "Identificação do produto (details.identification).",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProdutoCatalogo",
+      "description": "Dados de catálogo do produto (details.product).",
+      "fields": [
+        {
+          "name": "details.product.sku",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.product.sku"
+            ]
+          }
+        },
+        {
+          "name": "details.product.category",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.product.category"
+            ]
+          }
+        },
+        {
+          "name": "details.product.unitOfMeasure",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.product.unitOfMeasure"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProdutoControleEstoque",
+      "description": "Namespace do módulo: saldo mínimo gravado e valores derivados das movimentações.",
+      "fields": [
+        {
+          "name": "details.controleEstoque.saldoMinimo",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.controleEstoque.saldoMinimo"
+            ]
+          }
+        },
+        {
+          "name": "details.controleEstoque.saldoAtual",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.controleEstoque.saldoAtual"
+            ]
+          }
+        },
+        {
+          "name": "details.controleEstoque.abaixoDoMinimo",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.controleEstoque.abaixoDoMinimo"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProdutoDetalhes",
+      "description": "Documento do produto com as partes que a página mostra.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "ProdutoIdentificacao"
+        },
+        {
+          "name": "product",
+          "type": "ProdutoCatalogo"
+        },
+        {
+          "name": "controleEstoque",
+          "type": "ProdutoControleEstoque"
+        }
+      ]
+    },
+    {
+      "name": "ProdutoEstoque",
+      "description": "Produto com nome, catálogo, saldo mínimo, saldo atual e situação abaixo do mínimo; usado nas listas, no detalhe e no retorno do cadastro.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.version"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "ProdutoDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "ResumoSaldo",
+      "description": "Indicadores do estoque já calculados no servidor.",
+      "fields": [
+        {
+          "name": "totalProdutos",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Produto.id"
+            ]
+          }
+        },
+        {
+          "name": "totalAbaixoDoMinimo",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Produto.details.controleEstoque.abaixoDoMinimo"
+            ]
+          }
+        },
+        {
+          "name": "saldoAtualTotal",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Produto.details.controleEstoque.saldoAtual"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "carregarVisaoEstoque",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "resumo",
+          "type": "ResumoSaldo"
+        },
+        {
+          "name": "produtosAbaixoMinimo",
+          "type": "ProdutoEstoque[]"
+        }
+      ],
+      "rules": [
+        "avisoSaldoAbaixoDoMinimo"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega, na abertura da página, o panorama do estoque: indicadores do saldo e os produtos abaixo do mínimo que geram aviso.",
+        "input": "Nenhuma entrada; o escopo é a organização do estoquista.",
+        "processing": "Considera os produtos com a tag de produto de estoque (subtipo Product). Calcula no servidor: total de produtos, quantidade de produtos abaixo do mínimo e soma do saldo atual. O saldo atual é derivado (entradas menos saídas das movimentações) e abaixoDoMinimo é derivado conforme avisoSaldoAbaixoDoMinimo (saldo atual menor que o saldo mínimo); nada disso é gravado pelo endpoint. Filtra os produtos com abaixoDoMinimo verdadeiro, ordenados pelo maior déficit (saldo mínimo menos saldo atual).",
+        "output": "resumo com os números prontos para o bloco de resumo e produtosAbaixoMinimo com nome, saldo atual e saldo mínimo para o destaque de aviso."
+      }
+    },
+    {
+      "id": "buscarProdutos",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "nome",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "produtos",
+          "type": "ProdutoEstoque[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "avisoSaldoAbaixoDoMinimo"
+      ],
+      "jsdoc": {
+        "purpose": "Lista os produtos do estoque, paginados, e localiza pelo nome o que o estoquista digita.",
+        "input": "nome: texto opcional procurado no nome do produto; page e pageSize: página pedida e tamanho da página.",
+        "processing": "Filtra pelo subtipo Product com a tag do módulo e, se houver texto, pelo nome contendo o texto (locate.byName). Ordena pelo nome. Compõe o saldo atual derivado das movimentações e abaixoDoMinimo derivado segundo avisoSaldoAbaixoDoMinimo, sem gravá-los.",
+        "output": "produtos em { items, page, pageSize, hasMore } com nome, SKU, unidade, saldo atual e indicação de abaixo do mínimo para cada linha."
+      }
+    },
+    {
+      "id": "obterProduto",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "produtoId",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "produto",
+          "type": "ProdutoEstoque"
+        }
+      ],
+      "rules": [
+        "avisoSaldoAbaixoDoMinimo"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega o produto escolhido na lista, no destaque de aviso ou vindo de uma notificação, com o saldo atualizado.",
+        "input": "produtoId: identificador do produto selecionado (seleção ou URL).",
+        "processing": "Lê o produto por id (read.byId / controleEstoque.consultarSaldo). Calcula o saldo atual a partir das movimentações e abaixoDoMinimo conforme avisoSaldoAbaixoDoMinimo; valores derivados, nunca gravados.",
+        "output": "produto com nome, SKU, categoria, unidade, saldo mínimo, saldo atual e situação abaixo do mínimo para o detalhe, de onde o estoquista segue para registrar movimentação."
+      }
+    },
+    {
+      "id": "cadastrarProduto",
+      "kind": "cmd",
+      "when": "cadastrarProduto",
+      "writes": "Produto.create",
+      "input": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.product.sku",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.product.sku"
+            ]
+          }
+        },
+        {
+          "name": "details.product.category",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.product.category"
+            ]
+          }
+        },
+        {
+          "name": "details.product.unitOfMeasure",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.product.unitOfMeasure"
+            ]
+          }
+        },
+        {
+          "name": "details.controleEstoque.saldoMinimo",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Produto.details.controleEstoque.saldoMinimo"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "produto",
+          "type": "ProdutoEstoque"
+        }
+      ],
+      "rules": [
+        "saldoMinimoNaoNegativo",
+        "avisoSaldoAbaixoDoMinimo"
+      ],
+      "jsdoc": {
+        "purpose": "Cadastra o produto no estoque com o saldo mínimo que dispara o aviso e devolve o produto gravado como confirmação.",
+        "input": "name: nome do produto; sku: código interno; category: categoria; unitOfMeasure: unidade de medida; saldoMinimo: quantidade mínima para aviso.",
+        "processing": "Recusa saldo mínimo negativo (saldoMinimoNaoNegativo). Usa register.createOrAttach: cria o produto com subtipo Product (ou anexa o papel do módulo a um existente), marca a tag controleEstoque.Produto e grava saldoMinimo apenas no namespace controleEstoque; campos de plataforma obrigatórios não editados (país, nomes alternativos) recebem os padrões da organização. Saldo atual nasce derivado (zero sem movimentações) e abaixoDoMinimo é calculado conforme avisoSaldoAbaixoDoMinimo; ambos nunca são gravados.",
+        "output": "produto gravado com id, versão, dados de catálogo, saldo mínimo, saldo atual e situação, para confirmar o cadastro e inseri-lo na lista sem nova chamada."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "saldoResumo",
+        "reads": "carregarVisaoEstoque.resumo"
+      },
+      {
+        "organism": "produtosAbaixoMinimo",
+        "reads": "carregarVisaoEstoque.produtosAbaixoMinimo"
+      },
+      {
+        "organism": "listaProdutos",
+        "reads": "buscarProdutos.produtos"
+      },
+      {
+        "organism": "detalheProduto",
+        "reads": "obterProduto.produto"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "cadastrarProduto",
+        "refreshes": [
+          "carregarVisaoEstoque"
+        ]
+      }
+    ],
+    "selections": [
+      {
+        "organism": "produtosAbaixoMinimo",
+        "via": {
+          "query": "obterProduto"
+        }
+      },
+      {
+        "organism": "listaProdutos",
+        "via": {
+          "query": "obterProduto"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "cadastrarProduto/registrarProduto",
+        "organisms": [
+          "cadastroProduto",
+          "acoesCadastro"
+        ],
+        "endpoints": [
+          "cadastrarProduto"
+        ]
+      },
+      {
+        "step": "conferirAvisoMinimo/verProdutoAvisado",
+        "organisms": [
+          "produtosAbaixoMinimo",
+          "detalheProduto"
+        ],
+        "endpoints": [
+          "carregarVisaoEstoque",
+          "obterProduto"
+        ]
+      },
+      {
+        "step": "consultarSaldo/localizarProdutoSaldo",
+        "organisms": [
+          "listaProdutos"
+        ],
+        "endpoints": [
+          "buscarProdutos"
+        ]
+      },
+      {
+        "step": "consultarSaldo/verSaldoProduto",
+        "organisms": [
+          "detalheProduto"
+        ],
+        "endpoints": [
+          "obterProduto"
+        ]
+      },
+      {
+        "step": "registrarMovimentacao/localizarProdutoMovimentacao",
+        "organisms": [
+          "listaProdutos"
+        ],
+        "endpoints": [
+          "buscarProdutos"
+        ]
+      },
+      {
+        "step": "registrarMovimentacao/verSaldoMovimentacao",
+        "organisms": [
+          "detalheProduto"
+        ],
+        "endpoints": [
+          "obterProduto"
+        ]
+      },
+      {
+        "step": "registrarMovimentacao/registrarMovimentacaoEstoque",
+        "organisms": [
+          "detalheProduto"
+        ],
+        "endpoints": [],
+        "continuesIn": "movimentacoes"
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "buscarProdutos",
+        "state": "buscarProdutos.produtos",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "buscarProdutos",
+        "state": "buscarProdutos.produtos",
+        "mode": "append"
+      },
+      {
+        "endpoint": "cadastrarProduto",
+        "state": "buscarProdutos.produtos",
+        "mode": "upsert"
+      }
+    ]
+  }
+}

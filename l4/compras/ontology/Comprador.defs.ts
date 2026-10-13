@@ -1,0 +1,267 @@
+/// <mls fileReference="_102047_/l4/compras/ontology/Comprador.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const comprasEntityComprador = {
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+  "moduleName": "compras",
+  "entityId": "Comprador",
+  "title": "Comprador",
+  "description": "Pessoa que atua como comprador; seus pedidos e produtos fornecidos cadastrados formam o seu escopo pessoal.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "produtosFornecidos": {
+      "relationshipId": "produtoFornecidoComprador",
+      "to": "ProdutoFornecido",
+      "via": "ProdutoFornecido.compradorId",
+      "cardinality": "1:N",
+      "title": "Produtos fornecidos mantidos",
+      "description": "Produtos fornecidos com preço combinado que este comprador cadastrou e mantém.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
+    },
+    "pedidos": {
+      "relationshipId": "pedidoComprador",
+      "to": "PedidoCompra",
+      "via": "PedidoCompra.compradorId",
+      "cardinality": "1:N",
+      "title": "Pedidos de compra abertos",
+      "description": "Pedidos de compra abertos por este comprador; formam o seu escopo pessoal.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
+    }
+  },
+  "capabilities": {
+    "read.byId": "Lê o comprador pelo id para exibir seu nome nos pedidos de compra e nos produtos fornecidos; usado por todas as telas do módulo.",
+    "locate.byName": "Localiza o comprador pelo nome no índice de pessoas; usado pelo gerente de compras ao filtrar pedidos por comprador.",
+    "locate.byDocument": "Localiza a pessoa pelo CPF antes de cadastrá-la como compradora, evitando duplicidade; usado por quem mantém o cadastro de compradores.",
+    "register.createOrAttach": "Cria a pessoa quando não existe e anexa o papel compras.Comprador; usado por quem mantém o cadastro de compradores.",
+    "edit.platformFields": "Altera nome, documento e consentimento do comprador no registro mestre; usado por quem mantém o cadastro.",
+    "inactivate": "Inativa o comprador que deixou a função, mantendo seus pedidos e produtos fornecidos; pode ser reativado pelo gerente de compras.",
+    "link.contact": "Vincula telefone ou e-mail do comprador como canal de contato por HasContact; usado por quem mantém o cadastro.",
+    "listLinks": "Lista os vínculos do comprador, como contatos e equipe, na ficha da pessoa; usado pelo gerente de compras.",
+    "locate.byLogin": "Resolve o comprador da sessão a partir do e-mail de login, base do escopo 'meus pedidos' e 'meus produtos fornecidos'; usado pelo resolvedor de sessão.",
+    "invite.login": "Dá acesso de login ao comprador para que abra e acompanhe seus próprios pedidos; executado pela plataforma ao cadastrar.",
+    "comment": "Registra observações sobre o comprador na sua ficha; usado pelo gerente de compras.",
+    "statusHistory.read": "Mostra quando o comprador foi inativado ou reativado e por quem; consultado pelo gerente de compras.",
+    "audit": "Mostra quem alterou o cadastro do comprador e quando; consultado por um administrador."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-identity-never-in-namespace",
+    "rule-document-shape-validated",
+    "rule-delete-blocked-by-relationships",
+    "rule-person-privacy-consent-required-br-eu",
+    "compradorInativoNaoAbrePedido"
+  ],
+  "writer": "crud",
+  "kind": "role",
+  "subtype": "Person",
+  "roleTag": "compras.Comprador",
+  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true,
+        "writePrecondition": true,
+        "description": "Bumped by the engine on every write; optimistic concurrency."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "description": "Registro mestre da pessoa que atua como comprador no módulo compras.",
+        "fields": {
+          "identification": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "subtype": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Person",
+                    "title": "Pessoa"
+                  }
+                ],
+                "description": "Sempre pessoa física para o comprador.",
+                "title": "Subtipo"
+              },
+              "name": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "maxLength": 200,
+                "description": "Nome do comprador, exibido nos pedidos de compra que abriu e nos produtos fornecidos que mantém.",
+                "title": "Nome"
+              },
+              "status": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Active",
+                    "title": "Ativo"
+                  },
+                  {
+                    "value": "Inactive",
+                    "title": "Inativo"
+                  },
+                  {
+                    "value": "Merged",
+                    "title": "Mesclado"
+                  },
+                  {
+                    "value": "Blocked",
+                    "title": "Bloqueado"
+                  }
+                ],
+                "title": "Situação",
+                "description": "Situação do cadastro do comprador; comprador inativo não abre novos pedidos de compra."
+              },
+              "docType": {
+                "type": "enum",
+                "indexed": true,
+                "values": [
+                  {
+                    "value": "CPF",
+                    "title": "CPF"
+                  },
+                  {
+                    "value": "Passport",
+                    "title": "Passaporte"
+                  },
+                  {
+                    "value": "NationalId",
+                    "title": "Documento de identidade"
+                  },
+                  {
+                    "value": "Other",
+                    "title": "Outro"
+                  }
+                ],
+                "title": "Tipo de documento",
+                "description": "Tipo do documento nacional do comprador."
+              },
+              "docId": {
+                "type": "string",
+                "indexed": true,
+                "description": "Número do documento nacional do comprador, usado para evitar cadastro duplicado.",
+                "title": "Número do documento"
+              },
+              "countryCode": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "pattern": "^[A-Z]{2}$",
+                "maxLength": 2,
+                "default": "US",
+                "description": "País (ISO 3166-1 alfa-2) a que pertencem o documento e as regras legais do comprador.",
+                "title": "País"
+              },
+              "tags": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "derived": true,
+                "description": "Papéis de módulo do registro; inclui compras.Comprador.",
+                "title": "Papéis"
+              },
+              "createdAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Criado em",
+                "description": "Momento em que o registro da pessoa foi criado."
+              },
+              "updatedAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Atualizado em",
+                "description": "Momento da última alteração do registro da pessoa."
+              }
+            },
+            "description": "Identificação da pessoa que atua como comprador."
+          },
+          "base": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "aliases": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "description": "Apelidos ou nomes pelos quais o comprador também é conhecido.",
+                "title": "Outros nomes"
+              },
+              "contacts": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "ContactSummary",
+                "derived": true,
+                "description": "Resumo dos canais de contato do comprador (telefone, e-mail) vinculados por HasContact.",
+                "title": "Contatos"
+              },
+              "relationshipRefs": {
+                "type": "object",
+                "required": true,
+                "derived": true,
+                "description": "Chaves compactas dos vínculos do comprador, recalculadas pela plataforma.",
+                "title": "Vínculos"
+              }
+            },
+            "description": "Dados comuns do registro da pessoa."
+          },
+          "person": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "privacyConsent": {
+                "type": "object",
+                "of": "PrivacyConsent",
+                "description": "Consentimento LGPD do comprador, exigido para residentes no Brasil.",
+                "title": "Consentimento de privacidade"
+              }
+            },
+            "description": "Dados de pessoa física do comprador."
+          },
+          "general": {
+            "type": "object",
+            "owner": "organization",
+            "open": true,
+            "description": "Campos promovidos pela organização; lidos pelo módulo, não declarados aqui."
+          },
+          "compras": {
+            "type": "object",
+            "owner": "module",
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
+          }
+        }
+      }
+    }
+  }
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+
+export type ComprasEntityCompradorType = typeof comprasEntityComprador;
+
+export default comprasEntityComprador;

@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const controleEstoqueOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "controleEstoque",
-  "businessDomain": "Controle de estoque",
+  "businessDomain": "Controle de estoque: cadastro de produtos, registro permanente de entradas e saídas, saldo atual por produto e aviso quando o saldo fica abaixo do mínimo.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "controleEstoque",
@@ -18,21 +18,21 @@ export const controleEstoqueOntologyIndex = {
       "subtype": "Product"
     },
     {
-      "entityId": "MovimentacaoEstoque",
+      "entityId": "Movimentacao",
       "kind": "entity",
       "class": "event"
     }
   ],
   "relationships": [
     {
-      "relationshipId": "movimentacaoEstoqueProduto",
-      "from": "MovimentacaoEstoque",
+      "relationshipId": "produtoDaMovimentacao",
+      "from": "Movimentacao",
       "to": "Produto",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada movimentação de estoque registra uma entrada ou saída para um único produto.",
-      "field": "MovimentacaoEstoque.produtoId"
+      "description": "Produto cujo estoque recebe a entrada ou a saída registrada nesta movimentação.",
+      "field": "Movimentacao.produtoId"
     }
   ]
 } as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;

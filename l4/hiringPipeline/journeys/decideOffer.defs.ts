@@ -1,74 +1,67 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/journeys/decideOffer.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const decideOfferJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "journeyId": "decideOffer",
   "business": {
     "actorRef": "hiringManager",
-    "title": "Decide whether to make an offer",
-    "goal": "Make the hiring decision for an interviewed candidate assigned to the manager's position.",
+    "title": "Decide on an offer",
+    "goal": "Decide whether an interviewed candidate for one of my positions receives an offer.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "locateInterviewApplication",
+        "stepId": "findApplication",
         "kind": "locate",
         "entity": "Application",
-        "title": "x",
-        "description": "Locate the interviewed application for a position managed by the hiring manager."
+        "title": "Find interviewed application",
+        "description": "The hiring manager finds an application in the interview stage among the positions she manages."
       },
       {
-        "stepId": "inspectInterviewApplication",
+        "stepId": "reviewCandidate",
         "kind": "inspect",
         "entity": "Application",
-        "title": "x",
-        "description": "Review the interviewed candidate and the job position."
+        "title": "Review candidate",
+        "description": "The hiring manager reviews the candidate's resume link, source and application history."
       },
       {
-        "stepId": "inspectCandidateForOffer",
-        "kind": "inspect",
-        "entity": "Candidate",
-        "title": "x",
-        "description": "Review the candidate's qualifications and available resume before making the offer decision."
-      },
-      {
-        "stepId": "selectOfferDecision",
+        "stepId": "chooseOffer",
         "kind": "decide",
         "entity": "Application",
-        "title": "x",
-        "description": "Choose whether to make an offer or decline the candidate."
+        "title": "Offer or decline",
+        "description": "The hiring manager chooses between extending an offer or declining the candidate."
       },
       {
-        "stepId": "moveToOffer",
+        "stepId": "extendOffer",
         "kind": "act",
         "entity": "Application",
         "effect": "transition",
-        "transitionRef": "moveToOffer",
-        "title": "x",
-        "description": "When an offer is selected, move the application from interview to offer."
+        "transitionRef": "extendOffer",
+        "title": "Move to offer",
+        "description": "When she chooses to offer, the hiring manager moves the application to the offer stage."
       },
       {
-        "stepId": "referDeclinedCandidate",
+        "stepId": "returnToRecruiter",
         "kind": "handoff",
         "entity": "Application",
-        "title": "x",
-        "description": "When the candidate is declined, refer the application to the recruiter to record the rejection reason.",
+        "title": "Return to recruiter",
+        "description": "When she declines, the application goes back to the recruiter to be rejected with a reason.",
         "handoffTo": "recruiter"
       }
     ],
     "outcome": {
-      "statement": "An interviewed candidate is either advanced to offer or referred for rejection processing.",
+      "statement": "The application is either in the offer stage or returned to the recruiter for rejection.",
       "evidence": [
-        "For an offer decision, the application stage is offer.",
-        "For a decline decision, the recruiter receives the application for rejection processing."
+        "The application shows the offer stage, or",
+        "The recruiter sees the application flagged for rejection"
       ]
     }
   },
-  "businessHash": "sha256:2ab1e944d198bcc863c62f49b7f7c6886fae94f758a1c403fb237526585d555b"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:1c66b35ec085084fd368eafbffa6e0d404690f20ca310517e6f9d7e6e471a3e9"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type DecideOfferJourneyType = typeof decideOfferJourney;
 

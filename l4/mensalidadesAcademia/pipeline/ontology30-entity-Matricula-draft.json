@@ -4,30 +4,37 @@
     "moduleName": "mensalidadesAcademia",
     "entityId": "Matricula",
     "title": "Matrícula",
-    "description": "Vínculo do aluno a um plano a partir de uma data, cuja situação define a geração de mensalidades futuras.",
-    "displayField": "id",
+    "description": "Vínculo do aluno a um plano a partir de uma data de início; ativa até ser cancelada. O bloqueio por duas mensalidades vencidas é derivado, não digitado.",
+    "displayField": "numero",
     "relationships": {
       "aluno": {
         "relationshipId": "matriculaAluno",
         "to": "Aluno",
         "via": "Matricula.alunoId",
         "cardinality": "N:1",
-        "title": "Aluno matriculado",
-        "description": "Cada matrícula pertence obrigatoriamente a um aluno.",
+        "title": "Aluno da matrícula",
+        "description": "Cada matrícula pertence a um aluno; um aluno pode ter várias matrículas ao longo do tempo.",
         "mode": "fk",
-        "required": "sempre",
-        "role": "aluno matriculado"
+        "required": true
       },
       "plano": {
         "relationshipId": "matriculaPlano",
         "to": "Plano",
         "via": "Matricula.planoId",
         "cardinality": "N:1",
-        "title": "Plano contratado",
-        "description": "Cada matrícula é realizada obrigatoriamente em um plano da academia.",
+        "title": "Plano da matrícula",
+        "description": "Plano de onde vêm o valor e o dia de vencimento.",
         "mode": "fk",
-        "required": "sempre",
-        "role": "plano contratado"
+        "required": true
+      },
+      "recepcao": {
+        "relationshipId": "matriculaRecepcao",
+        "to": "Recepcao",
+        "via": "Matricula.recepcaoId",
+        "cardinality": "N:1",
+        "title": "Registrada por",
+        "description": "Atendente da recepção que registrou a matrícula.",
+        "mode": "fk"
       },
       "mensalidades": {
         "relationshipId": "mensalidadeMatricula",
@@ -35,26 +42,35 @@
         "via": "Mensalidade.matriculaId",
         "cardinality": "1:N",
         "title": "Mensalidades da matrícula",
-        "description": "Mensalidades geradas para esta matrícula.",
+        "description": "Mensalidades geradas para esta matrícula, uma por mês de referência.",
         "mode": "fk",
         "direction": "to",
-        "required": "quando houver mensalidades geradas",
-        "role": "origem da mensalidade"
+        "required": true
       }
     },
     "capabilities": {
-      "read.byId": "Lê uma matrícula pelo identificador para a recepção e o aluno consultarem seus dados.",
-      "locate.byColumn": "Lista matrículas por aluno, plano, situação ou data de início para a recepção e a gerência.",
-      "count": "Conta matrículas conforme a situação e os demais filtros para a gerência acompanhar a base de alunos.",
-      "listByForeignKey": "Lista as matrículas vinculadas a um aluno ou a um plano para as telas da recepção e da gerência.",
-      "create": "Cria a matrícula com aluno, plano e data de início quando a recepção efetiva a contratação.",
-      "transition": "Move a matrícula ativa para cancelada no cancelamento da própria matrícula pelo aluno.",
-      "read.mdmRecord": "Lê o cadastro mestre do aluno apontado pela matrícula para exibir sua identificação à recepção e à gerência."
+      "read.byId": "Abre a matrícula pelo id para a recepção consultar a situação do aluno e a gerência conferir antes de gerar mensalidades.",
+      "locate.byColumn": "Lista matrículas por situação, aluno, plano ou data de início; a gerência confere as ativas do mês e a recepção acha a matrícula do aluno que chegou.",
+      "locate.byText": "Busca a matrícula pelo número digitado na caixa de pesquisa da recepção.",
+      "count": "Conta as matrículas ativas que receberão mensalidade no mês, exibido para a gerência.",
+      "listByForeignKey": "Lista as matrículas de um aluno ou de um plano, e as mensalidades de cada matrícula, na tela da recepção.",
+      "create": "A recepção registra a matrícula do aluno no plano com a data de início, já ativa, criando ou vinculando o cadastro do aluno.",
+      "update": "A recepção corrige observações da matrícula.",
+      "transition": "A recepção cancela a matrícula a pedido do aluno, passando de ativa para cancelada e encerrando a geração de mensalidades futuras.",
+      "uniqueKey": "O sistema recusa dois números de matrícula iguais.",
+      "transaction": "Grava a matrícula e o vínculo do aluno juntos, tudo ou nada, no registro feito pela recepção.",
+      "read.mdmRecord": "Mostra nome e documento do aluno e o atendente da recepção nas listas e na tela da matrícula.",
+      "sequence.next": "Emite o número da matrícula na criação, pela chave mensalidadesAcademia.Matricula.",
+      "comment": "A recepção e a gerência deixam notas sobre a matrícula, como acordos de regularização.",
+      "mensalidadesAcademia.verificarLiberacao": "Informa à recepção se o aluno pode entrar: matrícula ativa e sem duas mensalidades vencidas, listando as vencidas quando bloqueado."
     },
     "rules": [
-      "matriculaAtivaUnicaPorAluno",
-      "cancelamentoSomenteMatriculaAtiva",
-      "cancelamentoInterrompeGeracao"
+      "matriculaExigeAlunoEPlano",
+      "alunoBloqueadoDuasVencidas",
+      "bloqueadoNaoEntra",
+      "mensalidadeVencidaAposVencimento",
+      "cancelamentoEncerraGeracao",
+      "somenteAtivaGeraMensalidade"
     ],
     "kind": "entity",
     "class": "core",
@@ -77,115 +93,159 @@
           "required": true,
           "derived": true
         },
+        "numero": {
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "indexed": true,
+          "derived": true,
+          "title": "Número da matrícula",
+          "description": "Número sequencial que a recepção informa ao aluno, emitido pelo sistema na criação da matrícula."
+        },
         "alunoId": {
           "type": "record",
           "required": true,
           "indexed": true,
-          "of": "ContactSummary",
           "to": [
             "Aluno"
           ],
           "title": "Aluno",
-          "description": "Aluno ao qual esta matrícula pertence.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "description": "Aluno matriculado; nome e documento são lidos do cadastro mestre."
         },
         "planoId": {
           "type": "record",
           "required": true,
           "indexed": true,
-          "of": "ContactSummary",
           "to": [
             "Plano"
           ],
           "title": "Plano",
-          "description": "Plano da academia contratado nesta matrícula.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "description": "Plano escolhido (mensal, trimestral ou anual), de onde vêm o valor e o dia de vencimento das mensalidades."
         },
-        "status": {
-          "type": "enum",
-          "required": true,
+        "recepcaoId": {
+          "type": "record",
           "indexed": true,
-          "of": "ContactSummary",
-          "values": [
-            {
-              "value": "active",
-              "title": "Ativa",
-              "description": "Matrícula vigente, apta à geração de mensalidades."
-            },
-            {
-              "value": "canceled",
-              "title": "Cancelada",
-              "description": "Matrícula encerrada, sem geração de mensalidades futuras."
-            }
+          "to": [
+            "Recepcao"
           ],
-          "title": "Situação",
-          "description": "Situação da matrícula que determina se ela participa da geração de mensalidades futuras.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "title": "Atendente da recepção",
+          "description": "Atendente da recepção que registrou a matrícula."
         },
         "dataInicio": {
           "type": "date",
           "required": true,
           "indexed": true,
-          "of": "ContactSummary",
           "title": "Data de início",
-          "description": "Data a partir da qual o aluno inicia a matrícula no plano e pode ter mensalidades geradas.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "description": "Data a partir da qual a matrícula vale e as mensalidades passam a ser geradas."
+        },
+        "status": {
+          "type": "enum",
+          "required": true,
+          "indexed": true,
+          "values": [
+            {
+              "value": "ativa",
+              "title": "Ativa"
+            },
+            {
+              "value": "cancelada",
+              "title": "Cancelada"
+            }
+          ],
+          "title": "Situação",
+          "description": "Situação da matrícula: ativa até ser cancelada. O bloqueio por mensalidades vencidas não é uma situação digitada; é calculado."
         },
         "details": {
           "type": "object",
           "required": true,
-          "of": "ContactSummary",
-          "title": "Dados da matrícula",
-          "description": "Informações próprias da matrícula que não são usadas em filtros ou ordenações.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "title": "Detalhes",
+          "description": "Demais informações da matrícula.",
           "fields": {
-            "dataCancelamento": {
-              "type": "date",
-              "of": "ContactSummary",
-              "title": "Data de cancelamento",
-              "description": "Data em que o aluno cancelou esta matrícula.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0
+            "observacoes": {
+              "type": "text",
+              "title": "Observações",
+              "description": "Anotações da recepção sobre a matrícula.",
+              "maxLength": 2000
+            },
+            "cancelamento": {
+              "type": "object",
+              "title": "Cancelamento",
+              "description": "Dados do cancelamento pedido pelo aluno; preenchido apenas quando a matrícula é cancelada.",
+              "fields": {
+                "dataCancelamento": {
+                  "type": "date",
+                  "required": true,
+                  "title": "Data do cancelamento",
+                  "description": "Data em que a matrícula foi encerrada; a partir dela não se geram novas mensalidades."
+                },
+                "motivo": {
+                  "type": "text",
+                  "title": "Motivo",
+                  "description": "Motivo informado pelo aluno para cancelar.",
+                  "maxLength": 1000
+                }
+              }
+            },
+            "mensalidadesVencidas": {
+              "type": "integer",
+              "derived": true,
+              "title": "Mensalidades vencidas",
+              "description": "Quantidade de mensalidades desta matrícula que não foram pagas e cujo vencimento já passou."
+            },
+            "bloqueada": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Bloqueada",
+              "description": "Matrícula ativa com duas ou mais mensalidades vencidas; o aluno não pode entrar até regularizar."
+            },
+            "inadimplente": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Inadimplente",
+              "description": "Matrícula com ao menos uma mensalidade vencida e não paga."
+            },
+            "entradaLiberada": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Entrada liberada",
+              "description": "Matrícula ativa e não bloqueada por mensalidades vencidas; é o que a recepção consulta quando o aluno chega."
             }
           }
         }
       }
     },
+    "uniqueKeys": [
+      [
+        "numero"
+      ]
+    ],
     "lifecycleStates": [
       {
-        "state": "active",
+        "state": "ativa",
         "reachedBy": "actor"
       },
       {
-        "state": "canceled",
+        "state": "cancelada",
         "reachedBy": "actor"
       }
     ],
     "transitions": [
       {
-        "transitionId": "cancelarMatricula",
+        "transitionId": "cancelar",
         "from": [
-          "active"
+          "ativa"
         ],
-        "to": "canceled",
+        "to": "cancelada",
         "by": [
-          "aluno"
+          "recepcao"
         ],
-        "description": "Cancela a própria matrícula ativa e interrompe a geração de mensalidades futuras.",
+        "description": "A recepção registra o cancelamento pedido pelo aluno, o que encerra a geração de mensalidades futuras.",
+        "payload": [
+          "details.cancelamento.dataCancelamento",
+          "details.cancelamento.motivo"
+        ],
         "ruleRefs": [
-          "cancelamentoSomenteMatriculaAtiva",
-          "cancelamentoInterrompeGeracao"
+          "cancelamentoEncerraGeracao"
         ]
       }
     ]
@@ -195,6 +255,26 @@
       "kind": "derivedFromPlatform",
       "entityId": "Matricula",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.details.fields.mensalidadesVencidas.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.details.fields.bloqueada.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.details.fields.inadimplente.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Matricula",
+      "detail": "record.fields.details.fields.entradaLiberada.derived (derived[])"
     }
   ]
 }

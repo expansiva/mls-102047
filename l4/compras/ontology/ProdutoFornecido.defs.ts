@@ -1,0 +1,202 @@
+/// <mls fileReference="_102047_/l4/compras/ontology/ProdutoFornecido.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const comprasEntityProdutoFornecido = {
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+  "moduleName": "compras",
+  "entityId": "ProdutoFornecido",
+  "title": "Produto fornecido",
+  "description": "Produto que um fornecedor fornece à organização, com o preço combinado vigente.",
+  "displayField": "codigo",
+  "relationships": {
+    "fornecedor": {
+      "relationshipId": "produtoFornecidoFornecedor",
+      "to": "Fornecedor",
+      "via": "ProdutoFornecido.fornecedorId",
+      "cardinality": "N:1",
+      "title": "Fornecedor",
+      "description": "Fornecedor que fornece o produto com o preço combinado.",
+      "mode": "fk",
+      "required": true
+    },
+    "produto": {
+      "relationshipId": "produtoFornecidoProduto",
+      "to": "Produto",
+      "via": "ProdutoFornecido.produtoId",
+      "cardinality": "N:1",
+      "title": "Produto",
+      "description": "Produto fornecido pelo fornecedor.",
+      "mode": "fk",
+      "required": true
+    },
+    "comprador": {
+      "relationshipId": "produtoFornecidoComprador",
+      "to": "Comprador",
+      "via": "ProdutoFornecido.compradorId",
+      "cardinality": "N:1",
+      "title": "Comprador responsável",
+      "description": "Comprador que cadastrou e mantém o preço combinado.",
+      "mode": "fk",
+      "required": true
+    },
+    "itensPedido": {
+      "relationshipId": "itemPedidoProdutoFornecido",
+      "to": "ItemPedido",
+      "via": "ItemPedido.produtoFornecidoId",
+      "cardinality": "1:N",
+      "title": "Itens de pedido",
+      "description": "Itens de pedidos de compra cujo preço foi sugerido por este preço combinado.",
+      "mode": "fk",
+      "direction": "to"
+    }
+  },
+  "capabilities": {
+    "read.byId": "Abre um produto fornecido pelo id para o comprador ver o preço atual antes de alterá-lo.",
+    "locate.byColumn": "Lista os produtos fornecidos filtrando por fornecedor, produto, comprador ou ativo, para a conferência do comprador e a sugestão de preço no pedido.",
+    "locate.byText": "Busca produtos fornecidos pelo código digitado na caixa de pesquisa do comprador.",
+    "count": "Conta quantos produtos ativos cada fornecedor fornece, exibido no cabeçalho da lista do fornecedor.",
+    "listByForeignKey": "Lista todos os produtos e preços combinados de um fornecedor na tela do fornecedor, usada pelo comprador ao conferir o cadastro.",
+    "create": "O comprador associa um produto a um fornecedor informando o preço combinado.",
+    "update": "O comprador altera o preço combinado, a vigência ou desativa o produto fornecido.",
+    "uniqueKey": "Recusa um segundo preço combinado para o mesmo fornecedor e o mesmo produto, e garante código único.",
+    "read.mdmRecord": "Lê a razão social do fornecedor e o nome e unidade do produto no cadastro mestre para exibir na lista.",
+    "sequence.next": "Emite o código do produto fornecido no momento do cadastro pelo comprador.",
+    "comment": "O comprador registra notas sobre a negociação do preço com o fornecedor."
+  },
+  "rules": [
+    "produtoFornecidoUnicoPorFornecedor",
+    "precoCombinadoPositivo",
+    "produtoFornecidoSomenteFornecedorAtivo",
+    "precoSugeridoNoItemPedido"
+  ],
+  "kind": "entity",
+  "class": "supporting",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "compras_produtofornecido",
+    "kind": "relational"
+  },
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "derived": true,
+        "indexed": true,
+        "title": "Id"
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true
+      },
+      "codigo": {
+        "type": "string",
+        "required": true,
+        "unique": true,
+        "indexed": true,
+        "derived": true,
+        "title": "Código",
+        "description": "Número do produto fornecido, emitido pela numeração da plataforma no cadastro; é como o comprador cita este preço combinado.",
+        "maxLength": 20
+      },
+      "fornecedorId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "to": [
+          "Fornecedor"
+        ],
+        "title": "Fornecedor",
+        "description": "Fornecedor que fornece o produto com este preço combinado."
+      },
+      "produtoId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "to": [
+          "Produto"
+        ],
+        "title": "Produto",
+        "description": "Produto do cadastro mestre que o fornecedor fornece."
+      },
+      "compradorId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "to": [
+          "Comprador"
+        ],
+        "title": "Comprador responsável",
+        "description": "Comprador que cadastrou e mantém o preço combinado com o fornecedor."
+      },
+      "ativo": {
+        "type": "boolean",
+        "required": true,
+        "indexed": true,
+        "title": "Ativo",
+        "description": "Indica se o fornecedor ainda fornece este produto; só os ativos são sugeridos ao abrir um pedido de compra."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "title": "Detalhes",
+        "description": "Dados do preço combinado entre a organização e o fornecedor para o produto.",
+        "fields": {
+          "precoCombinado": {
+            "type": "money",
+            "required": true,
+            "title": "Preço combinado",
+            "description": "Preço unitário combinado com o fornecedor para este produto, usado como sugestão do preço do item no pedido de compra.",
+            "min": 0
+          },
+          "vigenteDesde": {
+            "type": "date",
+            "required": true,
+            "title": "Vigente desde",
+            "description": "Data a partir da qual o preço combinado atual vale."
+          },
+          "precoAtualizadoEm": {
+            "type": "timestamp",
+            "required": true,
+            "derived": true,
+            "title": "Preço atualizado em",
+            "description": "Momento da última alteração do preço combinado, registrado pelo sistema."
+          },
+          "codigoNoFornecedor": {
+            "type": "string",
+            "title": "Código no fornecedor",
+            "description": "Código com que o fornecedor identifica o produto no catálogo dele, para constar no pedido.",
+            "maxLength": 60
+          },
+          "observacoes": {
+            "type": "text",
+            "title": "Observações",
+            "description": "Condições combinadas com o fornecedor para este produto (embalagem, quantidade mínima, prazo).",
+            "maxLength": 2000
+          },
+          "usadoEmPedidos": {
+            "type": "integer",
+            "derived": true,
+            "title": "Pedidos que usaram o preço",
+            "description": "Quantidade de itens de pedidos de compra cujo preço foi sugerido por este preço combinado."
+          }
+        }
+      }
+    }
+  },
+  "uniqueKeys": [
+    [
+      "fornecedorId",
+      "produtoId"
+    ],
+    [
+      "codigo"
+    ]
+  ]
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+
+export type ComprasEntityProdutoFornecidoType = typeof comprasEntityProdutoFornecido;
+
+export default comprasEntityProdutoFornecido;

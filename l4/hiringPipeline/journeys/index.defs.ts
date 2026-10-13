@@ -1,6 +1,6 @@
 /// <mls fileReference="_102047_/l4/hiringPipeline/journeys/index.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyIndexArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyIndexArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const hiringPipelineJourneyIndex = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -12,38 +12,38 @@ export const hiringPipelineJourneyIndex = {
       "title": "Open a job position"
     },
     {
-      "journeyId": "registerCandidate",
+      "journeyId": "registerCandidateApplication",
       "actorRef": "recruiter",
-      "title": "Register a candidate"
+      "title": "Register a candidate and an application"
     },
     {
-      "journeyId": "startApplicationScreening",
+      "journeyId": "advanceToInterview",
       "actorRef": "recruiter",
-      "title": "Start screening an application"
+      "title": "Move an application to interview"
     },
     {
-      "journeyId": "advanceApplicationToInterview",
+      "journeyId": "rejectApplication",
       "actorRef": "recruiter",
-      "title": "Advance an application to interview"
+      "title": "Reject an application"
     },
     {
       "journeyId": "decideOffer",
       "actorRef": "hiringManager",
-      "title": "Decide whether to make an offer"
+      "title": "Decide on an offer"
     },
     {
-      "journeyId": "decideHiringOutcome",
+      "journeyId": "decideHire",
       "actorRef": "hiringManager",
-      "title": "Decide the hiring outcome"
+      "title": "Decide on hiring"
     },
     {
-      "journeyId": "recordApplicationRejection",
-      "actorRef": "recruiter",
-      "title": "Record an application rejection"
+      "journeyId": "reviewMyPipeline",
+      "actorRef": "hiringManager",
+      "title": "Review my positions' pipeline"
     }
   ],
   "systemDecisions": []
-} as const satisfies Ns5JourneyIndexArtifact;
+} as const satisfies Ns5Readonly<Ns5JourneyIndexArtifact>;
 
 export type HiringPipelineJourneyIndexType = typeof hiringPipelineJourneyIndex;
 

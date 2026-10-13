@@ -4,51 +4,57 @@
     "moduleName": "financeiro",
     "entityId": "Recebimento",
     "title": "Recebimento",
-    "description": "Movimentação de recebimento total ou parcial de um título, registrada por dinheiro, Pix ou cartão e passível de estorno no mesmo dia.",
-    "displayField": "number",
+    "description": "Recebimento total ou parcial de um título, em dinheiro, pix ou cartão via Stripe, registrado pelo caixa ou pago pelo pagador no portal; pode ser estornado apenas no mesmo dia.",
+    "displayField": "numero",
     "relationships": {
-      "tituloReceber": {
-        "relationshipId": "recebimentoDoTitulo",
+      "titulo": {
+        "relationshipId": "recebimentoTitulo",
         "to": "TituloReceber",
-        "via": "Recebimento.tituloReceberId",
+        "via": "Recebimento.tituloId",
         "cardinality": "N:1",
-        "title": "Título do recebimento",
-        "description": "Cada recebimento pertence obrigatoriamente a um título a receber.",
+        "title": "Título baixado",
+        "description": "Cada recebimento baixa, total ou parcialmente, um título a receber.",
         "mode": "fk",
-        "required": "sempre"
+        "required": true
       },
       "pagador": {
-        "relationshipId": "pagadorTemRecebimentos",
+        "relationshipId": "pagadorRecebimentos",
         "to": "Pagador",
-        "via": "Recebimento",
+        "via": "TituloReceber",
         "cardinality": "N:1",
         "title": "Pagador do recebimento",
-        "description": "O pagador é obtido pelo título a receber deste recebimento, sem cópia de dados da pessoa no lançamento.",
+        "description": "O pagador obtido pelo título deste recebimento; usado no portal e no extrato.",
         "mode": "throughTable",
-        "path": "Pagador <- TituloReceber.pagadorId; Recebimento.tituloReceberId -> TituloReceber",
+        "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
         "derived": true,
-        "direction": "to",
-        "required": "quando o recebimento for consultado pelo pagador do título"
+        "direction": "to"
       }
     },
     "capabilities": {
-      "read.byId": "Consulta um recebimento pelo identificador da linha · usa findOne por id no repositório de recebimentos · caixa e pagador em seus respectivos contextos.",
-      "locate.byColumn": "Localiza recebimentos por número, título, data de registro, situação ou identificador Stripe · usa filtros e paginação sobre as colunas indexadas · caixa, gerente financeiro e pagador dentro do seu escopo.",
-      "count": "Conta os recebimentos que atendem aos filtros da consulta · usa o mesmo critério de busca sem paginação · gerente financeiro e pagador dentro do seu escopo.",
-      "listByForeignKey": "Lista os recebimentos de um título a receber · busca as linhas por tituloReceberId, inclusive em lote · caixa, gerente financeiro e portal do pagador.",
-      "create": "Registra um recebimento total ou parcial para um título em aberto · insere o lançamento com valor e forma de pagamento · caixa e pagador ao concluir pagamento por cartão.",
-      "transition": "Estorna um recebimento registrado no mesmo dia · altera a situação de registrado para estornado sob as regras do módulo · caixa.",
-      "transaction": "Registra ou estorna o recebimento junto com a atualização do saldo do título · executa as escritas relacionadas de forma atômica · caixa e pagamento por cartão do pagador.",
-      "sequence.next": "Emite o número sequencial do recebimento · obtém o próximo número da sequência do módulo antes da criação · módulo financeiro.",
-      "financeiro.processarPagamentoCartao": "Processa o pagamento de um título próprio por cartão na Stripe · confirma o identificador retornado pela Stripe e cria o recebimento em transação · pagador."
+      "read.byId": "Abre o recebimento pelo id para o caixa conferir título, valor, forma e data, e para o pagador ver o comprovante no portal.",
+      "locate.byColumn": "Lista recebimentos por data de recebimento, situação e forma de pagamento, como os registrados hoje que o caixa procura para estornar.",
+      "count": "Conta os recebimentos do filtro para o cabeçalho das listas do caixa e do gerente financeiro.",
+      "listByForeignKey": "Lista os recebimentos de um título pela coluna tituloId, e de vários títulos de uma vez para o extrato por pagador e o portal.",
+      "create": "Registra o recebimento total ou parcial pelo caixa (dinheiro, pix ou cartão) ou o pagamento com cartão feito pelo pagador no portal.",
+      "transition": "Move o recebimento de registrado para estornado quando o caixa estorna no mesmo dia.",
+      "transaction": "Grava o recebimento e atualiza o saldo do título juntos, tudo ou nada, no recebimento e no estorno.",
+      "uniqueKey": "Recusa número de recebimento repetido e a mesma confirmação do Stripe registrada duas vezes.",
+      "sequence.next": "Emite o número do recebimento na criação, pela chave financeiro.Recebimento.",
+      "read.mdmRecord": "Lê o nome do pagador do título para exibir no recebimento, no comprovante e no extrato.",
+      "comment": "Permite ao caixa e ao gerente financeiro deixar notas sobre um recebimento ou estorno.",
+      "statusHistory.read": "Mostra quando o recebimento foi estornado e por quem, para o gerente financeiro.",
+      "financeiro.pagarCartaoStripe": "Cobra o cartão via Stripe, no caixa ou no portal do pagador, e registra o recebimento ao confirmar o pagamento."
     },
     "rules": [
-      "receiptTitleMustBeOpen",
-      "receivedAmountPositive",
-      "receivedAmountDoesNotExceedTitleBalance",
-      "cardPaymentRequiresStripePaymentId",
-      "sameDayReversal",
-      "receiptReversalRecomposesTitleBalance"
+      "recebimentoValorPositivo",
+      "recebimentoNaoExcedeSaldo",
+      "tituloQuitadoNaoRecebe",
+      "estornoSomenteMesmoDia",
+      "estornoRestabeleceSaldo",
+      "portalSomenteCartao",
+      "pagadorVeSomenteProprios",
+      "numeroRecebimentoUnico",
+      "stripePagamentoUnico"
     ],
     "kind": "entity",
     "class": "event",
@@ -71,123 +77,146 @@
           "required": true,
           "derived": true
         },
-        "number": {
+        "numero": {
           "type": "string",
           "required": true,
           "unique": true,
           "indexed": true,
-          "of": "ContactSummary",
+          "derived": true,
           "title": "Número do recebimento",
-          "description": "Número sequencial que identifica o recebimento para consulta e conferência no financeiro.",
-          "maxLength": 80,
-          "min": 0,
-          "max": 0
+          "description": "Número sequencial do recebimento emitido pelo sistema na criação (sequence.next), citado no comprovante e na busca do caixa.",
+          "maxLength": 30
         },
-        "tituloReceberId": {
+        "tituloId": {
           "type": "record",
           "required": true,
           "indexed": true,
-          "of": "ContactSummary",
           "to": [
             "TituloReceber"
           ],
-          "title": "Título a receber",
-          "description": "Título a receber ao qual este valor recebido é obrigatoriamente lançado.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
-        },
-        "receivedAt": {
-          "type": "timestamp",
-          "required": true,
-          "indexed": true,
-          "of": "ContactSummary",
-          "title": "Data e hora do recebimento",
-          "description": "Data e hora em que o recebimento foi registrado; permite localizar lançamentos do dia para estorno.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
-        },
-        "stripePaymentId": {
-          "type": "string",
-          "unique": true,
-          "indexed": true,
-          "of": "ContactSummary",
-          "title": "Identificador do pagamento Stripe",
-          "description": "Identificador retornado pela Stripe para impedir o registro duplicado de um pagamento por cartão.",
-          "maxLength": 255,
-          "min": 0,
-          "max": 0
+          "title": "Título",
+          "description": "Título a receber que este recebimento baixa, total ou parcialmente."
         },
         "status": {
           "type": "enum",
           "required": true,
           "indexed": true,
-          "of": "ContactSummary",
           "values": [
             {
-              "value": "registered",
-              "title": "Registrado",
-              "description": "Recebimento lançado e considerado no saldo do título."
+              "value": "registrado",
+              "title": "Registrado"
             },
             {
-              "value": "reversed",
-              "title": "Estornado",
-              "description": "Recebimento cancelado no mesmo dia e desconsiderado do saldo do título."
+              "value": "estornado",
+              "title": "Estornado"
             }
           ],
           "title": "Situação",
-          "description": "Situação do lançamento de recebimento, registrada ou estornada.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0
+          "description": "Situação do recebimento: registrado ao ser criado, estornado quando o caixa o desfaz no mesmo dia."
+        },
+        "recebidoEm": {
+          "type": "timestamp",
+          "required": true,
+          "indexed": true,
+          "derived": true,
+          "title": "Recebido em",
+          "description": "Momento em que o recebimento foi registrado pelo sistema; usado para listar os recebimentos de hoje, para o painel por período e para a regra de estorno no mesmo dia."
+        },
+        "formaPagamento": {
+          "type": "enum",
+          "required": true,
+          "indexed": true,
+          "values": [
+            {
+              "value": "dinheiro",
+              "title": "Dinheiro"
+            },
+            {
+              "value": "pix",
+              "title": "Pix"
+            },
+            {
+              "value": "cartao",
+              "title": "Cartão (Stripe)"
+            }
+          ],
+          "title": "Forma de pagamento",
+          "description": "Meio usado para pagar: dinheiro ou pix no caixa, ou cartão via Stripe no caixa ou no portal."
+        },
+        "stripePaymentIntentId": {
+          "type": "string",
+          "indexed": true,
+          "title": "Identificador do pagamento no Stripe",
+          "description": "Identificador da cobrança de cartão no Stripe, preenchido apenas quando a forma é cartão; impede registrar duas vezes a mesma confirmação de pagamento.",
+          "maxLength": 255
         },
         "details": {
           "type": "object",
           "required": true,
-          "of": "ContactSummary",
-          "title": "Dados do recebimento",
-          "description": "Dados financeiros e da forma de pagamento que não são usados como índice.",
-          "maxLength": 0,
-          "min": 0,
-          "max": 0,
+          "title": "Detalhes",
+          "description": "Dados do recebimento que só são exibidos.",
           "fields": {
-            "amount": {
+            "valor": {
               "type": "money",
               "required": true,
-              "of": "ContactSummary",
               "title": "Valor recebido",
-              "description": "Valor efetivamente recebido neste lançamento, que pode corresponder a uma baixa total ou parcial do título.",
-              "maxLength": 0,
-              "min": 0.01,
-              "max": 0
+              "description": "Valor efetivamente recebido; menor que o saldo em aberto do título caracteriza baixa parcial.",
+              "min": 0.01
             },
-            "paymentMethod": {
+            "canal": {
               "type": "enum",
               "required": true,
-              "of": "ContactSummary",
               "values": [
                 {
-                  "value": "cash",
-                  "title": "Dinheiro",
-                  "description": "Valor recebido em dinheiro."
+                  "value": "caixa",
+                  "title": "Caixa"
                 },
                 {
-                  "value": "pix",
-                  "title": "Pix",
-                  "description": "Valor recebido por Pix."
-                },
-                {
-                  "value": "card",
-                  "title": "Cartão",
-                  "description": "Valor recebido por cartão processado pela Stripe."
+                  "value": "portal",
+                  "title": "Portal do pagador"
                 }
               ],
-              "title": "Forma de pagamento",
-              "description": "Meio pelo qual o valor foi recebido.",
-              "maxLength": 0,
-              "min": 0,
-              "max": 0
+              "title": "Canal",
+              "description": "Onde o recebimento foi registrado: no caixa da organização ou pelo próprio pagador no portal."
+            },
+            "observacao": {
+              "type": "text",
+              "title": "Observação",
+              "description": "Anotação livre do caixa sobre o recebimento.",
+              "maxLength": 1000
+            },
+            "estorno": {
+              "type": "object",
+              "title": "Estorno",
+              "description": "Dados do estorno, preenchidos quando o caixa estorna o recebimento.",
+              "fields": {
+                "motivo": {
+                  "type": "text",
+                  "required": true,
+                  "title": "Motivo do estorno",
+                  "description": "Por que o recebimento foi desfeito (por exemplo, registrado por engano).",
+                  "maxLength": 500
+                },
+                "estornadoEm": {
+                  "type": "timestamp",
+                  "required": true,
+                  "derived": true,
+                  "title": "Estornado em",
+                  "description": "Momento do estorno, gravado pelo sistema."
+                }
+              }
+            },
+            "estornavel": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Pode ser estornado",
+              "description": "Recebimento ainda registrado e recebido hoje."
+            },
+            "baixaParcial": {
+              "type": "boolean",
+              "derived": true,
+              "title": "Baixa parcial",
+              "description": "Valor recebido menor que o saldo em aberto do título no momento do recebimento."
             }
           }
         }
@@ -195,36 +224,39 @@
     },
     "uniqueKeys": [
       [
-        "number"
+        "numero"
       ],
       [
-        "stripePaymentId"
+        "stripePaymentIntentId"
       ]
     ],
     "lifecycleStates": [
       {
-        "state": "registered",
+        "state": "registrado",
         "reachedBy": "actor"
       },
       {
-        "state": "reversed",
+        "state": "estornado",
         "reachedBy": "actor"
       }
     ],
     "transitions": [
       {
-        "transitionId": "estornarRecebimento",
+        "transitionId": "estornar",
         "from": [
-          "registered"
+          "registrado"
         ],
-        "to": "reversed",
+        "to": "estornado",
         "by": [
           "caixa"
         ],
-        "description": "Estorna um recebimento registrado no mesmo dia, recompondo o saldo do título correspondente.",
+        "description": "O caixa estorna um recebimento registrado no mesmo dia; o saldo em aberto do título é restabelecido.",
+        "payload": [
+          "details.estorno.motivo"
+        ],
         "ruleRefs": [
-          "sameDayReversal",
-          "receiptReversalRecomposesTitleBalance"
+          "estornoSomenteMesmoDia",
+          "estornoRestabeleceSaldo"
         ]
       }
     ]
@@ -234,6 +266,16 @@
       "kind": "derivedFromPlatform",
       "entityId": "Recebimento",
       "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "record.fields.details.fields.estornavel.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Recebimento",
+      "detail": "record.fields.details.fields.baixaParcial.derived (derived[])"
     }
   ]
 }

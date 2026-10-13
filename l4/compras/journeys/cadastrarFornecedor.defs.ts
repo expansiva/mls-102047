@@ -1,52 +1,59 @@
 /// <mls fileReference="_102047_/l4/compras/journeys/cadastrarFornecedor.defs.ts" enhancement="_blank"/>
 
-import type { Ns5JourneyArtifact } from '/_102035_/l2/solution/types.js';
+import type { Ns5JourneyArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const cadastrarFornecedorJourney = {
   "schemaVersion": "2026-09-10-ns5-journey-v1",
   "journeyId": "cadastrarFornecedor",
   "business": {
     "actorRef": "comprador",
-    "title": "Cadastrar fornecedor e condições de fornecimento",
-    "goal": "Disponibilizar um fornecedor com os produtos e preços combinados para futuras compras.",
+    "title": "Cadastrar fornecedor e produtos fornecidos",
+    "goal": "Registrar um fornecedor e os produtos que ele fornece com o preço combinado.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
+        "stepId": "localizarFornecedor",
+        "kind": "locate",
+        "entity": "Fornecedor",
+        "title": "Buscar fornecedor existente",
+        "description": "O comprador busca o fornecedor por CNPJ ou razão social para evitar duplicidade."
+      },
+      {
         "stepId": "cadastrarFornecedor",
         "kind": "act",
-        "entity": "Supplier",
+        "entity": "Fornecedor",
         "effect": "create",
         "title": "Cadastrar fornecedor",
-        "description": "Cadastra ou vincula a empresa fornecedora usando seus dados cadastrais, incluindo CNPJ, razão social e contato."
+        "description": "O comprador registra a empresa com CNPJ, razão social e contato como fornecedor."
       },
       {
-        "stepId": "localizarProduto",
-        "kind": "locate",
-        "entity": "Product",
-        "title": "Localizar produto",
-        "description": "Localiza um produto que o fornecedor fornece."
-      },
-      {
-        "stepId": "registrarCondicaoFornecimento",
+        "stepId": "incluirProdutoFornecido",
         "kind": "act",
-        "entity": "SupplierOffering",
+        "entity": "ProdutoFornecido",
         "effect": "create",
-        "title": "Registrar condição de fornecimento",
-        "description": "Registra, para cada produto fornecido, o preço combinado com o fornecedor."
+        "title": "Incluir produto fornecido",
+        "description": "O comprador associa um produto ao fornecedor informando o preço combinado."
+      },
+      {
+        "stepId": "conferirProdutosFornecidos",
+        "kind": "inspect",
+        "entity": "ProdutoFornecido",
+        "title": "Conferir produtos do fornecedor",
+        "description": "O comprador revisa a lista de produtos e preços combinados do fornecedor."
       }
     ],
     "outcome": {
-      "statement": "O fornecedor fica disponível com suas condições de fornecimento cadastradas.",
+      "statement": "O fornecedor está cadastrado com os produtos que fornece e seus preços combinados.",
       "evidence": [
-        "Fornecedor identificado pelo CNPJ e razão social.",
-        "Produtos fornecidos e respectivos preços combinados estão registrados."
+        "Fornecedor aparece na busca por CNPJ",
+        "Lista de produtos fornecidos exibe o preço combinado de cada produto"
       ]
     }
   },
-  "businessHash": "sha256:2032678b2782397aa586269cca12d3122deaee3475444dd2a0149c1fe59eaf08"
-} as const satisfies Ns5JourneyArtifact;
+  "businessHash": "sha256:ec463ef2ecc26ce4a16fcb9a3069e852134794380864be588866dc4ca17779b9"
+} as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CadastrarFornecedorJourneyType = typeof cadastrarFornecedorJourney;
 

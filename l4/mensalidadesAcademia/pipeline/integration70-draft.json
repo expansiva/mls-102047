@@ -4,14 +4,54 @@
   "inbound": [],
   "outbound": [
     {
-      "id": "cancelarMatricula",
+      "id": "matriculaRealizada",
       "kind": "event",
       "to": "any",
-      "event": "cancelarMatricula",
-      "on": "Matricula.cancelarMatricula",
-      "description": "Publica o cancelamento da matrícula para que outros módulos deixem de considerar o aluno ativo.",
+      "event": "matriculaRealizada",
+      "on": "Matricula.create",
+      "description": "Publica a matrícula registrada pela recepção, com o aluno, o plano escolhido e a data de início, para módulos interessados (por exemplo, o financeiro).",
       "entityRefs": [
-        "Matricula"
+        "Matricula",
+        "Aluno",
+        "Plano"
+      ]
+    },
+    {
+      "id": "matriculaCancelada",
+      "kind": "event",
+      "to": "any",
+      "event": "matriculaCancelada",
+      "on": "Matricula.cancelar",
+      "description": "Publica o cancelamento da matrícula, que encerra a geração das próximas mensalidades, para que outros módulos parem de cobrar o aluno.",
+      "entityRefs": [
+        "Matricula",
+        "Aluno"
+      ]
+    },
+    {
+      "id": "mensalidadeGerada",
+      "kind": "event",
+      "to": "any",
+      "event": "mensalidadeGerada",
+      "on": "Mensalidade.create",
+      "description": "Publica cada mensalidade gerada no mês, com valor do plano e data de vencimento, para módulos que controlam valores a receber.",
+      "entityRefs": [
+        "Mensalidade",
+        "Matricula",
+        "Aluno"
+      ]
+    },
+    {
+      "id": "mensalidadeQuitada",
+      "kind": "event",
+      "to": "any",
+      "event": "mensalidadeQuitada",
+      "on": "Mensalidade.quitar",
+      "description": "Publica a quitação da mensalidade após o pagamento registrado pela recepção (data, valor e forma), para módulos que acompanham o que foi recebido.",
+      "entityRefs": [
+        "Mensalidade",
+        "Pagamento",
+        "Aluno"
       ]
     }
   ],

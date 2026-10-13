@@ -59,6 +59,17 @@ Também servem de contexto:
 - o design system do projeto, `l2/designSystem.ts`;
 - as moléculas sugeridas, com o índice e o `usage` de cada grupo (`_102040_/l2/molecules/<grupo>/index.defs.ts` e `_102020_/l2/aura/molecules/skills/<Grupo>/usage.ts`).
 
+### 2.1 Manutenção: regra alterada só no texto (Wagner, 08/10)
+*"Sobre uma mudança na rule, simples, o correto seria materializar novamente, porque irá pegar a rule alterada."*
+- Quando só o **texto** de uma regra do l4 muda (ex.: "exige anotação" → "exige anotação com pelo menos 20 caracteres"), **nenhum def muda**: os defs
+  guardam o id. O esforço calculado (`describeEffort`, `l2/helpers/effort/` em cada master) responde `materialize` para as unidades que **aplicam**
+  o id e nada a regerar.
+- Para isso funcionar, **a unidade rematerializada tem de ler o texto atual da regra no l4** (`l4/<mod>/rules.defs.ts`, pelo id que o def guarda) e
+  implementá-lo. Um caminho que gera a unidade só pelos campos do def, sem ler o texto da regra, não pega a mudança.
+- No L2, o `rules` de cada rota do contrato diz quais regras a tela valida antes de enviar (quem garante é o backend). Medido em 08/10 no
+  `agentMaterializeL2` de hoje (`mls-102020` `bca7f7e0`): o contexto de criação não carrega o `rules.defs.ts` do l4. E o JSDoc "Processamento" do
+  contrato parafraseia a regra (`agendaClinica` `contracts/agenda_diaria.defs.ts:113`): depois de mudar o texto, vale o texto do l4, não a paráfrase.
+
 ## 3. Ordem de geração (Wagner, 30/09)
 
 > “o materializador deve primeiro gerar o contracts, depois o shared e depois os pagexx, porque um

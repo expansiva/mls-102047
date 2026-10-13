@@ -5,120 +5,49 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
-      "pageId": "painel_gerencia",
+      "pageId": "painel_financeiro",
       "actors": [
         "gerencia"
       ],
       "reads": [
         {
-          "entity": "IndicadoresAcademia",
-          "family": "ddm",
-          "scope": "organization",
-          "derived": [
-            "details.quantidadeAlunosAtivos",
-            "details.quantidadeAlunosBloqueados",
-            "details.quantidadeAlunosInadimplentes",
-            "details.totalAReceber",
-            "details.totalRecebido",
-            "period"
-          ],
-          "from": [
-            "grant:gerenciaAcompanharIndicadores",
-            "organism:summary"
-          ]
-        },
-        {
-          "entity": "Matricula",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "grant:gerenciaGerarMensalidades",
-            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores",
-            "journey:gerarMensalidadesDoMes/criarMensalidades",
-            "relationship:Matricula/matriculaPlano",
-            "relationship:Matricula/mensalidadeMatricula",
-            "relationship:Mensalidade/mensalidadeMatricula",
-            "relationship:Plano/matriculaPlano"
-          ]
-        },
-        {
-          "entity": "Mensalidade",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [
-            "details.saldoDevedor",
-            "details.situacao",
-            "details.totalPago"
-          ],
-          "from": [
-            "grant:gerenciaGerarMensalidades",
-            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores",
-            "journey:gerarMensalidadesDoMes/criarMensalidades",
-            "relationship:Matricula/mensalidadeMatricula",
-            "relationship:Mensalidade/mensalidadeMatricula"
-          ]
-        },
-        {
-          "entity": "Plano",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "grant:gerenciaGerarMensalidades",
-            "journey:acompanharIndicadoresAcademia/inspecionarIndicadores",
-            "journey:gerarMensalidadesDoMes/criarMensalidades",
-            "relationship:Matricula/matriculaPlano",
-            "relationship:Matricula/mensalidadeMatricula",
-            "relationship:Plano/matriculaPlano"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Mensalidade",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:gerarMensalidadesDoMes/criarMensalidades"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "mensalidades_pagamentos",
-      "actors": [
-        "recepcao"
-      ],
-      "reads": [
-        {
           "entity": "Aluno",
           "family": "mdm",
           "scope": "organization",
-          "derived": [],
+          "derived": [
+            "details.mensalidadesAcademia.bloqueado",
+            "details.mensalidadesAcademia.inadimplente",
+            "details.mensalidadesAcademia.quantidadeMensalidadesVencidas"
+          ],
           "from": [
-            "grant:recepcaoLocalizarAluno",
-            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
-            "journey:registrarPagamentoMensalidade/localizarMensalidade",
-            "journey:registrarPagamentoMensalidade/registrarPagamento",
+            "grant:gerenciaAlunos",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "relationship:Aluno/alunoMensalidades",
             "relationship:Aluno/matriculaAluno",
             "relationship:Matricula/matriculaAluno",
-            "relationship:Matricula/mensalidadeMatricula"
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades"
           ]
         },
         {
           "entity": "Matricula",
           "family": "tdm",
           "scope": "organization",
-          "derived": [],
+          "derived": [
+            "details.bloqueada",
+            "details.entradaLiberada",
+            "details.inadimplente",
+            "details.mensalidadesVencidas",
+            "numero"
+          ],
           "from": [
-            "grant:recepcaoGerenciarCadastrosEcobrancas",
-            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
-            "journey:registrarPagamentoMensalidade/localizarMensalidade",
-            "journey:registrarPagamentoMensalidade/registrarPagamento",
+            "grant:gerenciaMensalidades",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "relationship:Aluno/alunoMensalidades",
             "relationship:Aluno/matriculaAluno",
             "relationship:Matricula/matriculaAluno",
-            "relationship:Matricula/matriculaPlano",
             "relationship:Matricula/mensalidadeMatricula",
             "relationship:Mensalidade/mensalidadeMatricula",
             "relationship:Plano/matriculaPlano"
@@ -129,16 +58,18 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
+            "details.geradaEm",
             "details.saldoDevedor",
-            "details.situacao",
-            "details.totalPago"
+            "details.totalPago",
+            "details.vencida"
           ],
           "from": [
-            "grant:recepcaoGerenciarCadastrosEcobrancas",
-            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
-            "journey:registrarPagamentoMensalidade/localizarMensalidade",
-            "journey:registrarPagamentoMensalidade/registrarPagamento",
+            "grant:gerenciaMensalidades",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "relationship:Aluno/alunoMensalidades",
             "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades",
             "relationship:Mensalidade/mensalidadeMatricula",
             "relationship:Mensalidade/pagamentoMensalidade",
             "relationship:Pagamento/pagamentoMensalidade"
@@ -148,46 +79,57 @@
           "entity": "Pagamento",
           "family": "tdm",
           "scope": "organization",
-          "derived": [],
+          "derived": [
+            "registradoEm"
+          ],
           "from": [
-            "grant:recepcaoGerenciarCadastrosEcobrancas",
-            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
-            "journey:registrarPagamentoMensalidade/localizarMensalidade",
-            "journey:registrarPagamentoMensalidade/registrarPagamento",
+            "grant:gerenciaMensalidades",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
             "relationship:Mensalidade/pagamentoMensalidade",
             "relationship:Pagamento/pagamentoMensalidade"
+          ]
+        },
+        {
+          "entity": "PainelMensalidades",
+          "family": "ddm",
+          "scope": "organization",
+          "derived": [
+            "details.alunosAtivos",
+            "details.alunosBloqueados",
+            "details.alunosInadimplentes",
+            "details.totalAReceber",
+            "details.totalRecebido",
+            "mesReferencia"
+          ],
+          "from": [
+            "grant:gerenciaPainel",
+            "journey:acompanharPainel/verPainel",
+            "organism:highlights"
           ]
         },
         {
           "entity": "Plano",
           "family": "tdm",
           "scope": "organization",
-          "derived": [],
+          "derived": [
+            "details.quantidadeMatriculasAtivas"
+          ],
           "from": [
-            "grant:recepcaoGerenciarCadastrosEcobrancas",
-            "journey:registrarPagamentoMensalidade/inspecionarMensalidade",
-            "journey:registrarPagamentoMensalidade/localizarMensalidade",
-            "journey:registrarPagamentoMensalidade/registrarPagamento",
-            "relationship:Matricula/matriculaPlano",
+            "grant:gerenciaPlanos",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
             "relationship:Matricula/mensalidadeMatricula",
             "relationship:Plano/matriculaPlano"
           ]
         }
       ],
-      "writes": [
-        {
-          "entity": "Pagamento",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:registrarPagamentoMensalidade/registrarPagamento"
-          ]
-        }
-      ]
+      "writes": []
     },
     {
       "pageId": "matriculas",
       "actors": [
+        "gerencia",
         "recepcao"
       ],
       "reads": [
@@ -195,26 +137,440 @@
           "entity": "Aluno",
           "family": "mdm",
           "scope": "organization",
-          "derived": [],
+          "derived": [
+            "details.mensalidadesAcademia.bloqueado",
+            "details.mensalidadesAcademia.inadimplente",
+            "details.mensalidadesAcademia.quantidadeMensalidadesVencidas"
+          ],
           "from": [
-            "grant:recepcaoLocalizarAluno",
-            "journey:matricularAluno/criarMatricula",
+            "grant:gerenciaAlunos",
+            "grant:recepcaoAlunos",
+            "journey:cancelarMatricula/conferirSituacaoMatricula",
+            "journey:cancelarMatricula/localizarMatriculaCancelar",
+            "journey:cancelarMatricula/registrarCancelamento",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:matricularAluno/escolherPlano",
             "journey:matricularAluno/localizarAluno",
-            "journey:matricularAluno/localizarPlano",
+            "journey:matricularAluno/registrarMatricula",
+            "journey:verificarAcessoAluno/consultarSituacao",
+            "journey:verificarAcessoAluno/localizarMatriculaAluno",
+            "relationship:Aluno/alunoMensalidades",
             "relationship:Aluno/matriculaAluno",
-            "relationship:Matricula/matriculaAluno"
+            "relationship:Matricula/matriculaAluno",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades"
           ]
         },
         {
           "entity": "Matricula",
           "family": "tdm",
           "scope": "organization",
+          "derived": [
+            "details.bloqueada",
+            "details.entradaLiberada",
+            "details.inadimplente",
+            "details.mensalidadesVencidas",
+            "numero"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:cancelarMatricula/conferirSituacaoMatricula",
+            "journey:cancelarMatricula/localizarMatriculaCancelar",
+            "journey:cancelarMatricula/registrarCancelamento",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "journey:verificarAcessoAluno/consultarSituacao",
+            "journey:verificarAcessoAluno/localizarMatriculaAluno",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/matriculaAluno",
+            "relationship:Matricula/matriculaPlano",
+            "relationship:Matricula/matriculaRecepcao",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/mensalidadeMatricula",
+            "relationship:Plano/matriculaPlano",
+            "relationship:Recepcao/matriculaRecepcao"
+          ]
+        },
+        {
+          "entity": "Mensalidade",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.geradaEm",
+            "details.saldoDevedor",
+            "details.totalPago",
+            "details.vencida"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:cancelarMatricula/conferirSituacaoMatricula",
+            "journey:cancelarMatricula/localizarMatriculaCancelar",
+            "journey:cancelarMatricula/registrarCancelamento",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "journey:verificarAcessoAluno/consultarSituacao",
+            "journey:verificarAcessoAluno/localizarMatriculaAluno",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades",
+            "relationship:Mensalidade/mensalidadeMatricula",
+            "relationship:Mensalidade/pagamentoMensalidade",
+            "relationship:Pagamento/pagamentoMensalidade"
+          ]
+        },
+        {
+          "entity": "Pagamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "registradoEm"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "relationship:Mensalidade/pagamentoMensalidade",
+            "relationship:Pagamento/pagamentoMensalidade"
+          ]
+        },
+        {
+          "entity": "Plano",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeMatriculasAtivas"
+          ],
+          "from": [
+            "grant:gerenciaPlanos",
+            "grant:recepcaoPlanos",
+            "journey:cancelarMatricula/conferirSituacaoMatricula",
+            "journey:cancelarMatricula/localizarMatriculaCancelar",
+            "journey:cancelarMatricula/registrarCancelamento",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "journey:verificarAcessoAluno/consultarSituacao",
+            "journey:verificarAcessoAluno/localizarMatriculaAluno",
+            "relationship:Matricula/matriculaPlano",
+            "relationship:Plano/matriculaPlano"
+          ]
+        },
+        {
+          "entity": "Recepcao",
+          "family": "mdm",
+          "scope": "organization",
           "derived": [],
           "from": [
-            "grant:recepcaoGerenciarCadastrosEcobrancas",
-            "journey:matricularAluno/criarMatricula",
+            "grant:gerenciaAtendentes",
+            "grant:recepcaoProprioCadastro",
+            "journey:cancelarMatricula/conferirSituacaoMatricula",
+            "journey:cancelarMatricula/localizarMatriculaCancelar",
+            "journey:cancelarMatricula/registrarCancelamento",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:matricularAluno/escolherPlano",
             "journey:matricularAluno/localizarAluno",
-            "journey:matricularAluno/localizarPlano",
+            "journey:matricularAluno/registrarMatricula",
+            "journey:verificarAcessoAluno/consultarSituacao",
+            "journey:verificarAcessoAluno/localizarMatriculaAluno",
+            "relationship:Matricula/matriculaRecepcao",
+            "relationship:Recepcao/matriculaRecepcao"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Matricula",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:matricularAluno/registrarMatricula"
+          ]
+        },
+        {
+          "entity": "Matricula",
+          "operation": "transition",
+          "transitionRef": "cancelar",
+          "from": [
+            "journey:cancelarMatricula/registrarCancelamento"
+          ]
+        },
+        {
+          "entity": "Mensalidade",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:gerarMensalidadesMes/gerarMensalidades"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "mensalidades",
+      "actors": [
+        "gerencia",
+        "recepcao"
+      ],
+      "reads": [
+        {
+          "entity": "Aluno",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.mensalidadesAcademia.bloqueado",
+            "details.mensalidadesAcademia.inadimplente",
+            "details.mensalidadesAcademia.quantidadeMensalidadesVencidas"
+          ],
+          "from": [
+            "grant:gerenciaAlunos",
+            "grant:recepcaoAlunos",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:registrarPagamento/conferirMensalidade",
+            "journey:registrarPagamento/lancarPagamento",
+            "journey:registrarPagamento/localizarMensalidade",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/matriculaAluno",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades"
+          ]
+        },
+        {
+          "entity": "Matricula",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.bloqueada",
+            "details.entradaLiberada",
+            "details.inadimplente",
+            "details.mensalidadesVencidas",
+            "numero"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:registrarPagamento/conferirMensalidade",
+            "journey:registrarPagamento/lancarPagamento",
+            "journey:registrarPagamento/localizarMensalidade",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/matriculaAluno",
+            "relationship:Matricula/matriculaPlano",
+            "relationship:Matricula/matriculaRecepcao",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/mensalidadeMatricula",
+            "relationship:Plano/matriculaPlano",
+            "relationship:Recepcao/matriculaRecepcao"
+          ]
+        },
+        {
+          "entity": "Mensalidade",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.geradaEm",
+            "details.saldoDevedor",
+            "details.totalPago",
+            "details.vencida"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:registrarPagamento/conferirMensalidade",
+            "journey:registrarPagamento/lancarPagamento",
+            "journey:registrarPagamento/localizarMensalidade",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades",
+            "relationship:Mensalidade/mensalidadeMatricula",
+            "relationship:Mensalidade/pagamentoMensalidade",
+            "relationship:Pagamento/pagamentoMensalidade"
+          ]
+        },
+        {
+          "entity": "Pagamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "registradoEm"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:registrarPagamento/conferirMensalidade",
+            "journey:registrarPagamento/lancarPagamento",
+            "journey:registrarPagamento/localizarMensalidade",
+            "relationship:Mensalidade/pagamentoMensalidade",
+            "relationship:Pagamento/pagamentoMensalidade"
+          ]
+        },
+        {
+          "entity": "PainelMensalidades",
+          "family": "ddm",
+          "scope": "organization",
+          "derived": [
+            "details.alunosAtivos",
+            "details.alunosBloqueados",
+            "details.alunosInadimplentes",
+            "details.totalAReceber",
+            "details.totalRecebido",
+            "mesReferencia"
+          ],
+          "from": [
+            "grant:gerenciaPainel",
+            "journey:acompanharPainel/verPainel"
+          ]
+        },
+        {
+          "entity": "Plano",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.quantidadeMatriculasAtivas"
+          ],
+          "from": [
+            "grant:gerenciaPlanos",
+            "grant:recepcaoPlanos",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:registrarPagamento/conferirMensalidade",
+            "journey:registrarPagamento/lancarPagamento",
+            "journey:registrarPagamento/localizarMensalidade",
+            "relationship:Matricula/matriculaPlano",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Plano/matriculaPlano"
+          ]
+        },
+        {
+          "entity": "Recepcao",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenciaAtendentes",
+            "grant:recepcaoProprioCadastro",
+            "journey:acompanharPainel/detalharInadimplentes",
+            "journey:acompanharPainel/verPainel",
+            "journey:gerarMensalidadesMes/conferirMatriculasAtivas",
+            "journey:gerarMensalidadesMes/gerarMensalidades",
+            "journey:gerarMensalidadesMes/revisarMensalidadesGeradas",
+            "journey:registrarPagamento/conferirMensalidade",
+            "journey:registrarPagamento/lancarPagamento",
+            "journey:registrarPagamento/localizarMensalidade",
+            "relationship:Matricula/matriculaRecepcao",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Recepcao/matriculaRecepcao"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Mensalidade",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:gerarMensalidadesMes/gerarMensalidades"
+          ]
+        },
+        {
+          "entity": "Pagamento",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:registrarPagamento/lancarPagamento"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "alunos",
+      "actors": [
+        "gerencia",
+        "recepcao"
+      ],
+      "reads": [
+        {
+          "entity": "Aluno",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.mensalidadesAcademia.bloqueado",
+            "details.mensalidadesAcademia.inadimplente",
+            "details.mensalidadesAcademia.quantidadeMensalidadesVencidas"
+          ],
+          "from": [
+            "grant:gerenciaAlunos",
+            "grant:recepcaoAlunos",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/matriculaAluno",
+            "relationship:Mensalidade/alunoMensalidades"
+          ]
+        },
+        {
+          "entity": "Matricula",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.bloqueada",
+            "details.entradaLiberada",
+            "details.inadimplente",
+            "details.mensalidadesVencidas",
+            "numero"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Aluno/alunoMensalidades",
             "relationship:Aluno/matriculaAluno",
             "relationship:Matricula/matriculaAluno",
             "relationship:Matricula/matriculaPlano",
@@ -228,16 +584,20 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
+            "details.geradaEm",
             "details.saldoDevedor",
-            "details.situacao",
-            "details.totalPago"
+            "details.totalPago",
+            "details.vencida"
           ],
           "from": [
-            "grant:recepcaoGerenciarCadastrosEcobrancas",
-            "journey:matricularAluno/criarMatricula",
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:matricularAluno/escolherPlano",
             "journey:matricularAluno/localizarAluno",
-            "journey:matricularAluno/localizarPlano",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Aluno/alunoMensalidades",
             "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades",
             "relationship:Mensalidade/mensalidadeMatricula"
           ]
         },
@@ -245,12 +605,15 @@
           "entity": "Plano",
           "family": "tdm",
           "scope": "organization",
-          "derived": [],
+          "derived": [
+            "details.quantidadeMatriculasAtivas"
+          ],
           "from": [
-            "grant:recepcaoGerenciarCadastrosEcobrancas",
-            "journey:matricularAluno/criarMatricula",
+            "grant:gerenciaPlanos",
+            "grant:recepcaoPlanos",
+            "journey:matricularAluno/escolherPlano",
             "journey:matricularAluno/localizarAluno",
-            "journey:matricularAluno/localizarPlano",
+            "journey:matricularAluno/registrarMatricula",
             "relationship:Matricula/matriculaPlano",
             "relationship:Plano/matriculaPlano"
           ]
@@ -262,7 +625,7 @@
           "operation": "create",
           "transitionRef": "",
           "from": [
-            "journey:matricularAluno/criarMatricula"
+            "journey:matricularAluno/registrarMatricula"
           ]
         }
       ]
@@ -270,23 +633,191 @@
     {
       "pageId": "planos",
       "actors": [
+        "gerencia",
         "recepcao"
       ],
       "reads": [
         {
+          "entity": "Aluno",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.mensalidadesAcademia.bloqueado",
+            "details.mensalidadesAcademia.inadimplente",
+            "details.mensalidadesAcademia.quantidadeMensalidadesVencidas"
+          ],
+          "from": [
+            "grant:gerenciaAlunos",
+            "grant:recepcaoAlunos",
+            "journey:cadastrarPlano/consultarPlanos",
+            "journey:cadastrarPlano/registrarPlano",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/matriculaAluno",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades",
+            "relationship:Plano/matriculaPlano"
+          ]
+        },
+        {
+          "entity": "Matricula",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.bloqueada",
+            "details.entradaLiberada",
+            "details.inadimplente",
+            "details.mensalidadesVencidas",
+            "numero"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:cadastrarPlano/consultarPlanos",
+            "journey:cadastrarPlano/registrarPlano",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/matriculaAluno",
+            "relationship:Matricula/matriculaPlano",
+            "relationship:Matricula/matriculaRecepcao",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/mensalidadeMatricula",
+            "relationship:Plano/matriculaPlano",
+            "relationship:Recepcao/matriculaRecepcao"
+          ]
+        },
+        {
+          "entity": "Mensalidade",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.geradaEm",
+            "details.saldoDevedor",
+            "details.totalPago",
+            "details.vencida"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:cadastrarPlano/consultarPlanos",
+            "journey:cadastrarPlano/registrarPlano",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Aluno/matriculaAluno",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/alunoMensalidades",
+            "relationship:Mensalidade/mensalidadeMatricula",
+            "relationship:Mensalidade/pagamentoMensalidade",
+            "relationship:Pagamento/pagamentoMensalidade",
+            "relationship:Plano/matriculaPlano"
+          ]
+        },
+        {
+          "entity": "Pagamento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "registradoEm"
+          ],
+          "from": [
+            "grant:gerenciaMensalidades",
+            "grant:recepcaoMatriculas",
+            "journey:cadastrarPlano/consultarPlanos",
+            "journey:cadastrarPlano/registrarPlano",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Aluno/alunoMensalidades",
+            "relationship:Matricula/mensalidadeMatricula",
+            "relationship:Mensalidade/pagamentoMensalidade",
+            "relationship:Pagamento/pagamentoMensalidade",
+            "relationship:Plano/matriculaPlano"
+          ]
+        },
+        {
           "entity": "Plano",
           "family": "tdm",
           "scope": "organization",
+          "derived": [
+            "details.quantidadeMatriculasAtivas"
+          ],
+          "from": [
+            "grant:gerenciaPlanos",
+            "grant:recepcaoPlanos",
+            "journey:cadastrarPlano/consultarPlanos",
+            "journey:cadastrarPlano/registrarPlano",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Matricula/matriculaPlano",
+            "relationship:Plano/matriculaPlano"
+          ]
+        },
+        {
+          "entity": "Recepcao",
+          "family": "mdm",
+          "scope": "organization",
           "derived": [],
           "from": [
-            "grant:recepcaoGerenciarCadastrosEcobrancas",
+            "grant:gerenciaAtendentes",
+            "grant:recepcaoProprioCadastro",
+            "journey:cadastrarPlano/consultarPlanos",
+            "journey:cadastrarPlano/registrarPlano",
+            "journey:matricularAluno/escolherPlano",
+            "journey:matricularAluno/localizarAluno",
+            "journey:matricularAluno/registrarMatricula",
+            "relationship:Matricula/matriculaRecepcao",
+            "relationship:Plano/matriculaPlano"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Matricula",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:matricularAluno/registrarMatricula"
+          ]
+        },
+        {
+          "entity": "Plano",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:cadastrarPlano/registrarPlano"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "atendentes",
+      "actors": [
+        "gerencia"
+      ],
+      "reads": [
+        {
+          "entity": "Recepcao",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:gerenciaAtendentes",
             "organism:form"
           ]
         }
       ],
       "writes": [
         {
-          "entity": "Plano",
+          "entity": "Recepcao",
           "operation": "create",
           "transitionRef": "",
           "from": [
@@ -294,7 +825,7 @@
           ]
         },
         {
-          "entity": "Plano",
+          "entity": "Recepcao",
           "operation": "update",
           "transitionRef": "",
           "from": [
@@ -304,38 +835,16 @@
       ]
     },
     {
-      "pageId": "minha_matricula",
+      "pageId": "meu_cadastro_dados",
       "actors": [
-        "aluno"
+        "recepcao"
       ],
-      "reads": [
-        {
-          "entity": "Matricula",
-          "family": "tdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "grant:alunoCancelarPropriaMatricula",
-            "journey:cancelarPropriaMatricula/cancelarMatricula",
-            "journey:cancelarPropriaMatricula/inspecionarPropriaMatricula",
-            "journey:cancelarPropriaMatricula/localizarPropriaMatricula"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Matricula",
-          "operation": "transition",
-          "transitionRef": "cancelarMatricula",
-          "from": [
-            "journey:cancelarPropriaMatricula/cancelarMatricula"
-          ]
-        }
-      ]
+      "reads": [],
+      "writes": []
     }
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-10-02T16:14:05.528Z"
+    "generatedAt": "2026-10-13T01:09:35.325Z"
   }
 }

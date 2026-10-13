@@ -1,13 +1,13 @@
 {
   "moduleName": "locacaoEquipamentos",
-  "businessDomain": "Locação de equipamentos para construção",
+  "businessDomain": "Locação de equipamentos para construção: contratos de locação de um ou mais equipamentos por período, controle de sobreposição, devolução com cálculo de multa por atraso e acompanhamento da situação dos equipamentos.",
   "entities": [
     {
       "entityId": "Cliente",
       "kind": "role",
       "family": "mdm",
       "title": "Cliente",
-      "description": "Pessoa cadastrada no MDM que celebra contratos de locação de equipamentos.",
+      "description": "Pessoa do cadastro mestre da organização que aluga equipamentos; localizada por nome ou documento e cadastrada pelo atendente quando ainda não existe.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "locacaoEquipamentos.Cliente",
@@ -18,7 +18,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Equipamento",
-      "description": "Equipamento da locadora identificado por código, com diária definida e situação operacional calculada a partir das locações e manutenções.",
+      "description": "Equipamento de construção operado pela locadora, com código, descrição, valor da diária e situação (disponível, locado ou em manutenção); 'locado' decorre dos contratos ativos que apontam para ele.",
       "displayField": "codigo",
       "writer": "crud",
       "class": "core",
@@ -33,8 +33,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Contrato de locação",
-      "description": "Contrato que registra a locação de um cliente, seu período previsto e a devolução efetiva dos equipamentos.",
-      "displayField": "id",
+      "description": "Contrato firmado com um cliente para um período, com data de retirada, data prevista e data real de devolução; ao devolver com atraso, calcula dias de atraso e multa (diária × dias de atraso × 1,5).",
+      "displayField": "numero",
       "class": "event",
       "storage": {
         "target": "moduleDatabase",
@@ -43,75 +43,62 @@
       }
     },
     {
-      "entityId": "ItemLocacao",
+      "entityId": "ItemContrato",
       "kind": "entity",
       "family": "tdm",
-      "title": "Item de locação",
-      "description": "Item de um contrato que vincula um equipamento à locação e preserva a diária usada no cálculo de multa.",
-      "displayField": "id",
+      "title": "Item do contrato",
+      "description": "Equipamento incluído em um contrato de locação, com o valor da diária praticado; o mesmo equipamento não pode estar em dois contratos com períodos sobrepostos.",
+      "displayField": "equipamentoId",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "locacaoEquipamentos_itemlocacao",
-        "kind": "relational"
-      }
-    },
-    {
-      "entityId": "ManutencaoEquipamento",
-      "kind": "entity",
-      "family": "tdm",
-      "title": "Manutenção de equipamento",
-      "description": "Período de indisponibilidade de um equipamento para manutenção, usado no cálculo de sua situação.",
-      "displayField": "id",
-      "writer": "crud",
-      "class": "supporting",
-      "storage": {
-        "target": "moduleDatabase",
-        "table": "locacaoEquipamentos_manutencaoequipamento",
+        "table": "locacaoEquipamentos_itemcontrato",
         "kind": "relational"
       }
     }
   ],
   "relationships": [
     {
-      "relationshipId": "clienteContratosLocacao",
-      "from": "Cliente",
-      "to": "ContratoLocacao",
-      "type": "oneToMany",
+      "relationshipId": "contratoCliente",
+      "from": "ContratoLocacao",
+      "to": "Cliente",
+      "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Um cliente pode possuir vários contratos de locação, e cada contrato pertence a um cliente.",
+      "description": "Cada contrato de locação pertence a um cliente; um cliente pode ter vários contratos.",
       "field": "ContratoLocacao.clienteId"
     },
     {
-      "relationshipId": "contratoItensLocacao",
-      "from": "ContratoLocacao",
-      "to": "ItemLocacao",
-      "type": "oneToMany",
+      "relationshipId": "itemContrato",
+      "from": "ItemContrato",
+      "to": "ContratoLocacao",
+      "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Um contrato de locação contém um ou mais itens de equipamentos locados.",
-      "field": "ItemLocacao.contratoLocacaoId"
+      "description": "Cada item pertence a um contrato; um contrato tem um ou mais itens.",
+      "field": "ItemContrato.contratoId"
     },
     {
-      "relationshipId": "itemLocacaoEquipamento",
-      "from": "ItemLocacao",
+      "relationshipId": "itemEquipamento",
+      "from": "ItemContrato",
       "to": "Equipamento",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item de locação referencia exatamente um equipamento, que pode constar em locações diferentes em períodos não sobrepostos.",
-      "field": "ItemLocacao.equipamentoId"
+      "description": "Cada item aponta para o equipamento locado; um equipamento aparece em vários itens ao longo do tempo, sem períodos sobrepostos.",
+      "field": "ItemContrato.equipamentoId"
     },
     {
-      "relationshipId": "equipamentoManutencoes",
+      "relationshipId": "equipamentoContratos",
       "from": "Equipamento",
-      "to": "ManutencaoEquipamento",
-      "type": "oneToMany",
-      "required": true,
-      "mode": "fk",
-      "description": "Um equipamento pode ter vários períodos de manutenção, cada um associado a um único equipamento.",
-      "field": "ManutencaoEquipamento.equipamentoId"
+      "to": "ContratoLocacao",
+      "type": "manyToMany",
+      "required": false,
+      "mode": "throughTable",
+      "description": "Contratos em que o equipamento foi ou está locado, usados para mostrar o contrato atual e derivar a situação 'locado'.",
+      "through": "ItemContrato",
+      "path": "Equipamento <- ItemContrato.equipamentoId -> ItemContrato.contratoId -> ContratoLocacao",
+      "derived": true
     }
   ],
   "normalizations": [
@@ -132,13 +119,8 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "ItemLocacao",
-      "detail": "storage.table locacaoEquipamentos_itemlocacao"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "ManutencaoEquipamento",
-      "detail": "storage.table locacaoEquipamentos_manutencaoequipamento"
+      "entityId": "ItemContrato",
+      "detail": "storage.table locacaoEquipamentos_itemcontrato"
     }
   ]
 }

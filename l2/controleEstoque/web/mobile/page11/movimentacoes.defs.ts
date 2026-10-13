@@ -5,28 +5,21 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/inventoryControl/page21.md",
     "experience": "splitViewOperations"
   },
-  "intent": "Em uma faixa estreita e fluida em torno de 390px, também usável em 360px e 430px, o estoquista informa a entrada ou saída, confirma o registro que atualiza o saldo e, em seguida, consulta o histórico de movimentações já gravadas.",
+  "intent": "No celular, o estoquista registra rapidamente uma entrada ou saída de um produto, vendo o saldo atual antes de confirmar, e consulta abaixo o histórico de movimentações em conteúdo fluido de coluna única, por volta de 390px e utilizável entre 360px e 430px.",
   "sections": [
     {
-      "id": "capturaMovimentacao",
+      "id": "registro",
       "priority": "primary",
-      "purpose": "Na faixa estreita, concentra primeiro a localização do produto, a conferência do saldo e o preenchimento do tipo e da quantidade da movimentação.",
+      "purpose": "Registrar a movimentação em poucos toques: produto, saldo atual, tipo, quantidade e confirmação ao final do formulário.",
       "organisms": [
-        "formularioMovimentacao"
+        "registroMovimentacao",
+        "acoesRegistro"
       ]
     },
     {
-      "id": "confirmacaoRegistro",
+      "id": "historico",
       "priority": "main",
-      "purpose": "Mantém o registro ao alcance imediato após o preenchimento, para gravar a movimentação e mostrar o saldo atualizado sem exigir deslocamento lateral.",
-      "organisms": [
-        "confirmarMovimentacao"
-      ]
-    },
-    {
-      "id": "historicoRegistrado",
-      "priority": "secondary",
-      "purpose": "Empilha abaixo o histórico de entradas e saídas já registradas, para consulta depois do registro na mesma faixa fluida.",
+      "purpose": "Listar as movimentações recentes em itens empilhados e legíveis em tela estreita, com filtro por tipo.",
       "organisms": [
         "historicoMovimentacoes"
       ]
@@ -35,17 +28,17 @@ export const definition = {
   "organisms": {
     "historicoMovimentacoes": {
       "kind": "list",
-      "text": "Lista em sequência as entradas e saídas já registradas, com produto, tipo, quantidade e data e hora, para o estoquista revisar o histórico imutável na faixa estreita.",
+      "text": "Vejo as entradas e saídas de estoque em itens empilhados com produto, tipo, quantidade e data; posso filtrar por tipo ou período.",
       "intents": []
     },
-    "formularioMovimentacao": {
+    "registroMovimentacao": {
       "kind": "form",
-      "text": "Permite localizar o produto, conferir o saldo atual e a quantidade mínima e informar o tipo de entrada ou saída e a quantidade de unidades a movimentar.",
+      "text": "Registro uma entrada ou saída de quantidade de um produto, vendo o saldo atual e se ele está abaixo do mínimo antes de informar a quantidade.",
       "intents": []
     },
-    "confirmarMovimentacao": {
+    "acoesRegistro": {
       "kind": "actions",
-      "text": "Grava a movimentação e atualiza o saldo do produto; o estoquista vê a confirmação e o novo saldo logo após o preenchimento, e a movimentação não pode mais ser alterada.",
+      "text": "Registro a movimentação no estoque com um botão de largura total; recebo a confirmação e o aviso de abaixo do mínimo quando ocorrer.",
       "intents": [
         {
           "id": "registrarMovimentacao",
@@ -57,43 +50,49 @@ export const definition = {
   "molecules": {
     "historicoMovimentacoes": [
       {
-        "role": "collection",
+        "role": "lista do histórico de movimentações",
         "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-timeline-view"
+        "alternative": "groupviewtable--ml-responsive-data-table"
+      },
+      {
+        "role": "filtro por tipo entrada ou saída",
+        "preferred": "groupselectone--ml-segmented-control"
+      },
+      {
+        "role": "filtro por período de registro",
+        "preferred": "groupenterdateinterval--ml-date-interval-presets"
       }
     ],
-    "formularioMovimentacao": [
+    "registroMovimentacao": [
       {
-        "role": "productLookup",
+        "role": "escolha do produto pelo nome",
         "preferred": "groupselectone--ml-select-one-autocomplete",
         "alternative": "groupselectone--ml-combobox"
       },
       {
-        "role": "movementType",
+        "role": "tipo da movimentação",
         "preferred": "groupselectone--ml-segmented-control",
         "alternative": "groupselectone--ml-radio-group"
       },
       {
-        "role": "quantity",
+        "role": "quantidade movimentada",
         "preferred": "groupenternumber--ml-number-stepper",
         "alternative": "groupenternumber--ml-number-input"
       }
     ],
-    "confirmarMovimentacao": [
+    "acoesRegistro": [
       {
-        "role": "submit",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-icon-button"
+        "role": "confirmar o registro",
+        "preferred": "grouptriggeraction--ml-button-standard"
       },
       {
-        "role": "feedback",
-        "preferred": "groupnotifyuser--ml-toast-notification",
-        "alternative": "groupnotifyuser--ml-contextual-feedback"
+        "role": "confirmação do registro",
+        "preferred": "groupnotifyuser--ml-toast-notification"
       },
       {
-        "role": "updatedBalance",
-        "preferred": "groupviewmetric--ml-metric-card",
-        "alternative": "groupviewmetric--ml-compact-metric-sparkline"
+        "role": "aviso de saldo abaixo do mínimo",
+        "preferred": "groupnotifyuser--ml-contextual-feedback",
+        "alternative": "groupnotifyuser--ml-notify-banner"
       }
     ]
   }

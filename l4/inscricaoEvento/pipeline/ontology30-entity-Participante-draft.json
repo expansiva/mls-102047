@@ -4,49 +4,62 @@
     "moduleName": "inscricaoEvento",
     "entityId": "Participante",
     "title": "Participante",
-    "description": "Pessoa participante identificada no cadastro mestre para realizar ou manter uma inscrição em evento.",
+    "description": "Pessoa do público que se inscreve em eventos informando nome e e-mail; é criada ou associada ao registro mestre pelo e-mail no momento da inscrição.",
     "displayField": "details.identification.name",
     "relationships": {
-      "participanteDaInscricao": {
-        "relationshipId": "participanteDaInscricao",
+      "inscricoes": {
+        "relationshipId": "inscricaoParticipante",
         "to": "Inscricao",
         "via": "Inscricao.participanteId",
         "cardinality": "1:N",
         "title": "Inscrições do participante",
-        "description": "Inscrições em eventos que identificam esta pessoa participante.",
+        "description": "Inscrições feitas por esta pessoa; no máximo uma por evento.",
         "mode": "fk",
         "direction": "to",
-        "required": "ao criar ou manter uma inscrição",
-        "role": "participante"
+        "required": true
       },
-      "contatoDoParticipante": {
-        "relationshipId": "contatoDoParticipante",
+      "emails": {
+        "relationshipId": "participanteEmail",
         "to": "EmailParticipante",
         "via": "HasContact",
         "cardinality": "1:N",
-        "title": "E-mails do participante",
-        "description": "Canais de contato vinculados à pessoa participante, incluindo o e-mail utilizado para a inscrição.",
-        "required": "ao realizar uma inscrição",
-        "role": "titular"
+        "title": "E-mail do participante",
+        "description": "E-mail informado na inscrição, registrado como canal de contato (HasContact).",
+        "required": "sempre que a pessoa se inscreve"
+      },
+      "eventos": {
+        "relationshipId": "eventosDoParticipante",
+        "to": "Evento",
+        "via": "Inscricao",
+        "cardinality": "N:N",
+        "title": "Eventos do participante",
+        "description": "Eventos em que a pessoa está inscrita, obtidos pelas suas inscrições.",
+        "mode": "throughTable",
+        "path": "Participante <- Inscricao.participanteId -> Inscricao.eventoId -> Evento",
+        "derived": true
       }
     },
     "capabilities": {
-      "read.byId": "Consulta um participante pelo identificador mestre para apresentar seus dados na inscrição; usa leitura direta pelo mdmId; utilizado pelo organizador e pelos fluxos de inscrição.",
-      "locate.byContact": "Localiza a pessoa participante pelo e-mail já vinculado como canal de contato para evitar duplicidade de pessoa; usa a busca de proprietário do ContactChannel; utilizado pelo público ao se inscrever e pelo fluxo de inscrição.",
-      "register.createOrAttach": "Cria ou vincula a pessoa participante encontrada pelo contato disponível e anexa o papel do módulo; usa criação ou associação no cadastro mestre seguida da marca de papel; utilizado pelo público durante a inscrição.",
-      "register.asProspect": "Registra uma pessoa interessada sem documento nacional para permitir a inscrição pública com nome e e-mail; usa cadastro de prospecto no MDM; utilizado pelo público na página publicada do evento.",
-      "link.contact": "Vincula o e-mail informado pela pessoa ao seu cadastro mestre; cria ou associa o ContactChannel por HasContact; utilizado pelo público durante a inscrição.",
-      "listLinks": "Lista os canais de contato vinculados ao participante para conferir o e-mail associado; usa consulta de relacionamentos ativos; utilizado pelos fluxos de inscrição.",
-      "edit.platformFields": "Atualiza os dados de identificação permitidos da pessoa participante quando necessário; usa atualização do cadastro mestre e do índice de identificação; utilizado pelo organizador.",
-      "edit.moduleNamespace": "Mantém exclusivamente o espaço do módulo no cadastro mestre do participante quando houver dado específico autorizado; usa atualização de details.inscricaoEvento; utilizado pelo módulo de inscrições.",
-      "inactivate": "Inativa ou reativa o cadastro mestre do participante sem removê-lo; usa a alteração de situação do MDM; utilizado pelo organizador quando a pessoa não puder mais ser usada.",
-      "audit": "Consulta quem alterou os dados do cadastro mestre do participante e quando; usa o histórico de auditoria do MDM; utilizado pelo organizador para acompanhamento administrativo."
+      "read.byId": "Lê o participante pelo mdmId para preencher nome e e-mail na lista de inscritos e no CSV que o organizador baixa.",
+      "locate.byContact": "Encontra a pessoa dona do e-mail digitado na página pública, para reaproveitar o registro mestre em vez de duplicá-lo a cada inscrição.",
+      "locate.byName": "Permite ao organizador procurar um inscrito pelo nome dentro do cadastro.",
+      "register.createOrAttach": "Na inscrição pelo público, cria a pessoa quando o e-mail não existe e, em qualquer caso, marca o papel inscricaoEvento.Participante.",
+      "link.contact": "Registra o e-mail informado na inscrição como canal de contato ligado por HasContact.",
+      "listLinks": "Mostra ao organizador os canais de contato ligados ao participante.",
+      "edit.platformFields": "Permite ao organizador corrigir o nome de um participante digitado errado na inscrição.",
+      "inactivate": "Retira o papel de participante de uso sem apagá-lo, podendo ser reativado numa nova inscrição.",
+      "comment": "O organizador deixa observações sobre o participante, como pedidos especiais.",
+      "tag": "O organizador marca participantes com rótulos livres dentro do namespace do módulo.",
+      "statusHistory.read": "Mostra quando o cadastro do participante foi ativado ou inativado e por quem.",
+      "audit": "Informa quem alterou os dados do participante e quando."
     },
     "rules": [
       "rule-foreign-namespace-refused",
-      "rule-document-shape-validated",
       "rule-identity-never-in-namespace",
-      "rule-person-privacy-consent-required-br-eu"
+      "rule-document-shape-validated",
+      "rule-person-privacy-consent-required-br-eu",
+      "rule-delete-blocked-by-relationships",
+      "umaInscricaoPorEmailPorEvento"
     ],
     "kind": "role",
     "subtype": "Person",
@@ -65,12 +78,13 @@
           "type": "integer",
           "required": true,
           "derived": true,
+          "writePrecondition": true,
           "description": "Bumped by the engine on every write; optimistic concurrency."
         },
         "details": {
           "type": "object",
           "required": true,
-          "description": "Documento mestre da pessoa participante, com dados de identificação, dados de pessoa e o espaço exclusivo do módulo de inscrições.",
+          "description": "Registro mestre da pessoa que se inscreve em eventos, como o MDM o guarda e devolve.",
           "fields": {
             "identification": {
               "type": "object",
@@ -84,25 +98,19 @@
                   "values": [
                     {
                       "value": "Person",
-                      "title": "Pessoa",
-                      "description": "Pessoa física no cadastro mestre."
+                      "title": "Pessoa"
                     }
                   ],
-                  "description": "Indica que este cadastro mestre é uma pessoa participante.",
-                  "title": "Tipo de cadastro",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
+                  "description": "Sempre Person: o participante é uma pessoa física.",
+                  "title": "Subtipo"
                 },
                 "name": {
                   "type": "string",
                   "required": true,
                   "indexed": true,
-                  "maxLength": 0,
-                  "description": "Nome pelo qual a pessoa participante é identificada na inscrição do evento.",
-                  "title": "Nome",
-                  "min": 0,
-                  "max": 0
+                  "maxLength": 200,
+                  "description": "Nome informado pela pessoa na página pública do evento ao se inscrever; é como o organizador a reconhece na lista de inscritos e no CSV.",
+                  "title": "Nome"
                 },
                 "status": {
                   "type": "enum",
@@ -112,45 +120,60 @@
                   "values": [
                     {
                       "value": "Active",
-                      "title": "Ativo",
-                      "description": "Cadastro mestre disponível para uso."
+                      "title": "Ativo"
                     },
                     {
                       "value": "Inactive",
-                      "title": "Inativo",
-                      "description": "Cadastro mestre fora de uso."
+                      "title": "Inativo"
                     },
                     {
                       "value": "Merged",
-                      "title": "Mesclado",
-                      "description": "Cadastro mestre unido a outro cadastro."
+                      "title": "Mesclado"
                     },
                     {
                       "value": "Blocked",
-                      "title": "Bloqueado",
-                      "description": "Cadastro mestre bloqueado pela plataforma."
+                      "title": "Bloqueado"
                     }
                   ],
-                  "title": "Situação do cadastro",
-                  "description": "Situação de atividade do cadastro mestre da pessoa participante.",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
+                  "title": "Situação no cadastro",
+                  "description": "Situação do registro mestre (ativo ou inativo); não é a situação da inscrição, que vive na própria inscrição."
                 },
                 "countryCode": {
                   "type": "string",
                   "required": true,
                   "indexed": true,
                   "pattern": "^[A-Z]{2}$",
-                  "maxLength": 0,
+                  "maxLength": 2,
                   "default": "US",
-                  "description": "Código ISO do país aplicável aos dados e regras da pessoa participante.",
-                  "title": "País",
-                  "min": 0,
-                  "max": 0
+                  "description": "País da pessoa (ISO 3166-1 alfa-2), que define as regras de privacidade aplicáveis à inscrição.",
+                  "title": "País"
+                },
+                "tags": {
+                  "type": "string",
+                  "required": true,
+                  "collection": true,
+                  "derived": true,
+                  "description": "Papéis de módulo do registro; inclui inscricaoEvento.Participante, gravado na primeira inscrição.",
+                  "title": "Papéis"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "title": "Criado em",
+                  "description": "Momento em que a pessoa entrou no cadastro mestre."
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "title": "Atualizado em",
+                  "description": "Momento da última alteração do cadastro."
                 }
               },
-              "description": "Dados de identificação da pessoa participante no cadastro mestre."
+              "description": "Colunas de índice da plataforma usadas para localizar o participante."
             },
             "base": {
               "type": "object",
@@ -162,36 +185,30 @@
                   "collection": true,
                   "of": "ContactSummary",
                   "derived": true,
-                  "description": "Resumo derivado dos canais de contato vinculados à pessoa, incluindo o e-mail usado na inscrição.",
-                  "title": "Canais de contato",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
-                },
-                "relationshipRefs": {
-                  "type": "object",
-                  "required": true,
-                  "derived": true,
-                  "description": "Referências derivadas dos relacionamentos ativos da pessoa participante.",
-                  "title": "Referências de relacionamentos",
-                  "maxLength": 0,
-                  "min": 0,
-                  "max": 0
+                  "description": "Resumo dos canais de contato ligados por HasContact; aqui aparece o e-mail com que a pessoa se inscreveu, exibido na lista de inscritos e no CSV.",
+                  "title": "Contatos"
                 }
               },
-              "description": "Dados básicos de plataforma usados para relacionar a pessoa participante ao seu e-mail de inscrição."
+              "description": "Dados comuns a todo registro mestre que o módulo lê."
             },
             "person": {
               "type": "object",
               "owner": "platform",
-              "fields": {},
-              "description": "Dados próprios de pessoa física disponíveis no cadastro mestre."
+              "fields": {
+                "privacyConsent": {
+                  "type": "object",
+                  "of": "PrivacyConsent",
+                  "description": "Consentimento LGPD/GDPR dado pela pessoa ao enviar seus dados na página pública de inscrição.",
+                  "title": "Consentimento de privacidade"
+                }
+              },
+              "description": "Ramo de pessoa física da plataforma."
             },
             "general": {
               "type": "object",
               "owner": "organization",
               "open": true,
-              "description": "Dados promovidos pela organização para uso comum entre módulos; este módulo apenas os consulta."
+              "description": "Campos promovidos pela organização; o módulo apenas lê."
             },
             "inscricaoEvento": {
               "type": "object",

@@ -1,41 +1,56 @@
 /// <mls fileReference="_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts" enhancement="_blank"/>
 
-import type { Ns5OntologyEntityV3 } from '/_102035_/l2/solution/types.js';
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
 export const inscricaoEventoEntityEvento = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "inscricaoEvento",
   "entityId": "Evento",
   "title": "Evento",
-  "description": "Evento organizado e publicado para receber inscrições públicas, com informações, capacidade e situação de publicação.",
-  "displayField": "titulo",
+  "description": "Evento cadastrado pelo organizador com título, descrição, data, local e número de vagas; nasce como rascunho e, ao ser publicado, ganha uma página pública aberta a inscrições. Vagas ocupadas, vagas restantes e tamanho da lista de espera são campos derivados das inscrições.",
+  "displayField": "title",
   "relationships": {
     "inscricoes": {
-      "relationshipId": "inscricaoDoEvento",
+      "relationshipId": "inscricaoEvento",
       "to": "Inscricao",
       "via": "Inscricao.eventoId",
       "cardinality": "1:N",
       "title": "Inscrições do evento",
-      "description": "Inscrições registradas para este evento, incluindo as confirmadas e as que aguardam na lista de espera.",
+      "description": "Inscritos confirmados e lista de espera do evento.",
       "mode": "fk",
       "direction": "to",
       "required": true
+    },
+    "participantes": {
+      "relationshipId": "eventosDoParticipante",
+      "to": "Participante",
+      "via": "Inscricao",
+      "cardinality": "N:N",
+      "title": "Participantes do evento",
+      "description": "Pessoas inscritas no evento, obtidas a partir das inscrições.",
+      "mode": "throughTable",
+      "path": "Participante <- Inscricao.participanteId -> Inscricao.eventoId -> Evento",
+      "derived": true,
+      "direction": "to"
     }
   },
   "capabilities": {
-    "read.byId": "Lê um evento pelo identificador já conhecido no repositório da tabela, para telas que já têm o evento em contexto.",
-    "locate.byColumn": "Localiza eventos por situação de publicação ou data do evento, com ordenação e paginação, para o organizador e para a página pública.",
-    "locate.byText": "Encontra eventos pelo texto do título, por busca sem diferenciação entre maiúsculas e minúsculas, para o organizador localizar eventos cadastrados.",
-    "count": "Conta os eventos que correspondem aos filtros de situação ou data, para a listagem do organizador.",
-    "listByForeignKey": "Lista as inscrições que apontam para este evento pela chave estrangeira, para o organizador consultar inscritos e situações.",
-    "create": "Cria um evento em cadastro com título, descrição, data, local e número de vagas, para o organizador.",
-    "update": "Atualiza as informações de um evento ainda em cadastro pelo identificador, para o organizador corrigir seus dados antes da publicação.",
-    "transition": "Move a situação indexada do evento de em cadastro para publicado, para o organizador disponibilizar a página pública.",
-    "inscricaoEvento.exportarInscricoesCsv": "Gera e baixa em CSV a lista de inscrições vinculadas ao evento, para o organizador acompanhar e exportar os inscritos."
+    "create": "Cria o evento como rascunho com título, descrição, data, local e número de vagas; usado pelo organizador ao cadastrar o evento.",
+    "update": "Altera os dados do evento (título, descrição, data, local, vagas); usado pelo organizador ao revisar o evento.",
+    "transition": "Publica o evento movendo a situação de rascunho para publicado; usado pelo organizador, com a regra de dados completos verificada no módulo.",
+    "read.byId": "Lê o evento pelo id para a página pública de inscrição e para a tela de revisão e ocupação do organizador.",
+    "locate.byColumn": "Lista eventos filtrando por situação e ordenando por data; o público vê só os publicados e o organizador vê todos.",
+    "locate.byText": "Busca eventos pelo título digitado; usado pelo organizador para localizar o evento entre os cadastrados.",
+    "count": "Conta os eventos por situação para o cabeçalho da lista do organizador.",
+    "listByForeignKey": "Lista as inscrições que apontam para o evento, para calcular vagas ocupadas, lista de espera e mostrar os inscritos ao organizador.",
+    "delete": "Remove um evento em rascunho cadastrado por engano; usado pelo organizador.",
+    "inscricaoEvento.paginaPublica": "Expõe a página pública de um evento publicado com título, descrição, data, local e disponibilidade de vagas, acessível ao público sem login."
   },
   "rules": [
-    "eventoCompletoParaPublicacao",
-    "inscricoesConfirmadasOcupamVagas"
+    "publicarExigeDadosCompletos",
+    "inscricaoSomenteEventoPublicado",
+    "vagasNaoMenorQueOcupadas",
+    "inscricaoExcedenteVaiParaListaEspera"
   ],
   "kind": "entity",
   "class": "core",
@@ -58,102 +73,135 @@ export const inscricaoEventoEntityEvento = {
         "required": true,
         "derived": true
       },
-      "titulo": {
+      "title": {
         "type": "string",
         "required": true,
         "indexed": true,
-        "of": "Address",
         "title": "Título",
-        "description": "Título pelo qual o organizador e o público identificam o evento.",
-        "maxLength": 200,
-        "min": 0,
-        "max": 0
+        "description": "Título do evento, mostrado na página pública e usado na busca do organizador.",
+        "maxLength": 200
       },
-      "dataEvento": {
-        "type": "date",
+      "eventDate": {
+        "type": "timestamp",
         "required": true,
         "indexed": true,
-        "of": "Address",
-        "title": "Data do evento",
-        "description": "Data em que o evento será realizado, usada para localizar e organizar os eventos.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "title": "Data",
+        "description": "Data e hora do evento; a lista de eventos é ordenada e filtrada por ela."
       },
       "status": {
         "type": "enum",
         "required": true,
         "indexed": true,
-        "of": "Address",
         "values": [
           {
             "value": "draft",
-            "title": "Em cadastro",
-            "description": "Evento cadastrado, ainda não disponível para inscrições públicas."
+            "title": "Rascunho",
+            "description": "Evento em edição, sem página pública."
           },
           {
             "value": "published",
             "title": "Publicado",
-            "description": "Evento disponível na página pública para receber inscrições."
+            "description": "Evento com página pública aberta a inscrições."
           }
         ],
-        "title": "Situação de publicação",
-        "description": "Situação que indica se o evento ainda está em cadastro ou se já está disponível na página pública.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0
+        "title": "Situação",
+        "description": "Situação do evento: rascunho enquanto o organizador edita, publicado quando a página pública aceita inscrições."
       },
       "details": {
         "type": "object",
         "required": true,
-        "of": "Address",
-        "title": "Informações do evento",
-        "description": "Informações informadas pelo organizador para apresentar e realizar o evento.",
-        "maxLength": 0,
-        "min": 0,
-        "max": 0,
+        "title": "Detalhes",
+        "description": "Dados do evento que não são filtrados.",
         "fields": {
-          "descricao": {
+          "description": {
             "type": "text",
             "required": true,
-            "of": "Address",
             "title": "Descrição",
-            "description": "Descrição apresentada ao público com as informações do evento.",
-            "maxLength": 0,
-            "min": 0,
-            "max": 0
+            "description": "Texto que apresenta o evento ao público na página pública."
           },
-          "local": {
-            "type": "string",
+          "venue": {
+            "type": "object",
             "required": true,
-            "of": "Address",
             "title": "Local",
-            "description": "Local informado para a realização do evento.",
-            "maxLength": 300,
-            "min": 0,
-            "max": 0
+            "description": "Onde o evento acontece.",
+            "fields": {
+              "name": {
+                "type": "string",
+                "required": true,
+                "title": "Nome do local",
+                "description": "Nome do local como aparece para o público (ex.: auditório, sala, endereço resumido ou 'online').",
+                "maxLength": 200
+              },
+              "address": {
+                "type": "object",
+                "of": "Address",
+                "title": "Endereço",
+                "description": "Endereço do local, quando presencial.",
+                "fields": {
+                  "line1": {
+                    "type": "string",
+                    "title": "Logradouro"
+                  },
+                  "line2": {
+                    "type": "string",
+                    "title": "Complemento"
+                  },
+                  "city": {
+                    "type": "string",
+                    "title": "Cidade"
+                  },
+                  "stateOrProvince": {
+                    "type": "string",
+                    "title": "Estado"
+                  },
+                  "postalCode": {
+                    "type": "string",
+                    "title": "CEP"
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "title": "País"
+                  }
+                }
+              }
+            }
           },
-          "numeroVagas": {
+          "capacity": {
             "type": "integer",
             "required": true,
-            "of": "Address",
             "title": "Número de vagas",
-            "description": "Quantidade máxima de inscrições confirmadas que o evento comporta.",
-            "maxLength": 0,
-            "min": 1,
-            "max": 0
+            "description": "Quantidade de vagas confirmadas do evento; inscrições além dela entram na lista de espera.",
+            "min": 1
           },
-          "vagasOcupadas": {
+          "publishedAt": {
+            "type": "timestamp",
+            "derived": true,
+            "title": "Publicado em",
+            "description": "Momento em que o organizador publicou o evento, registrado pelo sistema na publicação."
+          },
+          "occupiedSeats": {
             "type": "integer",
             "derived": true,
             "title": "Vagas ocupadas",
-            "description": "Quantidade de inscrições confirmadas deste evento."
+            "description": "Quantidade de inscrições confirmadas deste evento, sem contar as canceladas nem as que estão na lista de espera."
           },
-          "vagasDisponiveis": {
+          "remainingSeats": {
             "type": "integer",
             "derived": true,
-            "title": "Vagas disponíveis",
-            "description": "Número de vagas do evento menos a quantidade de inscrições confirmadas deste evento."
+            "title": "Vagas restantes",
+            "description": "Número de vagas do evento menos as vagas ocupadas, nunca abaixo de zero."
+          },
+          "waitlistSize": {
+            "type": "integer",
+            "derived": true,
+            "title": "Tamanho da lista de espera",
+            "description": "Quantidade de inscrições deste evento que estão aguardando na lista de espera."
+          },
+          "isFull": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Lotado",
+            "description": "Verdadeiro quando as vagas ocupadas alcançaram o número de vagas do evento; a partir daí novas inscrições vão para a lista de espera."
           }
         }
       }
@@ -171,7 +219,7 @@ export const inscricaoEventoEntityEvento = {
   ],
   "transitions": [
     {
-      "transitionId": "publicarEvento",
+      "transitionId": "publicar",
       "from": [
         "draft"
       ],
@@ -179,13 +227,14 @@ export const inscricaoEventoEntityEvento = {
       "by": [
         "organizador"
       ],
-      "description": "Publica o evento e disponibiliza sua página para inscrições públicas.",
+      "description": "O organizador publica o evento, que ganha uma página pública aberta a inscrições.",
+      "payload": [],
       "ruleRefs": [
-        "eventoCompletoParaPublicacao"
+        "publicarExigeDadosCompletos"
       ]
     }
   ]
-} as const satisfies Ns5OntologyEntityV3;
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
 export type InscricaoEventoEntityEventoType = typeof inscricaoEventoEntityEvento;
 
