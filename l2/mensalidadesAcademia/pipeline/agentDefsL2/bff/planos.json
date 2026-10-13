@@ -1,0 +1,275 @@
+{
+  "types": [
+    {
+      "name": "PlanoDetalhes",
+      "description": "Detalhes do plano mostrados no catálogo e na escolha para matrícula.",
+      "fields": [
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.diaVencimento",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.details.diaVencimento"
+            ]
+          }
+        },
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.details.descricao"
+            ]
+          }
+        },
+        {
+          "name": "details.quantidadeMatriculasAtivas",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.details.quantidadeMatriculasAtivas"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PlanoCatalogo",
+      "description": "Plano da academia como o catálogo o mostra: nome, periodicidade, valor, dia de vencimento, descrição e matrículas ativas.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.version"
+            ]
+          }
+        },
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.nome"
+            ]
+          }
+        },
+        {
+          "name": "periodicidade",
+          "type": "'monthly' | 'quarterly' | 'yearly'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.periodicidade"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "PlanoDetalhes"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "consultarPlanos",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "planos",
+          "type": "PlanoCatalogo[]"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega, na abertura da página, todos os planos da academia para a gerência conferir antes de cadastrar e para a recepção escolher o plano da matrícula.",
+        "input": "Nenhuma entrada: a página mostra o catálogo completo da organização.",
+        "processing": "Lista todos os planos da organização ordenados pelo nome. Para cada plano calcula quantidadeMatriculasAtivas contando as matrículas com status 'ativa' que apontam para o plano (campo derivado, calculado na leitura e nunca gravado). A lista não é paginada: o catálogo de planos é pequeno e cabe numa tela; filtros por periodicidade ou nome são feitos na própria página.",
+        "output": "Lista de planos com id, version, nome, periodicidade, valor, dia de vencimento, descrição e matrículas ativas; alimenta o catálogo e resolve o plano escolhido nas ações de matrícula sem nova chamada."
+      }
+    },
+    {
+      "id": "registrarPlano",
+      "kind": "cmd",
+      "when": "registrarPlano",
+      "writes": "Plano.create",
+      "input": [
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.nome"
+            ]
+          }
+        },
+        {
+          "name": "periodicidade",
+          "type": "'monthly' | 'quarterly' | 'yearly'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.periodicidade"
+            ]
+          }
+        },
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.diaVencimento",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.details.diaVencimento"
+            ]
+          }
+        },
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Plano.details.descricao"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "plano",
+          "type": "PlanoCatalogo"
+        }
+      ],
+      "rules": [
+        "planoNomeUnico",
+        "planoValorPositivo",
+        "planoDiaVencimentoValido"
+      ],
+      "jsdoc": {
+        "purpose": "Cadastra um novo plano pela gerência e o devolve pronto para entrar no catálogo.",
+        "input": "nome: nome do plano; periodicidade: mensal, trimestral ou anual; valor: valor cobrado em cada mensalidade; diaVencimento: dia do mês em que vencem as mensalidades; descricao: observações opcionais da gerência.",
+        "processing": "Recusa o cadastro se já existir plano com o mesmo nome (planoNomeUnico), se o valor não for maior que zero (planoValorPositivo) ou se o dia de vencimento não estiver entre 1 e 31 (planoDiaVencimentoValido). Cria o plano; quantidadeMatriculasAtivas é derivada e, para um plano novo, é calculada como zero, nunca gravada.",
+        "output": "O plano criado com id, version e todos os campos do catálogo, para a página inseri-lo na lista sem recarregar."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "planosList",
+        "reads": "consultarPlanos.planos"
+      },
+      {
+        "organism": "planoActions",
+        "reads": "consultarPlanos.planos"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "registrarPlano",
+        "refreshes": []
+      }
+    ],
+    "selections": [
+      {
+        "organism": "planosList",
+        "via": {
+          "list": "consultarPlanos.planos"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "cadastrarPlano/consultarPlanos",
+        "organisms": [
+          "planosList"
+        ],
+        "endpoints": [
+          "consultarPlanos"
+        ]
+      },
+      {
+        "step": "cadastrarPlano/registrarPlano",
+        "organisms": [
+          "planoForm"
+        ],
+        "endpoints": [
+          "registrarPlano"
+        ]
+      },
+      {
+        "step": "matricularAluno/escolherPlano",
+        "organisms": [
+          "planosList",
+          "planoActions"
+        ],
+        "endpoints": [
+          "consultarPlanos"
+        ]
+      },
+      {
+        "step": "matricularAluno/localizarAluno",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "matriculas"
+      },
+      {
+        "step": "matricularAluno/registrarMatricula",
+        "organisms": [
+          "planoActions"
+        ],
+        "endpoints": [],
+        "continuesIn": "matriculas"
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "registrarPlano",
+        "state": "consultarPlanos.planos",
+        "mode": "upsert"
+      }
+    ]
+  }
+}

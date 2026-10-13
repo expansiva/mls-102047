@@ -1,0 +1,332 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 114015,
+  "receivedAt": "2026-10-13T11:43:19.580Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "A página mantém um cadastro mestre (família mdm) das pessoas da recepção: a gerência vê a lista da equipe, escolhe uma pessoa e cadastra ou atualiza os dados dela. É uma manutenção simples de dados base, sem fluxo de vida nem indicadores, por isso se encaixa em masterDataManagement nos dois dispositivos.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "masterDataManagement"
+            },
+            "intent": "Permitir que a gerência veja todas as pessoas que trabalham na recepção da academia e mantenha o cadastro de cada atendente atualizado, incluindo novos atendentes, sem duplicar ninguém.",
+            "sections": [
+              {
+                "id": "equipe",
+                "priority": "primary",
+                "purpose": "Mostrar a equipe da recepção com nome, documento e situação no cadastro, para a gerência encontrar rapidamente quem precisa revisar.",
+                "organisms": [
+                  "equipeRecepcao"
+                ]
+              },
+              {
+                "id": "cadastro",
+                "priority": "main",
+                "purpose": "Ao lado da lista, abrir os dados do atendente escolhido para atualização ou um cadastro em branco para incluir uma nova pessoa.",
+                "organisms": [
+                  "cadastroAtendente"
+                ]
+              }
+            ],
+            "organisms": {
+              "equipeRecepcao": {
+                "kind": "list",
+                "text": "Pessoas que trabalham na recepção, com nome, apelidos, documento e se o cadastro está ativo ou inativo. Escolher uma pessoa abre seus dados para atualização.",
+                "intents": []
+              },
+              "cadastroAtendente": {
+                "kind": "form",
+                "text": "Cadastrar um novo atendente ou atualizar nome, apelidos, documento, país e consentimento de privacidade de quem já está na equipe.",
+                "intents": [
+                  {
+                    "id": "cadastrarAtendente",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "salvarAtendente",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "equipeRecepcao": [
+                {
+                  "role": "Tabela da equipe da recepção",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewtable--ml-side-detail-table"
+                },
+                {
+                  "role": "Busca de atendente pelo nome ou documento",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": "groupsearchcontent--ml-search-filters"
+                },
+                {
+                  "role": "Novo atendente",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                }
+              ],
+              "cadastroAtendente": [
+                {
+                  "role": "Nome e número do documento",
+                  "preferred": "groupentertext--ml-enter-text",
+                  "alternative": "groupentertext--ml-floating-text-input"
+                },
+                {
+                  "role": "Número do CPF",
+                  "preferred": "groupentertext--ml-cpf-input",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "Apelidos",
+                  "preferred": "groupentertext--ml-tag-input",
+                  "alternative": ""
+                },
+                {
+                  "role": "Tipo de documento",
+                  "preferred": "groupselectone--ml-select",
+                  "alternative": "groupselectone--ml-segmented-control"
+                },
+                {
+                  "role": "País",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "Consentimento de privacidade",
+                  "preferred": "groupenterboolean--ml-checkbox-preference",
+                  "alternative": ""
+                },
+                {
+                  "role": "Salvar cadastro",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "Confirmação ou erro ao salvar",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "equipeRecepcao": {
+                "reads": [
+                  "Recepcao.details.identification.name",
+                  "Recepcao.details.base.aliases",
+                  "Recepcao.details.identification.docType",
+                  "Recepcao.details.identification.docId",
+                  "Recepcao.details.identification.status"
+                ],
+                "edits": [],
+                "selects": "cadastroAtendente",
+                "submits": []
+              },
+              "cadastroAtendente": {
+                "reads": [
+                  "Recepcao.details.identification.name",
+                  "Recepcao.details.base.aliases",
+                  "Recepcao.details.identification.docType",
+                  "Recepcao.details.identification.docId",
+                  "Recepcao.details.identification.countryCode",
+                  "Recepcao.details.identification.status",
+                  "Recepcao.details.base.contacts",
+                  "Recepcao.details.person.privacyConsent"
+                ],
+                "edits": [
+                  "Recepcao.details.identification.name",
+                  "Recepcao.details.base.aliases",
+                  "Recepcao.details.identification.docType",
+                  "Recepcao.details.identification.docId",
+                  "Recepcao.details.identification.countryCode",
+                  "Recepcao.details.person.privacyConsent"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "cadastrarAtendente",
+                    "write": "Recepcao.create"
+                  },
+                  {
+                    "intentId": "salvarAtendente",
+                    "write": "Recepcao.update"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "masterDataManagement"
+            },
+            "intent": "No celular, a gerência consulta a equipe da recepção e abre o cadastro de um atendente para atualizar ou incluir alguém, em conteúdo fluido de coluna única pensado para cerca de 390px e usável entre 360px e 430px.",
+            "sections": [
+              {
+                "id": "equipe",
+                "priority": "primary",
+                "purpose": "Lista compacta da equipe da recepção, com nome e situação em destaque, para tocar e abrir o cadastro.",
+                "organisms": [
+                  "equipeRecepcao"
+                ]
+              },
+              {
+                "id": "cadastro",
+                "priority": "main",
+                "purpose": "Formulário empilhado abaixo da lista, ou em seu lugar ao escolher alguém, para cadastrar ou atualizar o atendente.",
+                "organisms": [
+                  "cadastroAtendente"
+                ]
+              }
+            ],
+            "organisms": {
+              "equipeRecepcao": {
+                "kind": "list",
+                "text": "Pessoas que trabalham na recepção, mostrando nome, documento e se estão ativas. Tocar em uma pessoa abre seus dados.",
+                "intents": []
+              },
+              "cadastroAtendente": {
+                "kind": "form",
+                "text": "Cadastrar um novo atendente ou atualizar nome, apelidos, documento, país e consentimento de privacidade, com o botão de salvar sempre ao alcance.",
+                "intents": [
+                  {
+                    "id": "cadastrarAtendente",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "salvarAtendente",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "equipeRecepcao": [
+                {
+                  "role": "Lista da equipe da recepção",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                },
+                {
+                  "role": "Busca de atendente pelo nome",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": ""
+                },
+                {
+                  "role": "Novo atendente",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-icon-button"
+                }
+              ],
+              "cadastroAtendente": [
+                {
+                  "role": "Nome e número do documento",
+                  "preferred": "groupentertext--ml-floating-text-input",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "Número do CPF",
+                  "preferred": "groupentertext--ml-cpf-input",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "Apelidos",
+                  "preferred": "groupentertext--ml-tag-input",
+                  "alternative": ""
+                },
+                {
+                  "role": "Tipo de documento",
+                  "preferred": "groupselectone--ml-select",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "País",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "Consentimento de privacidade",
+                  "preferred": "groupenterboolean--ml-checkbox-preference",
+                  "alternative": "groupenterboolean--ml-toggle-switch"
+                },
+                {
+                  "role": "Salvar cadastro",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "Confirmação ou erro ao salvar",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "equipeRecepcao": {
+                "reads": [
+                  "Recepcao.details.identification.name",
+                  "Recepcao.details.identification.docId",
+                  "Recepcao.details.identification.status"
+                ],
+                "edits": [],
+                "selects": "cadastroAtendente",
+                "submits": []
+              },
+              "cadastroAtendente": {
+                "reads": [
+                  "Recepcao.details.identification.name",
+                  "Recepcao.details.base.aliases",
+                  "Recepcao.details.identification.docType",
+                  "Recepcao.details.identification.docId",
+                  "Recepcao.details.identification.countryCode",
+                  "Recepcao.details.identification.status",
+                  "Recepcao.details.base.contacts",
+                  "Recepcao.details.person.privacyConsent"
+                ],
+                "edits": [
+                  "Recepcao.details.identification.name",
+                  "Recepcao.details.base.aliases",
+                  "Recepcao.details.identification.docType",
+                  "Recepcao.details.identification.docId",
+                  "Recepcao.details.identification.countryCode",
+                  "Recepcao.details.person.privacyConsent"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "cadastrarAtendente",
+                    "write": "Recepcao.create"
+                  },
+                  {
+                    "intentId": "salvarAtendente",
+                    "write": "Recepcao.update"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 22,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}
