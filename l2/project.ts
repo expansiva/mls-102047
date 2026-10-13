@@ -1,6 +1,4 @@
 /// <mls fileReference="_102047_/l2/project.ts" enhancement="_102027_/l2/enhancementLit" />
-// rt62 s4
-export const rt62s4: number = "x";
 
 export const projectConfig = {
     masterFrontEnd: {
