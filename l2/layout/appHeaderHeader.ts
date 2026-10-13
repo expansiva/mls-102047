@@ -61,5 +61,3 @@ ${tag} .aura-header-subtitle {
 }
 
 customElements.define('layout--app-header-header-102047', AppHeaderHeader102047);
-
-// rt65 verificação do supervisor
