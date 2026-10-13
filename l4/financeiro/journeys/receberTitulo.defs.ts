@@ -8,7 +8,7 @@ export const receberTituloJourney = {
   "business": {
     "actorRef": "caixa",
     "title": "Receber título no caixa",
-    "goal": "Registrar o recebimento total ou parcial de um título a receber em dinheiro, pix ou cartão.",
+    "goal": "Registrar o recebimento total ou parcial de um título a receber em dinheiro, pix ou cartão via Stripe.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,8 +17,8 @@ export const receberTituloJourney = {
         "stepId": "localizarTitulo",
         "kind": "locate",
         "entity": "TituloReceber",
-        "title": "Buscar título a receber",
-        "description": "O caixa localiza o título em aberto pelo pagador, origem ou vencimento."
+        "title": "Localizar título em aberto",
+        "description": "O caixa busca o título em aberto pelo pagador, pela origem ou pelo vencimento."
       },
       {
         "stepId": "conferirTitulo",
@@ -33,19 +33,19 @@ export const receberTituloJourney = {
         "entity": "Recebimento",
         "effect": "create",
         "title": "Registrar recebimento",
-        "description": "O caixa informa a forma de pagamento (dinheiro, pix ou cartão via Stripe) e o valor recebido, podendo ser parcial; o saldo do título é atualizado e ele fica quitado quando o saldo chega a zero."
+        "description": "O caixa informa o valor recebido e a forma de pagamento (dinheiro, pix ou cartão via Stripe); um valor menor que o saldo gera baixa parcial e o saldo do título é atualizado, ficando quitado quando zerar."
       }
     ],
     "outcome": {
-      "statement": "O recebimento está registrado e o saldo do título reflete a baixa total ou parcial.",
+      "statement": "O recebimento fica registrado e o título fica quitado ou com saldo parcial reduzido.",
       "evidence": [
-        "Recebimento com forma de pagamento, valor e data registrado no título",
-        "Saldo em aberto do título reduzido pelo valor recebido",
-        "Título quitado quando o saldo chega a zero"
+        "Recebimento listado no título com valor, forma de pagamento e data",
+        "Saldo em aberto do título atualizado",
+        "Título marcado como quitado quando o saldo chega a zero"
       ]
     }
   },
-  "businessHash": "sha256:313bb8904734b2e6ff6e6272677c788309c1f6c9bf6e871f12cd9ce145afbaa7"
+  "businessHash": "sha256:179d52634791df91a650935868c066fbdb94e4bcec19e5dc490cacd66893c350"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ReceberTituloJourneyType = typeof receberTituloJourney;

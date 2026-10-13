@@ -19,7 +19,7 @@ export const financeiroJourneyIndex = {
     {
       "journeyId": "acompanharRecebiveis",
       "actorRef": "gerenteFinanceiro",
-      "title": "Acompanhar painel de recebíveis"
+      "title": "Acompanhar recebíveis e vencidos"
     },
     {
       "journeyId": "emitirExtratoPagador",

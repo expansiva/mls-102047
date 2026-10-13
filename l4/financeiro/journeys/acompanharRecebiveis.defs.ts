@@ -7,43 +7,51 @@ export const acompanharRecebiveisJourney = {
   "journeyId": "acompanharRecebiveis",
   "business": {
     "actorRef": "gerenteFinanceiro",
-    "title": "Acompanhar painel de recebíveis",
-    "goal": "Analisar os recebíveis por período e por origem e identificar os títulos vencidos.",
+    "title": "Acompanhar recebíveis e vencidos",
+    "goal": "Ver os recebíveis da organização por período e por origem e identificar os títulos vencidos e não quitados.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
+        "stepId": "filtrarRecebiveis",
+        "kind": "locate",
+        "entity": "TituloReceber",
+        "title": "Escolher período e origem",
+        "description": "O gerente escolhe o período e, se quiser, a origem (restaurante, academia, assistência técnica)."
+      },
+      {
         "stepId": "verPainel",
         "kind": "inspect",
         "entity": "TituloReceber",
         "title": "Ver painel de recebíveis",
-        "description": "O gerente vê os totais a receber e recebidos por período e por origem (restaurante, academia, assistência técnica)."
+        "description": "O gerente vê os totais a receber, recebidos e em aberto agrupados por período e por origem."
       },
       {
-        "stepId": "localizarVencidos",
+        "stepId": "listarVencidos",
         "kind": "locate",
         "entity": "TituloReceber",
         "title": "Listar títulos vencidos",
-        "description": "O gerente filtra os títulos com vencimento passado e saldo em aberto."
+        "description": "O gerente lista os títulos com vencimento passado e saldo em aberto, podendo filtrar por origem ou pagador."
       },
       {
-        "stepId": "detalharVencido",
+        "stepId": "verTituloVencido",
         "kind": "inspect",
         "entity": "TituloReceber",
-        "title": "Detalhar título vencido",
-        "description": "O gerente abre um título vencido para ver pagador, valor, saldo, origem e recebimentos já feitos."
+        "title": "Ver detalhe do título",
+        "description": "O gerente vê pagador, valor, saldo, dias de atraso, origem e recebimentos parciais do título vencido."
       }
     ],
     "outcome": {
-      "statement": "O gerente conhece a posição dos recebíveis por período e origem e quais títulos estão vencidos.",
+      "statement": "O gerente conhece a posição dos recebíveis no período e por origem e sabe quais títulos estão vencidos, de quem e de qual origem.",
       "evidence": [
-        "Totais por período e por origem exibidos no painel",
-        "Lista de títulos vencidos com saldo em aberto"
+        "Totais a receber, recebidos e em aberto exibidos por origem no período escolhido",
+        "Lista de títulos vencidos com saldo e dias de atraso",
+        "Detalhe do título vencido com recebimentos parciais"
       ]
     }
   },
-  "businessHash": "sha256:15dd7c4c205658291f338f288cf0da571987f49528bf275b94b86598f4a1af64"
+  "businessHash": "sha256:f70fc05b65aa8ea226f509bb7614773cb77aaba7b32355eb5e6a4431430e7955"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharRecebiveisJourneyType = typeof acompanharRecebiveisJourney;

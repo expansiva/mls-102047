@@ -7,7 +7,7 @@ export const financeiroEntityPagador = {
   "moduleName": "financeiro",
   "entityId": "Pagador",
   "title": "Pagador",
-  "description": "Pessoa responsável por pagar os títulos a receber. É o mesmo cadastro mestre do cliente, aluno ou consumidor de outros módulos; acessa o portal para ver só os próprios títulos e recebimentos.",
+  "description": "Pessoa responsável pelo pagamento dos títulos a receber; acessa o portal para ver os próprios títulos e recebimentos e pagar com cartão.",
   "displayField": "details.identification.name",
   "relationships": {
     "titulos": {
@@ -16,44 +16,45 @@ export const financeiroEntityPagador = {
       "via": "TituloReceber.pagadorId",
       "cardinality": "1:N",
       "title": "Títulos a receber do pagador",
-      "description": "Títulos que o pagador deve; caminho do escopo 'próprios títulos' no portal e base do extrato.",
+      "description": "Títulos pelos quais o pagador responde; base do portal e do extrato.",
       "mode": "fk",
       "direction": "to",
       "required": true
     },
     "recebimentos": {
-      "relationshipId": "recebimentosPagador",
+      "relationshipId": "pagadorRecebimentos",
       "to": "Recebimento",
       "via": "TituloReceber",
       "cardinality": "1:N",
       "title": "Recebimentos do pagador",
-      "description": "Recebimentos e estornos dos títulos do pagador, usados no extrato e no portal.",
+      "description": "Recebimentos e estornos obtidos pelos títulos do pagador, exibidos no portal e no extrato.",
       "mode": "throughTable",
       "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
       "derived": true
     }
   },
   "capabilities": {
-    "read.byId": "Lê o pagador pelo mdmId para preencher títulos, recebimentos e o cabeçalho do extrato; usado por todas as telas do financeiro.",
-    "locate.byName": "Localiza o pagador pelo nome digitado; usado pelo gerente financeiro ao emitir o extrato e pelo caixa ao receber.",
-    "locate.byDocument": "Localiza o pagador pelo CPF ou outro documento; usado pelo gerente financeiro no extrato e pelo cadastro de origem para evitar duplicidade.",
-    "register.createOrAttach": "Cria ou anexa o papel financeiro.Pagador ao cadastro mestre quando um título chega de outro módulo (comanda, mensalidade, ordem de serviço); feito pela integração, não por uma pessoa.",
-    "locate.byLogin": "Resolve o pagador da sessão pelo e-mail de login, para que o portal mostre só os próprios títulos e recebimentos.",
-    "invite.login": "Dá ao pagador um login para acessar o portal e pagar com cartão os títulos em aberto; acionado pela organização.",
-    "listLinks": "Mostra os vínculos do pagador no cadastro mestre, como contatos e responsáveis; usado pelo gerente financeiro ao conferir o extrato.",
-    "comment": "Registra observações de cobrança sobre o pagador; usado pelo caixa e pelo gerente financeiro.",
-    "tag": "Marca o pagador com rótulos do financeiro, como acordo de pagamento; usado pelo gerente financeiro.",
-    "statusHistory.read": "Mostra quando o cadastro do pagador foi ativado ou inativado e por quem; usado pelo gerente financeiro.",
-    "audit": "Informa quem alterou o cadastro do pagador e quando; consultado pelo administrador.",
-    "financeiro.extratoPagador": "Emite o extrato do pagador no período, com títulos, recebimentos, estornos e saldo, para imprimir ou baixar; usado pelo gerente financeiro."
+    "read.byId": "Lê o pagador pelo mdmId para preencher nome e documento nas listas de títulos, recebimentos e no extrato; usado por caixa, gerente financeiro e pelo portal.",
+    "locate.byName": "Localiza o pagador pelo nome digitado no índice da plataforma; usado pelo gerente financeiro ao emitir o extrato e pelo caixa ao receber.",
+    "locate.byDocument": "Localiza o pagador pelo CPF ou outro documento nacional; usado pelo gerente financeiro no extrato e pela entrada de cobranças para deduplicar.",
+    "register.createOrAttach": "Cria ou anexa o papel financeiro.Pagador quando um título chega de outro módulo (comanda, mensalidade, ordem de serviço), procurando primeiro pelo documento; feito pela integração de entrada.",
+    "locate.byLogin": "Resolve o pagador logado pelo e-mail de login na tabela de tags, para o portal mostrar só os próprios títulos e recebimentos; usado pela plataforma na sessão.",
+    "invite.login": "Dá ao pagador um login para acessar o portal de títulos e pagar com cartão; feito pela plataforma a pedido da equipe financeira.",
+    "link.contact": "Vincula telefone, WhatsApp ou e-mail do pagador como canal de contato da plataforma, usado na cobrança de títulos vencidos; mantido pela plataforma.",
+    "listLinks": "Mostra os vínculos do pagador (contatos e demais relações) na ficha consultada pelo gerente financeiro.",
+    "inactivate": "Inativa o papel de pagador sem apagar o histórico de títulos, podendo ser reativado; usado pelo gerente financeiro.",
+    "comment": "Registra observações de cobrança sobre o pagador, como acordos combinados; usado por caixa e gerente financeiro.",
+    "tag": "Marca o pagador com rótulos do financeiro (ex.: inadimplente recorrente) para agrupamento; usado pelo gerente financeiro.",
+    "audit": "Mostra quem alterou o cadastro do pagador e quando, pelo módulo de auditoria da plataforma; usado pelo gerente financeiro.",
+    "financeiro.extratoPagador": "Reúne os títulos do pagador no período com seus recebimentos, estornos e saldo para exportar ou imprimir; usado pelo gerente financeiro."
   },
   "rules": [
     "rule-foreign-namespace-refused",
     "rule-identity-never-in-namespace",
     "rule-document-shape-validated",
-    "rule-person-privacy-consent-required-br-eu",
     "rule-delete-blocked-by-relationships",
-    "pagadorVeSomenteProprios"
+    "rule-person-privacy-consent-required-br-eu",
+    "pagadorVeApenasProprios"
   ],
   "writer": "inbound",
   "kind": "role",
@@ -79,7 +80,7 @@ export const financeiroEntityPagador = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Cadastro mestre da pessoa que paga os títulos a receber, como a plataforma o guarda e devolve.",
+        "description": "Registro mestre da pessoa que responde pelo pagamento dos títulos a receber.",
         "fields": {
           "identification": {
             "type": "object",
@@ -104,7 +105,7 @@ export const financeiroEntityPagador = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 200,
-                "description": "Nome pelo qual o gerente localiza o pagador e que aparece nos títulos e no extrato.",
+                "description": "Nome pelo qual o gerente financeiro localiza o pagador e que aparece nos títulos, recebimentos e no extrato.",
                 "title": "Nome do pagador"
               },
               "status": {
@@ -113,62 +114,35 @@ export const financeiroEntityPagador = {
                 "indexed": true,
                 "derived": true,
                 "values": [
-                  {
-                    "value": "Active",
-                    "title": "Ativo"
-                  },
-                  {
-                    "value": "Inactive",
-                    "title": "Inativo"
-                  },
-                  {
-                    "value": "Merged",
-                    "title": "Mesclado"
-                  },
-                  {
-                    "value": "Blocked",
-                    "title": "Bloqueado"
-                  }
+                  "Active",
+                  "Inactive",
+                  "Merged",
+                  "Blocked"
                 ],
-                "title": "Situação do cadastro",
-                "description": "Situação do cadastro mestre; um pagador inativo continua com seu histórico de títulos."
+                "title": "Situação no cadastro",
+                "description": "Situação do registro mestre (ativo, inativo, mesclado, bloqueado), mantida pela plataforma."
               },
               "docType": {
                 "type": "enum",
                 "indexed": true,
                 "values": [
-                  {
-                    "value": "CPF",
-                    "title": "CPF"
-                  },
-                  {
-                    "value": "Passport",
-                    "title": "Passaporte"
-                  },
-                  {
-                    "value": "NationalId",
-                    "title": "Documento nacional"
-                  },
-                  {
-                    "value": "SSN",
-                    "title": "SSN"
-                  },
-                  {
-                    "value": "DriversLicense",
-                    "title": "Carteira de motorista"
-                  },
-                  {
-                    "value": "Other",
-                    "title": "Outro"
-                  }
+                  "SSN",
+                  "EIN",
+                  "Passport",
+                  "DriversLicense",
+                  "NationalId",
+                  "CPF",
+                  "CNPJ",
+                  "VAT",
+                  "Other"
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional usado para localizar o pagador e emitir o extrato."
+                "description": "Tipo do documento nacional do pagador, usado para localizá-lo e deduplicar quando a cobrança chega de outro módulo."
               },
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento do pagador; impresso no extrato e usado para localizá-lo e evitar duplicidade.",
+                "description": "Número do documento do pagador (ex.: CPF), impresso no extrato e usado na busca do gerente.",
                 "title": "Número do documento"
               },
               "countryCode": {
@@ -178,38 +152,23 @@ export const financeiroEntityPagador = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "País do documento e das regras de privacidade aplicáveis ao pagador.",
+                "description": "País ao qual pertencem o documento e as regras legais do pagador (ex.: BR para LGPD).",
                 "title": "País"
-              },
-              "tags": {
-                "type": "string",
-                "required": true,
-                "collection": true,
-                "derived": true,
-                "description": "Papéis do cadastro nos módulos; aqui contém financeiro.Pagador.",
-                "title": "Papéis"
               }
             },
-            "description": "Chaves de índice da plataforma usadas para localizar o pagador."
+            "description": "Chaves de índice da plataforma usadas para localizar o pagador no extrato e no portal."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {
-              "aliases": {
-                "type": "string",
-                "required": true,
-                "collection": true,
-                "description": "Apelidos ou nomes alternativos que ajudam o gerente a reconhecer o pagador.",
-                "title": "Outros nomes"
-              },
               "addresses": {
                 "type": "object",
                 "required": true,
                 "collection": true,
                 "of": "Address",
                 "title": "Endereços",
-                "description": "Endereço do pagador impresso no cabeçalho do extrato."
+                "description": "Endereços do pagador, exibidos no cabeçalho do extrato quando existirem."
               },
               "contacts": {
                 "type": "object",
@@ -217,11 +176,11 @@ export const financeiroEntityPagador = {
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Resumo dos canais de contato vinculados ao pagador, exibido no extrato e usado no convite ao portal.",
+                "description": "Resumo dos canais de contato vinculados ao pagador, mantido pela plataforma; usado para entrar em contato sobre títulos vencidos.",
                 "title": "Contatos"
               }
             },
-            "description": "Dados comuns do cadastro mestre que o extrato exibe."
+            "description": "Dados comuns da plataforma lidos pelo financeiro."
           },
           "person": {
             "type": "object",
@@ -230,11 +189,11 @@ export const financeiroEntityPagador = {
               "privacyConsent": {
                 "type": "object",
                 "of": "PrivacyConsent",
-                "description": "Consentimento LGPD do pagador, exigido para manter o cadastro ativo e o acesso ao portal.",
+                "description": "Consentimento LGPD do pagador para o tratamento dos dados de cobrança e acesso ao portal.",
                 "title": "Consentimento de privacidade"
               }
             },
-            "description": "Ramo de pessoa física do cadastro mestre."
+            "description": "Dados de pessoa física da plataforma."
           },
           "general": {
             "type": "object",
@@ -245,21 +204,8 @@ export const financeiroEntityPagador = {
           "financeiro": {
             "type": "object",
             "owner": "module",
-            "fields": {
-              "saldoEmAberto": {
-                "type": "money",
-                "derived": true,
-                "title": "Saldo em aberto",
-                "description": "Soma do que falta receber nos títulos ainda em aberto do pagador, descontados os recebimentos e considerados os estornos."
-              },
-              "quantidadeTitulosVencidos": {
-                "type": "integer",
-                "derived": true,
-                "title": "Títulos vencidos",
-                "description": "Quantidade de títulos do pagador em aberto e com vencimento anterior a hoje."
-              }
-            },
-            "description": "Namespace do módulo financeiro; nada específico do pagador foi pedido, os títulos e recebimentos ficam nas tabelas do módulo."
+            "fields": {},
+            "description": "Module namespace; the prompt asked for no data of this module about the record."
           }
         }
       }

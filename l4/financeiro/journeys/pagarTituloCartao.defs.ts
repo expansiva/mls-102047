@@ -8,7 +8,7 @@ export const pagarTituloCartaoJourney = {
   "business": {
     "actorRef": "pagador",
     "title": "Pagar título com cartão",
-    "goal": "Pagar pelo portal, com cartão, um título próprio em aberto.",
+    "goal": "Pagar pelo portal, com cartão, um título em aberto.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,33 +18,33 @@ export const pagarTituloCartaoJourney = {
         "kind": "locate",
         "entity": "TituloReceber",
         "title": "Escolher título em aberto",
-        "description": "O pagador localiza entre os próprios títulos um que esteja em aberto."
+        "description": "O pagador escolhe um dos próprios títulos em aberto."
       },
       {
-        "stepId": "conferirTituloAberto",
+        "stepId": "conferirValor",
         "kind": "inspect",
         "entity": "TituloReceber",
-        "title": "Conferir valor e vencimento",
-        "description": "O pagador confere valor em aberto, vencimento e origem do título."
+        "title": "Conferir valor a pagar",
+        "description": "O pagador confere o saldo em aberto, o vencimento e a origem do título."
       },
       {
-        "stepId": "pagarCartao",
+        "stepId": "pagarComCartao",
         "kind": "act",
         "entity": "Recebimento",
         "effect": "create",
         "title": "Pagar com cartão",
-        "description": "O pagador paga com cartão via Stripe; o recebimento é registrado e o saldo do título é baixado."
+        "description": "O pagador paga o saldo com cartão via Stripe; o recebimento é registrado e o título fica quitado."
       }
     ],
     "outcome": {
-      "statement": "O título foi pago com cartão e aparece quitado no portal.",
+      "statement": "O título é pago com cartão e aparece quitado no portal.",
       "evidence": [
-        "Recebimento com forma cartão registrado no título",
-        "Título com saldo zero e situação quitado"
+        "Recebimento por cartão listado no título",
+        "Título com situação quitado e saldo zero"
       ]
     }
   },
-  "businessHash": "sha256:d3f17c860e0d463a305ddc7fcc36e05a8447ec6d173d42bd75760f5fceb1f584"
+  "businessHash": "sha256:b35a0a5e33b7472bee857bce83976f01d02475110d37ee42f460486ec778a219"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type PagarTituloCartaoJourneyType = typeof pagarTituloCartaoJourney;

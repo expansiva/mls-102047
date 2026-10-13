@@ -8,7 +8,7 @@ export const emitirExtratoPagadorJourney = {
   "business": {
     "actorRef": "gerenteFinanceiro",
     "title": "Emitir extrato por pagador",
-    "goal": "Gerar o extrato de títulos e recebimentos de um pagador.",
+    "goal": "Emitir o extrato de títulos e recebimentos de um pagador.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,33 +17,33 @@ export const emitirExtratoPagadorJourney = {
         "stepId": "localizarPagador",
         "kind": "locate",
         "entity": "Pagador",
-        "title": "Buscar pagador",
-        "description": "O gerente localiza o pagador pelo nome ou documento."
+        "title": "Localizar pagador",
+        "description": "O gerente busca o pagador pelo nome ou documento."
       },
       {
         "stepId": "verExtrato",
         "kind": "inspect",
         "entity": "TituloReceber",
         "title": "Ver extrato do pagador",
-        "description": "O gerente vê os títulos do pagador no período, com recebimentos, estornos e saldo."
+        "description": "O gerente vê os títulos do pagador no período com seus recebimentos, estornos e saldo."
       },
       {
-        "stepId": "exportarExtrato",
+        "stepId": "emitirExtrato",
         "kind": "inspect",
         "entity": "TituloReceber",
         "title": "Emitir extrato",
-        "description": "O gerente imprime ou baixa o extrato do pagador."
+        "description": "O gerente exporta ou imprime o extrato do pagador."
       }
     ],
     "outcome": {
-      "statement": "O extrato do pagador foi emitido com seus títulos, recebimentos e saldo.",
+      "statement": "O extrato do pagador é emitido com títulos, recebimentos e saldo do período.",
       "evidence": [
-        "Extrato listando títulos, recebimentos e saldo do pagador no período",
-        "Arquivo do extrato disponível para impressão ou download"
+        "Extrato com títulos, recebimentos e saldo em aberto",
+        "Arquivo ou impressão do extrato gerado"
       ]
     }
   },
-  "businessHash": "sha256:770991887ef0ba6214074aeb3238606b50e9f5f0ed2d414111eb207b11bbb27e"
+  "businessHash": "sha256:85910986b617f410a20f5a45f07193ff32b370de327c4bbb7c78c022d0214f94"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type EmitirExtratoPagadorJourneyType = typeof emitirExtratoPagadorJourney;

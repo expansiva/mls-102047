@@ -8,7 +8,7 @@ export const estornarRecebimentoJourney = {
   "business": {
     "actorRef": "caixa",
     "title": "Estornar recebimento do dia",
-    "goal": "Desfazer um recebimento registrado no mesmo dia, devolvendo o saldo ao título.",
+    "goal": "Desfazer um recebimento registrado por engano no mesmo dia.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,15 +17,15 @@ export const estornarRecebimentoJourney = {
         "stepId": "localizarRecebimento",
         "kind": "locate",
         "entity": "Recebimento",
-        "title": "Buscar recebimento do dia",
-        "description": "O caixa localiza o recebimento registrado hoje pelo título ou pagador."
+        "title": "Localizar recebimento do dia",
+        "description": "O caixa busca entre os recebimentos registrados hoje o que precisa ser estornado."
       },
       {
         "stepId": "conferirRecebimento",
         "kind": "inspect",
         "entity": "Recebimento",
         "title": "Conferir recebimento",
-        "description": "O caixa confere valor, forma de pagamento, data e título do recebimento."
+        "description": "O caixa confere título, valor, forma de pagamento e data do recebimento."
       },
       {
         "stepId": "estornar",
@@ -34,18 +34,18 @@ export const estornarRecebimentoJourney = {
         "effect": "transition",
         "transitionRef": "estornar",
         "title": "Estornar recebimento",
-        "description": "O caixa estorna o recebimento, permitido apenas no mesmo dia; o valor volta ao saldo em aberto do título."
+        "description": "O caixa estorna o recebimento, permitido apenas no mesmo dia, e o saldo em aberto do título é restabelecido."
       }
     ],
     "outcome": {
-      "statement": "O recebimento está estornado e o título voltou a ter o saldo correspondente em aberto.",
+      "statement": "O recebimento fica estornado e o título volta a ter o saldo em aberto correspondente.",
       "evidence": [
         "Recebimento com situação estornado",
-        "Saldo em aberto do título acrescido do valor estornado"
+        "Saldo em aberto do título restabelecido"
       ]
     }
   },
-  "businessHash": "sha256:9dce3d6bfdd693a963b880919e9e8f42ca58200020fdb641dc93b88837d1d15a"
+  "businessHash": "sha256:d63137ac5acb49f148dce3b4e4a705d746dd58cad8e77422375652457288c9d3"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type EstornarRecebimentoJourneyType = typeof estornarRecebimentoJourney;

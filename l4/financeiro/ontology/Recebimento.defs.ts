@@ -7,7 +7,7 @@ export const financeiroEntityRecebimento = {
   "moduleName": "financeiro",
   "entityId": "Recebimento",
   "title": "Recebimento",
-  "description": "Pagamento total ou parcial de um título em dinheiro, pix ou cartão via Stripe, registrado pelo caixa ou pelo pagador no portal; pode ser estornado apenas no mesmo dia.",
+  "description": "Recebimento total ou parcial de um título, em dinheiro, pix ou cartão via Stripe, registrado pelo caixa ou pago pelo pagador no portal; pode ser estornado apenas no mesmo dia.",
   "displayField": "numero",
   "relationships": {
     "titulo": {
@@ -16,17 +16,17 @@ export const financeiroEntityRecebimento = {
       "via": "Recebimento.tituloId",
       "cardinality": "N:1",
       "title": "Título baixado",
-      "description": "Cada recebimento baixa o saldo de um título; um título pode ter vários recebimentos.",
+      "description": "Cada recebimento baixa, total ou parcialmente, um título a receber.",
       "mode": "fk",
       "required": true
     },
     "pagador": {
-      "relationshipId": "recebimentosPagador",
+      "relationshipId": "pagadorRecebimentos",
       "to": "Pagador",
       "via": "TituloReceber",
       "cardinality": "N:1",
       "title": "Pagador do recebimento",
-      "description": "Pagador alcançado pelo título deste recebimento; usado no portal e no extrato.",
+      "description": "O pagador obtido pelo título deste recebimento; usado no portal e no extrato.",
       "mode": "throughTable",
       "path": "Pagador <- TituloReceber.pagadorId <- Recebimento.tituloId",
       "derived": true,
@@ -34,27 +34,30 @@ export const financeiroEntityRecebimento = {
     }
   },
   "capabilities": {
-    "read.byId": "Abre um recebimento pelo id para o caixa conferir valor, forma, data e título, e para o pagador ver o detalhe no portal.",
-    "locate.byColumn": "Lista recebimentos por título, situação, forma de pagamento e data de recebimento, ordenados pela data; o caixa usa para achar os recebimentos de hoje.",
-    "listByForeignKey": "Lista os recebimentos de um título (ou de vários títulos de uma vez) para a tela do título, o portal do pagador e o extrato do gerente financeiro.",
-    "count": "Conta os recebimentos de um filtro para o cabeçalho das listas do caixa e do gerente financeiro.",
-    "create": "Registra um novo recebimento total ou parcial, pelo caixa no balcão ou pelo pagador ao pagar com cartão no portal.",
+    "read.byId": "Abre o recebimento pelo id para o caixa conferir título, valor, forma e data, e para o pagador ver o comprovante no portal.",
+    "locate.byColumn": "Lista recebimentos por data de recebimento, situação e forma de pagamento, como os registrados hoje que o caixa procura para estornar.",
+    "count": "Conta os recebimentos do filtro para o cabeçalho das listas do caixa e do gerente financeiro.",
+    "listByForeignKey": "Lista os recebimentos de um título pela coluna tituloId, e de vários títulos de uma vez para o extrato por pagador e o portal.",
+    "create": "Registra o recebimento total ou parcial pelo caixa (dinheiro, pix ou cartão) ou o pagamento com cartão feito pelo pagador no portal.",
     "transition": "Move o recebimento de registrado para estornado quando o caixa estorna no mesmo dia.",
-    "uniqueKey": "Impede dois recebimentos com o mesmo número ou com o mesmo pagamento Stripe, protegendo contra confirmação duplicada.",
-    "transaction": "Grava o recebimento (ou o estorno) e a atualização do saldo do título juntos, tudo ou nada.",
-    "read.mdmRecord": "Lê o registro mestre do pagador do título para mostrar o nome no recebimento e no extrato.",
-    "sequence.next": "Emite o número sequencial do recebimento na criação, citado como comprovante pelo caixa e pelo pagador.",
-    "comment": "Permite ao caixa e ao gerente financeiro deixar notas sobre um recebimento, como a conferência de um estorno.",
-    "financeiro.pagarCartaoStripe": "Cobra o cartão via Stripe, no caixa ou no portal do pagador, e só registra o recebimento quando o Stripe confirma o pagamento."
+    "transaction": "Grava o recebimento e atualiza o saldo do título juntos, tudo ou nada, no recebimento e no estorno.",
+    "uniqueKey": "Recusa número de recebimento repetido e a mesma confirmação do Stripe registrada duas vezes.",
+    "sequence.next": "Emite o número do recebimento na criação, pela chave financeiro.Recebimento.",
+    "read.mdmRecord": "Lê o nome do pagador do título para exibir no recebimento, no comprovante e no extrato.",
+    "comment": "Permite ao caixa e ao gerente financeiro deixar notas sobre um recebimento ou estorno.",
+    "statusHistory.read": "Mostra quando o recebimento foi estornado e por quem, para o gerente financeiro.",
+    "financeiro.pagarCartaoStripe": "Cobra o cartão via Stripe, no caixa ou no portal do pagador, e registra o recebimento ao confirmar o pagamento."
   },
   "rules": [
-    "valorRecebidoNaoExcedeSaldo",
-    "tituloQuitadoQuandoSaldoZero",
+    "recebimentoValorPositivo",
+    "recebimentoNaoExcedeSaldo",
+    "tituloQuitadoNaoRecebe",
     "estornoSomenteMesmoDia",
-    "estornoDevolveSaldoTitulo",
-    "cartaoSomenteViaStripe",
-    "pagadorPagaSomenteTituloProprioEmAberto",
-    "pagadorVeSomenteProprioRecebimento"
+    "estornoRestabeleceSaldo",
+    "portalSomenteCartao",
+    "pagadorVeSomenteProprios",
+    "numeroRecebimentoUnico",
+    "stripePagamentoUnico"
   ],
   "kind": "entity",
   "class": "event",
@@ -82,8 +85,9 @@ export const financeiroEntityRecebimento = {
         "required": true,
         "unique": true,
         "indexed": true,
+        "derived": true,
         "title": "Número do recebimento",
-        "description": "Número sequencial que o caixa e o pagador citam como comprovante do recebimento, emitido pela sequência da plataforma na criação.",
+        "description": "Número sequencial do recebimento emitido pelo sistema na criação (sequence.next), citado no comprovante e na busca do caixa.",
         "maxLength": 30
       },
       "tituloId": {
@@ -94,7 +98,7 @@ export const financeiroEntityRecebimento = {
           "TituloReceber"
         ],
         "title": "Título",
-        "description": "Título a receber cujo saldo este recebimento baixa; um título pode ter vários recebimentos parciais."
+        "description": "Título a receber que este recebimento baixa, total ou parcialmente."
       },
       "status": {
         "type": "enum",
@@ -111,14 +115,15 @@ export const financeiroEntityRecebimento = {
           }
         ],
         "title": "Situação",
-        "description": "Situação do recebimento: registrado e válido, ou estornado no mesmo dia."
+        "description": "Situação do recebimento: registrado ao ser criado, estornado quando o caixa o desfaz no mesmo dia."
       },
       "recebidoEm": {
         "type": "timestamp",
         "required": true,
         "indexed": true,
+        "derived": true,
         "title": "Recebido em",
-        "description": "Data e hora em que o recebimento foi registrado; usada para localizar os recebimentos de hoje e para permitir o estorno só no mesmo dia."
+        "description": "Momento em que o recebimento foi registrado pelo sistema; usado para listar os recebimentos de hoje, para o painel por período e para a regra de estorno no mesmo dia."
       },
       "formaPagamento": {
         "type": "enum",
@@ -139,27 +144,26 @@ export const financeiroEntityRecebimento = {
           }
         ],
         "title": "Forma de pagamento",
-        "description": "Meio pelo qual o valor foi recebido."
+        "description": "Meio usado para pagar: dinheiro ou pix no caixa, ou cartão via Stripe no caixa ou no portal."
       },
       "stripePaymentIntentId": {
         "type": "string",
-        "unique": true,
         "indexed": true,
-        "title": "Pagamento Stripe",
-        "description": "Identificador do pagamento no Stripe quando a forma é cartão; evita registrar duas vezes o mesmo pagamento confirmado.",
+        "title": "Identificador do pagamento no Stripe",
+        "description": "Identificador da cobrança de cartão no Stripe, preenchido apenas quando a forma é cartão; impede registrar duas vezes a mesma confirmação de pagamento.",
         "maxLength": 255
       },
       "details": {
         "type": "object",
         "required": true,
         "title": "Detalhes",
-        "description": "Dados do recebimento que apenas são exibidos.",
+        "description": "Dados do recebimento que só são exibidos.",
         "fields": {
           "valor": {
             "type": "money",
             "required": true,
             "title": "Valor recebido",
-            "description": "Valor efetivamente recebido, total ou parcial; não pode exceder o saldo em aberto do título no momento do registro.",
+            "description": "Valor efetivamente recebido; menor que o saldo em aberto do título caracteriza baixa parcial.",
             "min": 0.01
           },
           "canal": {
@@ -176,53 +180,32 @@ export const financeiroEntityRecebimento = {
               }
             ],
             "title": "Canal",
-            "description": "Onde o recebimento foi registrado: no caixa ou pelo próprio pagador no portal."
+            "description": "Onde o recebimento foi registrado: no caixa da organização ou pelo próprio pagador no portal."
           },
           "observacao": {
             "type": "text",
             "title": "Observação",
             "description": "Anotação livre do caixa sobre o recebimento.",
-            "maxLength": 500
-          },
-          "cartao": {
-            "type": "object",
-            "title": "Dados do cartão",
-            "description": "Resumo do pagamento com cartão devolvido pelo Stripe, quando a forma é cartão.",
-            "fields": {
-              "bandeira": {
-                "type": "string",
-                "title": "Bandeira",
-                "description": "Bandeira do cartão informada pelo Stripe.",
-                "maxLength": 30
-              },
-              "ultimosDigitos": {
-                "type": "string",
-                "title": "Últimos dígitos",
-                "description": "Quatro últimos dígitos do cartão, para conferência.",
-                "pattern": "^\\d{4}$"
-              },
-              "autorizadoEm": {
-                "type": "timestamp",
-                "title": "Autorizado em",
-                "description": "Momento em que o Stripe confirmou a cobrança."
-              }
-            }
+            "maxLength": 1000
           },
           "estorno": {
             "type": "object",
             "title": "Estorno",
-            "description": "Informações do estorno, preenchidas quando o caixa estorna o recebimento.",
+            "description": "Dados do estorno, preenchidos quando o caixa estorna o recebimento.",
             "fields": {
-              "estornadoEm": {
-                "type": "timestamp",
-                "title": "Estornado em",
-                "description": "Data e hora do estorno, sempre no mesmo dia do recebimento."
-              },
               "motivo": {
                 "type": "text",
+                "required": true,
                 "title": "Motivo do estorno",
-                "description": "Motivo informado pelo caixa ao estornar o recebimento.",
+                "description": "Por que o recebimento foi desfeito (por exemplo, registrado por engano).",
                 "maxLength": 500
+              },
+              "estornadoEm": {
+                "type": "timestamp",
+                "required": true,
+                "derived": true,
+                "title": "Estornado em",
+                "description": "Momento do estorno, gravado pelo sistema."
               }
             }
           },
@@ -230,7 +213,13 @@ export const financeiroEntityRecebimento = {
             "type": "boolean",
             "derived": true,
             "title": "Pode ser estornado",
-            "description": "Recebimento ainda registrado e recebido na data de hoje."
+            "description": "Recebimento ainda registrado e recebido hoje."
+          },
+          "baixaParcial": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Baixa parcial",
+            "description": "Valor recebido menor que o saldo em aberto do título no momento do recebimento."
           }
         }
       }
@@ -264,13 +253,13 @@ export const financeiroEntityRecebimento = {
       "by": [
         "caixa"
       ],
-      "description": "O caixa estorna um recebimento registrado hoje; o valor volta ao saldo em aberto do título.",
+      "description": "O caixa estorna um recebimento registrado no mesmo dia; o saldo em aberto do título é restabelecido.",
       "payload": [
         "details.estorno.motivo"
       ],
       "ruleRefs": [
         "estornoSomenteMesmoDia",
-        "estornoDevolveSaldoTitulo"
+        "estornoRestabeleceSaldo"
       ]
     }
   ]

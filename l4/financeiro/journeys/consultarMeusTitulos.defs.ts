@@ -8,7 +8,7 @@ export const consultarMeusTitulosJourney = {
   "business": {
     "actorRef": "pagador",
     "title": "Consultar meus títulos",
-    "goal": "Ver no portal os próprios títulos e recebimentos.",
+    "goal": "Ver os próprios títulos e recebimentos no portal.",
     "entry": {
       "mode": "coldStart"
     },
@@ -18,25 +18,25 @@ export const consultarMeusTitulosJourney = {
         "kind": "locate",
         "entity": "TituloReceber",
         "title": "Ver meus títulos",
-        "description": "O pagador vê no portal apenas os títulos em que ele é o pagador, em aberto e quitados."
+        "description": "O pagador vê no portal somente os próprios títulos, em aberto e quitados."
       },
       {
-        "stepId": "verRecebimentos",
+        "stepId": "verMeuTitulo",
         "kind": "inspect",
-        "entity": "Recebimento",
-        "title": "Ver meus recebimentos",
-        "description": "O pagador abre um título e vê os recebimentos registrados nele."
+        "entity": "TituloReceber",
+        "title": "Ver título e recebimentos",
+        "description": "O pagador vê valor, vencimento, origem, saldo e os recebimentos do título."
       }
     ],
     "outcome": {
-      "statement": "O pagador conhece a situação dos próprios títulos e pagamentos.",
+      "statement": "O pagador conhece a situação dos seus títulos e pagamentos.",
       "evidence": [
-        "Lista apenas com os títulos do pagador",
-        "Recebimentos de cada título exibidos com data, valor e forma"
+        "Lista apenas com títulos do próprio pagador",
+        "Recebimentos exibidos em cada título"
       ]
     }
   },
-  "businessHash": "sha256:8c02b8d4aba3a6c0ae462e896ddbc1faa437010d91b152f66f6b9f51ade0e0cb"
+  "businessHash": "sha256:5bed44ebdc9c4af14100aaa6c1526558054a44d06c329644d5666a498eba9d46"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ConsultarMeusTitulosJourneyType = typeof consultarMeusTitulosJourney;

@@ -529,65 +529,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-10-12T22:55:44.737Z"
     },
     {
-      "moduleName": "financeiro",
-      "actors": [
-        {
-          "actorId": "caixa",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gerenteFinanceiro",
-          "kind": "internal"
-        },
-        {
-          "actorId": "pagador",
-          "kind": "external"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "financeiro.Pagador",
-          "namespace": "financeiro"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Pagador",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "TituloReceber",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Recebimento",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "PainelRecebiveis",
-          "kind": "entity",
-          "class": "supporting"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "recebimentoRegistrado",
-          "on": "Recebimento.create"
-        },
-        {
-          "eventId": "recebimentoEstornado",
-          "on": "Recebimento.estornar"
-        }
-      ],
-      "updatedAt": "2026-10-12T22:58:55.610Z"
-    },
-    {
       "moduleName": "mensalidadesAcademia",
       "actors": [
         {
@@ -777,6 +718,65 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-13T00:47:30.635Z"
+    },
+    {
+      "moduleName": "financeiro",
+      "actors": [
+        {
+          "actorId": "caixa",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerenteFinanceiro",
+          "kind": "internal"
+        },
+        {
+          "actorId": "pagador",
+          "kind": "external"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "financeiro.Pagador",
+          "namespace": "financeiro"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Pagador",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "TituloReceber",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Recebimento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PainelRecebiveis",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "recebimentoRegistrado",
+          "on": "Recebimento.create"
+        },
+        {
+          "eventId": "recebimentoEstornado",
+          "on": "Recebimento.estornar"
+        }
+      ],
+      "updatedAt": "2026-10-13T00:51:10.149Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

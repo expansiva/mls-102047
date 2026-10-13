@@ -16,7 +16,7 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "create",
-      "description": "Quando a comanda é fechada no restaurante (Comanda.fecharComanda), cria um título a receber com origem 'comanda', valor igual ao total da comanda, vencimento na data do fechamento e o cliente da comanda como pagador (localiza ou cria o Pagador).",
+      "description": "Quando o restaurante fecha uma comanda (Comanda.fecharComanda), o financeiro cria um título a receber com origem 'comanda'. O cliente da comanda vira o pagador (criado se ainda não existir), o total da comanda vira o valor e a data de fechamento vira o vencimento.",
       "entityRefs": []
     },
     {
@@ -29,7 +29,7 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "create",
-      "description": "Quando uma mensalidade é gerada na academia (Mensalidade.create), cria um título a receber com origem 'mensalidade', valor e vencimento da mensalidade e o aluno como pagador (localiza ou cria o Pagador).",
+      "description": "Quando a academia gera uma mensalidade (Mensalidade.create), o financeiro cria um título a receber com origem 'mensalidade'. O aluno vira o pagador, e o valor e o vencimento da mensalidade passam para o título.",
       "entityRefs": []
     },
     {
@@ -42,11 +42,11 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "create",
-      "description": "Quando a ordem de serviço é finalizada/entregue na assistência técnica (OrdenServicio.finalizar), cria um título a receber com origem 'ordem de serviço', valor do orçamento aprovado, vencimento na entrega e o cliente da ordem como pagador (localiza ou cria o Pagador).",
+      "description": "Quando a assistência técnica entrega a ordem de serviço (OrdenServicio.finalizar), o financeiro cria um título a receber com origem 'ordem de serviço'. O cliente da ordem vira o pagador, o valor total da ordem vira o valor do título e a data de entrega vira o vencimento.",
       "entityRefs": []
     },
     {
-      "id": "pessoaAtualizada",
+      "id": "mdmUpdated",
       "kind": "event",
       "from": "organization",
       "event": "mdmUpdated",
@@ -54,7 +54,7 @@ export const financeiroIntegration = {
         "Pagador"
       ],
       "effect": "update",
-      "description": "Quando os dados cadastrais da pessoa são atualizados no catálogo da organização, atualiza nome e documento do Pagador correspondente.",
+      "description": "Quando o cadastro da pessoa muda no catálogo da organização, o financeiro atualiza o nome e o contato do pagador ligado a ela.",
       "entityRefs": []
     }
   ],
@@ -65,7 +65,7 @@ export const financeiroIntegration = {
       "to": "any",
       "event": "recebimentoRegistrado",
       "on": "Recebimento.create",
-      "description": "Publicado quando um recebimento (total ou parcial) é registrado para um título, para que o módulo de origem (comanda, mensalidade ou ordem de serviço) saiba que a cobrança foi paga.",
+      "description": "Publicado quando um recebimento é registrado (inteiro ou parcial) pelo caixa ou pelo portal do pagador. Serve para o módulo de origem (comanda, mensalidade ou ordem de serviço) saber que a cobrança foi paga.",
       "entityRefs": [
         "Recebimento",
         "TituloReceber",
@@ -78,21 +78,20 @@ export const financeiroIntegration = {
       "to": "any",
       "event": "recebimentoEstornado",
       "on": "Recebimento.estornar",
-      "description": "Publicado quando um recebimento é estornado no mesmo dia, para que o módulo de origem volte a considerar a cobrança em aberto.",
+      "description": "Publicado quando um recebimento é estornado no mesmo dia. Serve para o módulo de origem saber que a cobrança voltou a ficar em aberto.",
       "entityRefs": [
         "Recebimento",
-        "TituloReceber",
-        "Pagador"
+        "TituloReceber"
       ]
     }
   ],
   "plugins": [
     {
       "pluginId": "stripe",
-      "description": "Processa o pagamento com cartão via Stripe, tanto no caixa ao receber um título quanto no portal quando o pagador paga um título em aberto. Os dados do cartão ficam no Stripe.",
+      "description": "Faz o pagamento com cartão pelo Stripe, tanto no caixa quanto no portal do pagador. Os dados do cartão ficam só no Stripe; o financeiro guarda apenas o resultado do pagamento no recebimento.",
       "usedBy": [
         "receberTitulo.registrarRecebimento",
-        "pagarTituloCartao.pagarCartao"
+        "pagarTituloCartao.pagarComCartao"
       ]
     }
   ]

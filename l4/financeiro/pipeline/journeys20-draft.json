@@ -6,7 +6,7 @@
       "business": {
         "actorRef": "caixa",
         "title": "Receber título no caixa",
-        "goal": "Registrar o recebimento total ou parcial de um título a receber em dinheiro, pix ou cartão.",
+        "goal": "Registrar o recebimento total ou parcial de um título a receber em dinheiro, pix ou cartão via Stripe.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -15,8 +15,8 @@
             "stepId": "localizarTitulo",
             "kind": "locate",
             "entity": "TituloReceber",
-            "title": "Buscar título a receber",
-            "description": "O caixa localiza o título em aberto pelo pagador, origem ou vencimento."
+            "title": "Localizar título em aberto",
+            "description": "O caixa busca o título em aberto pelo pagador, pela origem ou pelo vencimento."
           },
           {
             "stepId": "conferirTitulo",
@@ -31,19 +31,19 @@
             "entity": "Recebimento",
             "effect": "create",
             "title": "Registrar recebimento",
-            "description": "O caixa informa a forma de pagamento (dinheiro, pix ou cartão via Stripe) e o valor recebido, podendo ser parcial; o saldo do título é atualizado e ele fica quitado quando o saldo chega a zero."
+            "description": "O caixa informa o valor recebido e a forma de pagamento (dinheiro, pix ou cartão via Stripe); um valor menor que o saldo gera baixa parcial e o saldo do título é atualizado, ficando quitado quando zerar."
           }
         ],
         "outcome": {
-          "statement": "O recebimento está registrado e o saldo do título reflete a baixa total ou parcial.",
+          "statement": "O recebimento fica registrado e o título fica quitado ou com saldo parcial reduzido.",
           "evidence": [
-            "Recebimento com forma de pagamento, valor e data registrado no título",
-            "Saldo em aberto do título reduzido pelo valor recebido",
-            "Título quitado quando o saldo chega a zero"
+            "Recebimento listado no título com valor, forma de pagamento e data",
+            "Saldo em aberto do título atualizado",
+            "Título marcado como quitado quando o saldo chega a zero"
           ]
         }
       },
-      "businessHash": "sha256:313bb8904734b2e6ff6e6272677c788309c1f6c9bf6e871f12cd9ce145afbaa7"
+      "businessHash": "sha256:179d52634791df91a650935868c066fbdb94e4bcec19e5dc490cacd66893c350"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -51,7 +51,7 @@
       "business": {
         "actorRef": "caixa",
         "title": "Estornar recebimento do dia",
-        "goal": "Desfazer um recebimento registrado no mesmo dia, devolvendo o saldo ao título.",
+        "goal": "Desfazer um recebimento registrado por engano no mesmo dia.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -60,15 +60,15 @@
             "stepId": "localizarRecebimento",
             "kind": "locate",
             "entity": "Recebimento",
-            "title": "Buscar recebimento do dia",
-            "description": "O caixa localiza o recebimento registrado hoje pelo título ou pagador."
+            "title": "Localizar recebimento do dia",
+            "description": "O caixa busca entre os recebimentos registrados hoje o que precisa ser estornado."
           },
           {
             "stepId": "conferirRecebimento",
             "kind": "inspect",
             "entity": "Recebimento",
             "title": "Conferir recebimento",
-            "description": "O caixa confere valor, forma de pagamento, data e título do recebimento."
+            "description": "O caixa confere título, valor, forma de pagamento e data do recebimento."
           },
           {
             "stepId": "estornar",
@@ -77,61 +77,69 @@
             "effect": "transition",
             "transitionRef": "estornar",
             "title": "Estornar recebimento",
-            "description": "O caixa estorna o recebimento, permitido apenas no mesmo dia; o valor volta ao saldo em aberto do título."
+            "description": "O caixa estorna o recebimento, permitido apenas no mesmo dia, e o saldo em aberto do título é restabelecido."
           }
         ],
         "outcome": {
-          "statement": "O recebimento está estornado e o título voltou a ter o saldo correspondente em aberto.",
+          "statement": "O recebimento fica estornado e o título volta a ter o saldo em aberto correspondente.",
           "evidence": [
             "Recebimento com situação estornado",
-            "Saldo em aberto do título acrescido do valor estornado"
+            "Saldo em aberto do título restabelecido"
           ]
         }
       },
-      "businessHash": "sha256:9dce3d6bfdd693a963b880919e9e8f42ca58200020fdb641dc93b88837d1d15a"
+      "businessHash": "sha256:d63137ac5acb49f148dce3b4e4a705d746dd58cad8e77422375652457288c9d3"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
       "journeyId": "acompanharRecebiveis",
       "business": {
         "actorRef": "gerenteFinanceiro",
-        "title": "Acompanhar painel de recebíveis",
-        "goal": "Analisar os recebíveis por período e por origem e identificar os títulos vencidos.",
+        "title": "Acompanhar recebíveis e vencidos",
+        "goal": "Ver os recebíveis da organização por período e por origem e identificar os títulos vencidos e não quitados.",
         "entry": {
           "mode": "coldStart"
         },
         "steps": [
           {
+            "stepId": "filtrarRecebiveis",
+            "kind": "locate",
+            "entity": "TituloReceber",
+            "title": "Escolher período e origem",
+            "description": "O gerente escolhe o período e, se quiser, a origem (restaurante, academia, assistência técnica)."
+          },
+          {
             "stepId": "verPainel",
             "kind": "inspect",
             "entity": "TituloReceber",
             "title": "Ver painel de recebíveis",
-            "description": "O gerente vê os totais a receber e recebidos por período e por origem (restaurante, academia, assistência técnica)."
+            "description": "O gerente vê os totais a receber, recebidos e em aberto agrupados por período e por origem."
           },
           {
-            "stepId": "localizarVencidos",
+            "stepId": "listarVencidos",
             "kind": "locate",
             "entity": "TituloReceber",
             "title": "Listar títulos vencidos",
-            "description": "O gerente filtra os títulos com vencimento passado e saldo em aberto."
+            "description": "O gerente lista os títulos com vencimento passado e saldo em aberto, podendo filtrar por origem ou pagador."
           },
           {
-            "stepId": "detalharVencido",
+            "stepId": "verTituloVencido",
             "kind": "inspect",
             "entity": "TituloReceber",
-            "title": "Detalhar título vencido",
-            "description": "O gerente abre um título vencido para ver pagador, valor, saldo, origem e recebimentos já feitos."
+            "title": "Ver detalhe do título",
+            "description": "O gerente vê pagador, valor, saldo, dias de atraso, origem e recebimentos parciais do título vencido."
           }
         ],
         "outcome": {
-          "statement": "O gerente conhece a posição dos recebíveis por período e origem e quais títulos estão vencidos.",
+          "statement": "O gerente conhece a posição dos recebíveis no período e por origem e sabe quais títulos estão vencidos, de quem e de qual origem.",
           "evidence": [
-            "Totais por período e por origem exibidos no painel",
-            "Lista de títulos vencidos com saldo em aberto"
+            "Totais a receber, recebidos e em aberto exibidos por origem no período escolhido",
+            "Lista de títulos vencidos com saldo e dias de atraso",
+            "Detalhe do título vencido com recebimentos parciais"
           ]
         }
       },
-      "businessHash": "sha256:15dd7c4c205658291f338f288cf0da571987f49528bf275b94b86598f4a1af64"
+      "businessHash": "sha256:f70fc05b65aa8ea226f509bb7614773cb77aaba7b32355eb5e6a4431430e7955"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -139,7 +147,7 @@
       "business": {
         "actorRef": "gerenteFinanceiro",
         "title": "Emitir extrato por pagador",
-        "goal": "Gerar o extrato de títulos e recebimentos de um pagador.",
+        "goal": "Emitir o extrato de títulos e recebimentos de um pagador.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -148,33 +156,33 @@
             "stepId": "localizarPagador",
             "kind": "locate",
             "entity": "Pagador",
-            "title": "Buscar pagador",
-            "description": "O gerente localiza o pagador pelo nome ou documento."
+            "title": "Localizar pagador",
+            "description": "O gerente busca o pagador pelo nome ou documento."
           },
           {
             "stepId": "verExtrato",
             "kind": "inspect",
             "entity": "TituloReceber",
             "title": "Ver extrato do pagador",
-            "description": "O gerente vê os títulos do pagador no período, com recebimentos, estornos e saldo."
+            "description": "O gerente vê os títulos do pagador no período com seus recebimentos, estornos e saldo."
           },
           {
-            "stepId": "exportarExtrato",
+            "stepId": "emitirExtrato",
             "kind": "inspect",
             "entity": "TituloReceber",
             "title": "Emitir extrato",
-            "description": "O gerente imprime ou baixa o extrato do pagador."
+            "description": "O gerente exporta ou imprime o extrato do pagador."
           }
         ],
         "outcome": {
-          "statement": "O extrato do pagador foi emitido com seus títulos, recebimentos e saldo.",
+          "statement": "O extrato do pagador é emitido com títulos, recebimentos e saldo do período.",
           "evidence": [
-            "Extrato listando títulos, recebimentos e saldo do pagador no período",
-            "Arquivo do extrato disponível para impressão ou download"
+            "Extrato com títulos, recebimentos e saldo em aberto",
+            "Arquivo ou impressão do extrato gerado"
           ]
         }
       },
-      "businessHash": "sha256:770991887ef0ba6214074aeb3238606b50e9f5f0ed2d414111eb207b11bbb27e"
+      "businessHash": "sha256:85910986b617f410a20f5a45f07193ff32b370de327c4bbb7c78c022d0214f94"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -182,7 +190,7 @@
       "business": {
         "actorRef": "pagador",
         "title": "Consultar meus títulos",
-        "goal": "Ver no portal os próprios títulos e recebimentos.",
+        "goal": "Ver os próprios títulos e recebimentos no portal.",
         "entry": {
           "mode": "coldStart"
         },
@@ -192,25 +200,25 @@
             "kind": "locate",
             "entity": "TituloReceber",
             "title": "Ver meus títulos",
-            "description": "O pagador vê no portal apenas os títulos em que ele é o pagador, em aberto e quitados."
+            "description": "O pagador vê no portal somente os próprios títulos, em aberto e quitados."
           },
           {
-            "stepId": "verRecebimentos",
+            "stepId": "verMeuTitulo",
             "kind": "inspect",
-            "entity": "Recebimento",
-            "title": "Ver meus recebimentos",
-            "description": "O pagador abre um título e vê os recebimentos registrados nele."
+            "entity": "TituloReceber",
+            "title": "Ver título e recebimentos",
+            "description": "O pagador vê valor, vencimento, origem, saldo e os recebimentos do título."
           }
         ],
         "outcome": {
-          "statement": "O pagador conhece a situação dos próprios títulos e pagamentos.",
+          "statement": "O pagador conhece a situação dos seus títulos e pagamentos.",
           "evidence": [
-            "Lista apenas com os títulos do pagador",
-            "Recebimentos de cada título exibidos com data, valor e forma"
+            "Lista apenas com títulos do próprio pagador",
+            "Recebimentos exibidos em cada título"
           ]
         }
       },
-      "businessHash": "sha256:8c02b8d4aba3a6c0ae462e896ddbc1faa437010d91b152f66f6b9f51ade0e0cb"
+      "businessHash": "sha256:5bed44ebdc9c4af14100aaa6c1526558054a44d06c329644d5666a498eba9d46"
     },
     {
       "schemaVersion": "2026-09-10-ns5-journey-v1",
@@ -218,7 +226,7 @@
       "business": {
         "actorRef": "pagador",
         "title": "Pagar título com cartão",
-        "goal": "Pagar pelo portal, com cartão, um título próprio em aberto.",
+        "goal": "Pagar pelo portal, com cartão, um título em aberto.",
         "entry": {
           "mode": "contextOrLookup"
         },
@@ -228,33 +236,33 @@
             "kind": "locate",
             "entity": "TituloReceber",
             "title": "Escolher título em aberto",
-            "description": "O pagador localiza entre os próprios títulos um que esteja em aberto."
+            "description": "O pagador escolhe um dos próprios títulos em aberto."
           },
           {
-            "stepId": "conferirTituloAberto",
+            "stepId": "conferirValor",
             "kind": "inspect",
             "entity": "TituloReceber",
-            "title": "Conferir valor e vencimento",
-            "description": "O pagador confere valor em aberto, vencimento e origem do título."
+            "title": "Conferir valor a pagar",
+            "description": "O pagador confere o saldo em aberto, o vencimento e a origem do título."
           },
           {
-            "stepId": "pagarCartao",
+            "stepId": "pagarComCartao",
             "kind": "act",
             "entity": "Recebimento",
             "effect": "create",
             "title": "Pagar com cartão",
-            "description": "O pagador paga com cartão via Stripe; o recebimento é registrado e o saldo do título é baixado."
+            "description": "O pagador paga o saldo com cartão via Stripe; o recebimento é registrado e o título fica quitado."
           }
         ],
         "outcome": {
-          "statement": "O título foi pago com cartão e aparece quitado no portal.",
+          "statement": "O título é pago com cartão e aparece quitado no portal.",
           "evidence": [
-            "Recebimento com forma cartão registrado no título",
-            "Título com saldo zero e situação quitado"
+            "Recebimento por cartão listado no título",
+            "Título com situação quitado e saldo zero"
           ]
         }
       },
-      "businessHash": "sha256:d3f17c860e0d463a305ddc7fcc36e05a8447ec6d173d42bd75760f5fceb1f584"
+      "businessHash": "sha256:b35a0a5e33b7472bee857bce83976f01d02475110d37ee42f460486ec778a219"
     }
   ],
   "systemDecisions": [],
