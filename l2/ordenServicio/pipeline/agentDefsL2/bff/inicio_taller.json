@@ -1,0 +1,453 @@
+{
+  "types": [
+    {
+      "name": "ClienteIdentificacion",
+      "description": "Identificación mínima del cliente visible para recepcionista y técnico.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Cliente.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ClienteDetalle",
+      "description": "Detalle del cliente anidado como en la ontología.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "ClienteIdentificacion"
+        }
+      ]
+    },
+    {
+      "name": "ClienteResumen",
+      "description": "Cliente dueño de la orden, reducido a su nombre.",
+      "fields": [
+        {
+          "name": "details",
+          "type": "ClienteDetalle"
+        }
+      ]
+    },
+    {
+      "name": "AparatoResumen",
+      "description": "Datos del aparato que identifican la orden en la cola.",
+      "fields": [
+        {
+          "name": "details.aparato.tipo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.details.aparato.tipo"
+            ]
+          }
+        },
+        {
+          "name": "details.aparato.marca",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.details.aparato.marca"
+            ]
+          }
+        },
+        {
+          "name": "details.aparato.modelo",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.details.aparato.modelo"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OrdenPendienteDetalle",
+      "description": "Detalle de la orden pendiente: aparato y defecto informado.",
+      "fields": [
+        {
+          "name": "aparato",
+          "type": "AparatoResumen"
+        },
+        {
+          "name": "details.defectoInformado",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.details.defectoInformado"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OrdenPendiente",
+      "description": "Fila de la cola de trabajo: orden que espera el paso del usuario.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.id"
+            ]
+          }
+        },
+        {
+          "name": "numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.numero"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'abierta' | 'presupuestada' | 'aprobada' | 'rechazada' | 'lista' | 'finalizada'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.status"
+            ]
+          }
+        },
+        {
+          "name": "fechaApertura",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.fechaApertura"
+            ]
+          }
+        },
+        {
+          "name": "clienteId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.clienteId"
+            ]
+          }
+        },
+        {
+          "name": "cliente",
+          "type": "ClienteResumen"
+        },
+        {
+          "name": "details",
+          "type": "OrdenPendienteDetalle"
+        }
+      ]
+    },
+    {
+      "name": "OrdenDestacadaDetalle",
+      "description": "Valores calculados por el servidor para la orden destacada.",
+      "fields": [
+        {
+          "name": "details.disponibleParaRetiro",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.details.disponibleParaRetiro"
+            ]
+          }
+        },
+        {
+          "name": "details.costoInternoPiezas",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.details.costoInternoPiezas"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OrdenDestacada",
+      "description": "Orden destacada con su disponibilidad para retiro y costo interno de piezas.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.id"
+            ]
+          }
+        },
+        {
+          "name": "numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.numero"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'abierta' | 'presupuestada' | 'aprobada' | 'rechazada' | 'lista' | 'finalizada'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.status"
+            ]
+          }
+        },
+        {
+          "name": "clienteId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "OrdenServicio.clienteId"
+            ]
+          }
+        },
+        {
+          "name": "cliente",
+          "type": "ClienteResumen"
+        },
+        {
+          "name": "details",
+          "type": "OrdenDestacadaDetalle"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "qryOrdenesPendientes",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "etapa",
+          "type": "'abierta' | 'aprobada' | 'lista'",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "ordenes",
+          "type": "OrdenPendiente[]",
+          "paginated": true
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carga la cola de trabajo del inicio del taller: las órdenes que esperan el paso del usuario actual, paginadas para recorrerlas con scroll.",
+        "input": "etapa: filtro opcional de la etapa dentro de las que corresponden al usuario (abierta, aprobada o lista). page y pageSize: página solicitada y su tamaño.",
+        "processing": "Filtra OrdenServicio por estado según el actor de la sesión: técnico ve 'abierta' (por diagnosticar y presupuestar) y 'aprobada' (por reparar); recepcionista ve 'lista' (por entregar). Si llega etapa, la restringe a ese estado dentro de los permitidos. Ordena por fechaApertura ascendente (las más antiguas primero). Une cada orden con el nombre de su Cliente vía clienteId. Solo devuelve campos permitidos por los grants (sin anotaciones ni costos internos).",
+        "output": "Página { items, page, pageSize, hasMore } de órdenes con id, número, estado, fecha de apertura, cliente, aparato (tipo, marca, modelo) y defecto informado; el id permite navegar a ordenes_servicio para avanzarla."
+      }
+    },
+    {
+      "id": "qryDestacadosTaller",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "cantidadDisponiblesRetiro",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "OrdenServicio.details.disponibleParaRetiro",
+              "OrdenServicio.status"
+            ]
+          }
+        },
+        {
+          "name": "ordenes",
+          "type": "OrdenDestacada[]"
+        }
+      ],
+      "rules": [
+        "disponibleParaRetiroCalculado",
+        "costoInternoPiezasOrden",
+        "costoTotalPieza"
+      ],
+      "jsdoc": {
+        "purpose": "Carga los destacados del taller: el indicador de aparatos disponibles para retiro y una lista breve de órdenes con su disponibilidad y su costo interno de piezas.",
+        "input": "Sin parámetros; el alcance lo da el usuario de la sesión.",
+        "processing": "Calcula disponibleParaRetiro (regla disponibleParaRetiroCalculado: estado lista o rechazada) y cuenta esas órdenes en el servidor para el indicador. Selecciona las órdenes no finalizadas que están disponibles para retiro o tienen piezas registradas, limitadas a una lista breve ordenada por fechaApertura. Para cada una calcula costoInternoPiezas como la suma de los costos totales de sus piezas (costoInternoPiezasOrden), donde cada costo total es cantidad × costo unitario (costoTotalPieza); ambos son derivados, nunca se graban. El costo interno solo se incluye para el técnico: el grant del recepcionista lo deniega, así que para él se omite el campo.",
+        "output": "cantidadDisponiblesRetiro como número ya calculado, y la lista de órdenes con número, estado, cliente, disponibilidad para retiro y costo interno (cuando el actor puede verlo), para preparar la entrega y comparar con el presupuesto."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "ordenesPendientes",
+        "reads": "qryOrdenesPendientes.ordenes"
+      },
+      {
+        "organism": "retiroYcostos",
+        "reads": "qryDestacadosTaller.cantidadDisponiblesRetiro"
+      },
+      {
+        "organism": "retiroYcostos",
+        "reads": "qryDestacadosTaller.ordenes"
+      }
+    ],
+    "commands": [],
+    "selections": [],
+    "journeys": [
+      {
+        "step": "abrirOrdenServicio/buscarCliente",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "abrirOrdenServicio/registrarCliente",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "abrirOrdenServicio/crearOrden",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "diagnosticarYpresupuestar/buscarOrdenAbierta",
+        "organisms": [
+          "ordenesPendientes"
+        ],
+        "endpoints": [
+          "qryOrdenesPendientes"
+        ]
+      },
+      {
+        "step": "diagnosticarYpresupuestar/revisarOrden",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "diagnosticarYpresupuestar/registrarDiagnostico",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "diagnosticarYpresupuestar/registrarPiezas",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "diagnosticarYpresupuestar/emitirPresupuesto",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "entregarYfinalizar/buscarOrdenLista",
+        "organisms": [
+          "ordenesPendientes",
+          "retiroYcostos"
+        ],
+        "endpoints": [
+          "qryOrdenesPendientes",
+          "qryDestacadosTaller"
+        ]
+      },
+      {
+        "step": "entregarYfinalizar/revisarOrdenLista",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "entregarYfinalizar/finalizarOrden",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "realizarReparacion/buscarOrdenAprobada",
+        "organisms": [
+          "ordenesPendientes"
+        ],
+        "endpoints": [
+          "qryOrdenesPendientes"
+        ]
+      },
+      {
+        "step": "realizarReparacion/revisarOrdenAprobada",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "realizarReparacion/registrarTrabajo",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      },
+      {
+        "step": "realizarReparacion/marcarLista",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "ordenes_servicio"
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "qryOrdenesPendientes",
+        "state": "qryOrdenesPendientes.ordenes",
+        "mode": "append"
+      }
+    ]
+  }
+}

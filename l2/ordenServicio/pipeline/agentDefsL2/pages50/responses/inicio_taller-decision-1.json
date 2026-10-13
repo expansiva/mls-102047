@@ -1,0 +1,262 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 127649,
+  "receivedAt": "2026-10-13T13:08:09.516Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "operationsQueue"
+            },
+            "intent": "Punto de partida del taller: muestra al recepcionista y al técnico las órdenes que esperan su paso en el ciclo (abrir, diagnosticar y presupuestar, reparar, entregar) y destaca los aparatos disponibles para retiro y el costo interno de piezas por orden, para que cada uno sepa qué hacer ahora.",
+            "sections": [
+              {
+                "id": "colaTrabajo",
+                "priority": "primary",
+                "purpose": "Lista de órdenes pendientes según la etapa que le toca al usuario, con número, cliente, aparato, defecto y fecha de apertura, para abrir la orden y avanzarla.",
+                "organisms": [
+                  "ordenesPendientes"
+                ]
+              },
+              {
+                "id": "destacadosTaller",
+                "priority": "secondary",
+                "purpose": "Resumen de aparatos disponibles para retiro y costo interno de piezas por orden, como apoyo a la entrega y al presupuesto.",
+                "organisms": [
+                  "retiroYcostos"
+                ]
+              }
+            ],
+            "organisms": {
+              "ordenesPendientes": {
+                "kind": "inbox",
+                "text": "Órdenes que esperan tu paso: abiertas por analizar y presupuestar, aprobadas por reparar y listas por entregar, con su número, cliente, aparato, defecto informado y fecha de apertura. Desde aquí abres una orden nueva o vas a la orden para avanzarla.",
+                "intents": [
+                  {
+                    "id": "abrirNuevaOrden",
+                    "kind": "navigate",
+                    "to": "ordenes_servicio"
+                  },
+                  {
+                    "id": "atenderOrden",
+                    "kind": "navigate",
+                    "to": "ordenes_servicio"
+                  }
+                ]
+              },
+              "retiroYcostos": {
+                "kind": "highlights",
+                "text": "Órdenes con aparato disponible para retiro y costo interno de las piezas registradas en cada orden, para preparar la entrega y comparar con el presupuesto.",
+                "intents": [
+                  {
+                    "id": "verOrdenDestacada",
+                    "kind": "navigate",
+                    "to": "ordenes_servicio"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "ordenesPendientes": [
+                {
+                  "role": "Cola de órdenes pendientes",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                },
+                {
+                  "role": "Filtrar por etapa del ciclo",
+                  "preferred": "groupnavigatesection--ml-navigate-pills",
+                  "alternative": "groupnavigatesection--ml-tabs"
+                },
+                {
+                  "role": "Buscar orden por número o cliente",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": ""
+                },
+                {
+                  "role": "Abrir orden nueva",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                }
+              ],
+              "retiroYcostos": [
+                {
+                  "role": "Cantidad de aparatos para retiro",
+                  "preferred": "groupviewmetric--ml-metric-card",
+                  "alternative": "groupviewmetric--ml-metric-big-number"
+                },
+                {
+                  "role": "Costo interno de piezas por orden",
+                  "preferred": "groupviewtable--ml-data-table-minimal",
+                  "alternative": "groupviewchart--ml-bar-chart"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "ordenesPendientes": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.fechaApertura",
+                  "OrdenServicio.clienteId",
+                  "Cliente.details.identification.name",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.aparato.marca",
+                  "OrdenServicio.details.aparato.modelo",
+                  "OrdenServicio.details.defectoInformado"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "retiroYcostos": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.clienteId",
+                  "Cliente.details.identification.name",
+                  "OrdenServicio.details.disponibleParaRetiro",
+                  "OrdenServicio.details.costoInternoPiezas"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "operationsQueue"
+            },
+            "intent": "Inicio del taller en pantalla estrecha: primero las órdenes que esperan tu paso, en una lista fluida fácil de recorrer con el pulgar, y luego los aparatos para retiro y el costo interno de piezas por orden.",
+            "sections": [
+              {
+                "id": "colaTrabajo",
+                "priority": "primary",
+                "purpose": "Órdenes pendientes apiladas con número, cliente, aparato y etapa, para tocar una y avanzarla en la página de órdenes.",
+                "organisms": [
+                  "ordenesPendientes"
+                ]
+              },
+              {
+                "id": "destacadosTaller",
+                "priority": "secondary",
+                "purpose": "Indicador de aparatos disponibles para retiro y lista breve del costo interno de piezas por orden.",
+                "organisms": [
+                  "retiroYcostos"
+                ]
+              }
+            ],
+            "organisms": {
+              "ordenesPendientes": {
+                "kind": "inbox",
+                "text": "Órdenes que esperan tu paso: por analizar y presupuestar, por reparar o por entregar, con número, cliente, aparato y defecto informado. Toca una para avanzarla o abre una orden nueva.",
+                "intents": [
+                  {
+                    "id": "abrirNuevaOrden",
+                    "kind": "navigate",
+                    "to": "ordenes_servicio"
+                  },
+                  {
+                    "id": "atenderOrden",
+                    "kind": "navigate",
+                    "to": "ordenes_servicio"
+                  }
+                ]
+              },
+              "retiroYcostos": {
+                "kind": "highlights",
+                "text": "Aparatos disponibles para retiro y costo interno de piezas de cada orden, en formato compacto.",
+                "intents": [
+                  {
+                    "id": "verOrdenDestacada",
+                    "kind": "navigate",
+                    "to": "ordenes_servicio"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "ordenesPendientes": [
+                {
+                  "role": "Cola de órdenes pendientes",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-table"
+                },
+                {
+                  "role": "Filtrar por etapa del ciclo",
+                  "preferred": "groupnavigatesection--ml-navigate-pills",
+                  "alternative": ""
+                },
+                {
+                  "role": "Abrir orden nueva",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-icon-button"
+                }
+              ],
+              "retiroYcostos": [
+                {
+                  "role": "Cantidad de aparatos para retiro",
+                  "preferred": "groupviewmetric--ml-metric-big-number",
+                  "alternative": "groupviewmetric--ml-metric-card"
+                },
+                {
+                  "role": "Costo interno de piezas por orden",
+                  "preferred": "groupviewtable--ml-responsive-table",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "ordenesPendientes": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.fechaApertura",
+                  "OrdenServicio.clienteId",
+                  "Cliente.details.identification.name",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.aparato.marca",
+                  "OrdenServicio.details.defectoInformado"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "retiroYcostos": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.clienteId",
+                  "Cliente.details.identification.name",
+                  "OrdenServicio.details.disponibleParaRetiro",
+                  "OrdenServicio.details.costoInternoPiezas"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        },
+        "categoryReason": "La página es una cola de trabajo: muestra las órdenes de servicio según la etapa en que esperan al recepcionista o al técnico (abierta, aprobada, lista) y lleva a cada una a la página de órdenes, donde se hacen todas las escrituras del ciclo. Los destacados (retiro y costo interno) apoyan la cola, no son un tablero de monitoreo."
+      }
+    },
+    "status": "completed",
+    "stepId": 15,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

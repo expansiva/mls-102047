@@ -1,0 +1,523 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 139691,
+  "receivedAt": "2026-10-13T13:09:07.091Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "La tarea central del cliente en esta página es revisar el presupuesto de su propia orden y decidir si lo aprueba o lo rechaza; las únicas escrituras son esas dos decisiones. La lista de órdenes, los aparatos para retiro y el historial sirven de contexto para esa decisión. Por eso la categoría compartida es approvalWorkflow.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "approvalWorkflow"
+            },
+            "intent": "Mostrar al cliente sus propias órdenes de servicio, destacar los presupuestos que esperan su respuesta y permitirle aprobarlos o rechazarlos después de ver el estado, el diagnóstico y el valor, sin información interna del taller.",
+            "sections": [
+              {
+                "id": "pendientes",
+                "priority": "primary",
+                "purpose": "Lo que requiere tu atención ahora: presupuestos por responder y aparatos que ya puedes retirar.",
+                "organisms": [
+                  "pendingBudgets",
+                  "readyForPickup"
+                ]
+              },
+              {
+                "id": "revision",
+                "priority": "main",
+                "purpose": "La orden elegida con su estado, diagnóstico y valor del presupuesto, junto a la decisión de aprobar o rechazar.",
+                "organisms": [
+                  "orderDetail",
+                  "budgetDecision"
+                ]
+              },
+              {
+                "id": "misOrdenes",
+                "priority": "main",
+                "purpose": "Todas tus órdenes de servicio con su estado para consultar cualquiera de ellas.",
+                "organisms": [
+                  "myOrders"
+                ]
+              },
+              {
+                "id": "historial",
+                "priority": "secondary",
+                "purpose": "El recorrido de la orden elegida, desde la recepción hasta la entrega.",
+                "organisms": [
+                  "orderHistory"
+                ]
+              }
+            ],
+            "organisms": {
+              "pendingBudgets": {
+                "kind": "inbox",
+                "text": "Presupuestos que esperan tu aprobación o rechazo, con el número de orden, el aparato y el valor propuesto.",
+                "intents": []
+              },
+              "readyForPickup": {
+                "kind": "highlights",
+                "text": "Tus aparatos disponibles para retiro, porque la reparación terminó o porque rechazaste el presupuesto.",
+                "intents": []
+              },
+              "myOrders": {
+                "kind": "list",
+                "text": "Tus órdenes de servicio con número, aparato, fecha de apertura y estado.",
+                "intents": []
+              },
+              "orderDetail": {
+                "kind": "detail",
+                "text": "Estado de la orden, aparato, defecto informado, diagnóstico del técnico y valor del presupuesto, sin costos internos ni anotaciones del técnico.",
+                "intents": []
+              },
+              "budgetDecision": {
+                "kind": "actions",
+                "text": "Aprueba el presupuesto para que el técnico repare el aparato, o recházalo indicando opcionalmente el motivo; la orden se cierra y el aparato queda disponible para retiro.",
+                "intents": [
+                  {
+                    "id": "aprobarPresupuesto",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "rechazarPresupuesto",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "orderHistory": {
+                "kind": "timeline",
+                "text": "Lo que pasó con tu orden: recepción, emisión del presupuesto, tu respuesta, reparación y entrega.",
+                "intents": []
+              }
+            },
+            "molecules": {
+              "pendingBudgets": [
+                {
+                  "role": "lista de presupuestos pendientes",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                }
+              ],
+              "readyForPickup": [
+                {
+                  "role": "tarjeta de aparato para retiro",
+                  "preferred": "groupviewcard--ml-view-card-horizontal",
+                  "alternative": "groupviewdata--ml-card-grid"
+                },
+                {
+                  "role": "aviso de aparatos listos para retirar",
+                  "preferred": "groupnotifyuser--ml-notify-banner",
+                  "alternative": ""
+                }
+              ],
+              "myOrders": [
+                {
+                  "role": "tabla de órdenes con estado",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewtable--ml-responsive-table"
+                },
+                {
+                  "role": "filtro por estado",
+                  "preferred": "groupnavigatesection--ml-navigate-pills",
+                  "alternative": "groupnavigatesection--ml-tabs"
+                }
+              ],
+              "orderDetail": [
+                {
+                  "role": "ficha de la orden",
+                  "preferred": "groupviewcard--ml-vertical-card",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                },
+                {
+                  "role": "valor del presupuesto",
+                  "preferred": "groupviewmetric--ml-metric-big-number",
+                  "alternative": "groupviewmetric--ml-metric-card"
+                },
+                {
+                  "role": "datos del aparato",
+                  "preferred": "groupexpandcontent--ml-collapsible-panel",
+                  "alternative": "groupexpandcontent--ml-readmore-expand"
+                }
+              ],
+              "budgetDecision": [
+                {
+                  "role": "botones aprobar y rechazar",
+                  "preferred": "grouptriggeraction--ml-button-group",
+                  "alternative": "grouptriggeraction--ml-button-standard"
+                },
+                {
+                  "role": "motivo del rechazo",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "confirmación de la decisión",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-alert-modal"
+                }
+              ],
+              "orderHistory": [
+                {
+                  "role": "recorrido de la orden",
+                  "preferred": "groupviewdata--ml-timeline-view",
+                  "alternative": "groupnavigatesteps--ml-vertical-stepper"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "pendingBudgets": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.aparato.marca",
+                  "OrdenServicio.details.presupuesto.valor",
+                  "OrdenServicio.details.presupuesto.fechaEmision"
+                ],
+                "edits": [],
+                "selects": "orderDetail",
+                "submits": []
+              },
+              "readyForPickup": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.aparato.marca",
+                  "OrdenServicio.details.disponibleParaRetiro"
+                ],
+                "edits": [],
+                "selects": "orderDetail",
+                "submits": []
+              },
+              "myOrders": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.fechaApertura",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.aparato.marca",
+                  "OrdenServicio.details.aparato.modelo"
+                ],
+                "edits": [],
+                "selects": "orderDetail",
+                "submits": []
+              },
+              "orderDetail": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.fechaApertura",
+                  "Cliente.details.identification.name",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.aparato.marca",
+                  "OrdenServicio.details.aparato.modelo",
+                  "OrdenServicio.details.aparato.numeroSerie",
+                  "OrdenServicio.details.aparato.accesorios",
+                  "OrdenServicio.details.defectoInformado",
+                  "OrdenServicio.details.diagnostico",
+                  "OrdenServicio.details.presupuesto.valor",
+                  "OrdenServicio.details.presupuesto.fechaEmision",
+                  "OrdenServicio.details.disponibleParaRetiro"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "budgetDecision": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.details.presupuesto.valor"
+                ],
+                "edits": [
+                  "OrdenServicio.details.presupuesto.motivoRechazo"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "aprobarPresupuesto",
+                    "write": "OrdenServicio.aprobarPresupuesto"
+                  },
+                  {
+                    "intentId": "rechazarPresupuesto",
+                    "write": "OrdenServicio.rechazarPresupuesto"
+                  }
+                ]
+              },
+              "orderHistory": {
+                "reads": [
+                  "OrdenServicio.fechaApertura",
+                  "OrdenServicio.status",
+                  "OrdenServicio.details.presupuesto.fechaEmision",
+                  "OrdenServicio.details.presupuesto.fechaRespuesta",
+                  "OrdenServicio.details.presupuesto.motivoRechazo",
+                  "OrdenServicio.details.reparacion.trabajoRealizado",
+                  "OrdenServicio.details.reparacion.fechaLista",
+                  "OrdenServicio.details.entrega.fechaEntrega"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "approvalWorkflow"
+            },
+            "intent": "En una pantalla estrecha y fluida (unos 390px, usable de 360px a 430px), mostrar primero al cliente los presupuestos por responder y los aparatos para retiro; luego la orden elegida con la decisión de aprobar o rechazar, y después sus demás órdenes y el historial.",
+            "sections": [
+              {
+                "id": "pendientes",
+                "priority": "primary",
+                "purpose": "Arriba, lo que requiere tu respuesta o tu visita: presupuestos pendientes y aparatos para retirar.",
+                "organisms": [
+                  "pendingBudgets",
+                  "readyForPickup"
+                ]
+              },
+              {
+                "id": "revision",
+                "priority": "main",
+                "purpose": "La orden elegida en una sola columna: estado, diagnóstico y valor del presupuesto, con la decisión justo debajo.",
+                "organisms": [
+                  "orderDetail",
+                  "budgetDecision"
+                ]
+              },
+              {
+                "id": "misOrdenes",
+                "priority": "secondary",
+                "purpose": "Todas tus órdenes en una lista compacta para abrir cualquiera.",
+                "organisms": [
+                  "myOrders"
+                ]
+              },
+              {
+                "id": "historial",
+                "priority": "secondary",
+                "purpose": "El recorrido de la orden elegida, de la recepción a la entrega.",
+                "organisms": [
+                  "orderHistory"
+                ]
+              }
+            ],
+            "organisms": {
+              "pendingBudgets": {
+                "kind": "inbox",
+                "text": "Presupuestos que esperan tu aprobación o rechazo, con el aparato y el valor propuesto.",
+                "intents": []
+              },
+              "readyForPickup": {
+                "kind": "highlights",
+                "text": "Tus aparatos disponibles para retiro.",
+                "intents": []
+              },
+              "myOrders": {
+                "kind": "list",
+                "text": "Tus órdenes de servicio con número, aparato y estado.",
+                "intents": []
+              },
+              "orderDetail": {
+                "kind": "detail",
+                "text": "Estado, aparato, diagnóstico y valor del presupuesto de la orden, sin costos internos ni anotaciones del técnico.",
+                "intents": []
+              },
+              "budgetDecision": {
+                "kind": "actions",
+                "text": "Aprueba el presupuesto para que reparen tu aparato, o recházalo con un motivo opcional; el aparato quedará disponible para retiro.",
+                "intents": [
+                  {
+                    "id": "aprobarPresupuesto",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "rechazarPresupuesto",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "orderHistory": {
+                "kind": "timeline",
+                "text": "Lo que pasó con tu orden: recepción, presupuesto, tu respuesta, reparación y entrega.",
+                "intents": []
+              }
+            },
+            "molecules": {
+              "pendingBudgets": [
+                {
+                  "role": "tarjetas de presupuestos pendientes",
+                  "preferred": "groupviewcard--ml-view-card-horizontal",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ],
+              "readyForPickup": [
+                {
+                  "role": "aviso de aparatos listos para retirar",
+                  "preferred": "groupnotifyuser--ml-notify-banner",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                }
+              ],
+              "myOrders": [
+                {
+                  "role": "lista compacta de órdenes",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-table"
+                },
+                {
+                  "role": "filtro por estado",
+                  "preferred": "groupnavigatesection--ml-navigate-pills",
+                  "alternative": ""
+                }
+              ],
+              "orderDetail": [
+                {
+                  "role": "ficha de la orden",
+                  "preferred": "groupviewcard--ml-vertical-card",
+                  "alternative": ""
+                },
+                {
+                  "role": "valor del presupuesto",
+                  "preferred": "groupviewmetric--ml-metric-big-number",
+                  "alternative": "groupviewmetric--ml-metric-card"
+                },
+                {
+                  "role": "datos del aparato",
+                  "preferred": "groupexpandcontent--ml-accordion",
+                  "alternative": "groupexpandcontent--ml-readmore-expand"
+                }
+              ],
+              "budgetDecision": [
+                {
+                  "role": "botón de decisión a ancho completo",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-button-group"
+                },
+                {
+                  "role": "motivo del rechazo",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "confirmación de la decisión",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-alert-modal"
+                }
+              ],
+              "orderHistory": [
+                {
+                  "role": "recorrido de la orden",
+                  "preferred": "groupviewdata--ml-timeline-view",
+                  "alternative": "groupnavigatesteps--ml-compact-step-indicator"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "pendingBudgets": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.presupuesto.valor"
+                ],
+                "edits": [],
+                "selects": "orderDetail",
+                "submits": []
+              },
+              "readyForPickup": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.disponibleParaRetiro"
+                ],
+                "edits": [],
+                "selects": "orderDetail",
+                "submits": []
+              },
+              "myOrders": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.fechaApertura",
+                  "OrdenServicio.details.aparato.tipo"
+                ],
+                "edits": [],
+                "selects": "orderDetail",
+                "submits": []
+              },
+              "orderDetail": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.fechaApertura",
+                  "OrdenServicio.details.aparato.tipo",
+                  "OrdenServicio.details.aparato.marca",
+                  "OrdenServicio.details.aparato.modelo",
+                  "OrdenServicio.details.defectoInformado",
+                  "OrdenServicio.details.diagnostico",
+                  "OrdenServicio.details.presupuesto.valor",
+                  "OrdenServicio.details.disponibleParaRetiro"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "budgetDecision": {
+                "reads": [
+                  "OrdenServicio.numero",
+                  "OrdenServicio.status",
+                  "OrdenServicio.details.presupuesto.valor"
+                ],
+                "edits": [
+                  "OrdenServicio.details.presupuesto.motivoRechazo"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "aprobarPresupuesto",
+                    "write": "OrdenServicio.aprobarPresupuesto"
+                  },
+                  {
+                    "intentId": "rechazarPresupuesto",
+                    "write": "OrdenServicio.rechazarPresupuesto"
+                  }
+                ]
+              },
+              "orderHistory": {
+                "reads": [
+                  "OrdenServicio.fechaApertura",
+                  "OrdenServicio.status",
+                  "OrdenServicio.details.presupuesto.fechaEmision",
+                  "OrdenServicio.details.presupuesto.fechaRespuesta",
+                  "OrdenServicio.details.reparacion.fechaLista",
+                  "OrdenServicio.details.entrega.fechaEntrega"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 15,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

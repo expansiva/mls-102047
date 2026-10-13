@@ -1,0 +1,1634 @@
+{
+  "schemaVersion": "2026-10-04-agent-defs-l2-bff-v2",
+  "project": 102047,
+  "module": "ordenServicio",
+  "pageId": "ordenes_servicio",
+  "attempt": 2,
+  "diagnostic": "D2_BFF_COMMAND_INPUT: endpoints.cmdAbrirOrden.input: command cmdAbrirOrden (OrdenServicio.create) asks for OrdenServicio.details.diagnostico, OrdenServicio.details.anotacionesTecnico, OrdenServicio.details.presupuesto.valor, OrdenServicio.details.reparacion.trabajoRealizado; each input leaf that fills a stored value names that Entity.path as a field origin. | D2_BFF_COMMAND_INPUT: endpoints.cmdGuardarOrden.input: command cmdGuardarOrden (OrdenServicio.update) asks for OrdenServicio.clienteId; each input leaf that fills a stored value names that Entity.path as a field origin.",
+  "previous": {
+    "types": [
+      {
+        "name": "OrdenResumen",
+        "description": "Fila de la bandeja de órdenes.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          },
+          {
+            "name": "numero",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.numero"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "type": "'abierta' | 'presupuestada' | 'aprobada' | 'rechazada' | 'lista' | 'finalizada'",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.status"
+              ]
+            }
+          },
+          {
+            "name": "fechaApertura",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.fechaApertura"
+              ]
+            }
+          },
+          {
+            "name": "clienteId",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.clienteId"
+              ]
+            }
+          },
+          {
+            "name": "cliente",
+            "type": "ClienteNombre",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Cliente.details.identification.name"
+              ]
+            }
+          },
+          {
+            "name": "aparato",
+            "type": "AparatoResumen",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato"
+              ]
+            }
+          },
+          {
+            "name": "disponibleParaRetiro",
+            "type": "boolean",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.disponibleParaRetiro"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "ClienteNombre",
+        "description": "Cliente resumido: id y nombre.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Cliente.id"
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Cliente.details.identification.name"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "ClienteContacto",
+        "description": "Cliente de la orden con sus contactos para avisarle.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Cliente.id"
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Cliente.details.identification.name"
+              ]
+            }
+          },
+          {
+            "name": "contacts",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Cliente.details.base.contacts"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "AparatoResumen",
+        "description": "Tipo y marca del aparato para la bandeja.",
+        "fields": [
+          {
+            "name": "tipo",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.tipo"
+              ]
+            }
+          },
+          {
+            "name": "marca",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.marca"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "AparatoOrden",
+        "description": "Datos completos del aparato.",
+        "fields": [
+          {
+            "name": "tipo",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.tipo"
+              ]
+            }
+          },
+          {
+            "name": "marca",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.marca"
+              ]
+            }
+          },
+          {
+            "name": "modelo",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.modelo"
+              ]
+            }
+          },
+          {
+            "name": "numeroSerie",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.numeroSerie"
+              ]
+            }
+          },
+          {
+            "name": "accesorios",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.accesorios"
+              ]
+            }
+          },
+          {
+            "name": "estadoFisico",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.estadoFisico"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "PresupuestoOrden",
+        "description": "Presupuesto y respuesta del cliente.",
+        "fields": [
+          {
+            "name": "valor",
+            "type": "number",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.presupuesto.valor"
+              ]
+            }
+          },
+          {
+            "name": "fechaEmision",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.presupuesto.fechaEmision"
+              ]
+            }
+          },
+          {
+            "name": "fechaRespuesta",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.presupuesto.fechaRespuesta"
+              ]
+            }
+          },
+          {
+            "name": "motivoRechazo",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.presupuesto.motivoRechazo"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "ReparacionOrden",
+        "description": "Trabajo realizado y fecha de lista.",
+        "fields": [
+          {
+            "name": "trabajoRealizado",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.reparacion.trabajoRealizado"
+              ]
+            }
+          },
+          {
+            "name": "fechaLista",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.reparacion.fechaLista"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "EntregaOrden",
+        "description": "Datos de la entrega.",
+        "fields": [
+          {
+            "name": "fechaEntrega",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.entrega.fechaEntrega"
+              ]
+            }
+          },
+          {
+            "name": "observaciones",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.entrega.observaciones"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "OrdenFicha",
+        "description": "Orden completa con cliente, aparato, presupuesto, reparación, entrega y fechas del historial.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.version"
+              ]
+            }
+          },
+          {
+            "name": "numero",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.numero"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "type": "'abierta' | 'presupuestada' | 'aprobada' | 'rechazada' | 'lista' | 'finalizada'",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.status"
+              ]
+            }
+          },
+          {
+            "name": "fechaApertura",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.fechaApertura"
+              ]
+            }
+          },
+          {
+            "name": "clienteId",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.clienteId"
+              ]
+            }
+          },
+          {
+            "name": "cliente",
+            "type": "ClienteContacto",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Cliente.details"
+              ]
+            }
+          },
+          {
+            "name": "aparato",
+            "type": "AparatoOrden",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato"
+              ]
+            }
+          },
+          {
+            "name": "defectoInformado",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.defectoInformado"
+              ]
+            }
+          },
+          {
+            "name": "diagnostico",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.diagnostico"
+              ]
+            }
+          },
+          {
+            "name": "anotacionesTecnico",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.anotacionesTecnico"
+              ]
+            }
+          },
+          {
+            "name": "presupuesto",
+            "type": "PresupuestoOrden",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.presupuesto"
+              ]
+            }
+          },
+          {
+            "name": "reparacion",
+            "type": "ReparacionOrden",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.reparacion"
+              ]
+            }
+          },
+          {
+            "name": "entrega",
+            "type": "EntregaOrden",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.entrega"
+              ]
+            }
+          },
+          {
+            "name": "disponibleParaRetiro",
+            "type": "boolean",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.disponibleParaRetiro"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "PiezaLinea",
+        "description": "Pieza de la orden con su costo interno.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.version"
+              ]
+            }
+          },
+          {
+            "name": "descripcion",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.descripcion"
+              ]
+            }
+          },
+          {
+            "name": "cantidad",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.cantidad"
+              ]
+            }
+          },
+          {
+            "name": "costoUnitario",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.costoUnitario"
+              ]
+            }
+          },
+          {
+            "name": "codigoPieza",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.codigoPieza"
+              ]
+            }
+          },
+          {
+            "name": "observacion",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.observacion"
+              ]
+            }
+          },
+          {
+            "name": "costoTotal",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.costoTotal"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "qryListaOrdenes",
+        "kind": "qry",
+        "when": "onLoad",
+        "writes": "",
+        "input": [
+          {
+            "name": "status",
+            "type": "'abierta' | 'presupuestada' | 'aprobada' | 'rechazada' | 'lista' | 'finalizada'",
+            "optional": true,
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          },
+          {
+            "name": "texto",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          },
+          {
+            "name": "page",
+            "type": "number",
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          },
+          {
+            "name": "pageSize",
+            "type": "number",
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "ordenes",
+            "type": "OrdenResumen[]",
+            "paginated": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "disponibleParaRetiroCalculado"
+        ],
+        "jsdoc": {
+          "purpose": "Carga la bandeja de órdenes de la organización filtrada por estado, para que recepción y técnico elijan la orden a trabajar.",
+          "input": "status: estado por el que se filtra (abierta para analizar, aprobada para reparar, lista para entregar); si falta, todas. texto: búsqueda por número de orden en el mostrador. page y pageSize: paginación.",
+          "processing": "Filtra OrdenServicio por estado y número, ordena por fechaApertura descendente, une el nombre del cliente (Cliente.details.identification.name) por clienteId. disponibleParaRetiro se calcula (disponibleParaRetiroCalculado: estado lista o rechazada), no se guarda.",
+          "output": "Página de órdenes con número, estado, fecha de apertura, cliente, tipo y marca del aparato y disponibilidad para retiro."
+        }
+      },
+      {
+        "id": "qryOrden",
+        "kind": "qry",
+        "when": "interaction",
+        "writes": "",
+        "input": [
+          {
+            "name": "ordenId",
+            "type": "string",
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "orden",
+            "type": "OrdenFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          },
+          {
+            "name": "piezas",
+            "type": "PiezaLinea[]",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.id"
+              ]
+            }
+          },
+          {
+            "name": "costoInternoPiezas",
+            "type": "number",
+            "optional": true,
+            "origin": {
+              "kind": "aggregate",
+              "paths": [
+                "OrdenServicio.details.costoInternoPiezas",
+                "PiezaOrden.details.costoTotal"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "disponibleParaRetiroCalculado",
+          "costoInternoPiezasOrden",
+          "costoTotalPieza"
+        ],
+        "jsdoc": {
+          "purpose": "Carga en una sola llamada la orden seleccionada completa: ficha, datos para el formulario, acciones, historial, piezas y costo interno.",
+          "input": "ordenId: id de la orden elegida en la bandeja.",
+          "processing": "Lee OrdenServicio por id con el nombre y contactos del cliente, las fechas de presupuesto, reparación y entrega, y lista PiezaOrden por ordenServicioId. costoTotal de cada pieza = cantidad × costoUnitario (costoTotalPieza) y costoInternoPiezas = suma de costos totales (costoInternoPiezasOrden), ambos calculados. disponibleParaRetiro calculado (disponibleParaRetiroCalculado). Para el recepcionista se omiten anotacionesTecnico, piezas y costoInternoPiezas según su grant.",
+          "output": "La ficha de la orden, sus piezas y el costo interno total, para comparar con el valor del presupuesto y decidir el siguiente paso."
+        }
+      },
+      {
+        "id": "qryBuscarClientes",
+        "kind": "qry",
+        "when": "interaction",
+        "writes": "",
+        "input": [
+          {
+            "name": "texto",
+            "type": "string",
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "clientes",
+            "type": "ClienteNombre[]",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Cliente.id"
+              ]
+            }
+          }
+        ],
+        "rules": [],
+        "jsdoc": {
+          "purpose": "Busca al cliente por nombre o documento al abrir una orden, para reutilizar su registro.",
+          "input": "texto: parte del nombre o número de documento.",
+          "processing": "Busca Cliente por nombre (locate.byName) o documento (locate.byDocument); devuelve como máximo los primeros 20 resultados.",
+          "output": "Clientes coincidentes con id y nombre para elegir el clienteId de la nueva orden; si no aparece, la página navega a Clientes."
+        }
+      },
+      {
+        "id": "cmdAbrirOrden",
+        "kind": "cmd",
+        "when": "abrirOrden",
+        "writes": "OrdenServicio.create",
+        "input": [
+          {
+            "name": "clienteId",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.clienteId"
+              ]
+            }
+          },
+          {
+            "name": "aparatoTipo",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.tipo"
+              ]
+            }
+          },
+          {
+            "name": "aparatoMarca",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.marca"
+              ]
+            }
+          },
+          {
+            "name": "aparatoModelo",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.modelo"
+              ]
+            }
+          },
+          {
+            "name": "aparatoNumeroSerie",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.numeroSerie"
+              ]
+            }
+          },
+          {
+            "name": "aparatoAccesorios",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.accesorios"
+              ]
+            }
+          },
+          {
+            "name": "aparatoEstadoFisico",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.estadoFisico"
+              ]
+            }
+          },
+          {
+            "name": "defectoInformado",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.defectoInformado"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "orden",
+            "type": "OrdenFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "numeroOrdenUnico",
+          "fotosAparatoEnAdjuntos",
+          "disponibleParaRetiroCalculado"
+        ],
+        "jsdoc": {
+          "purpose": "Abre una orden de servicio nueva en estado abierta para el cliente elegido.",
+          "input": "clienteId: cliente dueño del aparato; datos del aparato (tipo, marca, modelo, número de serie, accesorios, estado físico) y defecto informado.",
+          "processing": "Crea OrdenServicio con status abierta y fechaApertura actual; el número lo emite la secuencia de la plataforma y es único (numeroOrdenUnico). Las fotos se suben como adjuntos de la orden (fotosAparatoEnAdjuntos), no como campos.",
+          "output": "La orden creada en forma de ficha para mostrarla seleccionada sin otra llamada."
+        }
+      },
+      {
+        "id": "cmdGuardarOrden",
+        "kind": "cmd",
+        "when": "guardarOrden",
+        "writes": "OrdenServicio.update",
+        "input": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.version"
+              ]
+            }
+          },
+          {
+            "name": "aparatoTipo",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.tipo"
+              ]
+            }
+          },
+          {
+            "name": "aparatoMarca",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.marca"
+              ]
+            }
+          },
+          {
+            "name": "aparatoModelo",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.modelo"
+              ]
+            }
+          },
+          {
+            "name": "aparatoNumeroSerie",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.numeroSerie"
+              ]
+            }
+          },
+          {
+            "name": "aparatoAccesorios",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.accesorios"
+              ]
+            }
+          },
+          {
+            "name": "aparatoEstadoFisico",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.aparato.estadoFisico"
+              ]
+            }
+          },
+          {
+            "name": "defectoInformado",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.defectoInformado"
+              ]
+            }
+          },
+          {
+            "name": "diagnostico",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.diagnostico"
+              ]
+            }
+          },
+          {
+            "name": "anotacionesTecnico",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.anotacionesTecnico"
+              ]
+            }
+          },
+          {
+            "name": "presupuestoValor",
+            "type": "number",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.presupuesto.valor"
+              ]
+            }
+          },
+          {
+            "name": "trabajoRealizado",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.reparacion.trabajoRealizado"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "orden",
+            "type": "OrdenFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "disponibleParaRetiroCalculado"
+        ],
+        "jsdoc": {
+          "purpose": "Guarda los datos de la etapa actual (aparato, diagnóstico, anotaciones internas, valor del presupuesto, trabajo realizado) sin cambiar el estado.",
+          "input": "id y version de la orden (concurrencia optimista) y los campos editados; los ausentes no se modifican.",
+          "processing": "Actualiza OrdenServicio con control de versión. anotacionesTecnico solo la escribe el técnico (el recepcionista no tiene acceso). disponibleParaRetiro se recalcula, no se guarda.",
+          "output": "La ficha actualizada para redibujar detalle, formulario y acciones."
+        }
+      },
+      {
+        "id": "cmdAgregarPieza",
+        "kind": "cmd",
+        "when": "agregarPieza",
+        "writes": "PiezaOrden.create",
+        "input": [
+          {
+            "name": "ordenServicioId",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.ordenServicioId"
+              ]
+            }
+          },
+          {
+            "name": "descripcion",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.descripcion"
+              ]
+            }
+          },
+          {
+            "name": "cantidad",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.cantidad"
+              ]
+            }
+          },
+          {
+            "name": "costoUnitario",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.costoUnitario"
+              ]
+            }
+          },
+          {
+            "name": "codigoPieza",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.codigoPieza"
+              ]
+            }
+          },
+          {
+            "name": "observacion",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.details.observacion"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "pieza",
+            "type": "PiezaLinea",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "PiezaOrden.id"
+              ]
+            }
+          },
+          {
+            "name": "costoInternoPiezas",
+            "type": "number",
+            "origin": {
+              "kind": "aggregate",
+              "paths": [
+                "OrdenServicio.details.costoInternoPiezas",
+                "PiezaOrden.details.costoTotal"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "cantidadPositiva",
+          "piezasSoloAntesDePresupuesto",
+          "costoTotalPieza",
+          "costoInternoPiezasOrden"
+        ],
+        "jsdoc": {
+          "purpose": "Agrega una pieza con su costo interno a la orden durante el diagnóstico.",
+          "input": "ordenServicioId: orden seleccionada; descripción, cantidad, costo unitario, código y observación interna de la pieza.",
+          "processing": "Rechaza si la cantidad no es entero mayor que cero (cantidadPositiva) o si la orden no está abierta (piezasSoloAntesDePresupuesto). Crea PiezaOrden; costoTotal = cantidad × costoUnitario (costoTotalPieza) y el nuevo costoInternoPiezas = suma de costos totales de la orden (costoInternoPiezasOrden), ambos calculados, no grabados.",
+          "output": "La pieza creada para insertarla en la lista y el costo interno total recalculado para el resumen."
+        }
+      },
+      {
+        "id": "cmdEmitirPresupuesto",
+        "kind": "cmd",
+        "when": "emitirPresupuesto",
+        "writes": "OrdenServicio.emitirPresupuesto",
+        "input": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.version"
+              ]
+            }
+          },
+          {
+            "name": "diagnostico",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.diagnostico"
+              ]
+            }
+          },
+          {
+            "name": "presupuestoValor",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.presupuesto.valor"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "orden",
+            "type": "OrdenFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "presupuestoRequiereDiagnosticoYValor"
+        ],
+        "jsdoc": {
+          "purpose": "Emite el presupuesto al cliente y pasa la orden de abierta a presupuestada.",
+          "input": "id y version de la orden; diagnóstico y valor del presupuesto.",
+          "processing": "Rechaza si la orden no está abierta, si falta el diagnóstico o si el valor no es mayor que cero (presupuestoRequiereDiagnosticoYValor). Ejecuta la transición emitirPresupuesto registrando fechaEmision.",
+          "output": "La ficha actualizada con estado presupuestada y la fecha de emisión para el historial."
+        }
+      },
+      {
+        "id": "cmdMarcarLista",
+        "kind": "cmd",
+        "when": "marcarLista",
+        "writes": "OrdenServicio.marcarLista",
+        "input": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.version"
+              ]
+            }
+          },
+          {
+            "name": "trabajoRealizado",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.reparacion.trabajoRealizado"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "orden",
+            "type": "OrdenFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "listaRequiereTrabajoRealizado",
+          "disponibleParaRetiroCalculado"
+        ],
+        "jsdoc": {
+          "purpose": "Marca la orden aprobada como lista para entrega.",
+          "input": "id y version de la orden; descripción del trabajo realizado.",
+          "processing": "Rechaza si la orden no está aprobada o si falta el trabajo realizado (listaRequiereTrabajoRealizado). Ejecuta la transición marcarLista registrando fechaLista; disponibleParaRetiro pasa a verdadero por cálculo (disponibleParaRetiroCalculado).",
+          "output": "La ficha actualizada con estado lista, fecha de lista y disponibilidad para retiro."
+        }
+      },
+      {
+        "id": "cmdFinalizarOrden",
+        "kind": "cmd",
+        "when": "finalizarOrden",
+        "writes": "OrdenServicio.finalizar",
+        "input": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.version"
+              ]
+            }
+          },
+          {
+            "name": "observaciones",
+            "type": "string",
+            "optional": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.details.entrega.observaciones"
+              ]
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "orden",
+            "type": "OrdenFicha",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "OrdenServicio.id"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "finalizarSoloOrdenLista"
+        ],
+        "jsdoc": {
+          "purpose": "Registra la entrega del aparato y finaliza la orden.",
+          "input": "id y version de la orden; observaciones de entrega opcionales.",
+          "processing": "Rechaza si la orden no está lista (finalizarSoloOrdenLista). Ejecuta la transición finalizar registrando fechaEntrega y las observaciones.",
+          "output": "La ficha actualizada con estado finalizada y la fecha de entrega para el historial."
+        }
+      }
+    ],
+    "bindings": {
+      "organisms": [
+        {
+          "organism": "listaOrdenes",
+          "reads": "qryListaOrdenes.ordenes"
+        },
+        {
+          "organism": "detalleOrden",
+          "reads": "qryOrden.orden"
+        },
+        {
+          "organism": "formularioOrden",
+          "reads": "qryOrden.orden"
+        },
+        {
+          "organism": "formularioOrden",
+          "reads": "qryBuscarClientes.clientes"
+        },
+        {
+          "organism": "piezasOrden",
+          "reads": "qryOrden.piezas"
+        },
+        {
+          "organism": "costoPiezas",
+          "reads": "qryOrden.costoInternoPiezas"
+        },
+        {
+          "organism": "costoPiezas",
+          "reads": "qryOrden.orden"
+        },
+        {
+          "organism": "accionesOrden",
+          "reads": "qryOrden.orden"
+        },
+        {
+          "organism": "historialOrden",
+          "reads": "qryOrden.orden"
+        }
+      ],
+      "commands": [
+        {
+          "endpoint": "cmdAbrirOrden",
+          "refreshes": [
+            "qryListaOrdenes"
+          ]
+        },
+        {
+          "endpoint": "cmdGuardarOrden",
+          "refreshes": []
+        },
+        {
+          "endpoint": "cmdAgregarPieza",
+          "refreshes": []
+        },
+        {
+          "endpoint": "cmdEmitirPresupuesto",
+          "refreshes": [
+            "qryListaOrdenes"
+          ]
+        },
+        {
+          "endpoint": "cmdMarcarLista",
+          "refreshes": [
+            "qryListaOrdenes"
+          ]
+        },
+        {
+          "endpoint": "cmdFinalizarOrden",
+          "refreshes": [
+            "qryListaOrdenes"
+          ]
+        }
+      ],
+      "selections": [
+        {
+          "organism": "listaOrdenes",
+          "via": {
+            "kind": "query",
+            "ref": "qryOrden"
+          }
+        }
+      ],
+      "updates": [
+        {
+          "endpoint": "qryListaOrdenes",
+          "state": "qryListaOrdenes.ordenes",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "qryOrden",
+          "state": "qryOrden.orden",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "qryBuscarClientes",
+          "state": "qryBuscarClientes.clientes",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "cmdAbrirOrden",
+          "state": "qryOrden.orden",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "cmdGuardarOrden",
+          "state": "qryOrden.orden",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "cmdAgregarPieza",
+          "state": "qryOrden.piezas",
+          "mode": "upsert"
+        },
+        {
+          "endpoint": "cmdAgregarPieza",
+          "state": "qryOrden.costoInternoPiezas",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "cmdEmitirPresupuesto",
+          "state": "qryOrden.orden",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "cmdMarcarLista",
+          "state": "qryOrden.orden",
+          "mode": "replace"
+        },
+        {
+          "endpoint": "cmdFinalizarOrden",
+          "state": "qryOrden.orden",
+          "mode": "replace"
+        }
+      ],
+      "journeys": [
+        {
+          "step": "abrirOrdenServicio/buscarCliente",
+          "organisms": [
+            "formularioOrden"
+          ],
+          "endpoints": [
+            "qryBuscarClientes"
+          ]
+        },
+        {
+          "step": "abrirOrdenServicio/registrarCliente",
+          "organisms": [
+            "formularioOrden"
+          ],
+          "endpoints": [],
+          "continuesIn": "clientes"
+        },
+        {
+          "step": "abrirOrdenServicio/crearOrden",
+          "organisms": [
+            "formularioOrden"
+          ],
+          "endpoints": [
+            "cmdAbrirOrden"
+          ]
+        },
+        {
+          "step": "diagnosticarYpresupuestar/buscarOrdenAbierta",
+          "organisms": [
+            "listaOrdenes"
+          ],
+          "endpoints": [
+            "qryListaOrdenes"
+          ]
+        },
+        {
+          "step": "diagnosticarYpresupuestar/revisarOrden",
+          "organisms": [
+            "detalleOrden",
+            "historialOrden"
+          ],
+          "endpoints": [
+            "qryOrden"
+          ]
+        },
+        {
+          "step": "diagnosticarYpresupuestar/registrarDiagnostico",
+          "organisms": [
+            "formularioOrden"
+          ],
+          "endpoints": [
+            "cmdGuardarOrden"
+          ]
+        },
+        {
+          "step": "diagnosticarYpresupuestar/registrarPiezas",
+          "organisms": [
+            "piezasOrden",
+            "costoPiezas"
+          ],
+          "endpoints": [
+            "cmdAgregarPieza"
+          ]
+        },
+        {
+          "step": "diagnosticarYpresupuestar/emitirPresupuesto",
+          "organisms": [
+            "accionesOrden"
+          ],
+          "endpoints": [
+            "cmdEmitirPresupuesto"
+          ]
+        },
+        {
+          "step": "entregarYfinalizar/buscarOrdenLista",
+          "organisms": [
+            "listaOrdenes"
+          ],
+          "endpoints": [
+            "qryListaOrdenes"
+          ]
+        },
+        {
+          "step": "entregarYfinalizar/revisarOrdenLista",
+          "organisms": [
+            "detalleOrden"
+          ],
+          "endpoints": [
+            "qryOrden"
+          ]
+        },
+        {
+          "step": "entregarYfinalizar/finalizarOrden",
+          "organisms": [
+            "accionesOrden"
+          ],
+          "endpoints": [
+            "cmdFinalizarOrden"
+          ]
+        },
+        {
+          "step": "realizarReparacion/buscarOrdenAprobada",
+          "organisms": [
+            "listaOrdenes"
+          ],
+          "endpoints": [
+            "qryListaOrdenes"
+          ]
+        },
+        {
+          "step": "realizarReparacion/revisarOrdenAprobada",
+          "organisms": [
+            "detalleOrden",
+            "piezasOrden"
+          ],
+          "endpoints": [
+            "qryOrden"
+          ]
+        },
+        {
+          "step": "realizarReparacion/registrarTrabajo",
+          "organisms": [
+            "formularioOrden"
+          ],
+          "endpoints": [
+            "cmdGuardarOrden"
+          ]
+        },
+        {
+          "step": "realizarReparacion/marcarLista",
+          "organisms": [
+            "accionesOrden"
+          ],
+          "endpoints": [
+            "cmdMarcarLista"
+          ]
+        }
+      ]
+    }
+  },
+  "inputHash": "sha256:738c7f60610e13785aefe651e2975bdfce0fdcbc659f7f2c647cc19b87309476",
+  "unitInputHash": "sha256:98eacf8a81379300f52701aa29166cb8650f01235d689eaaaab3feecaefb05d8",
+  "promptHash": "sha256:9ac1b3808a2b31640ec7ef6ce5a103aaeec04fb77aa3fa45c761ed3120dfa2b3",
+  "promptChars": 71834,
+  "repairPromptChars": 71834,
+  "designHash": "sha256:71e34887c6d5709db2ad60a993fa35ab77a1e49a5a066034f3d67275b666008d"
+}
