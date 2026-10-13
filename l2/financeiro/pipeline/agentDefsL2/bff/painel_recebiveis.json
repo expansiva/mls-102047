@@ -1,0 +1,831 @@
+{
+  "types": [
+    {
+      "name": "PainelOrigemDetails",
+      "description": "Totais do período de uma origem, somados das linhas diárias do painel.",
+      "fields": [
+        {
+          "name": "totalAReceber",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PainelRecebiveis.details.totalAReceber"
+            ]
+          }
+        },
+        {
+          "name": "totalRecebido",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PainelRecebiveis.details.totalRecebido"
+            ]
+          }
+        },
+        {
+          "name": "totalEmAberto",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PainelRecebiveis.details.totalEmAberto"
+            ]
+          }
+        },
+        {
+          "name": "quantidadeTitulos",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PainelRecebiveis.details.quantidadeTitulos"
+            ]
+          }
+        },
+        {
+          "name": "quantidadeRecebimentos",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PainelRecebiveis.details.quantidadeRecebimentos"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PosicaoOrigem",
+      "description": "Posição do período escolhido para uma origem.",
+      "fields": [
+        {
+          "name": "periodo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PainelRecebiveis.periodo"
+            ]
+          }
+        },
+        {
+          "name": "origem",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PainelRecebiveis.origem"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "PainelOrigemDetails"
+        }
+      ]
+    },
+    {
+      "name": "ResumoVencidosDetails",
+      "description": "Saldo e quantidade de títulos vencidos e não quitados do período.",
+      "fields": [
+        {
+          "name": "totalVencido",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PainelRecebiveis.details.totalVencido"
+            ]
+          }
+        },
+        {
+          "name": "quantidadeVencidos",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PainelRecebiveis.details.quantidadeVencidos"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ResumoVencidos",
+      "description": "Resumo dos vencidos no período e origem filtrados.",
+      "fields": [
+        {
+          "name": "periodo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PainelRecebiveis.periodo"
+            ]
+          }
+        },
+        {
+          "name": "origem",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PainelRecebiveis.origem"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "ResumoVencidosDetails"
+        }
+      ]
+    },
+    {
+      "name": "PagadorIdentificacao",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Pagador.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Pagador.details.identification.docId"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PagadorDetails",
+      "description": "",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "PagadorIdentificacao"
+        }
+      ]
+    },
+    {
+      "name": "PagadorResumo",
+      "description": "Nome e documento do pagador lidos do registro mestre.",
+      "fields": [
+        {
+          "name": "details",
+          "type": "PagadorDetails"
+        }
+      ]
+    },
+    {
+      "name": "TituloVencidoLinhaDetails",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.vencido",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.vencido"
+            ]
+          }
+        },
+        {
+          "name": "details.diasAtraso",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.diasAtraso"
+            ]
+          }
+        },
+        {
+          "name": "details.saldoAberto",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.saldoAberto"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TituloVencidoLinha",
+      "description": "Linha da lista de títulos vencidos.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.id"
+            ]
+          }
+        },
+        {
+          "name": "numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.numero"
+            ]
+          }
+        },
+        {
+          "name": "pagadorId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.pagadorId"
+            ]
+          }
+        },
+        {
+          "name": "pagador",
+          "type": "PagadorResumo"
+        },
+        {
+          "name": "origem",
+          "type": "'restaurante' | 'academia' | 'assistenciaTecnica'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.origem"
+            ]
+          }
+        },
+        {
+          "name": "emissao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.emissao"
+            ]
+          }
+        },
+        {
+          "name": "vencimento",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.vencimento"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "TituloVencidoLinhaDetails"
+        }
+      ]
+    },
+    {
+      "name": "RecebimentoEstorno",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.estorno.estornadoEm",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Recebimento.details.estorno.estornadoEm"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "RecebimentoDetails",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Recebimento.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.baixaParcial",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Recebimento.details.baixaParcial"
+            ]
+          }
+        },
+        {
+          "name": "estorno",
+          "type": "RecebimentoEstorno",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "RecebimentoLinha",
+      "description": "Recebimento do título, inclusive estornado.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Recebimento.id"
+            ]
+          }
+        },
+        {
+          "name": "numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Recebimento.numero"
+            ]
+          }
+        },
+        {
+          "name": "recebidoEm",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Recebimento.recebidoEm"
+            ]
+          }
+        },
+        {
+          "name": "formaPagamento",
+          "type": "'dinheiro' | 'pix' | 'cartao'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Recebimento.formaPagamento"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'registrado' | 'estornado'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Recebimento.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "RecebimentoDetails"
+        }
+      ]
+    },
+    {
+      "name": "TituloVencidoDetalheDetails",
+      "description": "",
+      "fields": [
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.descricao"
+            ]
+          }
+        },
+        {
+          "name": "details.origemRotulo",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.origemRotulo"
+            ]
+          }
+        },
+        {
+          "name": "details.totalRecebido",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.totalRecebido"
+            ]
+          }
+        },
+        {
+          "name": "details.saldoAberto",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.saldoAberto"
+            ]
+          }
+        },
+        {
+          "name": "details.diasAtraso",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.diasAtraso"
+            ]
+          }
+        },
+        {
+          "name": "details.parcialmenteRecebido",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.details.parcialmenteRecebido"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TituloVencidoDetalhe",
+      "description": "Título vencido com pagador, saldo e recebimentos.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.id"
+            ]
+          }
+        },
+        {
+          "name": "numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.numero"
+            ]
+          }
+        },
+        {
+          "name": "pagadorId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.pagadorId"
+            ]
+          }
+        },
+        {
+          "name": "pagador",
+          "type": "PagadorResumo"
+        },
+        {
+          "name": "origem",
+          "type": "'restaurante' | 'academia' | 'assistenciaTecnica'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.origem"
+            ]
+          }
+        },
+        {
+          "name": "vencimento",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "TituloReceber.vencimento"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "TituloVencidoDetalheDetails"
+        },
+        {
+          "name": "recebimentos",
+          "type": "RecebimentoLinha[]"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "qryPainelRecebiveis",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "periodoInicio",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "periodoFim",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "origem",
+          "type": "'restaurante' | 'academia' | 'assistenciaTecnica'",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pagadorBusca",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "porOrigem",
+          "type": "PosicaoOrigem[]"
+        },
+        {
+          "name": "resumoVencidos",
+          "type": "ResumoVencidos"
+        },
+        {
+          "name": "vencidos",
+          "type": "TituloVencidoLinha[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "painelSomenteGerenteFinanceiro",
+        "painelTotaisCalculados",
+        "estornoExcluiDoRecebido",
+        "tituloVencidoEmAbertoAposVencimento",
+        "saldoAbertoCalculado"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega de uma vez o painel de recebíveis do período escolhido: os totais por origem, o resumo dos vencidos e a primeira página da lista de títulos vencidos. É chamada de novo quando o gerente troca período, origem ou busca de pagador.",
+        "input": "periodoInicio/periodoFim: janela de datas do período (padrão: mês corrente); origem: filtra uma origem (restaurante, academia, assistência técnica), ausente = todas; pagadorBusca: nome ou documento do pagador para restringir a lista de vencidos; pageSize: tamanho da primeira página da lista.",
+        "processing": "Acesso somente ao gerente financeiro (painelSomenteGerenteFinanceiro). Lê o painel pela janela (read.window) e soma as linhas diárias por origem: totalAReceber, totalRecebido, totalEmAberto, quantidadeTitulos e quantidadeRecebimentos (painelTotaisCalculados; estornos excluídos do recebido e da quantidade, estornoExcluiDoRecebido). Soma totalVencido e quantidadeVencidos do período/origem para o resumo. A lista traz títulos com vencimento no período, saldo em aberto > 0 e vencimento anterior a hoje (tituloVencidoEmAbertoAposVencimento; saldo = valor − recebimentos não estornados, saldoAbertoCalculado), com nome do pagador do registro mestre, ordenada por diasAtraso decrescente, página 1. Campos derivados são calculados, nunca gravados.",
+        "output": "porOrigem: uma posição por origem com os totais já calculados; resumoVencidos: valor e quantidade vencidos; vencidos: primeira página { items, page, pageSize, hasMore } da lista de vencidos."
+      }
+    },
+    {
+      "id": "qryVencidosPagina",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "periodoInicio",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "periodoFim",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "origem",
+          "type": "'restaurante' | 'academia' | 'assistenciaTecnica'",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pagadorBusca",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "vencidos",
+          "type": "TituloVencidoLinha[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "painelSomenteGerenteFinanceiro",
+        "tituloVencidoEmAbertoAposVencimento",
+        "saldoAbertoCalculado"
+      ],
+      "jsdoc": {
+        "purpose": "Traz as páginas seguintes da lista de títulos vencidos quando o gerente rola ou pede mais.",
+        "input": "Os mesmos filtros do painel (periodoInicio, periodoFim, origem, pagadorBusca) e page/pageSize da página pedida.",
+        "processing": "Somente gerente financeiro (painelSomenteGerenteFinanceiro). Filtra títulos do período/origem/pagador com saldo em aberto e vencimento anterior a hoje (tituloVencidoEmAbertoAposVencimento), saldo calculado como valor menos recebimentos não estornados (saldoAbertoCalculado), dias de atraso calculados até hoje; ordena por diasAtraso decrescente e lê o nome do pagador no registro mestre.",
+        "output": "vencidos: { items, page, pageSize, hasMore } que a página acrescenta à lista já exibida."
+      }
+    },
+    {
+      "id": "qryTituloVencido",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "tituloId",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "titulo",
+          "type": "TituloVencidoDetalhe"
+        }
+      ],
+      "rules": [
+        "painelSomenteGerenteFinanceiro",
+        "saldoAbertoCalculado",
+        "recebimentoEstornadoNaoConta",
+        "tituloQuitadoQuandoSaldoZera",
+        "tituloVencidoEmAbertoAposVencimento"
+      ],
+      "jsdoc": {
+        "purpose": "Abre o título vencido selecionado na lista com pagador, valores, atraso e todos os recebimentos, inclusive estornados.",
+        "input": "tituloId: id do título escolhido na lista de vencidos.",
+        "processing": "Somente gerente financeiro (painelSomenteGerenteFinanceiro). Lê o título por id, o nome e o documento do pagador no registro mestre e os recebimentos do título (listByForeignKey) ordenados por recebidoEm. totalRecebido exclui estornados (recebimentoEstornadoNaoConta); saldoAberto = valor − totalRecebido, nunca negativo (saldoAbertoCalculado); parcialmenteRecebido conforme tituloQuitadoQuandoSaldoZera; diasAtraso conforme tituloVencidoEmAbertoAposVencimento. Tudo calculado na leitura.",
+        "output": "titulo: o detalhe completo com a lista de recebimentos, para a página exibir sem outra chamada."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "recebiveisPorOrigem",
+        "reads": "qryPainelRecebiveis.porOrigem"
+      },
+      {
+        "organism": "resumoVencidos",
+        "reads": "qryPainelRecebiveis.resumoVencidos"
+      },
+      {
+        "organism": "listaVencidos",
+        "reads": "qryPainelRecebiveis.vencidos"
+      },
+      {
+        "organism": "detalheTituloVencido",
+        "reads": "qryTituloVencido.titulo"
+      }
+    ],
+    "commands": [],
+    "selections": [
+      {
+        "organism": "listaVencidos",
+        "via": {
+          "query": "qryTituloVencido"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "acompanharRecebiveis/filtrarRecebiveis",
+        "organisms": [
+          "listaVencidos",
+          "recebiveisPorOrigem"
+        ],
+        "endpoints": [
+          "qryPainelRecebiveis"
+        ]
+      },
+      {
+        "step": "acompanharRecebiveis/verPainel",
+        "organisms": [
+          "recebiveisPorOrigem"
+        ],
+        "endpoints": [
+          "qryPainelRecebiveis"
+        ]
+      },
+      {
+        "step": "acompanharRecebiveis/listarVencidos",
+        "organisms": [
+          "resumoVencidos",
+          "listaVencidos"
+        ],
+        "endpoints": [
+          "qryPainelRecebiveis",
+          "qryVencidosPagina"
+        ]
+      },
+      {
+        "step": "acompanharRecebiveis/verTituloVencido",
+        "organisms": [
+          "detalheTituloVencido"
+        ],
+        "endpoints": [
+          "qryTituloVencido"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "qryVencidosPagina",
+        "state": "qryPainelRecebiveis.vencidos",
+        "mode": "append"
+      }
+    ]
+  }
+}
