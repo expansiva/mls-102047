@@ -57,9 +57,10 @@ async function handleReenviarParaAprovacao(input: IRequestEnvelope): Promise<Bff
 async function handleRegistrarDespesa(input: IRequestEnvelope): Promise<BffResponse<Minhas_despesasContracts['reembolsoDespesas.minhas_despesas.registrarDespesa']['output']>> {
   const denied = authorize(input.request, ['colaboradorGerenciaPropriasDespesas']);
   if (denied) throw denied;
-  const invalid = validateInput(input.request.params, ['colaboradorId', 'details', 'details.dataDespesa', 'details.categoria', 'details.valor', 'details.descricao'], ['colaboradorId', 'details', 'details.dataDespesa', 'details.categoria', 'details.valor', 'details.descricao'], []);
-  if (invalid) throw invalid;
+  // colaboradorId comes from the session (own scope): fill it before validating, or an empty one from the page is refused.
   const params = scopeParams(input.request.params, input.ctx, ['colaboradorGerenciaPropriasDespesas']) as Minhas_despesasContracts['reembolsoDespesas.minhas_despesas.registrarDespesa']['input'];
+  const invalid = validateInput(params, ['colaboradorId', 'details', 'details.dataDespesa', 'details.categoria', 'details.valor', 'details.descricao'], ['colaboradorId', 'details', 'details.dataDespesa', 'details.categoria', 'details.valor', 'details.descricao'], []);
+  if (invalid) throw invalid;
   const data = await requests["reembolsoDespesas.minhas_despesas.registrarDespesa"](params, input.ctx);
   return { ok: true, data: data as Minhas_despesasContracts['reembolsoDespesas.minhas_despesas.registrarDespesa']['output'], error: null };
 }
