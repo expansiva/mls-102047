@@ -4,23 +4,23 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_da_equipe",
   "device": "mobile",
-  "contextHash": "sha256:2619d15cdb9e8e47421a9d91878d2990f3090a0ffef92668b4abc9d2867a528e",
+  "contextHash": "sha256:7c73bba97cd437ae3c943ff8deacbcb67b6f83a67602ba784a4470ac111a52b2",
   "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/despesas_da_equipe.ts",
-  "sourceHash": "sha256:4f1e034851d5e6e2eb91aef6ed611e2eec4e5dd7346acd6ca91d0900542a147f",
+  "sourceHash": "sha256:305b5fc9e8fca1c6a33a59979ebac7d8ff9a2380fc4ed4cfd96c04d9ffa1bd45",
   "attempt": 1,
   "design": {
-    "concept": "A two-step phone flow for a manager: first a compact queue of the team's pending expenses (who, how much, when), then one expense read like a memo (who, decisive facts, description, trail) with the decision at the very end. Approving takes one plain confirmation dialog; rejecting expands an inline reason field that must be filled before its button enables.",
+    "concept": "Duas cenas em coluna única: a fila de despesas pendentes da equipe (cartões compactos com colaborador, valor e data) e, ao tocar em uma, a leitura da despesa como um memorando — identidade, fatos decisivos, descrição, histórico — com a decisão só no fim. Aprovar abre uma única confirmação; rejeitar expande o motivo obrigatório no próprio bloco.",
     "views": [
       {
         "id": "fila",
-        "purpose": "Queue of pending team expenses. Tapping a row selects it and opens the analysis."
+        "purpose": "Localizar e escolher a despesa pendente; o título da cena é o título da página. Tem carregar mais, estados de carregamento, vazio e erro."
       },
       {
         "id": "analise",
-        "purpose": "One expense under review, read top to bottom and decided at the end. It has a back control to the queue. It is the first view when an expense arrives already selected."
+        "purpose": "Ler a despesa escolhida de cima para baixo e decidir ao final. Cena com botão de voltar para a fila, sem avanço automático após a decisão."
       }
     ],
-    "decisions": "The views are the queue and the analysis, switched only by the scene host in scenary mode. The host starts on the analysis when an expense is already selected, so the record carried in is not asked for again. The analysis follows the template's reading order: a card with the collaborator's name, amount, date, category and status, then the description, then the trail (resubmission and rejection reason). The decision block comes last and is never sticky. Approve opens a native dialog restating the name and amount. Rejecting uses a native disclosure whose textarea is required before 'Confirmar rejeição' enables. Both need no page state. The page-level draft and command states from the shared drive loading, error with retry, and the final statement. While a command runs the controls are inert. Success replaces the controls with a calm statement and there is no auto-advance. The queue uses the responsive data table with three always-visible columns, with the category under the name. Left out: the search bar, because the shared has no search source and the page may not filter; the proof viewer, because no row field holds a proof; the toast, because the template wants local success and no page banner. Danger styling is not used on reject."
+    "decisions": "Usei o scene host em mode=scenary porque fila e análise são passos em sequência, com voltar; a fila continua no DOM e preserva a posição. A lista usa ml-responsive-table, que no celular vira cartões legíveis, com rowClick abrindo a análise e a linha marcada por índice. A busca por colaborador/categoria ficou de fora: o compartilhado não oferece filtro e a página não pode guardar estado nem filtrar. O comprovante também ficou de fora: o contrato não tem campo de arquivo. A ordem de leitura segue o template: identidade e fatos no cartão, depois descrição, depois histórico (reenvio e motivo anterior). O bloco de decisão fica no fim, sem barra fixa. Aprovar abre um <dialog> nativo (sem estado na página) que repete colaborador e valor. Rejeitar usa <details> que expande o campo de motivo (ml-multiline-text); o botão de confirmação só habilita com motivo preenchido, e a orientação aparece no campo. Erros aparecem dentro do bloco, acima dos botões. Após a decisão o bloco vira uma declaração calma da situação, mostrando o motivo quando rejeitada. Sem toast: o template proíbe banner de página. Alvos de toque de pelo menos 44px.."
   },
   "advisories": [
     {

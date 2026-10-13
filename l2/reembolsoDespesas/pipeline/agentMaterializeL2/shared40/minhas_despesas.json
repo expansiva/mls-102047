@@ -3,46 +3,38 @@
   "project": 102047,
   "module": "reembolsoDespesas",
   "pageId": "minhas_despesas",
-  "unitInputHash": "sha256:7828a584ba8542a9e312320ff2dd313dd9cfd2d0a43b5a58855806634df9172e",
-  "promptHash": "sha256:b3a659fe5771bf76c78c9267163dfc50fe98cea99da16e70d57a951e18b92742",
+  "unitInputHash": "sha256:455850985a9aa1f49c69d3620a6ed71fc2f0c960053c37ba498d069472ff5acd",
+  "promptHash": "sha256:7892145be1d692df52c7d5be34d8b7e4aac91a4e72169ab9fb4fbd62b4a9cf8b",
   "rulesHash": "sha256:016b9ad36d6c01dff95a7582e61dd5ad1aab2b1d20b2675fa342b1c91f4179ad",
   "sourcePath": "l2/reembolsoDespesas/web/shared/minhas_despesas.ts",
-  "sourceHash": "sha256:8a1db4729e1b75d1b7f420d4180ce41e9c08710df14a65cc97a251f542897824",
+  "sourceHash": "sha256:f059f5230f2f74769307511dd3bdc84137d73a9a798dc11fd47bb7d551c0f6bb",
   "declarationPath": "l2/reembolsoDespesas/web/shared/minhas_despesasDts.txt",
-  "declarationHash": "sha256:12da2a055c01c73aabc51222f74a15e2d6627bc44e911971eba845b35792d2c4",
+  "declarationHash": "sha256:00841629abee33ea4442dc9f9e39e9b94fb5e233d7d3bec280db9cc3dbca97de",
   "attempt": 1,
   "findings": [
     {
-      "code": "SELECT_SETTER_MISSING",
-      "message": "The defs declare entry.params.despesaId (select:detalheDespesa) but no method that selects. Added public selectDespesa(id | null), which publishes selectedDespesa and loads the record into despesa through obterDespesa."
+      "code": "FILTER_STATE_MISSING",
+      "message": "Entry params status and page have effect filter:listaMinhasDespesas but no state holds them. Added public states `status` (ExpenseStatus | null) and `page` (number | null), both persisted; listarMinhasDespesas takes them as arguments and publishes them."
     },
     {
-      "code": "FILTER_STATE_MISSING",
-      "message": "Entry params status and page filter listaMinhasDespesas but no state holds them. Added persisted states filtroStatus and filtroPage; listarMinhasDespesas(status?, page?, append) publishes them and sends them in the query input."
+      "code": "SELECT_SETTER_MISSING",
+      "message": "State selectedDespesa holds only the id (entry.params.despesaId) and no member selects. The selection is served by obterDespesa(id | null), which publishes the id and loads the record into `despesa`."
     },
     {
       "code": "DRAFT_STATE_MISSING",
-      "message": "registrarDespesa and salvarCorrecao are filled in through formularioDespesa but the defs have no <command>.input state. Added registrarDespesaDraft and salvarCorrecaoDraft with setters setRegistrarDespesaDraft and setSalvarCorrecaoDraft; the correction draft is prefilled from the opened expense."
+      "message": "The defs declare no <command>.input state for registrarDespesa and salvarCorrecao (formularioDespesa). Added registrarDespesaDraft and salvarCorrecaoDraft with setters setRegistrarDespesaDraft and setSalvarCorrecaoDraft; salvarCorrecaoDraft is prefilled from `despesa`. No field for the proof (comprovante) exists in any route, so the draft has none."
     },
     {
-      "code": "IDENTITY_UNAVAILABLE",
-      "message": "registrarDespesa input requires colaboradorId from the session, but the shared has no identity source it may import. It sends an empty string; the backend must take the colaborador from the session."
-    },
-    {
-      "code": "PROOF_ATTACHMENT_NOT_IN_CONTRACT",
-      "message": "The form organism mentions the proof (comprovante) but no route or field of the contract carries it (it is attached by the document attachment capability), so the shared has no member for it."
+      "code": "IDENTITY_NOT_AVAILABLE",
+      "message": "registrarDespesa requires colaboradorId from the session, but the shared has no identity source. It sends an empty string and relies on the backend to bind the logged collaborator."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "Commands return despesa and item but no state has them as source. Applied despesa to the despesa state and selectedDespesa, and item upserted (or removed when it no longer matches filtroStatus) in despesas, without reloading."
+      "message": "Command rows (item) are applied to despesas by id (insert at top for registrarDespesa, update in place otherwise, removed when the status filter no longer matches); page/hasMore of the list are not recomputed."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public filtroPage is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public filtroStatus is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public page is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
@@ -54,15 +46,15 @@
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public selectDespesa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
       "message": "public setRegistrarDespesaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
       "message": "public setSalvarCorrecaoDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public status is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     }
   ]
 }

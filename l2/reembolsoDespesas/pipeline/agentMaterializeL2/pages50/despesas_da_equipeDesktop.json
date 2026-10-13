@@ -4,14 +4,23 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_da_equipe",
   "device": "desktop",
-  "contextHash": "sha256:4213908fb8e933c5e0a0c30d05644e9676725c82cf2f7a71ee4b9e916c3a8e9e",
+  "contextHash": "sha256:6112c7452a9b5727095ca5804206bb9de9144a4b3c8a8027b0288b5a56345ed4",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/despesas_da_equipe.ts",
-  "sourceHash": "sha256:e7b407f76225cf6e84df95d22c3603786082b895bb1356015d8c912770caf7a6",
+  "sourceHash": "sha256:47bdce4b42ebfd003434e93c10acc0069bff6f176f95c78aa448f6b0db0e3f3a",
   "attempt": 1,
   "design": {
-    "concept": "Uma tela de leitura e decisão para o gestor: à esquerda a fila de despesas que aguardam a aprovação da equipe, à direita a despesa escolhida lida como um memorando (quem, fatos decisivos, descrição, histórico) e, só no fim da leitura, o bloco de decisão. A tela conta uma história de uma despesa por vez e fecha essa história com uma declaração calma do que foi decidido.",
-    "views": [],
-    "decisions": "Uma só vista, sem scene host: fila e análise ficam lado a lado em duas colunas, porque a fila continua útil durante a leitura. O painel direito troca de conteúdo pelos dados (nada selecionado, carregando, erro, despesa carregada), não por cenas. A fila usa ml-data-table sem ordenação, para que o índice do clique corresponda à linha; a seleção é marcada pelo índice em `value` e o clique chama selectDespesa com o id da linha. A leitura segue a ordem do template: identidade com situação, fatos decisivos (valor grande à direita, data, categoria), descrição e histórico (motivo de rejeição anterior e reenvio). O bloco de decisão fica no fim. Aprovar abre uma confirmação nativa <dialog> que repete colaborador e valor (sem estado na página: showModal é chamado pelo evento). Rejeitar abre um <details> inline com o campo de motivo (ml-multiline-text); o botão só habilita com motivo preenchido. Aprovar é o primário e rejeitar é secundário, sem estilo de perigo. Erros de comando aparecem dentro do bloco de decisão, acima dos botões, com ml-contextual-feedback; durante a execução o bloco trava e mostra progresso. No sucesso o bloco vira uma declaração da decisão, sem redirecionar nem avançar para a próxima. Deixei de fora a busca, o filtro por período e o visualizador de comprovante: o shared não tem estado nem método de filtro, e a despesa não tem campo de comprovante, e a página não pode filtrar nem inventar dados. O formato da página da fila não é declarado no .d.ts, então um helper de módulo lê a lista de forma defensiva."
+    "concept": "Uma tela de mesa de trabalho em duas regiões lado a lado. À esquerda, a fila de despesas pendentes da equipe, que é o ponto de partida. À direita, a despesa escolhida é lida como um memorando: identidade, fatos decisivos, descrição, histórico. A decisão fica no fim da leitura.",
+    "views": [
+      {
+        "id": "aguardando",
+        "purpose": "Estado inicial da região de análise. Convida a escolher uma despesa na fila e não mostra nenhuma ação de decisão."
+      },
+      {
+        "id": "analise",
+        "purpose": "Leitura da despesa selecionada, de cima para baixo, com o bloco de decisão ao final. Tem um controle de voltar que fecha a análise e limpa a seleção, e a fila continua visível ao lado."
+      }
+    ],
+    "decisions": "Segui o template readAndDecide. A fila é a seção primária e fica à esquerda numa tabela de dados (alternativa à side-detail-table) com a linha selecionada marcada por índice. A região de análise é um host de cena em modo scenary: 'aguardando' e 'analise'. Assim a fila não perde o lugar e a troca passa só pelo host.\n\nA ordem de leitura é fixa: nome do colaborador e situação, depois valor, data e categoria em destaque, depois a descrição, depois o histórico (reenvio e motivo de rejeição anterior). Só então vem a decisão.\n\nAprovar abre uma única confirmação, um <dialog> nativo que repete colaborador, categoria e valor. Isso evita estado na página. Rejeitar expande, num <details>, um campo de motivo obrigatório; o botão 'Registrar rejeição' só habilita com o motivo preenchido. Erros de comando aparecem dentro do bloco de decisão, acima dos botões, e o botão serve de nova tentativa. Durante a decisão os botões travam com indicador de progresso. O sucesso vira uma declaração calma no lugar do bloco, sem toast e sem avançar para a próxima despesa. Não há botões de decisão nas linhas da fila.\n\nFicaram de fora, porque o contrato não oferece dado nem método para eles:\n- Busca e filtro por período: o shared não tem método de filtro, e filtrar na página seria computar.\n- Comprovante: nenhuma linha traz um campo com a origem dele.\n\nO 'Carregar mais' usa a paginação da fila declarada pelo shared. Todos os textos vêm do catálogo pt."
   },
   "advisories": [
     {

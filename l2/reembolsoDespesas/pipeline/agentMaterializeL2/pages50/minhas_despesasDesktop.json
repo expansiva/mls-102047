@@ -4,27 +4,23 @@
   "module": "reembolsoDespesas",
   "pageId": "minhas_despesas",
   "device": "desktop",
-  "contextHash": "sha256:af7b52801ff0fc14ed9aa1cdcc59f593bf9ce9dc8ddc12a7448393796399ab43",
+  "contextHash": "sha256:17f5cbd83dbcca90739f7210b2d3cdfa7146bd79387d51bb6af04b1eadf54d85",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/minhas_despesas.ts",
-  "sourceHash": "sha256:313b35b12227d21f13cddf8d183d096f1e64a9a34eddc6903fc7cc525cd0685c",
+  "sourceHash": "sha256:137111469a65cd7a985a9c0b11fa7b14612d7fe797d2a1388033e3fc80d89d22",
   "attempt": 1,
   "design": {
-    "concept": "Mestre-detalhe de leitura: à esquerda a lista de despesas do colaborador, sempre visível, com filtro por situação. À direita um painel de trabalho, que é um scene host, lê a despesa escolhida como um memorando (identidade, fatos decisivos, descrição, motivo da rejeição) e só no fim mostra o próximo passo (enviar ou reenviar). Registrar uma despesa nova e corrigir uma rejeitada são cenas secundárias do mesmo painel, abertas sob demanda.",
+    "concept": "Uma tela mestre-detalhe para o colaborador acompanhar as próprias despesas. A lista com a situação de cada uma fica sempre visível à esquerda. À direita há um painel de trabalho que se lê de cima para baixo (identidade, fatos decisivos, descrição, motivo da rejeição) e termina no bloco de envio ou reenvio. Registrar uma despesa nova ou corrigir uma rejeitada abre no mesmo painel, sob demanda.",
     "views": [
       {
         "id": "detalhe",
-        "purpose": "Leitura da despesa selecionada, do topo ao fim, terminando no bloco de envio ou reenvio. É a cena inicial e mostra um estado vazio quando nada foi escolhido."
+        "purpose": "Leitura da despesa escolhida, como um memorando: identidade, valor e datas, descrição, motivo da rejeição. No fim fica o bloco de envio ou reenvio para aprovação. Sem despesa escolhida, mostra um convite para escolher uma da lista."
       },
       {
-        "id": "nova",
-        "purpose": "Formulário para registrar uma despesa nova, com volta para o detalhe. Depois do sucesso mostra uma declaração calma com um passo seguinte."
-      },
-      {
-        "id": "corrigir",
-        "purpose": "Formulário para corrigir a despesa rejeitada que está aberta, já preenchido pelo shared. Depois do sucesso leva de volta ao detalhe, onde fica o reenvio."
+        "id": "formulario",
+        "purpose": "Formulário do painel. Sem despesa aberta, registra uma despesa nova. Com uma despesa rejeitada aberta, corrige essa despesa. Tem botão de voltar para o detalhe."
       }
     ],
-    "decisions": "Segui a ordem de leitura do template (identidade, fatos, narrativa, trilha, decisão). O bloco de envio fica no fim do painel, nunca em cabeçalho fixo ou ao lado do conteúdo. A lista (primária) fica fora do host para continuar visível e manter a seleção ao alternar de cena. O host cobre só a região direita, em mode=scenary com volta. Selecionar uma linha chama selectDespesa e abre a cena de detalhe. O sucesso de cada comando é local: no bloco de envio, ou no lugar do formulário com um único passo seguinte. Erros aparecem dentro do bloco, acima dos botões, sem perder o que foi digitado. O comprovante ficou de fora: o shared não declara estado nem campo de arquivo, e não posso inventar um. O motivo da rejeição usa o contextual-feedback e vem depois da descrição, como trilha. O botão de enviar vira statement calmo após sucesso. Os botões de ação e salvar ficam desabilitados enquanto algum campo obrigatório está vazio, o que é só presença e não cálculo de negócio. O filtro de situação usa botões nativos com aria-pressed. Não há paginação numérica: usei 'Carregar mais despesas' quando o shared informa hasMore."
+    "decisions": "Usei o scene host só na região do painel direito, em mode=\"scenary\", e a lista permanece fora dele, então o colaborador nunca perde o lugar. A página não guarda estado, então o formulário é uma única cena. O modo vem do compartilhado: despesa aberta (null ou não) define se é correção ou registro. Por isso \"Registrar despesa\" limpa a seleção com obterDespesa(null) antes de abrir o formulário. Como há uma cena só, o organismo formularioDespesa aparece uma vez. Seguindo o template readAndDecide, o detalhe segue a ordem fixa (identidade e situação, fatos decisivos com o valor grande, descrição, motivo da rejeição) e o bloco de ações fica no fim. Esse bloco afirma o estado quando a despesa não admite ação (aguardando, aprovada, paga, já reenviada) e mostra o erro acima dos botões, travando enquanto o comando roda. Os botões levam o nome do resultado: Enviar para aprovação, Reenviar para aprovação, Corrigir despesa. Depois de registrar ou salvar a correção com sucesso, a página volta ao detalhe, onde a despesa já aparece com o novo estado. Cartão vertical e contextual-feedback mostram o resumo e o motivo da rejeição. A lista usa a tabela sem ordenação, para o índice do clique coincidir com a linha, e marca a seleção por índice. O filtro de situação é um select simples. Deixei de fora o comprovante e a paginação. O compartilhado não expõe estado de arquivo, e o formato da paginação da lista não está declarado, então não inventei campos. Todos os valores vêm prontos do backend. A página só formata data e moeda com Intl."
   },
   "advisories": [
     {

@@ -1,0 +1,107 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { Minhas_despesasContracts, DespesaResumo, DespesaDetalhe } from '/_102047_/l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.js';
+export type { Minhas_despesasContracts, DespesaResumoDetalhes, DespesaResumo, DespesaDetalheDetalhes, DespesaDetalhe } from '/_102047_/l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.js';
+type Output<R extends keyof Minhas_despesasContracts> = Minhas_despesasContracts[R]['output'];
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type QueryStatus = 'idle' | 'loading' | 'success' | 'error';
+export type ExpenseStatus = DespesaResumo['status'];
+export type DespesasPage = Output<'reembolsoDespesas.minhas_despesas.listarMinhasDespesas'>['despesas'];
+/** The expense data the person types; every leaf is null until filled. */
+export type DespesaDetailsDraft = {
+    dataDespesa: string | null;
+    categoria: string | null;
+    valor: string | null;
+    descricao: string | null;
+};
+/** Draft of a new expense (input of registrarDespesa; colaboradorId comes from the session). */
+export type RegistrarDespesaDraft = {
+    details: DespesaDetailsDraft;
+};
+/** Draft of the correction of a rejected expense (input of salvarCorrecao; id and version come from the loaded expense). */
+export type SalvarCorrecaoDraft = {
+    details: DespesaDetailsDraft;
+};
+export declare class ReembolsoDespesasMinhas_despesasShared extends StateLitElement {
+    /** state despesas — page of the expenses of the logged collaborator (rows with id, status, date, category, value); source listarMinhasDespesas.despesas; organism listaMinhasDespesas */
+    despesas: DespesasPage | null;
+    /** state despesa — the complete open expense (detail, correction form and submit actions); null when none is open; source obterDespesa.despesa; organisms acoesEnvio, detalheDespesa, formularioDespesa */
+    despesa: DespesaDetalhe | null;
+    /** state selectedDespesa — id of the selected expense (the record itself is in `despesa`); source entry.params.despesaId; organisms detalheDespesa, listaMinhasDespesas; persisted */
+    selectedDespesa: string | null;
+    /** state status — filter of the list by expense status, null for every status; source entry.params.status; organism listaMinhasDespesas; persisted */
+    status: ExpenseStatus | null;
+    /** state page — the page of the list the person went to with a pager (a "load more" never writes it); source entry.params.page; organism listaMinhasDespesas; persisted */
+    page: number | null;
+    /** state registrarDespesaDraft — draft of the new expense typed in the form; source registrarDespesa.input; organism formularioDespesa */
+    registrarDespesaDraft: RegistrarDespesaDraft;
+    /** state salvarCorrecaoDraft — draft of the correction of the open rejected expense, prefilled from `despesa`; source salvarCorrecao.input; organism formularioDespesa */
+    salvarCorrecaoDraft: SalvarCorrecaoDraft;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    /** state pageStatus — overall status of the page load: idle, loading, empty (no expense), success or error */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state listarMinhasDespesasStatus — status of the list request */
+    listarMinhasDespesasStatus: QueryStatus;
+    /** state listarMinhasDespesasError — error of the list request, null when none */
+    listarMinhasDespesasError: ErrorState;
+    /** state obterDespesaStatus — status of the request that opens an expense */
+    obterDespesaStatus: QueryStatus;
+    /** state obterDespesaError — error of the request that opens an expense, null when none */
+    obterDespesaError: ErrorState;
+    /** state registrarDespesaStatus — status of the command that registers a new expense */
+    registrarDespesaStatus: QueryStatus;
+    /** state registrarDespesaError — error of the register command, null when none */
+    registrarDespesaError: ErrorState;
+    /** state salvarCorrecaoStatus — status of the command that saves the correction */
+    salvarCorrecaoStatus: QueryStatus;
+    /** state salvarCorrecaoError — error of the save-correction command, null when none */
+    salvarCorrecaoError: ErrorState;
+    /** state enviarParaAprovacaoStatus — status of the command that submits a draft expense for approval */
+    enviarParaAprovacaoStatus: QueryStatus;
+    /** state enviarParaAprovacaoError — error of the submit command, null when none */
+    enviarParaAprovacaoError: ErrorState;
+    /** state reenviarParaAprovacaoStatus — status of the command that resubmits a rejected expense */
+    reenviarParaAprovacaoStatus: QueryStatus;
+    /** state reenviarParaAprovacaoError — error of the resubmit command, null when none */
+    reenviarParaAprovacaoError: ErrorState;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private hydrateData;
+    private resetVisit;
+    private readParam;
+    private applyEntryParams;
+    private commandStatus;
+    private setCommandStatus;
+    private setCommandError;
+    private resetCommandResults;
+    private failCommand;
+    private missingKeys;
+    private executeCommand;
+    /** Redraws the open expense, its selection, the correction draft and the list row from a command output. A row that no longer matches the status filter leaves the list. */
+    private applyCommandOutput;
+    /** setScenario — publishes the visible scene of the page (`scenary`); clears the results of the commands */
+    setScenario(value: string): void;
+    /** setRegistrarDespesaDraft — replaces the draft of the new expense with the whole value typed in the form; clears the results of the commands */
+    setRegistrarDespesaDraft(value: RegistrarDespesaDraft): void;
+    /** setSalvarCorrecaoDraft — replaces the draft of the correction with the whole value typed in the form; clears the results of the commands */
+    setSalvarCorrecaoDraft(value: SalvarCorrecaoDraft): void;
+    /** request listarMinhasDespesas — loads the expenses of the logged collaborator (the onLoad request, also used to reload, filter by status and page the list); redraws despesas (replace, or append the next page to its items when append is true) and pageStatus; arguments: status = the status filter (null for every status, omitted for the current filter), page = the page to load (default 1; a new filter loads page 1), append = true for "load more" (does nothing when the list has no more pages; it never changes the page param) */
+    listarMinhasDespesas(status?: ExpenseStatus | null, page?: number, append?: boolean): Promise<void>;
+    /** request obterDespesa — selects an expense of the list: opens it with every field the detail, the correction form and the submit actions need; redraws selectedDespesa (the id) and despesa (replace, the record with its version) and fills salvarCorrecaoDraft from it; argument: id = the expense picked in the list, or null to clear the selection (no call) */
+    obterDespesa(id: string | null): Promise<void>;
+    /** request registrarDespesa — registers a new expense as a draft from registrarDespesaDraft (date, category, value and description are required); redraws despesa and selectedDespesa (the created expense opens in the detail), inserts the returned row at the top of despesas (when the status filter allows it), fills salvarCorrecaoDraft and resets registrarDespesaDraft; no arguments */
+    registrarDespesa(): Promise<void>;
+    /** request salvarCorrecao — saves the correction of the open rejected expense from salvarCorrecaoDraft (id and version come from `despesa`); redraws despesa, salvarCorrecaoDraft (filled again from the saved record) and updates the row in despesas; no arguments; refused with client.preconditionMissing when no expense is open */
+    salvarCorrecao(): Promise<void>;
+    /** request enviarParaAprovacao — sends the open draft expense to the manager for approval (needs an attached proof); redraws despesa (new status and version) and updates the row in despesas; no arguments; refused with client.preconditionMissing when no expense is open */
+    enviarParaAprovacao(): Promise<void>;
+    /** request reenviarParaAprovacao — resubmits, only once, the open rejected and corrected expense for a new analysis; redraws despesa (new status, resubmission marked, new version) and updates the row in despesas; no arguments; refused with client.preconditionMissing when no expense is open */
+    reenviarParaAprovacao(): Promise<void>;
+}

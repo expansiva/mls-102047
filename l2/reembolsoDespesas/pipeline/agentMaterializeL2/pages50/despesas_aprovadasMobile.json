@@ -4,23 +4,23 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_aprovadas",
   "device": "mobile",
-  "contextHash": "sha256:a44a3a203e53c3656858cc45de488003b5bd9a1fe58c1e5265618f95a4e054c6",
+  "contextHash": "sha256:f6d323a0830b66e67746cc4f6f827d7a8cc0c2a7fc77fa2eccd77cf9eecaf587",
   "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/despesas_aprovadas.ts",
-  "sourceHash": "sha256:8b999c18511aa31fc8cb2b8bb9dbd1d5dfa0f5d070c36fe69266548eb8b8eaa6",
+  "sourceHash": "sha256:671dbacd7f718f5c3bdaef6bf888d271c55ad47f360a0da5266e134ac5bd6685",
   "attempt": 1,
   "design": {
-    "concept": "Fluxo de duas telas para o financeiro no celular: primeiro a fila de despesas aprovadas em itens empilhados e fáceis de tocar, depois, ao tocar numa despesa, uma tela de conferência com os dados e, logo abaixo, a data de pagamento com uma ação fixa no rodapé. Uma coisa de cada vez, sem perder o lugar na fila.",
+    "concept": "Fluxo de duas cenas para o financeiro no celular: primeiro a fila de despesas aprovadas (filtro por categoria, itens empilhados e fáceis de tocar), depois uma cena única de conferência e pagamento com os dados da despesa e, logo abaixo, a data de pagamento e o botão de confirmar. Uma coisa de cada vez, com voltar para a fila sem perder filtro nem posição.",
     "views": [
       {
         "id": "fila",
-        "purpose": "Fila de despesas aprovadas aguardando pagamento, com filtro por categoria (token removível), lista tocável, estados de carregamento/vazio/erro e carregar mais."
+        "purpose": "Localizar a despesa: filtro por categoria com ficha removível, lista de itens com valor, categoria, colaborador, data e situação, e carregar mais."
       },
       {
         "id": "pagamento",
-        "purpose": "Conferência dos dados da despesa escolhida (card) e registro da data de pagamento com botão fixo no rodapé; voltar leva à fila."
+        "purpose": "Conferir a despesa escolhida e registrar a data de pagamento; confirmação do registro no próprio fluxo e atalho para voltar à fila."
       }
     ],
-    "decisions": "Usei o scene host em mode=scenary porque as etapas localizar → conferir/pagar são sequenciais, com voltar. Os títulos das cenas são os únicos títulos (sem repetir o texto do botão). A lista usa o vertical-record-list (preferido) com seleção única controlada pela página (?selected pelo selectedDespesa); valor sempre por último, alinhado à direita, em algarismos tabulares com moeda. Filtro: apenas categoria vem como busca de texto; colaboradorId não é renderizado como campo (é contexto/id), e o filtro aplicado aparece como token removível. Paginação: o contrato só informa hasMore, sem total de páginas, então troquei o controle de paginação por um botão 'Carregar mais' (append) mostrado só quando hasMore. Não exibi totais nem contagens porque nada disso é entregue pelo contrato e a página não calcula. Detalhe em vertical-card com dl; o formulário usa o date-shortcut-picker (atalhos como Hoje agilizam no celular) e o botão ml-button-standard size lg em barra sticky com o valor no rótulo, para o escopo ser conhecido antes do toque. Sucesso: toast inline-flutuante e a própria despesa atualizada (situação paga e data de pagamento), com ação de voltar à fila; erros ficam no próprio bloco, em cor de texto normal, com nova tentativa."
+    "decisions": "Troca de cenas só pelo scene host em mode=scenary: tocar numa despesa carrega o detalhe (obterDespesaAprovada) e abre a cena de pagamento; o voltar nativo do host leva à fila, que fica no DOM com filtro e rolagem preservados. Lista com ml-vertical-record-list (preferida) e seleção única marcada pelo ?selected conforme selectedDespesa; valor à direita em algarismos tabulares, sem somar nada (o contrato não declara totais, então não há totais inventados). Paginação: como a fila é um append com hasMore, troquei o pager numerado por um botão 'Carregar mais' com append, mais natural no celular. Filtro: só categoria (declarado), com search-bar e ficha removível; colaborador é id de contexto e nunca vira campo. Detalhe em vertical-card, formulário com date-shortcut-picker (atalhos como Hoje/Ontem) e botão de largura total com alvo de 44px+. Estados: esqueleto de carregamento, vazio, erro com tentar novamente na própria região, erro de validação no campo de data, e toast de sucesso inline (sem posição) ao registrar; depois do sucesso o botão fica desabilitado e a despesa já aparece com a nova situação e a data de pagamento."
   },
   "advisories": [
     {

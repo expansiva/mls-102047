@@ -1,0 +1,78 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { Despesas_aprovadasContracts, DespesaAprovadaDetalhe } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.js';
+export type { Despesas_aprovadasContracts, DespesaAprovadaResumoDetails, DespesaAprovadaResumo, DespesaAprovadaDetalheDetails, DespesaAprovadaDetalhe } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.js';
+type Output<R extends keyof Despesas_aprovadasContracts> = Despesas_aprovadasContracts[R]['output'];
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
+export type DespesasPage = Output<'reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas'>['despesas'];
+/** Draft of the registrarPagamento command: only what the person types (the payment date). */
+export type RegistrarPagamentoDraft = {
+    details: {
+        dataPagamento: string | null;
+    };
+};
+/** Options of the list request: filters that change (undefined keeps the current one, null or '' clears it), the page to load and whether to append it. */
+export type ListarDespesasAprovadasOptions = {
+    colaboradorId?: string | null;
+    categoria?: string | null;
+    page?: number;
+    append?: boolean;
+};
+export declare function emptyRegistrarPagamentoDraft(): RegistrarPagamentoDraft;
+export declare class ReembolsoDespesasDespesas_aprovadasShared extends StateLitElement {
+    /** state despesas — queue of approved expenses awaiting payment, as a page { items, page, pageSize, hasMore }; source listarDespesasAprovadas.despesas; organism despesasAprovadasLista */
+    despesas: DespesasPage | null;
+    /** state despesa — the chosen expense with its full data and the version used to register the payment; source obterDespesaAprovada.despesa; organisms despesaAprovadaDetalhe, registroPagamentoForm */
+    despesa: DespesaAprovadaDetalhe | null;
+    /** state selectedDespesa — id of the chosen expense (the record itself is in despesa); source entry.params.despesaId; organisms despesaAprovadaDetalhe, despesasAprovadasLista; persisted */
+    selectedDespesa: string | null;
+    /** state colaboradorId — filter of the queue by collaborator id, null when not filtering; source entry.params.colaboradorId; organism despesasAprovadasLista; persisted */
+    colaboradorId: string | null;
+    /** state categoria — filter of the queue by category, null when not filtering; source entry.params.categoria; organism despesasAprovadasLista; persisted */
+    categoria: string | null;
+    /** state page — the page of the queue the person went to with a pager (a load-more append never writes it), null for the first; source entry.params.page; organism despesasAprovadasLista; persisted */
+    page: number | null;
+    /** state registrarPagamentoDraft — form draft of the payment registration (payment date typed by the person); source registrarPagamento.input; organism registroPagamentoForm */
+    registrarPagamentoDraft: RegistrarPagamentoDraft;
+    /** state pageStatus — overall status of the page load: loading while the queue loads, empty when it has no items, error when it failed; source none (page status) */
+    pageStatus: PageStatus;
+    /** state listarDespesasAprovadasStatus — status of the queue request; source none (request status) */
+    listarDespesasAprovadasStatus: RequestStatus;
+    /** state listarDespesasAprovadasError — error of the queue request, null when none; source none (request error) */
+    listarDespesasAprovadasError: ErrorState;
+    /** state obterDespesaAprovadaStatus — status of the request that loads the chosen expense; source none (request status) */
+    obterDespesaAprovadaStatus: RequestStatus;
+    /** state obterDespesaAprovadaError — error of the request that loads the chosen expense, null when none; source none (request error) */
+    obterDespesaAprovadaError: ErrorState;
+    /** state registrarPagamentoStatus — status of the payment registration command ('success' means the payment was registered); source none (request status) */
+    registrarPagamentoStatus: RequestStatus;
+    /** state registrarPagamentoError — error of the payment registration command, null when none; source none (request error) */
+    registrarPagamentoError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private resetVisit;
+    private resetCommandResults;
+    private readParam;
+    private applyEntryParams;
+    private unexpectedError;
+    /** scene — publishes the visible scene of the page (any string the page uses to switch scenes); clears the previous command result */
+    setScenario(value: string): void;
+    /** draft — replaces the whole payment form draft (the payment date the person types); clears the previous command result */
+    setRegistrarPagamentoDraft(value: RegistrarPagamentoDraft): void;
+    /** request listarDespesasAprovadas — loads the queue of approved expenses awaiting payment (initial load, reload, filter and paging); redraws despesas (replace, or append the next page when options.append is true; append keeps page/hasMore in the list itself and never writes the page state), pageStatus, and the filter states colaboradorId, categoria and page; options.colaboradorId and options.categoria are the new filter values (undefined keeps the current one, null or '' clears it) and a filter change loads from the first page; options.page is the page to load (a pager writes the page state); options.append adds the next page to the items and does nothing when the list has no more */
+    listarDespesasAprovadas(options?: ListarDespesasAprovadasOptions): Promise<void>;
+    /** request obterDespesaAprovada — selects an expense of the queue and loads its full data for review before payment; redraws selectedDespesa (the id, replace) and despesa (the record with its version, replace; cleared first and on failure); id is the expense picked in the list, or null to clear the selection */
+    obterDespesaAprovada(id: string | null): Promise<void>;
+    /** request registrarPagamento — registers the payment of the chosen expense (approved -> paid) with the date in registrarPagamentoDraft and the version of despesa; redraws despesa (replace with the paid record and its new version), removes the expense from despesas.items (it no longer belongs to the queue), and resets registrarPagamentoDraft; refuses with client.preconditionMissing when no expense is loaded and with client.requiredMissing when the payment date is empty; takes no arguments */
+    registrarPagamento(): Promise<void>;
+}

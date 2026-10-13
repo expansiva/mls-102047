@@ -4,23 +4,14 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_aprovadas",
   "device": "desktop",
-  "contextHash": "sha256:215a0725b44f0e0b5149ebf1f020940a34064e248c37349571f851417d053be9",
+  "contextHash": "sha256:1202c6440dadd4b65b52c42f854485f3d80d3dcea90380ee22623fea2104f78e",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/despesas_aprovadas.ts",
-  "sourceHash": "sha256:0c29ebf8723851b3654a4122fafc324bbbe1d6d84acc3c57bb8ef9961d75b07e",
+  "sourceHash": "sha256:6639fcd09faea11ffbc40341231a76cfa20cf480bd15ca0efb7df7d482744bf9",
   "attempt": 1,
   "design": {
-    "concept": "Bancada do financeiro: a fila de despesas aprovadas ocupa a área principal como um livro-razão denso, com valor alinhado à direita, e ao lado fica um painel de trabalho que muda conforme a escolha. Ao clicar numa linha, o painel mostra os dados da despesa e, logo abaixo, a data de pagamento e o botão que registra o pagamento. A fila permanece visível e o filtro e a página são preservados.",
-    "views": [
-      {
-        "id": "vazio",
-        "purpose": "Painel lateral sem seleção: orienta o financeiro a escolher uma despesa da fila."
-      },
-      {
-        "id": "analise",
-        "purpose": "Painel lateral com a despesa escolhida: resumo para conferir o valor, formulário da data de pagamento e confirmação. O botão de voltar limpa a seleção."
-      }
-    ],
-    "decisions": "Segui o template ledgerTable: tabela densa com valor por último, alinhado à direita e em algarismos tabulares com moeda, filtro acima e ações discretas. A seleção é feita clicando na linha, e o índice marcado vem de selectedDespesa. Fiz duas escolhas por causa do contrato. Primeiro, não há totais nem contagem: a página não calcula nada e o contrato não os entrega. Segundo, o filtro por colaborador não existe, porque colaboradorId é um registro sem lista de opções e id não se digita. Ficou só o filtro de categoria, com a busca com chips removíveis. Usei data-table em vez de side-detail-table para ter controle do painel ao lado. As visões Vazio e Análise passam pelo host de cenas só nessa região, com back que limpa a seleção. A paginação usa botões Anterior e Próxima guiados por page e hasMore, porque o total de páginas não é entregue. O pagamento é confirmado uma vez: o valor é repetido no texto de apoio da data e o botão mostra progresso. O sucesso aparece como feedback inline no próprio painel, e a despesa paga sai da fila e continua no painel com a data registrada. A erro de data obrigatória aparece no campo, e os outros erros aparecem no painel com nova tentativa."
+    "concept": "Bancada do financeiro em duas colunas: à esquerda a fila de despesas aprovadas aguardando pagamento (tabela densa, valor por último e alinhado à direita); à direita o painel de conferência que fica sempre visível, com os dados da despesa escolhida e, logo abaixo, a data de pagamento e o botão que registra o pagamento. Escolher uma linha, conferir o valor e registrar a data acontece sem sair da tela e sem perder a fila.",
+    "views": [],
+    "decisions": "Uma única vista, sem scene host: fila e conferência são regiões paralelas e simultâneas (ledgerTable + detalhe ao lado), então nenhuma troca de vista é necessária. Usei ml-data-table (alternativa) porque o painel lateral é meu e precisa ficar fixo ao lado; a linha escolhida é marcada por índice via value e o rowClick chama obterDespesaAprovada. Filtros só os declarados (categoria numa barra de busca; colaborador aparece apenas como token removível quando vem do contexto), com fichas removíveis dos filtros aplicados. A paginação do contrato não informa total de páginas, então no lugar do pager uso 'Carregar mais' (append) quando hasMore, sem calcular nada. Não há totais porque o contrato não entrega nenhum agregado; nada é somado na página. O botão de pagamento leva o valor no rótulo (escopo antes do clique) e fica no painel, desabilitado e com progresso enquanto roda; o sucesso aparece inline junto ao formulário e a própria despesa passa a 'Paga', saindo da fila. Falhas da fila aparecem acima da tabela com nova tentativa; falha de carga da despesa aparece no painel. Data obrigatória vira erro do próprio campo. Estados de carregamento, vazio e erro são desenhados."
   },
   "advisories": [
     {

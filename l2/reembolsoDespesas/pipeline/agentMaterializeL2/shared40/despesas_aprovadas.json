@@ -3,30 +3,30 @@
   "project": 102047,
   "module": "reembolsoDespesas",
   "pageId": "despesas_aprovadas",
-  "unitInputHash": "sha256:f2f9e3e7f1f04df8a7e2c0a7eeaab159df2734118c53712c7e2f38dadcf75cc0",
-  "promptHash": "sha256:b3a659fe5771bf76c78c9267163dfc50fe98cea99da16e70d57a951e18b92742",
+  "unitInputHash": "sha256:7475281250ede7ee2bd741697bd149225c1398ed9f906e7d02635c70947151bf",
+  "promptHash": "sha256:7892145be1d692df52c7d5be34d8b7e4aac91a4e72169ab9fb4fbd62b4a9cf8b",
   "rulesHash": "sha256:f448288e2aa10d17f8466396e7eaf195e42eb9467ea51f4f73358f0336686752",
   "sourcePath": "l2/reembolsoDespesas/web/shared/despesas_aprovadas.ts",
-  "sourceHash": "sha256:85261d6121952e56cf09d3ecdda7ad58d4d521cd1ddcc33c2174c18bbb76f5c9",
+  "sourceHash": "sha256:1746db2c093a9e99d41921a8b63e5e14ba720850971508d8a8485b0817b43f8f",
   "declarationPath": "l2/reembolsoDespesas/web/shared/despesas_aprovadasDts.txt",
-  "declarationHash": "sha256:f4618e9e61026e2be63079df982775094c47ed0421fc4ec861e244574af764a7",
-  "attempt": 2,
+  "declarationHash": "sha256:29cf4543f69c3bbbf10d424328b9f7611cfcaaad5c45ae224f8cb5c91d041a3a",
+  "attempt": 1,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "Entry params colaboradorId, categoria and page filter the list but no state holds them; added persisted public states colaboradorId, categoria and page (set through listarDespesasAprovadas)."
+      "message": "Entry params colaboradorId, categoria and page filter despesasAprovadasLista but no state holds them. Added persisted public states colaboradorId, categoria and page (filters of listarDespesasAprovadas); listarDespesasAprovadas(options) publishes them and loads from the first page when a filter changes."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "The selectedDespesa param (id) had no public selection method; added selectDespesaAprovadaDetalhe(id | null), which fetches the record through obterDespesaAprovada into despesa."
+      "message": "selectedDespesa (entry.params.despesaId) holds only the id and no setter existed. The request method obterDespesaAprovada(id | null) acts as the selection: it publishes selectedDespesa, clears and then loads the record into despesa; null clears the selection."
     },
     {
-      "code": "FORM_DRAFT_MISSING",
-      "message": "registrarPagamento has a typed field (dataPagamento) but no <command>.input state; added registrarPagamentoDraft with setRegistrarPagamentoDraft."
+      "code": "DRAFT_MISSING",
+      "message": "The registroPagamentoForm has no <command>.input state. Added the registrarPagamentoDraft state (RegistrarPagamentoDraft with details.dataPagamento) with its setter setRegistrarPagamentoDraft."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "registrarPagamento returns despesa, which is applied to despesa and removed from despesas items, but the list page/hasMore and pageStatus (e.g. empty queue) are not refreshed because the route does not return them."
+      "message": "registrarPagamento returns the paid despesa. It redraws despesa and selectedDespesa and removes the item from despesas.items (it is no longer approved). Nothing in the output updates the list pager or hasMore, and pageStatus stays unchanged even if the list becomes empty."
     },
     {
       "code": "MEMBER_ADDED",
@@ -43,10 +43,6 @@
     {
       "code": "MEMBER_ADDED",
       "message": "public registrarPagamentoDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public selectDespesaAprovadaDetalhe is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
