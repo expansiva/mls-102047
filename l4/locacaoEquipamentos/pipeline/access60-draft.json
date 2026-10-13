@@ -21,104 +21,110 @@
   ],
   "grants": [
     {
-      "grantId": "atendenteContratos",
+      "grantId": "atendenteClientes",
       "actorRef": "atendente",
-      "title": "Contratos de locação e clientes",
-      "description": "O atendente localiza ou cadastra o cliente, cria o contrato de locação, inclui os equipamentos, confirma o contrato e registra a devolução com a data real e a multa calculada.",
-      "entityRefs": [
-        "Cliente",
-        "ContratoLocacao",
-        "ItemContrato"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Todos os clientes e contratos de locação da locadora."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Registro completo do cliente, do contrato e dos itens, incluindo valores previstos, dias de atraso e multa."
-      }
-    },
-    {
-      "grantId": "atendenteConsultaEquipamentos",
-      "actorRef": "atendente",
-      "title": "Consulta de equipamentos para locação",
-      "description": "O atendente pesquisa os equipamentos pelo código ou descrição e confere a situação e o valor da diária ao montar o contrato.",
-      "entityRefs": [
-        "Equipamento"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Todos os equipamentos da locadora."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Código, descrição, valor da diária, situação e contrato vigente do equipamento."
-      }
-    },
-    {
-      "grantId": "gerenteEquipamentos",
-      "actorRef": "gerente",
-      "title": "Cadastro e situação dos equipamentos",
-      "description": "O gerente mantém os equipamentos, acompanha quais estão disponíveis, locados ou em manutenção, e envia ou retorna equipamentos da manutenção.",
-      "entityRefs": [
-        "Equipamento"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Todos os equipamentos da locadora."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "Registro completo do equipamento, incluindo a situação atual, o contrato vigente e a data prevista de devolução."
-      }
-    },
-    {
-      "grantId": "gerenteContratosVigentes",
-      "actorRef": "gerente",
-      "title": "Consulta de contratos dos equipamentos",
-      "description": "O gerente consulta o contrato vigente de um equipamento locado e a data prevista de devolução, e confere que o equipamento não está em contrato vigente antes de enviá-lo à manutenção.",
-      "entityRefs": [
-        "ContratoLocacao",
-        "ItemContrato"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Todos os contratos de locação e seus itens."
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Número, cliente, situação e período do contrato e os equipamentos incluídos; sem observações nem valores.",
-        "allowedFields": [
-          "ContratoLocacao.numero",
-          "ContratoLocacao.clienteId",
-          "ContratoLocacao.status",
-          "ContratoLocacao.dataRetirada",
-          "ContratoLocacao.dataPrevistaDevolucao",
-          "ContratoLocacao.dataRealDevolucao",
-          "ContratoLocacao.details.atrasado",
-          "ItemContrato.contratoId",
-          "ItemContrato.equipamentoId"
-        ]
-      }
-    },
-    {
-      "grantId": "gerenteClienteNome",
-      "actorRef": "gerente",
-      "title": "Nome do cliente do contrato",
-      "description": "O gerente vê o nome do cliente que está com o equipamento locado.",
+      "title": "Localizar e cadastrar clientes",
+      "description": "O atendente busca clientes pelo nome ou documento e cadastra o cliente quando ainda não existe, para abrir contratos de locação.",
       "entityRefs": [
         "Cliente"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Clientes da locadora referenciados pelos contratos."
+        "description": "Todos os clientes da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O atendente vê o cadastro completo do cliente: identificação, documento, endereços, contatos e consentimento."
+      }
+    },
+    {
+      "grantId": "atendenteContratos",
+      "actorRef": "atendente",
+      "title": "Criar contratos e registrar devoluções",
+      "description": "O atendente cria contratos de locação, inclui equipamentos, confirma o contrato e registra a data real de devolução, conferindo dias de atraso e multa.",
+      "entityRefs": [
+        "ContratoLocacao",
+        "ItemContrato"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os contratos e itens de contrato da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O atendente vê todos os dados do contrato e de seus itens, incluindo valores calculados de atraso e multa."
+      }
+    },
+    {
+      "grantId": "atendenteEquipamentos",
+      "actorRef": "atendente",
+      "title": "Consultar equipamentos",
+      "description": "O atendente busca equipamentos pelo código ou descrição e confere a situação e o valor da diária antes de incluí-los no contrato.",
+      "entityRefs": [
+        "Equipamento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os equipamentos da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O atendente vê código, descrição, situação, valor da diária e o contrato atual do equipamento."
+      }
+    },
+    {
+      "grantId": "gerenteEquipamentos",
+      "actorRef": "gerente",
+      "title": "Manter e acompanhar equipamentos",
+      "description": "O gerente cadastra os equipamentos, mantém a situação (disponível ou em manutenção) e acompanha quais estão disponíveis, locados ou em manutenção.",
+      "entityRefs": [
+        "Equipamento"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os equipamentos da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O gerente vê todos os dados do equipamento, inclusive a situação atual e o contrato em que está locado."
+      }
+    },
+    {
+      "grantId": "gerenteContratos",
+      "actorRef": "gerente",
+      "title": "Consultar contratos dos equipamentos",
+      "description": "O gerente consulta o contrato e os itens em que um equipamento está locado.",
+      "entityRefs": [
+        "ContratoLocacao",
+        "ItemContrato"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todos os contratos e itens de contrato da locadora."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "O gerente vê os dados dos contratos e itens, incluindo período, atraso e multa."
+      }
+    },
+    {
+      "grantId": "gerenteClientes",
+      "actorRef": "gerente",
+      "title": "Identificar o cliente do contrato",
+      "description": "O gerente vê o nome do cliente titular do contrato em que o equipamento está locado.",
+      "entityRefs": [
+        "Cliente"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Clientes da locadora."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Apenas o nome do cliente; documento, endereços, contatos e consentimento ficam ocultos.",
+        "description": "O gerente vê apenas o nome e a situação do cadastro do cliente, sem documento, endereços ou contatos.",
         "allowedFields": [
-          "Cliente.details.identification.name"
+          "Cliente.details.identification.name",
+          "Cliente.details.identification.status"
         ]
       }
     }

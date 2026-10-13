@@ -10,13 +10,14 @@ export const locacaoEquipamentosIntegration = {
     {
       "id": "contratoLocacaoAtivado",
       "kind": "event",
-      "to": "financeiro",
+      "to": "any",
       "event": "contratoLocacaoAtivado",
       "on": "ContratoLocacao.ativarContrato",
-      "description": "Publicado quando o contrato de locação é ativado. Leva o cliente, os equipamentos e o período para que o módulo financeiro gere o título a receber da locação.",
+      "description": "Publicado quando o atendente confirma o contrato de locação: informa o cliente, os equipamentos locados e o período (data de retirada e data prevista de devolução), para que outros módulos (por exemplo, o financeiro) possam gerar cobranças da locação.",
       "entityRefs": [
         "ContratoLocacao",
         "ItemContrato",
+        "Equipamento",
         "Cliente"
       ]
     },
@@ -26,7 +27,7 @@ export const locacaoEquipamentosIntegration = {
       "to": "financeiro",
       "event": "devolucaoRegistrada",
       "on": "ContratoLocacao.registrarDevolucao",
-      "description": "Publicado quando a devolução é registrada com a data real. Leva os dias de atraso e a multa calculada (diária × dias de atraso × 1,5), se houver, para que o módulo financeiro faça a cobrança.",
+      "description": "Publicado quando a devolução é registrada com a data real: informa o contrato, o cliente, os dias de atraso e o valor da multa calculada (diária × dias de atraso × 1,5), permitindo que o financeiro registre o título a receber da multa.",
       "entityRefs": [
         "ContratoLocacao",
         "ItemContrato",

@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const locacaoEquipamentosOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "locacaoEquipamentos",
-  "businessDomain": "Locação de equipamentos para construção: cadastro de equipamentos com código, descrição, valor da diária e situação; contratos de locação para clientes com um ou mais equipamentos e período, sem sobreposição de períodos para o mesmo equipamento; devolução com data real e multa por atraso (diária × dias de atraso × 1,5); acompanhamento da situação dos equipamentos pelo gerente.",
+  "businessDomain": "Locação de equipamentos para construção: contratos de locação de um ou mais equipamentos por período, controle de sobreposição, devolução com cálculo de multa por atraso e acompanhamento da situação dos equipamentos.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "locacaoEquipamentos",
@@ -61,30 +61,20 @@ export const locacaoEquipamentosOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada item aponta para o equipamento locado; um equipamento aparece em vários contratos ao longo do tempo, sem períodos sobrepostos.",
+      "description": "Cada item aponta para o equipamento locado; um equipamento aparece em vários itens ao longo do tempo, sem períodos sobrepostos.",
       "field": "ItemContrato.equipamentoId"
     },
     {
-      "relationshipId": "equipamentosDoContrato",
-      "from": "ContratoLocacao",
-      "to": "Equipamento",
+      "relationshipId": "equipamentoContratos",
+      "from": "Equipamento",
+      "to": "ContratoLocacao",
       "type": "manyToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Equipamentos de um contrato e, no sentido inverso, o contrato vigente de um equipamento locado, lidos pelos itens do contrato.",
+      "description": "Contratos em que o equipamento foi ou está locado, usados para mostrar o contrato atual e derivar a situação 'locado'.",
       "through": "ItemContrato",
-      "path": "ContratoLocacao.id -> ItemContrato.contratoId -> ItemContrato.equipamentoId -> Equipamento.id",
+      "path": "Equipamento <- ItemContrato.equipamentoId -> ItemContrato.contratoId -> ContratoLocacao",
       "derived": true
-    },
-    {
-      "relationshipId": "contatosCliente",
-      "from": "Cliente",
-      "to": "ContactChannel",
-      "type": "oneToMany",
-      "required": false,
-      "mode": "mdmRelationship",
-      "description": "Telefones e e-mails do cliente, mantidos como canais de contato no cadastro mestre.",
-      "catalogType": "HasContact"
     }
   ]
 } as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;

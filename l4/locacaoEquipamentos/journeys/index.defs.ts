@@ -20,16 +20,6 @@ export const locacaoEquipamentosJourneyIndex = {
       "journeyId": "acompanharSituacaoEquipamentos",
       "actorRef": "gerente",
       "title": "Acompanhar situação dos equipamentos"
-    },
-    {
-      "journeyId": "enviarEquipamentoManutencao",
-      "actorRef": "gerente",
-      "title": "Enviar equipamento para manutenção"
-    },
-    {
-      "journeyId": "retornarEquipamentoManutencao",
-      "actorRef": "gerente",
-      "title": "Retornar equipamento da manutenção"
     }
   ],
   "systemDecisions": []

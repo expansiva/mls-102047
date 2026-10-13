@@ -8,7 +8,7 @@ export const registrarDevolucaoJourney = {
   "business": {
     "actorRef": "atendente",
     "title": "Registrar devolução",
-    "goal": "Encerrar a locação registrando a data real de devolução e a multa por atraso, quando houver.",
+    "goal": "Encerrar o contrato registrando a data real de devolução e a multa por atraso, se houver.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -17,15 +17,15 @@ export const registrarDevolucaoJourney = {
         "stepId": "localizarContrato",
         "kind": "locate",
         "entity": "ContratoLocacao",
-        "title": "Localizar o contrato",
-        "description": "Busca o contrato vigente pelo cliente, número do contrato ou código do equipamento."
+        "title": "Localizar contrato ativo",
+        "description": "O atendente busca o contrato ativo pelo cliente ou pelo código do equipamento."
       },
       {
         "stepId": "conferirContrato",
         "kind": "inspect",
         "entity": "ContratoLocacao",
-        "title": "Conferir contrato e equipamentos",
-        "description": "Confere os equipamentos, o período contratado e a data prevista de devolução."
+        "title": "Conferir contrato",
+        "description": "O atendente confere os equipamentos, a data de retirada e a data prevista de devolução."
       },
       {
         "stepId": "registrarDataReal",
@@ -33,27 +33,27 @@ export const registrarDevolucaoJourney = {
         "entity": "ContratoLocacao",
         "effect": "transition",
         "transitionRef": "registrarDevolucao",
-        "title": "Registrar data real de devolução",
-        "description": "Informa a data real de devolução; se houve atraso, o sistema calcula a multa (diária × dias de atraso × 1,5) e os equipamentos voltam a ficar disponíveis."
+        "title": "Registrar data real",
+        "description": "O atendente informa a data real de devolução; se houve atraso, o sistema calcula a multa (diária × dias de atraso × 1,5) e os equipamentos voltam a ficar disponíveis."
       },
       {
         "stepId": "conferirMulta",
         "kind": "inspect",
         "entity": "ContratoLocacao",
-        "title": "Conferir multa por atraso",
-        "description": "Verifica os dias de atraso e o valor da multa calculada para informar ao cliente."
+        "title": "Conferir multa calculada",
+        "description": "O atendente visualiza os dias de atraso e o valor da multa para informar ao cliente."
       }
     ],
     "outcome": {
-      "statement": "O contrato está encerrado com a data real de devolução e a multa calculada quando houve atraso.",
+      "statement": "O contrato fica encerrado com a data real de devolução e a multa calculada quando houve atraso.",
       "evidence": [
-        "Contrato aparece como devolvido com a data real de devolução",
-        "Multa por atraso exibida com dias de atraso e valor quando a devolução passou da data prevista",
-        "Equipamentos devolvidos aparecem com situação disponível"
+        "Contrato com situação devolvido e data real registrada",
+        "Valor da multa exibido quando a devolução foi após a data prevista",
+        "Equipamentos exibidos como disponíveis"
       ]
     }
   },
-  "businessHash": "sha256:7d0e355a8ab073d0965a7dbc31e5e5b77f188df1fdd5414cfc47ad73af52e0d0"
+  "businessHash": "sha256:f3a8b3816f66c96f8fec4bcbece189f86cb7ad2d937bc11454ab936402aa7ff2"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RegistrarDevolucaoJourneyType = typeof registrarDevolucaoJourney;

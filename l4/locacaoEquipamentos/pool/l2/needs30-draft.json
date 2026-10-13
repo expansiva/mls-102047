@@ -1,7 +1,7 @@
 {
-  "thread": "locacaoEquipamentos-20261012193427",
+  "thread": "locacaoEquipamentos-20261013010205",
   "round": 1,
-  "inputFile": "l4/locacaoEquipamentos/pool/l2/20261012193427_locacaoEquipamentos-20261012193427_1.json",
+  "inputFile": "l4/locacaoEquipamentos/pool/l2/20261013010205_locacaoEquipamentos-20261013010205_1.json",
   "needs": {
     "schemaVersion": "2026-09-21-p2-needs-v1",
     "moduleName": "locacaoEquipamentos",
@@ -9,7 +9,7 @@
     "menuSchema": "2026-09-20-p2-menu-v2.2",
     "pages": [
       {
-        "pageId": "inicio",
+        "pageId": "painel_locacao",
         "actors": [
           "atendente",
           "gerente"
@@ -21,13 +21,13 @@
             "scope": "organization",
             "derived": [],
             "from": [
-              "grant:atendenteContratos",
-              "grant:gerenteClienteNome",
-              "journey:acompanharSituacaoEquipamentos/filtrarPorSituacao",
+              "grant:atendenteClientes",
+              "grant:gerenteClientes",
+              "journey:acompanharSituacaoEquipamentos/listarEquipamentos",
               "journey:acompanharSituacaoEquipamentos/verEquipamento",
               "relationship:Cliente/contratoCliente",
               "relationship:ContratoLocacao/contratoCliente",
-              "relationship:Equipamento/equipamentosDoContrato"
+              "relationship:Equipamento/equipamentoContratos"
             ]
           },
           {
@@ -37,20 +37,20 @@
             "derived": [
               "details.atrasado",
               "details.diasAtraso",
-              "details.diasContratados",
+              "details.quantidadeItens",
               "details.valorMulta",
-              "details.valorPrevisto"
+              "numero"
             ],
             "from": [
               "grant:atendenteContratos",
-              "grant:gerenteContratosVigentes",
-              "journey:acompanharSituacaoEquipamentos/filtrarPorSituacao",
+              "grant:gerenteContratos",
+              "journey:acompanharSituacaoEquipamentos/listarEquipamentos",
               "journey:acompanharSituacaoEquipamentos/verEquipamento",
               "relationship:Cliente/contratoCliente",
               "relationship:ContratoLocacao/contratoCliente",
-              "relationship:ContratoLocacao/equipamentosDoContrato",
+              "relationship:ContratoLocacao/equipamentoContratos",
               "relationship:ContratoLocacao/itemContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:Equipamento/itemEquipamento",
               "relationship:ItemContrato/itemContrato"
             ]
@@ -60,18 +60,17 @@
             "family": "tdm",
             "scope": "organization",
             "derived": [
-              "details.contratoVigente",
-              "details.dataPrevistaDevolucao",
+              "details.contratoAtual",
               "details.locado",
               "details.situacaoAtual"
             ],
             "from": [
-              "grant:atendenteConsultaEquipamentos",
+              "grant:atendenteEquipamentos",
               "grant:gerenteEquipamentos",
-              "journey:acompanharSituacaoEquipamentos/filtrarPorSituacao",
+              "journey:acompanharSituacaoEquipamentos/listarEquipamentos",
               "journey:acompanharSituacaoEquipamentos/verEquipamento",
-              "relationship:ContratoLocacao/equipamentosDoContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "relationship:ContratoLocacao/equipamentoContratos",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:Equipamento/itemEquipamento",
               "relationship:ItemContrato/itemEquipamento"
             ]
@@ -88,11 +87,11 @@
             ],
             "from": [
               "grant:atendenteContratos",
-              "grant:gerenteContratosVigentes",
-              "journey:acompanharSituacaoEquipamentos/filtrarPorSituacao",
+              "grant:gerenteContratos",
+              "journey:acompanharSituacaoEquipamentos/listarEquipamentos",
               "journey:acompanharSituacaoEquipamentos/verEquipamento",
               "relationship:ContratoLocacao/itemContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:Equipamento/itemEquipamento",
               "relationship:ItemContrato/itemContrato",
               "relationship:ItemContrato/itemEquipamento"
@@ -102,9 +101,10 @@
         "writes": []
       },
       {
-        "pageId": "contratos",
+        "pageId": "contratos_locacao",
         "actors": [
-          "atendente"
+          "atendente",
+          "gerente"
         ],
         "reads": [
           {
@@ -113,12 +113,13 @@
             "scope": "organization",
             "derived": [],
             "from": [
-              "grant:atendenteContratos",
+              "grant:atendenteClientes",
+              "grant:gerenteClientes",
               "journey:criarContratoLocacao/adicionarItens",
               "journey:criarContratoLocacao/confirmarContrato",
+              "journey:criarContratoLocacao/consultarEquipamentos",
               "journey:criarContratoLocacao/informarPeriodo",
               "journey:criarContratoLocacao/localizarCliente",
-              "journey:criarContratoLocacao/localizarEquipamentos",
               "journey:registrarDevolucao/conferirContrato",
               "journey:registrarDevolucao/conferirMulta",
               "journey:registrarDevolucao/localizarContrato",
@@ -134,26 +135,27 @@
             "derived": [
               "details.atrasado",
               "details.diasAtraso",
-              "details.diasContratados",
+              "details.quantidadeItens",
               "details.valorMulta",
-              "details.valorPrevisto"
+              "numero"
             ],
             "from": [
               "grant:atendenteContratos",
+              "grant:gerenteContratos",
               "journey:criarContratoLocacao/adicionarItens",
               "journey:criarContratoLocacao/confirmarContrato",
+              "journey:criarContratoLocacao/consultarEquipamentos",
               "journey:criarContratoLocacao/informarPeriodo",
               "journey:criarContratoLocacao/localizarCliente",
-              "journey:criarContratoLocacao/localizarEquipamentos",
               "journey:registrarDevolucao/conferirContrato",
               "journey:registrarDevolucao/conferirMulta",
               "journey:registrarDevolucao/localizarContrato",
               "journey:registrarDevolucao/registrarDataReal",
               "relationship:Cliente/contratoCliente",
               "relationship:ContratoLocacao/contratoCliente",
-              "relationship:ContratoLocacao/equipamentosDoContrato",
+              "relationship:ContratoLocacao/equipamentoContratos",
               "relationship:ContratoLocacao/itemContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:ItemContrato/itemContrato"
             ]
           },
@@ -162,25 +164,25 @@
             "family": "tdm",
             "scope": "organization",
             "derived": [
-              "details.contratoVigente",
-              "details.dataPrevistaDevolucao",
+              "details.contratoAtual",
               "details.locado",
               "details.situacaoAtual"
             ],
             "from": [
-              "grant:atendenteConsultaEquipamentos",
+              "grant:atendenteEquipamentos",
+              "grant:gerenteEquipamentos",
               "journey:criarContratoLocacao/adicionarItens",
               "journey:criarContratoLocacao/confirmarContrato",
+              "journey:criarContratoLocacao/consultarEquipamentos",
               "journey:criarContratoLocacao/informarPeriodo",
               "journey:criarContratoLocacao/localizarCliente",
-              "journey:criarContratoLocacao/localizarEquipamentos",
               "journey:registrarDevolucao/conferirContrato",
               "journey:registrarDevolucao/conferirMulta",
               "journey:registrarDevolucao/localizarContrato",
               "journey:registrarDevolucao/registrarDataReal",
-              "relationship:ContratoLocacao/equipamentosDoContrato",
+              "relationship:ContratoLocacao/equipamentoContratos",
               "relationship:ContratoLocacao/itemContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:Equipamento/itemEquipamento",
               "relationship:ItemContrato/itemEquipamento"
             ]
@@ -197,17 +199,18 @@
             ],
             "from": [
               "grant:atendenteContratos",
+              "grant:gerenteContratos",
               "journey:criarContratoLocacao/adicionarItens",
               "journey:criarContratoLocacao/confirmarContrato",
+              "journey:criarContratoLocacao/consultarEquipamentos",
               "journey:criarContratoLocacao/informarPeriodo",
               "journey:criarContratoLocacao/localizarCliente",
-              "journey:criarContratoLocacao/localizarEquipamentos",
               "journey:registrarDevolucao/conferirContrato",
               "journey:registrarDevolucao/conferirMulta",
               "journey:registrarDevolucao/localizarContrato",
               "journey:registrarDevolucao/registrarDataReal",
               "relationship:ContratoLocacao/itemContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:Equipamento/itemEquipamento",
               "relationship:ItemContrato/itemContrato",
               "relationship:ItemContrato/itemEquipamento"
@@ -262,18 +265,18 @@
             "scope": "organization",
             "derived": [],
             "from": [
-              "grant:atendenteContratos",
-              "grant:gerenteClienteNome",
-              "journey:acompanharSituacaoEquipamentos/filtrarPorSituacao",
+              "grant:atendenteClientes",
+              "grant:gerenteClientes",
+              "journey:acompanharSituacaoEquipamentos/listarEquipamentos",
               "journey:acompanharSituacaoEquipamentos/verEquipamento",
-              "journey:enviarEquipamentoManutencao/conferirEquipamento",
-              "journey:enviarEquipamentoManutencao/enviarManutencao",
-              "journey:enviarEquipamentoManutencao/localizarEquipamento",
-              "journey:retornarEquipamentoManutencao/localizarEmManutencao",
-              "journey:retornarEquipamentoManutencao/retornarManutencao",
+              "journey:criarContratoLocacao/adicionarItens",
+              "journey:criarContratoLocacao/confirmarContrato",
+              "journey:criarContratoLocacao/consultarEquipamentos",
+              "journey:criarContratoLocacao/informarPeriodo",
+              "journey:criarContratoLocacao/localizarCliente",
               "relationship:Cliente/contratoCliente",
               "relationship:ContratoLocacao/contratoCliente",
-              "relationship:Equipamento/equipamentosDoContrato"
+              "relationship:Equipamento/equipamentoContratos"
             ]
           },
           {
@@ -283,25 +286,25 @@
             "derived": [
               "details.atrasado",
               "details.diasAtraso",
-              "details.diasContratados",
+              "details.quantidadeItens",
               "details.valorMulta",
-              "details.valorPrevisto"
+              "numero"
             ],
             "from": [
               "grant:atendenteContratos",
-              "grant:gerenteContratosVigentes",
-              "journey:acompanharSituacaoEquipamentos/filtrarPorSituacao",
+              "grant:gerenteContratos",
+              "journey:acompanharSituacaoEquipamentos/listarEquipamentos",
               "journey:acompanharSituacaoEquipamentos/verEquipamento",
-              "journey:enviarEquipamentoManutencao/conferirEquipamento",
-              "journey:enviarEquipamentoManutencao/enviarManutencao",
-              "journey:enviarEquipamentoManutencao/localizarEquipamento",
-              "journey:retornarEquipamentoManutencao/localizarEmManutencao",
-              "journey:retornarEquipamentoManutencao/retornarManutencao",
+              "journey:criarContratoLocacao/adicionarItens",
+              "journey:criarContratoLocacao/confirmarContrato",
+              "journey:criarContratoLocacao/consultarEquipamentos",
+              "journey:criarContratoLocacao/informarPeriodo",
+              "journey:criarContratoLocacao/localizarCliente",
               "relationship:Cliente/contratoCliente",
               "relationship:ContratoLocacao/contratoCliente",
-              "relationship:ContratoLocacao/equipamentosDoContrato",
+              "relationship:ContratoLocacao/equipamentoContratos",
               "relationship:ContratoLocacao/itemContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:Equipamento/itemEquipamento",
               "relationship:ItemContrato/itemContrato"
             ]
@@ -311,23 +314,22 @@
             "family": "tdm",
             "scope": "organization",
             "derived": [
-              "details.contratoVigente",
-              "details.dataPrevistaDevolucao",
+              "details.contratoAtual",
               "details.locado",
               "details.situacaoAtual"
             ],
             "from": [
-              "grant:atendenteConsultaEquipamentos",
+              "grant:atendenteEquipamentos",
               "grant:gerenteEquipamentos",
-              "journey:acompanharSituacaoEquipamentos/filtrarPorSituacao",
+              "journey:acompanharSituacaoEquipamentos/listarEquipamentos",
               "journey:acompanharSituacaoEquipamentos/verEquipamento",
-              "journey:enviarEquipamentoManutencao/conferirEquipamento",
-              "journey:enviarEquipamentoManutencao/enviarManutencao",
-              "journey:enviarEquipamentoManutencao/localizarEquipamento",
-              "journey:retornarEquipamentoManutencao/localizarEmManutencao",
-              "journey:retornarEquipamentoManutencao/retornarManutencao",
-              "relationship:ContratoLocacao/equipamentosDoContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "journey:criarContratoLocacao/adicionarItens",
+              "journey:criarContratoLocacao/confirmarContrato",
+              "journey:criarContratoLocacao/consultarEquipamentos",
+              "journey:criarContratoLocacao/informarPeriodo",
+              "journey:criarContratoLocacao/localizarCliente",
+              "relationship:ContratoLocacao/equipamentoContratos",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:Equipamento/itemEquipamento",
               "relationship:ItemContrato/itemEquipamento"
             ]
@@ -344,16 +346,16 @@
             ],
             "from": [
               "grant:atendenteContratos",
-              "grant:gerenteContratosVigentes",
-              "journey:acompanharSituacaoEquipamentos/filtrarPorSituacao",
+              "grant:gerenteContratos",
+              "journey:acompanharSituacaoEquipamentos/listarEquipamentos",
               "journey:acompanharSituacaoEquipamentos/verEquipamento",
-              "journey:enviarEquipamentoManutencao/conferirEquipamento",
-              "journey:enviarEquipamentoManutencao/enviarManutencao",
-              "journey:enviarEquipamentoManutencao/localizarEquipamento",
-              "journey:retornarEquipamentoManutencao/localizarEmManutencao",
-              "journey:retornarEquipamentoManutencao/retornarManutencao",
+              "journey:criarContratoLocacao/adicionarItens",
+              "journey:criarContratoLocacao/confirmarContrato",
+              "journey:criarContratoLocacao/consultarEquipamentos",
+              "journey:criarContratoLocacao/informarPeriodo",
+              "journey:criarContratoLocacao/localizarCliente",
               "relationship:ContratoLocacao/itemContrato",
-              "relationship:Equipamento/equipamentosDoContrato",
+              "relationship:Equipamento/equipamentoContratos",
               "relationship:Equipamento/itemEquipamento",
               "relationship:ItemContrato/itemContrato",
               "relationship:ItemContrato/itemEquipamento"
@@ -362,19 +364,27 @@
         ],
         "writes": [
           {
-            "entity": "Equipamento",
-            "operation": "transition",
-            "transitionRef": "enviarManutencao",
+            "entity": "ContratoLocacao",
+            "operation": "create",
+            "transitionRef": "",
             "from": [
-              "journey:enviarEquipamentoManutencao/enviarManutencao"
+              "journey:criarContratoLocacao/informarPeriodo"
             ]
           },
           {
-            "entity": "Equipamento",
+            "entity": "ContratoLocacao",
             "operation": "transition",
-            "transitionRef": "retornarManutencao",
+            "transitionRef": "ativarContrato",
             "from": [
-              "journey:retornarEquipamentoManutencao/retornarManutencao"
+              "journey:criarContratoLocacao/confirmarContrato"
+            ]
+          },
+          {
+            "entity": "ItemContrato",
+            "operation": "create",
+            "transitionRef": "",
+            "from": [
+              "journey:criarContratoLocacao/adicionarItens"
             ]
           }
         ]
@@ -382,7 +392,7 @@
     ],
     "meta": {
       "sourceMenu": "pool/l2/web/menu.json",
-      "generatedAt": "2026-10-12T19:34:44.333Z"
+      "generatedAt": "2026-10-13T01:02:22.256Z"
     }
   }
 }

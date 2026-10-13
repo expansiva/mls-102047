@@ -8,35 +8,35 @@ export const acompanharSituacaoEquipamentosJourney = {
   "business": {
     "actorRef": "gerente",
     "title": "Acompanhar situação dos equipamentos",
-    "goal": "Saber quais equipamentos estão disponíveis, locados ou em manutenção.",
+    "goal": "Ver quais equipamentos estão disponíveis, locados ou em manutenção.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "filtrarPorSituacao",
+        "stepId": "listarEquipamentos",
         "kind": "locate",
         "entity": "Equipamento",
-        "title": "Filtrar equipamentos por situação",
-        "description": "Lista os equipamentos agrupados ou filtrados por situação: disponível, locado ou em manutenção."
+        "title": "Listar equipamentos por situação",
+        "description": "O gerente filtra os equipamentos pela situação: disponível, locado ou em manutenção."
       },
       {
         "stepId": "verEquipamento",
         "kind": "inspect",
         "entity": "Equipamento",
         "title": "Ver detalhes do equipamento",
-        "description": "Consulta código, descrição, valor da diária, situação e, quando locado, o contrato vigente e a data prevista de devolução."
+        "description": "O gerente consulta código, descrição, valor da diária, situação e o contrato em que o equipamento está locado."
       }
     ],
     "outcome": {
       "statement": "O gerente conhece a situação atual de cada equipamento da locadora.",
       "evidence": [
-        "Totais de equipamentos disponíveis, locados e em manutenção exibidos",
-        "Equipamento locado mostra o contrato vigente e a data prevista de devolução"
+        "Lista de equipamentos agrupada ou filtrada por situação",
+        "Totais de equipamentos disponíveis, locados e em manutenção"
       ]
     }
   },
-  "businessHash": "sha256:c1254552ccda220a560108a0d2d8540e4435981cc4af8ad2267d1c7faf73b5e8"
+  "businessHash": "sha256:b10ab0216be78e39ce7448cfabaf73acffdc92c71851fbda5955e6fbebb351c6"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharSituacaoEquipamentosJourneyType = typeof acompanharSituacaoEquipamentosJourney;

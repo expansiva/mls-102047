@@ -208,61 +208,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-10-12T15:41:38.204Z"
     },
     {
-      "moduleName": "locacaoEquipamentos",
-      "actors": [
-        {
-          "actorId": "atendente",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gerente",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "locacaoEquipamentos.Cliente",
-          "namespace": "locacaoEquipamentos"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Cliente",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Equipamento",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "ContratoLocacao",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "ItemContrato",
-          "kind": "entity",
-          "class": "supporting"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "contratoLocacaoAtivado",
-          "on": "ContratoLocacao.ativarContrato"
-        },
-        {
-          "eventId": "devolucaoRegistrada",
-          "on": "ContratoLocacao.registrarDevolucao"
-        }
-      ],
-      "updatedAt": "2026-10-12T19:34:07.351Z"
-    },
-    {
       "moduleName": "manutencaoFrota",
       "actors": [
         {
@@ -777,6 +722,61 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-13T00:58:17.896Z"
+    },
+    {
+      "moduleName": "locacaoEquipamentos",
+      "actors": [
+        {
+          "actorId": "atendente",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerente",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "locacaoEquipamentos.Cliente",
+          "namespace": "locacaoEquipamentos"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Cliente",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Equipamento",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "ContratoLocacao",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "ItemContrato",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "contratoLocacaoAtivado",
+          "on": "ContratoLocacao.ativarContrato"
+        },
+        {
+          "eventId": "devolucaoRegistrada",
+          "on": "ContratoLocacao.registrarDevolucao"
+        }
+      ],
+      "updatedAt": "2026-10-13T01:01:52.979Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;
