@@ -1,0 +1,875 @@
+{
+  "attempt": "1",
+  "model": "claude-opus-5-5",
+  "promptChars": 48301,
+  "receivedAt": "2026-10-13T07:39:42.980Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Bff",
+      "arguments": {
+        "types": [
+          {
+            "name": "StageSummary",
+            "description": "One active pipeline stage with its count and time-in-stage indicators.",
+            "fields": [
+              {
+                "name": "status",
+                "type": "'screening' | 'interview' | 'offer'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.status"
+                  ]
+                }
+              },
+              {
+                "name": "activeApplications",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Application.id",
+                    "Application.status",
+                    "Application.details.isActive"
+                  ]
+                }
+              },
+              {
+                "name": "maxDaysInStage",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Application.details.daysInStage",
+                    "Application.stageChangedAt"
+                  ]
+                }
+              },
+              {
+                "name": "avgDaysInStage",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Application.details.daysInStage",
+                    "Application.stageChangedAt"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "OpenPositionDetails",
+            "description": "Headcount figures of an open position.",
+            "fields": [
+              {
+                "name": "headcount",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.details.headcount"
+                  ]
+                }
+              },
+              {
+                "name": "hiresSoFar",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.details.hiresSoFar"
+                  ]
+                }
+              },
+              {
+                "name": "remainingOpenings",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.details.remainingOpenings"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "OpenPositionSummary",
+            "description": "An open job position with its remaining openings, hires so far and active applications.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.id"
+                  ]
+                }
+              },
+              {
+                "name": "title",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.title"
+                  ]
+                }
+              },
+              {
+                "name": "department",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.department"
+                  ]
+                }
+              },
+              {
+                "name": "status",
+                "type": "'open' | 'closed'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.status"
+                  ]
+                }
+              },
+              {
+                "name": "details",
+                "type": "OpenPositionDetails",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.details"
+                  ]
+                }
+              },
+              {
+                "name": "activeApplications",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Application.jobPositionId",
+                    "Application.details.isActive"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueApplicationDetails",
+            "description": "Derived and free details of a queued application.",
+            "fields": [
+              {
+                "name": "notes",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.details.notes"
+                  ]
+                }
+              },
+              {
+                "name": "isActive",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.details.isActive"
+                  ]
+                }
+              },
+              {
+                "name": "daysInStage",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.details.daysInStage"
+                  ]
+                }
+              },
+              {
+                "name": "remainingOpenings",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.details.remainingOpenings"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueCandidateIdentification",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Candidate.details.identification.name"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueCandidateHiringPipeline",
+            "fields": [
+              {
+                "name": "resumeLink",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Candidate.details.hiringPipeline.resumeLink"
+                  ]
+                }
+              },
+              {
+                "name": "source",
+                "type": "'careerSite' | 'jobBoard' | 'linkedIn' | 'referral' | 'agency' | 'event' | 'other'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Candidate.details.hiringPipeline.source"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueCandidateDetails",
+            "fields": [
+              {
+                "name": "identification",
+                "type": "QueueCandidateIdentification",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Candidate.details.identification"
+                  ]
+                }
+              },
+              {
+                "name": "hiringPipeline",
+                "type": "QueueCandidateHiringPipeline",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Candidate.details.hiringPipeline"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueCandidate",
+            "description": "Candidate of the application, read from the master record.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Candidate.id"
+                  ]
+                }
+              },
+              {
+                "name": "details",
+                "type": "QueueCandidateDetails",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Candidate.details"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueHiringManagerIdentification",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "HiringManager.details.identification.name"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueHiringManagerDetails",
+            "fields": [
+              {
+                "name": "identification",
+                "type": "QueueHiringManagerIdentification",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "HiringManager.details.identification"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueHiringManager",
+            "description": "Hiring manager of the position, only the name allowed by the grant.",
+            "fields": [
+              {
+                "name": "details",
+                "type": "QueueHiringManagerDetails",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "HiringManager.details"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "QueueJobPosition",
+            "description": "Position of the application with its hiring manager.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.id"
+                  ]
+                }
+              },
+              {
+                "name": "title",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.title"
+                  ]
+                }
+              },
+              {
+                "name": "hiringManagerId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.hiringManagerId"
+                  ]
+                }
+              },
+              {
+                "name": "hiringManager",
+                "type": "QueueHiringManager",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "HiringManager.details"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "WorkQueueItem",
+            "description": "One application of the recruiter's work queue with candidate and position, as the inbox row and its expanded view show it.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.id"
+                  ]
+                }
+              },
+              {
+                "name": "version",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.version"
+                  ]
+                }
+              },
+              {
+                "name": "code",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.code"
+                  ]
+                }
+              },
+              {
+                "name": "status",
+                "type": "'screening' | 'interview' | 'offer' | 'hired' | 'rejected'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.status"
+                  ]
+                }
+              },
+              {
+                "name": "appliedAt",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.appliedAt"
+                  ]
+                }
+              },
+              {
+                "name": "stageChangedAt",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.stageChangedAt"
+                  ]
+                }
+              },
+              {
+                "name": "candidateId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.candidateId"
+                  ]
+                }
+              },
+              {
+                "name": "jobPositionId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.jobPositionId"
+                  ]
+                }
+              },
+              {
+                "name": "details",
+                "type": "QueueApplicationDetails",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.details"
+                  ]
+                }
+              },
+              {
+                "name": "candidate",
+                "type": "QueueCandidate",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Candidate.details"
+                  ]
+                }
+              },
+              {
+                "name": "jobPosition",
+                "type": "QueueJobPosition",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "JobPosition.details"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "endpoints": [
+          {
+            "id": "getPipelineOverview",
+            "kind": "qry",
+            "when": "onLoad",
+            "input": [],
+            "output": [
+              {
+                "name": "stages",
+                "type": "StageSummary[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Application.status",
+                    "Application.details.isActive",
+                    "Application.details.daysInStage",
+                    "Application.stageChangedAt"
+                  ]
+                }
+              },
+              {
+                "name": "openPositions",
+                "type": "OpenPositionSummary[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "JobPosition.status",
+                    "JobPosition.details.headcount",
+                    "JobPosition.details.hiresSoFar",
+                    "JobPosition.details.remainingOpenings",
+                    "Application.jobPositionId"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "applicationActiveCalculation",
+              "daysInStageCalculation",
+              "hiresSoFarCalculation",
+              "remainingOpeningsCalculation"
+            ],
+            "jsdoc": {
+              "purpose": "Loads the pipeline summary of the recruiter home: active applications per stage with time-in-stage indicators, and the open positions with their openings.",
+              "input": "None; the scope is the recruiter's organization.",
+              "processing": "Counts active applications (applicationActiveCalculation: screening, interview or offer) grouped by stage, always returning the three stages even when zero; computes max and average days in stage from stageChangedAt up to today (daysInStageCalculation). Lists positions with status open, with hiresSoFar = applications in hired (hiresSoFarCalculation), remainingOpenings = headcount - hiresSoFar, never below zero (remainingOpeningsCalculation), and the count of active applications per position. Derived values are computed, never stored. Positions ordered by remaining openings descending, then title.",
+              "output": "stages and openPositions, already computed, so the highlights render without any summing on the page."
+            }
+          },
+          {
+            "id": "listWorkQueue",
+            "kind": "qry",
+            "when": "onLoad",
+            "input": [
+              {
+                "name": "status",
+                "type": "'screening' | 'interview' | 'offer'",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.status"
+                  ]
+                }
+              },
+              {
+                "name": "page",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              },
+              {
+                "name": "pageSize",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "applications",
+                "type": "WorkQueueItem[]",
+                "paginated": true,
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Application.id",
+                    "Application.details.isActive",
+                    "Application.stageChangedAt"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "applicationActiveCalculation",
+              "daysInStageCalculation",
+              "remainingOpeningsCalculation"
+            ],
+            "jsdoc": {
+              "purpose": "Lists the applications waiting for the recruiter, optionally narrowed to one stage picked in the pipeline highlights.",
+              "input": "status: optional stage filter (screening, interview or offer) chosen in the highlights; page and pageSize: paging of the queue.",
+              "processing": "Selects active applications only (applicationActiveCalculation) in the organization, filtered by status when given, ordered by stageChangedAt ascending (oldest in their stage first). Joins the candidate master record (name, resume link, source), the job position (title, hiringManagerId) and the hiring manager name. Computes daysInStage up to today (daysInStageCalculation) and the position's remainingOpenings (remainingOpeningsCalculation) per row.",
+              "output": "A page { items, page, pageSize, hasMore } of WorkQueueItem, carrying id and version for the stage-change commands."
+            }
+          },
+          {
+            "id": "advanceToInterview",
+            "kind": "cmd",
+            "when": "advanceToInterview",
+            "writes": "Application.advanceToInterview",
+            "input": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.id"
+                  ]
+                }
+              },
+              {
+                "name": "version",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.version"
+                  ]
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "application",
+                "type": "WorkQueueItem",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.id"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "stageSequenceEnforced",
+              "finalStagesAreTerminal",
+              "daysInStageCalculation"
+            ],
+            "jsdoc": {
+              "purpose": "Moves a screened application to the interview stage so it reaches the position's hiring manager after the interview.",
+              "input": "id: the application; version: the version the recruiter saw, for optimistic concurrency.",
+              "processing": "Refuses on version mismatch. Applies transition advanceToInterview only from screening (stageSequenceEnforced) and refuses hired or rejected applications (finalStagesAreTerminal). The engine records status interview, stageChangedAt, details.interview.movedAt and movedBy (the signed-in recruiter). daysInStage is recomputed (daysInStageCalculation), not stored.",
+              "output": "The updated WorkQueueItem, upserted in place in the queue."
+            }
+          },
+          {
+            "id": "rejectApplication",
+            "kind": "cmd",
+            "when": "rejectApplication",
+            "writes": "Application.reject",
+            "input": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.id"
+                  ]
+                }
+              },
+              {
+                "name": "version",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.version"
+                  ]
+                }
+              },
+              {
+                "name": "reason",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.details.rejection.reason"
+                  ]
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "application",
+                "type": "WorkQueueItem",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Application.id"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "rejectionRequiresReason",
+              "finalStagesAreTerminal",
+              "stageSequenceEnforced"
+            ],
+            "jsdoc": {
+              "purpose": "Rejects an application that will not move forward, recording the reason.",
+              "input": "id and version of the application; reason: the rejection reason typed by the recruiter.",
+              "processing": "Refuses on version mismatch. Refuses an empty reason (rejectionRequiresReason) and records stageAtRejection and rejectedAt. Allowed only from screening, interview or offer (stageSequenceEnforced); hired or rejected applications are refused (finalStagesAreTerminal). Status becomes rejected and the application stops being active.",
+              "output": "The rejected WorkQueueItem, used to remove the row from the queue."
+            }
+          }
+        ],
+        "bindings": {
+          "organisms": [
+            {
+              "organism": "pipelineHighlights",
+              "reads": "getPipelineOverview.stages"
+            },
+            {
+              "organism": "pipelineHighlights",
+              "reads": "getPipelineOverview.openPositions"
+            },
+            {
+              "organism": "applicationsInbox",
+              "reads": "listWorkQueue.applications"
+            }
+          ],
+          "commands": [
+            {
+              "endpoint": "advanceToInterview",
+              "refreshes": [
+                "getPipelineOverview"
+              ]
+            },
+            {
+              "endpoint": "rejectApplication",
+              "refreshes": [
+                "getPipelineOverview"
+              ]
+            }
+          ],
+          "selections": [
+            {
+              "organism": "pipelineHighlights",
+              "via": {
+                "kind": "query",
+                "ref": "listWorkQueue"
+              }
+            }
+          ],
+          "journeys": [
+            {
+              "step": "advanceToInterview/findApplication",
+              "organisms": [
+                "pipelineHighlights",
+                "applicationsInbox"
+              ],
+              "endpoints": [
+                "getPipelineOverview",
+                "listWorkQueue"
+              ]
+            },
+            {
+              "step": "advanceToInterview/reviewApplication",
+              "organisms": [
+                "applicationsInbox"
+              ],
+              "endpoints": [
+                "listWorkQueue"
+              ]
+            },
+            {
+              "step": "advanceToInterview/moveToInterview",
+              "organisms": [
+                "applicationsInbox"
+              ],
+              "endpoints": [
+                "advanceToInterview"
+              ]
+            },
+            {
+              "step": "rejectApplication/findApplication",
+              "organisms": [
+                "pipelineHighlights",
+                "applicationsInbox"
+              ],
+              "endpoints": [
+                "getPipelineOverview",
+                "listWorkQueue"
+              ]
+            },
+            {
+              "step": "rejectApplication/reviewApplication",
+              "organisms": [
+                "applicationsInbox"
+              ],
+              "endpoints": [
+                "listWorkQueue"
+              ]
+            },
+            {
+              "step": "rejectApplication/reject",
+              "organisms": [
+                "applicationsInbox"
+              ],
+              "endpoints": [
+                "rejectApplication"
+              ]
+            },
+            {
+              "step": "registerCandidateApplication/registerCandidate",
+              "organisms": [],
+              "endpoints": [],
+              "continuesIn": "candidates"
+            },
+            {
+              "step": "registerCandidateApplication/findPosition",
+              "organisms": [],
+              "endpoints": [],
+              "continuesIn": "applications"
+            },
+            {
+              "step": "registerCandidateApplication/createApplication",
+              "organisms": [],
+              "endpoints": [],
+              "continuesIn": "applications"
+            }
+          ],
+          "updates": [
+            {
+              "endpoint": "listWorkQueue",
+              "state": "listWorkQueue.applications",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "advanceToInterview",
+              "state": "listWorkQueue.applications",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "rejectApplication",
+              "state": "listWorkQueue.applications",
+              "mode": "remove"
+            }
+          ]
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 18,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

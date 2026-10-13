@@ -1,0 +1,580 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 158988,
+  "receivedAt": "2026-10-13T07:38:40.827Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "Applications is a recruiter work queue. Each application has a pipeline stage and days in that stage. The recruiter finds one, reviews it and acts on it by moving it to interview or rejecting it with a reason. The page can also record new applications. A queue of items with a status and transition actions matches operationsQueue on both devices.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "operationsQueue"
+            },
+            "intent": "Help the recruiter find any application in the organization, see how long it has been in its current stage, and review it: candidate, position, stage history and hiring manager decisions. The recruiter can then move it to interview, hand it to the hiring manager, or reject it with a reason. New applications for open positions can be recorded on the same page.",
+            "sections": [
+              {
+                "id": "findApplications",
+                "priority": "primary",
+                "purpose": "Find applications by number, candidate, position or stage, and spot stalled ones by their days in the current stage.",
+                "organisms": [
+                  "applicationList"
+                ]
+              },
+              {
+                "id": "reviewAndAct",
+                "priority": "main",
+                "purpose": "Review the selected application in full, act on it, and see how it moved through the pipeline.",
+                "organisms": [
+                  "applicationDetail",
+                  "applicationActions",
+                  "stageHistory"
+                ]
+              },
+              {
+                "id": "recordApplication",
+                "priority": "secondary",
+                "purpose": "Record a new application from a candidate to an open position. It starts in screening.",
+                "organisms": [
+                  "newApplicationForm"
+                ]
+              }
+            ],
+            "organisms": {
+              "applicationList": {
+                "kind": "list",
+                "text": "Applications with number, candidate, position, stage and days in the current stage. The recruiter can search and filter them to find the one to work on.",
+                "intents": []
+              },
+              "newApplicationForm": {
+                "kind": "form",
+                "text": "Choose the candidate and an open position and add optional notes to record the application in screening. If the candidate is not registered yet, register them first on the Candidates page.",
+                "intents": [
+                  {
+                    "id": "recordApplication",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "registerNewCandidate",
+                    "kind": "navigate",
+                    "to": "candidates"
+                  }
+                ]
+              },
+              "applicationDetail": {
+                "kind": "detail",
+                "text": "The selected application: candidate with e-mail, resume link and source; position with its hiring manager and remaining openings; current stage and applied date. Also shows interview, offer, hire and rejection details when they exist.",
+                "intents": []
+              },
+              "applicationActions": {
+                "kind": "actions",
+                "text": "Move a screened application to interview so it goes to the position's hiring manager for the offer decision, or reject an active application. A reason is required to reject.",
+                "intents": [
+                  {
+                    "id": "moveToInterview",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "rejectApplication",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "stageHistory": {
+                "kind": "timeline",
+                "text": "Each stage the application passed through, with when it happened and who decided: the move to interview, the hiring manager's offer and hire, or the rejection with the stage it was in.",
+                "intents": []
+              }
+            },
+            "molecules": {
+              "applicationList": [
+                {
+                  "role": "application table",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewtable--ml-advanced-data-table"
+                },
+                {
+                  "role": "search by number, candidate or position",
+                  "preferred": "groupsearchcontent--ml-search-filters",
+                  "alternative": "groupsearchcontent--ml-search-bar"
+                },
+                {
+                  "role": "stage filter",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-select"
+                }
+              ],
+              "newApplicationForm": [
+                {
+                  "role": "candidate choice",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "open position choice",
+                  "preferred": "groupselectone--ml-combobox",
+                  "alternative": "groupselectone--ml-select-one-autocomplete"
+                },
+                {
+                  "role": "application notes",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "record application",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "recorded confirmation",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ],
+              "applicationDetail": [
+                {
+                  "role": "candidate summary",
+                  "preferred": "groupviewcard--ml-profile-card",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                },
+                {
+                  "role": "interview, offer, hire and rejection details",
+                  "preferred": "groupexpandcontent--ml-collapsible-panel",
+                  "alternative": "groupexpandcontent--ml-accordion"
+                }
+              ],
+              "applicationActions": [
+                {
+                  "role": "stage actions",
+                  "preferred": "grouptriggeraction--ml-button-group",
+                  "alternative": "grouptriggeraction--ml-button-standard"
+                },
+                {
+                  "role": "rejection reason",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "confirm rejection",
+                  "preferred": "groupnotifyuser--ml-alert-modal",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ],
+              "stageHistory": [
+                {
+                  "role": "stage history",
+                  "preferred": "groupviewdata--ml-timeline-view",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "applicationList": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.isActive",
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Candidate.details.identification.name",
+                  "JobPosition.title",
+                  "JobPosition.department"
+                ],
+                "edits": [],
+                "selects": "applicationDetail",
+                "submits": []
+              },
+              "newApplicationForm": {
+                "reads": [
+                  "Candidate.details.identification.name",
+                  "CandidateEmail.details.contactChannel.value",
+                  "JobPosition.title",
+                  "JobPosition.department",
+                  "JobPosition.status",
+                  "JobPosition.details.remainingOpenings"
+                ],
+                "edits": [
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Application.details.notes"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "recordApplication",
+                    "write": "Application.create"
+                  }
+                ]
+              },
+              "applicationDetail": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.notes",
+                  "Application.details.remainingOpenings",
+                  "Application.details.interview.movedAt",
+                  "Application.details.offer.extendedAt",
+                  "Application.details.offer.notes",
+                  "Application.details.hire.hiredAt",
+                  "Application.details.rejection.reason",
+                  "Application.details.rejection.rejectedAt",
+                  "Application.details.rejection.stageAtRejection",
+                  "Candidate.details.identification.name",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source",
+                  "CandidateEmail.details.contactChannel.value",
+                  "JobPosition.title",
+                  "JobPosition.department",
+                  "JobPosition.status",
+                  "HiringManager.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "applicationActions": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.details.isActive"
+                ],
+                "edits": [
+                  "Application.details.rejection.reason"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "moveToInterview",
+                    "write": "Application.advanceToInterview"
+                  },
+                  {
+                    "intentId": "rejectApplication",
+                    "write": "Application.reject"
+                  }
+                ]
+              },
+              "stageHistory": {
+                "reads": [
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.interview.movedAt",
+                  "Application.details.interview.movedBy",
+                  "Application.details.offer.extendedAt",
+                  "Application.details.offer.decidedBy",
+                  "Application.details.hire.hiredAt",
+                  "Application.details.hire.decidedBy",
+                  "Application.details.rejection.rejectedAt",
+                  "Application.details.rejection.stageAtRejection",
+                  "Application.details.rejection.reason"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "operationsQueue"
+            },
+            "intent": "On a narrow screen (about 390px, also usable at 360px and 430px), the recruiter finds an application and then opens it to review the candidate, position and stage. From there they move it to interview or reject it with a reason, and can check its stage history. Recording a new application is a short form that follows.",
+            "sections": [
+              {
+                "id": "findApplications",
+                "priority": "primary",
+                "purpose": "A compact, searchable list of applications showing stage and days in the current stage.",
+                "organisms": [
+                  "applicationList"
+                ]
+              },
+              {
+                "id": "reviewAndAct",
+                "priority": "main",
+                "purpose": "The selected application's essentials first, then the actions, then its stage history, stacked in one fluid column.",
+                "organisms": [
+                  "applicationDetail",
+                  "applicationActions",
+                  "stageHistory"
+                ]
+              },
+              {
+                "id": "recordApplication",
+                "priority": "secondary",
+                "purpose": "Record a candidate's application to an open position. It starts in screening.",
+                "organisms": [
+                  "newApplicationForm"
+                ]
+              }
+            ],
+            "organisms": {
+              "applicationList": {
+                "kind": "list",
+                "text": "Stacked application rows showing number, candidate, position, stage and days in stage. The recruiter searches or filters by stage, then taps a row to open it.",
+                "intents": []
+              },
+              "newApplicationForm": {
+                "kind": "form",
+                "text": "Pick the candidate and an open position and add optional notes to record the application in screening. Go to Candidates first if the person is not registered.",
+                "intents": [
+                  {
+                    "id": "recordApplication",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "registerNewCandidate",
+                    "kind": "navigate",
+                    "to": "candidates"
+                  }
+                ]
+              },
+              "applicationDetail": {
+                "kind": "detail",
+                "text": "Candidate, position, hiring manager, stage and applied date at the top. Interview, offer, hire and rejection details are in sections that expand on demand.",
+                "intents": []
+              },
+              "applicationActions": {
+                "kind": "actions",
+                "text": "Full-width actions to move a screened application to interview, which hands it to the hiring manager, or to reject it. A reason is required to reject.",
+                "intents": [
+                  {
+                    "id": "moveToInterview",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "rejectApplication",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "stageHistory": {
+                "kind": "timeline",
+                "text": "A vertical history of the application's stages, showing when each change happened and who decided it, including the hiring manager's offer and hire.",
+                "intents": []
+              }
+            },
+            "molecules": {
+              "applicationList": [
+                {
+                  "role": "application list",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                },
+                {
+                  "role": "search",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": "groupsearchcontent--ml-search-filters"
+                },
+                {
+                  "role": "stage filter",
+                  "preferred": "groupselectone--ml-select",
+                  "alternative": "groupselectone--ml-segmented-control"
+                }
+              ],
+              "newApplicationForm": [
+                {
+                  "role": "candidate choice",
+                  "preferred": "groupselectone--ml-select-one-autocomplete",
+                  "alternative": "groupselectone--ml-combobox"
+                },
+                {
+                  "role": "open position choice",
+                  "preferred": "groupselectone--ml-combobox",
+                  "alternative": "groupselectone--ml-select-one-autocomplete"
+                },
+                {
+                  "role": "application notes",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "record application",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "recorded confirmation",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": ""
+                }
+              ],
+              "applicationDetail": [
+                {
+                  "role": "candidate summary",
+                  "preferred": "groupviewcard--ml-view-card-horizontal",
+                  "alternative": "groupviewcard--ml-profile-card"
+                },
+                {
+                  "role": "stage details",
+                  "preferred": "groupexpandcontent--ml-accordion",
+                  "alternative": "groupexpandcontent--ml-collapsible-panel"
+                }
+              ],
+              "applicationActions": [
+                {
+                  "role": "stage actions",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-button-group"
+                },
+                {
+                  "role": "rejection reason",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "confirm rejection",
+                  "preferred": "groupnotifyuser--ml-alert-modal",
+                  "alternative": ""
+                }
+              ],
+              "stageHistory": [
+                {
+                  "role": "stage history",
+                  "preferred": "groupviewdata--ml-timeline-view",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "applicationList": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.isActive",
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Candidate.details.identification.name",
+                  "JobPosition.title",
+                  "JobPosition.department"
+                ],
+                "edits": [],
+                "selects": "applicationDetail",
+                "submits": []
+              },
+              "newApplicationForm": {
+                "reads": [
+                  "Candidate.details.identification.name",
+                  "CandidateEmail.details.contactChannel.value",
+                  "JobPosition.title",
+                  "JobPosition.department",
+                  "JobPosition.status",
+                  "JobPosition.details.remainingOpenings"
+                ],
+                "edits": [
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Application.details.notes"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "recordApplication",
+                    "write": "Application.create"
+                  }
+                ]
+              },
+              "applicationDetail": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.notes",
+                  "Application.details.remainingOpenings",
+                  "Application.details.interview.movedAt",
+                  "Application.details.offer.extendedAt",
+                  "Application.details.offer.notes",
+                  "Application.details.hire.hiredAt",
+                  "Application.details.rejection.reason",
+                  "Application.details.rejection.rejectedAt",
+                  "Application.details.rejection.stageAtRejection",
+                  "Candidate.details.identification.name",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source",
+                  "CandidateEmail.details.contactChannel.value",
+                  "JobPosition.title",
+                  "JobPosition.department",
+                  "JobPosition.status",
+                  "HiringManager.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "applicationActions": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.details.isActive"
+                ],
+                "edits": [
+                  "Application.details.rejection.reason"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "moveToInterview",
+                    "write": "Application.advanceToInterview"
+                  },
+                  {
+                    "intentId": "rejectApplication",
+                    "write": "Application.reject"
+                  }
+                ]
+              },
+              "stageHistory": {
+                "reads": [
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.interview.movedAt",
+                  "Application.details.interview.movedBy",
+                  "Application.details.offer.extendedAt",
+                  "Application.details.offer.decidedBy",
+                  "Application.details.hire.hiredAt",
+                  "Application.details.hire.decidedBy",
+                  "Application.details.rejection.rejectedAt",
+                  "Application.details.rejection.stageAtRejection",
+                  "Application.details.rejection.reason"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 18,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

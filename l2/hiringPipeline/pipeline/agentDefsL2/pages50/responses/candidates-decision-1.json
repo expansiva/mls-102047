@@ -1,0 +1,376 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 141926,
+  "receivedAt": "2026-10-13T07:38:03.823Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "Candidates is a directory of people: the recruiter searches the organization's candidates, registers new ones without duplicating anyone, and opens a profile with contact data and related applications. This matches customerManagement, a paginated directory with a create command and a profile view, on both desktop and mobile.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "customerManagement"
+            },
+            "intent": "Help the recruiter find any candidate in the organization, register a new candidate without creating a duplicate, and review a candidate's details and applications before recording a new application.",
+            "sections": [
+              {
+                "id": "findCandidates",
+                "priority": "primary",
+                "purpose": "Search candidates by name, e-mail or source and choose one to review.",
+                "organisms": [
+                  "candidateSearch"
+                ]
+              },
+              {
+                "id": "candidateDetails",
+                "priority": "main",
+                "purpose": "Show the chosen candidate's details and every application they have made, with stage and days in stage, so the recruiter knows where the candidate stands.",
+                "organisms": [
+                  "candidateProfile"
+                ]
+              },
+              {
+                "id": "registerCandidate",
+                "priority": "secondary",
+                "purpose": "Register a new candidate with name, e-mail, resume link and source. An existing person is reused, not duplicated.",
+                "organisms": [
+                  "candidateRegistration"
+                ]
+              }
+            ],
+            "organisms": {
+              "candidateSearch": {
+                "kind": "list",
+                "text": "Find a candidate by name, e-mail or source and see each candidate's status at a glance",
+                "intents": []
+              },
+              "candidateRegistration": {
+                "kind": "form",
+                "text": "Register a candidate with name, e-mail, resume link and source",
+                "intents": [
+                  {
+                    "id": "registerCandidate",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "candidateProfile": {
+                "kind": "detail",
+                "text": "See the candidate's name, e-mail, resume link and source, plus their applications with position, stage, applied date and days in the current stage",
+                "intents": [
+                  {
+                    "id": "recordApplication",
+                    "kind": "navigate",
+                    "to": "applications"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "candidateSearch": [
+                {
+                  "role": "Search by name, e-mail or source",
+                  "preferred": "groupsearchcontent--ml-search-filters",
+                  "alternative": "groupsearchcontent--ml-search-bar"
+                },
+                {
+                  "role": "Candidate results",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                },
+                {
+                  "role": "Move between result pages",
+                  "preferred": "grouptriggeraction--ml-pagination-control",
+                  "alternative": ""
+                }
+              ],
+              "candidateRegistration": [
+                {
+                  "role": "Candidate name",
+                  "preferred": "groupentertext--ml-enter-text",
+                  "alternative": "groupentertext--ml-floating-text-input"
+                },
+                {
+                  "role": "E-mail address",
+                  "preferred": "groupentertext--ml-enter-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Resume link",
+                  "preferred": "groupentertext--ml-enter-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Candidate source",
+                  "preferred": "groupselectone--ml-select",
+                  "alternative": "groupselectone--ml-radio-group"
+                },
+                {
+                  "role": "Register action",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "Registration result",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ],
+              "candidateProfile": [
+                {
+                  "role": "Candidate summary",
+                  "preferred": "groupviewcard--ml-profile-card",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                },
+                {
+                  "role": "Candidate's applications",
+                  "preferred": "groupviewtable--ml-data-table-minimal",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "candidateSearch": {
+                "reads": [
+                  "Candidate.details.identification.name",
+                  "Candidate.details.identification.status",
+                  "Candidate.details.hiringPipeline.source",
+                  "CandidateEmail.details.contactChannel.value"
+                ],
+                "edits": [],
+                "selects": "candidateProfile",
+                "submits": []
+              },
+              "candidateRegistration": {
+                "reads": [],
+                "edits": [
+                  "Candidate.details.identification.name",
+                  "CandidateEmail.details.contactChannel.value",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "registerCandidate",
+                    "write": "Candidate.create"
+                  }
+                ]
+              },
+              "candidateProfile": {
+                "reads": [
+                  "Candidate.details.identification.name",
+                  "Candidate.details.identification.status",
+                  "Candidate.details.identification.createdAt",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source",
+                  "CandidateEmail.details.contactChannel.value",
+                  "Application.code",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.isActive",
+                  "JobPosition.title",
+                  "JobPosition.status"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "customerManagement"
+            },
+            "intent": "On a narrow screen (about 390px, still usable at 360px and 430px), let the recruiter quickly find a candidate, open their details and applications, and register a new candidate in one short flowing column.",
+            "sections": [
+              {
+                "id": "findCandidates",
+                "priority": "primary",
+                "purpose": "Search candidates by name, e-mail or source in a compact list. Tapping a candidate opens their details.",
+                "organisms": [
+                  "candidateSearch"
+                ]
+              },
+              {
+                "id": "candidateDetails",
+                "priority": "main",
+                "purpose": "Show the chosen candidate's contact data and applications as stacked items that are easy to read on a phone.",
+                "organisms": [
+                  "candidateProfile"
+                ]
+              },
+              {
+                "id": "registerCandidate",
+                "priority": "secondary",
+                "purpose": "Register a new candidate with a short single-column form.",
+                "organisms": [
+                  "candidateRegistration"
+                ]
+              }
+            ],
+            "organisms": {
+              "candidateSearch": {
+                "kind": "list",
+                "text": "Find a candidate by name, e-mail or source and see each candidate's status at a glance",
+                "intents": []
+              },
+              "candidateRegistration": {
+                "kind": "form",
+                "text": "Register a candidate with name, e-mail, resume link and source",
+                "intents": [
+                  {
+                    "id": "registerCandidate",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "candidateProfile": {
+                "kind": "detail",
+                "text": "See the candidate's name, e-mail, resume link and source, plus their applications with position, stage, applied date and days in the current stage",
+                "intents": [
+                  {
+                    "id": "recordApplication",
+                    "kind": "navigate",
+                    "to": "applications"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "candidateSearch": [
+                {
+                  "role": "Search by name, e-mail or source",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": "groupsearchcontent--ml-search-filters"
+                },
+                {
+                  "role": "Candidate results",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                },
+                {
+                  "role": "Move between result pages",
+                  "preferred": "grouptriggeraction--ml-pagination-control",
+                  "alternative": ""
+                }
+              ],
+              "candidateRegistration": [
+                {
+                  "role": "Candidate name",
+                  "preferred": "groupentertext--ml-floating-text-input",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "E-mail address",
+                  "preferred": "groupentertext--ml-enter-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Resume link",
+                  "preferred": "groupentertext--ml-enter-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Candidate source",
+                  "preferred": "groupselectone--ml-select",
+                  "alternative": "groupselectone--ml-select-dropdown"
+                },
+                {
+                  "role": "Register action",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": ""
+                },
+                {
+                  "role": "Registration result",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ],
+              "candidateProfile": [
+                {
+                  "role": "Candidate summary",
+                  "preferred": "groupviewcard--ml-profile-card",
+                  "alternative": "groupviewcard--ml-vertical-card"
+                },
+                {
+                  "role": "Candidate's applications",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-table"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "candidateSearch": {
+                "reads": [
+                  "Candidate.details.identification.name",
+                  "Candidate.details.identification.status",
+                  "Candidate.details.hiringPipeline.source",
+                  "CandidateEmail.details.contactChannel.value"
+                ],
+                "edits": [],
+                "selects": "candidateProfile",
+                "submits": []
+              },
+              "candidateRegistration": {
+                "reads": [],
+                "edits": [
+                  "Candidate.details.identification.name",
+                  "CandidateEmail.details.contactChannel.value",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "registerCandidate",
+                    "write": "Candidate.create"
+                  }
+                ]
+              },
+              "candidateProfile": {
+                "reads": [
+                  "Candidate.details.identification.name",
+                  "Candidate.details.identification.status",
+                  "Candidate.details.identification.createdAt",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source",
+                  "CandidateEmail.details.contactChannel.value",
+                  "Application.code",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.isActive",
+                  "JobPosition.title",
+                  "JobPosition.status"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 18,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

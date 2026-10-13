@@ -1,0 +1,484 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 174875,
+  "receivedAt": "2026-10-13T07:38:16.842Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "The hiring manager opens this page to make decisions. She finds an application on one of her positions, reviews the candidate, the interview, the offer and the remaining openings, and then extends an offer, hires, or sends the application back for rejection. The stage history shows who made each decision. This review-and-decide flow on one record at a time fits approvalWorkflow better than a plain queue or a record editor.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "approvalWorkflow"
+            },
+            "intent": "Decide on applications to the positions I manage. Find the application, review the candidate, the interview, the offer and the remaining openings, then extend an offer, hire the candidate, or send the application back to the recruiter to be rejected.",
+            "sections": [
+              {
+                "id": "findSection",
+                "priority": "main",
+                "purpose": "Find applications on my positions by number, candidate, stage or position. Days in the current stage show which applications are waiting longest for my decision.",
+                "organisms": [
+                  "applicationList"
+                ]
+              },
+              {
+                "id": "reviewSection",
+                "priority": "primary",
+                "purpose": "Review the selected application before deciding: the candidate's resume link and source, the interview, the offer, and how many openings the position still has.",
+                "organisms": [
+                  "applicationReview"
+                ]
+              },
+              {
+                "id": "decisionSection",
+                "priority": "primary",
+                "purpose": "Make the decision this stage calls for: extend an offer to an interviewed candidate, hire a candidate who has an offer, or send the application back to the recruiter with a reason.",
+                "organisms": [
+                  "applicationDecision"
+                ]
+              },
+              {
+                "id": "historySection",
+                "priority": "secondary",
+                "purpose": "See how the application moved through the stages, who moved it, and who decided the offer and the hire.",
+                "organisms": [
+                  "stageHistory"
+                ]
+              }
+            ],
+            "organisms": {
+              "applicationList": {
+                "kind": "list",
+                "text": "Applications to the positions I manage. Each shows its number, candidate, position, stage and days in the current stage, and can be searched or filtered by stage.",
+                "intents": []
+              },
+              "applicationReview": {
+                "kind": "detail",
+                "text": "The candidate and the application: name, contact, resume link and source, when they applied, when they moved to interview, the offer and its notes, and the position's remaining openings, so I can decide with the headcount in view.",
+                "intents": [
+                  {
+                    "id": "openMyPositions",
+                    "kind": "navigate",
+                    "to": "my_positions"
+                  }
+                ]
+              },
+              "applicationDecision": {
+                "kind": "actions",
+                "text": "Only the decisions allowed at the current stage: extend an offer with offer notes, hire the candidate when an opening remains, or send the application back to the recruiter with a rejection reason.",
+                "intents": [
+                  {
+                    "id": "extendOffer",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "hireCandidate",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "sendBackToReject",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "stageHistory": {
+                "kind": "timeline",
+                "text": "The application's stage history: when it was applied, moved to interview and by whom, when the offer was extended and the hire was decided and by whom, and when and at which stage it was rejected.",
+                "intents": []
+              }
+            },
+            "molecules": {
+              "applicationList": [
+                {
+                  "role": "Search by application number, candidate or position",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": "groupsearchcontent--ml-search-filters"
+                },
+                {
+                  "role": "Filter by stage",
+                  "preferred": "groupselectone--ml-segmented-control",
+                  "alternative": "groupselectone--ml-select"
+                },
+                {
+                  "role": "Applications with stage and days in stage",
+                  "preferred": "groupviewtable--ml-data-table",
+                  "alternative": "groupviewtable--ml-advanced-data-table"
+                }
+              ],
+              "applicationReview": [
+                {
+                  "role": "Candidate summary with resume link and source",
+                  "preferred": "groupviewcard--ml-profile-card",
+                  "alternative": "groupviewcard--ml-view-card-horizontal"
+                },
+                {
+                  "role": "Remaining openings of the position",
+                  "preferred": "groupviewmetric--ml-metric-card",
+                  "alternative": "groupviewmetric--ml-metric-big-number"
+                },
+                {
+                  "role": "Interview and offer details",
+                  "preferred": "groupexpandcontent--ml-collapsible-panel",
+                  "alternative": "groupexpandcontent--ml-accordion"
+                }
+              ],
+              "applicationDecision": [
+                {
+                  "role": "Decision buttons for offer, hire or send back",
+                  "preferred": "grouptriggeraction--ml-button-group",
+                  "alternative": "grouptriggeraction--ml-button-standard"
+                },
+                {
+                  "role": "Offer notes or rejection reason",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": "groupentertext--ml-enter-text"
+                },
+                {
+                  "role": "Confirm the decision before it is recorded",
+                  "preferred": "groupnotifyuser--ml-alert-modal",
+                  "alternative": ""
+                },
+                {
+                  "role": "Result of the decision",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ],
+              "stageHistory": [
+                {
+                  "role": "Stage changes over time",
+                  "preferred": "groupviewdata--ml-timeline-view",
+                  "alternative": "groupviewtable--ml-data-table-minimal"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "applicationList": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.isActive",
+                  "Candidate.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "applicationReview",
+                "submits": []
+              },
+              "applicationReview": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.jobPositionId",
+                  "Application.details.notes",
+                  "Application.details.interview.movedAt",
+                  "Application.details.offer.extendedAt",
+                  "Application.details.offer.notes",
+                  "Application.details.remainingOpenings",
+                  "Candidate.details.identification.name",
+                  "Candidate.details.base.contacts",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "applicationDecision": {
+                "reads": [
+                  "Application.status",
+                  "Application.details.remainingOpenings"
+                ],
+                "edits": [
+                  "Application.details.offer.notes",
+                  "Application.details.rejection.reason"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "extendOffer",
+                    "write": "Application.extendOffer"
+                  },
+                  {
+                    "intentId": "hireCandidate",
+                    "write": "Application.hire"
+                  },
+                  {
+                    "intentId": "sendBackToReject",
+                    "write": "Application.reject"
+                  }
+                ]
+              },
+              "stageHistory": {
+                "reads": [
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.interview.movedAt",
+                  "Application.details.interview.movedBy",
+                  "Application.details.offer.extendedAt",
+                  "Application.details.offer.decidedBy",
+                  "Application.details.hire.hiredAt",
+                  "Application.details.hire.decidedBy",
+                  "Application.details.rejection.rejectedAt",
+                  "Application.details.rejection.stageAtRejection"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "approvalWorkflow"
+            },
+            "intent": "On a narrow screen, find an application on my positions and decide it. The review comes first and the decision stays close below it, in a single fluid column of about 390px that also works at 360px and 430px.",
+            "sections": [
+              {
+                "id": "findSection",
+                "priority": "main",
+                "purpose": "Search and filter my applications by stage. Each one appears as a compact entry showing the candidate, position, stage and days in stage.",
+                "organisms": [
+                  "applicationList"
+                ]
+              },
+              {
+                "id": "reviewSection",
+                "priority": "primary",
+                "purpose": "Read the candidate and the application in short stacked blocks. The remaining openings stay visible before deciding.",
+                "organisms": [
+                  "applicationReview"
+                ]
+              },
+              {
+                "id": "decisionSection",
+                "priority": "primary",
+                "purpose": "Extend the offer, hire, or send the application back with a reason, using full-width actions under the review.",
+                "organisms": [
+                  "applicationDecision"
+                ]
+              },
+              {
+                "id": "historySection",
+                "priority": "secondary",
+                "purpose": "Check the stage history and who made each decision when needed.",
+                "organisms": [
+                  "stageHistory"
+                ]
+              }
+            ],
+            "organisms": {
+              "applicationList": {
+                "kind": "list",
+                "text": "Applications to the positions I manage. Each shows its number, candidate, position, stage and days in the current stage, and can be searched or filtered by stage.",
+                "intents": []
+              },
+              "applicationReview": {
+                "kind": "detail",
+                "text": "The candidate and the application: name, contact, resume link and source, when they applied, when they moved to interview, the offer and its notes, and the position's remaining openings, so I can decide with the headcount in view.",
+                "intents": [
+                  {
+                    "id": "openMyPositions",
+                    "kind": "navigate",
+                    "to": "my_positions"
+                  }
+                ]
+              },
+              "applicationDecision": {
+                "kind": "actions",
+                "text": "Only the decisions allowed at the current stage: extend an offer with offer notes, hire the candidate when an opening remains, or send the application back to the recruiter with a rejection reason.",
+                "intents": [
+                  {
+                    "id": "extendOffer",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "hireCandidate",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "sendBackToReject",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              "stageHistory": {
+                "kind": "timeline",
+                "text": "The application's stage history: when it was applied, moved to interview and by whom, when the offer was extended and the hire was decided and by whom, and when and at which stage it was rejected.",
+                "intents": []
+              }
+            },
+            "molecules": {
+              "applicationList": [
+                {
+                  "role": "Search by application number, candidate or position",
+                  "preferred": "groupsearchcontent--ml-search-bar",
+                  "alternative": ""
+                },
+                {
+                  "role": "Filter by stage",
+                  "preferred": "groupselectone--ml-select",
+                  "alternative": "groupselectone--ml-segmented-control"
+                },
+                {
+                  "role": "Applications with stage and days in stage",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                }
+              ],
+              "applicationReview": [
+                {
+                  "role": "Candidate summary with resume link and source",
+                  "preferred": "groupviewcard--ml-profile-card",
+                  "alternative": "groupviewcard--ml-vertical-card"
+                },
+                {
+                  "role": "Remaining openings of the position",
+                  "preferred": "groupviewmetric--ml-metric-big-number",
+                  "alternative": "groupviewmetric--ml-metric-card"
+                },
+                {
+                  "role": "Interview and offer details",
+                  "preferred": "groupexpandcontent--ml-accordion",
+                  "alternative": "groupexpandcontent--ml-collapsible-panel"
+                }
+              ],
+              "applicationDecision": [
+                {
+                  "role": "Decision buttons for offer, hire or send back",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-button-group"
+                },
+                {
+                  "role": "Offer notes or rejection reason",
+                  "preferred": "groupentertext--ml-multiline-text",
+                  "alternative": ""
+                },
+                {
+                  "role": "Confirm the decision before it is recorded",
+                  "preferred": "groupnotifyuser--ml-alert-modal",
+                  "alternative": ""
+                },
+                {
+                  "role": "Result of the decision",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": ""
+                }
+              ],
+              "stageHistory": [
+                {
+                  "role": "Stage changes over time",
+                  "preferred": "groupviewdata--ml-timeline-view",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "applicationList": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.isActive",
+                  "Candidate.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "applicationReview",
+                "submits": []
+              },
+              "applicationReview": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.appliedAt",
+                  "Application.jobPositionId",
+                  "Application.details.notes",
+                  "Application.details.interview.movedAt",
+                  "Application.details.offer.extendedAt",
+                  "Application.details.offer.notes",
+                  "Application.details.remainingOpenings",
+                  "Candidate.details.identification.name",
+                  "Candidate.details.base.contacts",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "applicationDecision": {
+                "reads": [
+                  "Application.status",
+                  "Application.details.remainingOpenings"
+                ],
+                "edits": [
+                  "Application.details.offer.notes",
+                  "Application.details.rejection.reason"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "extendOffer",
+                    "write": "Application.extendOffer"
+                  },
+                  {
+                    "intentId": "hireCandidate",
+                    "write": "Application.hire"
+                  },
+                  {
+                    "intentId": "sendBackToReject",
+                    "write": "Application.reject"
+                  }
+                ]
+              },
+              "stageHistory": {
+                "reads": [
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.interview.movedAt",
+                  "Application.details.interview.movedBy",
+                  "Application.details.offer.extendedAt",
+                  "Application.details.offer.decidedBy",
+                  "Application.details.hire.hiredAt",
+                  "Application.details.hire.decidedBy",
+                  "Application.details.rejection.rejectedAt",
+                  "Application.details.rejection.stageAtRejection"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 18,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

@@ -1,0 +1,327 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 142331,
+  "receivedAt": "2026-10-13T07:37:56.998Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "The hiring manager's home is a command center. It shows a summary of the pipeline on her positions (active applications by stage, days in stage, remaining openings), next to a queue of exceptions that need her decision. She acts on those directly: extend an offer, hire, or send the application back. This matches dashboardCommandCenter (fixed monitoring plus recommended actions) better than a pure queue or a single-record approval.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "dashboardCommandCenter"
+            },
+            "intent": "Give the hiring manager one place to see where the applications on her positions stand and to act on the ones waiting for her decision: interviewed candidates to offer or send back, and offers to hire or send back.",
+            "sections": [
+              {
+                "id": "decisions",
+                "priority": "primary",
+                "purpose": "Applications waiting for my decision, with what I need to choose: the candidate, the position, how long the application has waited and how many openings are left.",
+                "organisms": [
+                  "decisionInbox"
+                ]
+              },
+              {
+                "id": "pipeline",
+                "priority": "main",
+                "purpose": "How my positions' pipeline is going: active applications by stage, how long they have stayed there, and how many openings each position still has.",
+                "organisms": [
+                  "pipelineSummary"
+                ]
+              }
+            ],
+            "organisms": {
+              "pipelineSummary": {
+                "kind": "summary",
+                "text": "Active applications on my positions by stage and days in stage, and remaining openings for each position, so I can see where candidates are stuck and how close each position is to being filled.",
+                "intents": [
+                  {
+                    "id": "openMyPositions",
+                    "kind": "navigate",
+                    "to": "my_positions"
+                  }
+                ]
+              },
+              "decisionInbox": {
+                "kind": "inbox",
+                "text": "Applications waiting for my decision. For interviewed candidates I can extend an offer or send them back to the recruiter. For offers I can hire the candidate or send the application back. Each one shows the candidate, resume link, source, position, days waiting and remaining openings.",
+                "intents": [
+                  {
+                    "id": "extendOffer",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "hireCandidate",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "sendBack",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "openApplication",
+                    "kind": "navigate",
+                    "to": "my_applications"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "pipelineSummary": [
+                {
+                  "role": "Active applications by stage",
+                  "preferred": "groupviewchart--ml-bar-chart",
+                  "alternative": "groupviewchart--ml-pie-chart"
+                },
+                {
+                  "role": "Headline counts such as active applications and days in stage",
+                  "preferred": "groupviewmetric--ml-metric-card",
+                  "alternative": "groupviewmetric--ml-metric-big-number"
+                },
+                {
+                  "role": "Remaining openings for each position",
+                  "preferred": "groupviewtable--ml-data-table-minimal",
+                  "alternative": "groupviewtable--ml-view-table"
+                }
+              ],
+              "decisionInbox": [
+                {
+                  "role": "Queue of applications waiting for my decision",
+                  "preferred": "groupviewtable--ml-side-detail-table",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                },
+                {
+                  "role": "Decision actions on an application",
+                  "preferred": "grouptriggeraction--ml-button-group",
+                  "alternative": "grouptriggeraction--ml-split-button"
+                },
+                {
+                  "role": "Confirmation after a decision",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": "groupnotifyuser--ml-contextual-feedback"
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "pipelineSummary": {
+                "reads": [
+                  "Application.status",
+                  "Application.jobPositionId",
+                  "Application.stageChangedAt",
+                  "Application.details.isActive",
+                  "Application.details.daysInStage",
+                  "Application.details.remainingOpenings"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "decisionInbox": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Application.appliedAt",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.remainingOpenings",
+                  "Application.details.interview.movedAt",
+                  "Application.details.offer.extendedAt",
+                  "Candidate.details.identification.name",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source"
+                ],
+                "edits": [
+                  "Application.details.offer.notes",
+                  "Application.details.rejection.reason"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "extendOffer",
+                    "write": "Application.extendOffer"
+                  },
+                  {
+                    "intentId": "hireCandidate",
+                    "write": "Application.hire"
+                  },
+                  {
+                    "intentId": "sendBack",
+                    "write": "Application.reject"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "dashboardCommandCenter"
+            },
+            "intent": "On a narrow screen (about 390px, still usable at 360px and 430px), put the decisions waiting for the hiring manager first, then a short summary of her positions' pipeline.",
+            "sections": [
+              {
+                "id": "decisions",
+                "priority": "primary",
+                "purpose": "Applications waiting for my decision, stacked one per item, so I can offer, hire or send back without leaving the page.",
+                "organisms": [
+                  "decisionInbox"
+                ]
+              },
+              {
+                "id": "pipeline",
+                "priority": "main",
+                "purpose": "A short view of my pipeline: active applications by stage, days in stage and remaining openings for each position.",
+                "organisms": [
+                  "pipelineSummary"
+                ]
+              }
+            ],
+            "organisms": {
+              "pipelineSummary": {
+                "kind": "summary",
+                "text": "Active applications on my positions by stage and days in stage, and remaining openings for each position, as short readings that fit a narrow screen.",
+                "intents": [
+                  {
+                    "id": "openMyPositions",
+                    "kind": "navigate",
+                    "to": "my_positions"
+                  }
+                ]
+              },
+              "decisionInbox": {
+                "kind": "inbox",
+                "text": "Applications waiting for my decision, each showing the candidate, position, days waiting and remaining openings. Interviewed candidates can get an offer or be sent back; offers can end in a hire or be sent back.",
+                "intents": [
+                  {
+                    "id": "extendOffer",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "hireCandidate",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "sendBack",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "openApplication",
+                    "kind": "navigate",
+                    "to": "my_applications"
+                  }
+                ]
+              }
+            },
+            "molecules": {
+              "pipelineSummary": [
+                {
+                  "role": "Headline counts such as active applications and days in stage",
+                  "preferred": "groupviewmetric--ml-compact-metric-sparkline",
+                  "alternative": "groupviewmetric--ml-metric-card"
+                },
+                {
+                  "role": "Active applications by stage",
+                  "preferred": "groupviewchart--ml-bar-chart",
+                  "alternative": ""
+                },
+                {
+                  "role": "Remaining openings for each position",
+                  "preferred": "groupviewtable--ml-responsive-table",
+                  "alternative": "groupviewdata--ml-vertical-record-list"
+                }
+              ],
+              "decisionInbox": [
+                {
+                  "role": "Queue of applications waiting for my decision",
+                  "preferred": "groupviewdata--ml-vertical-record-list",
+                  "alternative": "groupviewtable--ml-responsive-data-table"
+                },
+                {
+                  "role": "Decision actions on an application",
+                  "preferred": "grouptriggeraction--ml-button-standard",
+                  "alternative": "grouptriggeraction--ml-kebab-action-trigger"
+                },
+                {
+                  "role": "Confirmation after a decision",
+                  "preferred": "groupnotifyuser--ml-toast-notification",
+                  "alternative": ""
+                }
+              ]
+            }
+          },
+          "needs": {
+            "organisms": {
+              "pipelineSummary": {
+                "reads": [
+                  "Application.status",
+                  "Application.jobPositionId",
+                  "Application.stageChangedAt",
+                  "Application.details.isActive",
+                  "Application.details.daysInStage",
+                  "Application.details.remainingOpenings"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              "decisionInbox": {
+                "reads": [
+                  "Application.code",
+                  "Application.status",
+                  "Application.candidateId",
+                  "Application.jobPositionId",
+                  "Application.stageChangedAt",
+                  "Application.details.daysInStage",
+                  "Application.details.remainingOpenings",
+                  "Application.details.interview.movedAt",
+                  "Application.details.offer.extendedAt",
+                  "Candidate.details.identification.name",
+                  "Candidate.details.hiringPipeline.resumeLink",
+                  "Candidate.details.hiringPipeline.source"
+                ],
+                "edits": [
+                  "Application.details.offer.notes",
+                  "Application.details.rejection.reason"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "extendOffer",
+                    "write": "Application.extendOffer"
+                  },
+                  {
+                    "intentId": "hireCandidate",
+                    "write": "Application.hire"
+                  },
+                  {
+                    "intentId": "sendBack",
+                    "write": "Application.reject"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 18,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}
