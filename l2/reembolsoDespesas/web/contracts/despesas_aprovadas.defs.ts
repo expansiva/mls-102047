@@ -2,11 +2,9 @@
 
 /** Dados da despesa exibidos em cada item da fila de pagamento. */
 export interface DespesaAprovadaResumoDetails {
-  details: {
-    dataDespesa: string;
-    categoria: string;
-    valor: string;
-  };
+  dataDespesa: string;
+  categoria: string;
+  valor: string;
 }
 
 /** Item da fila de despesas aprovadas que aguardam pagamento. */
@@ -19,13 +17,11 @@ export interface DespesaAprovadaResumo {
 
 /** Dados completos da despesa conferidos pelo financeiro antes do pagamento. */
 export interface DespesaAprovadaDetalheDetails {
-  details: {
-    dataDespesa: string;
-    categoria: string;
-    valor: string;
-    descricao: string;
-    dataPagamento?: string;
-  };
+  dataDespesa: string;
+  categoria: string;
+  valor: string;
+  descricao: string;
+  dataPagamento?: string;
 }
 
 /** Despesa escolhida com seus dados completos e a versão usada no registro do pagamento. */

@@ -2,11 +2,7 @@
 
 /** Identificação do colaborador reduzida ao nome exibido. */
 export interface ColaboradorIdentificacaoNome {
-  details: {
-    identification: {
-      name: string;
-    };
-  };
+  name: string;
 }
 
 /** Detalhes do colaborador com a identificação. */
@@ -21,11 +17,9 @@ export interface ColaboradorNome {
 
 /** Dados da despesa exibidos na fila de pendentes. */
 export interface DespesaResumoDetalhes {
-  details: {
-    dataDespesa: string;
-    categoria: string;
-    valor: string;
-  };
+  dataDespesa: string;
+  categoria: string;
+  valor: string;
 }
 
 /** Linha da fila de despesas pendentes da equipe. */
@@ -39,14 +33,12 @@ export interface DespesaPendenteResumo {
 
 /** Dados completos da despesa para análise. */
 export interface DespesaAnaliseDetalhes {
-  details: {
-    dataDespesa: string;
-    categoria: string;
-    valor: string;
-    descricao: string;
-    motivoRejeicao?: string;
-    reenvioRealizado: boolean;
-  };
+  dataDespesa: string;
+  categoria: string;
+  valor: string;
+  descricao: string;
+  motivoRejeicao?: string;
+  reenvioRealizado: boolean;
 }
 
 /** Despesa completa em análise, com colaborador, usada pela análise e pela decisão. */

@@ -46,6 +46,12 @@ Parece que duas descrições foram juntadas numa só. É pequeno, mas a descriç
 
 **Correção esperada:** deixar no `totalPendentes` só a parte dele, por exemplo "Número de despesas aguardando decisão do gestor".
 
+## Situação
+
+Em 13/10, os pontos 1 e 2 foram corrigidos **à mão nos arquivos gerados** do reembolsoDespesas (4 contratos e `shared/inicio.defs.ts`), para podermos gerar as telas já.
+
+O agentDefsL2 continua gerando com o problema. Se ele rodar de novo, os defs voltam com o `details` repetido.
+
 ## O que melhorou em relação à versão anterior
 
 - **Colaborador junto com a despesa:** em `despesas_da_equipe` e `inicio`, cada despesa já vem com o colaborador. A tela não vai mais mostrar "Colaborador não identificado" quando a pessoa existe.

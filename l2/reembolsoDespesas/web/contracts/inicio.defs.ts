@@ -2,17 +2,13 @@
 
 /** Identificação do colaborador que registrou a despesa. */
 export interface IdentificacaoColaborador {
-  details: {
-    identification: {
-      readonly subtype: 'Person';
-      name: string;
-      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';
-      docType?: 'SSN' | 'EIN' | 'Passport' | 'DriversLicense' | 'NationalId' | 'CPF' | 'CNPJ' | 'VAT' | 'Other';
-      docId?: string;
-      countryCode: string;
-      readonly tags: string;
-    };
-  };
+  readonly subtype: 'Person';
+  name: string;
+  readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';
+  docType?: 'SSN' | 'EIN' | 'Passport' | 'DriversLicense' | 'NationalId' | 'CPF' | 'CNPJ' | 'VAT' | 'Other';
+  docId?: string;
+  countryCode: string;
+  readonly tags: string;
 }
 
 /** Detalhes do colaborador visíveis ao gestor. */
@@ -28,12 +24,10 @@ export interface ColaboradorResponsavel {
 
 /** Dados resumidos da despesa exibidos na caixa de pendências. */
 export interface DetalhesDespesaPendente {
-  details: {
-    dataDespesa: string;
-    categoria: string;
-    valor: string;
-    reenvioRealizado: boolean;
-  };
+  dataDespesa: string;
+  categoria: string;
+  valor: string;
+  reenvioRealizado: boolean;
 }
 
 /** Despesa da equipe aguardando a decisão do gestor, com o colaborador que a registrou. */

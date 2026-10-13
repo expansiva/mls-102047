@@ -28,7 +28,7 @@ export const definition = {
   "states": {
     "totalPendentes": {
       "source": "qryInicio.totalPendentes",
-      "description": "totalPendentes: número de despesas aguardando decisão, para o destaque do volume pendente; despesasPendentes: página de despesas com data, categoria, valor, indicador de reenvio e identificação do colaborador, para o gestor escolher o que analisar antes de seguir para despesas_da_equipe.",
+      "description": "Número de despesas da equipe aguardando a decisão do gestor, para o destaque do volume pendente.",
       "organisms": [
         "caixaDespesasPendentes"
       ]
