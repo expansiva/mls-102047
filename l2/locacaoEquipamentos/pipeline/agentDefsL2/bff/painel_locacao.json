@@ -1,0 +1,415 @@
+{
+  "types": [
+    {
+      "name": "ClienteResumo",
+      "description": "Nome do cliente titular do contrato, lido do cadastro mestre.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Cliente.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ContratoEmAtraso",
+      "description": "Contrato em atraso com cliente, datas, dias de atraso e multa.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.id"
+            ]
+          }
+        },
+        {
+          "name": "numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.numero"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'rascunho' | 'ativo' | 'encerrado'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.status"
+            ]
+          }
+        },
+        {
+          "name": "clienteId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.clienteId"
+            ]
+          }
+        },
+        {
+          "name": "cliente",
+          "type": "ClienteResumo"
+        },
+        {
+          "name": "dataRetirada",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.dataRetirada"
+            ]
+          }
+        },
+        {
+          "name": "dataPrevistaDevolucao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.dataPrevistaDevolucao"
+            ]
+          }
+        },
+        {
+          "name": "details.atrasado",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.details.atrasado"
+            ]
+          }
+        },
+        {
+          "name": "details.diasAtraso",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.details.diasAtraso"
+            ]
+          }
+        },
+        {
+          "name": "details.valorMulta",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.details.valorMulta"
+            ]
+          }
+        },
+        {
+          "name": "details.quantidadeItens",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.details.quantidadeItens"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ContratoAtualResumo",
+      "description": "Contrato ativo em que o equipamento está locado.",
+      "fields": [
+        {
+          "name": "details.contratoAtual",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Equipamento.details.contratoAtual"
+            ]
+          }
+        },
+        {
+          "name": "contratoLocacao.numero",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContratoLocacao.numero"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EquipamentoLocado",
+      "description": "Equipamento com sua situação atual e o contrato em que está locado.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Equipamento.id"
+            ]
+          }
+        },
+        {
+          "name": "codigo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Equipamento.codigo"
+            ]
+          }
+        },
+        {
+          "name": "descricao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Equipamento.descricao"
+            ]
+          }
+        },
+        {
+          "name": "situacao",
+          "type": "'disponivel' | 'emManutencao'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Equipamento.situacao"
+            ]
+          }
+        },
+        {
+          "name": "details.situacaoAtual",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Equipamento.details.situacaoAtual"
+            ]
+          }
+        },
+        {
+          "name": "details.locado",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Equipamento.details.locado"
+            ]
+          }
+        },
+        {
+          "name": "details.valorDiaria",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Equipamento.details.valorDiaria"
+            ]
+          }
+        },
+        {
+          "name": "contratoAtual",
+          "type": "ContratoAtualResumo",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "obterPainelLocacao",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "contratosEmAtraso",
+          "type": "ContratoEmAtraso[]"
+        },
+        {
+          "name": "totalContratosEmAtraso",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "ContratoLocacao.id",
+              "ContratoLocacao.details.atrasado"
+            ]
+          }
+        },
+        {
+          "name": "totalMultas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "ContratoLocacao.details.valorMulta",
+              "ContratoLocacao.details.atrasado"
+            ]
+          }
+        },
+        {
+          "name": "totalDisponiveis",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Equipamento.id",
+              "Equipamento.details.situacaoAtual"
+            ]
+          }
+        },
+        {
+          "name": "totalLocados",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Equipamento.id",
+              "Equipamento.details.situacaoAtual"
+            ]
+          }
+        },
+        {
+          "name": "totalEmManutencao",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Equipamento.id",
+              "Equipamento.details.situacaoAtual"
+            ]
+          }
+        }
+      ],
+      "rules": [
+        "multaAtrasoDevolucao",
+        "multaPorAtraso",
+        "equipamentoLocadoDecorreDeContratoAtivo"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega, em uma única chamada ao abrir o painel, os contratos em atraso com dias e multa, o total de contratos atrasados, a soma das multas em aberto e os totais de equipamentos disponíveis, locados e em manutenção.",
+        "input": "Sem parâmetros: o escopo é a organização do usuário (atendente ou gerente).",
+        "processing": "Seleciona os contratos com atrasado verdadeiro (ativo sem data real de devolução e com data prevista anterior a hoje), ordenados por dias de atraso decrescente, e junta o nome do cliente do cadastro mestre por clienteId. diasAtraso, atrasado, valorMulta e quantidadeItens são calculados, nunca gravados: a multa segue multaAtrasoDevolucao e multaPorAtraso (soma por item de diária praticada × dias de atraso × 1,5; para contrato ainda não devolvido os dias são contados até hoje). Os totais são calculados no servidor: totalContratosEmAtraso conta a lista e totalMultas soma valorMulta. Os totais de equipamentos contam por situacaoAtual conforme equipamentoLocadoDecorreDeContratoAtivo: em manutenção quando cadastrado assim, locado quando há contrato ativo sem devolução, disponível nos demais casos.",
+        "output": "Lista de contratos em atraso e indicadores já calculados, para a seção de atrasos e os números da situação dos equipamentos sem cálculo no cliente."
+      }
+    },
+    {
+      "id": "listarEquipamentosLocados",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "equipamentos",
+          "type": "EquipamentoLocado[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "equipamentoLocadoDecorreDeContratoAtivo"
+      ],
+      "jsdoc": {
+        "purpose": "Lista, paginada, os equipamentos locados com o contrato atual de cada um, para a seção de situação dos equipamentos.",
+        "input": "page: página solicitada (começa em 1); pageSize: quantidade de equipamentos por página.",
+        "processing": "Filtra os equipamentos cuja situacaoAtual é locado segundo equipamentoLocadoDecorreDeContratoAtivo (constam em item de contrato ativo sem devolução registrada), ordenados por código. locado, situacaoAtual e contratoAtual são derivados e calculados na consulta, nunca gravados; o número do contrato atual é lido do contrato apontado.",
+        "output": "Página { items, page, pageSize, hasMore } de equipamentos com código, descrição, diária, situação e contrato atual; a página seguinte é acrescentada à lista."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "contratosEmAtraso",
+        "reads": "obterPainelLocacao.contratosEmAtraso"
+      },
+      {
+        "organism": "contratosEmAtraso",
+        "reads": "obterPainelLocacao.totalContratosEmAtraso"
+      },
+      {
+        "organism": "contratosEmAtraso",
+        "reads": "obterPainelLocacao.totalMultas"
+      },
+      {
+        "organism": "situacaoEquipamentos",
+        "reads": "obterPainelLocacao.totalDisponiveis"
+      },
+      {
+        "organism": "situacaoEquipamentos",
+        "reads": "obterPainelLocacao.totalLocados"
+      },
+      {
+        "organism": "situacaoEquipamentos",
+        "reads": "obterPainelLocacao.totalEmManutencao"
+      },
+      {
+        "organism": "situacaoEquipamentos",
+        "reads": "listarEquipamentosLocados.equipamentos"
+      }
+    ],
+    "commands": [],
+    "selections": [],
+    "journeys": [
+      {
+        "step": "acompanharSituacaoEquipamentos/listarEquipamentos",
+        "organisms": [
+          "situacaoEquipamentos"
+        ],
+        "endpoints": [
+          "obterPainelLocacao",
+          "listarEquipamentosLocados"
+        ]
+      },
+      {
+        "step": "acompanharSituacaoEquipamentos/verEquipamento",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "equipamentos"
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "listarEquipamentosLocados",
+        "state": "listarEquipamentosLocados.equipamentos",
+        "mode": "append"
+      }
+    ]
+  }
+}
