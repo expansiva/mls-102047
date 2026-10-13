@@ -1,9 +1,9 @@
-/// <mls fileReference="_102047_/l1/reembolsoDespesas/layer_2_application/usecases/listColaborador.defs.ts" enhancement="_blank"/>
+/// <mls fileReference="_102047_/l1/reembolsoDespesas/layer_2_application/usecases/getColaborador.defs.ts" enhancement="_blank"/>
 
 export const definition = {
   "schemaVersion": "2026-09-24-d1-definition-v2",
   "artifactType": "usecase",
-  "artifactId": "listColaborador",
+  "artifactId": "getColaborador",
   "moduleName": "reembolsoDespesas",
   "status": "pending",
   "dependencies": [
@@ -12,19 +12,31 @@ export const definition = {
     "_102047_/l4/reembolsoDespesas/ontology/Colaborador.defs.ts"
   ],
   "data": {
-    "usecaseId": "listColaborador",
+    "usecaseId": "getColaborador",
     "entityId": "Colaborador",
-    "operation": "list",
+    "operation": "get",
     "ports": [],
     "rulesApplied": [],
     "functions": [
       {
-        "functionName": "listColaborador",
+        "functionName": "getColaborador",
         "input": [
           {
             "name": "id",
             "type": "uuid",
             "fieldRef": "Colaborador.id"
+          }
+        ],
+        "output": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "fieldRef": "Colaborador.id"
+          },
+          {
+            "name": "version",
+            "type": "integer",
+            "fieldRef": "Colaborador.version"
           },
           {
             "name": "details",
@@ -100,24 +112,6 @@ export const definition = {
             "name": "details.reembolsoDespesas",
             "type": "object",
             "fieldRef": "Colaborador.details.reembolsoDespesas"
-          },
-          {
-            "name": "page",
-            "type": "number"
-          },
-          {
-            "name": "pageSize",
-            "type": "number"
-          }
-        ],
-        "output": [
-          {
-            "name": "items",
-            "type": "Colaborador"
-          },
-          {
-            "name": "hasMore",
-            "type": "boolean"
           }
         ]
       }
@@ -136,50 +130,9 @@ export const definition = {
         "call": "get",
         "entity": "Colaborador",
         "capability": "read.byId"
-      },
-      {
-        "kind": "mdm",
-        "namespace": "reembolsoDespesas",
-        "call": "findByDocument",
-        "entity": "Colaborador",
-        "capability": "locate.byDocument"
-      },
-      {
-        "kind": "mdm",
-        "namespace": "reembolsoDespesas",
-        "call": "listByType",
-        "entity": "Colaborador",
-        "capability": "locate.byName"
-      },
-      {
-        "kind": "mdm",
-        "namespace": "reembolsoDespesas",
-        "call": "relatedOfMany",
-        "entity": "Colaborador",
-        "capability": "listLinks"
       }
     ],
     "uses": [
-      {
-        "path": "details.base.relationshipRefs",
-        "role": "filter",
-        "source": "input"
-      },
-      {
-        "path": "details.identification.status",
-        "role": "filter",
-        "source": "input"
-      },
-      {
-        "path": "details.identification.subtype",
-        "role": "filter",
-        "source": "input"
-      },
-      {
-        "path": "details.identification.tags",
-        "role": "filter",
-        "source": "input"
-      },
       {
         "path": "id",
         "role": "filter",
@@ -191,28 +144,28 @@ export const definition = {
       {
         "ruleId": "rule-document-shape-validated",
         "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
-        "consumer": "operation:list",
+        "consumer": "operation:get",
         "enforcement": "pending",
         "gap": "DELEGATION_UNPROVEN"
       },
       {
         "ruleId": "rule-foreign-namespace-refused",
         "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
-        "consumer": "operation:list",
+        "consumer": "operation:get",
         "enforcement": "pending",
         "gap": "DELEGATION_UNPROVEN"
       },
       {
         "ruleId": "rule-identity-never-in-namespace",
         "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
-        "consumer": "operation:list",
+        "consumer": "operation:get",
         "enforcement": "pending",
         "gap": "DELEGATION_UNPROVEN"
       },
       {
         "ruleId": "rule-person-privacy-consent-required-br-eu",
         "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-person-privacy-consent-required-br-eu",
-        "consumer": "operation:list",
+        "consumer": "operation:get",
         "enforcement": "pending",
         "gap": "DELEGATION_UNPROVEN"
       }
@@ -223,7 +176,7 @@ export const definition = {
     "mdm": {
       "namespace": "reembolsoDespesas",
       "role": "reembolsoDespesas.Colaborador",
-      "atomic": false,
+      "atomic": true,
       "calls": [
         {
           "id": "get",
@@ -250,124 +203,6 @@ export const definition = {
             "mdmId",
             "version",
             "details"
-          ]
-        },
-        {
-          "id": "findByDocument",
-          "method": "findByDocument",
-          "target": "entity",
-          "shape": "point",
-          "capabilities": [
-            "locate.byDocument"
-          ],
-          "alternative": false,
-          "when": [
-            {
-              "kind": "contract",
-              "path": "details.identification.docType",
-              "present": true
-            },
-            {
-              "kind": "contract",
-              "path": "details.identification.docId",
-              "present": true
-            }
-          ],
-          "arguments": [
-            {
-              "name": "docType",
-              "role": "selector",
-              "origin": {
-                "kind": "contract",
-                "path": "details.identification.docType"
-              },
-              "path": "details.identification.docType"
-            },
-            {
-              "name": "docId",
-              "role": "selector",
-              "origin": {
-                "kind": "contract",
-                "path": "details.identification.docId"
-              },
-              "path": "details.identification.docId"
-            }
-          ],
-          "result": [
-            "mdmId",
-            "version",
-            "details"
-          ]
-        },
-        {
-          "id": "listByName",
-          "method": "listByType",
-          "target": "collection",
-          "shape": "collection",
-          "capabilities": [
-            "locate.byName"
-          ],
-          "alternative": false,
-          "when": [
-            {
-              "kind": "contract",
-              "path": "details.identification.name",
-              "present": true
-            }
-          ],
-          "arguments": [
-            {
-              "name": "type",
-              "role": "parameter",
-              "origin": {
-                "kind": "literal",
-                "evidence": "role"
-              },
-              "value": "reembolsoDespesas.Colaborador"
-            },
-            {
-              "name": "name",
-              "role": "selector",
-              "origin": {
-                "kind": "contract",
-                "path": "details.identification.name"
-              },
-              "path": "details.identification.name"
-            }
-          ],
-          "result": [
-            "items",
-            "page",
-            "pageSize",
-            "total"
-          ]
-        },
-        {
-          "id": "listLinks",
-          "method": "relatedOfMany",
-          "target": "collection",
-          "shape": "collection",
-          "capabilities": [
-            "listLinks"
-          ],
-          "alternative": false,
-          "when": [],
-          "arguments": [
-            {
-              "name": "mdmIds",
-              "role": "selector",
-              "origin": {
-                "kind": "contract",
-                "path": "id"
-              },
-              "path": "id"
-            }
-          ],
-          "result": [
-            "mdmId",
-            "relationshipId",
-            "type",
-            "direction"
           ]
         }
       ]

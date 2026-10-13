@@ -15,42 +15,42 @@ export const definition = {
     "pageId": "despesas_da_equipe",
     "handlers": [
       {
-        "route": "reembolsoDespesas.despesas_da_equipe.approveExpense",
+        "route": "reembolsoDespesas.despesas_da_equipe.aprovarDespesa",
         "kind": "command",
         "grantIds": [
           "gestorAnalisaDespesasDaEquipe"
         ],
-        "serviceFunction": "reembolsoDespesas.despesas_da_equipe.approveExpense",
+        "serviceFunction": "reembolsoDespesas.despesas_da_equipe.aprovarDespesa",
         "contractPath": "l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts",
         "contractInterface": "Despesas_da_equipeContracts"
       },
       {
-        "route": "reembolsoDespesas.despesas_da_equipe.load",
+        "route": "reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe",
         "kind": "query",
         "grantIds": [
           "gestorAnalisaDespesasDaEquipe"
         ],
-        "serviceFunction": "reembolsoDespesas.despesas_da_equipe.load",
+        "serviceFunction": "reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe",
         "contractPath": "l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts",
         "contractInterface": "Despesas_da_equipeContracts"
       },
       {
-        "route": "reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe",
+        "route": "reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise",
         "kind": "query",
         "grantIds": [
           "gestorAnalisaDespesasDaEquipe"
         ],
-        "serviceFunction": "reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe",
+        "serviceFunction": "reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise",
         "contractPath": "l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts",
         "contractInterface": "Despesas_da_equipeContracts"
       },
       {
-        "route": "reembolsoDespesas.despesas_da_equipe.rejectExpense",
+        "route": "reembolsoDespesas.despesas_da_equipe.rejeitarDespesa",
         "kind": "command",
         "grantIds": [
           "gestorAnalisaDespesasDaEquipe"
         ],
-        "serviceFunction": "reembolsoDespesas.despesas_da_equipe.rejectExpense",
+        "serviceFunction": "reembolsoDespesas.despesas_da_equipe.rejeitarDespesa",
         "contractPath": "l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.ts",
         "contractInterface": "Despesas_da_equipeContracts"
       }

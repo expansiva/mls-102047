@@ -15,32 +15,32 @@ export const definition = {
     "pageId": "despesas_aprovadas",
     "handlers": [
       {
-        "route": "reembolsoDespesas.despesas_aprovadas.load",
+        "route": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
         "kind": "query",
         "grantIds": [
           "financeiroConsultaEpagaDespesasAprovadas"
         ],
-        "serviceFunction": "reembolsoDespesas.despesas_aprovadas.load",
+        "serviceFunction": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
         "contractPath": "l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.ts",
         "contractInterface": "Despesas_aprovadasContracts"
       },
       {
-        "route": "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
+        "route": "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
         "kind": "query",
         "grantIds": [
           "financeiroConsultaEpagaDespesasAprovadas"
         ],
-        "serviceFunction": "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
+        "serviceFunction": "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
         "contractPath": "l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.ts",
         "contractInterface": "Despesas_aprovadasContracts"
       },
       {
-        "route": "reembolsoDespesas.despesas_aprovadas.registerPayment",
+        "route": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
         "kind": "command",
         "grantIds": [
           "financeiroConsultaEpagaDespesasAprovadas"
         ],
-        "serviceFunction": "reembolsoDespesas.despesas_aprovadas.registerPayment",
+        "serviceFunction": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
         "contractPath": "l2/reembolsoDespesas/web/contracts/despesas_aprovadas.defs.ts",
         "contractInterface": "Despesas_aprovadasContracts"
       }
