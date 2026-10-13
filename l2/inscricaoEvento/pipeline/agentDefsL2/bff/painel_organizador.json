@@ -1,0 +1,275 @@
+{
+  "types": [
+    {
+      "name": "EventoOcupacaoDetails",
+      "description": "Números de ocupação de um evento publicado, todos calculados pelo servidor a partir das inscrições.",
+      "fields": [
+        {
+          "name": "details.capacity",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.details.capacity"
+            ]
+          }
+        },
+        {
+          "name": "details.occupiedSeats",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.details.occupiedSeats"
+            ]
+          }
+        },
+        {
+          "name": "details.remainingSeats",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.details.remainingSeats"
+            ]
+          }
+        },
+        {
+          "name": "details.waitlistSize",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.details.waitlistSize"
+            ]
+          }
+        },
+        {
+          "name": "details.isFull",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.details.isFull"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EventoOcupacao",
+      "description": "Evento publicado com sua situação de ocupação, para os destaques do painel.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.id"
+            ]
+          }
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.title"
+            ]
+          }
+        },
+        {
+          "name": "eventDate",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.eventDate"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'draft' | 'published'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "EventoOcupacaoDetails"
+        }
+      ]
+    },
+    {
+      "name": "EventoPublicadoDetails",
+      "description": "Data de publicação e vagas ocupadas de um evento publicado recentemente.",
+      "fields": [
+        {
+          "name": "details.publishedAt",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.details.publishedAt"
+            ]
+          }
+        },
+        {
+          "name": "details.occupiedSeats",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.details.occupiedSeats"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EventoPublicado",
+      "description": "Evento publicado recentemente, para o resumo de publicações.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.id"
+            ]
+          }
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.title"
+            ]
+          }
+        },
+        {
+          "name": "eventDate",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.eventDate"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'draft' | 'published'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Evento.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "EventoPublicadoDetails"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "qryPainelOrganizador",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "destaques",
+          "type": "EventoOcupacao[]"
+        },
+        {
+          "name": "totalVagasOcupadas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Evento.details.occupiedSeats",
+              "Evento.status"
+            ]
+          }
+        },
+        {
+          "name": "recentes",
+          "type": "EventoPublicado[]"
+        }
+      ],
+      "rules": [
+        "calculoVagasOcupadas",
+        "calculoVagasRestantes",
+        "listaEsperaQuandoVagasEsgotadas"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega, em uma única chamada ao abrir o painel, a situação de ocupação dos eventos publicados da organização do organizador, o total de vagas ocupadas e os eventos publicados recentemente.",
+        "input": "Sem parâmetros: a organização vem do contexto do organizador autenticado (grant organizadorEventos, escopo organização).",
+        "processing": "Seleciona os eventos da organização com status 'published'. Para cada um calcula, a partir das inscrições: occupiedSeats = inscrições confirmadas, sem canceladas nem em lista de espera (calculoVagasOcupadas); remainingSeats = capacity - occupiedSeats, nunca abaixo de zero (calculoVagasRestantes); waitlistSize = inscrições em lista de espera; isFull verdadeiro quando occupiedSeats alcança capacity (listaEsperaQuandoVagasEsgotadas). Esses campos são derivados, calculados na leitura e nunca gravados. destaques: ordena primeiro os lotados, depois os com lista de espera maior, depois os com menos vagas restantes, limitado aos primeiros (ex.: 10). totalVagasOcupadas: soma de occupiedSeats de todos os eventos publicados. recentes: eventos publicados ordenados por publishedAt decrescente, limitado aos mais recentes (ex.: 5).",
+        "output": "destaques com título, data, situação e números de ocupação de cada evento que pede atenção; totalVagasOcupadas já somado para o resumo; recentes com título, data, situação, data de publicação e vagas ocupadas. O id de cada evento permite navegar para a gestão de eventos."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "destaquesOcupacao",
+        "reads": "qryPainelOrganizador.destaques"
+      },
+      {
+        "organism": "resumoPublicacoes",
+        "reads": "qryPainelOrganizador.totalVagasOcupadas"
+      },
+      {
+        "organism": "resumoPublicacoes",
+        "reads": "qryPainelOrganizador.recentes"
+      }
+    ],
+    "commands": [],
+    "selections": [],
+    "journeys": [
+      {
+        "step": "acompanharInscritos/localizarEventoOrg",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "gestao_eventos"
+      },
+      {
+        "step": "acompanharInscritos/verOcupacao",
+        "organisms": [
+          "destaquesOcupacao",
+          "resumoPublicacoes"
+        ],
+        "endpoints": [
+          "qryPainelOrganizador"
+        ]
+      },
+      {
+        "step": "acompanharInscritos/verInscritos",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "gestao_eventos"
+      },
+      {
+        "step": "acompanharInscritos/baixarCsv",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "gestao_eventos"
+      }
+    ],
+    "updates": []
+  }
+}
