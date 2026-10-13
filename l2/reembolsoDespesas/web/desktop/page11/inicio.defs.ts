@@ -2,27 +2,27 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/operationsQueue/page21.md",
-    "experience": "workQueueSplit"
+    "category": "_102020_/l4/collabux/templates/approvalWorkflow/page21.md",
+    "experience": "readAndDecide"
   },
-  "intent": "Mostra ao gestor a fila de despesas da equipe que aguardam análise e decisão, para ele ver o que precisa tratar agora e seguir para analisar.",
+  "intent": "Mostrar ao gestor, logo ao entrar, quais despesas da equipe estão esperando a análise e a decisão dele, para que ele perceba o volume pendente e siga direto para a análise.",
   "sections": [
     {
-      "id": "filaAnalise",
+      "id": "pendenciasDecisao",
       "priority": "primary",
-      "purpose": "Reúne as despesas pendentes da equipe para o gestor identificar rapidamente o que espera a decisão dele e abrir a análise.",
+      "purpose": "Reunir as despesas da equipe que aguardam a decisão do gestor, com quem registrou, a data, a categoria e o valor, para ele escolher o que analisar primeiro.",
       "organisms": [
-        "despesasPendentesEquipe"
+        "caixaDespesasPendentes"
       ]
     }
   ],
   "organisms": {
-    "despesasPendentesEquipe": {
+    "caixaDespesasPendentes": {
       "kind": "inbox",
-      "text": "Comunica ao gestor as despesas da equipe que estão esperando ele analisar e decidir, para que ele enxergue a fila de pendências e siga para a análise.",
+      "text": "Vejo as despesas da equipe que estão esperando eu analisar e decidir: quem registrou, quando foi a despesa, a categoria e o valor, além de saber se é um reenvio depois de uma correção. Daqui sigo para a análise e decisão.",
       "intents": [
         {
-          "id": "abrirDespesasDaEquipe",
+          "id": "abrirAnaliseDespesas",
           "kind": "navigate",
           "to": "despesas_da_equipe"
         }
@@ -30,16 +30,20 @@ export const definition = {
     }
   },
   "molecules": {
-    "despesasPendentesEquipe": [
+    "caixaDespesasPendentes": [
       {
-        "role": "viewTable",
-        "preferred": "groupviewtable--ml-data-table",
-        "alternative": "groupviewtable--ml-responsive-data-table"
+        "role": "Total de despesas aguardando decisão",
+        "preferred": "groupviewmetric--ml-metric-card",
+        "alternative": "groupviewmetric--ml-metric-big-number"
       },
       {
-        "role": "triggerAction",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-icon-button"
+        "role": "Lista das despesas pendentes da equipe",
+        "preferred": "groupviewtable--ml-data-table",
+        "alternative": "groupviewdata--ml-vertical-record-list"
+      },
+      {
+        "role": "Ir para a análise das despesas",
+        "preferred": "grouptriggeraction--ml-button-standard"
       }
     ]
   }

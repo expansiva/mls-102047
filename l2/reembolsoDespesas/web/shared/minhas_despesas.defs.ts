@@ -3,23 +3,15 @@
 export const definition = {
   "entry": {
     "params": {
-      "despesaId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:detalheDespesa",
-        "persist": true
-      },
-      "colaboradorId": {
+      "status": {
         "type": "string",
         "sources": [
           "url",
           "localStorage"
         ],
         "effect": "filter:listaMinhasDespesas",
-        "persist": true
+        "persist": true,
+        "required": false
       },
       "page": {
         "type": "number",
@@ -28,56 +20,51 @@ export const definition = {
           "localStorage"
         ],
         "effect": "filter:listaMinhasDespesas",
-        "persist": true
+        "persist": true,
+        "required": false
+      },
+      "despesaId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:detalheDespesa",
+        "persist": true,
+        "required": false
       }
     }
   },
-  "forms": {
-    "registrarDespesa": {
-      "organism": "formularioDespesa",
-      "submit": "registrarDespesa"
-    },
-    "corrigirDespesa": {
-      "organism": "formularioDespesa",
-      "submit": "corrigirDespesa"
-    },
-    "enviarParaAprovacao": {
-      "organism": "formularioDespesa",
-      "submit": "enviarParaAprovacao"
-    },
-    "reenviarParaAprovacao": {
-      "organism": "formularioDespesa",
-      "submit": "reenviarParaAprovacao"
-    }
-  },
   "requests": {
-    "load": {
+    "listarMinhasDespesas": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "minhasDespesas"
+        "despesas"
       ]
     },
-    "loadMinhasDespesas": {
+    "obterDespesa": {
       "kind": "qry",
-      "trigger": "loadMinhasDespesas",
+      "trigger": "obterDespesa",
       "returns": [
-        "minhasDespesas"
+        "despesa"
       ]
     },
     "registrarDespesa": {
       "kind": "cmd",
       "trigger": "registrarDespesa",
       "returns": [
-        "despesa"
+        "despesa",
+        "item"
       ],
       "writes": "Despesa.create"
     },
-    "corrigirDespesa": {
+    "salvarCorrecao": {
       "kind": "cmd",
-      "trigger": "corrigirDespesa",
+      "trigger": "salvarCorrecao",
       "returns": [
-        "despesa"
+        "despesa",
+        "item"
       ],
       "writes": "Despesa.update"
     },
@@ -85,7 +72,8 @@ export const definition = {
       "kind": "cmd",
       "trigger": "enviarParaAprovacao",
       "returns": [
-        "despesa"
+        "despesa",
+        "item"
       ],
       "writes": "Despesa.enviarParaAprovacao"
     },
@@ -93,184 +81,94 @@ export const definition = {
       "kind": "cmd",
       "trigger": "reenviarParaAprovacao",
       "returns": [
-        "despesa"
+        "despesa",
+        "item"
       ],
       "writes": "Despesa.reenviarParaAprovacao"
     }
   },
   "states": {
-    "minhasDespesas": {
-      "source": "load.minhasDespesas",
-      "description": "Lista paginada de despesas do colaborador."
+    "despesas": {
+      "source": "listarMinhasDespesas.despesas",
+      "description": "Linha da lista de despesas do colaborador.",
+      "organisms": [
+        "listaMinhasDespesas"
+      ]
     },
-    "colaboradorId": {
-      "source": "entry.params.colaboradorId",
-      "description": "Identificador do colaborador usado para filtrar as despesas."
+    "despesa": {
+      "source": "obterDespesa.despesa",
+      "description": "Despesa completa, usada no detalhe, no formulário de correção e nas ações de envio.",
+      "organisms": [
+        "acoesEnvio",
+        "detalheDespesa",
+        "formularioDespesa"
+      ]
     },
-    "page": {
-      "source": "entry.params.page",
-      "description": "Página solicitada da lista de despesas."
-    },
-    "detalheDespesa": {
+    "selectedDespesa": {
       "source": "entry.params.despesaId",
-      "description": "Despesa selecionada na lista para consulta, correção ou envio."
-    }
-  },
-  "functions": {
-    "load": {
-      "description": "Carrega a primeira página das despesas do colaborador.",
-      "calls": "load",
-      "sets": "minhasDespesas"
-    },
-    "filterListaMinhasDespesas": {
-      "description": "Recarrega a primeira página das despesas conforme os filtros informados.",
-      "calls": "loadMinhasDespesas",
-      "sets": "minhasDespesas"
-    },
-    "loadMoreListaMinhasDespesas": {
-      "description": "Acrescenta a próxima página de despesas à lista.",
-      "calls": "loadMinhasDespesas",
-      "sets": "minhasDespesas"
-    },
-    "registrarDespesa": {
-      "description": "Registra uma nova despesa.",
-      "calls": "registrarDespesa",
-      "sets": "detalheDespesa",
-      "updates": [
-        "minhasDespesas"
-      ]
-    },
-    "corrigirDespesa": {
-      "description": "Corrige a despesa selecionada.",
-      "calls": "corrigirDespesa",
-      "sets": "detalheDespesa",
-      "updates": [
-        "minhasDespesas"
-      ]
-    },
-    "enviarParaAprovacao": {
-      "description": "Envia a despesa selecionada para aprovação.",
-      "calls": "enviarParaAprovacao",
-      "sets": "detalheDespesa",
-      "updates": [
-        "minhasDespesas"
-      ]
-    },
-    "reenviarParaAprovacao": {
-      "description": "Reenvia para aprovação a despesa rejeitada selecionada.",
-      "calls": "reenviarParaAprovacao",
-      "sets": "detalheDespesa",
-      "updates": [
-        "minhasDespesas"
+      "description": "Despesa completa, usada no detalhe, no formulário de correção e nas ações de envio.",
+      "organisms": [
+        "detalheDespesa",
+        "listaMinhasDespesas"
       ]
     }
   },
   "journeys": [
     {
-      "step": "consultarMinhasDespesas/consultarDespesa",
-      "organisms": [
-        "listaMinhasDespesas",
-        "detalheDespesa"
-      ],
-      "functions": [
-        "load"
-      ]
-    },
-    {
       "step": "consultarMinhasDespesas/localizarMinhasDespesas",
       "organisms": [
         "listaMinhasDespesas"
-      ],
-      "functions": [
-        "filterListaMinhasDespesas",
-        "loadMoreListaMinhasDespesas"
+      ]
+    },
+    {
+      "step": "consultarMinhasDespesas/consultarDespesa",
+      "organisms": [
+        "detalheDespesa"
+      ]
+    },
+    {
+      "step": "corrigirReenviarDespesa/localizarDespesaRejeitada",
+      "organisms": [
+        "listaMinhasDespesas"
       ]
     },
     {
       "step": "corrigirReenviarDespesa/consultarMotivoRejeicao",
       "organisms": [
         "detalheDespesa"
-      ],
-      "functions": [
-        "load"
-      ]
-    },
-    {
-      "step": "corrigirReenviarDespesa/localizarDespesaRejeitada",
-      "organisms": [
-        "listaMinhasDespesas",
-        "detalheDespesa"
-      ],
-      "functions": [
-        "filterListaMinhasDespesas"
       ]
     },
     {
       "step": "corrigirReenviarDespesa/corrigirDespesa",
       "organisms": [
         "formularioDespesa"
-      ],
-      "functions": [
-        "corrigirDespesa"
       ]
     },
     {
       "step": "corrigirReenviarDespesa/reenviarDespesa",
       "organisms": [
-        "formularioDespesa",
-        "acoesDespesa"
-      ],
-      "functions": [
-        "reenviarParaAprovacao"
+        "acoesEnvio"
       ]
     },
     {
       "step": "registrarEnviarDespesa/registrarDespesa",
       "organisms": [
         "formularioDespesa"
-      ],
-      "functions": [
-        "registrarDespesa"
       ]
     },
     {
       "step": "registrarEnviarDespesa/enviarParaAprovacao",
       "organisms": [
-        "formularioDespesa",
-        "acoesDespesa"
-      ],
-      "functions": [
-        "enviarParaAprovacao"
+        "acoesEnvio"
       ]
     }
   ],
-  "rules": {
-    "load": [
-      "expenseOwnerOnly"
-    ],
-    "loadMinhasDespesas": [
-      "expenseOwnerOnly"
-    ],
-    "registrarDespesa": [
-      "validExpenseData"
-    ],
-    "corrigirDespesa": [
-      "expenseOwnerOnly",
-      "validExpenseData",
-      "singleResubmission"
-    ],
-    "enviarParaAprovacao": [
-      "expenseOwnerOnly",
-      "validExpenseData",
-      "proofRequiredBeforeSubmission"
-    ],
-    "reenviarParaAprovacao": [
-      "expenseOwnerOnly",
-      "validExpenseData",
-      "proofRequiredBeforeSubmission",
-      "singleResubmission"
-    ]
-  },
+  "rules": [
+    "expenseOwnerOnly",
+    "proofRequiredBeforeSubmission",
+    "singleResubmission",
+    "validExpenseData"
+  ],
   "access": {
     "actors": [
       "colaborador"

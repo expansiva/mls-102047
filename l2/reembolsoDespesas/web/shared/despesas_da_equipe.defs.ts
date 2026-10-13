@@ -3,72 +3,54 @@
 export const definition = {
   "entry": {
     "params": {
-      "despesaId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:expenseReview",
-        "persist": true
-      },
-      "colaboradorId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:pendingTeamExpenses",
-        "persist": true
-      },
       "page": {
         "type": "number",
         "sources": [
           "url",
           "localStorage"
         ],
-        "effect": "filter:pendingTeamExpenses",
-        "persist": true
+        "effect": "filter:despesasPendentes",
+        "persist": true,
+        "required": false
+      },
+      "despesaId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:analiseDespesa",
+        "persist": true,
+        "required": false
       }
     }
   },
-  "forms": {
-    "approveExpense": {
-      "organism": "approvalDecision",
-      "submit": "approveExpense"
-    },
-    "rejectExpense": {
-      "organism": "approvalDecision",
-      "submit": "rejectExpense"
-    }
-  },
   "requests": {
-    "load": {
+    "listarDespesasPendentesEquipe": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "despesasDaEquipe",
-        "colaborador"
+        "despesas"
       ]
     },
-    "loadDespesasDaEquipe": {
+    "obterDespesaParaAnalise": {
       "kind": "qry",
-      "trigger": "loadDespesasDaEquipe",
+      "trigger": "obterDespesaParaAnalise",
       "returns": [
-        "despesasDaEquipe"
+        "despesa"
       ]
     },
-    "approveExpense": {
+    "aprovarDespesa": {
       "kind": "cmd",
-      "trigger": "approveExpense",
+      "trigger": "aprovarDespesa",
       "returns": [
         "despesa"
       ],
       "writes": "Despesa.aprovarDespesa"
     },
-    "rejectExpense": {
+    "rejeitarDespesa": {
       "kind": "cmd",
-      "trigger": "rejectExpense",
+      "trigger": "rejeitarDespesa",
       "returns": [
         "despesa"
       ],
@@ -76,60 +58,28 @@ export const definition = {
     }
   },
   "states": {
-    "despesasDaEquipe": {
-      "source": "load.despesasDaEquipe",
-      "description": "Despesas pendentes da equipe"
+    "despesas": {
+      "source": "listarDespesasPendentesEquipe.despesas",
+      "description": "Linha da fila de despesas pendentes da equipe.",
+      "organisms": [
+        "despesasPendentes"
+      ]
     },
-    "colaborador": {
-      "source": "load.colaborador",
-      "description": "Colaborador da despesa selecionada"
+    "despesa": {
+      "source": "obterDespesaParaAnalise.despesa",
+      "description": "Despesa completa em análise, com colaborador, usada pela análise e pela decisão.",
+      "organisms": [
+        "analiseDespesa",
+        "decisaoDespesa"
+      ]
     },
-    "despesaSelecionada": {
+    "selectedDespesa": {
       "source": "entry.params.despesaId",
-      "description": "Despesa selecionada para análise"
-    },
-    "colaboradorId": {
-      "source": "entry.params.colaboradorId",
-      "description": "Filtro de colaborador"
-    },
-    "page": {
-      "source": "entry.params.page",
-      "description": "Página da lista de despesas"
-    }
-  },
-  "functions": {
-    "load": {
-      "description": "Carrega despesas pendentes da equipe e colaborador da despesa selecionada",
-      "calls": "load",
-      "sets": "despesasDaEquipe",
-      "updates": [
-        "colaborador"
-      ]
-    },
-    "filterPendingTeamExpenses": {
-      "description": "Filtra despesas pendentes da equipe",
-      "calls": "loadDespesasDaEquipe",
-      "sets": "despesasDaEquipe"
-    },
-    "loadMorePendingTeamExpenses": {
-      "description": "Carrega mais despesas pendentes da equipe",
-      "calls": "loadDespesasDaEquipe",
-      "sets": "despesasDaEquipe"
-    },
-    "approveExpense": {
-      "description": "Aprova a despesa selecionada",
-      "calls": "approveExpense",
-      "sets": "despesasDaEquipe",
-      "updates": [
-        "despesaSelecionada"
-      ]
-    },
-    "rejectExpense": {
-      "description": "Rejeita a despesa selecionada",
-      "calls": "rejectExpense",
-      "sets": "despesasDaEquipe",
-      "updates": [
-        "despesaSelecionada"
+      "description": "Despesa completa em análise, com colaborador, usada pela análise e pela decisão.",
+      "organisms": [
+        "analiseDespesa",
+        "decisaoDespesa",
+        "despesasPendentes"
       ]
     }
   },
@@ -137,43 +87,21 @@ export const definition = {
     {
       "step": "analisarDecidirDespesa/localizarDespesasPendentes",
       "organisms": [
-        "pendingTeamExpenses"
-      ],
-      "functions": [
-        "load",
-        "filterPendingTeamExpenses",
-        "loadMorePendingTeamExpenses"
-      ],
-      "continuesIn": "despesas_da_equipe"
+        "despesasPendentes"
+      ]
     },
     {
       "step": "analisarDecidirDespesa/analisarDespesa",
       "organisms": [
-        "expenseReview",
-        "approvalDecision"
-      ],
-      "functions": [
-        "approveExpense",
-        "rejectExpense"
-      ],
-      "continuesIn": "despesas_da_equipe"
+        "analiseDespesa",
+        "decisaoDespesa"
+      ]
     }
   ],
-  "rules": {
-    "load": [
-      "managerTeamExpenseAccess"
-    ],
-    "loadDespesasDaEquipe": [
-      "managerTeamExpenseAccess"
-    ],
-    "approveExpense": [
-      "managerTeamExpenseAccess"
-    ],
-    "rejectExpense": [
-      "managerTeamExpenseAccess",
-      "rejectionReasonRequired"
-    ]
-  },
+  "rules": [
+    "managerTeamExpenseAccess",
+    "rejectionReasonRequired"
+  ],
   "access": {
     "actors": [
       "gestorEquipe"

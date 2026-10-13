@@ -1,0 +1,504 @@
+{
+  "types": [
+    {
+      "name": "ColaboradorIdentificacaoNome",
+      "description": "Identificação do colaborador reduzida ao nome exibido.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Colaborador.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ColaboradorDetalhesNome",
+      "description": "Detalhes do colaborador com a identificação.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "ColaboradorIdentificacaoNome"
+        }
+      ]
+    },
+    {
+      "name": "ColaboradorNome",
+      "description": "Colaborador responsável pela despesa, apenas com o nome.",
+      "fields": [
+        {
+          "name": "details",
+          "type": "ColaboradorDetalhesNome"
+        }
+      ]
+    },
+    {
+      "name": "DespesaResumoDetalhes",
+      "description": "Dados da despesa exibidos na fila de pendentes.",
+      "fields": [
+        {
+          "name": "details.dataDespesa",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.dataDespesa"
+            ]
+          }
+        },
+        {
+          "name": "details.categoria",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.categoria"
+            ]
+          }
+        },
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.valor"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DespesaPendenteResumo",
+      "description": "Linha da fila de despesas pendentes da equipe.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.id"
+            ]
+          }
+        },
+        {
+          "name": "colaboradorId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.colaboradorId"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "DespesaResumoDetalhes"
+        },
+        {
+          "name": "colaborador",
+          "type": "ColaboradorNome"
+        }
+      ]
+    },
+    {
+      "name": "DespesaAnaliseDetalhes",
+      "description": "Dados completos da despesa para análise.",
+      "fields": [
+        {
+          "name": "details.dataDespesa",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.dataDespesa"
+            ]
+          }
+        },
+        {
+          "name": "details.categoria",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.categoria"
+            ]
+          }
+        },
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.descricao"
+            ]
+          }
+        },
+        {
+          "name": "details.motivoRejeicao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.motivoRejeicao"
+            ]
+          }
+        },
+        {
+          "name": "details.reenvioRealizado",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.reenvioRealizado"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DespesaAnalise",
+      "description": "Despesa completa em análise, com colaborador, usada pela análise e pela decisão.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.version"
+            ]
+          }
+        },
+        {
+          "name": "colaboradorId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.colaboradorId"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "DespesaAnaliseDetalhes"
+        },
+        {
+          "name": "colaborador",
+          "type": "ColaboradorNome"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "listarDespesasPendentesEquipe",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "despesas",
+          "type": "DespesaPendenteResumo[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "managerTeamExpenseAccess"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega a fila paginada de despesas da equipe do gestor que aguardam aprovação, para ele escolher qual analisar.",
+        "input": "page: número da página solicitada; pageSize: quantidade de despesas por página.",
+        "processing": "Filtra Despesa com status 'awaitingApproval' cujos colaboradores pertencem à equipe do gestor autenticado (managerTeamExpenseAccess: o gestor só consulta despesas de colaboradores da própria equipe, via relacionamento ReportsTo). Compõe cada linha com o nome do colaborador lido pelo colaboradorId. Ordena pela data da despesa, da mais antiga para a mais recente.",
+        "output": "Lista paginada { items, page, pageSize, hasMore } com id, colaborador, situação, data, categoria e valor de cada despesa pendente, já no formato da fila."
+      }
+    },
+    {
+      "id": "obterDespesaParaAnalise",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "despesaId",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "despesa",
+          "type": "DespesaAnalise"
+        }
+      ],
+      "rules": [
+        "managerTeamExpenseAccess"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega os dados completos da despesa escolhida na fila para análise e decisão.",
+        "input": "despesaId: identificador da despesa selecionada na fila.",
+        "processing": "Lê a despesa pelo id e recusa se o colaborador dono não pertencer à equipe do gestor (managerTeamExpenseAccess). Compõe com o nome do colaborador. O comprovante é consultado pelo anexo da despesa (attach.document).",
+        "output": "A despesa com versão, situação, data, categoria, valor, descrição, indicação de reenvio, motivo de rejeição anterior e nome do colaborador; a versão é usada pelos comandos de decisão."
+      }
+    },
+    {
+      "id": "aprovarDespesa",
+      "kind": "cmd",
+      "when": "aprovarDespesa",
+      "writes": "Despesa.aprovarDespesa",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.version"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "despesa",
+          "type": "DespesaAnalise"
+        }
+      ],
+      "rules": [
+        "managerTeamExpenseAccess"
+      ],
+      "jsdoc": {
+        "purpose": "Aprova a despesa em análise para que siga ao financeiro.",
+        "input": "despesaId: despesa a aprovar; version: versão lida, para controle de concorrência otimista.",
+        "processing": "Verifica que a despesa é de colaborador da equipe do gestor (managerTeamExpenseAccess) e que está em 'awaitingApproval'; executa a transição aprovarDespesa para 'approved', recusando se a versão divergir.",
+        "output": "A despesa atualizada, para redesenhar a análise e retirá-la da fila de pendentes sem nova chamada."
+      }
+    },
+    {
+      "id": "rejeitarDespesa",
+      "kind": "cmd",
+      "when": "rejeitarDespesa",
+      "writes": "Despesa.rejeitarDespesa",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.version"
+            ]
+          }
+        },
+        {
+          "name": "details.motivoRejeicao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.motivoRejeicao"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "despesa",
+          "type": "DespesaAnalise"
+        }
+      ],
+      "rules": [
+        "managerTeamExpenseAccess",
+        "rejectionReasonRequired"
+      ],
+      "jsdoc": {
+        "purpose": "Rejeita a despesa em análise registrando o motivo informado pelo gestor.",
+        "input": "despesaId: despesa a rejeitar; version: versão lida, para concorrência otimista; motivoRejeicao: justificativa da rejeição.",
+        "processing": "Verifica que a despesa é de colaborador da equipe do gestor (managerTeamExpenseAccess) e que está em 'awaitingApproval'; recusa se o motivo estiver vazio (rejectionReasonRequired); executa a transição rejeitarDespesa para 'rejected' gravando details.motivoRejeicao, recusando se a versão divergir.",
+        "output": "A despesa atualizada com o motivo, para redesenhar a análise e retirá-la da fila de pendentes sem nova chamada."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "despesasPendentes",
+        "reads": "listarDespesasPendentesEquipe.despesas"
+      },
+      {
+        "organism": "analiseDespesa",
+        "reads": "obterDespesaParaAnalise.despesa"
+      },
+      {
+        "organism": "decisaoDespesa",
+        "reads": "obterDespesaParaAnalise.despesa"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "aprovarDespesa",
+        "refreshes": []
+      },
+      {
+        "endpoint": "rejeitarDespesa",
+        "refreshes": []
+      }
+    ],
+    "selections": [
+      {
+        "organism": "despesasPendentes",
+        "via": {
+          "query": "obterDespesaParaAnalise"
+        }
+      },
+      {
+        "organism": "analiseDespesa",
+        "via": {
+          "list": "obterDespesaParaAnalise.despesa"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "analisarDecidirDespesa/localizarDespesasPendentes",
+        "organisms": [
+          "despesasPendentes"
+        ],
+        "endpoints": [
+          "listarDespesasPendentesEquipe"
+        ]
+      },
+      {
+        "step": "analisarDecidirDespesa/analisarDespesa",
+        "organisms": [
+          "analiseDespesa",
+          "decisaoDespesa"
+        ],
+        "endpoints": [
+          "obterDespesaParaAnalise",
+          "aprovarDespesa",
+          "rejeitarDespesa"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "listarDespesasPendentesEquipe",
+        "state": "listarDespesasPendentesEquipe.despesas",
+        "mode": "append"
+      },
+      {
+        "endpoint": "obterDespesaParaAnalise",
+        "state": "obterDespesaParaAnalise.despesa",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "aprovarDespesa",
+        "state": "obterDespesaParaAnalise.despesa",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "aprovarDespesa",
+        "state": "listarDespesasPendentesEquipe.despesas",
+        "mode": "remove"
+      },
+      {
+        "endpoint": "rejeitarDespesa",
+        "state": "obterDespesaParaAnalise.despesa",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "rejeitarDespesa",
+        "state": "listarDespesasPendentesEquipe.despesas",
+        "mode": "remove"
+      }
+    ]
+  }
+}

@@ -2,65 +2,65 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/financialTransactions/page21.md",
-    "experience": "ledgerTable"
+    "category": "_102020_/l4/collabux/templates/approvalWorkflow/page21.md",
+    "experience": "readAndDecide"
   },
-  "intent": "Em coluna fluida em torno de 390px, ainda usável em 360px e 430px, o colaborador percorre as próprias despesas, consulta o detalhe, preenche o registro ou a correção e envia ou reenvia para aprovação.",
+  "intent": "Em tela estreita e fluida, por volta de 390px e ainda usável entre 360px e 430px, deixar o colaborador acompanhar suas despesas, abrir uma de cada vez, registrar ou corrigir e enviar ou reenviar para aprovação.",
   "sections": [
     {
       "id": "acompanhamento",
       "priority": "primary",
-      "purpose": "Empilha as despesas do colaborador em faixa estreita para ele varrer valor e situação sem grade fixa.",
+      "purpose": "Mostrar as despesas do colaborador numa lista empilhada, com situação e valor bem visíveis, para tocar e abrir a que interessa.",
       "organisms": [
         "listaMinhasDespesas"
       ]
     },
     {
-      "id": "registro",
+      "id": "despesaSelecionada",
       "priority": "main",
-      "purpose": "Concentra o preenchimento de data, categoria, valor, descrição e comprovante em fluxo vertical estreito para registrar ou corrigir.",
+      "purpose": "Mostrar a despesa aberta em leitura vertical, com o motivo da rejeição em destaque quando houver, e logo abaixo as ações de envio ou reenvio.",
       "organisms": [
-        "formularioDespesa"
+        "detalheDespesa",
+        "acoesEnvio"
       ]
     },
     {
-      "id": "consultaEEnvio",
+      "id": "registroCorrecao",
       "priority": "secondary",
-      "purpose": "Mostra o detalhe da despesa aberta, inclusive o motivo da rejeição, e as ações de envio ou reenvio na sequência da coluna.",
+      "purpose": "Oferecer um formulário em coluna única para registrar uma despesa nova ou corrigir uma rejeitada, com o comprovante anexado.",
       "organisms": [
-        "detalheDespesa",
-        "acoesDespesa"
+        "formularioDespesa"
       ]
     }
   ],
   "organisms": {
     "listaMinhasDespesas": {
       "kind": "list",
-      "text": "Mostra em lista vertical as despesas do colaborador, com data, valor e situação, para ele achar o registro certo no telefone.",
+      "text": "Vejo as despesas que registrei, com data, categoria, valor e situação de cada uma, para acompanhar o andamento e escolher qual abrir.",
       "intents": []
     },
     "detalheDespesa": {
       "kind": "detail",
-      "text": "Apresenta dados, comprovante, situação e motivo da rejeição da despesa aberta, para o colaborador conferir o que foi pedido e o que o gestor recusou.",
+      "text": "Abro a despesa para ver os dados, o comprovante, a situação, se já foi reenviada, a data de pagamento e o motivo informado pelo gestor quando ela foi rejeitada.",
       "intents": []
     },
     "formularioDespesa": {
       "kind": "form",
-      "text": "Oferece os campos de data, categoria, valor, descrição e comprovante em conteúdo estreito para registrar uma despesa ou corrigir uma rejeitada.",
+      "text": "Preencho a data, a categoria, o valor, a descrição e o comprovante para registrar uma despesa nova ou corrigir uma rejeitada.",
       "intents": [
         {
           "id": "registrarDespesa",
           "kind": "submit"
         },
         {
-          "id": "corrigirDespesa",
+          "id": "salvarCorrecao",
           "kind": "submit"
         }
       ]
     },
-    "acoesDespesa": {
+    "acoesEnvio": {
       "kind": "actions",
-      "text": "Coloca o envio da despesa nova e o reenvio da despesa corrigida ao alcance do polegar, para seguir o fluxo de aprovação.",
+      "text": "Envio a despesa em rascunho para aprovação do gestor ou reenvio, uma única vez, a despesa rejeitada que corrigi.",
       "intents": [
         {
           "id": "enviarParaAprovacao",
@@ -76,60 +76,59 @@ export const definition = {
   "molecules": {
     "listaMinhasDespesas": [
       {
-        "role": "collection",
+        "role": "Lista das minhas despesas com situação",
         "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-card-grid"
+        "alternative": "groupviewtable--ml-responsive-data-table"
       }
     ],
     "detalheDespesa": [
       {
-        "role": "record",
+        "role": "Resumo da despesa selecionada",
         "preferred": "groupviewcard--ml-vertical-card",
         "alternative": "groupviewcard--ml-view-card-horizontal"
+      },
+      {
+        "role": "Destaque do motivo da rejeição",
+        "preferred": "groupnotifyuser--ml-contextual-feedback",
+        "alternative": "groupnotifyuser--ml-notify-banner"
       }
     ],
     "formularioDespesa": [
       {
-        "role": "expenseDate",
-        "preferred": "groupenterdate--ml-compact-calendar",
+        "role": "Data da despesa",
+        "preferred": "groupenterdate--ml-date-shortcut-picker",
         "alternative": "groupenterdate--ml-date-picker"
       },
       {
-        "role": "expenseAmount",
-        "preferred": "groupentermoney--ml-enter-money-br",
-        "alternative": "groupentermoney--ml-currency-input"
-      },
-      {
-        "role": "expenseCategory",
+        "role": "Categoria da despesa",
         "preferred": "groupentertext--ml-enter-text",
         "alternative": "groupentertext--ml-floating-text-input"
       },
       {
-        "role": "expenseDescription",
-        "preferred": "groupentertext--ml-multiline-text",
-        "alternative": "groupentertext--ml-enter-text"
+        "role": "Valor a reembolsar",
+        "preferred": "groupentermoney--ml-enter-money-br",
+        "alternative": "groupentermoney--ml-currency-input"
       },
       {
-        "role": "expenseProof",
+        "role": "Descrição da despesa",
+        "preferred": "groupentertext--ml-multiline-text"
+      },
+      {
+        "role": "Comprovante da despesa",
         "preferred": "groupselectfileforupload--ml-file-upload-preview",
         "alternative": "groupselectfileforupload--ml-file-upload-dropzone"
       }
     ],
-    "acoesDespesa": [
+    "acoesEnvio": [
       {
-        "role": "primaryActions",
+        "role": "Enviar ou reenviar para aprovação",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-button-group"
       },
       {
-        "role": "actionFeedback",
+        "role": "Confirmação do envio",
         "preferred": "groupnotifyuser--ml-toast-notification",
         "alternative": "groupnotifyuser--ml-contextual-feedback"
-      },
-      {
-        "role": "actionProgress",
-        "preferred": "groupshowprogress--ml-indeterminate-spinner",
-        "alternative": "groupshowprogress--ml-linear-progress"
       }
     ]
   }

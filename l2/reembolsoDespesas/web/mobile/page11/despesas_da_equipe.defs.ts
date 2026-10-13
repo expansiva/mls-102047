@@ -5,84 +5,89 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/approvalWorkflow/page21.md",
     "experience": "readAndDecide"
   },
-  "intent": "Em coluna estreita e fluida em torno de 390px, também usável em 360px e 430px, o gestor percorre as despesas pendentes da equipe, analisa a selecionada e decide aprovar ou rejeitar informando o motivo.",
+  "intent": "No celular, em uma coluna fluida de cerca de 390px (também usável entre 360px e 430px), o gestor percorre as despesas pendentes da equipe, abre uma para analisar dados e comprovante e decide aprovar ou rejeitar com o motivo.",
   "sections": [
     {
-      "id": "pendingQueue",
+      "id": "filaPendentes",
       "priority": "primary",
-      "purpose": "Empilha as despesas pendentes da equipe em faixa estreita para o gestor localizar qual analisar.",
+      "purpose": "Listar de forma compacta as despesas pendentes da equipe, destacando colaborador, valor e data, para tocar e abrir a análise.",
       "organisms": [
-        "pendingTeamExpenses"
+        "despesasPendentes"
       ]
     },
     {
-      "id": "review",
+      "id": "analiseDecisao",
       "priority": "main",
-      "purpose": "Mostra em sequência os dados, o colaborador e o comprovante da despesa escolhida, cabendo em cerca de 390px.",
+      "purpose": "Mostrar em sequência vertical os dados e o comprovante da despesa escolhida e, ao final, as ações de aprovar ou rejeitar ao alcance do polegar.",
       "organisms": [
-        "expenseReview"
-      ]
-    },
-    {
-      "id": "decision",
-      "priority": "secondary",
-      "purpose": "Mantém aprovação, rejeição e motivo ao alcance do polegar após a leitura da despesa.",
-      "organisms": [
-        "approvalDecision"
+        "analiseDespesa",
+        "decisaoDespesa"
       ]
     }
   ],
   "organisms": {
-    "pendingTeamExpenses": {
+    "despesasPendentes": {
       "kind": "list",
-      "text": "Lista as despesas da equipe que aguardam decisão, com colaborador, data, categoria, valor e situação, para o gestor achar o próximo item em tela estreita.",
+      "text": "Localizo as despesas pendentes da equipe em uma lista compacta com colaborador, valor e data e escolho a que vou analisar.",
       "intents": []
     },
-    "expenseReview": {
+    "analiseDespesa": {
       "kind": "detail",
-      "text": "Exibe os dados da despesa selecionada, o colaborador e o comprovante em bloco vertical, para conferir o reembolso antes de decidir.",
+      "text": "Analiso os dados da despesa — categoria, descrição, valor, data, reenvio e motivo de rejeição anterior — e abro o comprovante em tela cheia.",
       "intents": []
     },
-    "approvalDecision": {
+    "decisaoDespesa": {
       "kind": "actions",
-      "text": "Oferece aprovar a despesa ou rejeitá-la com o motivo, para o gestor concluir a análise sem sair do fluxo estreito.",
+      "text": "Aprovo a despesa ou rejeito informando o motivo, com confirmação clara da decisão.",
       "intents": [
         {
-          "id": "approveExpense",
+          "id": "aprovarDespesa",
           "kind": "submit"
         },
         {
-          "id": "rejectExpense",
+          "id": "rejeitarDespesa",
           "kind": "submit"
         }
       ]
     }
   },
   "molecules": {
-    "pendingTeamExpenses": [
+    "despesasPendentes": [
       {
-        "role": "queue",
-        "preferred": "groupviewdata--ml-vertical-record-list",
+        "role": "lista de despesas pendentes",
+        "preferred": "groupviewtable--ml-responsive-data-table",
         "alternative": "groupviewtable--ml-responsive-table"
-      }
-    ],
-    "expenseReview": [
-      {
-        "role": "summary",
-        "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-horizontal"
-      }
-    ],
-    "approvalDecision": [
-      {
-        "role": "rejectionReason",
-        "preferred": "groupentertext--ml-multiline-text",
-        "alternative": "groupentertext--ml-enter-text"
       },
       {
-        "role": "decision",
+        "role": "busca por colaborador ou categoria",
+        "preferred": "groupsearchcontent--ml-search-bar"
+      }
+    ],
+    "analiseDespesa": [
+      {
+        "role": "resumo da despesa",
+        "preferred": "groupviewcard--ml-vertical-card",
+        "alternative": "groupviewcard--ml-view-card-horizontal"
+      },
+      {
+        "role": "visualização do comprovante",
+        "preferred": "groupplaymedia--ml-pdf-viewer",
+        "alternative": "groupplaymedia--ml-image-gallery"
+      }
+    ],
+    "decisaoDespesa": [
+      {
+        "role": "botões aprovar e rejeitar",
         "preferred": "grouptriggeraction--ml-button-group",
         "alternative": "grouptriggeraction--ml-button-standard"
+      },
+      {
+        "role": "motivo da rejeição",
+        "preferred": "groupentertext--ml-multiline-text"
+      },
+      {
+        "role": "confirmação da decisão",
+        "preferred": "groupnotifyuser--ml-toast-notification"
       }
     ]
   }

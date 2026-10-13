@@ -5,80 +5,84 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/financialTransactions/page21.md",
     "experience": "ledgerTable"
   },
-  "intent": "Em uma coluna estreita e fluida, permitir ao financeiro percorrer as despesas aprovadas a pagar, abrir os dados da selecionada e informar a data de pagamento.",
+  "intent": "No celular, o financeiro percorre as despesas aprovadas em uma coluna estreita e fluida (cerca de 390px, usável de 360px a 430px). Ao escolher uma despesa, ele confere os dados e registra a data de pagamento.",
   "sections": [
     {
-      "id": "paymentQueue",
+      "id": "filaPagamento",
       "priority": "primary",
-      "purpose": "Empilhar a fila de despesas aprovadas em conteúdo fluido perto de 390px, ainda utilizável em 360px e 430px, para o financeiro localizar o que falta pagar.",
+      "purpose": "Mostra as despesas aprovadas que ainda aguardam pagamento em itens empilhados, fáceis de tocar.",
       "organisms": [
-        "approvedExpensesList"
+        "despesasAprovadasLista"
       ]
     },
     {
-      "id": "expenseReview",
+      "id": "analisePagamento",
       "priority": "main",
-      "purpose": "Mostrar abaixo da fila, no mesmo fluxo estreito, os dados da despesa selecionada para conferência antes de pagar.",
+      "purpose": "Mostra os dados da despesa escolhida e, logo abaixo, o registro da data de pagamento.",
       "organisms": [
-        "approvedExpenseDetail"
-      ]
-    },
-    {
-      "id": "paymentCapture",
-      "priority": "secondary",
-      "purpose": "Seguir no fluxo estreito com a data de pagamento e a confirmação do registro do reembolso.",
-      "organisms": [
-        "paymentDateForm"
+        "despesaAprovadaDetalhe",
+        "registroPagamentoForm"
       ]
     }
   ],
   "organisms": {
-    "approvedExpensesList": {
+    "despesasAprovadasLista": {
       "kind": "list",
-      "text": "Lista em sequência as despesas aprovadas que aguardam pagamento, com colaborador, valor, categoria e data, para o financeiro escolher o reembolso a pagar na tela estreita.",
+      "text": "Lista as despesas aprovadas que aguardam pagamento, destacando o valor, o colaborador e a data. O financeiro escolhe a despesa que vai pagar.",
       "intents": []
     },
-    "approvedExpenseDetail": {
+    "despesaAprovadaDetalhe": {
       "kind": "detail",
-      "text": "Mostra os dados da despesa aprovada selecionada — colaborador, categoria, valor, descrição, situação e data de pagamento, se houver — para conferência no fluxo estreito antes de pagar.",
+      "text": "Mostra os dados da despesa aprovada: colaborador, data, categoria, valor, descrição e situação. O financeiro confere essas informações antes de pagar.",
       "intents": []
     },
-    "paymentDateForm": {
+    "registroPagamentoForm": {
       "kind": "form",
-      "text": "Permite informar a data em que o pagamento foi realizado e confirmar o registro, encerrando a despesa aprovada como paga.",
+      "text": "Recebe a data em que a despesa aprovada foi paga e registra o pagamento. Com isso, a despesa passa para a situação de paga.",
       "intents": [
         {
-          "id": "registerPayment",
+          "id": "registrarPagamento",
           "kind": "submit"
         }
       ]
     }
   },
   "molecules": {
-    "approvedExpensesList": [
+    "despesasAprovadasLista": [
       {
-        "role": "collection",
+        "role": "lista de despesas aprovadas",
         "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewtable--ml-responsive-table"
+        "alternative": "groupviewtable--ml-responsive-data-table"
+      },
+      {
+        "role": "busca na lista",
+        "preferred": "groupsearchcontent--ml-search-bar"
+      },
+      {
+        "role": "paginação",
+        "preferred": "grouptriggeraction--ml-pagination-control"
       }
     ],
-    "approvedExpenseDetail": [
+    "despesaAprovadaDetalhe": [
       {
-        "role": "summary",
+        "role": "resumo da despesa",
         "preferred": "groupviewcard--ml-vertical-card",
         "alternative": "groupviewcard--ml-view-card-horizontal"
       }
     ],
-    "paymentDateForm": [
+    "registroPagamentoForm": [
       {
-        "role": "dateEntry",
-        "preferred": "groupenterdate--ml-compact-calendar",
-        "alternative": "groupenterdate--ml-date-picker"
+        "role": "data de pagamento",
+        "preferred": "groupenterdate--ml-date-shortcut-picker",
+        "alternative": "groupenterdate--ml-compact-calendar"
       },
       {
-        "role": "confirmAction",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-icon-button"
+        "role": "confirmar pagamento",
+        "preferred": "grouptriggeraction--ml-button-standard"
+      },
+      {
+        "role": "confirmação do registro",
+        "preferred": "groupnotifyuser--ml-toast-notification"
       }
     ]
   }

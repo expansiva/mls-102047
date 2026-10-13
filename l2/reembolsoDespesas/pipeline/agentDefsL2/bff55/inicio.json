@@ -1,0 +1,261 @@
+{
+  "schemaVersion": "2026-10-04-agent-defs-l2-bff-v2",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "inicio",
+  "attempt": 2,
+  "diagnostic": "D2_BFF_COVERAGE: organisms.caixaDespesasPendentes.reads.Colaborador.details.identification: organism caixaDespesasPendentes reads Colaborador.details.identification, and the page delivers 1 of 7 leaves of Colaborador.details.identification; missing: subtype, status, docType, docId, countryCode, tags.",
+  "previous": {
+    "types": [
+      {
+        "name": "IdentificacaoColaborador",
+        "description": "Identificação do colaborador que registrou a despesa.",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Colaborador.details.identification.name"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "DetalhesColaborador",
+        "description": "Detalhes do colaborador visíveis ao gestor.",
+        "fields": [
+          {
+            "name": "identification",
+            "type": "IdentificacaoColaborador",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Colaborador.details.identification"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "ColaboradorResponsavel",
+        "description": "Colaborador que registrou a despesa pendente.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Colaborador.id"
+              ]
+            }
+          },
+          {
+            "name": "details",
+            "type": "DetalhesColaborador",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Colaborador.details"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "DetalhesDespesaPendente",
+        "description": "Dados resumidos da despesa exibidos na caixa de pendências.",
+        "fields": [
+          {
+            "name": "dataDespesa",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.details.dataDespesa"
+              ]
+            }
+          },
+          {
+            "name": "categoria",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.details.categoria"
+              ]
+            }
+          },
+          {
+            "name": "valor",
+            "type": "number",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.details.valor"
+              ]
+            }
+          },
+          {
+            "name": "reenvioRealizado",
+            "type": "boolean",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.details.reenvioRealizado"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "DespesaPendente",
+        "description": "Despesa da equipe aguardando a decisão do gestor, com o colaborador que a registrou.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.id"
+              ]
+            }
+          },
+          {
+            "name": "colaboradorId",
+            "type": "string",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.colaboradorId"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "type": "'awaitingApproval'",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.status"
+              ]
+            }
+          },
+          {
+            "name": "details",
+            "type": "DetalhesDespesaPendente",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.details"
+              ]
+            }
+          },
+          {
+            "name": "colaborador",
+            "type": "ColaboradorResponsavel",
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.colaboradorId"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "qryInicio",
+        "kind": "qry",
+        "when": "onLoad",
+        "input": [
+          {
+            "name": "page",
+            "type": "number",
+            "optional": true,
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          },
+          {
+            "name": "pageSize",
+            "type": "number",
+            "optional": true,
+            "origin": {
+              "kind": "context",
+              "paths": []
+            }
+          }
+        ],
+        "output": [
+          {
+            "name": "totalPendentes",
+            "type": "number",
+            "origin": {
+              "kind": "aggregate",
+              "paths": [
+                "Despesa.id",
+                "Despesa.status",
+                "Despesa.colaboradorId"
+              ]
+            }
+          },
+          {
+            "name": "despesasPendentes",
+            "type": "DespesaPendente[]",
+            "paginated": true,
+            "origin": {
+              "kind": "field",
+              "paths": [
+                "Despesa.id"
+              ]
+            }
+          }
+        ],
+        "rules": [
+          "managerTeamExpenseAccess"
+        ],
+        "jsdoc": {
+          "purpose": "Carrega, ao abrir a página inicial, o total de despesas da equipe que aguardam a decisão do gestor e a lista dessas despesas com quem as registrou.",
+          "input": "page: número da página da lista de pendências (padrão 1); pageSize: quantidade de despesas por página.",
+          "processing": "Identifica o gestor logado e os colaboradores de sua equipe (vínculo ReportsTo). Aplica managerTeamExpenseAccess: considera somente despesas de colaboradores da própria equipe. Filtra status = awaitingApproval, ordena pela data da despesa mais antiga primeiro, pagina a lista e junta a identificação do colaborador pelo colaboradorId. O totalPendentes é calculado no servidor por contagem com os mesmos filtros (situação e escopo da equipe), independentemente da página.",
+          "output": "totalPendentes: número de despesas aguardando decisão, para o destaque do volume pendente; despesasPendentes: página de despesas com data, categoria, valor, indicador de reenvio e nome do colaborador, para o gestor escolher o que analisar antes de seguir para despesas_da_equipe."
+        }
+      }
+    ],
+    "bindings": {
+      "organisms": [
+        {
+          "organism": "caixaDespesasPendentes",
+          "reads": "qryInicio.totalPendentes"
+        },
+        {
+          "organism": "caixaDespesasPendentes",
+          "reads": "qryInicio.despesasPendentes"
+        }
+      ],
+      "commands": [],
+      "selections": [],
+      "journeys": [],
+      "updates": [
+        {
+          "endpoint": "qryInicio",
+          "state": "qryInicio.despesasPendentes",
+          "mode": "append"
+        }
+      ]
+    }
+  },
+  "inputHash": "sha256:337e5852a57438800186c14fd437c71b151414f1c596911d5b1574d25432a211",
+  "unitInputHash": "sha256:bc96757c5c1a19ac2997a8f4dc97357c77ed28df93fd3e2765f635f2f5b98156",
+  "promptHash": "sha256:9ac1b3808a2b31640ec7ef6ce5a103aaeec04fb77aa3fa45c761ed3120dfa2b3",
+  "promptChars": 24292,
+  "repairPromptChars": 24292,
+  "designHash": "sha256:2f03255f1ce5a4a0a3d1dfe4b05f9ecd012df8e0d517cc1e92ea9a21edadd0bc"
+}

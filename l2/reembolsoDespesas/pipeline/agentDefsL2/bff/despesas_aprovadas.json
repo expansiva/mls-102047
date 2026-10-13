@@ -1,0 +1,428 @@
+{
+  "types": [
+    {
+      "name": "DespesaAprovadaResumoDetails",
+      "description": "Dados da despesa exibidos em cada item da fila de pagamento.",
+      "fields": [
+        {
+          "name": "details.dataDespesa",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.dataDespesa"
+            ]
+          }
+        },
+        {
+          "name": "details.categoria",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.categoria"
+            ]
+          }
+        },
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.valor"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DespesaAprovadaResumo",
+      "description": "Item da fila de despesas aprovadas que aguardam pagamento.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.id"
+            ]
+          }
+        },
+        {
+          "name": "colaboradorId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.colaboradorId"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "DespesaAprovadaResumoDetails"
+        }
+      ]
+    },
+    {
+      "name": "DespesaAprovadaDetalheDetails",
+      "description": "Dados completos da despesa conferidos pelo financeiro antes do pagamento.",
+      "fields": [
+        {
+          "name": "details.dataDespesa",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.dataDespesa"
+            ]
+          }
+        },
+        {
+          "name": "details.categoria",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.categoria"
+            ]
+          }
+        },
+        {
+          "name": "details.valor",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.valor"
+            ]
+          }
+        },
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.descricao"
+            ]
+          }
+        },
+        {
+          "name": "details.dataPagamento",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.dataPagamento"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DespesaAprovadaDetalhe",
+      "description": "Despesa escolhida com seus dados completos e a versão usada no registro do pagamento.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.version"
+            ]
+          }
+        },
+        {
+          "name": "colaboradorId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.colaboradorId"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "DespesaAprovadaDetalheDetails"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "listarDespesasAprovadas",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "colaboradorId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.colaboradorId"
+            ]
+          }
+        },
+        {
+          "name": "details.categoria",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.categoria"
+            ]
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "despesas",
+          "type": "DespesaAprovadaResumo[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "financeApprovedExpenseAccess"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega a fila de despesas aprovadas que aguardam pagamento, para o financeiro localizar e escolher a despesa a pagar.",
+        "input": "page e pageSize: página e tamanho da página da fila; colaboradorId (opcional): filtra as despesas de um colaborador; categoria (opcional): filtra pela categoria informada.",
+        "processing": "Localiza despesas com status = 'approved' (locate.byColumn), aplicando os filtros opcionais de colaborador e categoria, ordenadas pela data da despesa. Aplica financeApprovedExpenseAccess: o financeiro só consulta despesas aprovadas, portanto nenhuma outra situação é retornada.",
+        "output": "Página { items, page, pageSize, hasMore } com id, colaborador, situação, data, categoria e valor de cada despesa, no formato que a lista exibe."
+      }
+    },
+    {
+      "id": "obterDespesaAprovada",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.id"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "despesa",
+          "type": "DespesaAprovadaDetalhe"
+        }
+      ],
+      "rules": [
+        "financeApprovedExpenseAccess"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega os dados completos da despesa escolhida na fila, para o financeiro conferir antes de registrar o pagamento.",
+        "input": "id: identificador da despesa selecionada na lista.",
+        "processing": "Lê a despesa por id (read.byId). Aplica financeApprovedExpenseAccess: recusa a consulta se a despesa não estiver aprovada (ou já paga por este fluxo). Retorna apenas os campos permitidos ao financeiro.",
+        "output": "A despesa com id, versão, colaborador, situação, data, categoria, valor, descrição e data de pagamento; alimenta o detalhe e o formulário de pagamento (a versão é usada no comando)."
+      }
+    },
+    {
+      "id": "registrarPagamento",
+      "kind": "cmd",
+      "when": "registrarPagamento",
+      "writes": "Despesa.registrarPagamento",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.version"
+            ]
+          }
+        },
+        {
+          "name": "details.dataPagamento",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Despesa.details.dataPagamento"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "despesa",
+          "type": "DespesaAprovadaDetalhe"
+        }
+      ],
+      "rules": [
+        "financeApprovedExpenseAccess",
+        "paymentDateRequired"
+      ],
+      "jsdoc": {
+        "purpose": "Registra o pagamento da despesa aprovada, movendo-a da situação aprovada para paga.",
+        "input": "id: despesa a pagar; version: versão lida no detalhe, para controle de concorrência; dataPagamento: data em que a despesa foi paga.",
+        "processing": "Executa a transição registrarPagamento (approved -> paid) gravando details.dataPagamento. Aplica financeApprovedExpenseAccess: recusa se a despesa não estiver aprovada; aplica paymentDateRequired: recusa se a data de pagamento não for informada. Recusa se a versão não corresponder à atual.",
+        "output": "A despesa atualizada (situação paga, data de pagamento e nova versão), para o detalhe ser redesenhado e o item sair da fila sem nova chamada."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "despesasAprovadasLista",
+        "reads": "listarDespesasAprovadas.despesas"
+      },
+      {
+        "organism": "despesaAprovadaDetalhe",
+        "reads": "obterDespesaAprovada.despesa"
+      },
+      {
+        "organism": "registroPagamentoForm",
+        "reads": "obterDespesaAprovada.despesa"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "registrarPagamento",
+        "refreshes": []
+      }
+    ],
+    "selections": [
+      {
+        "organism": "despesasAprovadasLista",
+        "via": {
+          "query": "obterDespesaAprovada"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "consultarDespesasAprovadas/localizarDespesasAprovadas",
+        "organisms": [
+          "despesasAprovadasLista"
+        ],
+        "endpoints": [
+          "listarDespesasAprovadas"
+        ]
+      },
+      {
+        "step": "consultarDespesasAprovadas/consultarDespesaAprovada",
+        "organisms": [
+          "despesaAprovadaDetalhe"
+        ],
+        "endpoints": [
+          "obterDespesaAprovada"
+        ]
+      },
+      {
+        "step": "registrarPagamentoDespesa/localizarDespesaAprovada",
+        "organisms": [
+          "despesasAprovadasLista"
+        ],
+        "endpoints": [
+          "listarDespesasAprovadas"
+        ]
+      },
+      {
+        "step": "registrarPagamentoDespesa/registrarDataPagamento",
+        "organisms": [
+          "despesaAprovadaDetalhe",
+          "registroPagamentoForm"
+        ],
+        "endpoints": [
+          "obterDespesaAprovada",
+          "registrarPagamento"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "listarDespesasAprovadas",
+        "state": "listarDespesasAprovadas.despesas",
+        "mode": "append"
+      },
+      {
+        "endpoint": "obterDespesaAprovada",
+        "state": "obterDespesaAprovada.despesa",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "registrarPagamento",
+        "state": "obterDespesaAprovada.despesa",
+        "mode": "upsert"
+      },
+      {
+        "endpoint": "registrarPagamento",
+        "state": "listarDespesasAprovadas.despesas",
+        "mode": "remove"
+      }
+    ]
+  }
+}

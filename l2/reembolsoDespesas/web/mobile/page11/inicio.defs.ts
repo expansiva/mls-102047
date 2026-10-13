@@ -2,27 +2,27 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/operationsQueue/page21.md",
-    "experience": "workQueueSplit"
+    "category": "_102020_/l4/collabux/templates/approvalWorkflow/page21.md",
+    "experience": "readAndDecide"
   },
-  "intent": "Em conteúdo fluido e estreito em torno de 390px, também usável em 360px e 430px, mostra ao gestor a fila de despesas da equipe que aguardam análise e decisão, para ele ver o que precisa tratar agora e seguir para analisar.",
+  "intent": "No celular, mostrar ao gestor em uma coluna estreita e fluida quantas despesas da equipe esperam a decisão dele e quais são, para que ele siga rápido para a análise.",
   "sections": [
     {
-      "id": "filaAnalise",
+      "id": "pendenciasDecisao",
       "priority": "primary",
-      "purpose": "Empilha em coluna estreita e fluida as despesas pendentes da equipe para o gestor varrer o que espera decisão e abrir a análise.",
+      "purpose": "Mostrar primeiro o total de pendências e, abaixo, cada despesa em formato compacto com quem registrou, a data e o valor, legível de 360px a 430px.",
       "organisms": [
-        "despesasPendentesEquipe"
+        "caixaDespesasPendentes"
       ]
     }
   ],
   "organisms": {
-    "despesasPendentesEquipe": {
+    "caixaDespesasPendentes": {
       "kind": "inbox",
-      "text": "Comunica ao gestor, em lista estreita e contínua, as despesas da equipe que estão esperando ele analisar e decidir, para que ele enxergue a fila de pendências e siga para a análise.",
+      "text": "Vejo as despesas da equipe que estão esperando eu analisar e decidir, cada uma resumida com quem registrou, a data, a categoria, o valor e se é um reenvio. Toco para seguir para a análise e decisão.",
       "intents": [
         {
-          "id": "abrirDespesasDaEquipe",
+          "id": "abrirAnaliseDespesas",
           "kind": "navigate",
           "to": "despesas_da_equipe"
         }
@@ -30,16 +30,20 @@ export const definition = {
     }
   },
   "molecules": {
-    "despesasPendentesEquipe": [
+    "caixaDespesasPendentes": [
       {
-        "role": "viewData",
-        "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewdata--ml-card-grid"
+        "role": "Total de despesas aguardando decisão",
+        "preferred": "groupviewmetric--ml-metric-big-number",
+        "alternative": "groupviewmetric--ml-metric-card"
       },
       {
-        "role": "triggerAction",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-icon-button"
+        "role": "Lista compacta das despesas pendentes da equipe",
+        "preferred": "groupviewdata--ml-vertical-record-list",
+        "alternative": "groupviewtable--ml-responsive-table"
+      },
+      {
+        "role": "Ir para a análise das despesas",
+        "preferred": "grouptriggeraction--ml-button-standard"
       }
     ]
   }

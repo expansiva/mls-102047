@@ -3,23 +3,25 @@
 export const definition = {
   "entry": {
     "params": {
-      "despesaId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:approvedExpenseDetail",
-        "persist": true
-      },
       "colaboradorId": {
         "type": "string",
         "sources": [
           "url",
           "localStorage"
         ],
-        "effect": "filter:approvedExpensesList",
-        "persist": true
+        "effect": "filter:despesasAprovadasLista",
+        "persist": true,
+        "required": false
+      },
+      "categoria": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:despesasAprovadasLista",
+        "persist": true,
+        "required": false
       },
       "page": {
         "type": "number",
@@ -27,35 +29,40 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "filter:approvedExpensesList",
-        "persist": true
+        "effect": "filter:despesasAprovadasLista",
+        "persist": true,
+        "required": false
+      },
+      "despesaId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:despesaAprovadaDetalhe",
+        "persist": true,
+        "required": false
       }
     }
   },
-  "forms": {
-    "registerPayment": {
-      "organism": "paymentDateForm",
-      "submit": "registerPayment"
-    }
-  },
   "requests": {
-    "load": {
+    "listarDespesasAprovadas": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "despesasAprovadas"
+        "despesas"
       ]
     },
-    "loadDespesasAprovadas": {
+    "obterDespesaAprovada": {
       "kind": "qry",
-      "trigger": "loadDespesasAprovadas",
+      "trigger": "obterDespesaAprovada",
       "returns": [
-        "despesasAprovadas"
+        "despesa"
       ]
     },
-    "registerPayment": {
+    "registrarPagamento": {
       "kind": "cmd",
-      "trigger": "registerPayment",
+      "trigger": "registrarPagamento",
       "returns": [
         "despesa"
       ],
@@ -63,109 +70,61 @@ export const definition = {
     }
   },
   "states": {
-    "despesasAprovadas": {
-      "source": "load.despesasAprovadas",
-      "description": "Despesas aprovadas para pagamento."
+    "despesas": {
+      "source": "listarDespesasAprovadas.despesas",
+      "description": "Item da fila de despesas aprovadas que aguardam pagamento.",
+      "organisms": [
+        "despesasAprovadasLista"
+      ]
     },
-    "despesaAprovada": {
+    "despesa": {
+      "source": "obterDespesaAprovada.despesa",
+      "description": "Despesa escolhida com seus dados completos e a versão usada no registro do pagamento.",
+      "organisms": [
+        "despesaAprovadaDetalhe",
+        "registroPagamentoForm"
+      ]
+    },
+    "selectedDespesa": {
       "source": "entry.params.despesaId",
-      "description": "Despesa aprovada selecionada."
-    },
-    "colaboradorId": {
-      "source": "entry.params.colaboradorId",
-      "description": "Colaborador usado para filtrar despesas aprovadas."
-    },
-    "page": {
-      "source": "entry.params.page",
-      "description": "Página da lista de despesas aprovadas."
-    },
-    "dataPagamento": {
-      "source": "registerPayment.input",
-      "description": "Data de pagamento informada."
-    }
-  },
-  "functions": {
-    "load": {
-      "description": "Carrega as despesas aprovadas.",
-      "calls": "load",
-      "sets": "despesasAprovadas"
-    },
-    "filterApprovedExpensesList": {
-      "description": "Filtra as despesas aprovadas.",
-      "calls": "loadDespesasAprovadas",
-      "sets": "despesasAprovadas"
-    },
-    "loadMoreApprovedExpensesList": {
-      "description": "Carrega mais despesas aprovadas.",
-      "calls": "loadDespesasAprovadas",
-      "sets": "despesasAprovadas"
-    },
-    "registerPayment": {
-      "description": "Registra o pagamento da despesa aprovada.",
-      "calls": "registerPayment",
-      "sets": "despesaAprovada",
-      "updates": [
-        "despesasAprovadas"
+      "description": "Despesa escolhida com seus dados completos e a versão usada no registro do pagamento.",
+      "organisms": [
+        "despesaAprovadaDetalhe",
+        "despesasAprovadasLista"
       ]
     }
   },
   "journeys": [
     {
-      "step": "consultarDespesasAprovadas/consultarDespesaAprovada",
-      "organisms": [
-        "approvedExpensesList",
-        "approvedExpenseDetail"
-      ],
-      "functions": [
-        "load"
-      ],
-      "continuesIn": "despesas_aprovadas"
-    },
-    {
       "step": "consultarDespesasAprovadas/localizarDespesasAprovadas",
       "organisms": [
-        "approvedExpensesList"
-      ],
-      "functions": [
-        "filterApprovedExpensesList",
-        "loadMoreApprovedExpensesList"
-      ],
-      "continuesIn": "despesas_aprovadas"
+        "despesasAprovadasLista"
+      ]
+    },
+    {
+      "step": "consultarDespesasAprovadas/consultarDespesaAprovada",
+      "organisms": [
+        "despesaAprovadaDetalhe"
+      ]
     },
     {
       "step": "registrarPagamentoDespesa/localizarDespesaAprovada",
       "organisms": [
-        "approvedExpensesList",
-        "approvedExpenseDetail"
-      ],
-      "functions": [
-        "load"
-      ],
-      "continuesIn": "despesas_aprovadas"
+        "despesasAprovadasLista"
+      ]
     },
     {
       "step": "registrarPagamentoDespesa/registrarDataPagamento",
       "organisms": [
-        "paymentDateForm"
-      ],
-      "functions": [
-        "registerPayment"
-      ],
-      "continuesIn": "despesas_aprovadas"
+        "despesaAprovadaDetalhe",
+        "registroPagamentoForm"
+      ]
     }
   ],
-  "rules": {
-    "load": [
-      "financeApprovedExpenseAccess"
-    ],
-    "loadDespesasAprovadas": [
-      "financeApprovedExpenseAccess"
-    ],
-    "registerPayment": [
-      "financeApprovedExpenseAccess",
-      "paymentDateRequired"
-    ]
-  },
+  "rules": [
+    "financeApprovedExpenseAccess",
+    "paymentDateRequired"
+  ],
   "access": {
     "actors": [
       "financeiro"
