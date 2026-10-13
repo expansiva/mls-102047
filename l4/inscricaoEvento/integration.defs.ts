@@ -13,7 +13,7 @@ export const inscricaoEventoIntegration = {
       "to": "any",
       "event": "eventoPublicado",
       "on": "Evento.publicar",
-      "description": "Publicado quando o organizador publica um evento. O registro do Evento nesse momento traz título, data, local e número de vagas, e qualquer módulo interessado pode usá-lo.",
+      "description": "Publicado quando o organizador publica um evento. O registro do Evento leva título, descrição, data, local e número de vagas, e a página pública passa a receber inscrições.",
       "entityRefs": [
         "Evento"
       ]
@@ -24,7 +24,7 @@ export const inscricaoEventoIntegration = {
       "to": "any",
       "event": "inscricaoRealizada",
       "on": "Inscricao.create",
-      "description": "Publicado quando uma pessoa do público se inscreve em um evento, seja com vaga confirmada ou na lista de espera. O registro da Inscricao indica o evento e o participante.",
+      "description": "Publicado quando alguém do público se inscreve em um evento publicado. A Inscricao fica confirmada ou em lista de espera, conforme as vagas disponíveis.",
       "entityRefs": [
         "Inscricao",
         "Evento",
@@ -37,7 +37,7 @@ export const inscricaoEventoIntegration = {
       "to": "any",
       "event": "inscricaoCancelada",
       "on": "Inscricao.cancelar",
-      "description": "Publicado quando um inscrito cancela a própria inscrição e libera uma vaga no evento.",
+      "description": "Publicado quando um inscrito cancela a própria inscrição, o que libera uma vaga no evento.",
       "entityRefs": [
         "Inscricao",
         "Evento",
@@ -50,7 +50,7 @@ export const inscricaoEventoIntegration = {
       "to": "any",
       "event": "inscricaoPromovida",
       "on": "Inscricao.promover",
-      "description": "Publicado quando o primeiro da lista de espera sobe para uma vaga confirmada depois de um cancelamento.",
+      "description": "Publicado quando a primeira inscrição da lista de espera é promovida e ocupa a vaga liberada por um cancelamento.",
       "entityRefs": [
         "Inscricao",
         "Evento",

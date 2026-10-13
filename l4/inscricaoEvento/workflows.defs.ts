@@ -8,21 +8,21 @@ export const inscricaoEventoWorkflows = {
   "processes": [
     {
       "processId": "promoverListaEspera",
-      "title": "Promover lista de espera",
-      "description": "Quando uma inscrição confirmada é cancelada, a vaga liberada é ocupada pela primeira inscrição da lista de espera, por ordem de chegada.",
+      "title": "Promover primeiro da lista de espera",
+      "description": "Quando uma inscrição é cancelada, a primeira inscrição da lista de espera do mesmo evento, por ordem de chegada, é promovida para a vaga liberada.",
       "trigger": {
         "kind": "event",
         "event": "Inscricao.cancelar"
       },
       "tasks": [
         {
-          "taskId": "promoverPrimeiroDaEspera",
+          "taskId": "promoverPrimeiraDaFila",
           "kind": "mechanical",
           "entityRef": "Inscricao",
           "effect": "transition",
           "transitionRef": "promover",
           "next": [],
-          "description": "Se a inscrição cancelada era confirmada, a primeira inscrição da lista de espera do mesmo evento é promovida a confirmada."
+          "description": "Se a inscrição cancelada ocupava vaga, a inscrição mais antiga em lista de espera do evento passa a ocupar a vaga liberada."
         }
       ]
     }
@@ -33,19 +33,15 @@ export const inscricaoEventoWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "editarEvento",
-      "inProcess": false
-    },
-    {
-      "journeyId": "acompanharInscritos",
-      "inProcess": false
-    },
-    {
-      "journeyId": "inscreverEvento",
+      "journeyId": "inscreverEmEvento",
       "inProcess": false
     },
     {
       "journeyId": "cancelarInscricao",
+      "inProcess": false
+    },
+    {
+      "journeyId": "acompanharInscritos",
       "inProcess": false
     }
   ]

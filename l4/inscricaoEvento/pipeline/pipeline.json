@@ -6,7 +6,7 @@
   "steps": {
     "module10": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:53:02.219Z",
+      "updatedAt": "2026-10-13T00:56:15.761Z",
       "artifactPaths": [
         "l4/inscricaoEvento/module.defs.ts"
       ],
@@ -20,38 +20,37 @@
           "kind": "internal",
           "origin": "named",
           "title": "Organizador",
-          "description": "Cadastra e publica eventos com título, descrição, data, local e número de vagas, acompanha os inscritos e as vagas ocupadas e baixa a lista de inscritos em CSV."
+          "description": "Cadastra e publica eventos com título, descrição, data, local e número de vagas; acompanha os inscritos e as vagas ocupadas e baixa a lista de inscritos em CSV."
         },
         {
           "actorId": "publico",
           "kind": "external",
           "origin": "named",
           "title": "Público",
-          "description": "Qualquer pessoa que acessa a página pública de um evento publicado e se inscreve com nome e e-mail, entrando na lista de espera quando as vagas acabam, e pode cancelar a própria inscrição."
+          "description": "Qualquer pessoa que acessa a página pública de um evento publicado e se inscreve com nome e e-mail, entrando na lista de espera quando as vagas acabam, e que pode cancelar a própria inscrição."
         }
       ]
     },
     "journeys20": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:53:24.340Z",
+      "updatedAt": "2026-10-13T00:56:32.707Z",
       "artifactPaths": [
         "l4/inscricaoEvento/journeys/cadastrarPublicarEvento.defs.ts",
-        "l4/inscricaoEvento/journeys/editarEvento.defs.ts",
-        "l4/inscricaoEvento/journeys/acompanharInscritos.defs.ts",
-        "l4/inscricaoEvento/journeys/inscreverEvento.defs.ts",
+        "l4/inscricaoEvento/journeys/inscreverEmEvento.defs.ts",
         "l4/inscricaoEvento/journeys/cancelarInscricao.defs.ts",
+        "l4/inscricaoEvento/journeys/acompanharInscritos.defs.ts",
         "l4/inscricaoEvento/journeys/index.defs.ts"
       ],
       "decideStepCount": 0,
       "droppedActors": [],
       "compile": {
         "status": "clean",
-        "files": 6
+        "files": 5
       }
     },
     "workflows50": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:53:35.593Z",
+      "updatedAt": "2026-10-13T00:56:49.235Z",
       "artifactPaths": [
         "l4/inscricaoEvento/workflows.defs.ts"
       ],
@@ -62,7 +61,7 @@
     },
     "ontology30": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:55:04.612Z",
+      "updatedAt": "2026-10-13T00:57:43.142Z",
       "artifactPaths": [
         "l4/inscricaoEvento/ontology/Evento.defs.ts",
         "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
@@ -108,27 +107,37 @@
         {
           "kind": "derivedFromPlatform",
           "entityId": "Evento",
-          "detail": "record.fields.details.fields.vagasOcupadas.derived (derived[])"
+          "detail": "record.fields.details.fields.occupiedSeats.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "Evento",
-          "detail": "record.fields.details.fields.vagasDisponiveis.derived (derived[])"
+          "detail": "record.fields.details.fields.remainingSeats.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "Evento",
-          "detail": "record.fields.details.fields.tamanhoListaEspera.derived (derived[])"
+          "detail": "record.fields.details.fields.waitlistSize.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "Evento",
-          "detail": "record.fields.details.fields.lotado.derived (derived[])"
+          "detail": "record.fields.details.fields.isFull.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
           "entityId": "Inscricao",
           "detail": "record.fields.id, record.fields.version"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Inscricao",
+          "detail": "record.fields.details.fields.posicaoListaEspera.derived (derived[])"
+        },
+        {
+          "kind": "derivedFromPlatform",
+          "entityId": "Inscricao",
+          "detail": "record.fields.details.fields.ocupaVaga.derived (derived[])"
         },
         {
           "kind": "derivedFromPlatform",
@@ -172,46 +181,46 @@
         }
       ],
       "citedRules": [
-        "eventoCompletoParaPublicar",
-        "numeroVagasPositivo",
-        "somentePublicadoRecebeInscricao",
-        "inscricaoAlemDasVagasVaiParaEspera",
-        "vagasNaoMenoresQueConfirmados",
-        "inscricaoSomenteEmEventoPublicado",
-        "emailUnicoPorEvento",
-        "confirmarSeHaVaga",
-        "esperaPorOrdemDeChegada",
-        "promoverPrimeiroDaEspera",
-        "cancelarApenasPropriaInscricao",
+        "publicarExigeDadosCompletos",
+        "inscricaoSomenteEventoPublicado",
+        "vagasNaoMenorQueOcupadas",
+        "inscricaoExcedenteVaiParaListaEspera",
+        "inscricaoUnicaPorEmailEvento",
+        "listaEsperaQuandoVagasEsgotadas",
+        "ordemChegadaListaEspera",
+        "promoverPrimeiroListaEsperaAoCancelar",
+        "cancelamentoSomentePropriaInscricao",
         "rule-foreign-namespace-refused",
         "rule-identity-never-in-namespace",
         "rule-document-shape-validated",
         "rule-person-privacy-consent-required-br-eu",
         "rule-delete-blocked-by-relationships",
+        "umaInscricaoPorEmailPorEvento",
         "rule-contact-value-unique-per-type"
       ],
       "citedCapabilities": [
+        "create",
+        "update",
+        "transition",
         "read.byId",
         "locate.byColumn",
         "locate.byText",
         "count",
         "listByForeignKey",
-        "create",
-        "update",
-        "transition",
-        "read.mdmRecord",
+        "delete",
         "inscricaoEvento.paginaPublica",
-        "inscricaoEvento.exportarCsv",
         "uniqueKey",
-        "sequence.next",
         "transaction",
-        "locate.byName",
+        "read.mdmRecord",
+        "sequence.next",
+        "inscricaoEvento.exportarCsv",
         "locate.byContact",
+        "locate.byName",
         "register.createOrAttach",
         "link.contact",
+        "listLinks",
         "edit.platformFields",
         "inactivate",
-        "listLinks",
         "comment",
         "tag",
         "statusHistory.read",
@@ -222,7 +231,7 @@
     },
     "judge35": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:55:04.842Z",
+      "updatedAt": "2026-10-13T00:57:43.307Z",
       "artifactPaths": [
         "l4/inscricaoEvento/pipeline/judge35-draft.json"
       ],
@@ -230,7 +239,7 @@
     },
     "rules40": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:55:21.929Z",
+      "updatedAt": "2026-10-13T00:58:00.517Z",
       "artifactPaths": [
         "l4/inscricaoEvento/rules.defs.ts"
       ],
@@ -241,7 +250,7 @@
     },
     "access60": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:55:33.197Z",
+      "updatedAt": "2026-10-13T00:58:06.417Z",
       "artifactPaths": [
         "l4/inscricaoEvento/access.defs.ts"
       ],
@@ -252,7 +261,7 @@
     },
     "integration70": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:55:44.545Z",
+      "updatedAt": "2026-10-13T00:58:17.714Z",
       "artifactPaths": [
         "l4/inscricaoEvento/integration.defs.ts"
       ],
@@ -263,7 +272,7 @@
     },
     "finalize80": {
       "status": "approved",
-      "updatedAt": "2026-10-12T22:55:44.748Z",
+      "updatedAt": "2026-10-13T00:58:17.905Z",
       "artifactPaths": [
         "l4/inscricaoEvento/pipeline/finalize-report.json",
         "l4/organization/registry.defs.ts",
@@ -278,7 +287,7 @@
     "module": "inscricaoEvento",
     "rebuildAll": true
   },
-  "updatedAt": "2026-10-12T22:56:23.782Z",
+  "updatedAt": "2026-10-13T00:58:54.523Z",
   "rebuildAll": {
     "deleted": [
       "l4/inscricaoEvento/access.defs.ts",
@@ -288,7 +297,7 @@
       "l4/inscricaoEvento/journeys/cancelarInscricao.defs.ts",
       "l4/inscricaoEvento/journeys/editarEvento.defs.ts",
       "l4/inscricaoEvento/journeys/index.defs.ts",
-      "l4/inscricaoEvento/journeys/inscreverEmEvento.defs.ts",
+      "l4/inscricaoEvento/journeys/inscreverEvento.defs.ts",
       "l4/inscricaoEvento/module.defs.ts",
       "l4/inscricaoEvento/ontology/EmailParticipante.defs.ts",
       "l4/inscricaoEvento/ontology/Evento.defs.ts",
@@ -331,46 +340,46 @@
       "l5/config.json",
       "l5/project.json"
     ],
-    "at": "2026-10-12T22:53:01.993Z"
+    "at": "2026-10-13T00:56:15.534Z"
   },
   "poolWiped": [],
   "pool": [
     {
-      "at": "2026-10-12T22:56:04.863Z",
-      "file": "l4/inscricaoEvento/pool/l2/20261012225604_inscricaoEvento-20261012225604_1.json",
+      "at": "2026-10-13T00:58:30.524Z",
+      "file": "l4/inscricaoEvento/pool/l2/20261013005830_inscricaoEvento-20261013005830_1.json",
       "from": "l4",
       "to": "l2",
-      "thread": "inscricaoEvento-20261012225604",
+      "thread": "inscricaoEvento-20261013005830",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T22:56:22.469Z",
-      "file": "l4/inscricaoEvento/pool/l1/20261012225622_inscricaoEvento-20261012225604_1.json",
+      "at": "2026-10-13T00:58:53.164Z",
+      "file": "l4/inscricaoEvento/pool/l1/20261013005852_inscricaoEvento-20261013005830_1.json",
       "from": "l2",
       "to": "l1",
-      "thread": "inscricaoEvento-20261012225604",
+      "thread": "inscricaoEvento-20261013005830",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T22:56:23.158Z",
-      "file": "l4/inscricaoEvento/pool/l2/20261012225622_inscricaoEvento-20261012225604_1.json",
+      "at": "2026-10-13T00:58:53.829Z",
+      "file": "l4/inscricaoEvento/pool/l2/20261013005853_inscricaoEvento-20261013005830_1.json",
       "from": "l1",
       "to": "l2",
-      "thread": "inscricaoEvento-20261012225604",
+      "thread": "inscricaoEvento-20261013005830",
       "round": 1,
       "mode": "estimate",
       "outcome": "delivered"
     },
     {
-      "at": "2026-10-12T22:56:23.740Z",
-      "file": "l4/inscricaoEvento/pool/l4/20261012225623_inscricaoEvento-20261012225604_1.json",
+      "at": "2026-10-13T00:58:54.482Z",
+      "file": "l4/inscricaoEvento/pool/l4/20261013005854_inscricaoEvento-20261013005830_1.json",
       "from": "l2",
       "to": "l4",
-      "thread": "inscricaoEvento-20261012225604",
+      "thread": "inscricaoEvento-20261013005830",
       "round": 1,
       "mode": "estimate",
       "outcome": "processed"

@@ -5,7 +5,7 @@
   "menuSchema": "2026-09-20-p2-menu-v2.2",
   "pages": [
     {
-      "pageId": "eventos",
+      "pageId": "painel_organizador",
       "actors": [
         "organizador"
       ],
@@ -15,46 +15,42 @@
           "family": "tdm",
           "scope": "organization",
           "derived": [
-            "details.lotado",
-            "details.tamanhoListaEspera",
-            "details.vagasDisponiveis",
-            "details.vagasOcupadas"
+            "details.isFull",
+            "details.occupiedSeats",
+            "details.publishedAt",
+            "details.remainingSeats",
+            "details.waitlistSize"
           ],
           "from": [
-            "grant:organizadorGerenciaEventosInscricoes",
+            "grant:organizadorEventos",
             "journey:acompanharInscritos/baixarCsv",
-            "journey:acompanharInscritos/localizarEventoInscritos",
+            "journey:acompanharInscritos/localizarEventoOrg",
             "journey:acompanharInscritos/verInscritos",
             "journey:acompanharInscritos/verOcupacao",
-            "journey:cadastrarPublicarEvento/criarEvento",
-            "journey:cadastrarPublicarEvento/publicarEvento",
-            "journey:cadastrarPublicarEvento/revisarEvento",
-            "journey:editarEvento/atualizarEvento",
-            "journey:editarEvento/localizarEvento",
+            "relationship:Evento/eventosDoParticipante",
             "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
             "relationship:Inscricao/inscricaoEvento",
-            "relationship:Participante/participantesDoEvento"
+            "relationship:Participante/eventosDoParticipante"
           ]
         },
         {
           "entity": "Inscricao",
           "family": "tdm",
           "scope": "organization",
-          "derived": [],
+          "derived": [
+            "details.ocupaVaga",
+            "details.posicaoListaEspera",
+            "receivedAt",
+            "registrationCode"
+          ],
           "from": [
-            "grant:organizadorGerenciaEventosInscricoes",
+            "grant:organizadorInscritos",
             "journey:acompanharInscritos/baixarCsv",
-            "journey:acompanharInscritos/localizarEventoInscritos",
+            "journey:acompanharInscritos/localizarEventoOrg",
             "journey:acompanharInscritos/verInscritos",
             "journey:acompanharInscritos/verOcupacao",
-            "journey:cadastrarPublicarEvento/criarEvento",
-            "journey:cadastrarPublicarEvento/publicarEvento",
-            "journey:cadastrarPublicarEvento/revisarEvento",
-            "journey:editarEvento/atualizarEvento",
-            "journey:editarEvento/localizarEvento",
+            "relationship:Evento/eventosDoParticipante",
             "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
             "relationship:Inscricao/inscricaoEvento",
             "relationship:Inscricao/inscricaoParticipante",
             "relationship:Participante/inscricaoParticipante"
@@ -66,21 +62,116 @@
           "scope": "organization",
           "derived": [],
           "from": [
-            "grant:organizadorGerenciaEventosInscricoes",
+            "grant:organizadorInscritos",
             "journey:acompanharInscritos/baixarCsv",
-            "journey:acompanharInscritos/localizarEventoInscritos",
+            "journey:acompanharInscritos/localizarEventoOrg",
+            "journey:acompanharInscritos/verInscritos",
+            "journey:acompanharInscritos/verOcupacao",
+            "relationship:Evento/eventosDoParticipante",
+            "relationship:Inscricao/inscricaoParticipante",
+            "relationship:Participante/inscricaoParticipante"
+          ]
+        }
+      ],
+      "writes": []
+    },
+    {
+      "pageId": "gestao_eventos",
+      "actors": [
+        "organizador"
+      ],
+      "reads": [
+        {
+          "entity": "EmailParticipante",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:organizadorInscritos",
+            "journey:acompanharInscritos/baixarCsv",
+            "journey:acompanharInscritos/localizarEventoOrg",
             "journey:acompanharInscritos/verInscritos",
             "journey:acompanharInscritos/verOcupacao",
             "journey:cadastrarPublicarEvento/criarEvento",
             "journey:cadastrarPublicarEvento/publicarEvento",
             "journey:cadastrarPublicarEvento/revisarEvento",
-            "journey:editarEvento/atualizarEvento",
-            "journey:editarEvento/localizarEvento",
+            "relationship:Evento/eventosDoParticipante",
+            "relationship:Participante/participanteEmail"
+          ]
+        },
+        {
+          "entity": "Evento",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.isFull",
+            "details.occupiedSeats",
+            "details.publishedAt",
+            "details.remainingSeats",
+            "details.waitlistSize"
+          ],
+          "from": [
+            "grant:organizadorEventos",
+            "journey:acompanharInscritos/baixarCsv",
+            "journey:acompanharInscritos/localizarEventoOrg",
+            "journey:acompanharInscritos/verInscritos",
+            "journey:acompanharInscritos/verOcupacao",
+            "journey:cadastrarPublicarEvento/criarEvento",
+            "journey:cadastrarPublicarEvento/publicarEvento",
+            "journey:cadastrarPublicarEvento/revisarEvento",
+            "relationship:Evento/eventosDoParticipante",
             "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
+            "relationship:Inscricao/inscricaoEvento",
+            "relationship:Participante/eventosDoParticipante"
+          ]
+        },
+        {
+          "entity": "Inscricao",
+          "family": "tdm",
+          "scope": "organization",
+          "derived": [
+            "details.ocupaVaga",
+            "details.posicaoListaEspera",
+            "receivedAt",
+            "registrationCode"
+          ],
+          "from": [
+            "grant:organizadorInscritos",
+            "journey:acompanharInscritos/baixarCsv",
+            "journey:acompanharInscritos/localizarEventoOrg",
+            "journey:acompanharInscritos/verInscritos",
+            "journey:acompanharInscritos/verOcupacao",
+            "journey:cadastrarPublicarEvento/criarEvento",
+            "journey:cadastrarPublicarEvento/publicarEvento",
+            "journey:cadastrarPublicarEvento/revisarEvento",
+            "process:promoverListaEspera",
+            "relationship:Evento/eventosDoParticipante",
+            "relationship:Evento/inscricaoEvento",
+            "relationship:Inscricao/inscricaoEvento",
             "relationship:Inscricao/inscricaoParticipante",
+            "relationship:Participante/inscricaoParticipante"
+          ]
+        },
+        {
+          "entity": "Participante",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:organizadorInscritos",
+            "journey:acompanharInscritos/baixarCsv",
+            "journey:acompanharInscritos/localizarEventoOrg",
+            "journey:acompanharInscritos/verInscritos",
+            "journey:acompanharInscritos/verOcupacao",
+            "journey:cadastrarPublicarEvento/criarEvento",
+            "journey:cadastrarPublicarEvento/publicarEvento",
+            "journey:cadastrarPublicarEvento/revisarEvento",
+            "relationship:Evento/eventosDoParticipante",
+            "relationship:Evento/inscricaoEvento",
+            "relationship:Inscricao/inscricaoParticipante",
+            "relationship:Participante/eventosDoParticipante",
             "relationship:Participante/inscricaoParticipante",
-            "relationship:Participante/participantesDoEvento"
+            "relationship:Participante/participanteEmail"
           ]
         }
       ],
@@ -100,186 +191,6 @@
           "from": [
             "journey:cadastrarPublicarEvento/publicarEvento"
           ]
-        },
-        {
-          "entity": "Evento",
-          "operation": "update",
-          "transitionRef": "",
-          "from": [
-            "journey:editarEvento/atualizarEvento"
-          ]
-        }
-      ]
-    },
-    {
-      "pageId": "evento_inscritos",
-      "actors": [
-        "organizador"
-      ],
-      "reads": [
-        {
-          "entity": "EmailParticipante",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "grant:organizadorGerenciaEventosInscricoes",
-            "journey:acompanharInscritos/baixarCsv",
-            "journey:acompanharInscritos/localizarEventoInscritos",
-            "journey:acompanharInscritos/verInscritos",
-            "journey:acompanharInscritos/verOcupacao",
-            "relationship:EmailParticipante/participanteEmail",
-            "relationship:Evento/participantesDoEvento",
-            "relationship:Participante/participanteEmail"
-          ]
-        },
-        {
-          "entity": "Evento",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [
-            "details.lotado",
-            "details.tamanhoListaEspera",
-            "details.vagasDisponiveis",
-            "details.vagasOcupadas"
-          ],
-          "from": [
-            "grant:organizadorGerenciaEventosInscricoes",
-            "journey:acompanharInscritos/baixarCsv",
-            "journey:acompanharInscritos/localizarEventoInscritos",
-            "journey:acompanharInscritos/verInscritos",
-            "journey:acompanharInscritos/verOcupacao",
-            "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
-            "relationship:Inscricao/inscricaoEvento",
-            "relationship:Participante/participantesDoEvento"
-          ]
-        },
-        {
-          "entity": "Inscricao",
-          "family": "tdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "grant:organizadorGerenciaEventosInscricoes",
-            "journey:acompanharInscritos/baixarCsv",
-            "journey:acompanharInscritos/localizarEventoInscritos",
-            "journey:acompanharInscritos/verInscritos",
-            "journey:acompanharInscritos/verOcupacao",
-            "process:promoverListaEspera",
-            "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
-            "relationship:Inscricao/inscricaoEvento",
-            "relationship:Inscricao/inscricaoParticipante",
-            "relationship:Participante/inscricaoParticipante"
-          ]
-        },
-        {
-          "entity": "Participante",
-          "family": "mdm",
-          "scope": "organization",
-          "derived": [],
-          "from": [
-            "grant:organizadorGerenciaEventosInscricoes",
-            "journey:acompanharInscritos/baixarCsv",
-            "journey:acompanharInscritos/localizarEventoInscritos",
-            "journey:acompanharInscritos/verInscritos",
-            "journey:acompanharInscritos/verOcupacao",
-            "relationship:EmailParticipante/participanteEmail",
-            "relationship:Evento/participantesDoEvento",
-            "relationship:Inscricao/inscricaoParticipante",
-            "relationship:Participante/inscricaoParticipante",
-            "relationship:Participante/participanteEmail",
-            "relationship:Participante/participantesDoEvento"
-          ]
-        }
-      ],
-      "writes": []
-    },
-    {
-      "pageId": "evento_publico",
-      "actors": [
-        "publico"
-      ],
-      "reads": [
-        {
-          "entity": "EmailParticipante",
-          "family": "mdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "grant:publicoMinhaInscricao",
-            "journey:inscreverEvento/abrirPaginaEvento",
-            "journey:inscreverEvento/enviarInscricao",
-            "journey:inscreverEvento/verDetalhesEvento",
-            "relationship:Evento/participantesDoEvento",
-            "relationship:Participante/participanteEmail"
-          ]
-        },
-        {
-          "entity": "Evento",
-          "family": "tdm",
-          "scope": "own",
-          "derived": [
-            "details.lotado",
-            "details.tamanhoListaEspera",
-            "details.vagasDisponiveis",
-            "details.vagasOcupadas"
-          ],
-          "from": [
-            "grant:publicoMinhaInscricao",
-            "journey:inscreverEvento/abrirPaginaEvento",
-            "journey:inscreverEvento/enviarInscricao",
-            "journey:inscreverEvento/verDetalhesEvento",
-            "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
-            "relationship:Inscricao/inscricaoEvento",
-            "relationship:Participante/participantesDoEvento"
-          ]
-        },
-        {
-          "entity": "Inscricao",
-          "family": "tdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "grant:publicoMinhaInscricao",
-            "journey:inscreverEvento/abrirPaginaEvento",
-            "journey:inscreverEvento/enviarInscricao",
-            "journey:inscreverEvento/verDetalhesEvento",
-            "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
-            "relationship:Inscricao/inscricaoEvento",
-            "relationship:Inscricao/inscricaoParticipante",
-            "relationship:Participante/inscricaoParticipante"
-          ]
-        },
-        {
-          "entity": "Participante",
-          "family": "mdm",
-          "scope": "own",
-          "derived": [],
-          "from": [
-            "grant:publicoMinhaInscricao",
-            "journey:inscreverEvento/abrirPaginaEvento",
-            "journey:inscreverEvento/enviarInscricao",
-            "journey:inscreverEvento/verDetalhesEvento",
-            "relationship:Evento/participantesDoEvento",
-            "relationship:Inscricao/inscricaoParticipante",
-            "relationship:Participante/inscricaoParticipante",
-            "relationship:Participante/participanteEmail",
-            "relationship:Participante/participantesDoEvento"
-          ]
-        }
-      ],
-      "writes": [
-        {
-          "entity": "Inscricao",
-          "operation": "create",
-          "transitionRef": "",
-          "from": [
-            "journey:inscreverEvento/enviarInscricao"
-          ]
         }
       ]
     },
@@ -295,9 +206,10 @@
           "scope": "own",
           "derived": [],
           "from": [
-            "grant:publicoMinhaInscricao",
-            "journey:cancelarInscricao/cancelarMinhaInscricao",
+            "grant:publicoMeuCadastro",
+            "journey:cancelarInscricao/cancelar",
             "journey:cancelarInscricao/localizarInscricao",
+            "journey:cancelarInscricao/verInscricao",
             "relationship:Inscricao/inscricaoParticipante",
             "relationship:Participante/participanteEmail"
           ]
@@ -307,31 +219,39 @@
           "family": "tdm",
           "scope": "own",
           "derived": [
-            "details.lotado",
-            "details.tamanhoListaEspera",
-            "details.vagasDisponiveis",
-            "details.vagasOcupadas"
+            "details.isFull",
+            "details.occupiedSeats",
+            "details.publishedAt",
+            "details.remainingSeats",
+            "details.waitlistSize"
           ],
           "from": [
-            "grant:publicoMinhaInscricao",
-            "journey:cancelarInscricao/cancelarMinhaInscricao",
+            "grant:publicoMinhasInscricoes",
+            "journey:cancelarInscricao/cancelar",
             "journey:cancelarInscricao/localizarInscricao",
+            "journey:cancelarInscricao/verInscricao",
+            "relationship:Evento/eventosDoParticipante",
             "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
             "relationship:Inscricao/inscricaoEvento",
             "relationship:Inscricao/inscricaoParticipante",
-            "relationship:Participante/participantesDoEvento"
+            "relationship:Participante/eventosDoParticipante"
           ]
         },
         {
           "entity": "Inscricao",
           "family": "tdm",
           "scope": "own",
-          "derived": [],
+          "derived": [
+            "details.ocupaVaga",
+            "details.posicaoListaEspera",
+            "receivedAt",
+            "registrationCode"
+          ],
           "from": [
-            "grant:publicoMinhaInscricao",
-            "journey:cancelarInscricao/cancelarMinhaInscricao",
+            "grant:publicoMinhasInscricoes",
+            "journey:cancelarInscricao/cancelar",
             "journey:cancelarInscricao/localizarInscricao",
+            "journey:cancelarInscricao/verInscricao",
             "process:promoverListaEspera",
             "relationship:Evento/inscricaoEvento",
             "relationship:Inscricao/inscricaoEvento",
@@ -345,15 +265,16 @@
           "scope": "own",
           "derived": [],
           "from": [
-            "grant:publicoMinhaInscricao",
-            "journey:cancelarInscricao/cancelarMinhaInscricao",
+            "grant:publicoMeuCadastro",
+            "journey:cancelarInscricao/cancelar",
             "journey:cancelarInscricao/localizarInscricao",
+            "journey:cancelarInscricao/verInscricao",
+            "relationship:Evento/eventosDoParticipante",
             "relationship:Evento/inscricaoEvento",
-            "relationship:Evento/participantesDoEvento",
             "relationship:Inscricao/inscricaoParticipante",
+            "relationship:Participante/eventosDoParticipante",
             "relationship:Participante/inscricaoParticipante",
-            "relationship:Participante/participanteEmail",
-            "relationship:Participante/participantesDoEvento"
+            "relationship:Participante/participanteEmail"
           ]
         }
       ],
@@ -363,7 +284,85 @@
           "operation": "transition",
           "transitionRef": "cancelar",
           "from": [
-            "journey:cancelarInscricao/cancelarMinhaInscricao"
+            "journey:cancelarInscricao/cancelar"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "eventos_abertos",
+      "actors": [
+        "publico"
+      ],
+      "reads": [
+        {
+          "entity": "Evento",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.isFull",
+            "details.occupiedSeats",
+            "details.publishedAt",
+            "details.remainingSeats",
+            "details.waitlistSize"
+          ],
+          "from": [
+            "grant:publicoMinhasInscricoes",
+            "journey:inscreverEmEvento/criarInscricao",
+            "journey:inscreverEmEvento/localizarEvento",
+            "journey:inscreverEmEvento/verEvento",
+            "relationship:Evento/eventosDoParticipante",
+            "relationship:Evento/inscricaoEvento",
+            "relationship:Inscricao/inscricaoEvento",
+            "relationship:Participante/eventosDoParticipante"
+          ]
+        },
+        {
+          "entity": "Inscricao",
+          "family": "tdm",
+          "scope": "own",
+          "derived": [
+            "details.ocupaVaga",
+            "details.posicaoListaEspera",
+            "receivedAt",
+            "registrationCode"
+          ],
+          "from": [
+            "grant:publicoMinhasInscricoes",
+            "journey:inscreverEmEvento/criarInscricao",
+            "journey:inscreverEmEvento/localizarEvento",
+            "journey:inscreverEmEvento/verEvento",
+            "relationship:Evento/eventosDoParticipante",
+            "relationship:Evento/inscricaoEvento",
+            "relationship:Inscricao/inscricaoEvento",
+            "relationship:Inscricao/inscricaoParticipante",
+            "relationship:Participante/inscricaoParticipante"
+          ]
+        },
+        {
+          "entity": "Participante",
+          "family": "mdm",
+          "scope": "own",
+          "derived": [],
+          "from": [
+            "grant:publicoMeuCadastro",
+            "journey:inscreverEmEvento/criarInscricao",
+            "journey:inscreverEmEvento/localizarEvento",
+            "journey:inscreverEmEvento/verEvento",
+            "relationship:Evento/eventosDoParticipante",
+            "relationship:Inscricao/inscricaoParticipante",
+            "relationship:Participante/eventosDoParticipante",
+            "relationship:Participante/inscricaoParticipante"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Inscricao",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:inscreverEmEvento/criarInscricao"
           ]
         }
       ]
@@ -371,6 +370,6 @@
   ],
   "meta": {
     "sourceMenu": "pool/l2/web/menu.json",
-    "generatedAt": "2026-10-12T22:56:22.225Z"
+    "generatedAt": "2026-10-13T00:58:52.931Z"
   }
 }

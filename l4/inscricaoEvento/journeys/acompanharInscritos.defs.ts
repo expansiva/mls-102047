@@ -7,32 +7,32 @@ export const acompanharInscritosJourney = {
   "journeyId": "acompanharInscritos",
   "business": {
     "actorRef": "organizador",
-    "title": "Acompanhar inscritos e baixar lista",
-    "goal": "Ver os inscritos de um evento, o total de vagas ocupadas e baixar a lista em CSV.",
+    "title": "Acompanhar inscritos do evento",
+    "goal": "Ver os inscritos, o total de vagas ocupadas e baixar a lista em CSV.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarEventoInscritos",
+        "stepId": "localizarEventoOrg",
         "kind": "locate",
         "entity": "Evento",
         "title": "Localizar evento",
-        "description": "O organizador busca o evento publicado que deseja acompanhar."
+        "description": "O organizador localiza o evento entre os eventos cadastrados."
       },
       {
         "stepId": "verOcupacao",
         "kind": "inspect",
         "entity": "Evento",
         "title": "Ver vagas ocupadas",
-        "description": "O organizador vê o total de vagas, as vagas ocupadas e o tamanho da lista de espera."
+        "description": "O organizador vê o total de vagas ocupadas, as vagas restantes e o tamanho da lista de espera."
       },
       {
         "stepId": "verInscritos",
         "kind": "inspect",
         "entity": "Inscricao",
         "title": "Ver lista de inscritos",
-        "description": "O organizador vê os inscritos confirmados e a lista de espera na ordem de chegada."
+        "description": "O organizador vê os inscritos com nome, e-mail, situação e ordem de chegada."
       },
       {
         "stepId": "baixarCsv",
@@ -50,7 +50,7 @@ export const acompanharInscritosJourney = {
       ]
     }
   },
-  "businessHash": "sha256:e6fb53d30de796a20f2c1afe1ec31039fb4f401c808ca2612977c43a189e0b6f"
+  "businessHash": "sha256:3fb13d9b3477d9f9a70e055b8a28154b03dc7e3d1374d29ad8f24e199d666f17"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type AcompanharInscritosJourneyType = typeof acompanharInscritosJourney;
