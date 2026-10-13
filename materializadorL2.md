@@ -39,7 +39,7 @@ Para cada página `<pageId>` de um módulo `<mod>` do projeto cliente, em `l2/<m
 | `desktop/page11/<pageId>.defs.ts` | **page11 v2 desktop**: intenção, sections com `purpose`, organismos em prosa com intents, moléculas sugeridas, template collabux | LLM (`pages50`) |
 | `mobile/page11/<pageId>.defs.ts` | page11 v2 mobile, com os mesmos organismos e configuração própria (P5) | LLM (`pages50`) |
 | `contracts/<pageId>.defs.ts` | **contrato BFF**: os endpoints da página, cada um com **JSDoc** (Finalidade, Entrada, Processamento, Saída), tipos literais de entrada e saída, tipos nomeados, `rules` e `access`. **Sem `meta`**. | código, a partir do desenho do BFF |
-| `shared/<pageId>.defs.ts` | **shared v2**: o motor da página (P9). Traz `entry.params`, `forms`, `requests`, `states`, `functions`, `journeys`, `rules` e `access` | código, transcrevendo o desenho do BFF |
+| `shared/<pageId>.defs.ts` | **shared**: a intenção da página (P9). Traz `entry.params`, `requests`, `states`, `journeys`, `rules` e `access` (estrutura congelada em 13/10/2026, §5 e §10) | código, transcrevendo o desenho do BFF |
 
 Exemplo real e atual: `mls-102047/l2/comandaRestaurante/web/` (bancada `83b4de0`, 5 páginas, 19 rotas). O desenho de cada
 página está em `l2/<mod>/pipeline/agentDefsL2/bff/<pageId>.json` e é só contexto, porque o materializador lê os defs.
@@ -51,7 +51,7 @@ Princípios, com as frases do Wagner: `todo/gerarApp/l4/docs/como-deve-ser-o-l2.
   ligar a tela e a Saída para saber o que redesenhar. Nenhum código precisa interpretar o JSDoc. O parser
   (`/_102020_/l2/helpers/contractV2/`) o expõe em `route.jsdoc`.
 - **P10, a LLM estruturou e o código gerou.** O shared e o contrato são consequência mecânica do desenho. Não "corrija" o
-  shared: se algo faltar, é defeito do gerador, e deve ser avisado ao planner L2.
+  shared: se algo faltar, é defeito do gerador, e deve ser avisado ao How planner (`todo/gerarApp/how/agents/planner/`).
 - **P11, o contrato diz o que a página precisa, não de onde vem.** Não existe `meta`, entidade de origem nem tabela.
 
 Também servem de contexto:
@@ -111,44 +111,40 @@ esses ids exatamente.
   A bancada (`mls-102047` `83b4de0`) ainda está na forma antiga, com nomes achatados e quatro formas de paginação, até a
   regeração da p4_30.
 
-## 5. O que o shared manda o código fazer
-- **States.** Cada state tem `source` em `<endpoint>.<chave>` ou em `entry.params.<param>`. Nenhum state tem uma função
-  como fonte. Os valores que o usuário digita num form não são state do shared: o form está em `forms` (abaixo).
-- **Quem cada state alimenta** (d2_80, 05/10). `states.<id>.organisms` lista os organismos que o state alimenta. Um
-  organismo pode aparecer em vários states quando mostra mais de uma fonte (por exemplo, mesas e comandas abertas na
-  mesma busca). Ligue a tela por esse mapa, nunca pelo nome do state. O state de seleção lista quem seleciona e quem
-  mostra o item.
-- **Functions.** Há uma por endpoint, com `calls` igual a ele.
-  - Uma consulta põe (`sets`) a sua saída num state.
-  - Um comando lista em `updates` **todos** os states que mudam depois dele, em dois grupos:
-    - os que a saída dele redesenha;
-    - os que precisam ser recarregados.
-  - O modo de cada state diz qual grupo vale.
-  - O **modo** vem no fim da descrição, entre parênteses (`(comanda: upsert)`, `(pagina: append)`):
-    - `replace`: trocar a lista;
-    - `append`: acrescentar a próxima página;
-    - `upsert`: inserir ou atualizar o item pelo id na lista ou no item;
-    - `remove`: tirar o item.
-  - **Recarga:** para cada state do `updates` que a saída do comando não traz, a função chama de novo, depois do comando, a
-    consulta que é fonte desse state, com os parâmetros atuais.
-    - Exemplo: `abrirComanda` tem `updates: ['comanda', 'contextoAtendimento']`.
-    - `comanda` vem da saída do comando (`upsert`).
-    - `contextoAtendimento` é recarregado pela consulta dele.
-- **Forms.** `forms: { <submit>: { organism, submit } }` liga o organismo que edita a entrada da escrita ao seu comando. O
-  input do comando é **só a entrada da escrita**. Um botão de ação sem nada a digitar (abrir, aprovar, cancelar) **não está
-  em `forms`** e chama a função direto, com o contexto e a identidade.
+## 5. O que o shared diz, e o que fica com você (estrutura de 13/10/2026; ver §10)
+
+O shared carrega **intenção**, não script. A estrutura é esta, e é a única (congelada pelo Wagner em 13/10/2026):
+```
+entry:    { params: { <nome>: { type, sources, effect, persist, required } } }
+requests: { <id>: { kind, trigger, writes?, returns } }
+states:   { <id>: { source, description, organisms } }
+journeys: [ { step, organisms, continuesIn? } ]
+rules:    string[]
+access:   { actors, grants }
+```
 - **Parâmetros de entrada (toda página).** Wagner: *"Toda página tem que ter uma leitura de campos opcionais que podem vir na
   URL ou estar no local storage, a navegação é importante"*.
-  - Lê da URL; se estiver ausente, do localStorage, com chave `<mod>.<pageId>.<param>`. A URL vence. Todos são opcionais.
-  - O efeito vem declarado: `select:<organism>`, `filter:<organism>` ou pré-preencher. A seleção vence o filtro.
-  - `persist` grava no localStorage ao mudar.
-  - Converta o tipo de verdade (number/boolean), sem cast.
-- **Seleção.** O parâmetro `select:` guarda o id. O state selecionado é o **item**:
-  - vem da consulta de detalhe que o desenho declarou, quando existe;
-  - se não existe, é resolvido pelo id na lista carregada.
-- **Navegação.** As funções `navigate` levam `carries` para os `entry.params` da página de destino.
-- **Jornadas.** `journeys` diz qual passo de negócio cada organismo e função atende, e onde ele continua (`continuesIn`).
-  Use para textos, foco e ordem, e depois para os casos de teste.
+  - Lê da URL; se estiver ausente, do localStorage, com chave `<mod>.<pageId>.<param>`. A URL vence.
+  - `required: true` diz que a página não abre sem ele (vem de uma entrada obrigatória da consulta que filtra a tela); `false` é
+    opcional. O efeito vem declarado: `select:<organism>`, `filter:<organism>` ou `prefill:<organism>`. A seleção vence o filtro.
+  - `persist` grava no localStorage ao mudar. Converta o tipo de verdade (number/boolean), sem cast.
+- **Requests.** Uma por rota do contrato (`<id>` é o último segmento da rota). `trigger` é `onLoad` ou **o id do intent do page11**
+  que a dispara: é assim que um botão (`submit`) se liga à sua chamada. `writes` diz o que o comando grava; `returns`, as chaves de saída.
+  O que se digita antes de um comando é o `input` da rota no contrato; o que o contrato pede e nenhum organismo edita vem do contexto
+  e da identidade. Qual organismo é o formulário de qual botão, e se o botão fica junto dos campos, é decisão sua pelo page11.
+- **States.** Cada state tem `source` em `<request>.<chave>` ou em `entry.params.<param>`, e `organisms`, os organismos que ele alimenta
+  (um organismo pode aparecer em vários). Ligue a tela por esse mapa, nunca pelo nome do state. O state de seleção lista quem
+  seleciona e quem mostra o item: o item vem da consulta de detalhe quando existe; senão, é resolvido pelo id na lista carregada.
+- **O que fazer depois de cada chamada** (substituir a lista, anexar a próxima página, inserir ou atualizar um item pelo id, tirar um
+  item, recarregar uma consulta, repintar uma parte da tela) **é seu**: está no JSDoc do contrato ("Saída: … a busca substitui a lista
+  e a próxima página é anexada / atualizar a linha na lista sem nova consulta") e nos `states` que cada saída alimenta. O shared não
+  lista funções.
+- **Navegação.** Os intents `navigate` do page11 dizem a página de destino; os `entry.params` dela (com `required`) dizem o que levar.
+  `auraNavigate` continua sendo o único jeito de mudar de página (§6).
+- **Regras.** `rules` são os ids das regras que a página aplica; o texto está em `l4/<mod>/rules.defs.ts` (você já o recebe no contexto
+  do L4). **Em que ponto cada regra se aplica é decisão sua.** O contrato continua trazendo `rules` por rota: é o que o backend valida.
+- **Jornadas.** `journeys` diz qual passo de negócio cada organismo atende, e onde ele continua (`continuesIn`). Use para textos, foco e
+  ordem, e depois para os casos de teste.
 - **Página sem leitura nem escrita** (hub): o shared tem só navegação, o contrato não tem rotas, e não há chamada de BFF.
 
 ## 6. Regras do ambiente que já custaram caro
@@ -190,3 +186,37 @@ esses ids exatamente.
 - Decisões de desenho: Wagner.
 - Formatos e specs do L2: `todo/gerarApp/l2/agents/planner/STATE.md` e os planos em `todo/gerarApp/l2/doc/`.
 - Contratos entre sub-projetos: `todo/gerarApp/contratos.md`.
+
+## 9. Página de vários papéis: a tela esconde o que o papel não vê (Wagner, 13/10/2026)
+
+*"na tela pode ter seções hidden ou sem mostrar campos, seria da responsabilidade do materializador fazer isto"*; *"a LLM que irá materializar
+tem que ler a lista de acessos e as rules, a AI é inteligente para isto"*.
+
+Com a `l2_d2_93`, o page11/shared/contrato de uma página de vários papéis pode trazer campo, seção ou ação que só **alguns** dos papéis da página
+alcançam (antes o D2 exigia que todos alcançassem). O materializador L2 lê os papéis e grants da página (`shared.access`: `actors` e `grants`; o
+detalhe de cada grant está no `l4/<módulo>/access.defs.ts`) e as regras, e esconde por papel a seção, o campo ou a ação que o papel de quem está
+logado não alcança. Não chamar, para esse papel, a consulta que o backend recusaria (ou tratar a recusa sem quebrar a tela). Exemplo:
+ordenServicio, páginas `inicio_taller` e `ordenes_servicio` (recepcionista e técnico; as peças da ordem são só do técnico).
+O backend também muda para entregar a cada um só o que o seu papel vê (`materializadorL1.md` §9).
+
+## 10. O shared volta a ser só intenção; a estrutura dos defs do L2 fica congelada (Wagner, 13/10/2026)
+
+*"a intenção de mudança é para voltar ao conceito original, que o defs deve ter a intenção, do que deve ser feito, sem amarrar a LLM
+materializador, pois ela é inteligente o suficiente se tiver as informações corretas"*. Vale a partir da `l2_d2_94` (How) e da regeração dos
+módulos (`l2_d2_95`). A estrutura e o que fica com a LLM estão no §5 (reescrito em 13/10).
+
+### O que saiu do shared e por quê
+`forms`, `functions` e `fields` saíram, e `rules` passou a ser só a lista de ids: eram cálculos de ligação (qual organismo é o form, qual
+função chamar depois de cada comando, qual campo em qual organismo, qual regra em qual chamada) que amarravam a LLM materializadora e
+geravam recusa no gerador. page11 e contrato não mudam de forma. **Nenhuma chave, campo ou forma entra ou sai de nenhum def do L2 sem
+autorização do Wagner, datada e com a frase dele.** Quem precisar de algo a mais pede a ele, não acrescenta.
+
+### O que muda no `agentMaterializeL2` (medido em 13/10, `mls-102020` `e4251eb7`)
+- `helpers/defs/shared.ts:50` (`buildL2Shared`, `exact` com as 8 chaves antigas): passa a exigir as 6 chaves acima e `required` no param; hoje recusa a
+  forma nova com `L2_SHARED_KEYS: missing field forms`, e recusava os 9 módulos novos por `forbidden field fields`.
+- `steps/input20/gate.ts:93-96` (`m4ResolveMethod` por `functions`), `:173-181` (`M4_INPUT_FUNCTION_REF`, `STATE_UNKNOWN`, `CARRIES_TARGET`),
+  `:194` e `:236-247` (`m4ContextInputs` por `forms`): sem `forms`/`functions`, o método que a página chama nasce do `requests` (um método por
+  request, nome livre) e o contexto do input vem da rota do contrato.
+- `steps/shared40/gate.ts:109,165,215` e `steps/pages50/gate.ts:44-51`: as checagens sobre `functions`.
+- `steps/shared40/prompt.md:12-16` e `steps/pages50/prompt.md`: a descrição do shared; "Methods the pages call" passa a ser derivado dos `requests`.
+- Até essa mudança, os módulos regerados na `l2_d2_95` não materializam. Quem procurar: How planner (`todo/gerarApp/how/agents/planner/`).

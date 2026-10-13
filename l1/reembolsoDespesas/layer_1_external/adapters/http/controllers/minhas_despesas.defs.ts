@@ -15,16 +15,6 @@ export const definition = {
     "pageId": "minhas_despesas",
     "handlers": [
       {
-        "route": "reembolsoDespesas.minhas_despesas.corrigirDespesa",
-        "kind": "command",
-        "grantIds": [
-          "colaboradorGerenciaPropriasDespesas"
-        ],
-        "serviceFunction": "reembolsoDespesas.minhas_despesas.corrigirDespesa",
-        "contractPath": "l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts",
-        "contractInterface": "Minhas_despesasContracts"
-      },
-      {
         "route": "reembolsoDespesas.minhas_despesas.enviarParaAprovacao",
         "kind": "command",
         "grantIds": [
@@ -35,22 +25,22 @@ export const definition = {
         "contractInterface": "Minhas_despesasContracts"
       },
       {
-        "route": "reembolsoDespesas.minhas_despesas.load",
+        "route": "reembolsoDespesas.minhas_despesas.listarMinhasDespesas",
         "kind": "query",
         "grantIds": [
           "colaboradorGerenciaPropriasDespesas"
         ],
-        "serviceFunction": "reembolsoDespesas.minhas_despesas.load",
+        "serviceFunction": "reembolsoDespesas.minhas_despesas.listarMinhasDespesas",
         "contractPath": "l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts",
         "contractInterface": "Minhas_despesasContracts"
       },
       {
-        "route": "reembolsoDespesas.minhas_despesas.loadMinhasDespesas",
+        "route": "reembolsoDespesas.minhas_despesas.obterDespesa",
         "kind": "query",
         "grantIds": [
           "colaboradorGerenciaPropriasDespesas"
         ],
-        "serviceFunction": "reembolsoDespesas.minhas_despesas.loadMinhasDespesas",
+        "serviceFunction": "reembolsoDespesas.minhas_despesas.obterDespesa",
         "contractPath": "l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts",
         "contractInterface": "Minhas_despesasContracts"
       },
@@ -71,6 +61,16 @@ export const definition = {
           "colaboradorGerenciaPropriasDespesas"
         ],
         "serviceFunction": "reembolsoDespesas.minhas_despesas.registrarDespesa",
+        "contractPath": "l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts",
+        "contractInterface": "Minhas_despesasContracts"
+      },
+      {
+        "route": "reembolsoDespesas.minhas_despesas.salvarCorrecao",
+        "kind": "command",
+        "grantIds": [
+          "colaboradorGerenciaPropriasDespesas"
+        ],
+        "serviceFunction": "reembolsoDespesas.minhas_despesas.salvarCorrecao",
         "contractPath": "l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.ts",
         "contractInterface": "Minhas_despesasContracts"
       }

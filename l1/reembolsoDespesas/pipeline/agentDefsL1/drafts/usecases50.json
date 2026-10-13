@@ -2,7 +2,7 @@
   "schemaVersion": "2026-10-01-d1-usecases-v2",
   "project": 102047,
   "moduleName": "reembolsoDespesas",
-  "llmCalls": 6,
+  "llmCalls": 5,
   "ok": true,
   "enumerations": [
     {
@@ -109,7 +109,7 @@
       "operation": "transition",
       "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/aprovarDespesa.defs.ts",
       "routes": [
-        "reembolsoDespesas.despesas_da_equipe.approveExpense"
+        "reembolsoDespesas.despesas_da_equipe.aprovarDespesa"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -726,18 +726,18 @@
       }
     },
     {
-      "usecaseId": "listColaborador",
+      "usecaseId": "getColaborador",
       "entityId": "Colaborador",
-      "operation": "list",
-      "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/listColaborador.defs.ts",
+      "operation": "get",
+      "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/getColaborador.defs.ts",
       "routes": [
-        "reembolsoDespesas.despesas_da_equipe.load"
+        "reembolsoDespesas.inicio.qryInicio"
       ],
       "trustedContext": "ctx",
       "mdm": {
         "namespace": "reembolsoDespesas",
         "role": "reembolsoDespesas.Colaborador",
-        "atomic": false,
+        "atomic": true,
         "calls": [
           {
             "id": "get",
@@ -765,127 +765,16 @@
               "version",
               "details"
             ]
-          },
-          {
-            "id": "findByDocument",
-            "method": "findByDocument",
-            "target": "entity",
-            "shape": "point",
-            "capabilities": [
-              "locate.byDocument"
-            ],
-            "alternative": false,
-            "when": [
-              {
-                "kind": "contract",
-                "path": "details.identification.docType",
-                "present": true
-              },
-              {
-                "kind": "contract",
-                "path": "details.identification.docId",
-                "present": true
-              }
-            ],
-            "arguments": [
-              {
-                "name": "docType",
-                "role": "selector",
-                "path": "details.identification.docType",
-                "origin": {
-                  "kind": "contract",
-                  "path": "details.identification.docType"
-                }
-              },
-              {
-                "name": "docId",
-                "role": "selector",
-                "path": "details.identification.docId",
-                "origin": {
-                  "kind": "contract",
-                  "path": "details.identification.docId"
-                }
-              }
-            ],
-            "result": [
-              "mdmId",
-              "version",
-              "details"
-            ]
-          },
-          {
-            "id": "listByName",
-            "method": "listByType",
-            "target": "collection",
-            "shape": "collection",
-            "capabilities": [
-              "locate.byName"
-            ],
-            "alternative": false,
-            "when": [
-              {
-                "kind": "contract",
-                "path": "details.identification.name",
-                "present": true
-              }
-            ],
-            "arguments": [
-              {
-                "name": "type",
-                "role": "parameter",
-                "value": "reembolsoDespesas.Colaborador",
-                "origin": {
-                  "kind": "literal",
-                  "evidence": "role"
-                }
-              },
-              {
-                "name": "name",
-                "role": "selector",
-                "path": "details.identification.name",
-                "origin": {
-                  "kind": "contract",
-                  "path": "details.identification.name"
-                }
-              }
-            ],
-            "result": [
-              "items",
-              "page",
-              "pageSize",
-              "total"
-            ]
-          },
-          {
-            "id": "listLinks",
-            "method": "relatedOfMany",
-            "target": "collection",
-            "shape": "collection",
-            "capabilities": [
-              "listLinks"
-            ],
-            "alternative": false,
-            "when": [],
-            "arguments": [
-              {
-                "name": "mdmIds",
-                "role": "selector",
-                "path": "id",
-                "origin": {
-                  "kind": "contract",
-                  "path": "id"
-                }
-              }
-            ],
-            "result": [
-              "mdmId",
-              "relationshipId",
-              "type",
-              "direction"
-            ]
           }
         ],
-        "gaps": []
+        "gaps": [],
+        "skipped": [
+          {
+            "capability": "listLinks",
+            "code": "RESULT_UNUSED",
+            "evidence": "listLinks result (mdmId, relationshipId, type, direction) has no output field and no later prior."
+          }
+        ]
       },
       "transactionBoundary": null,
       "steps": [
@@ -899,33 +788,12 @@
           "call": "get",
           "entity": "Colaborador",
           "capability": "read.byId"
-        },
-        {
-          "kind": "mdm",
-          "namespace": "reembolsoDespesas",
-          "call": "findByDocument",
-          "entity": "Colaborador",
-          "capability": "locate.byDocument"
-        },
-        {
-          "kind": "mdm",
-          "namespace": "reembolsoDespesas",
-          "call": "listByType",
-          "entity": "Colaborador",
-          "capability": "locate.byName"
-        },
-        {
-          "kind": "mdm",
-          "namespace": "reembolsoDespesas",
-          "call": "relatedOfMany",
-          "entity": "Colaborador",
-          "capability": "listLinks"
         }
       ],
       "definition": {
         "schemaVersion": "2026-09-24-d1-definition-v2",
         "artifactType": "usecase",
-        "artifactId": "listColaborador",
+        "artifactId": "getColaborador",
         "moduleName": "reembolsoDespesas",
         "status": "pending",
         "dependencies": [
@@ -934,19 +802,31 @@
           "_102047_/l4/reembolsoDespesas/ontology/Colaborador.defs.ts"
         ],
         "data": {
-          "usecaseId": "listColaborador",
+          "usecaseId": "getColaborador",
           "entityId": "Colaborador",
-          "operation": "list",
+          "operation": "get",
           "ports": [],
           "rulesApplied": [],
           "functions": [
             {
-              "functionName": "listColaborador",
+              "functionName": "getColaborador",
               "input": [
                 {
                   "name": "id",
                   "type": "uuid",
                   "fieldRef": "Colaborador.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Colaborador.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Colaborador.version"
                 },
                 {
                   "name": "details",
@@ -1022,24 +902,6 @@
                   "name": "details.reembolsoDespesas",
                   "type": "object",
                   "fieldRef": "Colaborador.details.reembolsoDespesas"
-                },
-                {
-                  "name": "page",
-                  "type": "number"
-                },
-                {
-                  "name": "pageSize",
-                  "type": "number"
-                }
-              ],
-              "output": [
-                {
-                  "name": "items",
-                  "type": "Colaborador"
-                },
-                {
-                  "name": "hasMore",
-                  "type": "boolean"
                 }
               ]
             }
@@ -1058,50 +920,9 @@
               "call": "get",
               "entity": "Colaborador",
               "capability": "read.byId"
-            },
-            {
-              "kind": "mdm",
-              "namespace": "reembolsoDespesas",
-              "call": "findByDocument",
-              "entity": "Colaborador",
-              "capability": "locate.byDocument"
-            },
-            {
-              "kind": "mdm",
-              "namespace": "reembolsoDespesas",
-              "call": "listByType",
-              "entity": "Colaborador",
-              "capability": "locate.byName"
-            },
-            {
-              "kind": "mdm",
-              "namespace": "reembolsoDespesas",
-              "call": "relatedOfMany",
-              "entity": "Colaborador",
-              "capability": "listLinks"
             }
           ],
           "uses": [
-            {
-              "path": "details.base.relationshipRefs",
-              "role": "filter",
-              "source": "input"
-            },
-            {
-              "path": "details.identification.status",
-              "role": "filter",
-              "source": "input"
-            },
-            {
-              "path": "details.identification.subtype",
-              "role": "filter",
-              "source": "input"
-            },
-            {
-              "path": "details.identification.tags",
-              "role": "filter",
-              "source": "input"
-            },
             {
               "path": "id",
               "role": "filter",
@@ -1113,28 +934,28 @@
             {
               "ruleId": "rule-document-shape-validated",
               "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
-              "consumer": "operation:list",
+              "consumer": "operation:get",
               "enforcement": "pending",
               "gap": "DELEGATION_UNPROVEN"
             },
             {
               "ruleId": "rule-foreign-namespace-refused",
               "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
-              "consumer": "operation:list",
+              "consumer": "operation:get",
               "enforcement": "pending",
               "gap": "DELEGATION_UNPROVEN"
             },
             {
               "ruleId": "rule-identity-never-in-namespace",
               "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
-              "consumer": "operation:list",
+              "consumer": "operation:get",
               "enforcement": "pending",
               "gap": "DELEGATION_UNPROVEN"
             },
             {
               "ruleId": "rule-person-privacy-consent-required-br-eu",
               "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-person-privacy-consent-required-br-eu",
-              "consumer": "operation:list",
+              "consumer": "operation:get",
               "enforcement": "pending",
               "gap": "DELEGATION_UNPROVEN"
             }
@@ -1145,7 +966,7 @@
           "mdm": {
             "namespace": "reembolsoDespesas",
             "role": "reembolsoDespesas.Colaborador",
-            "atomic": false,
+            "atomic": true,
             "calls": [
               {
                 "id": "get",
@@ -1173,126 +994,213 @@
                   "version",
                   "details"
                 ]
-              },
-              {
-                "id": "findByDocument",
-                "method": "findByDocument",
-                "target": "entity",
-                "shape": "point",
-                "capabilities": [
-                  "locate.byDocument"
-                ],
-                "alternative": false,
-                "when": [
-                  {
-                    "kind": "contract",
-                    "path": "details.identification.docType",
-                    "present": true
-                  },
-                  {
-                    "kind": "contract",
-                    "path": "details.identification.docId",
-                    "present": true
-                  }
-                ],
-                "arguments": [
-                  {
-                    "name": "docType",
-                    "role": "selector",
-                    "origin": {
-                      "kind": "contract",
-                      "path": "details.identification.docType"
-                    },
-                    "path": "details.identification.docType"
-                  },
-                  {
-                    "name": "docId",
-                    "role": "selector",
-                    "origin": {
-                      "kind": "contract",
-                      "path": "details.identification.docId"
-                    },
-                    "path": "details.identification.docId"
-                  }
-                ],
-                "result": [
-                  "mdmId",
-                  "version",
-                  "details"
-                ]
-              },
-              {
-                "id": "listByName",
-                "method": "listByType",
-                "target": "collection",
-                "shape": "collection",
-                "capabilities": [
-                  "locate.byName"
-                ],
-                "alternative": false,
-                "when": [
-                  {
-                    "kind": "contract",
-                    "path": "details.identification.name",
-                    "present": true
-                  }
-                ],
-                "arguments": [
-                  {
-                    "name": "type",
-                    "role": "parameter",
-                    "origin": {
-                      "kind": "literal",
-                      "evidence": "role"
-                    },
-                    "value": "reembolsoDespesas.Colaborador"
-                  },
-                  {
-                    "name": "name",
-                    "role": "selector",
-                    "origin": {
-                      "kind": "contract",
-                      "path": "details.identification.name"
-                    },
-                    "path": "details.identification.name"
-                  }
-                ],
-                "result": [
-                  "items",
-                  "page",
-                  "pageSize",
-                  "total"
-                ]
-              },
-              {
-                "id": "listLinks",
-                "method": "relatedOfMany",
-                "target": "collection",
-                "shape": "collection",
-                "capabilities": [
-                  "listLinks"
-                ],
-                "alternative": false,
-                "when": [],
-                "arguments": [
-                  {
-                    "name": "mdmIds",
-                    "role": "selector",
-                    "origin": {
-                      "kind": "contract",
-                      "path": "id"
-                    },
-                    "path": "id"
-                  }
-                ],
-                "result": [
-                  "mdmId",
-                  "relationshipId",
-                  "type",
-                  "direction"
-                ]
               }
             ]
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "getDespesa",
+      "entityId": "Despesa",
+      "operation": "get",
+      "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/getDespesa.defs.ts",
+      "routes": [
+        "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
+        "reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise",
+        "reembolsoDespesas.minhas_despesas.obterDespesa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "get",
+          "port": "DespesaRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getDespesa",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/reembolsoDespesas/layer_2_application/ports/despesaRepository.defs.ts",
+          "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/despesa.defs.ts",
+          "_102047_/l4/reembolsoDespesas/ontology/Despesa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getDespesa",
+          "entityId": "Despesa",
+          "operation": "get",
+          "ports": [
+            "DespesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getDespesa",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Despesa.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Despesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Despesa.version"
+                },
+                {
+                  "name": "colaboradorId",
+                  "type": "record",
+                  "fieldRef": "Despesa.colaboradorId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Despesa.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Despesa.details"
+                },
+                {
+                  "name": "details.dataDespesa",
+                  "type": "date",
+                  "fieldRef": "Despesa.details.dataDespesa"
+                },
+                {
+                  "name": "details.categoria",
+                  "type": "string",
+                  "fieldRef": "Despesa.details.categoria"
+                },
+                {
+                  "name": "details.valor",
+                  "type": "money",
+                  "fieldRef": "Despesa.details.valor"
+                },
+                {
+                  "name": "details.descricao",
+                  "type": "text",
+                  "fieldRef": "Despesa.details.descricao"
+                },
+                {
+                  "name": "details.motivoRejeicao",
+                  "type": "text",
+                  "fieldRef": "Despesa.details.motivoRejeicao"
+                },
+                {
+                  "name": "details.reenvioRealizado",
+                  "type": "boolean",
+                  "fieldRef": "Despesa.details.reenvioRealizado"
+                },
+                {
+                  "name": "details.dataPagamento",
+                  "type": "date",
+                  "fieldRef": "Despesa.details.dataPagamento"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "DespesaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "expenseOwnerOnly",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "financeApprovedExpenseAccess",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "managerTeamExpenseAccess",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "paymentDateRequired",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "proofRequiredBeforeSubmission",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "rejectionReasonRequired",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "singleResubmission",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "validExpenseData",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
           }
         }
       }
@@ -1303,12 +1211,10 @@
       "operation": "list",
       "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/listDespesa.defs.ts",
       "routes": [
-        "reembolsoDespesas.despesas_aprovadas.load",
-        "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
-        "reembolsoDespesas.despesas_da_equipe.load",
-        "reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe",
-        "reembolsoDespesas.minhas_despesas.load",
-        "reembolsoDespesas.minhas_despesas.loadMinhasDespesas"
+        "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
+        "reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe",
+        "reembolsoDespesas.inicio.qryInicio",
+        "reembolsoDespesas.minhas_despesas.listarMinhasDespesas"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -1762,7 +1668,7 @@
       "operation": "transition",
       "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/registrarPagamento.defs.ts",
       "routes": [
-        "reembolsoDespesas.despesas_aprovadas.registerPayment"
+        "reembolsoDespesas.despesas_aprovadas.registrarPagamento"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -1989,7 +1895,7 @@
       "operation": "transition",
       "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/rejeitarDespesa.defs.ts",
       "routes": [
-        "reembolsoDespesas.despesas_da_equipe.rejectExpense"
+        "reembolsoDespesas.despesas_da_equipe.rejeitarDespesa"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -2216,7 +2122,7 @@
       "operation": "update",
       "defPath": "l1/reembolsoDespesas/layer_2_application/usecases/updateDespesa.defs.ts",
       "routes": [
-        "reembolsoDespesas.minhas_despesas.corrigirDespesa"
+        "reembolsoDespesas.minhas_despesas.salvarCorrecao"
       ],
       "trustedContext": "ctx",
       "mdm": null,
@@ -2466,28 +2372,13 @@
     },
     {
       "code": "DERIVED_FILTER",
-      "path": "listColaborador.details.base.relationshipRefs",
-      "detail": "Colaborador.details.base.relationshipRefs is a filter of listColaborador."
+      "path": "getColaborador.id",
+      "detail": "Colaborador.id is a filter of getColaborador."
     },
     {
       "code": "DERIVED_FILTER",
-      "path": "listColaborador.details.identification.status",
-      "detail": "Colaborador.details.identification.status is a filter of listColaborador."
-    },
-    {
-      "code": "DERIVED_FILTER",
-      "path": "listColaborador.details.identification.subtype",
-      "detail": "Colaborador.details.identification.subtype is a filter of listColaborador."
-    },
-    {
-      "code": "DERIVED_FILTER",
-      "path": "listColaborador.details.identification.tags",
-      "detail": "Colaborador.details.identification.tags is a filter of listColaborador."
-    },
-    {
-      "code": "DERIVED_FILTER",
-      "path": "listColaborador.id",
-      "detail": "Colaborador.id is a filter of listColaborador."
+      "path": "getDespesa.id",
+      "detail": "Despesa.id is a filter of getDespesa."
     },
     {
       "code": "DERIVED_FILTER",
@@ -3194,7 +3085,7 @@
       "definition": {
         "schemaVersion": "2026-09-24-d1-definition-v2",
         "artifactType": "usecase",
-        "artifactId": "listColaborador",
+        "artifactId": "getColaborador",
         "moduleName": "reembolsoDespesas",
         "status": "pending",
         "dependencies": [
@@ -3203,19 +3094,31 @@
           "_102047_/l4/reembolsoDespesas/ontology/Colaborador.defs.ts"
         ],
         "data": {
-          "usecaseId": "listColaborador",
+          "usecaseId": "getColaborador",
           "entityId": "Colaborador",
-          "operation": "list",
+          "operation": "get",
           "ports": [],
           "rulesApplied": [],
           "functions": [
             {
-              "functionName": "listColaborador",
+              "functionName": "getColaborador",
               "input": [
                 {
                   "name": "id",
                   "type": "uuid",
                   "fieldRef": "Colaborador.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Colaborador.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Colaborador.version"
                 },
                 {
                   "name": "details",
@@ -3291,24 +3194,6 @@
                   "name": "details.reembolsoDespesas",
                   "type": "object",
                   "fieldRef": "Colaborador.details.reembolsoDespesas"
-                },
-                {
-                  "name": "page",
-                  "type": "number"
-                },
-                {
-                  "name": "pageSize",
-                  "type": "number"
-                }
-              ],
-              "output": [
-                {
-                  "name": "items",
-                  "type": "Colaborador"
-                },
-                {
-                  "name": "hasMore",
-                  "type": "boolean"
                 }
               ]
             }
@@ -3327,50 +3212,9 @@
               "call": "get",
               "entity": "Colaborador",
               "capability": "read.byId"
-            },
-            {
-              "kind": "mdm",
-              "namespace": "reembolsoDespesas",
-              "call": "findByDocument",
-              "entity": "Colaborador",
-              "capability": "locate.byDocument"
-            },
-            {
-              "kind": "mdm",
-              "namespace": "reembolsoDespesas",
-              "call": "listByType",
-              "entity": "Colaborador",
-              "capability": "locate.byName"
-            },
-            {
-              "kind": "mdm",
-              "namespace": "reembolsoDespesas",
-              "call": "relatedOfMany",
-              "entity": "Colaborador",
-              "capability": "listLinks"
             }
           ],
           "uses": [
-            {
-              "path": "details.base.relationshipRefs",
-              "role": "filter",
-              "source": "input"
-            },
-            {
-              "path": "details.identification.status",
-              "role": "filter",
-              "source": "input"
-            },
-            {
-              "path": "details.identification.subtype",
-              "role": "filter",
-              "source": "input"
-            },
-            {
-              "path": "details.identification.tags",
-              "role": "filter",
-              "source": "input"
-            },
             {
               "path": "id",
               "role": "filter",
@@ -3382,28 +3226,28 @@
             {
               "ruleId": "rule-document-shape-validated",
               "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-document-shape-validated",
-              "consumer": "operation:list",
+              "consumer": "operation:get",
               "enforcement": "pending",
               "gap": "DELEGATION_UNPROVEN"
             },
             {
               "ruleId": "rule-foreign-namespace-refused",
               "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-foreign-namespace-refused",
-              "consumer": "operation:list",
+              "consumer": "operation:get",
               "enforcement": "pending",
               "gap": "DELEGATION_UNPROVEN"
             },
             {
               "ruleId": "rule-identity-never-in-namespace",
               "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-identity-never-in-namespace",
-              "consumer": "operation:list",
+              "consumer": "operation:get",
               "enforcement": "pending",
               "gap": "DELEGATION_UNPROVEN"
             },
             {
               "ruleId": "rule-person-privacy-consent-required-br-eu",
               "origin": "/_102034_/l4/ontology/mdm.defs.ts#rule-person-privacy-consent-required-br-eu",
-              "consumer": "operation:list",
+              "consumer": "operation:get",
               "enforcement": "pending",
               "gap": "DELEGATION_UNPROVEN"
             }
@@ -3414,7 +3258,7 @@
           "mdm": {
             "namespace": "reembolsoDespesas",
             "role": "reembolsoDespesas.Colaborador",
-            "atomic": false,
+            "atomic": true,
             "calls": [
               {
                 "id": "get",
@@ -3442,124 +3286,6 @@
                   "version",
                   "details"
                 ]
-              },
-              {
-                "id": "findByDocument",
-                "method": "findByDocument",
-                "target": "entity",
-                "shape": "point",
-                "capabilities": [
-                  "locate.byDocument"
-                ],
-                "alternative": false,
-                "when": [
-                  {
-                    "kind": "contract",
-                    "path": "details.identification.docType",
-                    "present": true
-                  },
-                  {
-                    "kind": "contract",
-                    "path": "details.identification.docId",
-                    "present": true
-                  }
-                ],
-                "arguments": [
-                  {
-                    "name": "docType",
-                    "role": "selector",
-                    "origin": {
-                      "kind": "contract",
-                      "path": "details.identification.docType"
-                    },
-                    "path": "details.identification.docType"
-                  },
-                  {
-                    "name": "docId",
-                    "role": "selector",
-                    "origin": {
-                      "kind": "contract",
-                      "path": "details.identification.docId"
-                    },
-                    "path": "details.identification.docId"
-                  }
-                ],
-                "result": [
-                  "mdmId",
-                  "version",
-                  "details"
-                ]
-              },
-              {
-                "id": "listByName",
-                "method": "listByType",
-                "target": "collection",
-                "shape": "collection",
-                "capabilities": [
-                  "locate.byName"
-                ],
-                "alternative": false,
-                "when": [
-                  {
-                    "kind": "contract",
-                    "path": "details.identification.name",
-                    "present": true
-                  }
-                ],
-                "arguments": [
-                  {
-                    "name": "type",
-                    "role": "parameter",
-                    "origin": {
-                      "kind": "literal",
-                      "evidence": "role"
-                    },
-                    "value": "reembolsoDespesas.Colaborador"
-                  },
-                  {
-                    "name": "name",
-                    "role": "selector",
-                    "origin": {
-                      "kind": "contract",
-                      "path": "details.identification.name"
-                    },
-                    "path": "details.identification.name"
-                  }
-                ],
-                "result": [
-                  "items",
-                  "page",
-                  "pageSize",
-                  "total"
-                ]
-              },
-              {
-                "id": "listLinks",
-                "method": "relatedOfMany",
-                "target": "collection",
-                "shape": "collection",
-                "capabilities": [
-                  "listLinks"
-                ],
-                "alternative": false,
-                "when": [],
-                "arguments": [
-                  {
-                    "name": "mdmIds",
-                    "role": "selector",
-                    "origin": {
-                      "kind": "contract",
-                      "path": "id"
-                    },
-                    "path": "id"
-                  }
-                ],
-                "result": [
-                  "mdmId",
-                  "relationshipId",
-                  "type",
-                  "direction"
-                ]
               }
             ]
           }
@@ -3567,10 +3293,10 @@
       },
       "pipeline": [
         {
-          "id": "102047/reembolsoDespesas/usecase/listColaborador",
+          "id": "102047/reembolsoDespesas/usecase/getColaborador",
           "type": "usecase",
-          "defPath": "_102047_/l1/reembolsoDespesas/layer_2_application/usecases/listColaborador.defs.ts",
-          "outputPath": "_102047_/l1/reembolsoDespesas/layer_2_application/usecases/listColaborador.ts",
+          "defPath": "_102047_/l1/reembolsoDespesas/layer_2_application/usecases/getColaborador.defs.ts",
+          "outputPath": "_102047_/l1/reembolsoDespesas/layer_2_application/usecases/getColaborador.ts",
           "outputAvailability": "future",
           "dependsFiles": [
             "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/colaborador.defs.ts",
@@ -3579,6 +3305,210 @@
           ],
           "dependsOn": [
             "102047/reembolsoDespesas/domainEntity/Colaborador"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getDespesa",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/reembolsoDespesas/layer_2_application/ports/despesaRepository.defs.ts",
+          "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/despesa.defs.ts",
+          "_102047_/l4/reembolsoDespesas/ontology/Despesa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getDespesa",
+          "entityId": "Despesa",
+          "operation": "get",
+          "ports": [
+            "DespesaRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getDespesa",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Despesa.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Despesa.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Despesa.version"
+                },
+                {
+                  "name": "colaboradorId",
+                  "type": "record",
+                  "fieldRef": "Despesa.colaboradorId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Despesa.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Despesa.details"
+                },
+                {
+                  "name": "details.dataDespesa",
+                  "type": "date",
+                  "fieldRef": "Despesa.details.dataDespesa"
+                },
+                {
+                  "name": "details.categoria",
+                  "type": "string",
+                  "fieldRef": "Despesa.details.categoria"
+                },
+                {
+                  "name": "details.valor",
+                  "type": "money",
+                  "fieldRef": "Despesa.details.valor"
+                },
+                {
+                  "name": "details.descricao",
+                  "type": "text",
+                  "fieldRef": "Despesa.details.descricao"
+                },
+                {
+                  "name": "details.motivoRejeicao",
+                  "type": "text",
+                  "fieldRef": "Despesa.details.motivoRejeicao"
+                },
+                {
+                  "name": "details.reenvioRealizado",
+                  "type": "boolean",
+                  "fieldRef": "Despesa.details.reenvioRealizado"
+                },
+                {
+                  "name": "details.dataPagamento",
+                  "type": "date",
+                  "fieldRef": "Despesa.details.dataPagamento"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "DespesaRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "expenseOwnerOnly",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "financeApprovedExpenseAccess",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "managerTeamExpenseAccess",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "paymentDateRequired",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "proofRequiredBeforeSubmission",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "rejectionReasonRequired",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "singleResubmission",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "validExpenseData",
+              "origin": "l4/reembolsoDespesas/ontology/Despesa.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/reembolsoDespesas/usecase/getDespesa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/reembolsoDespesas/layer_2_application/usecases/getDespesa.defs.ts",
+          "outputPath": "_102047_/l1/reembolsoDespesas/layer_2_application/usecases/getDespesa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/reembolsoDespesas/layer_3_domain/entities/despesa.defs.ts",
+            "_102047_/l1/reembolsoDespesas/layer_2_application/ports/despesaRepository.defs.ts",
+            "l4/reembolsoDespesas/ontology/Despesa.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/reembolsoDespesas/domainEntity/Despesa",
+            "102047/reembolsoDespesas/repositoryPort/DespesaRepository"
           ],
           "skills": [
             "_102021_/l2/agentDefsL1/skills/architecture.md",

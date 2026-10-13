@@ -28,6 +28,13 @@ export const definition = {
         "returns": "Despesa[]"
       },
       {
+        "name": "get",
+        "params": [
+          "id"
+        ],
+        "returns": "Despesa"
+      },
+      {
         "name": "update",
         "params": [
           "Despesa"
