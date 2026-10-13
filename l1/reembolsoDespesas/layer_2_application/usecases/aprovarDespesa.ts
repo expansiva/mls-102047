@@ -27,39 +27,30 @@ dataPagamento?: string;
 }
 
 export async function aprovarDespesa(input: AprovarDespesaInput, ctx: RequestContext): Promise<AprovarDespesaOutput> {
-const repository = resolveRepository<DespesaRepository>(ctx, 'DespesaRepository');
+const despesaRepository = resolveRepository<DespesaRepository>(ctx, 'DespesaRepository');
 
 const id = String(input.id ?? '');
-if (id === '') {
-throw new AppError('VALIDATION_ERROR', 'The expense id is required.', 400);
+if (!id) throw new AppError('VALIDATION_ERROR', 'The expense id is required.', 400);
+const version = Number(input.version);
+if (!Number.isFinite(version)) throw new AppError('VALIDATION_ERROR', 'The expense version is required.', 400);
+
+const current = await despesaRepository.get(id);
+if (!current) throw new AppError('NOT_FOUND', 'Expense not found.', 404);
+
+// managerTeamExpenseAccess: the actor must be the manager the expense's collaborator reports to.
+const actorId = ctx.sessionContext.person?.mdmId ?? ctx.sessionContext.actorId;
+if (!actorId) {
+throw new AppError('FORBIDDEN', 'The manager could not be identified from the session.', 403, { ruleId: 'managerTeamExpenseAccess' });
 }
-const inputVersion = Number(input.version);
-if (!Number.isFinite(inputVersion)) {
-throw new AppError('VALIDATION_ERROR', 'The expense version is required.', 400);
+// Colaborador lives in the platform MDM: its ReportsTo link is the compact ref `reportManagers`.
+const colaborador = await ctx.mdm.entity.get({ mdmId: current.colaboradorId });
+const refs = (colaborador.details as { relationshipRefs?: Record<string, unknown> }).relationshipRefs ?? {};
+const managers = refs['reportManagers'];
+if (!Array.isArray(managers) || !managers.includes(actorId)) {
+throw new AppError('FORBIDDEN', 'The manager can only approve expenses of collaborators of their own team.', 403, { ruleId: 'managerTeamExpenseAccess' });
 }
 
-// managerTeamExpenseAccess: only the team manager acts on the expense of a collaborator of the own team.
-const session = ctx.sessionContext;
-const managerId = session.actorId ?? session.actorSession.actorId ?? session.person?.mdmId;
-if (!managerId) {
-throw new AppError('FORBIDDEN', 'The team manager could not be identified.', 403, { ruleId: 'managerTeamExpenseAccess' });
-}
-const scope: string[] = session.actorScope ?? session.actorSession.scope ?? [];
-const isManager = scope.some((entry) => entry === 'gestorEquipe' || entry.endsWith(':gestorEquipe'));
-if (!isManager) {
-throw new AppError('FORBIDDEN', 'Only the team manager can approve team expenses.', 403, { ruleId: 'managerTeamExpenseAccess' });
-}
-
-const found = await repository.list({ id });
-const current: Despesa | undefined = found.find((item) => item.id === id);
-if (!current) {
-throw new AppError('NOT_FOUND', 'Expense not found.', 404);
-}
-if (current.colaboradorId === managerId) {
-throw new AppError('FORBIDDEN', 'A manager cannot approve an expense that is not from a collaborator of the team.', 403, { ruleId: 'managerTeamExpenseAccess' });
-}
-
-if (current.version !== inputVersion) {
+if (current.version !== version) {
 throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
 }
 if (current.status !== 'awaitingApproval') {
@@ -73,22 +64,23 @@ colaboradorId: current.colaboradorId,
 status: 'approved',
 details: { ...current.details },
 };
-const saved = await repository.transition(next, 'aprovarDespesa');
+const saved = await despesaRepository.transition(next, 'aprovarDespesa');
 
-const output: AprovarDespesaOutput = {
-id: saved.id,
-version: saved.version,
-colaboradorId: saved.colaboradorId,
-status: saved.status,
-details: {
+const details: AprovarDespesaOutput['details'] = {
 dataDespesa: saved.details.dataDespesa,
 categoria: saved.details.categoria,
 valor: saved.details.valor,
 descricao: saved.details.descricao,
-motivoRejeicao: saved.details.motivoRejeicao,
 reenvioRealizado: saved.details.reenvioRealizado,
-dataPagamento: saved.details.dataPagamento,
-},
 };
-return output;
+if (saved.details.motivoRejeicao !== undefined) details.motivoRejeicao = saved.details.motivoRejeicao;
+if (saved.details.dataPagamento !== undefined) details.dataPagamento = saved.details.dataPagamento;
+
+return {
+id: saved.id,
+version: saved.version,
+colaboradorId: saved.colaboradorId,
+status: saved.status,
+details,
+};
 }

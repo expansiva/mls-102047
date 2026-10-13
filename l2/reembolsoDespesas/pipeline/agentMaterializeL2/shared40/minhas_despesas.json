@@ -3,78 +3,66 @@
   "project": 102047,
   "module": "reembolsoDespesas",
   "pageId": "minhas_despesas",
-  "unitInputHash": "sha256:0796929d8894c20be73feb8ecee2e8ee09f3c48cdce9550209e9a736aeaba1ef",
-  "promptHash": "sha256:595d6a87ad7fb483838eaf48ce1df1eca8eebc10af0548cdfc76cca183f85783",
-  "rulesHash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "unitInputHash": "sha256:7828a584ba8542a9e312320ff2dd313dd9cfd2d0a43b5a58855806634df9172e",
+  "promptHash": "sha256:b3a659fe5771bf76c78c9267163dfc50fe98cea99da16e70d57a951e18b92742",
+  "rulesHash": "sha256:016b9ad36d6c01dff95a7582e61dd5ad1aab2b1d20b2675fa342b1c91f4179ad",
   "sourcePath": "l2/reembolsoDespesas/web/shared/minhas_despesas.ts",
-  "sourceHash": "sha256:c84d49d037a35b2d68b5fdaa0601ec4b2b25679f1bf07fadcc3fe4a03c0c09c9",
+  "sourceHash": "sha256:8a1db4729e1b75d1b7f420d4180ce41e9c08710df14a65cc97a251f542897824",
   "declarationPath": "l2/reembolsoDespesas/web/shared/minhas_despesasDts.txt",
-  "declarationHash": "sha256:beb0fcc8d4b5964d40371965096c3b6e481b566a923f9bc0dd6e3e3ab7690a5e",
+  "declarationHash": "sha256:12da2a055c01c73aabc51222f74a15e2d6627bc44e911971eba845b35792d2c4",
   "attempt": 1,
   "findings": [
     {
-      "code": "FORM_DRAFT_MISSING",
-      "message": "The forms registrarDespesa, corrigirDespesa, enviarParaAprovacao and reenviarParaAprovacao had no <command>.input state. Added the four drafts registrarDespesaInput, corrigirDespesaInput, enviarParaAprovacaoInput and reenviarParaAprovacaoInput (type DespesaDraft, every leaf nullable) with their setters set<Id>."
-    },
-    {
       "code": "SELECT_SETTER_MISSING",
-      "message": "Param despesaId selects detalheDespesa, but no function writes the selection and no query fetches one expense by id. The state detalheDespesa holds the id. Added public selectDetalheDespesa(id | null) and the getter detalheDespesaItem, which returns the loaded row. The getter cannot be named after the organism because that name is the state id."
+      "message": "The defs declare entry.params.despesaId (select:detalheDespesa) but no method that selects. Added public selectDespesa(id | null), which publishes selectedDespesa and loads the record into despesa through obterDespesa."
+    },
+    {
+      "code": "FILTER_STATE_MISSING",
+      "message": "Entry params status and page filter listaMinhasDespesas but no state holds them. Added persisted states filtroStatus and filtroPage; listarMinhasDespesas(status?, page?, append) publishes them and sends them in the query input."
+    },
+    {
+      "code": "DRAFT_STATE_MISSING",
+      "message": "registrarDespesa and salvarCorrecao are filled in through formularioDespesa but the defs have no <command>.input state. Added registrarDespesaDraft and salvarCorrecaoDraft with setters setRegistrarDespesaDraft and setSalvarCorrecaoDraft; the correction draft is prefilled from the opened expense."
+    },
+    {
+      "code": "IDENTITY_UNAVAILABLE",
+      "message": "registrarDespesa input requires colaboradorId from the session, but the shared has no identity source it may import. It sends an empty string; the backend must take the colaborador from the session."
+    },
+    {
+      "code": "PROOF_ATTACHMENT_NOT_IN_CONTRACT",
+      "message": "The form organism mentions the proof (comprovante) but no route or field of the contract carries it (it is attached by the document attachment capability), so the shared has no member for it."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "The commands return only id, version and details, with no status. After enviarParaAprovacao and reenviarParaAprovacao the status of the row in minhasDespesas stays stale, and so does reenvioRealizado after reenviarParaAprovacao. A newly registered row is inserted with status 'draft' and reenvioRealizado false. pageStatus stays 'empty' after the first expense is registered, because only the initial load writes it."
-    },
-    {
-      "code": "STATE_LEFT_STALE",
-      "message": "The list paging metadata (hasMore, page) had no state in the defs. Added the state hasMoreListaMinhasDespesas and published the page param from the output page. The page size is a constant."
-    },
-    {
-      "code": "FORM_DRAFT_MISSING",
-      "message": "The organism formularioDespesa mentions a comprovante (proof), but no contract input has a field for it. The shared sends no proof and the backend rule proofRequiredBeforeSubmission decides."
+      "message": "Commands return despesa and item but no state has them as source. Applied despesa to the despesa state and selectedDespesa, and item upserted (or removed when it no longer matches filtroStatus) in despesas, without reloading."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public corrigirDespesaInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public filtroPage is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public detalheDespesaItem is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public filtroStatus is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public enviarParaAprovacaoInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public registrarDespesaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public hasMoreListaMinhasDespesas is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public salvarCorrecaoDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public reenviarParaAprovacaoInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public selectDespesa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public registrarDespesaInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public setRegistrarDespesaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public selectDetalheDespesa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public setCorrigirDespesaInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public setEnviarParaAprovacaoInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public setReenviarParaAprovacaoInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public setRegistrarDespesaInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public setSalvarCorrecaoDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     }
   ]
 }

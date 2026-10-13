@@ -3,66 +3,46 @@
   "project": 102047,
   "module": "reembolsoDespesas",
   "pageId": "despesas_da_equipe",
-  "unitInputHash": "sha256:a86312fcaf74f8c33e7dc5f1f3cf943e4e3bf26b1a56d9ceb9200ea0315d6d4f",
-  "promptHash": "sha256:595d6a87ad7fb483838eaf48ce1df1eca8eebc10af0548cdfc76cca183f85783",
-  "rulesHash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "unitInputHash": "sha256:da5394249f6e564a280f6e648746c8a0127684870ff510ef9883390456c99c14",
+  "promptHash": "sha256:b3a659fe5771bf76c78c9267163dfc50fe98cea99da16e70d57a951e18b92742",
+  "rulesHash": "sha256:1941120b85aeec4b8ea459a406d0e30d20344df95e47db775871f27fcf0da4c8",
   "sourcePath": "l2/reembolsoDespesas/web/shared/despesas_da_equipe.ts",
-  "sourceHash": "sha256:bfd1fa3a9ae9fbd4852f4e49c5042c98a3b2613ff759c73ccce8825a59961c58",
+  "sourceHash": "sha256:5fba351eee3b3740e1e3e2834c1c10f8d4d74005babadf410431e9095ec72a25",
   "declarationPath": "l2/reembolsoDespesas/web/shared/despesas_da_equipeDts.txt",
-  "declarationHash": "sha256:083c3425eb3c17377e125dacf0e93d5110605c0e01e03b92f014d3fde69d8680",
-  "attempt": 1,
+  "declarationHash": "sha256:496bea90ba16ca73898a4cc75c4bfc841dcf00dde47c2626e0a472eaf5401fcf",
+  "attempt": 2,
   "findings": [
     {
-      "code": "FORM_DRAFT_MISSING",
-      "message": "Forms approveExpense and rejectExpense (organism approvalDecision) had no <command>.input state. Added approveExpenseInput and rejectExpenseInput drafts (DecisionDraft, every leaf nullable) with setApproveExpenseInput and setRejectExpenseInput. id, colaboradorId and version are filled from the selected expense at submit when the draft leaves them null."
+      "code": "FILTER_STATE_MISSING",
+      "message": "Entry param page (filter:despesasPendentes, persisted) has no state in the definition. Added the public state page (number | null, persisted) and used it as the page of listarDespesasPendentesEquipe."
+    },
+    {
+      "code": "DRAFT_STATE_MISSING",
+      "message": "rejeitarDespesa needs a typed reason but the definition has no <command>.input state. Added the rejeitarDespesaDraft state (RejeitarDespesaDraft) with setRejeitarDespesaDraft; id and version come from the loaded despesa."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "despesaSelecionada (select:expenseReview) had no function that writes it, and no query fetches a single expense. Added selectExpenseReview(id|null), the getter expenseReview (row of despesasDaEquipe by id) and expenseReviewColaborador (collaborator of that row)."
-    },
-    {
-      "code": "PAGINATION_STATE_MISSING",
-      "message": "loadMorePendingTeamExpenses needs the page size and hasMore returned by the list routes, but no state holds them. Added pageSizePendingTeamExpenses and hasMorePendingTeamExpenses; the page state is kept in sync with the output."
+      "message": "The definition has no member that selects the expense. Added selectDespesa(id | null), which publishes selectedDespesa and calls obterDespesaParaAnalise to fill despesa."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "approveExpense and rejectExpense return only a partial record (id, version, details.motivoRejeicao), with no status, and the defs declare no mode for despesasDaEquipe or despesaSelecionada. Applied: the decided expense is removed from despesasDaEquipe and the selection is cleared. The colaborador list is left untouched."
+      "message": "aprovarDespesa and rejeitarDespesa return despesa, which no state has as its source. Applied as the route comments say: the output replaces the despesa state and the row is removed from despesas.items without reloading. The paged totals (page, hasMore) of the queue are not adjusted."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public approveExpenseInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public page is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public expenseReview is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public rejeitarDespesaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public expenseReviewColaborador is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public selectDespesa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public hasMorePendingTeamExpenses is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public pageSizePendingTeamExpenses is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public rejectExpenseInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public selectExpenseReview is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public setApproveExpenseInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public setRejectExpenseInput is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public setRejeitarDespesaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     }
   ]
 }

@@ -4,27 +4,27 @@
   "module": "reembolsoDespesas",
   "pageId": "minhas_despesas",
   "device": "desktop",
-  "contextHash": "sha256:f8116f1e28a6096eb69173e6d8b22d40f7fba20ee9a12c9969e0b295ccd9d5e6",
+  "contextHash": "sha256:af7b52801ff0fc14ed9aa1cdcc59f593bf9ce9dc8ddc12a7448393796399ab43",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/minhas_despesas.ts",
-  "sourceHash": "sha256:00155adcd2ae84a23002d6f5dbab0166cd463b5ae1406c6cf569b919488dbcdf",
-  "attempt": 2,
+  "sourceHash": "sha256:313b35b12227d21f13cddf8d183d096f1e64a9a34eddc6903fc7cc525cd0685c",
+  "attempt": 1,
   "design": {
-    "concept": "A ledger bench for the collaborator's own expenses: the table of expenses leads on the left and never leaves the screen, while a working panel on the right changes between three views: consult the selected expense (data and available actions), register a new expense, and correct a rejected expense. Selecting a row, registering and correcting all happen without losing the list or the selection.",
+    "concept": "Mestre-detalhe de leitura: à esquerda a lista de despesas do colaborador, sempre visível, com filtro por situação. À direita um painel de trabalho, que é um scene host, lê a despesa escolhida como um memorando (identidade, fatos decisivos, descrição, motivo da rejeição) e só no fim mostra o próximo passo (enviar ou reenviar). Registrar uma despesa nova e corrigir uma rejeitada são cenas secundárias do mesmo painel, abertas sob demanda.",
     "views": [
       {
-        "id": "consulta",
-        "purpose": "Default view of the panel: detail of the selected expense and the send/resend actions that fit its situation."
+        "id": "detalhe",
+        "purpose": "Leitura da despesa selecionada, do topo ao fim, terminando no bloco de envio ou reenvio. É a cena inicial e mostra um estado vazio quando nada foi escolhido."
       },
       {
-        "id": "registrar",
-        "purpose": "Form to register a new expense (date, category, amount, description), opened from the header button; returns to the detail of the newly registered expense on success."
+        "id": "nova",
+        "purpose": "Formulário para registrar uma despesa nova, com volta para o detalhe. Depois do sucesso mostra uma declaração calma com um passo seguinte."
       },
       {
         "id": "corrigir",
-        "purpose": "Form prefilled with the rejected expense data to correct it; returns to the detail on success, where resubmission is offered."
+        "purpose": "Formulário para corrigir a despesa rejeitada que está aberta, já preenchido pelo shared. Depois do sucesso leva de volta ao detalhe, onde fica o reenvio."
       }
     ],
-    "decisions": "Followed the ledgerTable template: dense table first, amount last and right-aligned in tabular figures with BRL, status as a text chip, failure shown above the rows with retry, loading skeleton in the table. A collaborator filter field above the table now calls filterListaMinhasDespesas with the typed value (empty clears the filter), so the journey steps that locate expenses are wired. Load-more paging is exposed. The scene host covers only the right panel, so the table stays visible and the selection survives view changes. Actions appear according to status and 'reenvioRealizado'; drafts are prefilled from the selected row before correcting, sending or resending."
+    "decisions": "Segui a ordem de leitura do template (identidade, fatos, narrativa, trilha, decisão). O bloco de envio fica no fim do painel, nunca em cabeçalho fixo ou ao lado do conteúdo. A lista (primária) fica fora do host para continuar visível e manter a seleção ao alternar de cena. O host cobre só a região direita, em mode=scenary com volta. Selecionar uma linha chama selectDespesa e abre a cena de detalhe. O sucesso de cada comando é local: no bloco de envio, ou no lugar do formulário com um único passo seguinte. Erros aparecem dentro do bloco, acima dos botões, sem perder o que foi digitado. O comprovante ficou de fora: o shared não declara estado nem campo de arquivo, e não posso inventar um. O motivo da rejeição usa o contextual-feedback e vem depois da descrição, como trilha. O botão de enviar vira statement calmo após sucesso. Os botões de ação e salvar ficam desabilitados enquanto algum campo obrigatório está vazio, o que é só presença e não cálculo de negócio. O filtro de situação usa botões nativos com aria-pressed. Não há paginação numérica: usei 'Carregar mais despesas' quando o shared informa hasMore."
   },
   "advisories": [
     {
@@ -33,15 +33,15 @@
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section consultaERegistro needs an element with data-section-id=\"consultaERegistro\"."
+      "message": "Section despesaSelecionada needs an element with data-section-id=\"despesaSelecionada\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section envio needs an element with data-section-id=\"envio\"."
+      "message": "Section registroCorrecao needs an element with data-section-id=\"registroCorrecao\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism formularioDespesa (expenseProof) renders neither <groupselectfileforupload--ml-file-upload-dropzone> nor <groupselectfileforupload--ml-file-upload-preview>."
+      "message": "Organism formularioDespesa (Comprovante da despesa) renders neither <groupselectfileforupload--ml-file-upload-preview> nor <groupselectfileforupload--ml-file-upload-dropzone>."
     }
   ]
 }

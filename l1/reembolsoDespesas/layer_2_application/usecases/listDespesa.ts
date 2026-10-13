@@ -27,38 +27,51 @@ export interface ListDespesaOutput extends Record<string, unknown> {
   hasMore: boolean;
 }
 
+function filledText(value: unknown): value is string | number {
+  return (typeof value === 'string' && value.trim() !== '') || typeof value === 'number';
+}
+
+function normalizeText(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 export async function listDespesa(input: ListDespesaInput, ctx: RequestContext): Promise<ListDespesaOutput> {
   const repository = resolveRepository<DespesaRepository>(ctx, 'DespesaRepository');
-  const filled = (value: unknown): boolean => value !== undefined && value !== null && value !== '';
 
   const where: Record<string, unknown> = {};
-  if (filled(input.id)) where.id = String(input.id);
-  if (filled(input.colaboradorId)) where.colaboradorId = String(input.colaboradorId);
-  if (filled(input.status)) where.status = String(input.status);
+  if (filledText(input.id)) where.id = String(input.id);
+  if (filledText(input.colaboradorId)) where.colaboradorId = String(input.colaboradorId);
+  if (filledText(input.status)) where.status = String(input.status);
 
   const found = await repository.list(where);
 
-  const detailFilters: Array<[keyof Despesa['details'], unknown]> = [];
-  const given = input.details;
-  if (given && typeof given === 'object') {
-    const keys: Array<keyof Despesa['details']> = [
-      'dataDespesa',
-      'categoria',
-      'valor',
-      'descricao',
-      'motivoRejeicao',
-      'reenvioRealizado',
-      'dataPagamento',
-    ];
-    for (const key of keys) {
-      const value = given[key];
-      if (filled(value)) detailFilters.push([key, value]);
-    }
-  }
+  const details = input.details;
+  const exactDetails: Array<[keyof Despesa['details'], unknown]> = [
+    ['dataDespesa', details?.dataDespesa],
+    ['categoria', details?.categoria],
+    ['valor', details?.valor],
+    ['dataPagamento', details?.dataPagamento],
+  ];
+  const containsDetails: Array<[keyof Despesa['details'], unknown]> = [
+    ['descricao', details?.descricao],
+    ['motivoRejeicao', details?.motivoRejeicao],
+  ];
+  const reenvio = typeof details?.reenvioRealizado === 'boolean' ? details.reenvioRealizado : undefined;
 
-  const kept = found.filter((despesa) =>
-    detailFilters.every(([key, value]) => String(despesa.details?.[key]) === String(value)),
-  );
+  const kept = found.filter((despesa) => {
+    for (const [field, expected] of exactDetails) {
+      if (!filledText(expected)) continue;
+      if (String(despesa.details?.[field] ?? '') !== String(expected)) return false;
+    }
+    for (const [field, term] of containsDetails) {
+      if (!filledText(term)) continue;
+      const stored = despesa.details?.[field];
+      if (typeof stored !== 'string') return false;
+      if (!normalizeText(stored).includes(normalizeText(String(term)))) return false;
+    }
+    if (reenvio !== undefined && despesa.details?.reenvioRealizado !== reenvio) return false;
+    return true;
+  });
 
   const page = Math.max(1, Math.trunc(Number(input.page)) || 1);
   const size = Math.min(200, Math.max(1, Math.trunc(Number(input.pageSize)) || 20));

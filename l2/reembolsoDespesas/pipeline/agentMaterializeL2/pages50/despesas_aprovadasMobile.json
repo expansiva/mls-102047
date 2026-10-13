@@ -4,36 +4,36 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_aprovadas",
   "device": "mobile",
-  "contextHash": "sha256:a94e7b76886128a26c2886f7ea931967949b7d773fff99b5b689bc6ff76a0616",
+  "contextHash": "sha256:a44a3a203e53c3656858cc45de488003b5bd9a1fe58c1e5265618f95a4e054c6",
   "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/despesas_aprovadas.ts",
-  "sourceHash": "sha256:cdf72de80ce9864aacb71b2a1befc159b24cea496a892a29a6577f6958a0cdd6",
+  "sourceHash": "sha256:8b999c18511aa31fc8cb2b8bb9dbd1d5dfa0f5d070c36fe69266548eb8b8eaa6",
   "attempt": 1,
   "design": {
-    "concept": "Fila de pagamento em duas cenas de coluna única: o financeiro percorre as despesas aprovadas, toca numa e passa para a cena de conferência e pagamento, onde vê os dados da despesa e informa a data. Voltar à fila mantém a despesa marcada e a lista no lugar.",
+    "concept": "Fluxo de duas telas para o financeiro no celular: primeiro a fila de despesas aprovadas em itens empilhados e fáceis de tocar, depois, ao tocar numa despesa, uma tela de conferência com os dados e, logo abaixo, a data de pagamento com uma ação fixa no rodapé. Uma coisa de cada vez, sem perder o lugar na fila.",
     "views": [
       {
-        "id": "queue",
-        "purpose": "Fila de despesas aprovadas a pagar (organismo principal): lista densa com categoria, data, colaborador e valor alinhado à direita, ficha de filtro removível quando há filtro ativo, erro com nova tentativa acima da lista e carregar mais."
+        "id": "fila",
+        "purpose": "Fila de despesas aprovadas aguardando pagamento, com filtro por categoria (token removível), lista tocável, estados de carregamento/vazio/erro e carregar mais."
       },
       {
-        "id": "payment",
-        "purpose": "Conferência da despesa selecionada (cartão vertical) seguida do formulário de pagamento (calendário compacto + botão de confirmação), com botão de voltar à fila."
+        "id": "pagamento",
+        "purpose": "Conferência dos dados da despesa escolhida (card) e registro da data de pagamento com botão fixo no rodapé; voltar leva à fila."
       }
     ],
-    "decisions": "Troquei o empilhamento das três seções por duas cenas no host scenary, porque no celular uma coisa de cada vez é melhor do que espremer lista, detalhe e formulário numa rolagem longa; a ordem da fila → conferência → pagamento do defs foi mantida. O título de cada cena é o único título da região; o cartão e o calendário só usam título de dado ou rótulo de campo. Uso o vertical-record-list com seleção única marcada pela página (?selected), e o toque na linha seleciona e abre a cena de pagamento. O template pede totais e filtros, mas o contrato não entrega contagem nem soma e o colaborador é um id de sessão que nunca se digita; por isso não calculo totais e o filtro aparece apenas como ficha removível quando já está ativo. Valores e datas são só formatados com Intl (BRL, tabular-nums, alinhados à direita). Se a despesa já tem data de pagamento, o formulário dá lugar à confirmação, sem banner nem redirecionamento. O erro fica na região da lista, em cor de texto normal, com nova tentativa. Botões e calendário são moléculas; o botão de confirmação ocupa a largura toda com 44px+ de altura."
+    "decisions": "Usei o scene host em mode=scenary porque as etapas localizar → conferir/pagar são sequenciais, com voltar. Os títulos das cenas são os únicos títulos (sem repetir o texto do botão). A lista usa o vertical-record-list (preferido) com seleção única controlada pela página (?selected pelo selectedDespesa); valor sempre por último, alinhado à direita, em algarismos tabulares com moeda. Filtro: apenas categoria vem como busca de texto; colaboradorId não é renderizado como campo (é contexto/id), e o filtro aplicado aparece como token removível. Paginação: o contrato só informa hasMore, sem total de páginas, então troquei o controle de paginação por um botão 'Carregar mais' (append) mostrado só quando hasMore. Não exibi totais nem contagens porque nada disso é entregue pelo contrato e a página não calcula. Detalhe em vertical-card com dl; o formulário usa o date-shortcut-picker (atalhos como Hoje agilizam no celular) e o botão ml-button-standard size lg em barra sticky com o valor no rótulo, para o escopo ser conhecido antes do toque. Sucesso: toast inline-flutuante e a própria despesa atualizada (situação paga e data de pagamento), com ação de voltar à fila; erros ficam no próprio bloco, em cor de texto normal, com nova tentativa."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section paymentQueue needs an element with data-section-id=\"paymentQueue\"."
+      "message": "Section filaPagamento needs an element with data-section-id=\"filaPagamento\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section expenseReview needs an element with data-section-id=\"expenseReview\"."
+      "message": "Section analisePagamento needs an element with data-section-id=\"analisePagamento\"."
     },
     {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section paymentCapture needs an element with data-section-id=\"paymentCapture\"."
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (paginação) renders neither <grouptriggeraction--ml-pagination-control>."
     }
   ]
 }

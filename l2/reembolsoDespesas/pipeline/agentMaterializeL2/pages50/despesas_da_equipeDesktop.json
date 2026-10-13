@@ -4,36 +4,39 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_da_equipe",
   "device": "desktop",
-  "contextHash": "sha256:c217cb9103a9ee4c4aff7aee6717f53f94b72e21b0adf9aa3fc329e5005edc64",
+  "contextHash": "sha256:4213908fb8e933c5e0a0c30d05644e9676725c82cf2f7a71ee4b9e916c3a8e9e",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/despesas_da_equipe.ts",
-  "sourceHash": "sha256:cb981fa208e4399abab3036908dbc36adc584be3c18ad0a6f85a2f8b9215bd8b",
+  "sourceHash": "sha256:e7b407f76225cf6e84df95d22c3603786082b895bb1356015d8c912770caf7a6",
   "attempt": 1,
   "design": {
-    "concept": "Duas cenas para uma só história: a fila de despesas pendentes da equipe (com filtro por colaborador) e a análise de UMA despesa, lida como um memorando (quem, fatos decisivos, histórico) com a decisão apenas no fim. A decisão tem um gesto por desfecho: aprovar abre uma confirmação simples; rejeitar exige o motivo, escrito no próprio bloco.",
-    "views": [
-      {
-        "id": "queue",
-        "purpose": "Localizar a despesa a analisar: filtro por colaborador, tabela de pendentes e carregar mais."
-      },
-      {
-        "id": "review",
-        "purpose": "Ler a despesa escolhida (colaborador, valor, data, categoria, situação, histórico) e decidir no final; com voltar à fila."
-      }
-    ],
-    "decisions": "Segui o template readAndDecide: nada de aprovar/rejeitar nas linhas da fila; a decisão fica depois da leitura, sem barra fixa. A fila e a análise são cenas do scenary host (mode=scenary, com voltar); se a página já chega com uma despesa carregada, abre direto na análise. Escolhi data-table em vez de grouping-table porque a seleção é por índice e o agrupamento/ordenação reordenaria as linhas; o agrupamento por colaborador é coberto pelo filtro do backend. A confirmação de aprovação usa <dialog> nativo aberto por DOM (a página não guarda estado) e restate colaborador e valor. A rejeição não usa variante danger; o botão só habilita com o motivo preenchido e o erro aparece acima dos botões. Depois de decidir, o bloco vira uma declaração calma do resultado (a despesa sai da lista, então não há mais registro para reler). Nenhum valor é calculado: apenas formatação com Intl e busca do nome do colaborador pelo id. Comprovante e descrição não existem no contrato de linha, então ficaram de fora."
+    "concept": "Uma tela de leitura e decisão para o gestor: à esquerda a fila de despesas que aguardam a aprovação da equipe, à direita a despesa escolhida lida como um memorando (quem, fatos decisivos, descrição, histórico) e, só no fim da leitura, o bloco de decisão. A tela conta uma história de uma despesa por vez e fecha essa história com uma declaração calma do que foi decidido.",
+    "views": [],
+    "decisions": "Uma só vista, sem scene host: fila e análise ficam lado a lado em duas colunas, porque a fila continua útil durante a leitura. O painel direito troca de conteúdo pelos dados (nada selecionado, carregando, erro, despesa carregada), não por cenas. A fila usa ml-data-table sem ordenação, para que o índice do clique corresponda à linha; a seleção é marcada pelo índice em `value` e o clique chama selectDespesa com o id da linha. A leitura segue a ordem do template: identidade com situação, fatos decisivos (valor grande à direita, data, categoria), descrição e histórico (motivo de rejeição anterior e reenvio). O bloco de decisão fica no fim. Aprovar abre uma confirmação nativa <dialog> que repete colaborador e valor (sem estado na página: showModal é chamado pelo evento). Rejeitar abre um <details> inline com o campo de motivo (ml-multiline-text); o botão só habilita com motivo preenchido. Aprovar é o primário e rejeitar é secundário, sem estilo de perigo. Erros de comando aparecem dentro do bloco de decisão, acima dos botões, com ml-contextual-feedback; durante a execução o bloco trava e mostra progresso. No sucesso o bloco vira uma declaração da decisão, sem redirecionar nem avançar para a próxima. Deixei de fora a busca, o filtro por período e o visualizador de comprovante: o shared não tem estado nem método de filtro, e a despesa não tem campo de comprovante, e a página não pode filtrar nem inventar dados. O formato da página da fila não é declarado no .d.ts, então um helper de módulo lê a lista de forma defensiva."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section pendingQueue needs an element with data-section-id=\"pendingQueue\"."
+      "message": "Section filaPendentes needs an element with data-section-id=\"filaPendentes\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section review needs an element with data-section-id=\"review\"."
+      "message": "Section analiseDecisao needs an element with data-section-id=\"analiseDecisao\"."
     },
     {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section decision needs an element with data-section-id=\"decision\"."
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasPendentes (busca por colaborador ou categoria) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasPendentes (filtro por período da despesa) renders neither <groupenterdateinterval--ml-date-interval-presets>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism analiseDespesa (resumo da despesa) renders neither <groupviewcard--ml-view-card-horizontal> nor <groupviewcard--ml-vertical-card>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism analiseDespesa (visualização do comprovante) renders neither <groupplaymedia--ml-pdf-viewer> nor <groupplaymedia--ml-image-gallery>."
     }
   ]
 }

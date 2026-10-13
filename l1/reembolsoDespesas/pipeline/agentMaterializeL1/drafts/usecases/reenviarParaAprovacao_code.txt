@@ -33,23 +33,28 @@ function isBlank(value: unknown): boolean {
 export async function reenviarParaAprovacao(input: ReenviarParaAprovacaoInput, ctx: RequestContext): Promise<ReenviarParaAprovacaoOutput> {
   const repository = resolveRepository<DespesaRepository>(ctx, 'DespesaRepository');
 
-  const id = String(input.id ?? '');
-  if (id === '') throw new AppError('VALIDATION_ERROR', 'The expense id is required.', 400);
+  if (isBlank(input.id)) {
+    throw new AppError('VALIDATION_ERROR', 'The expense id is required.', 400);
+  }
+  const id = String(input.id);
 
   const found = await repository.list({ id });
   const current = found[0];
-  if (!current) throw new AppError('NOT_FOUND', 'Expense not found.', 404);
+  if (!current) {
+    throw new AppError('NOT_FOUND', 'Expense not found.', 404);
+  }
 
-  // expenseOwnerOnly: only the collaborator who registered the expense may resubmit it
+  // expenseOwnerOnly: only the collaborator who registered the expense may resubmit it.
   const actorId = ctx.sessionContext.person?.mdmId;
   if (!actorId) {
     throw new AppError('FORBIDDEN', 'The authenticated collaborator could not be identified.', 403, { ruleId: 'expenseOwnerOnly' });
   }
-  if (String(current.colaboradorId ?? '') !== actorId) {
-    throw new AppError('FORBIDDEN', 'Only the collaborator who registered the expense can resubmit it.', 403, { ruleId: 'expenseOwnerOnly' });
+  if (current.colaboradorId !== actorId) {
+    throw new AppError('FORBIDDEN', 'Only the collaborator who registered the expense may resubmit it.', 403, { ruleId: 'expenseOwnerOnly' });
   }
 
-  if (input.version !== undefined && Number(input.version) !== current.version) {
+  // Optimistic concurrency: the version sent must be the stored one.
+  if (Number(input.version) !== current.version) {
     throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
   }
 
@@ -57,49 +62,49 @@ export async function reenviarParaAprovacao(input: ReenviarParaAprovacaoInput, c
     throw new AppError('INVALID_STATE', 'Only a rejected expense can be resubmitted.', 409);
   }
 
-  // singleResubmission: a rejected expense can be corrected and resubmitted only once
-  if (current.details?.reenvioRealizado === true) {
-    throw new AppError('SINGLE_RESUBMISSION', 'A rejected expense can be resubmitted only once.', 409, { ruleId: 'singleResubmission' });
+  // singleResubmission: a rejected expense may be corrected and resubmitted only once.
+  if (current.details.reenvioRealizado === true) {
+    throw new AppError('ALREADY_RESUBMITTED', 'A rejected expense can be resubmitted only once.', 409, { ruleId: 'singleResubmission' });
   }
 
-  // validExpenseData: date, category, amount and description are required
-  const details = current.details;
-  if (
-    !details ||
-    isBlank(details.dataDespesa) ||
-    isBlank(details.categoria) ||
-    isBlank(details.valor) ||
-    isBlank(details.descricao)
-  ) {
+  // validExpenseData: date, category, amount and description are required.
+  const d = current.details;
+  if (isBlank(d.dataDespesa) || isBlank(d.categoria) || isBlank(d.valor) || isBlank(d.descricao)) {
     throw new AppError('VALIDATION_ERROR', 'The expense must have date, category, amount and description.', 400, { ruleId: 'validExpenseData' });
   }
-  const amount = Number(details.valor);
+  const amount = Number(d.valor);
   if (!Number.isFinite(amount) || amount < 0.01) {
     throw new AppError('VALIDATION_ERROR', 'The expense amount must be at least 0.01.', 400, { ruleId: 'validExpenseData' });
   }
 
   const next: Despesa = {
-    ...current,
+    id: current.id,
+    version: current.version,
+    colaboradorId: current.colaboradorId,
     status: 'awaitingApproval',
-    details: { ...details, reenvioRealizado: true },
+    details: {
+      ...current.details,
+      reenvioRealizado: true,
+    },
   };
 
   const saved = await repository.transition(next, 'reenviarParaAprovacao');
 
-  const output: ReenviarParaAprovacaoOutput = {
+  const details: ReenviarParaAprovacaoOutput['details'] = {
+    dataDespesa: saved.details.dataDespesa,
+    categoria: saved.details.categoria,
+    valor: saved.details.valor,
+    descricao: saved.details.descricao,
+    reenvioRealizado: saved.details.reenvioRealizado,
+  };
+  if (saved.details.motivoRejeicao !== undefined) details.motivoRejeicao = saved.details.motivoRejeicao;
+  if (saved.details.dataPagamento !== undefined) details.dataPagamento = saved.details.dataPagamento;
+
+  return {
     id: saved.id,
     version: saved.version,
     colaboradorId: saved.colaboradorId,
     status: saved.status,
-    details: {
-      dataDespesa: saved.details.dataDespesa,
-      categoria: saved.details.categoria,
-      valor: saved.details.valor,
-      descricao: saved.details.descricao,
-      motivoRejeicao: saved.details.motivoRejeicao,
-      reenvioRealizado: saved.details.reenvioRealizado,
-      dataPagamento: saved.details.dataPagamento,
-    },
+    details,
   };
-  return output;
 }

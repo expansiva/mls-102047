@@ -2,8 +2,8 @@
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
-import type { DespesaRepository } from '/_102047_/l1/reembolsoDespesas/layer_2_application/ports/despesaRepository.js';
 import type { Despesa } from '/_102047_/l1/reembolsoDespesas/layer_3_domain/entities/despesa.js';
+import type { DespesaRepository } from '/_102047_/l1/reembolsoDespesas/layer_2_application/ports/despesaRepository.js';
 
 export interface EnviarParaAprovacaoInput extends Record<string, unknown> {
   id: string;
@@ -35,41 +35,45 @@ export async function enviarParaAprovacao(input: EnviarParaAprovacaoInput, ctx: 
 
   const id = String(input.id ?? '');
   if (id === '') throw new AppError('VALIDATION_ERROR', 'The expense id is required.', 400);
+  const inputVersion = Number(input.version);
+  if (!Number.isFinite(inputVersion)) throw new AppError('VALIDATION_ERROR', 'The expense version is required.', 400);
 
-  const found = await repository.list({ id });
-  const current = found[0];
+  const current = await repository.get(id);
   if (!current) throw new AppError('NOT_FOUND', 'Expense not found.', 404);
 
-  // expenseOwnerOnly: only the collaborator who registered the expense may send it.
-  const callerId = ctx.sessionContext.person?.mdmId;
-  if (isBlank(callerId)) {
-    throw new AppError('FORBIDDEN', 'The authenticated collaborator could not be identified.', 403, { ruleId: 'expenseOwnerOnly' });
+  // expenseOwnerOnly: only the collaborator who registered the expense may submit it
+  const actorMdmId = ctx.sessionContext.person?.mdmId;
+  if (!actorMdmId) {
+    throw new AppError('FORBIDDEN', 'The session has no identified collaborator to own the expense.', 403, { ruleId: 'expenseOwnerOnly' });
   }
-  if (String(current.colaboradorId ?? '') !== callerId) {
-    throw new AppError('FORBIDDEN', 'Only the collaborator who registered the expense can send it for approval.', 403, { ruleId: 'expenseOwnerOnly' });
+  if (String(current.colaboradorId) !== actorMdmId) {
+    throw new AppError('FORBIDDEN', 'Only the collaborator who registered the expense can submit it.', 403, { ruleId: 'expenseOwnerOnly' });
   }
 
   if (current.status !== 'draft') {
     throw new AppError('INVALID_STATE', 'Only a draft expense can be sent for approval.', 409);
   }
-
-  if (Number(input.version) !== current.version) {
+  if (Number(current.version) !== inputVersion) {
     throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
   }
 
-  // validExpenseData: date, category, amount and description are required.
-  const d = current.details;
-  const amount = Number(d?.valor);
-  if (
-    !d ||
-    isBlank(d.dataDespesa) ||
-    isBlank(d.categoria) ||
-    isBlank(d.valor) ||
-    !Number.isFinite(amount) ||
-    amount < 0.01 ||
-    isBlank(d.descricao)
-  ) {
-    throw new AppError('VALIDATION_ERROR', 'The expense must have a date, category, amount and description to be sent for approval.', 400, { ruleId: 'validExpenseData' });
+  // validExpenseData: date, category, amount and description are required
+  const details = current.details;
+  if (!details) {
+    throw new AppError('VALIDATION_ERROR', 'The expense details are required.', 400, { ruleId: 'validExpenseData' });
+  }
+  if (isBlank(details.dataDespesa)) {
+    throw new AppError('VALIDATION_ERROR', 'The expense date is required.', 400, { ruleId: 'validExpenseData' });
+  }
+  if (isBlank(details.categoria) || String(details.categoria).length > 120) {
+    throw new AppError('VALIDATION_ERROR', 'The expense category is required and must have at most 120 characters.', 400, { ruleId: 'validExpenseData' });
+  }
+  const amount = Number(details.valor);
+  if (isBlank(details.valor) || !Number.isFinite(amount) || amount < 0.01) {
+    throw new AppError('VALIDATION_ERROR', 'The expense amount must be at least 0.01.', 400, { ruleId: 'validExpenseData' });
+  }
+  if (isBlank(details.descricao) || String(details.descricao).length > 2000) {
+    throw new AppError('VALIDATION_ERROR', 'The expense description is required and must have at most 2000 characters.', 400, { ruleId: 'validExpenseData' });
   }
 
   const next: Despesa = {
@@ -82,21 +86,20 @@ export async function enviarParaAprovacao(input: EnviarParaAprovacaoInput, ctx: 
 
   const saved = await repository.transition(next, 'enviarParaAprovacao');
 
-  const details: EnviarParaAprovacaoOutput['details'] = {
-    dataDespesa: saved.details.dataDespesa,
-    categoria: saved.details.categoria,
-    valor: saved.details.valor,
-    descricao: saved.details.descricao,
-    reenvioRealizado: saved.details.reenvioRealizado,
-  };
-  if (saved.details.motivoRejeicao !== undefined) details.motivoRejeicao = saved.details.motivoRejeicao;
-  if (saved.details.dataPagamento !== undefined) details.dataPagamento = saved.details.dataPagamento;
-
-  return {
+  const output: EnviarParaAprovacaoOutput = {
     id: saved.id,
     version: saved.version,
     colaboradorId: saved.colaboradorId,
     status: saved.status,
-    details,
+    details: {
+      dataDespesa: saved.details.dataDespesa,
+      categoria: saved.details.categoria,
+      valor: saved.details.valor,
+      descricao: saved.details.descricao,
+      reenvioRealizado: saved.details.reenvioRealizado,
+    },
   };
+  if (saved.details.motivoRejeicao !== undefined) output.details.motivoRejeicao = saved.details.motivoRejeicao;
+  if (saved.details.dataPagamento !== undefined) output.details.dataPagamento = saved.details.dataPagamento;
+  return output;
 }

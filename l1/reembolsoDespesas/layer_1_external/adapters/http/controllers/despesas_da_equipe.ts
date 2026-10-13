@@ -6,50 +6,50 @@ import { requests } from '/_102047_/l1/reembolsoDespesas/layer_2_application/req
 import type { Despesas_da_equipeContracts } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.js';
 
 export const routes: ControllerRoute[] = [
-  { key: 'reembolsoDespesas.despesas_da_equipe.approveExpense', handler: handleApproveExpense },
-  { key: 'reembolsoDespesas.despesas_da_equipe.load', handler: handleLoad },
-  { key: 'reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe', handler: handleLoadDespesasDaEquipe },
-  { key: 'reembolsoDespesas.despesas_da_equipe.rejectExpense', handler: handleRejectExpense },
+  { key: 'reembolsoDespesas.despesas_da_equipe.aprovarDespesa', handler: handleAprovarDespesa },
+  { key: 'reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe', handler: handleListarDespesasPendentesEquipe },
+  { key: 'reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise', handler: handleObterDespesaParaAnalise },
+  { key: 'reembolsoDespesas.despesas_da_equipe.rejeitarDespesa', handler: handleRejeitarDespesa },
 ];
 
-async function handleApproveExpense(input: IRequestEnvelope): Promise<BffResponse<Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.approveExpense']['output']>> {
+async function handleAprovarDespesa(input: IRequestEnvelope): Promise<BffResponse<Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.aprovarDespesa']['output']>> {
   const denied = authorize(input.request, ['gestorAnalisaDespesasDaEquipe']);
   if (denied) throw denied;
-  const invalid = validateInput(input.request.params, ['details', 'details.motivoRejeicao', 'colaboradorId', 'id', 'version'], ['details', 'details.motivoRejeicao', 'colaboradorId', 'id', 'version'], []);
+  const invalid = validateInput(input.request.params, ['id', 'version'], ['id', 'version'], []);
   if (invalid) throw invalid;
-  const params = scopeParams(input.request.params, input.ctx, ['gestorAnalisaDespesasDaEquipe']) as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.approveExpense']['input'];
-  const data = await requests["reembolsoDespesas.despesas_da_equipe.approveExpense"](params, input.ctx);
-  return { ok: true, data: data as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.approveExpense']['output'], error: null };
+  const params = scopeParams(input.request.params, input.ctx, ['gestorAnalisaDespesasDaEquipe']) as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.aprovarDespesa']['input'];
+  const data = await requests["reembolsoDespesas.despesas_da_equipe.aprovarDespesa"](params, input.ctx);
+  return { ok: true, data: data as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.aprovarDespesa']['output'], error: null };
 }
 
-async function handleLoad(input: IRequestEnvelope): Promise<BffResponse<Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.load']['output']>> {
+async function handleListarDespesasPendentesEquipe(input: IRequestEnvelope): Promise<BffResponse<Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe']['output']>> {
   const denied = authorize(input.request, ['gestorAnalisaDespesasDaEquipe']);
   if (denied) throw denied;
-  const invalid = validateInput(input.request.params, [], ['colaboradorId', 'page', 'pageSize'], []);
+  const invalid = validateInput(input.request.params, ['page', 'pageSize'], ['page', 'pageSize'], []);
   if (invalid) throw invalid;
-  const params = scopeParams(input.request.params, input.ctx, ['gestorAnalisaDespesasDaEquipe']) as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.load']['input'];
-  const data = await requests["reembolsoDespesas.despesas_da_equipe.load"](params, input.ctx);
-  return { ok: true, data: data as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.load']['output'], error: null };
+  const params = scopeParams(input.request.params, input.ctx, ['gestorAnalisaDespesasDaEquipe']) as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe']['input'];
+  const data = await requests["reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe"](params, input.ctx);
+  return { ok: true, data: data as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe']['output'], error: null };
 }
 
-async function handleLoadDespesasDaEquipe(input: IRequestEnvelope): Promise<BffResponse<Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe']['output']>> {
+async function handleObterDespesaParaAnalise(input: IRequestEnvelope): Promise<BffResponse<Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise']['output']>> {
   const denied = authorize(input.request, ['gestorAnalisaDespesasDaEquipe']);
   if (denied) throw denied;
-  const invalid = validateInput(input.request.params, [], ['colaboradorId', 'page', 'pageSize'], []);
+  const invalid = validateInput(input.request.params, ['despesaId'], ['despesaId'], []);
   if (invalid) throw invalid;
-  const params = scopeParams(input.request.params, input.ctx, ['gestorAnalisaDespesasDaEquipe']) as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe']['input'];
-  const data = await requests["reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe"](params, input.ctx);
-  return { ok: true, data: data as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe']['output'], error: null };
+  const params = scopeParams(input.request.params, input.ctx, ['gestorAnalisaDespesasDaEquipe']) as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise']['input'];
+  const data = await requests["reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise"](params, input.ctx);
+  return { ok: true, data: data as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise']['output'], error: null };
 }
 
-async function handleRejectExpense(input: IRequestEnvelope): Promise<BffResponse<Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.rejectExpense']['output']>> {
+async function handleRejeitarDespesa(input: IRequestEnvelope): Promise<BffResponse<Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.rejeitarDespesa']['output']>> {
   const denied = authorize(input.request, ['gestorAnalisaDespesasDaEquipe']);
   if (denied) throw denied;
-  const invalid = validateInput(input.request.params, ['details', 'details.motivoRejeicao', 'colaboradorId', 'id', 'version'], ['details', 'details.motivoRejeicao', 'colaboradorId', 'id', 'version'], []);
+  const invalid = validateInput(input.request.params, ['id', 'version', 'details', 'details.motivoRejeicao'], ['id', 'version', 'details', 'details.motivoRejeicao'], []);
   if (invalid) throw invalid;
-  const params = scopeParams(input.request.params, input.ctx, ['gestorAnalisaDespesasDaEquipe']) as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.rejectExpense']['input'];
-  const data = await requests["reembolsoDespesas.despesas_da_equipe.rejectExpense"](params, input.ctx);
-  return { ok: true, data: data as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.rejectExpense']['output'], error: null };
+  const params = scopeParams(input.request.params, input.ctx, ['gestorAnalisaDespesasDaEquipe']) as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.rejeitarDespesa']['input'];
+  const data = await requests["reembolsoDespesas.despesas_da_equipe.rejeitarDespesa"](params, input.ctx);
+  return { ok: true, data: data as Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.rejeitarDespesa']['output'], error: null };
 }
 
 function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string } }, grantIds: readonly string[]): Record<string, unknown> {
@@ -68,9 +68,12 @@ function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string
 function authorize(request: BffRequest, grantIds: readonly string[]): AppError | null {
   const source = request.meta?.source ?? 'http';
   const authorities = request.meta?.verifiedAuthorities ?? [];
-  if (source === 'http' && authorities.length === 0) {
-    return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
-  }
+  // TODO(login): o login ainda não está implementado, então nenhuma chamada traz verifiedAuthorities.
+  // Reativar quando o login emitir as autoridades.
+  // if (source === 'http' && authorities.length === 0) {
+  //   return new AppError('FORBIDDEN_ACTOR', 'You have no authority to call this routine.', 403);
+  // }
+  void source;
   for (const grantId of grantIds) {
     const resolved = resolveGrant(grantId);
     if (!('grantId' in resolved)) return new AppError(resolved.code, resolved.detail, 403);

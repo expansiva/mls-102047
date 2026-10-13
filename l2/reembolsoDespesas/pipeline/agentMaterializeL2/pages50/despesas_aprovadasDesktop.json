@@ -4,27 +4,36 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_aprovadas",
   "device": "desktop",
-  "contextHash": "sha256:19596f66540998bf46827263aa6728b35afb0798a98b5dde937b4c031ae4d7cd",
+  "contextHash": "sha256:215a0725b44f0e0b5149ebf1f020940a34064e248c37349571f851417d053be9",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/despesas_aprovadas.ts",
-  "sourceHash": "sha256:9e5e5ebf1e4e1795f308410c0e65a317f64c2ba552b23357379632b8281cefa5",
+  "sourceHash": "sha256:0c29ebf8723851b3654a4122fafc324bbbe1d6d84acc3c57bb8ef9961d75b07e",
   "attempt": 1,
   "design": {
-    "concept": "Uma bancada de trabalho do financeiro: à esquerda a fila de despesas aprovadas em tabela densa (valor por último, alinhado à direita), à direita um painel fixo que mostra a despesa selecionada para conferência e, logo abaixo, a captura da data de pagamento. Selecionar, conferir e registrar acontecem sem sair da tela e sem perder a fila.",
-    "views": [],
-    "decisions": "Uma única visão, sem scene host: fila e painel de conferência/pagamento são simultâneos (master-detail lado a lado), então não há troca de cena. Seguindo o ledgerTable, a tabela é o material principal e ocupa a coluna larga; o painel direito é sticky para que conferência e botão de pagamento acompanhem a rolagem. A seleção é marcada por índice (value) e a tabela não é ordenável para manter o índice estável com as linhas da shared. Não há totais nem contagens porque o contrato não entrega nenhum; nada é calculado na página. O filtro por colaborador aparece como token removível (filterApprovedExpensesList(null)) e pode ser aplicado pelo painel de conferência com 'Ver só deste colaborador', sem digitar ids. Paginação é feita por 'Carregar mais' (hasMore), sem expor página nem tamanho. Falhas aparecem na região da tabela, acima das linhas, com nova tentativa; falha e sucesso do pagamento aparecem no próprio formulário com aria-live. O registro de pagamento fica desabilitado sem despesa selecionada e mostra progresso no botão. Cada região tem um único título: legenda da tabela, título do cartão de conferência e título do formulário."
+    "concept": "Bancada do financeiro: a fila de despesas aprovadas ocupa a área principal como um livro-razão denso, com valor alinhado à direita, e ao lado fica um painel de trabalho que muda conforme a escolha. Ao clicar numa linha, o painel mostra os dados da despesa e, logo abaixo, a data de pagamento e o botão que registra o pagamento. A fila permanece visível e o filtro e a página são preservados.",
+    "views": [
+      {
+        "id": "vazio",
+        "purpose": "Painel lateral sem seleção: orienta o financeiro a escolher uma despesa da fila."
+      },
+      {
+        "id": "analise",
+        "purpose": "Painel lateral com a despesa escolhida: resumo para conferir o valor, formulário da data de pagamento e confirmação. O botão de voltar limpa a seleção."
+      }
+    ],
+    "decisions": "Segui o template ledgerTable: tabela densa com valor por último, alinhado à direita e em algarismos tabulares com moeda, filtro acima e ações discretas. A seleção é feita clicando na linha, e o índice marcado vem de selectedDespesa. Fiz duas escolhas por causa do contrato. Primeiro, não há totais nem contagem: a página não calcula nada e o contrato não os entrega. Segundo, o filtro por colaborador não existe, porque colaboradorId é um registro sem lista de opções e id não se digita. Ficou só o filtro de categoria, com a busca com chips removíveis. Usei data-table em vez de side-detail-table para ter controle do painel ao lado. As visões Vazio e Análise passam pelo host de cenas só nessa região, com back que limpa a seleção. A paginação usa botões Anterior e Próxima guiados por page e hasMore, porque o total de páginas não é entregue. O pagamento é confirmado uma vez: o valor é repetido no texto de apoio da data e o botão mostra progresso. O sucesso aparece como feedback inline no próprio painel, e a despesa paga sai da fila e continua no painel com a data registrada. A erro de data obrigatória aparece no campo, e os outros erros aparecem no painel com nova tentativa."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section paymentQueue needs an element with data-section-id=\"paymentQueue\"."
+      "message": "Section filaPagamento needs an element with data-section-id=\"filaPagamento\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section expenseReview needs an element with data-section-id=\"expenseReview\"."
+      "message": "Section analisePagamento needs an element with data-section-id=\"analisePagamento\"."
     },
     {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section paymentCapture needs an element with data-section-id=\"paymentCapture\"."
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (paginação) renders neither <grouptriggeraction--ml-pagination-control>."
     }
   ]
 }

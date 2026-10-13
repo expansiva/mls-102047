@@ -1,14 +1,18 @@
 /// <mls fileReference="_102047_/l1/reembolsoDespesas/layer_2_application/requests/minhas_despesas.ts" enhancement="_blank"/>
-import { AppError, type RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type { Minhas_despesasContracts, DespesaLoad, DespesaRegistrarDespesa } from '/_102047_/l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.js';
-import { listDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/listDespesa.js';
-import { createDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/createDespesa.js';
-import { updateDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/updateDespesa.js';
-import { enviarParaAprovacao } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/enviarParaAprovacao.js';
-import { reenviarParaAprovacao } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/reenviarParaAprovacao.js';
 
-type LoadInput = Minhas_despesasContracts['reembolsoDespesas.minhas_despesas.load']['input'];
-type LoadOutput = Minhas_despesasContracts['reembolsoDespesas.minhas_despesas.load']['output'];
+import type { Minhas_despesasContracts, DespesaResumo, DespesaDetalhe } from '/_102047_/l2/reembolsoDespesas/web/contracts/minhas_despesas.defs.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import { createDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/createDespesa.js';
+import { enviarParaAprovacao } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/enviarParaAprovacao.js';
+import { getDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/getDespesa.js';
+import { listDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/listDespesa.js';
+import type { ListDespesaInput } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/listDespesa.js';
+import { reenviarParaAprovacao } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/reenviarParaAprovacao.js';
+import { updateDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/updateDespesa.js';
+import type { UpdateDespesaInput } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/updateDespesa.js';
+
+type Status = DespesaResumo['status'];
 
 interface DespesaRecord {
   id: string;
@@ -26,197 +30,247 @@ interface DespesaRecord {
   };
 }
 
-interface ExpenseDetails {
+interface ExpenseData {
   dataDespesa: string;
   categoria: string;
   valor: string;
   descricao: string;
 }
 
-function toStatus(status: string): DespesaLoad['status'] {
-  switch (status) {
+function toStatus(value: string): Status {
+  switch (value) {
     case 'draft':
     case 'awaitingApproval':
     case 'rejected':
     case 'approved':
     case 'paid':
-      return status;
+      return value;
     default:
-      throw new AppError('INVALID_DATA', 'unknown despesa status: ' + status, 500);
+      throw new AppError('INVALID_STATE', 'Situação de despesa desconhecida: ' + String(value), 500);
   }
 }
 
-function toLoad(record: DespesaRecord): DespesaLoad {
+function sessionColaboradorId(ctx: RequestContext): string {
+  const person = ctx.sessionContext.person;
+  if (person == null || !person.mdmId) {
+    throw new AppError('UNAUTHENTICATED', 'Colaborador logado não identificado na sessão.', 401);
+  }
+  return person.mdmId;
+}
+
+function assertOwner(record: DespesaRecord, colaboradorId: string): void {
+  if (String(record.colaboradorId) !== colaboradorId) {
+    throw new AppError('FORBIDDEN', 'A despesa não pertence ao colaborador logado.', 403, { ruleId: 'expenseOwnerOnly' });
+  }
+}
+
+function assertValidExpenseData(data: ExpenseData): void {
+  const missing: string[] = [];
+  if (data.dataDespesa == null || String(data.dataDespesa).trim() === '') missing.push('dataDespesa');
+  if (data.categoria == null || String(data.categoria).trim() === '') missing.push('categoria');
+  if (data.valor == null || String(data.valor).trim() === '') missing.push('valor');
+  if (data.descricao == null || String(data.descricao).trim() === '') missing.push('descricao');
+  if (missing.length > 0) {
+    throw new AppError('VALIDATION_ERROR', 'Dados obrigatórios da despesa ausentes: ' + missing.join(', ') + '.', 400, { ruleId: 'validExpenseData' });
+  }
+}
+
+function assertVersion(record: DespesaRecord, version: number): void {
+  if (Number(version) !== record.version) {
+    throw new AppError('CONFLICT', 'A versão da despesa divergiu da versão lida.', 409);
+  }
+}
+
+function toResumo(record: DespesaRecord): DespesaResumo {
+  return {
+    id: record.id,
+    status: toStatus(record.status),
+    details: {
+      details: {
+        dataDespesa: record.details.dataDespesa,
+        categoria: record.details.categoria,
+        valor: record.details.valor,
+      },
+    },
+  };
+}
+
+function toDetalhe(record: DespesaRecord): DespesaDetalhe {
+  const inner: DespesaDetalhe['details']['details'] = {
+    dataDespesa: record.details.dataDespesa,
+    categoria: record.details.categoria,
+    valor: record.details.valor,
+    descricao: record.details.descricao,
+    reenvioRealizado: record.details.reenvioRealizado,
+  };
+  if (record.details.motivoRejeicao != null) inner.motivoRejeicao = record.details.motivoRejeicao;
+  if (record.details.dataPagamento != null) inner.dataPagamento = record.details.dataPagamento;
   return {
     id: record.id,
     version: record.version,
     status: toStatus(record.status),
-    details: {
-      dataDespesa: record.details.dataDespesa,
-      categoria: record.details.categoria,
-      valor: record.details.valor,
-      descricao: record.details.descricao,
-      reenvioRealizado: record.details.reenvioRealizado,
-    },
+    details: { details: inner },
   };
 }
 
-function toRegistered(record: DespesaRecord): DespesaRegistrarDespesa {
-  return {
-    id: record.id,
-    version: record.version,
-    details: {
-      dataDespesa: record.details.dataDespesa,
-      categoria: record.details.categoria,
-      valor: record.details.valor,
-      descricao: record.details.descricao,
-    },
-  };
-}
-
-function resolvePage(input: LoadInput): { page: number; pageSize: number } {
-  const rawPage = input.page == null ? 1 : Math.floor(Number(input.page));
-  const rawSize = input.pageSize == null ? 20 : Math.floor(Number(input.pageSize));
-  const page = Number.isFinite(rawPage) && rawPage >= 1 ? rawPage : 1;
-  const pageSize = Number.isFinite(rawSize) && rawSize >= 1 ? Math.min(rawSize, 200) : 20;
-  return { page, pageSize };
-}
-
-// expenseOwnerOnly: the identity of the session (when resolved) must be the collaborator of the request.
-function assertSessionOwner(colaboradorId: string, ctx: RequestContext): void {
-  const person = ctx.sessionContext.person;
-  if (person && person.mdmId !== colaboradorId) {
-    throw new AppError('FORBIDDEN', 'colaborador só pode acessar despesas que ele mesmo registrou', 403, { ruleId: 'expenseOwnerOnly' });
+async function loadOwned(id: string, ctx: RequestContext): Promise<DespesaRecord> {
+  const colaboradorId = sessionColaboradorId(ctx);
+  const record: DespesaRecord | null = await getDespesa({ id }, ctx);
+  if (record == null) {
+    throw new AppError('NOT_FOUND', 'Despesa não encontrada.', 404);
   }
-}
-
-function blank(value: unknown): boolean {
-  return value == null || (typeof value === 'string' && value.trim() === '');
-}
-
-// validExpenseData: date, category, value and description are required.
-function assertValidExpenseData(details: ExpenseDetails): void {
-  const missing: string[] = [];
-  if (blank(details.dataDespesa)) missing.push('dataDespesa');
-  if (blank(details.categoria)) missing.push('categoria');
-  if (blank(details.valor)) missing.push('valor');
-  if (blank(details.descricao)) missing.push('descricao');
-  if (missing.length > 0) {
-    throw new AppError('VALIDATION_ERROR', 'despesa deve conter data, categoria, valor e descrição: faltam ' + missing.join(', '), 422, { ruleId: 'validExpenseData' });
-  }
-}
-
-async function readOwnedDespesa(id: string, colaboradorId: string, ctx: RequestContext): Promise<DespesaRecord> {
-  assertSessionOwner(colaboradorId, ctx);
-  const found = await listDespesa({ id, page: 1, pageSize: 1 }, ctx);
-  const record: DespesaRecord | undefined = found.items.find((item) => item.id === id);
-  if (!record) throw new AppError('NOT_FOUND', 'Despesa não encontrada: ' + id, 404);
   // expenseOwnerOnly
-  if (String(record.colaboradorId) !== colaboradorId) {
-    throw new AppError('FORBIDDEN', 'colaborador só pode corrigir ou reenviar despesas que ele mesmo registrou', 403, { ruleId: 'expenseOwnerOnly' });
-  }
+  assertOwner(record, colaboradorId);
   return record;
 }
 
-function assertSingleResubmission(record: DespesaRecord): void {
-  // singleResubmission: a rejected despesa is corrected and resubmitted only once.
-  if (record.details.reenvioRealizado) {
-    throw new AppError('CONFLICT', 'despesa rejeitada já foi corrigida e reenviada uma vez', 409, { ruleId: 'singleResubmission' });
-  }
-  if (record.status !== 'rejected') {
-    throw new AppError('INVALID_STATE', 'somente despesa rejeitada pode ser corrigida e reenviada', 409);
-  }
-}
-
-async function loadMinhasDespesas(input: LoadInput, ctx: RequestContext): Promise<LoadOutput> {
-  const person = ctx.sessionContext.person;
-  const colaboradorId = input.colaboradorId != null && input.colaboradorId !== '' ? input.colaboradorId : person?.mdmId;
-  if (colaboradorId == null) {
-    throw new AppError('FORBIDDEN', 'colaborador não identificado para listar as próprias despesas', 403, { ruleId: 'expenseOwnerOnly' });
-  }
-  assertSessionOwner(colaboradorId, ctx);
-  const { page, pageSize } = resolvePage(input);
-  const result = await listDespesa({ colaboradorId, page, pageSize }, ctx);
-  return {
-    minhasDespesas: result.items.map((item: DespesaRecord) => toLoad(item)),
-    pageListaMinhasDespesas: page,
-    pageSizeListaMinhasDespesas: pageSize,
-    hasMoreListaMinhasDespesas: result.hasMore,
-  };
-}
-
 export const requests: { [K in keyof Minhas_despesasContracts]: (input: Minhas_despesasContracts[K]['input'], ctx: RequestContext) => Promise<Minhas_despesasContracts[K]['output']> } = {
-  "reembolsoDespesas.minhas_despesas.load": async function (input, ctx) {
-    return loadMinhasDespesas(input, ctx);
+  'reembolsoDespesas.minhas_despesas.listarMinhasDespesas': async function (input, ctx) {
+    const page = input.page > 0 ? Math.floor(input.page) : 1;
+    const requestedSize = input.pageSize > 0 ? Math.floor(input.pageSize) : 20;
+    const pageSize = Math.min(requestedSize, 200);
+
+    // expenseOwnerOnly: only the logged collaborator's expenses are listed
+    const colaboradorId = sessionColaboradorId(ctx);
+
+    const all: DespesaRecord[] = [];
+    let cursor = 1;
+    for (;;) {
+      const filter: ListDespesaInput = { colaboradorId, page: cursor, pageSize: 200 };
+      if (input.status !== undefined) filter.status = input.status;
+      const res = await listDespesa(filter, ctx);
+      for (const d of res.items) all.push(d);
+      if (!res.hasMore) break;
+      cursor += 1;
+    }
+
+    // most recent expense date first
+    all.sort((a, b) => {
+      const da = String(a.details.dataDespesa);
+      const db = String(b.details.dataDespesa);
+      if (da < db) return 1;
+      if (da > db) return -1;
+      return 0;
+    });
+
+    const start = (page - 1) * pageSize;
+    const slice = all.slice(start, start + pageSize);
+    return {
+      despesas: {
+        items: slice.map(toResumo),
+        page,
+        pageSize,
+        hasMore: start + pageSize < all.length,
+      },
+    };
   },
 
-  "reembolsoDespesas.minhas_despesas.loadMinhasDespesas": async function (input, ctx) {
-    return loadMinhasDespesas(input, ctx);
+  'reembolsoDespesas.minhas_despesas.obterDespesa': async function (input, ctx) {
+    const record = await loadOwned(String(input.id), ctx);
+    return { despesa: toDetalhe(record) };
   },
 
-  "reembolsoDespesas.minhas_despesas.registrarDespesa": async function (input, ctx) {
+  'reembolsoDespesas.minhas_despesas.registrarDespesa': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      assertSessionOwner(input.colaboradorId, bound);
-      assertValidExpenseData(input.details);
+      const colaboradorId = sessionColaboradorId(bound);
+      if (String(input.colaboradorId) !== colaboradorId) {
+        throw new AppError('FORBIDDEN', 'A despesa só pode ser registrada para o colaborador logado.', 403, { ruleId: 'expenseOwnerOnly' });
+      }
+      const data: ExpenseData = {
+        dataDespesa: input.details.dataDespesa,
+        categoria: input.details.categoria,
+        valor: input.details.valor,
+        descricao: input.details.descricao,
+      };
+      // validExpenseData
+      assertValidExpenseData(data);
       const created = await createDespesa({
-        colaboradorId: input.colaboradorId,
+        colaboradorId,
         details: {
-          dataDespesa: input.details.dataDespesa,
-          categoria: input.details.categoria,
-          valor: input.details.valor,
-          descricao: input.details.descricao,
+          dataDespesa: data.dataDespesa,
+          categoria: data.categoria,
+          valor: data.valor,
+          descricao: data.descricao,
         },
       }, bound);
-      return { despesa: toRegistered(created) };
+      return { despesa: toDetalhe(created), item: toResumo(created) };
     });
   },
 
-  "reembolsoDespesas.minhas_despesas.corrigirDespesa": async function (input, ctx) {
+  'reembolsoDespesas.minhas_despesas.salvarCorrecao': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const current = await readOwnedDespesa(input.id, input.colaboradorId, bound);
-      assertValidExpenseData(input.details);
-      assertSingleResubmission(current);
-      const updated = await updateDespesa({
-        id: input.id,
-        version: Number(input.version),
+      const current = await loadOwned(String(input.id), bound);
+      if (current.status !== 'rejected') {
+        throw new AppError('INVALID_STATE', 'Somente despesas rejeitadas podem ser corrigidas.', 409);
+      }
+      // singleResubmission
+      if (current.details.reenvioRealizado) {
+        throw new AppError('INVALID_STATE', 'A despesa já foi corrigida e reenviada uma vez.', 409, { ruleId: 'singleResubmission' });
+      }
+      assertVersion(current, input.version);
+      const data: ExpenseData = {
+        dataDespesa: input.details.dataDespesa,
+        categoria: input.details.categoria,
+        valor: input.details.valor,
+        descricao: input.details.descricao,
+      };
+      // validExpenseData
+      assertValidExpenseData(data);
+
+      const updateInput: UpdateDespesaInput = {
+        id: current.id,
+        version: current.version,
         colaboradorId: current.colaboradorId,
         status: current.status,
         details: {
-          dataDespesa: input.details.dataDespesa,
-          categoria: input.details.categoria,
-          valor: input.details.valor,
-          descricao: input.details.descricao,
+          dataDespesa: data.dataDespesa,
+          categoria: data.categoria,
+          valor: data.valor,
+          descricao: data.descricao,
           reenvioRealizado: current.details.reenvioRealizado,
-          ...(current.details.motivoRejeicao != null ? { motivoRejeicao: current.details.motivoRejeicao } : {}),
-          ...(current.details.dataPagamento != null ? { dataPagamento: current.details.dataPagamento } : {}),
         },
-      }, bound);
-      return { despesa: toRegistered(updated) };
+      };
+      if (current.details.motivoRejeicao != null) updateInput.details.motivoRejeicao = current.details.motivoRejeicao;
+      if (current.details.dataPagamento != null) updateInput.details.dataPagamento = current.details.dataPagamento;
+
+      const updated = await updateDespesa(updateInput, bound);
+      return { despesa: toDetalhe(updated), item: toResumo(updated) };
     });
   },
 
-  "reembolsoDespesas.minhas_despesas.enviarParaAprovacao": async function (input, ctx) {
+  'reembolsoDespesas.minhas_despesas.enviarParaAprovacao': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const current = await readOwnedDespesa(input.id, input.colaboradorId, bound);
-      assertValidExpenseData(input.details);
+      const current = await loadOwned(String(input.id), bound);
+      if (current.status !== 'draft') {
+        throw new AppError('INVALID_STATE', 'Somente despesas em rascunho podem ser enviadas para aprovação.', 409);
+      }
+      assertVersion(current, input.version);
+      // validExpenseData
       assertValidExpenseData(current.details);
-      const sent = await enviarParaAprovacao({ id: input.id, version: Number(input.version) }, bound);
-      return { despesa: toRegistered(sent) };
+      const sent = await enviarParaAprovacao({ id: current.id, version: current.version }, bound);
+      return { despesa: toDetalhe(sent), item: toResumo(sent) };
     });
   },
 
-  "reembolsoDespesas.minhas_despesas.reenviarParaAprovacao": async function (input, ctx) {
+  'reembolsoDespesas.minhas_despesas.reenviarParaAprovacao': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const current = await readOwnedDespesa(input.id, input.colaboradorId, bound);
-      assertValidExpenseData(input.details);
+      const current = await loadOwned(String(input.id), bound);
+      if (current.status !== 'rejected') {
+        throw new AppError('INVALID_STATE', 'Somente despesas rejeitadas podem ser reenviadas.', 409);
+      }
+      // singleResubmission
+      if (current.details.reenvioRealizado) {
+        throw new AppError('INVALID_STATE', 'A despesa já foi reenviada uma vez.', 409, { ruleId: 'singleResubmission' });
+      }
+      assertVersion(current, input.version);
+      // validExpenseData
       assertValidExpenseData(current.details);
-      assertSingleResubmission(current);
-      const resent = await reenviarParaAprovacao({ id: input.id, version: Number(input.version) }, bound);
-      return { despesa: toRegistered(resent) };
+      const resent = await reenviarParaAprovacao({ id: current.id, version: current.version }, bound);
+      return { despesa: toDetalhe(resent), item: toResumo(resent) };
     });
   },
 };

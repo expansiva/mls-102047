@@ -133,6 +133,13 @@ export function bind(runtime: IModuleDataRuntime): DespesaRepository {
       const rows = await table.findMany({ where });
       return rows.map(row => fromRow(row) as unknown as Despesa);
     },
+    async get(id: string): Promise<Despesa> {
+      const table = await runtime.getTable<Row>(REPOSITORY);
+      const column = columnOf(PRIMARY_KEY[0]);
+      const stored = await table.findOne({ where: { [column]: id } });
+      if (!stored) throw new AppError('NOT_FOUND', 'Record not found.', 404);
+      return fromRow(stored) as unknown as Despesa;
+    },
     async update(record: Despesa): Promise<Despesa> {
       
       const table = await runtime.getTable<Row>(REPOSITORY);

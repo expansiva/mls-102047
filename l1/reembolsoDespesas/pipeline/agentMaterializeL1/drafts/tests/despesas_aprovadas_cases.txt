@@ -1,208 +1,215 @@
 [
   {
-    "id": "load.list",
-    "routine": "reembolsoDespesas.despesas_aprovadas.load",
-    "params": {},
-    "expect": {
-      "ok": true,
-      "shape": "paginated",
-      "itemsKey": "despesasAprovadas"
-    },
-    "mutating": false
-  },
-  {
-    "id": "load.paged",
-    "routine": "reembolsoDespesas.despesas_aprovadas.load",
+    "id": "listarDespesasAprovadas.basic",
+    "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
     "params": {
       "page": 1,
-      "pageSize": 10
+      "pageSize": 20,
+      "details": {}
     },
     "expect": {
       "ok": true,
       "shape": "paginated",
-      "itemsKey": "despesasAprovadas"
+      "itemsKey": "despesas"
     },
     "mutating": false
   },
   {
-    "id": "load.byColaborador",
-    "routine": "reembolsoDespesas.despesas_aprovadas.load",
+    "id": "listarDespesasAprovadas.filterColaborador",
+    "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
     "params": {
+      "page": 1,
+      "pageSize": 20,
       "colaboradorId": "<seedRef>",
-      "page": 1,
-      "pageSize": 10
+      "details": {}
     },
+    "expect": {
+      "ok": true,
+      "shape": "paginated",
+      "itemsKey": "despesas"
+    },
+    "mutating": false,
     "paramFieldRefs": {
       "colaboradorId": "Despesa.colaboradorId"
-    },
-    "expect": {
-      "ok": true,
-      "shape": "paginated",
-      "itemsKey": "despesasAprovadas"
-    },
-    "mutating": false
+    }
   },
   {
-    "id": "loadDespesasAprovadas.list",
-    "routine": "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
-    "params": {},
-    "expect": {
-      "ok": true,
-      "shape": "paginated",
-      "itemsKey": "despesasAprovadas"
-    },
-    "mutating": false
-  },
-  {
-    "id": "loadDespesasAprovadas.paged",
-    "routine": "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
+    "id": "listarDespesasAprovadas.filterCategoria",
+    "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
     "params": {
       "page": 1,
-      "pageSize": 10
+      "pageSize": 20,
+      "details": {
+        "categoria": "<seedValue>"
+      }
     },
     "expect": {
       "ok": true,
       "shape": "paginated",
-      "itemsKey": "despesasAprovadas"
+      "itemsKey": "despesas"
+    },
+    "mutating": false,
+    "paramFieldRefs": {
+      "details.categoria": "Despesa.details.categoria"
+    }
+  },
+  {
+    "id": "listarDespesasAprovadas.page.required",
+    "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
+    "params": {
+      "pageSize": 20,
+      "details": {}
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
     },
     "mutating": false
   },
   {
-    "id": "loadDespesasAprovadas.byColaborador",
-    "routine": "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
+    "id": "listarDespesasAprovadas.pageSize.required",
+    "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
     "params": {
-      "colaboradorId": "<seedRef>",
       "page": 1,
-      "pageSize": 10
-    },
-    "paramFieldRefs": {
-      "colaboradorId": "Despesa.colaboradorId"
+      "details": {}
     },
     "expect": {
-      "ok": true,
-      "shape": "paginated",
-      "itemsKey": "despesasAprovadas"
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
     },
     "mutating": false
   },
   {
-    "id": "registerPayment.paymentDateRequired",
-    "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
+    "id": "obterDespesaAprovada.basic",
+    "routine": "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
     "params": {
-      "details": {},
-      "colaboradorId": "<seedRef>",
-      "id": "<seedRef>",
-      "version": "<seedRef>"
-    },
-    "paramFieldRefs": {
-      "colaboradorId": "Despesa.colaboradorId",
-      "id": "Despesa.id",
-      "version": "Despesa.version"
-    },
-    "expect": {
-      "ok": false,
-      "errorCode": "VALIDATION_ERROR"
-    },
-    "mutating": true
-  },
-  {
-    "id": "registerPayment.details.required",
-    "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-    "params": {
-      "colaboradorId": "<seedRef>",
-      "id": "<seedRef>",
-      "version": "<seedRef>"
-    },
-    "paramFieldRefs": {
-      "colaboradorId": "Despesa.colaboradorId",
-      "id": "Despesa.id",
-      "version": "Despesa.version"
-    },
-    "expect": {
-      "ok": false,
-      "errorCode": "VALIDATION_ERROR"
-    },
-    "mutating": true
-  },
-  {
-    "id": "registerPayment.id.required",
-    "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-    "params": {
-      "details": {
-        "dataPagamento": "2026-10-13"
-      },
-      "colaboradorId": "<seedRef>",
-      "version": "<seedRef>"
-    },
-    "paramFieldRefs": {
-      "colaboradorId": "Despesa.colaboradorId",
-      "version": "Despesa.version"
-    },
-    "expect": {
-      "ok": false,
-      "errorCode": "VALIDATION_ERROR"
-    },
-    "mutating": true
-  },
-  {
-    "id": "registerPayment.colaboradorId.required",
-    "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-    "params": {
-      "details": {
-        "dataPagamento": "2026-10-13"
-      },
-      "id": "<seedRef>",
-      "version": "<seedRef>"
-    },
-    "paramFieldRefs": {
-      "id": "Despesa.id",
-      "version": "Despesa.version"
-    },
-    "expect": {
-      "ok": false,
-      "errorCode": "VALIDATION_ERROR"
-    },
-    "mutating": true
-  },
-  {
-    "id": "registerPayment.version.required",
-    "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-    "params": {
-      "details": {
-        "dataPagamento": "2026-10-13"
-      },
-      "colaboradorId": "<seedRef>",
       "id": "<seedRef>"
     },
+    "expect": {
+      "ok": true,
+      "shape": "object"
+    },
+    "mutating": false,
     "paramFieldRefs": {
-      "colaboradorId": "Despesa.colaboradorId",
       "id": "Despesa.id"
+    }
+  },
+  {
+    "id": "obterDespesaAprovada.id.required",
+    "routine": "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
+    "params": {},
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": false
+  },
+  {
+    "id": "registrarPagamento.paymentDateMissing",
+    "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+    "params": {
+      "id": "<seedRef>",
+      "version": "<seedRef>",
+      "details": {}
     },
     "expect": {
       "ok": false,
       "errorCode": "VALIDATION_ERROR"
     },
-    "mutating": true
-  },
-  {
-    "id": "registerPayment.ok",
-    "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-    "params": {
-      "details": {
-        "dataPagamento": "2026-10-13"
-      },
-      "colaboradorId": "<seedRef>",
-      "id": "<seedRef>",
-      "version": "<seedRef>"
-    },
+    "mutating": true,
     "paramFieldRefs": {
-      "colaboradorId": "Despesa.colaboradorId",
       "id": "Despesa.id",
       "version": "Despesa.version"
+    }
+  },
+  {
+    "id": "registrarPagamento.id.required",
+    "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+    "params": {
+      "version": "<seedRef>",
+      "details": {
+        "dataPagamento": "2026-10-13"
+      }
     },
     "expect": {
-      "ok": true
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
     },
-    "mutating": true
+    "mutating": true,
+    "paramFieldRefs": {
+      "version": "Despesa.version"
+    }
+  },
+  {
+    "id": "registrarPagamento.version.required",
+    "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+    "params": {
+      "id": "<seedRef>",
+      "details": {
+        "dataPagamento": "2026-10-13"
+      }
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true,
+    "paramFieldRefs": {
+      "id": "Despesa.id"
+    }
+  },
+  {
+    "id": "registrarPagamento.basic",
+    "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+    "params": {
+      "id": "<seedRef>",
+      "version": "<seedRef>",
+      "details": {
+        "dataPagamento": "2026-10-13"
+      }
+    },
+    "expect": {
+      "ok": true,
+      "shape": "object"
+    },
+    "mutating": true,
+    "paramFieldRefs": {
+      "id": "Despesa.id",
+      "version": "Despesa.version"
+    }
+  },
+  {
+    "id": "obterDespesaAprovada.afterPayment",
+    "routine": "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
+    "params": {
+      "id": "<seedRef>"
+    },
+    "expect": {
+      "ok": false
+    },
+    "mutating": false,
+    "paramFieldRefs": {
+      "id": "Despesa.id"
+    }
+  },
+  {
+    "id": "registrarPagamento.notApproved",
+    "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+    "params": {
+      "id": "<seedRef>",
+      "version": "<seedRef>",
+      "details": {
+        "dataPagamento": "2026-10-14"
+      }
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "CONFLICT"
+    },
+    "mutating": true,
+    "paramFieldRefs": {
+      "id": "Despesa.id",
+      "version": "Despesa.version"
+    }
   }
 ]

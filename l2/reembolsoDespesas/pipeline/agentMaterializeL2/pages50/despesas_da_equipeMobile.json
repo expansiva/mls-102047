@@ -4,36 +4,44 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_da_equipe",
   "device": "mobile",
-  "contextHash": "sha256:af104842ad7c6be99dc6ab7289bc990570b78813e1666609469e30a6c170cdb2",
+  "contextHash": "sha256:2619d15cdb9e8e47421a9d91878d2990f3090a0ffef92668b4abc9d2867a528e",
   "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/despesas_da_equipe.ts",
-  "sourceHash": "sha256:9b7548a95e822ff8880f8536628f3d74318a3121eb3876c793e20e1f55dc4d6a",
+  "sourceHash": "sha256:4f1e034851d5e6e2eb91aef6ed611e2eec4e5dd7346acd6ca91d0900542a147f",
   "attempt": 1,
   "design": {
-    "concept": "Uma fila estreita de despesas pendentes leva a uma leitura vertical de uma única despesa. A decisão fica no fim da leitura: aprovar abre uma confirmação única e rejeitar abre o campo de motivo no próprio bloco.",
+    "concept": "A two-step phone flow for a manager: first a compact queue of the team's pending expenses (who, how much, when), then one expense read like a memo (who, decisive facts, description, trail) with the decision at the very end. Approving takes one plain confirmation dialog; rejecting expands an inline reason field that must be filled before its button enables.",
     "views": [
       {
-        "id": "queue",
-        "purpose": "Fila das despesas pendentes da equipe, com filtro por colaborador e carregar mais. Tocar numa linha abre a análise."
+        "id": "fila",
+        "purpose": "Queue of pending team expenses. Tapping a row selects it and opens the analysis."
       },
       {
-        "id": "review",
-        "purpose": "Leitura da despesa escolhida (quem, fatos decisivos, situação) e, ao fim, o bloco de decisão. Depois de decidir, o bloco mostra uma frase calma do que foi decidido, com um link de volta à fila."
+        "id": "analise",
+        "purpose": "One expense under review, read top to bottom and decided at the end. It has a back control to the queue. It is the first view when an expense arrives already selected."
       }
     ],
-    "decisions": "Usei o host de cenas em modo scenary com duas vistas: fila e análise, com voltar. Se a página já abre com uma despesa selecionada, ela começa direto na análise, como o template pede para um registro trazido de fora.\n\nA ordem de leitura segue o template: identidade (colaborador e categoria), fatos decisivos (valor grande, data, situação) e, por último, a decisão. O contrato não traz descrição, comprovante nem histórico, então não inventei esses blocos.\n\nAprovar abre um único <dialog> nativo que repete colaborador, categoria, data e valor, e só então confirma. Como a página não guarda estado, o dialog é aberto e fechado pelo próprio elemento, e fecha quando o comando termina com sucesso. Um erro aparece dentro do dialog e nada se perde.\n\nRejeitar usa um <details> nativo que expande o motivo inline. O botão \"Registrar rejeição\" fica desabilitado até haver texto. Nenhum botão usa a variante danger.\n\nA lista usa o ml-vertical-record-list com células ricas, e a linha aberta fica marcada como selecionada. O resumo da despesa usa o ml-vertical-card. A paginação é só o botão \"Carregar mais\", sem tamanho de página. Os estados de carregando, vazio e erro estão desenhados. Todos os alvos de toque têm pelo menos 44px."
+    "decisions": "The views are the queue and the analysis, switched only by the scene host in scenary mode. The host starts on the analysis when an expense is already selected, so the record carried in is not asked for again. The analysis follows the template's reading order: a card with the collaborator's name, amount, date, category and status, then the description, then the trail (resubmission and rejection reason). The decision block comes last and is never sticky. Approve opens a native dialog restating the name and amount. Rejecting uses a native disclosure whose textarea is required before 'Confirmar rejeição' enables. Both need no page state. The page-level draft and command states from the shared drive loading, error with retry, and the final statement. While a command runs the controls are inert. Success replaces the controls with a calm statement and there is no auto-advance. The queue uses the responsive data table with three always-visible columns, with the category under the name. Left out: the search bar, because the shared has no search source and the page may not filter; the proof viewer, because no row field holds a proof; the toast, because the template wants local success and no page banner. Danger styling is not used on reject."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section pendingQueue needs an element with data-section-id=\"pendingQueue\"."
+      "message": "Section filaPendentes needs an element with data-section-id=\"filaPendentes\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section review needs an element with data-section-id=\"review\"."
+      "message": "Section analiseDecisao needs an element with data-section-id=\"analiseDecisao\"."
     },
     {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section decision needs an element with data-section-id=\"decision\"."
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasPendentes (busca por colaborador ou categoria) renders neither <groupsearchcontent--ml-search-bar>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism analiseDespesa (visualização do comprovante) renders neither <groupplaymedia--ml-pdf-viewer> nor <groupplaymedia--ml-image-gallery>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism decisaoDespesa (confirmação da decisão) renders neither <groupnotifyuser--ml-toast-notification>."
     }
   ]
 }

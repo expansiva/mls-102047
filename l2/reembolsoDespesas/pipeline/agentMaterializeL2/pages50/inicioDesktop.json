@@ -4,23 +4,19 @@
   "module": "reembolsoDespesas",
   "pageId": "inicio",
   "device": "desktop",
-  "contextHash": "sha256:5351e4e9d63b9146e231db435b9a3a6dcfdbaa56aeff3a25358b38047733d18e",
+  "contextHash": "sha256:53d00ad966df2ffbd9e45b0d1f922879f1f3cdb295a7ed3e0b2a6b7247472ca0",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/inicio.ts",
-  "sourceHash": "sha256:5d7de097b51c16820e76146921ee9c278b53583c837b4ccd24a46151bdf714bf",
+  "sourceHash": "sha256:4114adbae4192f835a83cf0873e536c50bbd7fa70a7d1631869f2aae30b5b98e",
   "attempt": 1,
   "design": {
-    "concept": "Início do gestor: uma entrada calma e direta para a fila de despesas da equipe que aguardam decisão. Este hub não carrega dados, então a tela não finge uma fila: diz o que espera o gestor, mostra o caminho em três passos e entrega um único botão primário que leva à análise.",
+    "concept": "Tela de entrada do gestor: em uma única visão, mostra primeiro o volume de despesas da equipe aguardando decisão (destaque numérico) e, ao lado, a fila das pendentes da mais antiga para a mais recente. Um clique em qualquer despesa, ou no botão de atalho, leva direto à análise; a decisão em si fica na página seguinte.",
     "views": [],
-    "decisions": "Uma só vista, sem scene host, porque não há troca de contexto. A seção filaAnalise (primary) lidera a página inteira. O contrato não declara linhas, status nem contagens, então não usei a tabela (nem vazia, que passaria a falsa impressão de fila vazia) e não inventei números: usei só o botão padrão (molécula triggerAction) para a intenção abrirDespesasDaEquipe, em destaque e com tamanho lg. Os três passos à direita vêm do contexto L4 do ator (analisar, aprovar ou rejeitar informando o motivo) e ficam em segundo plano, em tons mudos. O título da página aparece uma vez, o cabeçalho da região nomeia a fila sem repetir o rótulo do botão. Cores só por tokens, foco visível herdado da molécula."
+    "decisions": "Página de uma só visão, sem scene host: o único objetivo é perceber o volume e seguir para a análise. O template readAndDecide manda ler e decidir um registro, mas esta é a porta de entrada que escolhe o registro; por isso não há aprovar/rejeitar na lista (proibido no template), apenas navegação. Hierarquia: título da página, depois o cartão de métrica (total pendente, vindo pronto do backend) e a tabela como região principal. A navegação acontece por clique na linha (rowClick -> abrirAnaliseDespesas com o id da linha) e por um botão primário que abre a despesa mais antiga da fila (primeira linha, sem calcular nada). Não coloquei botão dentro das linhas para evitar navegação dupla com o clique da linha; uma dica discreta explica o clique. A tabela fica sem ordenação interna para que o índice da linha corresponda sempre ao item carregado. Paginação é 'Carregar mais' via qryInicio(undefined, true), sem expor número de página. Reenvio após correção aparece como etiqueta informativa (sem cor de alarme). Estados de carregamento, vazio e erro (com nova tentativa) projetados; valores formatados com Intl."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section filaAnalise needs an element with data-section-id=\"filaAnalise\"."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism despesasPendentesEquipe (viewTable) renders neither <groupviewtable--ml-data-table> nor <groupviewtable--ml-responsive-data-table>."
+      "message": "Section pendenciasDecisao needs an element with data-section-id=\"pendenciasDecisao\"."
     }
   ]
 }

@@ -8,37 +8,28 @@ export const pageTests = {
   "actor": "financeiro",
   "cases": [
     {
-      "id": "load.list",
-      "routine": "reembolsoDespesas.despesas_aprovadas.load",
-      "params": {},
-      "expect": {
-        "ok": true,
-        "shape": "paginated",
-        "itemsKey": "despesasAprovadas"
-      },
-      "mutating": false
-    },
-    {
-      "id": "load.paged",
-      "routine": "reembolsoDespesas.despesas_aprovadas.load",
+      "id": "listarDespesasAprovadas.basic",
+      "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
       "params": {
         "page": 1,
-        "pageSize": 10
+        "pageSize": 20,
+        "details": {}
       },
       "expect": {
         "ok": true,
         "shape": "paginated",
-        "itemsKey": "despesasAprovadas"
+        "itemsKey": "despesas"
       },
       "mutating": false
     },
     {
-      "id": "load.byColaborador",
-      "routine": "reembolsoDespesas.despesas_aprovadas.load",
+      "id": "listarDespesasAprovadas.filterColaborador",
+      "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
       "params": {
+        "page": 1,
+        "pageSize": 20,
         "colaboradorId": "<seedRef>",
-        "page": 1,
-        "pageSize": 10
+        "details": {}
       },
       "paramFieldRefs": {
         "colaboradorId": "Despesa.colaboradorId"
@@ -46,144 +37,127 @@ export const pageTests = {
       "expect": {
         "ok": true,
         "shape": "paginated",
-        "itemsKey": "despesasAprovadas"
+        "itemsKey": "despesas"
       },
       "mutating": false
     },
     {
-      "id": "loadDespesasAprovadas.list",
-      "routine": "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
-      "params": {},
-      "expect": {
-        "ok": true,
-        "shape": "paginated",
-        "itemsKey": "despesasAprovadas"
-      },
-      "mutating": false
-    },
-    {
-      "id": "loadDespesasAprovadas.paged",
-      "routine": "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
+      "id": "listarDespesasAprovadas.filterCategoria",
+      "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
       "params": {
         "page": 1,
-        "pageSize": 10
+        "pageSize": 20,
+        "details": {
+          "categoria": "<seedValue>"
+        }
+      },
+      "paramFieldRefs": {
+        "details.categoria": "Despesa.details.categoria"
       },
       "expect": {
         "ok": true,
         "shape": "paginated",
-        "itemsKey": "despesasAprovadas"
+        "itemsKey": "despesas"
       },
       "mutating": false
     },
     {
-      "id": "loadDespesasAprovadas.byColaborador",
-      "routine": "reembolsoDespesas.despesas_aprovadas.loadDespesasAprovadas",
+      "id": "obterDespesaAprovada.basic",
+      "routine": "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
       "params": {
-        "colaboradorId": "<seedRef>",
-        "page": 1,
-        "pageSize": 10
-      },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
-      },
-      "expect": {
-        "ok": true,
-        "shape": "paginated",
-        "itemsKey": "despesasAprovadas"
-      },
-      "mutating": false
-    },
-    {
-      "id": "registerPayment.paymentDateRequired",
-      "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-      "params": {
-        "details": {},
-        "colaboradorId": "<seedRef>",
-        "id": "<seedRef>",
-        "version": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId",
-        "id": "Despesa.id",
-        "version": "Despesa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "registerPayment.details.required",
-      "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-      "params": {
-        "colaboradorId": "<seedRef>",
-        "id": "<seedRef>",
-        "version": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId",
-        "id": "Despesa.id",
-        "version": "Despesa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "registerPayment.id.required",
-      "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-      "params": {
-        "details": {
-          "dataPagamento": "2026-10-13"
-        },
-        "colaboradorId": "<seedRef>",
-        "version": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId",
-        "version": "Despesa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "registerPayment.colaboradorId.required",
-      "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-      "params": {
-        "details": {
-          "dataPagamento": "2026-10-13"
-        },
-        "id": "<seedRef>",
-        "version": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "id": "Despesa.id",
-        "version": "Despesa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "registerPayment.version.required",
-      "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
-      "params": {
-        "details": {
-          "dataPagamento": "2026-10-13"
-        },
-        "colaboradorId": "<seedRef>",
         "id": "<seedRef>"
       },
       "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId",
+        "id": "Despesa.id"
+      },
+      "expect": {
+        "ok": true,
+        "shape": "object"
+      },
+      "mutating": false
+    },
+    {
+      "id": "listarDespesasAprovadas.page.required",
+      "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
+      "params": {
+        "pageSize": 20,
+        "details": {}
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": false
+    },
+    {
+      "id": "listarDespesasAprovadas.pageSize.required",
+      "routine": "reembolsoDespesas.despesas_aprovadas.listarDespesasAprovadas",
+      "params": {
+        "page": 1,
+        "details": {}
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": false
+    },
+    {
+      "id": "obterDespesaAprovada.id.required",
+      "routine": "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
+      "params": {},
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": false
+    },
+    {
+      "id": "registrarPagamento.paymentDateMissing",
+      "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedRef>",
+        "details": {}
+      },
+      "paramFieldRefs": {
+        "id": "Despesa.id",
+        "version": "Despesa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "registrarPagamento.id.required",
+      "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+      "params": {
+        "version": "<seedRef>",
+        "details": {
+          "dataPagamento": "2026-10-13"
+        }
+      },
+      "paramFieldRefs": {
+        "version": "Despesa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "registrarPagamento.version.required",
+      "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+      "params": {
+        "id": "<seedRef>",
+        "details": {
+          "dataPagamento": "2026-10-13"
+        }
+      },
+      "paramFieldRefs": {
         "id": "Despesa.id"
       },
       "expect": {
@@ -193,23 +167,56 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "registerPayment.ok",
-      "routine": "reembolsoDespesas.despesas_aprovadas.registerPayment",
+      "id": "registrarPagamento.basic",
+      "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
       "params": {
+        "id": "<seedRef>",
+        "version": "<seedRef>",
         "details": {
           "dataPagamento": "2026-10-13"
-        },
-        "colaboradorId": "<seedRef>",
-        "id": "<seedRef>",
-        "version": "<seedRef>"
+        }
       },
       "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId",
         "id": "Despesa.id",
         "version": "Despesa.version"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
+      },
+      "mutating": true
+    },
+    {
+      "id": "obterDespesaAprovada.afterPayment",
+      "routine": "reembolsoDespesas.despesas_aprovadas.obterDespesaAprovada",
+      "params": {
+        "id": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "id": "Despesa.id"
+      },
+      "expect": {
+        "ok": false
+      },
+      "mutating": false
+    },
+    {
+      "id": "registrarPagamento.notApproved",
+      "routine": "reembolsoDespesas.despesas_aprovadas.registrarPagamento",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedRef>",
+        "details": {
+          "dataPagamento": "2026-10-14"
+        }
+      },
+      "paramFieldRefs": {
+        "id": "Despesa.id",
+        "version": "Despesa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "CONFLICT"
       },
       "mutating": true
     }

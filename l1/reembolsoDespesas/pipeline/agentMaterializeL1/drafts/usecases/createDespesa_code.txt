@@ -31,41 +31,37 @@ export interface CreateDespesaOutput extends Record<string, unknown> {
   };
 }
 
-function text(value: unknown): string {
-  return typeof value === 'string' ? value.trim() : '';
+function requiredText(value: unknown, field: string): string {
+  const text = typeof value === 'string' ? value.trim() : value === undefined || value === null ? '' : String(value).trim();
+  if (text === '') {
+    throw new AppError('INVALID_EXPENSE_DATA', `Field ${field} is required to register an expense.`, 400, { ruleId: 'validExpenseData' });
+  }
+  return text;
 }
 
 export async function createDespesa(input: CreateDespesaInput, ctx: RequestContext): Promise<CreateDespesaOutput> {
-  const repository = resolveRepository<DespesaRepository>(ctx, 'DespesaRepository');
+  const despesaRepository = resolveRepository<DespesaRepository>(ctx, 'DespesaRepository');
 
-  const colaboradorId = text(input.colaboradorId);
+  const colaboradorId = String(input.colaboradorId ?? '').trim();
   if (colaboradorId === '') {
-    throw new AppError('COLABORADOR_REQUIRED', 'colaboradorId is required to register an expense.', 400, { ruleId: 'validExpenseData' });
+    throw new AppError('INVALID_EXPENSE_DATA', 'Field colaboradorId is required to register an expense.', 400, { ruleId: 'validExpenseData' });
   }
 
-  const dataDespesa = text(input.details?.dataDespesa);
-  const categoria = text(input.details?.categoria);
-  const valor = text(input.details?.valor);
-  const descricao = text(input.details?.descricao);
+  const details = input.details as Partial<CreateDespesaInput['details']> | undefined;
+  const dataDespesa = requiredText(details?.dataDespesa, 'details.dataDespesa');
+  const categoria = requiredText(details?.categoria, 'details.categoria');
+  const valor = requiredText(details?.valor, 'details.valor');
+  const descricao = requiredText(details?.descricao, 'details.descricao');
 
-  if (dataDespesa === '' || Number.isNaN(Date.parse(dataDespesa))) {
-    throw new AppError('EXPENSE_DATE_REQUIRED', 'The expense date is required and must be a valid date.', 400, { ruleId: 'validExpenseData' });
-  }
-  if (categoria === '') {
-    throw new AppError('EXPENSE_CATEGORY_REQUIRED', 'The expense category is required.', 400, { ruleId: 'validExpenseData' });
+  const valorNumber = Number(valor);
+  if (!Number.isFinite(valorNumber) || valorNumber < 0.01) {
+    throw new AppError('INVALID_EXPENSE_DATA', 'Field details.valor must be at least 0.01.', 400, { ruleId: 'validExpenseData' });
   }
   if (categoria.length > 120) {
-    throw new AppError('EXPENSE_CATEGORY_TOO_LONG', 'The expense category must have at most 120 characters.', 400, { ruleId: 'validExpenseData' });
-  }
-  const valorNumber = Number(valor);
-  if (valor === '' || Number.isNaN(valorNumber) || valorNumber < 0.01) {
-    throw new AppError('EXPENSE_VALUE_INVALID', 'The expense value is required and must be at least 0.01.', 400, { ruleId: 'validExpenseData' });
-  }
-  if (descricao === '') {
-    throw new AppError('EXPENSE_DESCRIPTION_REQUIRED', 'The expense description is required.', 400, { ruleId: 'validExpenseData' });
+    throw new AppError('INVALID_EXPENSE_DATA', 'Field details.categoria must have at most 120 characters.', 400, { ruleId: 'validExpenseData' });
   }
   if (descricao.length > 2000) {
-    throw new AppError('EXPENSE_DESCRIPTION_TOO_LONG', 'The expense description must have at most 2000 characters.', 400, { ruleId: 'validExpenseData' });
+    throw new AppError('INVALID_EXPENSE_DATA', 'Field details.descricao must have at most 2000 characters.', 400, { ruleId: 'validExpenseData' });
   }
 
   const record: Despesa = {
@@ -82,27 +78,22 @@ export async function createDespesa(input: CreateDespesaInput, ctx: RequestConte
     },
   };
 
-  const saved = await repository.create(record);
+  const saved = await despesaRepository.create(record);
 
-  const details: CreateDespesaOutput['details'] = {
-    dataDespesa: saved.details.dataDespesa,
-    categoria: saved.details.categoria,
-    valor: saved.details.valor,
-    descricao: saved.details.descricao,
-    reenvioRealizado: saved.details.reenvioRealizado,
-  };
-  if (saved.details.motivoRejeicao !== undefined) {
-    details.motivoRejeicao = saved.details.motivoRejeicao;
-  }
-  if (saved.details.dataPagamento !== undefined) {
-    details.dataPagamento = saved.details.dataPagamento;
-  }
-
-  return {
+  const output: CreateDespesaOutput = {
     id: saved.id,
     version: saved.version,
     colaboradorId: saved.colaboradorId,
     status: saved.status,
-    details,
+    details: {
+      dataDespesa: saved.details.dataDespesa,
+      categoria: saved.details.categoria,
+      valor: saved.details.valor,
+      descricao: saved.details.descricao,
+      reenvioRealizado: saved.details.reenvioRealizado,
+      ...(saved.details.motivoRejeicao !== undefined ? { motivoRejeicao: saved.details.motivoRejeicao } : {}),
+      ...(saved.details.dataPagamento !== undefined ? { dataPagamento: saved.details.dataPagamento } : {}),
+    },
   };
+  return output;
 }

@@ -1,110 +1,190 @@
 /// <mls fileReference="_102047_/l1/reembolsoDespesas/layer_2_application/requests/despesas_da_equipe.ts" enhancement="_blank"/>
-import { AppError, type RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type { Despesas_da_equipeContracts, DespesaLoad, ColaboradorLoad } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.js';
+
+import type { Despesas_da_equipeContracts, DespesaAnalise, DespesaPendenteResumo } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.js';
+import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import { getDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/getDespesa.js';
 import { listDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/listDespesa.js';
-import { listColaborador } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/listColaborador.js';
 import { aprovarDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/aprovarDespesa.js';
 import { rejeitarDespesa } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/rejeitarDespesa.js';
+import { getColaborador } from '/_102047_/l1/reembolsoDespesas/layer_2_application/usecases/getColaborador.js';
 
-type DespesaRecord = Awaited<ReturnType<typeof listDespesa>>['items'][number];
-type LoadInput = Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.load']['input'];
-type DecisionInput = Despesas_da_equipeContracts['reembolsoDespesas.despesas_da_equipe.approveExpense']['input'];
+type DespesaStatus = 'draft' | 'awaitingApproval' | 'rejected' | 'approved' | 'paid';
 
-function toDespesaLoad(d: DespesaRecord): DespesaLoad {
-  return {
-    id: String(d.id),
-    version: Number(d.version),
-    colaboradorId: String(d.colaboradorId),
-    status: d.status as DespesaLoad['status'],
-    details: {
-      dataDespesa: d.details.dataDespesa,
-      categoria: d.details.categoria,
-      valor: d.details.valor,
-      reenvioRealizado: d.details.reenvioRealizado,
-      motivoRejeicao: d.details.motivoRejeicao ?? '',
-    },
+interface DespesaRecord {
+  id: string;
+  version: number;
+  colaboradorId: string;
+  status: string;
+  details: {
+    dataDespesa: string;
+    categoria: string;
+    valor: string;
+    descricao: string;
+    motivoRejeicao?: string;
+    reenvioRealizado: boolean;
   };
 }
 
-// Pending team expenses: only the ones awaiting the manager's decision, optionally of one collaborator.
-async function listPendingTeamExpenses(input: LoadInput, ctx: RequestContext): Promise<{ items: DespesaLoad[]; page: number; pageSize: number; hasMore: boolean }> {
-  const page = input.page != null && input.page >= 1 ? Math.floor(input.page) : 1;
-  const pageSize = input.pageSize != null && input.pageSize >= 1 ? Math.min(Math.floor(input.pageSize), 200) : 20;
-  const filter: Parameters<typeof listDespesa>[0] = { status: 'awaitingApproval', page, pageSize };
-  if (input.colaboradorId != null && input.colaboradorId !== '') filter.colaboradorId = input.colaboradorId;
-  const result = await listDespesa(filter, ctx);
-  return { items: result.items.map(toDespesaLoad), page, pageSize, hasMore: result.hasMore };
+const STATUS_VALUES: DespesaStatus[] = ['draft', 'awaitingApproval', 'rejected', 'approved', 'paid'];
+
+function toStatus(value: string): DespesaStatus {
+  const found = STATUS_VALUES.find((s) => s === value);
+  if (found === undefined) {
+    throw new AppError('INVALID_STATUS', `unknown expense status: ${value}`, 500);
+  }
+  return found;
 }
 
-// The despesa must exist and belong to the collaborator the manager is acting on.
-async function assertTeamExpense(input: DecisionInput, ctx: RequestContext): Promise<void> {
-  const found = await listDespesa({ id: String(input.id), page: 1, pageSize: 1 }, ctx);
-  const despesa = found.items.find((item) => String(item.id) === String(input.id));
-  if (despesa == null) throw new AppError('NOT_FOUND', 'Despesa ' + String(input.id) + ' não encontrada', 404);
-  if (String(despesa.colaboradorId) !== String(input.colaboradorId)) {
-    throw new AppError('FORBIDDEN', 'A despesa não pertence ao colaborador informado da equipe do gestor', 403, { ruleId: 'managerTeamExpenseAccess' });
+function containsId(value: unknown, id: string): boolean {
+  if (typeof value === 'string') return value === id;
+  if (Array.isArray(value)) return value.some((v) => containsId(v, id));
+  if (value !== null && typeof value === 'object') {
+    return Object.values(value as Record<string, unknown>).some((v) => containsId(v, id));
+  }
+  return false;
+}
+
+function currentManagerId(ctx: RequestContext): string {
+  const managerId = ctx.sessionContext.person?.mdmId;
+  if (managerId == null || managerId === '') {
+    throw new AppError('FORBIDDEN', 'manager identity not resolved for this session', 403, { ruleId: 'managerTeamExpenseAccess' });
+  }
+  return managerId;
+}
+
+/** Returns the collaborator name when the collaborator reports to the manager (ReportsTo); null otherwise.
+ * The MDM keeps a ReportsTo link as compact refs: `reportManagers` on the collaborator (`reports` on the manager). */
+async function teamMemberName(colaboradorId: string, managerId: string, ctx: RequestContext): Promise<string | null> {
+  const colaborador = await getColaborador({ id: colaboradorId }, ctx);
+  const refs = colaborador.details.base.relationshipRefs;
+  if (!containsId(refs['reportManagers'], managerId)) return null;
+  return colaborador.details.identification.name;
+}
+
+async function requireTeamMemberName(colaboradorId: string, managerId: string, ctx: RequestContext): Promise<string> {
+  const name = await teamMemberName(colaboradorId, managerId, ctx);
+  if (name === null) {
+    throw new AppError('FORBIDDEN', 'the expense does not belong to a collaborator of your team', 403, { ruleId: 'managerTeamExpenseAccess' });
+  }
+  return name;
+}
+
+function nomeColaborador(name: string): DespesaAnalise['colaborador'] {
+  return { details: { identification: { details: { identification: { name } } } } };
+}
+
+function buildAnalise(despesa: DespesaRecord, name: string): DespesaAnalise {
+  const details: DespesaAnalise['details']['details'] = {
+    dataDespesa: despesa.details.dataDespesa,
+    categoria: despesa.details.categoria,
+    valor: despesa.details.valor,
+    descricao: despesa.details.descricao,
+    reenvioRealizado: despesa.details.reenvioRealizado,
+  };
+  if (despesa.details.motivoRejeicao != null) {
+    details.motivoRejeicao = despesa.details.motivoRejeicao;
+  }
+  return {
+    id: despesa.id,
+    version: despesa.version,
+    colaboradorId: despesa.colaboradorId,
+    status: toStatus(despesa.status),
+    details: { details },
+    colaborador: nomeColaborador(name),
+  };
+}
+
+function requireAwaitingApproval(despesa: DespesaRecord): void {
+  if (despesa.status !== 'awaitingApproval') {
+    throw new AppError('INVALID_STATE', 'the expense is not awaiting approval', 409);
   }
 }
 
 export const requests: { [K in keyof Despesas_da_equipeContracts]: (input: Despesas_da_equipeContracts[K]['input'], ctx: RequestContext) => Promise<Despesas_da_equipeContracts[K]['output']> } = {
-  "reembolsoDespesas.despesas_da_equipe.load": async function (input, ctx) {
-    const pending = await listPendingTeamExpenses(input, ctx);
-    const ids: string[] = [];
-    for (const d of pending.items) if (!ids.includes(d.colaboradorId)) ids.push(d.colaboradorId);
-    const colaborador: ColaboradorLoad[] = [];
-    for (const id of ids) {
-      const found = await listColaborador({ id, page: 1, pageSize: 1 }, ctx);
-      const c = found.items.find((item) => String(item.id) === id);
-      if (c == null) continue;
-      colaborador.push({ id: String(c.id), details: { identification: String(c.details?.identification?.name ?? '') } });
+  "reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe": async function (input, ctx) {
+    const managerId = currentManagerId(ctx);
+    const page = input.page >= 1 ? Math.floor(input.page) : 1;
+    const pageSize = input.pageSize >= 1 ? Math.min(Math.floor(input.pageSize), 200) : 20;
+
+    // Read every expense awaiting approval, then keep the ones of the manager's team.
+    const pending: DespesaRecord[] = [];
+    let cursor = 1;
+    let more = true;
+    while (more) {
+      const res = await listDespesa({ status: 'awaitingApproval', page: cursor, pageSize: 200 }, ctx);
+      for (const d of res.items) pending.push(d);
+      more = res.hasMore;
+      cursor += 1;
     }
-    return {
-      despesasDaEquipe: pending.items,
-      colaborador,
-      pagePendingTeamExpenses: pending.page,
-      pageSizePendingTeamExpenses: pending.pageSize,
-      hasMorePendingTeamExpenses: pending.hasMore,
-    };
+
+    const names = new Map<string, string | null>();
+    const team: { despesa: DespesaRecord; name: string }[] = [];
+    for (const despesa of pending) {
+      if (!names.has(despesa.colaboradorId)) {
+        names.set(despesa.colaboradorId, await teamMemberName(despesa.colaboradorId, managerId, ctx));
+      }
+      const name = names.get(despesa.colaboradorId);
+      // managerTeamExpenseAccess: only expenses of collaborators that report to the manager
+      if (name != null) team.push({ despesa, name });
+    }
+
+    team.sort((a, b) => a.despesa.details.dataDespesa.localeCompare(b.despesa.details.dataDespesa));
+
+    const start = (page - 1) * pageSize;
+    const slice = team.slice(start, start + pageSize);
+    const items: DespesaPendenteResumo[] = slice.map(({ despesa, name }) => ({
+      id: despesa.id,
+      colaboradorId: despesa.colaboradorId,
+      status: toStatus(despesa.status),
+      details: {
+        details: {
+          dataDespesa: despesa.details.dataDespesa,
+          categoria: despesa.details.categoria,
+          valor: despesa.details.valor,
+        },
+      },
+      colaborador: nomeColaborador(name),
+    }));
+
+    return { despesas: { items, page, pageSize, hasMore: start + pageSize < team.length } };
   },
-  "reembolsoDespesas.despesas_da_equipe.loadDespesasDaEquipe": async function (input, ctx) {
-    const pending = await listPendingTeamExpenses(input, ctx);
-    return {
-      despesasDaEquipe: pending.items,
-      pagePendingTeamExpenses: pending.page,
-      pageSizePendingTeamExpenses: pending.pageSize,
-      hasMorePendingTeamExpenses: pending.hasMore,
-    };
+
+  "reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise": async function (input, ctx) {
+    const managerId = currentManagerId(ctx);
+    const despesa = await getDespesa({ id: input.despesaId }, ctx);
+    // managerTeamExpenseAccess
+    const name = await requireTeamMemberName(despesa.colaboradorId, managerId, ctx);
+    return { despesa: buildAnalise(despesa, name) };
   },
-  "reembolsoDespesas.despesas_da_equipe.approveExpense": async function (input, ctx) {
+
+  "reembolsoDespesas.despesas_da_equipe.aprovarDespesa": async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      await assertTeamExpense(input, bound);
-      const result = await aprovarDespesa({ id: String(input.id), version: Number(input.version) }, bound);
-      return {
-        despesa: {
-          id: String(result.id),
-          version: Number(result.version),
-          details: { motivoRejeicao: result.details.motivoRejeicao ?? '' },
-        },
-      };
+      const managerId = currentManagerId(bound);
+      const atual = await getDespesa({ id: input.id }, bound);
+      // managerTeamExpenseAccess
+      const name = await requireTeamMemberName(atual.colaboradorId, managerId, bound);
+      requireAwaitingApproval(atual);
+      const updated = await aprovarDespesa({ id: input.id, version: Number(input.version) }, bound);
+      return { despesa: buildAnalise(updated, name) };
     });
   },
-  "reembolsoDespesas.despesas_da_equipe.rejectExpense": async function (input, ctx) {
+
+  "reembolsoDespesas.despesas_da_equipe.rejeitarDespesa": async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const motivo = input.details.motivoRejeicao;
-      if (motivo == null || String(motivo).trim() === '') {
-        throw new AppError('REJECTION_REASON_REQUIRED', 'A rejeição exige o motivo registrado pelo gestor', 400, { ruleId: 'rejectionReasonRequired' });
+      const managerId = currentManagerId(bound);
+      const atual = await getDespesa({ id: input.id }, bound);
+      // managerTeamExpenseAccess
+      const name = await requireTeamMemberName(atual.colaboradorId, managerId, bound);
+      requireAwaitingApproval(atual);
+      const motivo = typeof input.details.motivoRejeicao === 'string' ? input.details.motivoRejeicao.trim() : '';
+      if (motivo === '') {
+        throw new AppError('VALIDATION_ERROR', 'a rejection reason is required to reject an expense', 400, { ruleId: 'rejectionReasonRequired' });
       }
-      await assertTeamExpense(input, bound);
-      const result = await rejeitarDespesa({ id: String(input.id), version: Number(input.version), details: { motivoRejeicao: String(motivo) } }, bound);
-      return {
-        despesa: {
-          id: String(result.id),
-          version: Number(result.version),
-          details: { motivoRejeicao: result.details.motivoRejeicao ?? '' },
-        },
-      };
+      const updated = await rejeitarDespesa({ id: input.id, version: Number(input.version), details: { motivoRejeicao: motivo } }, bound);
+      return { despesa: buildAnalise(updated, name) };
     });
   },
 };

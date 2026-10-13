@@ -3,50 +3,54 @@
   "project": 102047,
   "module": "reembolsoDespesas",
   "pageId": "despesas_aprovadas",
-  "unitInputHash": "sha256:1ca09b274c75148a5137f069ee4f486a6fb9c849f36d6ffedad9319db42e4738",
-  "promptHash": "sha256:595d6a87ad7fb483838eaf48ce1df1eca8eebc10af0548cdfc76cca183f85783",
-  "rulesHash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "unitInputHash": "sha256:f2f9e3e7f1f04df8a7e2c0a7eeaab159df2734118c53712c7e2f38dadcf75cc0",
+  "promptHash": "sha256:b3a659fe5771bf76c78c9267163dfc50fe98cea99da16e70d57a951e18b92742",
+  "rulesHash": "sha256:f448288e2aa10d17f8466396e7eaf195e42eb9467ea51f4f73358f0336686752",
   "sourcePath": "l2/reembolsoDespesas/web/shared/despesas_aprovadas.ts",
-  "sourceHash": "sha256:50b5807fe65bfd604e23aebf08aa92324c552c7e6466960e6c42c8e88ec6aec4",
+  "sourceHash": "sha256:85261d6121952e56cf09d3ecdda7ad58d4d521cd1ddcc33c2174c18bbb76f5c9",
   "declarationPath": "l2/reembolsoDespesas/web/shared/despesas_aprovadasDts.txt",
-  "declarationHash": "sha256:22e0faf344f9c2d9af5140187e66b27ca2c3da6ad877888f1cb100efacf55e8f",
-  "attempt": 1,
+  "declarationHash": "sha256:f4618e9e61026e2be63079df982775094c47ed0421fc4ec861e244574af764a7",
+  "attempt": 2,
   "findings": [
     {
-      "code": "SELECT_SETTER_MISSING",
-      "message": "State despesaAprovada (select:approvedExpenseDetail) had no function that selects it from the page. Added public selectDespesaAprovada(id | null) and the getter approvedExpenseDetail (the loaded row with that id, since no query fetches a single expense). An id not in the list publishes client.selectionInvalid in loadError."
+      "code": "FILTER_STATE_MISSING",
+      "message": "Entry params colaboradorId, categoria and page filter the list but no state holds them; added persisted public states colaboradorId, categoria and page (set through listarDespesasAprovadas)."
     },
     {
-      "code": "STATE_LEFT_STALE",
-      "message": "registerPayment returns only { id, version, details.dataPagamento }, with no new status. The row in despesasAprovadas is updated (version, dataPagamento merged) but keeps status 'approved' and stays in the list. The defs declare no mode or reload for this update. Nothing was added."
+      "code": "SELECT_SETTER_MISSING",
+      "message": "The selectedDespesa param (id) had no public selection method; added selectDespesaAprovadaDetalhe(id | null), which fetches the record through obterDespesaAprovada into despesa."
     },
     {
       "code": "FORM_DRAFT_MISSING",
-      "message": "The state dataPagamento (registerPayment.input) had no type or setter. Added the DataPagamentoDraft type ({ details: { dataPagamento } }) and setDataPagamento(value). id, colaboradorId and version are not in the draft: they come from the selected row."
+      "message": "registrarPagamento has a typed field (dataPagamento) but no <command>.input state; added registrarPagamentoDraft with setRegistrarPagamentoDraft."
     },
     {
-      "code": "PAGINATION_STATE_MISSING",
-      "message": "The defs have no state for the page size or for hasMore of the list, but loadMoreApprovedExpensesList needs hasMore. Added pageSizeApprovedExpensesList and hasMoreApprovedExpensesList as public states filled from the load output. The page state is kept in sync with the loaded page."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public approvedExpenseDetail is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "code": "STATE_LEFT_STALE",
+      "message": "registrarPagamento returns despesa, which is applied to despesa and removed from despesas items, but the list page/hasMore and pageStatus (e.g. empty queue) are not refreshed because the route does not return them."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public hasMoreApprovedExpensesList is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public categoria is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public pageSizeApprovedExpensesList is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public colaboradorId is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public selectDespesaAprovada is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public page is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public setDataPagamento is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public registrarPagamentoDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public selectDespesaAprovadaDetalhe is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public setRegistrarPagamentoDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     }
   ]
 }

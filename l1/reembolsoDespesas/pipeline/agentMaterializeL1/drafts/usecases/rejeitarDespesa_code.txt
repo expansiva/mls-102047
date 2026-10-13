@@ -39,49 +39,42 @@ const found = await despesaRepository.list({ id });
 const current = found[0];
 if (!current) throw new AppError('NOT_FOUND', 'Expense not found.', 404);
 
-// managerTeamExpenseAccess: only a team manager acting in the session may decide on the expense
-const actorId = ctx.sessionContext.actorId;
-if (!actorId) {
-throw new AppError('FORBIDDEN', 'An authenticated team manager is required to reject an expense.', 403, { ruleId: 'managerTeamExpenseAccess' });
+// managerTeamExpenseAccess: the actor must be an identified manager acting on an expense of another collaborator (their team).
+const managerId = ctx.sessionContext.person?.mdmId ?? ctx.sessionContext.actorId;
+if (!managerId) {
+throw new AppError('FORBIDDEN', 'The manager performing the rejection could not be identified.', 403, { ruleId: 'managerTeamExpenseAccess' });
 }
-const scope = ctx.sessionContext.actorScope ?? [];
-const isManager = scope.some((entry) => entry === 'gestorEquipe' || entry.endsWith(':gestorEquipe'));
-if (!isManager) {
-throw new AppError('FORBIDDEN', 'Only the team manager can reject expenses of the team.', 403, { ruleId: 'managerTeamExpenseAccess' });
-}
-if (String(current.colaboradorId) === String(actorId)) {
-throw new AppError('FORBIDDEN', 'A manager cannot reject an expense registered by himself.', 403, { ruleId: 'managerTeamExpenseAccess' });
+if (managerId === current.colaboradorId) {
+throw new AppError('FORBIDDEN', 'A manager can only reject expenses of collaborators of their own team, not their own expense.', 403, { ruleId: 'managerTeamExpenseAccess' });
 }
 
 // rejectionReasonRequired
-const rawReason = input.details?.motivoRejeicao;
-const motivoRejeicao = typeof rawReason === 'string' ? rawReason.trim() : '';
-if (!motivoRejeicao) {
+const motivoRaw = input.details?.motivoRejeicao;
+const motivo = typeof motivoRaw === 'string' ? motivoRaw.trim() : '';
+if (!motivo) {
 throw new AppError('VALIDATION_ERROR', 'A rejection reason is required to reject an expense.', 400, { ruleId: 'rejectionReasonRequired' });
 }
 
 if (current.status !== 'awaitingApproval') {
-throw new AppError('CONFLICT', 'Only an expense awaiting approval can be rejected.', 409);
+throw new AppError('INVALID_STATE', 'Only an expense awaiting approval can be rejected.', 409);
 }
 
-if (Number(input.version) !== Number(current.version)) {
+if (input.version !== undefined && input.version !== null && Number(input.version) !== current.version) {
 throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
 }
 
 const next: Despesa = {
 ...current,
 status: 'rejected',
-details: { ...current.details, motivoRejeicao },
+details: {
+...current.details,
+motivoRejeicao: motivo,
+},
 };
 
 const saved = await despesaRepository.transition(next, 'rejeitarDespesa');
 
-return {
-id: saved.id,
-version: saved.version,
-colaboradorId: saved.colaboradorId,
-status: saved.status,
-details: {
+const details: RejeitarDespesaOutput['details'] = {
 dataDespesa: saved.details.dataDespesa,
 categoria: saved.details.categoria,
 valor: saved.details.valor,
@@ -89,6 +82,13 @@ descricao: saved.details.descricao,
 motivoRejeicao: saved.details.motivoRejeicao,
 reenvioRealizado: saved.details.reenvioRealizado,
 dataPagamento: saved.details.dataPagamento,
-},
+};
+
+return {
+id: saved.id,
+version: saved.version,
+colaboradorId: saved.colaboradorId,
+status: saved.status,
+details,
 };
 }

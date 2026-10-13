@@ -8,60 +8,55 @@ export const pageTests = {
   "actor": "colaborador",
   "cases": [
     {
-      "id": "load.ok",
-      "routine": "reembolsoDespesas.minhas_despesas.load",
-      "params": {},
-      "expect": {
-        "ok": true,
-        "shape": "paginated",
-        "itemsKey": "minhasDespesas"
-      },
-      "mutating": false
-    },
-    {
-      "id": "load.byColaborador",
-      "routine": "reembolsoDespesas.minhas_despesas.load",
+      "id": "listarMinhasDespesas.ok",
+      "routine": "reembolsoDespesas.minhas_despesas.listarMinhasDespesas",
       "params": {
-        "colaboradorId": "<seedRef>",
         "page": 1,
         "pageSize": 10
       },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
-      },
       "expect": {
         "ok": true,
         "shape": "paginated",
-        "itemsKey": "minhasDespesas"
+        "itemsKey": "items"
       },
       "mutating": false
     },
     {
-      "id": "loadMinhasDespesas.ok",
-      "routine": "reembolsoDespesas.minhas_despesas.loadMinhasDespesas",
-      "params": {},
-      "expect": {
-        "ok": true,
-        "shape": "paginated",
-        "itemsKey": "minhasDespesas"
-      },
-      "mutating": false
-    },
-    {
-      "id": "loadMinhasDespesas.byColaborador",
-      "routine": "reembolsoDespesas.minhas_despesas.loadMinhasDespesas",
+      "id": "listarMinhasDespesas.filtroStatus",
+      "routine": "reembolsoDespesas.minhas_despesas.listarMinhasDespesas",
       "params": {
-        "colaboradorId": "<seedRef>",
+        "status": "draft",
         "page": 1,
         "pageSize": 10
       },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
-      },
       "expect": {
         "ok": true,
         "shape": "paginated",
-        "itemsKey": "minhasDespesas"
+        "itemsKey": "items"
+      },
+      "mutating": false
+    },
+    {
+      "id": "obterDespesa.ok",
+      "routine": "reembolsoDespesas.minhas_despesas.obterDespesa",
+      "params": {
+        "id": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "id": "Despesa.id"
+      },
+      "expect": {
+        "ok": true
+      },
+      "mutating": false
+    },
+    {
+      "id": "reembolsoDespesas.minhas_despesas.obterDespesa.id.required",
+      "routine": "reembolsoDespesas.minhas_despesas.obterDespesa",
+      "params": {},
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
       },
       "mutating": false
     },
@@ -69,16 +64,16 @@ export const pageTests = {
       "id": "registrarDespesa.ok",
       "routine": "reembolsoDespesas.minhas_despesas.registrarDespesa",
       "params": {
+        "colaboradorId": "<seedRef>",
         "details": {
           "dataDespesa": "2026-10-01",
           "categoria": "transporte",
-          "valor": "100.00",
+          "valor": "45.90",
           "descricao": "Taxi para reuniao com cliente"
-        },
-        "colaboradorId": "<seedRef>"
+        }
       },
       "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
+        "colaboradorId": "Colaborador.id"
       },
       "expect": {
         "ok": true
@@ -86,13 +81,19 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "registrarDespesa.details.required",
+      "id": "registrarDespesa.dadosInvalidos",
       "routine": "reembolsoDespesas.minhas_despesas.registrarDespesa",
       "params": {
-        "colaboradorId": "<seedRef>"
+        "colaboradorId": "<seedRef>",
+        "details": {
+          "dataDespesa": "2026-10-01",
+          "categoria": "",
+          "valor": "45.90",
+          "descricao": ""
+        }
       },
       "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
+        "colaboradorId": "Colaborador.id"
       },
       "expect": {
         "ok": false,
@@ -101,13 +102,13 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "registrarDespesa.colaboradorId.required",
+      "id": "reembolsoDespesas.minhas_despesas.registrarDespesa.colaboradorId.required",
       "routine": "reembolsoDespesas.minhas_despesas.registrarDespesa",
       "params": {
         "details": {
           "dataDespesa": "2026-10-01",
           "categoria": "transporte",
-          "valor": "100.00",
+          "valor": "45.90",
           "descricao": "Taxi"
         }
       },
@@ -118,128 +119,16 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "registrarDespesa.invalidData",
-      "routine": "reembolsoDespesas.minhas_despesas.registrarDespesa",
+      "id": "salvarCorrecao.ok",
+      "routine": "reembolsoDespesas.minhas_despesas.salvarCorrecao",
       "params": {
-        "details": {
-          "dataDespesa": "2026-10-01",
-          "categoria": "",
-          "valor": "100.00",
-          "descricao": ""
-        },
-        "colaboradorId": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "corrigirDespesa.ok",
-      "routine": "reembolsoDespesas.minhas_despesas.corrigirDespesa",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "<seedRef>",
+        "id": "<seedSpare>",
+        "version": "<seedValue>",
         "details": {
           "dataDespesa": "2026-10-02",
           "categoria": "alimentacao",
-          "valor": "85.50",
+          "valor": "80.00",
           "descricao": "Almoco com cliente corrigido"
-        }
-      },
-      "paramFieldRefs": {
-        "id": "Despesa.id",
-        "version": "Despesa.version",
-        "colaboradorId": "Despesa.colaboradorId"
-      },
-      "expect": {
-        "ok": true
-      },
-      "mutating": true
-    },
-    {
-      "id": "corrigirDespesa.id.required",
-      "routine": "reembolsoDespesas.minhas_despesas.corrigirDespesa",
-      "params": {
-        "version": 1,
-        "colaboradorId": "<seedRef>",
-        "details": {
-          "dataDespesa": "2026-10-02",
-          "categoria": "alimentacao",
-          "valor": "85.50",
-          "descricao": "Almoco"
-        }
-      },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "corrigirDespesa.details.required",
-      "routine": "reembolsoDespesas.minhas_despesas.corrigirDespesa",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "id": "Despesa.id",
-        "version": "Despesa.version",
-        "colaboradorId": "Despesa.colaboradorId"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "corrigirDespesa.invalidData",
-      "routine": "reembolsoDespesas.minhas_despesas.corrigirDespesa",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "<seedRef>",
-        "details": {
-          "dataDespesa": "",
-          "categoria": "alimentacao",
-          "valor": "",
-          "descricao": "Almoco"
-        }
-      },
-      "paramFieldRefs": {
-        "id": "Despesa.id",
-        "version": "Despesa.version",
-        "colaboradorId": "Despesa.colaboradorId"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "corrigirDespesa.notOwner",
-      "routine": "reembolsoDespesas.minhas_despesas.corrigirDespesa",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "outro-colaborador",
-        "details": {
-          "dataDespesa": "2026-10-02",
-          "categoria": "alimentacao",
-          "valor": "85.50",
-          "descricao": "Almoco"
         }
       },
       "paramFieldRefs": {
@@ -247,7 +136,48 @@ export const pageTests = {
         "version": "Despesa.version"
       },
       "expect": {
-        "ok": false
+        "ok": true
+      },
+      "mutating": true
+    },
+    {
+      "id": "salvarCorrecao.dadosInvalidos",
+      "routine": "reembolsoDespesas.minhas_despesas.salvarCorrecao",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedValue>",
+        "details": {
+          "dataDespesa": "2026-10-02",
+          "categoria": "",
+          "valor": "80.00",
+          "descricao": ""
+        }
+      },
+      "paramFieldRefs": {
+        "id": "Despesa.id",
+        "version": "Despesa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "reembolsoDespesas.minhas_despesas.salvarCorrecao.id.required",
+      "routine": "reembolsoDespesas.minhas_despesas.salvarCorrecao",
+      "params": {
+        "version": 1,
+        "details": {
+          "dataDespesa": "2026-10-02",
+          "categoria": "alimentacao",
+          "valor": "80.00",
+          "descricao": "Almoco"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
       },
       "mutating": true
     },
@@ -255,20 +185,12 @@ export const pageTests = {
       "id": "enviarParaAprovacao.ok",
       "routine": "reembolsoDespesas.minhas_despesas.enviarParaAprovacao",
       "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "<seedRef>",
-        "details": {
-          "dataDespesa": "2026-10-01",
-          "categoria": "transporte",
-          "valor": "100.00",
-          "descricao": "Taxi para reuniao"
-        }
+        "id": "<seedSpare>",
+        "version": "<seedValue>"
       },
       "paramFieldRefs": {
         "id": "Despesa.id",
-        "version": "Despesa.version",
-        "colaboradorId": "Despesa.colaboradorId"
+        "version": "Despesa.version"
       },
       "expect": {
         "ok": true
@@ -276,20 +198,10 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "enviarParaAprovacao.id.required",
+      "id": "reembolsoDespesas.minhas_despesas.enviarParaAprovacao.id.required",
       "routine": "reembolsoDespesas.minhas_despesas.enviarParaAprovacao",
       "params": {
-        "version": 1,
-        "colaboradorId": "<seedRef>",
-        "details": {
-          "dataDespesa": "2026-10-01",
-          "categoria": "transporte",
-          "valor": "100.00",
-          "descricao": "Taxi"
-        }
-      },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
+        "version": 1
       },
       "expect": {
         "ok": false,
@@ -298,50 +210,17 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "enviarParaAprovacao.invalidData",
+      "id": "reembolsoDespesas.minhas_despesas.enviarParaAprovacao.version.required",
       "routine": "reembolsoDespesas.minhas_despesas.enviarParaAprovacao",
       "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "<seedRef>",
-        "details": {
-          "dataDespesa": "2026-10-01",
-          "categoria": "",
-          "valor": "100.00",
-          "descricao": "Taxi"
-        }
+        "id": "<seedRef>"
       },
       "paramFieldRefs": {
-        "id": "Despesa.id",
-        "version": "Despesa.version",
-        "colaboradorId": "Despesa.colaboradorId"
+        "id": "Despesa.id"
       },
       "expect": {
         "ok": false,
         "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "enviarParaAprovacao.notOwner",
-      "routine": "reembolsoDespesas.minhas_despesas.enviarParaAprovacao",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "outro-colaborador",
-        "details": {
-          "dataDespesa": "2026-10-01",
-          "categoria": "transporte",
-          "valor": "100.00",
-          "descricao": "Taxi"
-        }
-      },
-      "paramFieldRefs": {
-        "id": "Despesa.id",
-        "version": "Despesa.version"
-      },
-      "expect": {
-        "ok": false
       },
       "mutating": true
     },
@@ -349,20 +228,12 @@ export const pageTests = {
       "id": "reenviarParaAprovacao.ok",
       "routine": "reembolsoDespesas.minhas_despesas.reenviarParaAprovacao",
       "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "<seedRef>",
-        "details": {
-          "dataDespesa": "2026-10-02",
-          "categoria": "alimentacao",
-          "valor": "85.50",
-          "descricao": "Almoco corrigido"
-        }
+        "id": "<seedSpare>",
+        "version": "<seedValue>"
       },
       "paramFieldRefs": {
         "id": "Despesa.id",
-        "version": "Despesa.version",
-        "colaboradorId": "Despesa.colaboradorId"
+        "version": "Despesa.version"
       },
       "expect": {
         "ok": true
@@ -370,20 +241,10 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "reenviarParaAprovacao.id.required",
+      "id": "reembolsoDespesas.minhas_despesas.reenviarParaAprovacao.id.required",
       "routine": "reembolsoDespesas.minhas_despesas.reenviarParaAprovacao",
       "params": {
-        "version": 1,
-        "colaboradorId": "<seedRef>",
-        "details": {
-          "dataDespesa": "2026-10-02",
-          "categoria": "alimentacao",
-          "valor": "85.50",
-          "descricao": "Almoco"
-        }
-      },
-      "paramFieldRefs": {
-        "colaboradorId": "Despesa.colaboradorId"
+        "version": 1
       },
       "expect": {
         "ok": false,
@@ -392,50 +253,17 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "reenviarParaAprovacao.invalidData",
+      "id": "reembolsoDespesas.minhas_despesas.reenviarParaAprovacao.version.required",
       "routine": "reembolsoDespesas.minhas_despesas.reenviarParaAprovacao",
       "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "<seedRef>",
-        "details": {
-          "dataDespesa": "2026-10-02",
-          "categoria": "alimentacao",
-          "valor": "85.50",
-          "descricao": ""
-        }
+        "id": "<seedRef>"
       },
       "paramFieldRefs": {
-        "id": "Despesa.id",
-        "version": "Despesa.version",
-        "colaboradorId": "Despesa.colaboradorId"
+        "id": "Despesa.id"
       },
       "expect": {
         "ok": false,
         "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "reenviarParaAprovacao.notOwner",
-      "routine": "reembolsoDespesas.minhas_despesas.reenviarParaAprovacao",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "colaboradorId": "outro-colaborador",
-        "details": {
-          "dataDespesa": "2026-10-02",
-          "categoria": "alimentacao",
-          "valor": "85.50",
-          "descricao": "Almoco"
-        }
-      },
-      "paramFieldRefs": {
-        "id": "Despesa.id",
-        "version": "Despesa.version"
-      },
-      "expect": {
-        "ok": false
       },
       "mutating": true
     }

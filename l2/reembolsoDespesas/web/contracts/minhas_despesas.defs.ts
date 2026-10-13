@@ -2,9 +2,11 @@
 
 /** Dados da despesa mostrados em cada linha da lista. */
 export interface DespesaResumoDetalhes {
-  dataDespesa: string;
-  categoria: string;
-  valor: string;
+  details: {
+    dataDespesa: string;
+    categoria: string;
+    valor: string;
+  };
 }
 
 /** Linha da lista de despesas do colaborador. */
@@ -16,13 +18,15 @@ export interface DespesaResumo {
 
 /** Dados completos da despesa aberta. */
 export interface DespesaDetalheDetalhes {
-  dataDespesa: string;
-  categoria: string;
-  valor: string;
-  descricao: string;
-  motivoRejeicao?: string;
-  reenvioRealizado: boolean;
-  dataPagamento?: string;
+  details: {
+    dataDespesa: string;
+    categoria: string;
+    valor: string;
+    descricao: string;
+    motivoRejeicao?: string;
+    reenvioRealizado: boolean;
+    dataPagamento?: string;
+  };
 }
 
 /** Despesa completa, usada no detalhe, no formulário de correção e nas ações de envio. */

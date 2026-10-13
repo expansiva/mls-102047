@@ -4,31 +4,31 @@
   "module": "reembolsoDespesas",
   "pageId": "minhas_despesas",
   "device": "mobile",
-  "contextHash": "sha256:563a86b6343e34e89821c167b3f50bf741dd644ead264cd233f5b94e7bcd3158",
+  "contextHash": "sha256:36c8768bcf206d014286513bbb857b31044673745995f1109c18426f169d6182",
   "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/minhas_despesas.ts",
-  "sourceHash": "sha256:177be5202920e86fb6fd1775ca14073e8a58338bd8b41118a788b95e12c4118d",
-  "attempt": 2,
+  "sourceHash": "sha256:8589861a0f8e72acad17d02d1f110c3ec6aaa0dd6f99d9e2edf128d547d04cc8",
+  "attempt": 1,
   "design": {
-    "concept": "Uma faixa estreita de despesas em que o colaborador varre data, situação e valor, abre uma despesa e age sobre ela com o polegar. A lista é a tela de repouso; registrar, consultar e corrigir são passos com volta, um de cada vez, sempre pela scene host.",
+    "concept": "Celular, uma coisa por vez. A pessoa começa na lista das próprias despesas (situação e valor bem visíveis), toca numa para lê-la como um memorando e, só no fim da leitura, encontra a ação de envio ou reenvio. Registrar uma despesa nova e corrigir uma rejeitada são tarefas laterais que abrem em telas próprias, com voltar, e devolvem a pessoa ao detalhe.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Lista vertical das despesas do colaborador, com campo de busca por colaborador, carregar mais e um botão fixo no rodapé para registrar uma despesa."
+        "purpose": "Acompanhamento: botão para registrar, filtro por situação, lista empilhada de despesas e 'ver mais'. É a tela de entrada."
       },
       {
         "id": "detalhe",
-        "purpose": "Detalhe da despesa aberta e, numa barra fixa embaixo, as ações de envio, correção ou reenvio conforme a situação, com feedback no próprio lugar."
+        "purpose": "Despesa aberta em leitura vertical (identidade, fatos decisivos, descrição, andamento com motivo da rejeição) e, no fim, o bloco de envio/reenvio."
       },
       {
         "id": "registrar",
-        "purpose": "Formulário vertical para registrar uma despesa nova; ao registrar, segue para o detalhe, onde ela pode ser enviada."
+        "purpose": "Formulário em coluna única para uma despesa nova; ao registrar, abre o detalhe da nova despesa para enviá-la."
       },
       {
         "id": "corrigir",
-        "purpose": "Formulário vertical já preenchido com os dados da despesa rejeitada, para corrigir antes de reenviar; ao salvar, volta ao detalhe."
+        "purpose": "Formulário em coluna única, pré-preenchido, para corrigir a despesa rejeitada, com o motivo do gestor à vista; ao salvar volta ao detalhe."
       }
     ],
-    "decisions": "Segui o template ledgerTable adaptado ao telefone: a lista é o material de trabalho, com o valor como última coluna, alinhado à direita, em algarismos tabulares e com moeda. A situação aparece como chip com texto, nunca só por cor. Divergi da ordem das seções e transformei registro, consulta e correção em passos de scenary. Para localizar despesas, a lista ganhou um campo de texto que chama filterListaMinhasDespesas com o colaborador digitado (vazio = sem filtro). As ações ficam numa barra fixa embaixo, ao alcance do polegar. Antes de corrigir ou enviar, o rascunho é preenchido com os dados da despesa carregada. O valor usa o molecule de dinheiro BR e converte string e número só na borda. Erros e sucessos de envio aparecem em contextual-feedback inline."
+    "decisions": "Usei o scene host em modo scenary com quatro cenas e voltar, porque em 360–430px é melhor uma coisa por vez que empilhar tudo. A lista lidera (seção primária); o registro (secundário) abre sob demanda por um botão no topo da lista. No detalhe segui a ordem do template: identidade (categoria e data no card), fatos decisivos (valor grande e situação), narrativa (descrição), andamento (motivo da rejeição destacado com contextual-feedback, reenvio realizado, data de pagamento) e, por último, o bloco de ação. O bloco mostra só o que a situação permite: enviar (rascunho), corrigir + reenviar (rejeitada ainda não reenviada) ou uma frase calma nos demais casos; erro aparece acima dos botões, com nova tentativa, e o sucesso vira uma declaração no próprio bloco, sem toast nem redirecionamento. Registrar e salvar correção levam ao detalhe quando dão certo. A lista usa o vertical-record-list com duas células (despesa; valor e situação) para caber em coluna estreita; os filtros são chips de 44px que quebram linha, sem rolagem horizontal. Nada é calculado na página: valores, datas e situações são formatados com Intl a partir dos campos. O comprovante ficou de fora do formulário: o shared não tem estado nem campo de contrato para ele, e a página não guarda estado. O valor monetário é convertido de/para o texto do rascunho na borda do campo."
   },
   "advisories": [
     {
@@ -37,15 +37,15 @@
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section registro needs an element with data-section-id=\"registro\"."
+      "message": "Section despesaSelecionada needs an element with data-section-id=\"despesaSelecionada\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section consultaEEnvio needs an element with data-section-id=\"consultaEEnvio\"."
+      "message": "Section registroCorrecao needs an element with data-section-id=\"registroCorrecao\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism formularioDespesa (expenseProof) renders neither <groupselectfileforupload--ml-file-upload-preview> nor <groupselectfileforupload--ml-file-upload-dropzone>."
+      "message": "Organism formularioDespesa (Comprovante da despesa) renders neither <groupselectfileforupload--ml-file-upload-preview> nor <groupselectfileforupload--ml-file-upload-dropzone>."
     }
   ]
 }
