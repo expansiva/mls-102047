@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "despesas_da_equipe",
+  "device": "mobile",
+  "contextHash": "sha256:af104842ad7c6be99dc6ab7289bc990570b78813e1666609469e30a6c170cdb2",
+  "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/despesas_da_equipe.ts",
+  "sourceHash": "sha256:9b7548a95e822ff8880f8536628f3d74318a3121eb3876c793e20e1f55dc4d6a",
+  "attempt": 1,
+  "design": {
+    "concept": "Uma fila estreita de despesas pendentes leva a uma leitura vertical de uma única despesa. A decisão fica no fim da leitura: aprovar abre uma confirmação única e rejeitar abre o campo de motivo no próprio bloco.",
+    "views": [
+      {
+        "id": "queue",
+        "purpose": "Fila das despesas pendentes da equipe, com filtro por colaborador e carregar mais. Tocar numa linha abre a análise."
+      },
+      {
+        "id": "review",
+        "purpose": "Leitura da despesa escolhida (quem, fatos decisivos, situação) e, ao fim, o bloco de decisão. Depois de decidir, o bloco mostra uma frase calma do que foi decidido, com um link de volta à fila."
+      }
+    ],
+    "decisions": "Usei o host de cenas em modo scenary com duas vistas: fila e análise, com voltar. Se a página já abre com uma despesa selecionada, ela começa direto na análise, como o template pede para um registro trazido de fora.\n\nA ordem de leitura segue o template: identidade (colaborador e categoria), fatos decisivos (valor grande, data, situação) e, por último, a decisão. O contrato não traz descrição, comprovante nem histórico, então não inventei esses blocos.\n\nAprovar abre um único <dialog> nativo que repete colaborador, categoria, data e valor, e só então confirma. Como a página não guarda estado, o dialog é aberto e fechado pelo próprio elemento, e fecha quando o comando termina com sucesso. Um erro aparece dentro do dialog e nada se perde.\n\nRejeitar usa um <details> nativo que expande o motivo inline. O botão \"Registrar rejeição\" fica desabilitado até haver texto. Nenhum botão usa a variante danger.\n\nA lista usa o ml-vertical-record-list com células ricas, e a linha aberta fica marcada como selecionada. O resumo da despesa usa o ml-vertical-card. A paginação é só o botão \"Carregar mais\", sem tamanho de página. Os estados de carregando, vazio e erro estão desenhados. Todos os alvos de toque têm pelo menos 44px."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section pendingQueue needs an element with data-section-id=\"pendingQueue\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section review needs an element with data-section-id=\"review\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section decision needs an element with data-section-id=\"decision\"."
+    }
+  ]
+}

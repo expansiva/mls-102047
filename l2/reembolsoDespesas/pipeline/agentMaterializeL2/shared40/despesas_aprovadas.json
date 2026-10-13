@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-shared-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "despesas_aprovadas",
+  "unitInputHash": "sha256:1ca09b274c75148a5137f069ee4f486a6fb9c849f36d6ffedad9319db42e4738",
+  "promptHash": "sha256:595d6a87ad7fb483838eaf48ce1df1eca8eebc10af0548cdfc76cca183f85783",
+  "rulesHash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "sourcePath": "l2/reembolsoDespesas/web/shared/despesas_aprovadas.ts",
+  "sourceHash": "sha256:50b5807fe65bfd604e23aebf08aa92324c552c7e6466960e6c42c8e88ec6aec4",
+  "declarationPath": "l2/reembolsoDespesas/web/shared/despesas_aprovadasDts.txt",
+  "declarationHash": "sha256:22e0faf344f9c2d9af5140187e66b27ca2c3da6ad877888f1cb100efacf55e8f",
+  "attempt": 1,
+  "findings": [
+    {
+      "code": "SELECT_SETTER_MISSING",
+      "message": "State despesaAprovada (select:approvedExpenseDetail) had no function that selects it from the page. Added public selectDespesaAprovada(id | null) and the getter approvedExpenseDetail (the loaded row with that id, since no query fetches a single expense). An id not in the list publishes client.selectionInvalid in loadError."
+    },
+    {
+      "code": "STATE_LEFT_STALE",
+      "message": "registerPayment returns only { id, version, details.dataPagamento }, with no new status. The row in despesasAprovadas is updated (version, dataPagamento merged) but keeps status 'approved' and stays in the list. The defs declare no mode or reload for this update. Nothing was added."
+    },
+    {
+      "code": "FORM_DRAFT_MISSING",
+      "message": "The state dataPagamento (registerPayment.input) had no type or setter. Added the DataPagamentoDraft type ({ details: { dataPagamento } }) and setDataPagamento(value). id, colaboradorId and version are not in the draft: they come from the selected row."
+    },
+    {
+      "code": "PAGINATION_STATE_MISSING",
+      "message": "The defs have no state for the page size or for hasMore of the list, but loadMoreApprovedExpensesList needs hasMore. Added pageSizeApprovedExpensesList and hasMoreApprovedExpensesList as public states filled from the load output. The page state is kept in sync with the loaded page."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public approvedExpenseDetail is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public hasMoreApprovedExpensesList is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public pageSizeApprovedExpensesList is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public selectDespesaAprovada is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public setDataPagamento is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    }
+  ]
+}
