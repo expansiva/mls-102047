@@ -4,30 +4,16 @@
   "inbound": [],
   "outbound": [
     {
-      "id": "mensalidadeGerada",
+      "id": "matriculaRealizada",
       "kind": "event",
-      "to": "financeiro",
-      "event": "mensalidadeGerada",
-      "on": "Mensalidade.create",
-      "description": "Publicado quando a gerência gera a mensalidade do mês de um aluno ativo. O módulo financeiro pode usar o registro da mensalidade (aluno, valor do plano e vencimento) para abrir um título a receber.",
+      "to": "any",
+      "event": "matriculaRealizada",
+      "on": "Matricula.create",
+      "description": "Publica a matrícula registrada pela recepção, com o aluno, o plano escolhido e a data de início, para módulos interessados (por exemplo, o financeiro).",
       "entityRefs": [
-        "Mensalidade",
         "Matricula",
         "Aluno",
         "Plano"
-      ]
-    },
-    {
-      "id": "pagamentoMensalidadeRegistrado",
-      "kind": "event",
-      "to": "financeiro",
-      "event": "pagamentoMensalidadeRegistrado",
-      "on": "Pagamento.create",
-      "description": "Publicado quando a recepção registra o pagamento de uma mensalidade (data, valor e forma). O módulo financeiro pode usá-lo para dar baixa no título a receber correspondente.",
-      "entityRefs": [
-        "Pagamento",
-        "Mensalidade",
-        "Aluno"
       ]
     },
     {
@@ -35,12 +21,37 @@
       "kind": "event",
       "to": "any",
       "event": "matriculaCancelada",
-      "on": "Matricula.cancelarMatricula",
-      "description": "Publicado quando o aluno cancela a matrícula, encerrando a geração de mensalidades futuras. Outros módulos podem parar de cobrar ou de liberar serviços para esse aluno.",
+      "on": "Matricula.cancelar",
+      "description": "Publica o cancelamento da matrícula, que encerra a geração das próximas mensalidades, para que outros módulos parem de cobrar o aluno.",
       "entityRefs": [
         "Matricula",
-        "Aluno",
-        "Plano"
+        "Aluno"
+      ]
+    },
+    {
+      "id": "mensalidadeGerada",
+      "kind": "event",
+      "to": "any",
+      "event": "mensalidadeGerada",
+      "on": "Mensalidade.create",
+      "description": "Publica cada mensalidade gerada no mês, com valor do plano e data de vencimento, para módulos que controlam valores a receber.",
+      "entityRefs": [
+        "Mensalidade",
+        "Matricula",
+        "Aluno"
+      ]
+    },
+    {
+      "id": "mensalidadeQuitada",
+      "kind": "event",
+      "to": "any",
+      "event": "mensalidadeQuitada",
+      "on": "Mensalidade.quitar",
+      "description": "Publica a quitação da mensalidade após o pagamento registrado pela recepção (data, valor e forma), para módulos que acompanham o que foi recebido.",
+      "entityRefs": [
+        "Mensalidade",
+        "Pagamento",
+        "Aluno"
       ]
     }
   ],

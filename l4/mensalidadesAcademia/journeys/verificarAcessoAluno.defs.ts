@@ -7,36 +7,35 @@ export const verificarAcessoAlunoJourney = {
   "journeyId": "verificarAcessoAluno",
   "business": {
     "actorRef": "recepcao",
-    "title": "Verificar entrada do aluno",
-    "goal": "Conferir se o aluno pode entrar ou está bloqueado por mensalidades vencidas.",
+    "title": "Verificar liberação de entrada",
+    "goal": "Saber se o aluno pode entrar na academia ou está bloqueado por mensalidades vencidas.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "buscarAlunoEntrada",
+        "stepId": "localizarMatriculaAluno",
         "kind": "locate",
-        "entity": "Aluno",
-        "title": "Buscar aluno na entrada",
-        "description": "A recepção localiza o aluno que deseja entrar na academia."
+        "entity": "Matricula",
+        "title": "Buscar matrícula do aluno",
+        "description": "A recepção busca a matrícula do aluno que chegou à academia."
       },
       {
-        "stepId": "verSituacaoMatricula",
+        "stepId": "consultarSituacao",
         "kind": "inspect",
         "entity": "Matricula",
-        "title": "Ver situação da matrícula",
-        "description": "A recepção vê se a matrícula está ativa ou bloqueada e quais mensalidades estão vencidas."
+        "title": "Consultar situação do aluno",
+        "description": "A recepção vê se a matrícula está ativa, bloqueada por duas mensalidades vencidas ou cancelada, e quais mensalidades estão vencidas."
       }
     ],
     "outcome": {
-      "statement": "A recepção sabe se o aluno pode entrar ou precisa regularizar as mensalidades vencidas.",
+      "statement": "A recepção sabe se libera ou impede a entrada do aluno.",
       "evidence": [
-        "Situação ativa ou bloqueada exibida",
-        "Lista de mensalidades vencidas do aluno"
+        "A tela mostra a situação da matrícula e as mensalidades vencidas que impedem a entrada."
       ]
     }
   },
-  "businessHash": "sha256:31de0b5188311cc4ee21ff7261465daceabcc8802dc0fb9b879b351892c2ee27"
+  "businessHash": "sha256:9de2909efce26df8909e74c52657d06f3ec277a1d2605380907cf625ac5311eb"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type VerificarAcessoAlunoJourneyType = typeof verificarAcessoAlunoJourney;

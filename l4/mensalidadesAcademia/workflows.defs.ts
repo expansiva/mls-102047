@@ -7,37 +7,27 @@ export const mensalidadesAcademiaWorkflows = {
   "moduleName": "mensalidadesAcademia",
   "processes": [
     {
-      "processId": "geracaoMensalDeMensalidades",
-      "title": "Geração mensal de mensalidades",
-      "description": "Todo mês a gerência é lembrada e gera as mensalidades do mês para todos os alunos com matrícula ativa, uma por aluno, com o valor e o vencimento do plano.",
+      "processId": "geracaoMensalMensalidades",
+      "title": "Geração mensal das mensalidades",
+      "description": "Todo mês a gerência gera as mensalidades do mês para todos os alunos ativos, uma por aluno, com o valor do plano e o vencimento.",
       "trigger": {
         "kind": "scheduled",
         "schedule": "todo mês"
       },
       "tasks": [
         {
-          "taskId": "lembrarGeracaoMensal",
+          "taskId": "lembrarGeracaoMensalidades",
           "kind": "alert",
           "actorRef": "gerencia",
-          "next": [
-            "gerarMensalidadesMes"
-          ],
-          "description": "Lembrar a gerência de gerar as mensalidades do mês na jornada gerarMensalidadesDoMes."
-        },
-        {
-          "taskId": "gerarMensalidadesMes",
-          "kind": "human",
-          "actorRef": "gerencia",
-          "journeyRef": "gerarMensalidadesDoMes",
           "next": [],
-          "description": "A gerência gera e confere uma mensalidade por matrícula ativa com o valor e o vencimento do plano."
+          "description": "A gerência gera as mensalidades do mês para todos os alunos ativos, uma por aluno, com valor do plano e vencimento, pela jornada gerarMensalidadesMes."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "manterPlanos",
+      "journeyId": "cadastrarPlano",
       "inProcess": false
     },
     {
@@ -45,9 +35,9 @@ export const mensalidadesAcademiaWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "gerarMensalidadesDoMes",
+      "journeyId": "gerarMensalidadesMes",
       "inProcess": true,
-      "processId": "geracaoMensalDeMensalidades"
+      "processId": "geracaoMensalMensalidades"
     },
     {
       "journeyId": "registrarPagamento",

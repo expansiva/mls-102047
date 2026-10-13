@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const mensalidadesAcademiaOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "mensalidadesAcademia",
-  "businessDomain": "Gestão de matrículas e mensalidades de academia: planos, matrícula de alunos, geração mensal de mensalidades, registro de pagamentos, bloqueio por inadimplência e painel financeiro da gerência.",
+  "businessDomain": "Gestão de mensalidades de academia: alunos, planos, matrículas, geração mensal de mensalidades, pagamentos, bloqueio por inadimplência e painel financeiro.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "mensalidadesAcademia",
@@ -18,7 +18,7 @@ export const mensalidadesAcademiaOntologyIndex = {
       "subtype": "Person"
     },
     {
-      "entityId": "Recepcionista",
+      "entityId": "Recepcao",
       "kind": "role",
       "subtype": "Person"
     },
@@ -56,7 +56,7 @@ export const mensalidadesAcademiaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "A matrícula pertence a um aluno; um aluno pode ter várias matrículas ao longo do tempo.",
+      "description": "Cada matrícula pertence a um aluno; um aluno pode ter várias matrículas ao longo do tempo.",
       "field": "Matricula.alunoId"
     },
     {
@@ -66,18 +66,18 @@ export const mensalidadesAcademiaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "A matrícula é feita em um plano, que define valor e dia de vencimento das mensalidades.",
+      "description": "A matrícula é feita em um plano, de onde vêm o valor e o dia de vencimento.",
       "field": "Matricula.planoId"
     },
     {
-      "relationshipId": "matriculaRecepcionista",
+      "relationshipId": "matriculaRecepcao",
       "from": "Matricula",
-      "to": "Recepcionista",
+      "to": "Recepcao",
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Recepcionista que registrou a matrícula, usada para o escopo das matrículas da recepção.",
-      "field": "Matricula.recepcionistaId"
+      "description": "Atendente da recepção que registrou a matrícula.",
+      "field": "Matricula.recepcaoId"
     },
     {
       "relationshipId": "mensalidadeMatricula",
@@ -86,7 +86,7 @@ export const mensalidadesAcademiaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada mensalidade é gerada para uma matrícula ativa, uma por competência.",
+      "description": "Cada mensalidade é gerada para uma matrícula ativa, uma por mês de referência.",
       "field": "Mensalidade.matriculaId"
     },
     {
@@ -96,7 +96,7 @@ export const mensalidadesAcademiaOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "O pagamento quita uma mensalidade, que passa a paga.",
+      "description": "O pagamento quita uma mensalidade.",
       "field": "Pagamento.mensalidadeId"
     },
     {
@@ -106,7 +106,7 @@ export const mensalidadesAcademiaOntologyIndex = {
       "type": "oneToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Mensalidades do aluno obtidas pelas suas matrículas, usadas para verificar vencidas e bloqueio.",
+      "description": "Mensalidades do aluno, obtidas pelas suas matrículas.",
       "through": "Matricula",
       "path": "Aluno <- Matricula.alunoId <- Mensalidade.matriculaId",
       "derived": true

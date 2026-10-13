@@ -1,28 +1,28 @@
 {
   "moduleName": "mensalidadesAcademia",
-  "businessDomain": "Gestão de matrículas e mensalidades de academia: planos, matrícula de alunos, geração mensal de mensalidades, registro de pagamentos, bloqueio por inadimplência e painel financeiro da gerência.",
+  "businessDomain": "Gestão de mensalidades de academia: alunos, planos, matrículas, geração mensal de mensalidades, pagamentos, bloqueio por inadimplência e painel financeiro.",
   "entities": [
     {
       "entityId": "Aluno",
       "kind": "role",
       "family": "mdm",
       "title": "Aluno",
-      "description": "Pessoa matriculada na academia; papel do módulo sobre o cadastro mestre de pessoa. A situação de bloqueio é derivada das mensalidades vencidas de suas matrículas.",
+      "description": "Pessoa matriculada na academia. O cadastro é o registro mestre de pessoa da organização; a situação de bloqueio é derivada das mensalidades vencidas da matrícula.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "mensalidadesAcademia.Aluno",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "Recepcionista",
+      "entityId": "Recepcao",
       "kind": "role",
       "family": "mdm",
-      "title": "Recepcionista",
-      "description": "Pessoa da recepção que matricula alunos; usada para delimitar as matrículas que cada recepcionista registrou.",
+      "title": "Atendente da recepção",
+      "description": "Pessoa da recepção que registra matrículas; usada para delimitar as matrículas atribuídas a ela.",
       "displayField": "details.identification.name",
       "writer": "crud",
       "subtype": "Person",
-      "roleTag": "mensalidadesAcademia.Recepcionista",
+      "roleTag": "mensalidadesAcademia.Recepcao",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
@@ -30,7 +30,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Plano",
-      "description": "Plano da academia com periodicidade (mensal, trimestral ou anual), valor e dia de vencimento das mensalidades.",
+      "description": "Plano da academia (mensal, trimestral ou anual) com valor e dia de vencimento, oferecido nas matrículas.",
       "displayField": "nome",
       "class": "supporting",
       "storage": {
@@ -44,8 +44,8 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Matrícula",
-      "description": "Vínculo do aluno a um plano a partir de uma data de início; ativa até ser cancelada, quando encerra a geração de mensalidades futuras. Bloqueio é derivado de duas ou mais mensalidades vencidas.",
-      "displayField": "codigo",
+      "description": "Vínculo do aluno a um plano a partir de uma data de início; ativa até ser cancelada. O bloqueio por duas mensalidades vencidas é derivado, não digitado.",
+      "displayField": "numero",
       "class": "core",
       "storage": {
         "target": "moduleDatabase",
@@ -58,7 +58,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Mensalidade",
-      "description": "Cobrança mensal de uma matrícula ativa para uma competência, com valor do plano e vencimento no dia do plano; única por matrícula e competência. Vencida é derivada: em aberto e com vencimento anterior a hoje.",
+      "description": "Cobrança mensal gerada para uma matrícula ativa, com mês de referência, valor do plano e vencimento; única por matrícula e mês. Vencida é derivada: em aberto e com vencimento anterior a hoje.",
       "displayField": "competencia",
       "class": "event",
       "storage": {
@@ -72,7 +72,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Pagamento",
-      "description": "Pagamento de uma mensalidade registrado pela recepção, com data, valor e forma de pagamento.",
+      "description": "Pagamento recebido pela recepção para uma mensalidade, com data, valor e forma de pagamento.",
       "displayField": "dataPagamento",
       "class": "event",
       "storage": {
@@ -86,8 +86,8 @@
       "kind": "entity",
       "family": "ddm",
       "title": "Painel de mensalidades",
-      "description": "Painel da gerência recalculado por competência: total a receber no mês, total recebido, quantidade de alunos ativos, bloqueados e inadimplentes.",
-      "displayField": "competencia",
+      "description": "Resumo do mês recalculado: total a receber, total recebido e quantidade de alunos ativos, bloqueados e inadimplentes.",
+      "displayField": "mesReferencia",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
@@ -104,7 +104,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "A matrícula pertence a um aluno; um aluno pode ter várias matrículas ao longo do tempo.",
+      "description": "Cada matrícula pertence a um aluno; um aluno pode ter várias matrículas ao longo do tempo.",
       "field": "Matricula.alunoId"
     },
     {
@@ -114,18 +114,18 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "A matrícula é feita em um plano, que define valor e dia de vencimento das mensalidades.",
+      "description": "A matrícula é feita em um plano, de onde vêm o valor e o dia de vencimento.",
       "field": "Matricula.planoId"
     },
     {
-      "relationshipId": "matriculaRecepcionista",
+      "relationshipId": "matriculaRecepcao",
       "from": "Matricula",
-      "to": "Recepcionista",
+      "to": "Recepcao",
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Recepcionista que registrou a matrícula, usada para o escopo das matrículas da recepção.",
-      "field": "Matricula.recepcionistaId"
+      "description": "Atendente da recepção que registrou a matrícula.",
+      "field": "Matricula.recepcaoId"
     },
     {
       "relationshipId": "mensalidadeMatricula",
@@ -134,7 +134,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Cada mensalidade é gerada para uma matrícula ativa, uma por competência.",
+      "description": "Cada mensalidade é gerada para uma matrícula ativa, uma por mês de referência.",
       "field": "Mensalidade.matriculaId"
     },
     {
@@ -144,7 +144,7 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "O pagamento quita uma mensalidade, que passa a paga.",
+      "description": "O pagamento quita uma mensalidade.",
       "field": "Pagamento.mensalidadeId"
     },
     {
@@ -154,7 +154,7 @@
       "type": "oneToMany",
       "required": false,
       "mode": "throughTable",
-      "description": "Mensalidades do aluno obtidas pelas suas matrículas, usadas para verificar vencidas e bloqueio.",
+      "description": "Mensalidades do aluno, obtidas pelas suas matrículas.",
       "through": "Matricula",
       "path": "Aluno <- Matricula.alunoId <- Mensalidade.matriculaId",
       "derived": true
@@ -168,8 +168,8 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Recepcionista",
-      "detail": "roleTag mensalidadesAcademia.Recepcionista; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Recepcao",
+      "detail": "roleTag mensalidadesAcademia.Recepcao; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",

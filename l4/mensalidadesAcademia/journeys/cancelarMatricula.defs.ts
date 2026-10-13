@@ -7,8 +7,8 @@ export const cancelarMatriculaJourney = {
   "journeyId": "cancelarMatricula",
   "business": {
     "actorRef": "recepcao",
-    "title": "Cancelar matrícula do aluno",
-    "goal": "Quando o aluno pede o cancelamento, a recepção localiza a matrícula ativa, confere sua situação e registra o cancelamento, encerrando a geração de mensalidades futuras.",
+    "title": "Cancelar matrícula",
+    "goal": "A pedido do aluno, localizar a matrícula ativa, conferir sua situação e registrar o cancelamento, encerrando a geração de mensalidades futuras.",
     "entry": {
       "mode": "contextOrLookup"
     },
@@ -18,34 +18,34 @@ export const cancelarMatriculaJourney = {
         "kind": "locate",
         "entity": "Matricula",
         "title": "Buscar matrícula do aluno",
-        "description": "A recepção localiza a matrícula ativa do aluno que pediu o cancelamento."
+        "description": "A recepção busca a matrícula ativa do aluno que pediu o cancelamento."
       },
       {
-        "stepId": "conferirMatriculaCancelar",
+        "stepId": "conferirSituacaoMatricula",
         "kind": "inspect",
         "entity": "Matricula",
         "title": "Conferir situação da matrícula",
-        "description": "A recepção confere plano, data de início, situação e mensalidades em aberto ou vencidas da matrícula."
+        "description": "A recepção confere plano, data de início e mensalidades em aberto ou vencidas da matrícula."
       },
       {
         "stepId": "registrarCancelamento",
         "kind": "act",
         "entity": "Matricula",
         "effect": "transition",
-        "transitionRef": "cancelarMatricula",
-        "title": "Cancelar matrícula",
+        "transitionRef": "cancelar",
+        "title": "Registrar cancelamento",
         "description": "A recepção registra o cancelamento da matrícula, que deixa de receber mensalidades nas próximas gerações."
       }
     ],
     "outcome": {
       "statement": "A matrícula fica cancelada e não gera mais mensalidades futuras.",
       "evidence": [
-        "Matrícula com situação cancelada",
-        "Aluno ausente da próxima geração de mensalidades"
+        "A matrícula aparece como cancelada.",
+        "A próxima geração de mensalidades não inclui o aluno."
       ]
     }
   },
-  "businessHash": "sha256:9690ba7bbd1d85fe40bf2e4fb50cf3f0257362a5133827d9899dbf553067bf37"
+  "businessHash": "sha256:7f0d4513792f4afceb19d730ed95194188a7bc2b92139760ee5ba882f6a6d1cf"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CancelarMatriculaJourneyType = typeof cancelarMatriculaJourney;

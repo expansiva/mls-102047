@@ -266,86 +266,6 @@ export const solutionRegistry = {
       "updatedAt": "2026-10-12T20:29:01.147Z"
     },
     {
-      "moduleName": "mensalidadesAcademia",
-      "actors": [
-        {
-          "actorId": "recepcao",
-          "kind": "internal"
-        },
-        {
-          "actorId": "gerencia",
-          "kind": "internal"
-        }
-      ],
-      "roles": [
-        {
-          "subtype": "Person",
-          "roleTag": "mensalidadesAcademia.Aluno",
-          "namespace": "mensalidadesAcademia"
-        },
-        {
-          "subtype": "Person",
-          "roleTag": "mensalidadesAcademia.Recepcionista",
-          "namespace": "mensalidadesAcademia"
-        }
-      ],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Aluno",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Recepcionista",
-          "kind": "role",
-          "mdmSubtype": "Person",
-          "class": "mdm"
-        },
-        {
-          "entityId": "Plano",
-          "kind": "entity",
-          "class": "supporting"
-        },
-        {
-          "entityId": "Matricula",
-          "kind": "entity",
-          "class": "core"
-        },
-        {
-          "entityId": "Mensalidade",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "Pagamento",
-          "kind": "entity",
-          "class": "event"
-        },
-        {
-          "entityId": "PainelMensalidades",
-          "kind": "entity",
-          "class": "supporting"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "mensalidadeGerada",
-          "on": "Mensalidade.create"
-        },
-        {
-          "eventId": "pagamentoMensalidadeRegistrado",
-          "on": "Pagamento.create"
-        },
-        {
-          "eventId": "matriculaCancelada",
-          "on": "Matricula.cancelarMatricula"
-        }
-      ],
-      "updatedAt": "2026-10-12T23:03:17.905Z"
-    },
-    {
       "moduleName": "compras",
       "actors": [
         {
@@ -781,6 +701,90 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-13T01:05:14.988Z"
+    },
+    {
+      "moduleName": "mensalidadesAcademia",
+      "actors": [
+        {
+          "actorId": "recepcao",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gerencia",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "mensalidadesAcademia.Aluno",
+          "namespace": "mensalidadesAcademia"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "mensalidadesAcademia.Recepcao",
+          "namespace": "mensalidadesAcademia"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Aluno",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Recepcao",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Plano",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "Matricula",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "Mensalidade",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "Pagamento",
+          "kind": "entity",
+          "class": "event"
+        },
+        {
+          "entityId": "PainelMensalidades",
+          "kind": "entity",
+          "class": "supporting"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "matriculaRealizada",
+          "on": "Matricula.create"
+        },
+        {
+          "eventId": "matriculaCancelada",
+          "on": "Matricula.cancelar"
+        },
+        {
+          "eventId": "mensalidadeGerada",
+          "on": "Mensalidade.create"
+        },
+        {
+          "eventId": "mensalidadeQuitada",
+          "on": "Mensalidade.quitar"
+        }
+      ],
+      "updatedAt": "2026-10-13T01:09:01.349Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

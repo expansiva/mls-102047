@@ -7,7 +7,7 @@ export const mensalidadesAcademiaEntityPlano = {
   "moduleName": "mensalidadesAcademia",
   "entityId": "Plano",
   "title": "Plano",
-  "description": "Plano da academia com periodicidade (mensal, trimestral ou anual), valor e dia de vencimento das mensalidades.",
+  "description": "Plano da academia (mensal, trimestral ou anual) com valor e dia de vencimento, oferecido nas matrículas.",
   "displayField": "nome",
   "relationships": {
     "matriculas": {
@@ -15,28 +15,29 @@ export const mensalidadesAcademiaEntityPlano = {
       "to": "Matricula",
       "via": "Matricula.planoId",
       "cardinality": "1:N",
-      "title": "Matrículas no plano",
-      "description": "Matrículas feitas neste plano; cada uma usa o valor e o dia de vencimento do plano para gerar as mensalidades.",
+      "title": "Matrículas do plano",
+      "description": "As matrículas feitas neste plano, de onde as mensalidades tiram valor e dia de vencimento.",
       "mode": "fk",
       "direction": "to",
       "required": true
     }
   },
   "capabilities": {
-    "read.byId": "Lê um plano pelo id, quando a gerência abre o plano para ajustar ou quando a matrícula exibe o plano escolhido.",
-    "locate.byColumn": "Lista os planos filtrando por periodicidade e ordenando por nome, usado pela gerência ao consultar os planos e pela recepção ao escolher o plano do aluno.",
-    "locate.byText": "Procura planos pelo trecho do nome digitado na caixa de busca da gerência e da recepção.",
-    "count": "Conta os planos cadastrados para o cabeçalho da lista de planos da gerência.",
-    "create": "Cria um plano com nome, periodicidade, valor e dia de vencimento; usado pela gerência no cadastro de planos.",
-    "update": "Altera o valor, o dia de vencimento ou a descrição de um plano existente; usado pela gerência, valendo para as mensalidades geradas depois da alteração.",
-    "uniqueKey": "Recusa um segundo plano com o mesmo nome, pelo índice único da coluna nome, aplicado pelo motor na gravação.",
-    "comment": "Permite à gerência deixar observações internas sobre o plano, como motivo de um reajuste de valor."
+    "read.byId": "Abre um plano pelo identificador, quando a recepção confere valor e dia de vencimento na matrícula ou a gerência revê o plano.",
+    "locate.byColumn": "Lista os planos filtrados por periodicidade e ordenados pelo nome, para a gerência consultar o cadastro e a recepção escolher o plano da matrícula.",
+    "locate.byText": "Busca planos por parte do nome, para a gerência evitar duplicidade antes de cadastrar e a recepção achar o plano pedido pelo aluno.",
+    "count": "Conta os planos cadastrados por periodicidade, exibido no cabeçalho da lista de planos da gerência.",
+    "create": "Cadastra um novo plano com nome, periodicidade, valor e dia de vencimento; usado pela gerência.",
+    "update": "Altera valor, dia de vencimento ou descrição de um plano; usado pela gerência, valendo para as mensalidades geradas depois da alteração.",
+    "delete": "Remove um plano cadastrado por engano; usado pela gerência e recusado pelo módulo quando há matrícula apontando para ele.",
+    "uniqueKey": "Recusa um segundo plano com o mesmo nome, por índice único na coluna nome, ao gravar o cadastro da gerência.",
+    "comment": "Permite à gerência deixar anotações internas sobre o plano, como condições combinadas ou promoções."
   },
   "rules": [
     "planoNomeUnico",
     "planoValorPositivo",
     "planoDiaVencimentoValido",
-    "planoAlteracaoNaoAfetaMensalidadesGeradas"
+    "planoComMatriculaNaoPodeSerExcluido"
   ],
   "kind": "entity",
   "class": "supporting",
@@ -65,7 +66,7 @@ export const mensalidadesAcademiaEntityPlano = {
         "unique": true,
         "indexed": true,
         "title": "Nome do plano",
-        "description": "Nome pelo qual a gerência e a recepção identificam o plano (ex.: Mensal, Trimestral, Anual). A busca e a escolha do plano são feitas por ele.",
+        "description": "Nome pelo qual a gerência e a recepção identificam o plano na hora de matricular o aluno. É único entre os planos da academia.",
         "maxLength": 80
       },
       "periodicidade": {
@@ -82,45 +83,45 @@ export const mensalidadesAcademiaEntityPlano = {
             "title": "Trimestral"
           },
           {
-            "value": "annual",
+            "value": "yearly",
             "title": "Anual"
           }
         ],
         "title": "Periodicidade",
-        "description": "Período coberto pelo plano. A recepção filtra os planos por ela ao matricular o aluno."
+        "description": "Período de cobrança do plano; a recepção filtra os planos por ela ao escolher o plano da matrícula."
       },
       "details": {
         "type": "object",
         "required": true,
         "title": "Dados do plano",
-        "description": "Valor e dia de vencimento usados na geração das mensalidades dos alunos matriculados neste plano.",
+        "description": "Valor, dia de vencimento e descrição do plano.",
         "fields": {
           "valor": {
             "type": "money",
             "required": true,
             "title": "Valor",
-            "description": "Valor cobrado em cada mensalidade gerada para os alunos matriculados neste plano.",
+            "description": "Valor do plano, copiado para cada mensalidade gerada para os alunos matriculados nele.",
             "min": 0.01
           },
           "diaVencimento": {
             "type": "integer",
             "required": true,
             "title": "Dia de vencimento",
-            "description": "Dia do mês em que vencem as mensalidades geradas para este plano; em meses mais curtos vale o último dia do mês.",
+            "description": "Dia do mês em que vencem as mensalidades geradas para os alunos deste plano.",
             "min": 1,
             "max": 31
           },
           "descricao": {
             "type": "text",
             "title": "Descrição",
-            "description": "Observações da gerência sobre o plano, exibidas à recepção na escolha do plano.",
+            "description": "Observações da gerência sobre o plano, mostradas à recepção ao escolher o plano.",
             "maxLength": 500
           },
-          "matriculasAtivas": {
+          "quantidadeMatriculasAtivas": {
             "type": "integer",
             "derived": true,
             "title": "Matrículas ativas",
-            "description": "Quantidade de matrículas ativas feitas neste plano, contando as matrículas não canceladas que apontam para ele."
+            "description": "Quantidade de matrículas ativas (não canceladas) feitas neste plano."
           }
         }
       }
