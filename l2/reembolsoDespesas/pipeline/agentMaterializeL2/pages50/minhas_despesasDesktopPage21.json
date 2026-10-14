@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "minhas_despesas",
+  "device": "desktop",
+  "genome": "page21",
+  "contextHash": "sha256:8cdfe0b17915d43cad9e4f33a17039a49636f0dd8375b878289243f1d2ec9604",
+  "sourcePath": "l2/reembolsoDespesas/web/desktop/page21/minhas_despesas.ts",
+  "sourceHash": "sha256:5123e6a4075150cb7dfa686f4e42aaaf53256f4bf5ce00b2fc67ce92a06c92f0",
+  "attempt": 1,
+  "design": {
+    "concept": "A decision-first board of expense cards. Each card opens with a full-width colored status strip, then the date, category and the amount in large type. Opening a card takes the person to its own detail scene where the outcome buttons (send, resend, correct) come first, then the rejection reason and the facts.",
+    "views": [
+      {
+        "id": "board",
+        "purpose": "Board of expense cards with a status filter and the main action, Register expense. It has an empty state with a large icon, one sentence and the same main action."
+      },
+      {
+        "id": "detalhe",
+        "purpose": "The open expense: identity line with status strip, the outcome row at the top, the rejection reason, then the facts."
+      },
+      {
+        "id": "registrar",
+        "purpose": "Form for a new expense. It opens on demand from the board and goes straight to the detail of the created draft."
+      },
+      {
+        "id": "corrigir",
+        "purpose": "Form for correcting a rejected expense, prefilled by the shared. It returns to the detail so the person can resend."
+      }
+    ],
+    "decisions": "I followed the decisionFirst template, not the table preference in the defs. The collection is a grid of cards (1/2/3 columns) with no table and no column headers. The status strip is a full-width band, so status is never a small badge. The detail is not beside the board. It is its own scene of the scene host, which covers the board, so S2 holds without any state in the page. In the detail the outcome row comes before every fact. Success replaces that row with one line, and a failure shows above the buttons. The rejection reason uses contextual-feedback, right after the outcomes. The register and correct forms are secondary and open from a button. They are two scenes because a scene title is static. The shared state is used, with no page state. Registering or saving a correction moves to the detail through the .then of the shared command, and only when its status is success. The rows of the page come from `despesas.items` read defensively, because the declaration does not show the page shape. The proof (comprovante) upload is left out of the forms: the draft contracts have no field to hold a file, so I did not render a control bound to nothing. The money value is converted between the draft string and the number the molecule expects."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section acompanhamento needs an element with data-section-id=\"acompanhamento\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section despesaSelecionada needs an element with data-section-id=\"despesaSelecionada\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section registroCorrecao needs an element with data-section-id=\"registroCorrecao\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism listaMinhasDespesas (Lista das minhas despesas com situação) renders neither <groupviewtable--ml-data-table> nor <groupviewtable--ml-view-table>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism formularioDespesa (Comprovante da despesa) renders neither <groupselectfileforupload--ml-file-upload-preview> nor <groupselectfileforupload--ml-file-upload-dropzone>."
+    }
+  ]
+}

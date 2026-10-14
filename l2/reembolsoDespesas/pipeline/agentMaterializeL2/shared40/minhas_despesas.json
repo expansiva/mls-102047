@@ -3,34 +3,38 @@
   "project": 102047,
   "module": "reembolsoDespesas",
   "pageId": "minhas_despesas",
-  "unitInputHash": "sha256:455850985a9aa1f49c69d3620a6ed71fc2f0c960053c37ba498d069472ff5acd",
+  "unitInputHash": "sha256:b5c13829007afeed1c6a0e1833cc5973ecc37e81db3e21238182ee96fe5da8a8",
   "promptHash": "sha256:7892145be1d692df52c7d5be34d8b7e4aac91a4e72169ab9fb4fbd62b4a9cf8b",
   "rulesHash": "sha256:016b9ad36d6c01dff95a7582e61dd5ad1aab2b1d20b2675fa342b1c91f4179ad",
   "sourcePath": "l2/reembolsoDespesas/web/shared/minhas_despesas.ts",
-  "sourceHash": "sha256:f059f5230f2f74769307511dd3bdc84137d73a9a798dc11fd47bb7d551c0f6bb",
+  "sourceHash": "sha256:e7cbef281365dc82aff98f43e7c1dd1d601d043574417d88dd4128e8ada614f2",
   "declarationPath": "l2/reembolsoDespesas/web/shared/minhas_despesasDts.txt",
-  "declarationHash": "sha256:00841629abee33ea4442dc9f9e39e9b94fb5e233d7d3bec280db9cc3dbca97de",
+  "declarationHash": "sha256:48d9fc5576ee6d9ca0a9295247fc0cd6d39e3cbf5e541c816bb9dfeabb085a8c",
   "attempt": 1,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "Entry params status and page have effect filter:listaMinhasDespesas but no state holds them. Added public states `status` (ExpenseStatus | null) and `page` (number | null), both persisted; listarMinhasDespesas takes them as arguments and publishes them."
+      "message": "Entry params status and page (filter:listaMinhasDespesas) had no state. Added public states `status` and `page` (persisted), used in the input of listarMinhasDespesas."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "State selectedDespesa holds only the id (entry.params.despesaId) and no member selects. The selection is served by obterDespesa(id | null), which publishes the id and loads the record into `despesa`."
+      "message": "The selection param despesaId had no select method. obterDespesa(id | null) now selects the id (selectedDespesa) and fetches the record into `despesa`."
     },
     {
-      "code": "DRAFT_STATE_MISSING",
-      "message": "The defs declare no <command>.input state for registrarDespesa and salvarCorrecao (formularioDespesa). Added registrarDespesaDraft and salvarCorrecaoDraft with setters setRegistrarDespesaDraft and setSalvarCorrecaoDraft; salvarCorrecaoDraft is prefilled from `despesa`. No field for the proof (comprovante) exists in any route, so the draft has none."
+      "code": "FORM_DRAFT_MISSING",
+      "message": "registrarDespesa and salvarCorrecao have no `<command>.input` state. Added registrarDespesaDraft and salvarCorrecaoDraft with setters setRegistrarDespesaDraft and setSalvarCorrecaoDraft; salvarCorrecaoDraft is prefilled from the open expense."
     },
     {
-      "code": "IDENTITY_NOT_AVAILABLE",
-      "message": "registrarDespesa requires colaboradorId from the session, but the shared has no identity source. It sends an empty string and relies on the backend to bind the logged collaborator."
+      "code": "SESSION_IDENTITY_MISSING",
+      "message": "registrarDespesa requires colaboradorId from the session, but no identity source exists in the allowed modules. The draft holds an optional colaboradorId, sent as '' when null; the backend must bind the session collaborator."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "Command rows (item) are applied to despesas by id (insert at top for registrarDespesa, update in place otherwise, removed when the status filter no longer matches); page/hasMore of the list are not recomputed."
+      "message": "Inserting a row into a list that pageStatus marks 'empty' leaves pageStatus as 'empty', because only the list load writes pageStatus. The page should read despesas.items for that case."
+    },
+    {
+      "code": "ATTACHMENT_NOT_COVERED",
+      "message": "The proof (comprovante) is attached by another capability, with no route or state in this contract, so the shared does not handle it."
     },
     {
       "code": "MEMBER_ADDED",

@@ -1,0 +1,41 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { InicioContracts } from '/_102047_/l2/reembolsoDespesas/web/contracts/inicio.defs.js';
+export type { InicioContracts, IdentificacaoColaborador, DetalhesColaborador, ColaboradorResponsavel, DetalhesDespesaPendente, DespesaPendente } from '/_102047_/l2/reembolsoDespesas/web/contracts/inicio.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+type Output<R extends keyof InicioContracts> = InicioContracts[R]['output'];
+type DespesasPendentesPage = Output<'reembolsoDespesas.inicio.qryInicio'>['despesasPendentes'];
+export declare class ReembolsoDespesasInicioShared extends StateLitElement {
+    /** state page — the page of the pending-expense list the person went to with a pager; source entry.params.page; organism caixaDespesasPendentes; persisted */
+    page: number | null;
+    /** state totalPendentes — number of team expenses waiting for the manager's decision, for the pending volume highlight; source qryInicio.totalPendentes; organism caixaDespesasPendentes */
+    totalPendentes: number;
+    /** state despesasPendentes — page of team expenses waiting for the manager's decision, each with the collaborator who registered it; source qryInicio.despesasPendentes; organism caixaDespesasPendentes */
+    despesasPendentes: DespesasPendentesPage | null;
+    /** state pageStatus — overall status of the page: idle, loading, empty (no pending expense), success or error */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state qryInicioStatus — status of the request qryInicio: idle, loading, success or error */
+    qryInicioStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state qryInicioError — error of the request qryInicio (code, message, details), null when none */
+    qryInicioError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private hydrateData;
+    private resetVisit;
+    private readParam;
+    private applyEntryParams;
+    /** scene — publishes the visible scene of the page; resets nothing else */
+    setScenario(value: string): void;
+    /** request qryInicio — loads the total of team expenses awaiting the manager's decision and the list of those expenses with who registered them; redraws totalPendentes (replace) and despesasPendentes (replace, or append more items when append is true, keeping page and hasMore of the list itself); arguments: page = page to load (omit to use the current page param, or the first page), append = true for a "load more" that adds the next page to the items without changing the page param (does nothing when the list has no more pages). Also the method to reload and to page the list. */
+    qryInicio(page?: number, append?: boolean): Promise<void>;
+    /** navigate — opens the team expenses page (despesas_da_equipe) to analyse and decide the expense the person picked; despesaId = id of the picked pending expense, carried as the param that selects it there; refuses with client.preconditionMissing in qryInicioError when it is null or empty */
+    abrirAnaliseDespesas(despesaId: string | null): void;
+}

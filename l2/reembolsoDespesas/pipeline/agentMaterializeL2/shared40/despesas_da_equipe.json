@@ -3,30 +3,30 @@
   "project": 102047,
   "module": "reembolsoDespesas",
   "pageId": "despesas_da_equipe",
-  "unitInputHash": "sha256:62ba8c82d7879f252337a5fb3ed17b5b9f0db95d358288b47d53de5005b8b736",
+  "unitInputHash": "sha256:495514fb10cbca7283237620a2f620512e0a1508f9477a301f00567bc34b571e",
   "promptHash": "sha256:7892145be1d692df52c7d5be34d8b7e4aac91a4e72169ab9fb4fbd62b4a9cf8b",
   "rulesHash": "sha256:1941120b85aeec4b8ea459a406d0e30d20344df95e47db775871f27fcf0da4c8",
   "sourcePath": "l2/reembolsoDespesas/web/shared/despesas_da_equipe.ts",
-  "sourceHash": "sha256:3bb47bbd097890a0c2208e4fb143f56dfef2ba21631b028223d1e31d40adb845",
+  "sourceHash": "sha256:911fe30499b8ed285e3c87b5b5d63ea1d58adcf199e3e821f008b1c9ca34eb48",
   "declarationPath": "l2/reembolsoDespesas/web/shared/despesas_da_equipeDts.txt",
-  "declarationHash": "sha256:c19c4af38bab33d3f27196314f51daefbd768a34bbe079dc453e3770281936a0",
+  "declarationHash": "sha256:c6587bb969cd8a629fc0b6269b916d4c1ecee2b88e08c979ab6fe32f2938ccbf",
   "attempt": 1,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "Entry param page (filter:despesasPendentes, persisted) has no state in the definition. Added the public persisted state `page` (number | null) that records the page reached with a pager; listarDespesasPendentesEquipe(page, append) writes it only when not appending."
-    },
-    {
-      "code": "DRAFT_STATE_MISSING",
-      "message": "Command rejeitarDespesa needs a typed reason but the definition has no <command>.input state. Added the public state `rejeitarDespesaDraft` (RejeitarDespesaDraft) with setter setRejeitarDespesaDraft; id and version come from the loaded despesa."
+      "message": "Entry param page (filter:despesasPendentes, persisted) has no state in the definition. Added public state `page` (number | null, persisted) recording the page chosen with a pager; listarDespesasPendentesEquipe(page, append) uses it and publishes it when not appending."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "The selection state selectedDespesa (entry.params.despesaId) is written by no request setter. The selection is done through obterDespesaParaAnalise(despesaId | null), which publishes selectedDespesa and loads the record into despesa."
+      "message": "Param despesaId selects analiseDespesa but no member selects. Added selectDespesa(id | null), which publishes selectedDespesa (id) and fetches the record into `despesa` through obterDespesaParaAnalise."
+    },
+    {
+      "code": "DRAFT_STATE_MISSING",
+      "message": "rejeitarDespesa needs a typed reason but the definition has no <command>.input state. Added rejeitarDespesaDraft (RejeitarDespesaDraft) with setRejeitarDespesaDraft."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "aprovarDespesa and rejeitarDespesa return the updated despesa, which no state has as source. Applied as the route comments say: redraws despesa and removes the row from the pending queue (despesas.items) without reload."
+      "message": "aprovarDespesa and rejeitarDespesa return `despesa`, which no state declares as target. Applied it to the `despesa` state and removed the decided row from `despesas` (queue shows only awaitingApproval); no reload."
     },
     {
       "code": "MEMBER_ADDED",
@@ -35,6 +35,10 @@
     {
       "code": "MEMBER_ADDED",
       "message": "public rejeitarDespesaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public selectDespesa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",

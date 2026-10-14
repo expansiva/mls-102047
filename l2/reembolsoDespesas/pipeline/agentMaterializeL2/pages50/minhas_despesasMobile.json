@@ -4,33 +4,37 @@
   "module": "reembolsoDespesas",
   "pageId": "minhas_despesas",
   "device": "mobile",
-  "contextHash": "sha256:b5b1da8f0d818f98ff17569593e9e855f588c7478e5e7bf4c466725ad6548a56",
+  "contextHash": "sha256:7b55ec7509e8c176f277fab1d554b4718385fcb0b03cb618cd8886d38e437a2f",
   "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/minhas_despesas.ts",
-  "sourceHash": "sha256:6206c987217bfffda96f1421b8a04b4e104a7331aded8a57c491af18498b286e",
+  "sourceHash": "sha256:8447e2358e27adfc49dc6a5bacecafb4267105e9816455ba3716f67ad09dd088",
   "attempt": 1,
   "design": {
-    "concept": "Uma coluna única, uma coisa de cada vez: o colaborador vê a lista de despesas, toca numa e lê a despesa como um memorando (identidade, fatos decisivos, motivo da rejeição, descrição, trilha) até chegar, no fim, às ações de envio ou reenvio. Registrar e corrigir abrem como passos próprios, com voltar, para não competir com a leitura.",
+    "concept": "A single-column, one-thing-at-a-time expense tracker. The person lands on their expense list (status chips, stacked records with amount and status), taps one to read it like a memo (identity, amount, dates, description, rejection reason), and meets the send or resend actions at the very end of that reading. Registering and correcting are side tasks that open as their own steps with a back control.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Acompanhar as despesas: filtro por situação, lista empilhada com valor e situação bem visíveis, carregar mais e atalho para registrar uma nova despesa."
+        "purpose": "Primary view: filter chips by status, the stacked list of own expenses with date, category, amount and status, load more, and a clear entry point to register a new expense."
       },
       {
         "id": "detalhe",
-        "purpose": "Ler a despesa aberta em ordem vertical fixa e, no fim, decidir: enviar, corrigir ou reenviar para aprovação."
+        "purpose": "Read the open expense top to bottom (identity, decisive facts, narrative, rejection reason, resubmission trail), then the send or resend block at the end."
       },
       {
-        "id": "registrar",
-        "purpose": "Formulário em coluna única para registrar uma despesa nova (data, categoria, valor, descrição e comprovante)."
+        "id": "novo",
+        "purpose": "Single-column form to register a new expense (date, category, amount, description). On success the created draft opens in the detail view, where the person can send it."
       },
       {
-        "id": "corrigir",
-        "purpose": "Mesmo formulário preenchido a partir da despesa rejeitada, com o motivo da rejeição lembrado no topo."
+        "id": "correcao",
+        "purpose": "Single-column form prefilled from the rejected expense, with the manager's reason on top. Saving returns to the detail, where resubmission is the last beat."
       }
     ],
-    "decisions": "Usei um único host de cenas em mode=scenary com quatro cenas, porque no celular o fluxo é de passos com voltar (lista → detalhe → corrigir), e não de painéis paralelos. Registrar e corrigir são cenas separadas para que a página não precise de estado próprio para saber em que modo o formulário está; cada uma liga no seu rascunho do shared. Tocar numa linha abre a cena de detalhe na hora e mostra carregando até a despesa chegar; depois de registrar ou salvar a correção com sucesso, a pessoa cai no detalhe da despesa. O detalhe segue o template readAndDecide: cartão com categoria e situação, valor grande, motivo da rejeição em destaque logo abaixo, descrição, trilha (reenvio e pagamento) e só no fim o bloco de ações, com erro acima dos botões, botão em carregamento e declaração calma de sucesso. As ações vêm da situação: rascunho envia; rejeitada não reenviada oferece corrigir e reenviar (reenviar é o caminho primário); reenviada ou demais situações apenas mostram uma frase. A lista usa o vertical-record-list com seleção marcada por ?selected; a situação é filtrada por um select nativo de 44px para evitar chips com rolagem horizontal. Valores e datas só são formatados com Intl, nada é somado ou derivado. O comprovante usa o file-upload-preview, mas o shared não declara estado para o arquivo, então ele fica só no molecule; o campo existe porque o organismo o pede e a regra de negócio exige comprovante. Cores só por tokens; badges de situação usam os tokens status-*. Os títulos aparecem uma vez: o título da cena nomeia a vista, e botões não repetem o título da cena em que estão."
+    "decisions": "I used the scene host in scenary mode, so every view change goes through it. There are four scenes instead of one shared form scene, because the page holds no state. 'novo' and 'correcao' are the two form modes, each bound to its own draft and command. The page follows the readAndDecide template: the detail reads identity, facts, narrative, then the actions block at the end, with no sticky bar. Failures show above the buttons in body colour and keep the drafts. The success statement is calm and local. The list uses the preferred vertical record list, with status chips as a wrapping group, not a horizontal scroller, and 44px+ targets. Money and dates are only formatted with Intl, never computed. The draft money string is converted to a number only for the money input. Opening an expense switches the scene first and shows the card loading while obterDespesa runs. After registering or saving a correction, the page returns to the detail only when the command status is success. The proof attachment has no field in the contract or the shared state, so I left the file upload out rather than show a control that stores nothing. The 'Reenviar' action only appears for a rejected expense not yet resent (the reenvioRealizado flag), and 'Enviar' only for drafts, both read from backend fields."
   },
   "advisories": [
+    {
+      "code": "M4_PAGE_HEADER",
+      "message": "[contract] The first line must be exactly: /// <mls fileReference=\"_102047_/l2/reembolsoDespesas/web/mobile/page11/minhas_despesas.ts\" enhancement=\"_102020_/l2/enhancementAura\"/>"
+    },
     {
       "code": "M4_PAGE_SECTION",
       "message": "Section acompanhamento needs an element with data-section-id=\"acompanhamento\"."
@@ -42,6 +46,10 @@
     {
       "code": "M4_PAGE_SECTION",
       "message": "Section registroCorrecao needs an element with data-section-id=\"registroCorrecao\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism formularioDespesa (Comprovante da despesa) renders neither <groupselectfileforupload--ml-file-upload-preview> nor <groupselectfileforupload--ml-file-upload-dropzone>."
     }
   ]
 }

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "despesas_aprovadas",
+  "device": "mobile",
+  "genome": "page21",
+  "contextHash": "sha256:a78152c32115302cc29fe16e83f2f3984f0100cbc501c068acb300dfcff59cd6",
+  "sourcePath": "l2/reembolsoDespesas/web/mobile/page21/despesas_aprovadas.ts",
+  "sourceHash": "sha256:818982c69e259e45ebbc39aa5c23f1593aa8b8ea1131ffc316edd99d26f856fd",
+  "attempt": 1,
+  "design": {
+    "concept": "Pagar uma despesa por vez, guiado. A fila é uma coluna de cartões com o valor grande à direita e pílulas de categoria acima. Escolher um cartão abre um assistente de dois passos em cenas (Conferir → Data do pagamento) e termina em uma cena de sucesso com um botão de volta à fila.",
+    "views": [
+      {
+        "id": "fila",
+        "purpose": "Fila de despesas aprovadas: pílulas de categoria e cartões tocáveis; carregar mais quando houver outra página."
+      },
+      {
+        "id": "conferir",
+        "purpose": "Passo 1 de 2: despesa somente leitura com todos os dados do contrato e o botão Continuar."
+      },
+      {
+        "id": "pagamento",
+        "purpose": "Passo 2 de 2: resumo curto, data do pagamento e botão de confirmar, desabilitado até a data ser preenchida; erro e nova tentativa ficam aqui."
+      },
+      {
+        "id": "sucesso",
+        "purpose": "Confirmação grande do que foi pago e um botão de volta à fila, de onde a despesa já saiu."
+      }
+    ],
+    "decisions": "Segui o template à risca, pois ele manda no comportamento: sem tabela, sem pagar pela lista e sem formulário único que misture ler e preencher. Os dois passos e o sucesso são cenas do host ml-scenary em modo scenary, com voltar. A cena de sucesso abre quando o comando termina com status success. O filtro por categoria é uma fileira de pílulas com 'Todas'; as categorias vêm dos cartões já carregados, mais a categoria ativa, porque o contrato não traz a lista de escolhas. O filtro por colaborador não vira pílulas, já que só há ids e nada legível. Troquei a paginação numerada por 'Carregar mais' (append), porque o contrato devolve hasMore e não o total de páginas. O valor aparece como o backend o entrega; só as datas passam por Intl. Cartões usam ml-vertical-card clicável, o seletor de data é o date-shortcut-picker e os botões são ml-button-standard em largura total (toque de 44px ou mais). O toast não é usado, porque a cena de sucesso já confirma."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section filaPagamento needs an element with data-section-id=\"filaPagamento\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section analisePagamento needs an element with data-section-id=\"analisePagamento\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (lista de despesas aprovadas) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewtable--ml-responsive-data-table>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (busca na lista) renders neither <groupsearchcontent--ml-search-bar>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (paginação) renders neither <grouptriggeraction--ml-pagination-control>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism registroPagamentoForm (confirmação do registro) renders neither <groupnotifyuser--ml-toast-notification>."
+    }
+  ]
+}

@@ -4,23 +4,23 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_da_equipe",
   "device": "mobile",
-  "contextHash": "sha256:7c73bba97cd437ae3c943ff8deacbcb67b6f83a67602ba784a4470ac111a52b2",
+  "contextHash": "sha256:fefef7f293a3a44c51e217c0aaa78b24627f78c685d06e748b7901b4bf3bf85e",
   "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/despesas_da_equipe.ts",
-  "sourceHash": "sha256:305b5fc9e8fca1c6a33a59979ebac7d8ff9a2380fc4ed4cfd96c04d9ffa1bd45",
+  "sourceHash": "sha256:23a791e787b3872b9bd729a120b54d5e20e1fdde2fc454140f81072932318da6",
   "attempt": 1,
   "design": {
-    "concept": "Duas cenas em coluna única: a fila de despesas pendentes da equipe (cartões compactos com colaborador, valor e data) e, ao tocar em uma, a leitura da despesa como um memorando — identidade, fatos decisivos, descrição, histórico — com a decisão só no fim. Aprovar abre uma única confirmação; rejeitar expande o motivo obrigatório no próprio bloco.",
+    "concept": "A two-step memo for the manager's thumb: first a compact queue of the team's pending expenses, then one expense read top to bottom (who, the decisive facts, the description, the trail) with the decision only at the very end. Approving takes one confirmation dialog; rejecting expands an inline reason field. The result is a calm statement where the buttons were.",
     "views": [
       {
         "id": "fila",
-        "purpose": "Localizar e escolher a despesa pendente; o título da cena é o título da página. Tem carregar mais, estados de carregamento, vazio e erro."
+        "purpose": "Queue of pending team expenses (collaborator + category, date, amount) with load-more, loading, empty and error states. Tapping a row selects it and opens the analysis."
       },
       {
         "id": "analise",
-        "purpose": "Ler a despesa escolhida de cima para baixo e decidir ao final. Cena com botão de voltar para a fila, sem avanço automático após a decisão."
+        "purpose": "One expense read like a memo (identity, facts, description, trail), then the decision block: approve with a plain confirmation dialog, reject with an inline required reason. Back returns to the queue."
       }
     ],
-    "decisions": "Usei o scene host em mode=scenary porque fila e análise são passos em sequência, com voltar; a fila continua no DOM e preserva a posição. A lista usa ml-responsive-table, que no celular vira cartões legíveis, com rowClick abrindo a análise e a linha marcada por índice. A busca por colaborador/categoria ficou de fora: o compartilhado não oferece filtro e a página não pode guardar estado nem filtrar. O comprovante também ficou de fora: o contrato não tem campo de arquivo. A ordem de leitura segue o template: identidade e fatos no cartão, depois descrição, depois histórico (reenvio e motivo anterior). O bloco de decisão fica no fim, sem barra fixa. Aprovar abre um <dialog> nativo (sem estado na página) que repete colaborador e valor. Rejeitar usa <details> que expande o campo de motivo (ml-multiline-text); o botão de confirmação só habilita com motivo preenchido, e a orientação aparece no campo. Erros aparecem dentro do bloco, acima dos botões. Após a decisão o bloco vira uma declaração calma da situação, mostrando o motivo quando rejeitada. Sem toast: o template proíbe banner de página. Alvos de toque de pelo menos 44px.."
+    "decisions": "Used the scene host in scenary mode for queue → analysis, so the person keeps their place and goes back with the host's back control. The queue uses the responsive data table with three columns (collaborator with category beneath, date, amount), with the open expense marked by row index. The analysis follows the template reading order inside a vertical card, and the decision block sits after the trail, never sticky. Approve opens one native modal dialog (restating collaborator, amount and date) opened from the DOM in the event, so the page holds no state. Reject uses a native details element as the single inline beat: the reason field (bound to the shared draft) and a confirm button that stays disabled until the reason has text. Errors appear inside the decision block above the buttons, and nothing typed is lost. After a decision the block is replaced by a quiet statement based on the status the backend returns. Left out on purpose: the search bar (the shared has no query to search with, and filtering on the page is forbidden), the receipt viewer (no row field holds a receipt), and the toast (success is local; validation stays at the field). Paging is a single load-more button at the end of the list, never a page-size choice."
   },
   "advisories": [
     {

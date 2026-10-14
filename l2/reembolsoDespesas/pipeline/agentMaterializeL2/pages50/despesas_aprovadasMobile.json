@@ -4,23 +4,23 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_aprovadas",
   "device": "mobile",
-  "contextHash": "sha256:f6d323a0830b66e67746cc4f6f827d7a8cc0c2a7fc77fa2eccd77cf9eecaf587",
+  "contextHash": "sha256:39d1e1ac18234a3d3b15f13ff9fb58127f82ca9f39518eb33a0f8832e97ef137",
   "sourcePath": "l2/reembolsoDespesas/web/mobile/page11/despesas_aprovadas.ts",
-  "sourceHash": "sha256:671dbacd7f718f5c3bdaef6bf888d271c55ad47f360a0da5266e134ac5bd6685",
+  "sourceHash": "sha256:4c25bbab758c38fab850ad875756402bfcc5dbb5804772b0b862b9c87629303e",
   "attempt": 1,
   "design": {
-    "concept": "Fluxo de duas cenas para o financeiro no celular: primeiro a fila de despesas aprovadas (filtro por categoria, itens empilhados e fáceis de tocar), depois uma cena única de conferência e pagamento com os dados da despesa e, logo abaixo, a data de pagamento e o botão de confirmar. Uma coisa de cada vez, com voltar para a fila sem perder filtro nem posição.",
+    "concept": "A two-step, one-handed flow for the finance person on a phone. Step one is the queue of approved expenses, stacked as large touch rows with amount on the right and a category filter on top. Step two opens after a tap: the expense data is shown for checking and, right below, the payment date and one clear button to register the payment.",
     "views": [
       {
         "id": "fila",
-        "purpose": "Localizar a despesa: filtro por categoria com ficha removível, lista de itens com valor, categoria, colaborador, data e situação, e carregar mais."
+        "purpose": "Queue of approved expenses waiting for payment: category filter with removable token, tappable rows (category, collaborator, date, amount), load more. Failure, loading and empty states appear in the list's own region."
       },
       {
         "id": "pagamento",
-        "purpose": "Conferir a despesa escolhida e registrar a data de pagamento; confirmação do registro no próprio fluxo e atalho para voltar à fila."
+        "purpose": "Check the chosen expense (card with amount, category, collaborator, date, description, status) and register the payment date. Back returns to the queue; after success the expense has left the queue and the person goes back to it."
       }
     ],
-    "decisions": "Troca de cenas só pelo scene host em mode=scenary: tocar numa despesa carrega o detalhe (obterDespesaAprovada) e abre a cena de pagamento; o voltar nativo do host leva à fila, que fica no DOM com filtro e rolagem preservados. Lista com ml-vertical-record-list (preferida) e seleção única marcada pelo ?selected conforme selectedDespesa; valor à direita em algarismos tabulares, sem somar nada (o contrato não declara totais, então não há totais inventados). Paginação: como a fila é um append com hasMore, troquei o pager numerado por um botão 'Carregar mais' com append, mais natural no celular. Filtro: só categoria (declarado), com search-bar e ficha removível; colaborador é id de contexto e nunca vira campo. Detalhe em vertical-card, formulário com date-shortcut-picker (atalhos como Hoje/Ontem) e botão de largura total com alvo de 44px+. Estados: esqueleto de carregamento, vazio, erro com tentar novamente na própria região, erro de validação no campo de data, e toast de sucesso inline (sem posição) ao registrar; depois do sucesso o botão fica desabilitado e a despesa já aparece com a nova situação e a data de pagamento."
+    "decisions": "Used the scene host in scenary mode: queue and payment are steps of one job, so a single narrow column shows one thing at a time and the back control keeps the place. The record list is the preferred molecule with two rich cells (identity stack and right-aligned amount) so rows are readable at 360px and the amount follows the ledger rule: last, right-aligned, tabular figures. The search bar filters by category (a declared query input); colaboradorId is shown as a removable token only if already set, and never typed. No totals or counts are shown because the contract delivers none and the page must not compute them. Paging uses a 'load more' button (the contract exposes hasMore, not a page count), so the pagination control is not used. The payment date uses the shortcut picker (today/yesterday are the usual cases); the confirm button is disabled until a date exists and shows progress while running. Errors render above the rows or the form in body color with retry; success is the toast plus an inline confirmation with a way back, since the expense leaves the queue. Titles: scene titles are the only headings; the card title is the amount and no heading repeats the button label."
   },
   "advisories": [
     {

@@ -1,0 +1,79 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { Despesas_da_equipeContracts } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.js';
+export type { Despesas_da_equipeContracts, ColaboradorIdentificacaoNome, ColaboradorDetalhesNome, ColaboradorNome, DespesaResumoDetalhes, DespesaPendenteResumo, DespesaAnaliseDetalhes, DespesaAnalise, } from '/_102047_/l2/reembolsoDespesas/web/contracts/despesas_da_equipe.defs.js';
+type Output<R extends keyof Despesas_da_equipeContracts> = Despesas_da_equipeContracts[R]['output'];
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+/** The paged queue of pending expenses: { items, page, pageSize, hasMore }. */
+export type DespesasPage = Output<'reembolsoDespesas.despesas_da_equipe.listarDespesasPendentesEquipe'>['despesas'];
+/** The expense under analysis, with its version and collaborator name. */
+export type DespesaEmAnalise = Output<'reembolsoDespesas.despesas_da_equipe.obterDespesaParaAnalise'>['despesa'];
+/** Draft of the rejection command: the reason typed by the manager. */
+export type RejeitarDespesaDraft = {
+    motivoRejeicao: string | null;
+};
+type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export declare class ReembolsoDespesasDespesas_da_equipeShared extends StateLitElement {
+    /** state despesas — paged queue of the team's pending expenses ({ items, page, pageSize, hasMore }); source listarDespesasPendentesEquipe.despesas; organism despesasPendentes */
+    despesas: DespesasPage | null;
+    /** state despesa — the complete expense under analysis with its collaborator, used by the analysis and the decision; source obterDespesaParaAnalise.despesa; organisms analiseDespesa, decisaoDespesa */
+    despesa: DespesaEmAnalise | null;
+    /** state selectedDespesa — id of the expense chosen in the queue for analysis (null when none); the record itself is in `despesa`; source entry.params.despesaId; organisms analiseDespesa, decisaoDespesa, despesasPendentes; persisted */
+    selectedDespesa: string | null;
+    /** state page — the page of the queue the person went to with a pager (null until one is chosen); source entry.params.page; organism despesasPendentes; persisted */
+    page: number | null;
+    /** state rejeitarDespesaDraft — draft of the rejection form (the mandatory reason); source rejeitarDespesa.input */
+    rejeitarDespesaDraft: RejeitarDespesaDraft;
+    /** state pageStatus — overall status of the page: loading while the queue loads, empty when it has no rows, error when it failed; source page load */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state listarDespesasPendentesEquipeStatus — status of the queue request; source request listarDespesasPendentesEquipe */
+    listarDespesasPendentesEquipeStatus: RequestStatus;
+    /** state listarDespesasPendentesEquipeError — error of the queue request, null when none; source request listarDespesasPendentesEquipe */
+    listarDespesasPendentesEquipeError: ErrorState;
+    /** state obterDespesaParaAnaliseStatus — status of the expense detail request; source request obterDespesaParaAnalise */
+    obterDespesaParaAnaliseStatus: RequestStatus;
+    /** state obterDespesaParaAnaliseError — error of the expense detail request, null when none; source request obterDespesaParaAnalise */
+    obterDespesaParaAnaliseError: ErrorState;
+    /** state aprovarDespesaStatus — status of the approve command; source request aprovarDespesa */
+    aprovarDespesaStatus: RequestStatus;
+    /** state aprovarDespesaError — error of the approve command, null when none; source request aprovarDespesa */
+    aprovarDespesaError: ErrorState;
+    /** state rejeitarDespesaStatus — status of the reject command; source request rejeitarDespesa */
+    rejeitarDespesaStatus: RequestStatus;
+    /** state rejeitarDespesaError — error of the reject command, null when none; source request rejeitarDespesa */
+    rejeitarDespesaError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    /** Every transient member goes back to its initial value on each entry. */
+    private resetVisit;
+    /** An old command result never sits next to a new form, another record or another scene. */
+    private resetCommandResults;
+    private readParam;
+    private applyEntryParams;
+    private startInitialLoad;
+    private unexpectedError;
+    /** scene — publishes the visible scene of the page. */
+    setScenario(value: string): void;
+    /** draft — replaces the rejection form draft (the reason the manager types); resets the command results. */
+    setRejeitarDespesaDraft(value: RejeitarDespesaDraft): void;
+    /** select — chooses the expense to analyse by its id (null clears the selection): publishes selectedDespesa and loads the full record into `despesa` through obterDespesaParaAnalise; the rejection draft is emptied. */
+    selectDespesa(id: string | null): void;
+    /** request listarDespesasPendentesEquipe — loads the paged queue of the team's expenses awaiting approval; redraws despesas (replace, or append the next page when append is true) and pageStatus; also the method to reload and to page the list. Arguments: page = page to load (defaults to the current page param, or the first one; ignored when append is true, which loads the next page and does nothing when there is no more); append = true adds the loaded rows to the current ones (a "load more") without touching the page param. */
+    listarDespesasPendentesEquipe(page?: number, append?: boolean): Promise<void>;
+    /** request obterDespesaParaAnalise — loads the complete expense chosen in the queue (version, status, data, category, amount, description, resubmission flag, previous rejection reason, collaborator name); redraws despesa (replace). Argument: despesaId = id of the expense to analyse. Prefer selectDespesa, which also publishes the selection. */
+    obterDespesaParaAnalise(despesaId: string): Promise<void>;
+    /** Applies the expense returned by a decision: redraws the analysis and takes the row out of the pending queue. */
+    private applyDecidedDespesa;
+    /** request aprovarDespesa — approves the expense under analysis so it goes on to finance; takes no arguments (uses the selected `despesa` id and version); redraws despesa (replace with the returned expense) and despesas (remove the decided row from the queue). */
+    aprovarDespesa(): Promise<void>;
+    /** request rejeitarDespesa — rejects the expense under analysis with the reason typed in rejeitarDespesaDraft (mandatory; empty gives client.requiredMissing); takes no arguments (uses the selected `despesa` id and version); redraws despesa (replace with the returned expense), despesas (remove the decided row from the queue) and empties the draft. */
+    rejeitarDespesa(): Promise<void>;
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "despesas_aprovadas",
+  "device": "desktop",
+  "genome": "page21",
+  "contextHash": "sha256:286421f3fd938121e962637195746cfbfe36394dc6e486741199b3948a421907",
+  "sourcePath": "l2/reembolsoDespesas/web/desktop/page21/despesas_aprovadas.ts",
+  "sourceHash": "sha256:97b776b1de4273b5744c80d77da0aa7f61c255a252a47a363cd9dc6e6383bc71",
+  "attempt": 1,
+  "design": {
+    "concept": "One payment at a time, guided. The finance person sees a vertical queue of approved expenses as cards, with category pills above. Picking a card starts a two-step wizard (Conferir, then Data do pagamento) and ends on its own success scene with a single button back to the queue.",
+    "views": [
+      {
+        "id": "fila",
+        "purpose": "Queue of approved expenses as cards (identity, date, category, large right-aligned amount) with category pills and a load-more button. Loading, empty and error states."
+      },
+      {
+        "id": "conferir",
+        "purpose": "Step 1 of 2. Read-only card with every fact of the chosen expense and a single Continue button. Back returns to the queue."
+      },
+      {
+        "id": "pagamento",
+        "purpose": "Step 2 of 2. Short recap of what is being paid, the payment date field and the confirm button (disabled until a date is filled). Command errors appear above the button and the date is kept."
+      },
+      {
+        "id": "sucesso",
+        "purpose": "Large confirmation of what was paid, with one button back to the queue. The paid expense has already left the queue."
+      }
+    ],
+    "decisions": "Followed the paymentWizard template. The queue uses clickable vertical cards, with no table and no pagination control. The shared exposes only page, pageSize and hasMore, with no total of pages, so the queue grows through a 'load more' button. The filter is a row of category pills (all, plus one per category); there is no search field. The pills come from the categories of the loaded items; the pill of the active filter always stays. A collaborator filter was left out because the only data is an opaque id, which would be a poor pill. Paying happens only inside the wizard, never from the list. The scene host (mode scenary) switches every view. Moving to the success scene is done in the confirm handler with a `.then` on registrarPagamento, and only when the command status is 'success'. The step indicator (Passo 1 de 2 / Passo 2 de 2) uses two bars and text. The date uses the shortcut picker. The confirmation is the success scene itself, so no toast is needed. A command failure uses the contextual-feedback molecule in the flow, above the confirm button, and the button label changes to retry. The scene title is the only heading of each view."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section filaPagamento needs an element with data-section-id=\"filaPagamento\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section analisePagamento needs an element with data-section-id=\"analisePagamento\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (tabela de despesas aprovadas) renders neither <groupviewtable--ml-side-detail-table> nor <groupviewtable--ml-data-table>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (busca na lista) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (paginação) renders neither <grouptriggeraction--ml-pagination-control>."
+    }
+  ]
+}

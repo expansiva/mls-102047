@@ -4,23 +4,27 @@
   "module": "reembolsoDespesas",
   "pageId": "minhas_despesas",
   "device": "desktop",
-  "contextHash": "sha256:17f5cbd83dbcca90739f7210b2d3cdfa7146bd79387d51bb6af04b1eadf54d85",
+  "contextHash": "sha256:d41480742bbbec19aed5070b51e601803662fa7ab7c97a3fb87791cc72f34ab0",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/minhas_despesas.ts",
-  "sourceHash": "sha256:137111469a65cd7a985a9c0b11fa7b14612d7fe797d2a1388033e3fc80d89d22",
+  "sourceHash": "sha256:3b60906cc772244f4b8d9b391352b7057192cc4ce9d6f0cc086c1ccf06111e01",
   "attempt": 1,
   "design": {
-    "concept": "Uma tela mestre-detalhe para o colaborador acompanhar as próprias despesas. A lista com a situação de cada uma fica sempre visível à esquerda. À direita há um painel de trabalho que se lê de cima para baixo (identidade, fatos decisivos, descrição, motivo da rejeição) e termina no bloco de envio ou reenvio. Registrar uma despesa nova ou corrigir uma rejeitada abre no mesmo painel, sob demanda.",
+    "concept": "A reading-first workspace for the collaborator's own expenses. The main scene keeps the status-filtered list on the left and, on the right, the selected expense read like a memo (identity, decisive facts, description, trail), with the send or resend block at the very end. Registering a new expense and correcting a rejected one are side tasks that open on demand as back-able scenes.",
     "views": [
       {
-        "id": "detalhe",
-        "purpose": "Leitura da despesa escolhida, como um memorando: identidade, valor e datas, descrição, motivo da rejeição. No fim fica o bloco de envio ou reenvio para aprovação. Sem despesa escolhida, mostra um convite para escolher uma da lista."
+        "id": "acompanhamento",
+        "purpose": "Main scene. List of expenses with status filter, next to the selected expense's detail and the send/resend decision block."
       },
       {
-        "id": "formulario",
-        "purpose": "Formulário do painel. Sem despesa aberta, registra uma despesa nova. Com uma despesa rejeitada aberta, corrige essa despesa. Tem botão de voltar para o detalhe."
+        "id": "registrar",
+        "purpose": "Form to register a new expense (saved as draft). Returns to the main scene, where the new expense is open in the detail."
+      },
+      {
+        "id": "corrigir",
+        "purpose": "Form to correct a rejected expense, prefilled from the open expense. Returns to the main scene after saving, where the resend action waits."
       }
     ],
-    "decisions": "Usei o scene host só na região do painel direito, em mode=\"scenary\", e a lista permanece fora dele, então o colaborador nunca perde o lugar. A página não guarda estado, então o formulário é uma única cena. O modo vem do compartilhado: despesa aberta (null ou não) define se é correção ou registro. Por isso \"Registrar despesa\" limpa a seleção com obterDespesa(null) antes de abrir o formulário. Como há uma cena só, o organismo formularioDespesa aparece uma vez. Seguindo o template readAndDecide, o detalhe segue a ordem fixa (identidade e situação, fatos decisivos com o valor grande, descrição, motivo da rejeição) e o bloco de ações fica no fim. Esse bloco afirma o estado quando a despesa não admite ação (aguardando, aprovada, paga, já reenviada) e mostra o erro acima dos botões, travando enquanto o comando roda. Os botões levam o nome do resultado: Enviar para aprovação, Reenviar para aprovação, Corrigir despesa. Depois de registrar ou salvar a correção com sucesso, a página volta ao detalhe, onde a despesa já aparece com o novo estado. Cartão vertical e contextual-feedback mostram o resumo e o motivo da rejeição. A lista usa a tabela sem ordenação, para o índice do clique coincidir com a linha, e marca a seleção por índice. O filtro de situação é um select simples. Deixei de fora o comprovante e a paginação. O compartilhado não expõe estado de arquivo, e o formato da paginação da lista não está declarado, então não inventei campos. Todos os valores vêm prontos do backend. A página só formata data e moeda com Intl."
+    "decisions": "Followed the readAndDecide template: the detail reads downward (category and date as identity, status chip, the amount large, description, then the trail with resubmission flag, payment date and the manager's rejection reason in a contextual feedback). The send or resend block is a sibling after the card, never sticky or beside it. The block locks while running, shows errors above the buttons in body color, and ends in a calm statement. Departure: the list stays visible beside the record, because the list is the primary section and opening an expense replaces nothing. The record comes from the list, so no id is typed. The two forms are scenes through the scene host with back; the page title stays in one h1, scene titles name each view and differ from button labels. Status filter is native toggle chips (aria-pressed); the list uses ml-data-table without sorting so row indices match the data, and 'show more' appends the next page. Currency is shown as BRL, because the contract only says money. The proof-of-expense upload is left out because the shared has no state to hold a file. A missing proof will come back as a backend error shown above the submit button."
   },
   "advisories": [
     {

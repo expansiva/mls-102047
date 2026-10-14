@@ -4,23 +4,14 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_da_equipe",
   "device": "desktop",
-  "contextHash": "sha256:6112c7452a9b5727095ca5804206bb9de9144a4b3c8a8027b0288b5a56345ed4",
+  "contextHash": "sha256:fb6854f4987ce18a88894a1509afc879bd5f13bb1bc4906b5dbbd5a40db85ae8",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/despesas_da_equipe.ts",
-  "sourceHash": "sha256:47bdce4b42ebfd003434e93c10acc0069bff6f176f95c78aa448f6b0db0e3f3a",
+  "sourceHash": "sha256:728aa6740af6eeaf289ea25a6778d11702bcb5547cff3ffb222a011aa12ab53a",
   "attempt": 1,
   "design": {
-    "concept": "Uma tela de mesa de trabalho em duas regiões lado a lado. À esquerda, a fila de despesas pendentes da equipe, que é o ponto de partida. À direita, a despesa escolhida é lida como um memorando: identidade, fatos decisivos, descrição, histórico. A decisão fica no fim da leitura.",
-    "views": [
-      {
-        "id": "aguardando",
-        "purpose": "Estado inicial da região de análise. Convida a escolher uma despesa na fila e não mostra nenhuma ação de decisão."
-      },
-      {
-        "id": "analise",
-        "purpose": "Leitura da despesa selecionada, de cima para baixo, com o bloco de decisão ao final. Tem um controle de voltar que fecha a análise e limpa a seleção, e a fila continua visível ao lado."
-      }
-    ],
-    "decisions": "Segui o template readAndDecide. A fila é a seção primária e fica à esquerda numa tabela de dados (alternativa à side-detail-table) com a linha selecionada marcada por índice. A região de análise é um host de cena em modo scenary: 'aguardando' e 'analise'. Assim a fila não perde o lugar e a troca passa só pelo host.\n\nA ordem de leitura é fixa: nome do colaborador e situação, depois valor, data e categoria em destaque, depois a descrição, depois o histórico (reenvio e motivo de rejeição anterior). Só então vem a decisão.\n\nAprovar abre uma única confirmação, um <dialog> nativo que repete colaborador, categoria e valor. Isso evita estado na página. Rejeitar expande, num <details>, um campo de motivo obrigatório; o botão 'Registrar rejeição' só habilita com o motivo preenchido. Erros de comando aparecem dentro do bloco de decisão, acima dos botões, e o botão serve de nova tentativa. Durante a decisão os botões travam com indicador de progresso. O sucesso vira uma declaração calma no lugar do bloco, sem toast e sem avançar para a próxima despesa. Não há botões de decisão nas linhas da fila.\n\nFicaram de fora, porque o contrato não oferece dado nem método para eles:\n- Busca e filtro por período: o shared não tem método de filtro, e filtrar na página seria computar.\n- Comprovante: nenhuma linha traz um campo com a origem dele.\n\nO 'Carregar mais' usa a paginação da fila declarada pelo shared. Todos os textos vêm do catálogo pt."
+    "concept": "A two-column desk for the team manager: on the left the queue of pending expenses (the primary work surface, always visible), on the right one expense read like a memo (who, decisive facts, description, history) with the decision block at the very end. Choosing a row in the queue loads the memo; the decision is a deliberate, single beat per outcome.",
+    "views": [],
+    "decisions": "One view, no scene host: the queue must stay visible while the memo is read, so a side-by-side layout is the right tool. The queue uses the plain data table (internal mode, rows marked by index through `value`, `rowClick` selects) and a 'load more' button when the backend says there are more rows; no pager fields are shown. The right panel follows the readAndDecide template: identity line (collaborator name + status chip), decisive facts (date, category, large amount), narrative (description), quiet history (resubmission and previous rejection reason), then the decision block last, not sticky. Approve opens one native confirmation dialog restating collaborator, category and amount; reject expands an inline reason field (native details disclosure, so the page keeps no state) and its button stays disabled until the reason has text. While a command runs the block is locked with a live status; failures show in the block, above the buttons, with the reason kept. After a decision the block becomes a calm statement of the new status, and nothing auto-advances. Reject is secondary, never danger-styled. Search by collaborator/category and the period filter were left out because the shared exposes no state or request for filtering; the receipt viewer was left out because the expense contract carries no receipt field. Empty, loading and error states are designed for the queue and for the memo. Without a selection the decision buttons are present but inert."
   },
   "advisories": [
     {

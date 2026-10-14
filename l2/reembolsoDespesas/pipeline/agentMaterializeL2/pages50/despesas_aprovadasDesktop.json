@@ -4,24 +4,16 @@
   "module": "reembolsoDespesas",
   "pageId": "despesas_aprovadas",
   "device": "desktop",
-  "contextHash": "sha256:1202c6440dadd4b65b52c42f854485f3d80d3dcea90380ee22623fea2104f78e",
+  "contextHash": "sha256:cf647d5dcee5b8d0df1eeafbdcffc7f54a69eaa122b5b6b88ef01201b1df283f",
   "sourcePath": "l2/reembolsoDespesas/web/desktop/page11/despesas_aprovadas.ts",
-  "sourceHash": "sha256:6639fcd09faea11ffbc40341231a76cfa20cf480bd15ca0efb7df7d482744bf9",
+  "sourceHash": "sha256:4a1101bf3123b2f7100182938ad600cf8dd8cdec3491a9ec9b684066d37fc0e8",
   "attempt": 1,
   "design": {
-    "concept": "Bancada do financeiro em duas colunas: à esquerda a fila de despesas aprovadas aguardando pagamento (tabela densa, valor por último e alinhado à direita); à direita o painel de conferência que fica sempre visível, com os dados da despesa escolhida e, logo abaixo, a data de pagamento e o botão que registra o pagamento. Escolher uma linha, conferir o valor e registrar a data acontece sem sair da tela e sem perder a fila.",
+    "concept": "A working ledger for the finance team: the queue of approved expenses is the main surface (dense table, category filter above it, applied filters as removable tokens), and a fixed side panel next to it shows the chosen expense and the payment-date form. The person scans the queue, clicks a row, checks the data and registers the payment without leaving the table or losing the filter.",
     "views": [],
-    "decisions": "Uma única vista, sem scene host: fila e conferência são regiões paralelas e simultâneas (ledgerTable + detalhe ao lado), então nenhuma troca de vista é necessária. Usei ml-data-table (alternativa) porque o painel lateral é meu e precisa ficar fixo ao lado; a linha escolhida é marcada por índice via value e o rowClick chama obterDespesaAprovada. Filtros só os declarados (categoria numa barra de busca; colaborador aparece apenas como token removível quando vem do contexto), com fichas removíveis dos filtros aplicados. A paginação do contrato não informa total de páginas, então no lugar do pager uso 'Carregar mais' (append) quando hasMore, sem calcular nada. Não há totais porque o contrato não entrega nenhum agregado; nada é somado na página. O botão de pagamento leva o valor no rótulo (escopo antes do clique) e fica no painel, desabilitado e com progresso enquanto roda; o sucesso aparece inline junto ao formulário e a própria despesa passa a 'Paga', saindo da fila. Falhas da fila aparecem acima da tabela com nova tentativa; falha de carga da despesa aparece no painel. Data obrigatória vira erro do próprio campo. Estados de carregamento, vazio e erro são desenhados."
+    "decisions": "One view, so no scene host: the table and the panel are always side by side on desktop. I did not use the side-detail-table's own Detail panel because registering the payment removes the expense from the queue, and the row's Detail would vanish together with the confirmation. A separate panel stays and shows the paid expense with its payment date as the success feedback, in place and without a page banner. Table: ml-data-table, amount last, right-aligned in tabular figures, status chip with text, selected row marked by index. Filter: one search bar for the category (the only text filter the contract takes). The collaborator filter is an entry parameter, so it is never typed and only appears as a removable token when active. Totals and counts are left out because the contract delivers none and the page must not compute them. Pagination is a 'load more' that appends, driven by hasMore, since the contract has no total of pages. Errors of the queue appear above the rows with a retry. The payment form shows only while the loaded expense is approved. The button is disabled until a date exists and shows loading while the command runs. The pagination-control and toast molecules were skipped: no page count exists, and the confirmation stays inline in the panel."
   },
   "advisories": [
-    {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section filaPagamento needs an element with data-section-id=\"filaPagamento\"."
-    },
-    {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section analisePagamento needs an element with data-section-id=\"analisePagamento\"."
-    },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism despesasAprovadasLista (paginação) renders neither <grouptriggeraction--ml-pagination-control>."

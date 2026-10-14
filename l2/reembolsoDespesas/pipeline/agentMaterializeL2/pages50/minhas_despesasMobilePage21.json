@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "minhas_despesas",
+  "device": "mobile",
+  "genome": "page21",
+  "contextHash": "sha256:ab7468a655479ef570318e5c1dfe289701a145e4cc3d6d55ab0b18730cc40995",
+  "sourcePath": "l2/reembolsoDespesas/web/mobile/page21/minhas_despesas.ts",
+  "sourceHash": "sha256:c19a6c03399e0770cc31bcae64cec8d3a0691a813c698d453177a6a3023171e0",
+  "attempt": 1,
+  "design": {
+    "concept": "A phone-first expense board that puts the outcome first. The person sees their expenses as one column of cards, each opened by a full-width coloured status strip. Tapping a card opens its own full scene, where the large outcome buttons (send, resend, correct) sit right under the identity line, before any fact. Registering and correcting are separate on-demand scenes with a single-column form.",
+    "views": [
+      {
+        "id": "board",
+        "purpose": "The board of expense cards with a status filter, a main 'Register expense' action, and designed loading, error and empty states (large icon, one sentence, main action)."
+      },
+      {
+        "id": "detalhe",
+        "purpose": "The open expense as a full scene: status strip and decisive value, then the outcome buttons or one line of result, then the rejection reason, then the facts."
+      },
+      {
+        "id": "registrar",
+        "purpose": "Single-column form to register a new expense (date, category, value, description). On success it moves to the detail so the person can send it for approval."
+      },
+      {
+        "id": "corrigir",
+        "purpose": "Single-column form prefilled from the rejected expense, with the rejection reason in view. On success it returns to the detail where the resubmit button is."
+      }
+    ],
+    "decisions": "I followed the decisionFirst template over the section order of the defs. The collection is a one-column board of tappable cards, never a table or a list with column headers, so I did not use the record-list or table molecules. Each card opens with a full-width status strip in the status tokens. The detail is its own scene reached through the scene host (mobile: full scene, never split). The outcome row comes right after the identity line and before the facts. On mobile the buttons stack at full width with large touch targets. Success replaces the outcome row with one live line. A failure shows above the buttons, and the button stays as the retry. Statuses with no available command show one plain hint line instead of buttons. The rejection reason uses the contextual-feedback molecule. The form uses the preferred molecules (shortcut date picker, enter-text, money BR, multiline). The proof upload is left out because the shared exposes no field or state for a file. After a register or correction command succeeds, the page moves to the detail from the promise result, with no state of its own. The shape of the page of expenses is not declared in the .d.ts, so the rows are read through a tolerant helper typed as DespesaResumo. Two scenes both hold the formularioDespesa organism, one per mode. Totals and flags are shown as delivered and nothing is computed."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section acompanhamento needs an element with data-section-id=\"acompanhamento\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section despesaSelecionada needs an element with data-section-id=\"despesaSelecionada\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section registroCorrecao needs an element with data-section-id=\"registroCorrecao\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism listaMinhasDespesas (Lista das minhas despesas com situação) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewtable--ml-responsive-data-table>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism formularioDespesa (Comprovante da despesa) renders neither <groupselectfileforupload--ml-file-upload-preview> nor <groupselectfileforupload--ml-file-upload-dropzone>."
+    }
+  ]
+}
