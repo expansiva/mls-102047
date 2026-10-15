@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "despesas_aprovadas",
+  "device": "mobile",
+  "genome": "page31",
+  "contextHash": "sha256:960b5d7464ed6b328fa4b37438a4c21878ec9d56e5fabe0fe25fba0996250f7c",
+  "sourcePath": "l2/reembolsoDespesas/web/mobile/page31/despesas_aprovadas.ts",
+  "sourceHash": "sha256:8b74d0b54637191e71660c11697be6c93489c6f4a0581fb02c3e2a39eb635faa",
+  "attempt": 1,
+  "design": {
+    "concept": "One payment at a time, guided. The finance person scans a queue of approved expenses as tappable cards (amount large on the right), filters by category with a scrolling row of pills, taps one and walks two short scenes: Conferir (read-only facts) then Data do pagamento (date + confirm). Success is its own scene with one button back to the queue, where the paid expense is already gone.",
+    "views": [
+      {
+        "id": "fila",
+        "purpose": "Queue of approved expenses: category pills, vertical card list, load more. Entry point and return point."
+      },
+      {
+        "id": "conferir",
+        "purpose": "Step 1 of 2: the chosen expense read-only with every fact the contract gives, and one Continue button."
+      },
+      {
+        "id": "pagamento",
+        "purpose": "Step 2 of 2: summary of what is being paid, payment date field and the confirm button; failures stay here with the date kept."
+      },
+      {
+        "id": "sucesso",
+        "purpose": "Large confirmation of what was paid and a single button back to the queue."
+      }
+    ],
+    "decisions": "Followed the paymentWizard template literally: a scene host in mode scenary with four scenes (fila, conferir, pagamento, sucesso); picking a card opens step 1, back controls return one step. The step indicator (wizard-steps plus a visible 'Passo X de 2' line) sits at the top of both wizard scenes. Queue uses the vertical record list (never a table), the category filter uses navigate-pills (scrollable row, better on 360px than a segmented control) with 'Todas' plus the categories of the loaded items, since the contract exposes no category catalogue. Pagination is a 'load more' button (append) because the shared exposes only hasMore and the page state is explicitly not written by load-more; this also suits one-thumb mobile use. The confirm button stays disabled until a date exists and names the outcome; on command failure a contextual error appears above the button, the button turns into a retry and the draft is kept. The page holds no state: after registrarPagamento resolves with status success it opens the success scene through setScenario. Scene titles are the only headings of each view; the wizard step titles and card titles use different texts. Collaborator is shown by the only field the row has (colaboradorId) with its business label.Money and dates are only formatted, never computed."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section filaPagamento needs an element with data-section-id=\"filaPagamento\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section analisePagamento needs an element with data-section-id=\"analisePagamento\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (paginação) renders neither <grouptriggeraction--ml-pagination-control>."
+    }
+  ]
+}

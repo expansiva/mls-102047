@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "minhas_despesas",
+  "device": "desktop",
+  "genome": "page31",
+  "contextHash": "sha256:ff26782fc84e35e4d504ef801de1f81cd9cb8ee0cc957570a81fe128abfc7789",
+  "sourcePath": "l2/reembolsoDespesas/web/desktop/page31/minhas_despesas.ts",
+  "sourceHash": "sha256:a942a97217bc17cd74acadcf0751c8130a0bff12086bb1fa314084b233366663",
+  "attempt": 1,
+  "design": {
+    "concept": "Decision-first board of expenses. Each expense is a card with a full-width status strip, a big amount and the category. Opening a card takes the person to a panel scene where the send or resend outcomes sit at the very top, then the rejection reason, then the facts. Registering a new expense or correcting a rejected one opens in its own scene and returns to the panel, so the next outcome button is already there.",
+    "views": [
+      {
+        "id": "quadro",
+        "purpose": "Board of the collaborator's expenses with status filter chips, the main action 'Registrar despesa', and loading, error and empty states."
+      },
+      {
+        "id": "despesa",
+        "purpose": "Panel over the board for the open expense. Order: status strip and identity, outcome row (send, resend, correct) or the one-line result, rejection reason, then the facts."
+      },
+      {
+        "id": "novo",
+        "purpose": "Form to register a new expense (date, category, value, description). On success it opens the new draft in the panel, with 'Enviar para aprovação' on top."
+      },
+      {
+        "id": "correcao",
+        "purpose": "Same form prefilled from the rejected expense. Saving returns to the panel, where the resend button is."
+      }
+    ],
+    "decisions": "The template wins on behavior. The collection is a custom grid of native card buttons, not a table. I did not use ml-card-grid because the status strip has to reach the card edges, and a molecule cell cannot guarantee that. The grid has three columns on xl screens and two below. The detail is its own scene (the S2 option 'its own scene') and is never split beside the board. Inside the panel, outcomes come before facts. Failure shows right above the buttons. Success replaces the buttons with one line and the panel stays open. All views switch through the scene host in scenary mode, with back controls. The new-expense and correction scenes share one render method. Each has its own data-organism-id because the two flows write to different drafts and commands. After a successful register or save, the page calls setScenario('despesa') to open the panel; it does not hold any state. The proof of expense (comprovante) upload is left out because the shared has no state or command field for files, so there is nothing to bind it to. Money arrives as a string in the draft, so the page converts it to and from the number the money molecule uses. It only formats and does no business calculation. The list rows are read through a defensive helper because the page type is only imported."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section acompanhamento needs an element with data-section-id=\"acompanhamento\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section despesaSelecionada needs an element with data-section-id=\"despesaSelecionada\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section registroCorrecao needs an element with data-section-id=\"registroCorrecao\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism listaMinhasDespesas (Quadro de cartões das minhas despesas, um cartão por despesa com faixa de situação no topo) renders neither <groupviewdata--ml-card-grid> nor <groupviewdata--ml-vertical-record-list>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism formularioDespesa (Comprovante da despesa) renders neither <groupselectfileforupload--ml-file-upload-preview> nor <groupselectfileforupload--ml-file-upload-dropzone>."
+    }
+  ]
+}

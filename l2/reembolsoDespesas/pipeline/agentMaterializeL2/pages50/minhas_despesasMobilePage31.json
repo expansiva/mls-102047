@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "minhas_despesas",
+  "device": "mobile",
+  "genome": "page31",
+  "contextHash": "sha256:6839f7087d72e2290d18721ae9dc31878bc5ddf74ec7d179537e53147472563d",
+  "sourcePath": "l2/reembolsoDespesas/web/mobile/page31/minhas_despesas.ts",
+  "sourceHash": "sha256:c259e20e0610f5377ff1daa11dbbaf22b9c5c031208526d6490f1cd8c66ddb58",
+  "attempt": 1,
+  "design": {
+    "concept": "Uma tela de decisão primeiro, em coluna única: o colaborador vê as despesas como cartões com faixa de situação, toca um cartão e abre a despesa em uma cena própria. Nessa cena os botões de resultado (enviar, corrigir, reenviar) ficam logo abaixo da identificação, antes de qualquer dado. Registrar e corrigir são cenas de formulário separadas, abertas sob demanda.",
+    "views": [
+      {
+        "id": "board",
+        "purpose": "Quadro de cartões das minhas despesas, com filtro de situação, carregar mais e a ação principal Registrar despesa fixa no rodapé. Quando vazio, mostra ícone grande, uma frase e a mesma ação."
+      },
+      {
+        "id": "detalhe",
+        "purpose": "Despesa aberta em cena cheia (sobrepõe o quadro, com voltar): identidade com faixa de situação, botões de envio/reenvio no topo, motivo da rejeição e só depois os dados."
+      },
+      {
+        "id": "registrar",
+        "purpose": "Formulário em coluna única para registrar uma despesa nova (data, categoria, valor, descrição). Ao registrar, abre a despesa criada no detalhe, onde o envio para aprovação já está no topo."
+      },
+      {
+        "id": "corrigir",
+        "purpose": "Formulário em coluna única pré-preenchido para corrigir uma despesa rejeitada, com o motivo da rejeição à vista. Ao salvar, volta ao detalhe, onde o reenvio está no topo."
+      }
+    ],
+    "decisions": "Segui o template decisionFirst: a coleção é uma grade de cartões (ml-card-grid, sem tabela), cada cartão abre com uma faixa de situação em largura total usando os tokens de status, e o detalhe é uma cena inteira sobre o quadro, nunca ao lado. Os botões de resultado vêm antes dos fatos; sucesso troca a linha de botões por uma frase do que foi feito (contextual-feedback) e a falha aparece acima dos botões, que continuam disponíveis para tentar de novo. Registrar e corrigir viraram duas cenas (títulos diferentes) com o mesmo construtor de formulário, porque a página não guarda estado e não pode ler this.scenary para variar o modo. Depois de registrar ou salvar a correção, a página leva ao detalhe via setScenario, que é onde está a próxima decisão (enviar ou reenviar). O comprovante foi deixado de fora: nem o rascunho nem a despesa do shared têm campo para arquivo, então um seletor não ligado a nada enganaria o usuário. O valor do rascunho (texto) é convertido para número só na ponte com o campo monetário; nada é somado ou derivado. O filtro de situação é um select nativo de 44px para caber em 360px."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section acompanhamento needs an element with data-section-id=\"acompanhamento\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section despesaSelecionada needs an element with data-section-id=\"despesaSelecionada\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section registroCorrecao needs an element with data-section-id=\"registroCorrecao\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism formularioDespesa (Comprovante da despesa) renders neither <groupselectfileforupload--ml-file-upload-preview> nor <groupselectfileforupload--ml-file-upload-dropzone>."
+    }
+  ]
+}

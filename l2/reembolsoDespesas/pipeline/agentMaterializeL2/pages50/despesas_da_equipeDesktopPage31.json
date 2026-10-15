@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "despesas_da_equipe",
+  "device": "desktop",
+  "genome": "page31",
+  "contextHash": "sha256:f81250c48aaec90908ae7afb5b8d74827e1e183e61c9a45729358256ce1d2373",
+  "sourcePath": "l2/reembolsoDespesas/web/desktop/page31/despesas_da_equipe.ts",
+  "sourceHash": "sha256:6ce88cac91548b8aa2882e8ef19c2f498c2c3e2803f3679590e9be470f43fa51",
+  "attempt": 2,
+  "design": {
+    "concept": "Decision-first board: the pending expenses of the team are a grid of cards, each opened by a full-width status strip, the collaborator, the date/category and the amount shown large. Opening a card takes the manager to a panel-like scene over the board where Approve / Reject come first, the rejection reason sits right under them and the facts come after.",
+    "views": [
+      {
+        "id": "fila",
+        "purpose": "The board of pending expense cards (loading, empty, error and load-more states). Main task: pick the expense to decide."
+      },
+      {
+        "id": "analise",
+        "purpose": "The expense opened over the board: identity line, large Approve/Reject buttons, inline rejection reason, one-line outcome after a decision, then the facts. Back returns to the board."
+      }
+    ],
+    "decisions": "Followed the decisionFirst template, not the defs' 'side by side' wording: the board and the detail are never split. The detail is its own scene of the scene host (scenary mode, with back), so the board stays in the DOM and keeps scroll and loaded pages. The host @change handler now ignores bubbled events with the target/currentTarget guard and only calls setScenario. The card grid is made of semantic buttons in a CSS grid instead of the card-grid molecule, so the status strip can be truly full-width; no table or column headers anywhere. Outcome buttons use the button-standard molecule in a single row; the reason field opens inline under them; errors show above the buttons; on success the buttons are replaced by a contextual-feedback line and the panel stays open. Search and period filters are left out: the shared exposes no filter state or method. The receipt viewer is left out because the expense row has no receipt field. Values come as the backend delivers them; only dates are formatted with Intl."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section filaPendentes needs an element with data-section-id=\"filaPendentes\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section analiseDecisao needs an element with data-section-id=\"analiseDecisao\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasPendentes (Quadro de cartões das despesas pendentes, um cartão por despesa com faixa de situação no topo) renders neither <groupviewdata--ml-card-grid> nor <groupviewdata--ml-vertical-record-list>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasPendentes (busca por colaborador ou categoria) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasPendentes (filtro por período da despesa) renders neither <groupenterdateinterval--ml-date-interval-presets>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism analiseDespesa (Despesa aberta no painel sobre o quadro) renders neither <groupviewcard--ml-vertical-card> nor <groupviewcard--ml-view-card-horizontal>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism analiseDespesa (visualização do comprovante) renders neither <groupplaymedia--ml-pdf-viewer> nor <groupplaymedia--ml-image-gallery>."
+    }
+  ]
+}

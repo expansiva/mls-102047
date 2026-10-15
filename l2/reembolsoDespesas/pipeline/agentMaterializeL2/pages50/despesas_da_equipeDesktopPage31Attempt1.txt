@@ -1,0 +1,401 @@
+/* refused: M4_PAGE_GATE:
+M4_PAGE_SCENARY_BUBBLE: The host @change must ignore the change events that bubble from the molecules inside its scenes: @change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}. */
+
+/// <mls fileReference="_102047_/l2/reembolsoDespesas/web/desktop/page31/despesas_da_equipe.ts" enhancement="_102020_/l2/enhancementAura"/>
+
+import { html, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { ReembolsoDespesasDespesas_da_equipeShared } from '/_102047_/l2/reembolsoDespesas/web/shared/despesas_da_equipe.js';
+import '/_102040_/l2/molecules/groupentertext/ml-multiline-text.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
+
+/// **collab_i18n_start**
+const pageMessage_pt_br = {
+  pageTitle: 'Despesas da equipe',
+  pageHint: 'Escolha uma despesa para decidir.',
+  analysisTitle: 'Analisar despesa',
+  backLabel: 'Voltar às despesas',
+  loadingBoard: 'Carregando as despesas pendentes…',
+  emptyTitle: 'Nenhuma despesa da equipe aguarda aprovação.',
+  emptyAction: 'Atualizar a fila',
+  errorBoard: 'Não foi possível carregar as despesas pendentes.',
+  retry: 'Tentar novamente',
+  loadMore: 'Ver mais despesas',
+  loadingMore: 'Carregando…',
+  statusDraft: 'Rascunho',
+  statusAwaitingApproval: 'Aguardando aprovação',
+  statusRejected: 'Rejeitada',
+  statusApproved: 'Aprovada',
+  statusPaid: 'Paga',
+  approve: 'Aprovar despesa',
+  reject: 'Rejeitar despesa',
+  approvedDone: 'Despesa aprovada: ela segue para o financeiro.',
+  rejectedDone: 'Despesa rejeitada: o colaborador verá o motivo informado.',
+  decisionError: 'Não foi possível registrar a decisão.',
+  reasonLabel: 'Motivo da rejeição',
+  reasonHelper: 'Obrigatório somente para rejeitar.',
+  reasonPlaceholder: 'Explique ao colaborador o que precisa ser corrigido',
+  reasonRequired: 'Informe o motivo para rejeitar a despesa.',
+  factsCollaborator: 'Colaborador',
+  factsDate: 'Data da despesa',
+  factsCategory: 'Categoria',
+  factsAmount: 'Valor',
+  factsDescription: 'Descrição',
+  factsResubmitted: 'Reenvio realizado',
+  factsPreviousReason: 'Motivo da rejeição anterior',
+  yes: 'Sim',
+  no: 'Não',
+  loadingDetail: 'Carregando a despesa…',
+  detailError: 'Não foi possível carregar a despesa.',
+};
+const pageMessage_en_us = {
+  pageTitle: 'Team expenses',
+  pageHint: 'Pick an expense to decide on.',
+  analysisTitle: 'Review expense',
+  backLabel: 'Back to expenses',
+  loadingBoard: 'Loading pending expenses…',
+  emptyTitle: 'No team expense is waiting for approval.',
+  emptyAction: 'Refresh the board',
+  errorBoard: 'The pending expenses could not be loaded.',
+  retry: 'Try again',
+  loadMore: 'Show more expenses',
+  loadingMore: 'Loading…',
+  statusDraft: 'Draft',
+  statusAwaitingApproval: 'Awaiting approval',
+  statusRejected: 'Rejected',
+  statusApproved: 'Approved',
+  statusPaid: 'Paid',
+  approve: 'Approve expense',
+  reject: 'Reject expense',
+  approvedDone: 'Expense approved: it goes on to finance.',
+  rejectedDone: 'Expense rejected: the collaborator will see the reason given.',
+  decisionError: 'The decision could not be registered.',
+  reasonLabel: 'Rejection reason',
+  reasonHelper: 'Required only to reject.',
+  reasonPlaceholder: 'Tell the collaborator what needs to be fixed',
+  reasonRequired: 'Give a reason to reject the expense.',
+  factsCollaborator: 'Collaborator',
+  factsDate: 'Expense date',
+  factsCategory: 'Category',
+  factsAmount: 'Amount',
+  factsDescription: 'Description',
+  factsResubmitted: 'Resubmitted',
+  factsPreviousReason: 'Previous rejection reason',
+  yes: 'Yes',
+  no: 'No',
+  loadingDetail: 'Loading the expense…',
+  detailError: 'The expense could not be loaded.',
+};
+const pageMessage_es_es = {
+  pageTitle: 'Gastos del equipo',
+  pageHint: 'Elija un gasto para decidir.',
+  analysisTitle: 'Analizar gasto',
+  backLabel: 'Volver a los gastos',
+  loadingBoard: 'Cargando los gastos pendientes…',
+  emptyTitle: 'Ningún gasto del equipo espera aprobación.',
+  emptyAction: 'Actualizar el tablero',
+  errorBoard: 'No se pudieron cargar los gastos pendientes.',
+  retry: 'Intentar de nuevo',
+  loadMore: 'Ver más gastos',
+  loadingMore: 'Cargando…',
+  statusDraft: 'Borrador',
+  statusAwaitingApproval: 'Pendiente de aprobación',
+  statusRejected: 'Rechazado',
+  statusApproved: 'Aprobado',
+  statusPaid: 'Pagado',
+  approve: 'Aprobar gasto',
+  reject: 'Rechazar gasto',
+  approvedDone: 'Gasto aprobado: pasa a finanzas.',
+  rejectedDone: 'Gasto rechazado: el colaborador verá el motivo indicado.',
+  decisionError: 'No se pudo registrar la decisión.',
+  reasonLabel: 'Motivo del rechazo',
+  reasonHelper: 'Obligatorio solo para rechazar.',
+  reasonPlaceholder: 'Explique al colaborador qué debe corregir',
+  reasonRequired: 'Indique el motivo para rechazar el gasto.',
+  factsCollaborator: 'Colaborador',
+  factsDate: 'Fecha del gasto',
+  factsCategory: 'Categoría',
+  factsAmount: 'Importe',
+  factsDescription: 'Descripción',
+  factsResubmitted: 'Reenvío realizado',
+  factsPreviousReason: 'Motivo del rechazo anterior',
+  yes: 'Sí',
+  no: 'No',
+  loadingDetail: 'Cargando el gasto…',
+  detailError: 'No se pudo cargar el gasto.',
+};
+type PageMessageType = typeof pageMessage_pt_br;
+const pageMessages: Record<string, PageMessageType> = {
+  'pt-br': pageMessage_pt_br,
+  'en-us': pageMessage_en_us,
+  'es-es': pageMessage_es_es,
+};
+/// **collab_i18n_end**
+
+function formatDate(value: string): string {
+  const iso = value.length === 10 ? `${value}T00:00:00` : value;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat(document.documentElement.lang || undefined, { dateStyle: 'medium' }).format(d);
+}
+
+function statusLabel(msg: PageMessageType, status: string): string {
+  switch (status) {
+    case 'draft': return msg.statusDraft;
+    case 'awaitingApproval': return msg.statusAwaitingApproval;
+    case 'rejected': return msg.statusRejected;
+    case 'approved': return msg.statusApproved;
+    case 'paid': return msg.statusPaid;
+    default: return status;
+  }
+}
+
+function stripClass(status: string): string {
+  switch (status) {
+    case 'awaitingApproval':
+      return 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]';
+    case 'approved':
+      return 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]';
+    case 'rejected':
+      return 'bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]';
+    case 'paid':
+      return 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)]';
+    default:
+      return 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
+  }
+}
+
+@customElement('reembolso-despesas--web--desktop--page31--despesas_da_equipe-102047')
+export class ReembolsoDespesasDesktopPage31Despesas_da_equipePage extends ReembolsoDespesasDespesas_da_equipeShared {
+  private msg: PageMessageType = pageMessages['pt-br'];
+
+  render() {
+    this.msg = pageMessages[this.getMessageKey(pageMessages)];
+    return html`
+      <div class="min-h-full bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] p-8">
+        <molecules--ml-scenary-102020
+          mode="scenary"
+          .backLabel=${this.msg['backLabel']}
+          .value=${this.scenary || 'fila'}
+          @change=${(e: CustomEvent<{ value: string }>) => {
+            if (e.target === e.currentTarget) {
+              if (e.detail.value === 'fila') this.selectDespesa(null);
+              this.setScenario(e.detail.value);
+            }
+          }}
+        >
+          <Scene value="fila" title=${this.msg['pageTitle']}>${this.renderBoard()}</Scene>
+          <Scene value="analise" nav="back" backTo="fila" title=${this.msg['analysisTitle']}>${this.renderPanel()}</Scene>
+        </molecules--ml-scenary-102020>
+      </div>
+    `;
+  }
+
+  private renderBoard() {
+    return html`
+      <section data-organism-id="despesasPendentes" class="mx-auto max-w-6xl">
+        <p class="mb-6 text-[var(--text-muted,currentColor)]">${this.msg['pageHint']}</p>
+        ${this.renderBoardBody()}
+      </section>
+    `;
+  }
+
+  private renderBoardBody() {
+    if (this.pageStatus === 'error' || this.listarDespesasPendentesEquipeStatus === 'error' && !this.despesas) {
+      return html`
+        <div role="alert" class="flex flex-col items-center gap-4 py-16 text-center">
+          <p class="text-lg text-[var(--text-default,currentColor)]">${this.msg['errorBoard']}</p>
+          ${this.listarDespesasPendentesEquipeError ? html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.listarDespesasPendentesEquipeError.message}</p>` : nothing}
+          <grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${() => this.listarDespesasPendentesEquipe()}>
+            <Label>${this.msg['retry']}</Label>
+          </grouptriggeraction--ml-button-standard>
+        </div>
+      `;
+    }
+    if (this.pageStatus === 'empty') {
+      return html`
+        <div class="flex flex-col items-center gap-5 py-20 text-center">
+          <svg aria-hidden="true" class="h-24 w-24 text-[var(--text-muted,currentColor)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16v16H4z" />
+            <path d="M8 12.5l3 3 5-6" />
+          </svg>
+          <p class="text-xl text-[var(--text-strong,currentColor)]">${this.msg['emptyTitle']}</p>
+          <grouptriggeraction--ml-button-standard data-variant="primary" size="lg" @action=${() => this.listarDespesasPendentesEquipe()}>
+            <Label>${this.msg['emptyAction']}</Label>
+          </grouptriggeraction--ml-button-standard>
+        </div>
+      `;
+    }
+    const items = this.despesas?.items;
+    if (!items || this.pageStatus === 'loading' || this.pageStatus === 'idle') {
+      return html`
+        <div aria-busy="true" aria-live="polite">
+          <p class="sr-only">${this.msg['loadingBoard']}</p>
+          <div class="grid grid-cols-2 gap-5 xl:grid-cols-3">
+            ${[0, 1, 2, 3, 4, 5].map(() => html`<div class="h-44 animate-pulse rounded-xl bg-[var(--surface-alt-bg,transparent)]"></div>`)}
+          </div>
+        </div>
+      `;
+    }
+    const loadingMore = this.listarDespesasPendentesEquipeStatus === 'loading';
+    return html`
+      <div class="grid grid-cols-2 gap-5 xl:grid-cols-3">
+        ${items.map((item) => {
+          const selected = item.id === this.selectedDespesa;
+          return html`
+            <button
+              type="button"
+              ?aria-pressed=${selected}
+              class="flex flex-col overflow-hidden rounded-xl border text-left bg-[var(--surface-bg,transparent)] ${selected ? 'border-[var(--selected-border,currentColor)]' : 'border-[var(--border-default,currentColor)]'} hover:border-[var(--selected-border,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
+              @click=${() => {
+                this.selectDespesa(item.id);
+                this.setScenario('analise');
+              }}
+            >
+              <span class="block w-full px-4 py-2 text-sm font-semibold ${stripClass(item.status)}">${statusLabel(this.msg, item.status)}</span>
+              <span class="flex flex-col gap-1 p-4">
+                <span class="text-base font-medium text-[var(--text-strong,currentColor)]">${item.colaborador.details.identification.details.identification.name}</span>
+                <span class="text-sm text-[var(--text-muted,currentColor)]">${item.details.details.categoria}</span>
+                <span class="mt-3 text-3xl font-semibold text-[var(--text-strong,currentColor)]">${item.details.details.valor}</span>
+                <span class="text-sm text-[var(--text-default,currentColor)]">${formatDate(item.details.details.dataDespesa)}</span>
+              </span>
+            </button>
+          `;
+        })}
+      </div>
+      ${this.despesas?.hasMore
+        ? html`
+            <div class="mt-8 flex justify-center">
+              <grouptriggeraction--ml-button-standard data-variant="secondary" size="md" .loading=${loadingMore} @action=${() => this.listarDespesasPendentesEquipe(undefined, true)}>
+                <Label>${loadingMore ? this.msg['loadingMore'] : this.msg['loadMore']}</Label>
+              </grouptriggeraction--ml-button-standard>
+            </div>
+          `
+        : nothing}
+    `;
+  }
+
+  private renderPanel() {
+    const d = this.despesa;
+    if (this.obterDespesaParaAnaliseStatus === 'error') {
+      return html`
+        <div role="alert" class="mx-auto flex max-w-2xl flex-col items-center gap-4 py-16 text-center">
+          <p class="text-lg">${this.msg['detailError']}</p>
+          <grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${() => this.selectDespesa(this.selectedDespesa)}>
+            <Label>${this.msg['retry']}</Label>
+          </grouptriggeraction--ml-button-standard>
+        </div>
+      `;
+    }
+    if (!d || this.obterDespesaParaAnaliseStatus === 'loading') {
+      return html`
+        <div aria-busy="true" aria-live="polite" class="mx-auto max-w-2xl">
+          <p class="sr-only">${this.msg['loadingDetail']}</p>
+          <div class="h-64 animate-pulse rounded-xl bg-[var(--surface-alt-bg,transparent)]"></div>
+        </div>
+      `;
+    }
+    return html`
+      <div class="mx-auto max-w-2xl overflow-hidden rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
+        <div class="w-full px-6 py-2 text-sm font-semibold ${stripClass(d.status)}">${statusLabel(this.msg, d.status)}</div>
+        <div class="flex flex-col gap-6 p-6">
+          <div class="flex items-baseline justify-between gap-4">
+            <p class="text-xl font-semibold text-[var(--text-strong,currentColor)]">${d.colaborador.details.identification.details.identification.name}</p>
+            <p class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${d.details.details.valor}</p>
+          </div>
+          <div data-organism-id="decisaoDespesa" class="flex flex-col gap-4">
+            ${this.renderDecision()}
+          </div>
+          <div data-organism-id="analiseDespesa">
+            <dl class="grid grid-cols-2 gap-x-6 gap-y-4 border-t border-[var(--border-subtle,currentColor)] pt-6">
+              <div>
+                <dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['factsDate']}</dt>
+                <dd class="text-[var(--text-default,currentColor)]">${formatDate(d.details.details.dataDespesa)}</dd>
+              </div>
+              <div>
+                <dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['factsCategory']}</dt>
+                <dd class="text-[var(--text-default,currentColor)]">${d.details.details.categoria}</dd>
+              </div>
+              <div class="col-span-2">
+                <dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['factsDescription']}</dt>
+                <dd class="whitespace-pre-line text-[var(--text-default,currentColor)]">${d.details.details.descricao}</dd>
+              </div>
+              <div>
+                <dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['factsResubmitted']}</dt>
+                <dd class="text-[var(--text-default,currentColor)]">${d.details.details.reenvioRealizado ? this.msg['yes'] : this.msg['no']}</dd>
+              </div>
+              ${d.details.details.motivoRejeicao
+                ? html`
+                    <div class="col-span-2">
+                      <dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['factsPreviousReason']}</dt>
+                      <dd class="whitespace-pre-line text-[var(--text-default,currentColor)]">${d.details.details.motivoRejeicao}</dd>
+                    </div>
+                  `
+                : nothing}
+            </dl>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderDecision() {
+    if (this.aprovarDespesaStatus === 'success') {
+      return html`
+        <groupnotifyuser--ml-contextual-feedback type="success" .visible=${true} .dismissible=${false}>
+          <Message>${this.msg['approvedDone']}</Message>
+        </groupnotifyuser--ml-contextual-feedback>
+      `;
+    }
+    if (this.rejeitarDespesaStatus === 'success') {
+      return html`
+        <groupnotifyuser--ml-contextual-feedback type="info" .visible=${true} .dismissible=${false}>
+          <Message>${this.msg['rejectedDone']}</Message>
+        </groupnotifyuser--ml-contextual-feedback>
+      `;
+    }
+    const approving = this.aprovarDespesaStatus === 'loading';
+    const rejecting = this.rejeitarDespesaStatus === 'loading';
+    const busy = approving || rejecting;
+    const reasonMissing = this.rejeitarDespesaError?.code === 'client.requiredMissing';
+    const failure = this.aprovarDespesaError ?? (reasonMissing ? null : this.rejeitarDespesaError);
+    return html`
+      ${failure
+        ? html`
+            <p role="alert" aria-live="polite" class="text-[var(--text-default,currentColor)]">
+              ${this.msg['decisionError']} ${failure.message}
+            </p>
+          `
+        : nothing}
+      <div class="flex gap-3">
+        <div class="flex-1">
+          <grouptriggeraction--ml-button-standard data-class="w-full" data-variant="primary" size="lg" .loading=${approving} .disabled=${busy} @action=${() => this.aprovarDespesa()}>
+            <Label>${this.msg['approve']}</Label>
+          </grouptriggeraction--ml-button-standard>
+        </div>
+        <div class="flex-1">
+          <grouptriggeraction--ml-button-standard data-class="w-full" data-variant="danger" size="lg" .loading=${rejecting} .disabled=${busy} @action=${() => this.rejeitarDespesa()}>
+            <Label>${this.msg['reject']}</Label>
+          </grouptriggeraction--ml-button-standard>
+        </div>
+      </div>
+      <groupentertext--ml-multiline-text
+        .rows=${3}
+        .value=${this.rejeitarDespesaDraft.motivoRejeicao ?? ''}
+        .error=${reasonMissing ? this.msg['reasonRequired'] : ''}
+        .disabled=${busy}
+        .placeholder=${this.msg['reasonPlaceholder']}
+        @change=${(e: CustomEvent<{ value: string }>) => {
+          e.stopPropagation();
+          this.setRejeitarDespesaDraft({ motivoRejeicao: e.detail.value === '' ? null : e.detail.value });
+        }}
+      >
+        <Label>${this.msg['reasonLabel']}</Label>
+        <Helper>${this.msg['reasonHelper']}</Helper>
+      </groupentertext--ml-multiline-text>
+    `;
+  }
+}
+

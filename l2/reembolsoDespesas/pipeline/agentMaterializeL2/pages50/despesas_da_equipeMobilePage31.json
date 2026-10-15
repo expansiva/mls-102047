@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "despesas_da_equipe",
+  "device": "mobile",
+  "genome": "page31",
+  "contextHash": "sha256:88c5ab0d9d90130acd28f86a7b0a5b5ea30c9eb107b69e538917a0d41f5f8168",
+  "sourcePath": "l2/reembolsoDespesas/web/mobile/page31/despesas_da_equipe.ts",
+  "sourceHash": "sha256:4e6f28f2078d63c8c6e3bc646d6b2370a6bb3b1ae0d79cf9fac7d3ed58971d0f",
+  "attempt": 1,
+  "design": {
+    "concept": "Decision-first mobile board. The manager sees the pending expenses as a single column of cards, each opened by a full-width status strip, with who, how much and when in large type. Tapping a card opens its own full scene where the Approve / Reject buttons come first, the rejection reason sits right under them, and the facts come after.",
+    "views": [
+      {
+        "id": "board",
+        "purpose": "Board of pending expense cards (one column), with loading, error, empty and load-more states."
+      },
+      {
+        "id": "analise",
+        "purpose": "Full scene for one expense: identity line, then outcome buttons and the reason field, then the facts. It has a back control to the board."
+      }
+    ],
+    "decisions": "I followed the decisionFirst template, not the usual read-then-decide order. The board is a column of cards, with no table. Each card is a custom button inside a bordered wrapper, so the status strip can touch the top edge and span the full width. I did not use the card-grid molecule because I could not guarantee its padding would let the strip bleed to the edge. The detail is its own scene in the scene host (mode scenary), never beside the board. Decision buttons are two large buttons in one row, approve (primary) and reject (danger), placed right after the identity line and before any fact. The rejection reason field sits immediately under them and is always visible because the page holds no state to reveal it. The shared rule rejectionReasonRequired comes back as a plain-language error. Success replaces the buttons with one contextual-feedback line and the scene stays open. Failures appear above the buttons. If the expense is no longer awaiting approval, an info line replaces the buttons. The search bar is left out because the shared has no search or filter member and the page cannot filter. The receipt viewer is left out because no row field holds a receipt source. The empty state has a large icon, one sentence and a reload action. A load-more button follows the shared's paging (hasMore)."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section filaPendentes needs an element with data-section-id=\"filaPendentes\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section analiseDecisao needs an element with data-section-id=\"analiseDecisao\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasPendentes (Quadro de cartões das despesas pendentes, um cartão por despesa com faixa de situação no topo) renders neither <groupviewdata--ml-card-grid> nor <groupviewdata--ml-vertical-record-list>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasPendentes (busca por colaborador ou categoria) renders neither <groupsearchcontent--ml-search-bar>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism analiseDespesa (Despesa aberta no painel sobre o quadro) renders neither <groupviewcard--ml-vertical-card> nor <groupviewcard--ml-view-card-horizontal>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism analiseDespesa (visualização do comprovante) renders neither <groupplaymedia--ml-pdf-viewer> nor <groupplaymedia--ml-image-gallery>."
+    }
+  ]
+}

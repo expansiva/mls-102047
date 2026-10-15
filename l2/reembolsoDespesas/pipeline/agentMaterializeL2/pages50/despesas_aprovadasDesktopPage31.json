@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "reembolsoDespesas",
+  "pageId": "despesas_aprovadas",
+  "device": "desktop",
+  "genome": "page31",
+  "contextHash": "sha256:9bfe801fb0e9f53a29774570206cb5058777bceb1c1d327b26f0c5bc2a5d84ba",
+  "sourcePath": "l2/reembolsoDespesas/web/desktop/page31/despesas_aprovadas.ts",
+  "sourceHash": "sha256:478a9809afd276f8125725078c25a69e0caff1fb56bf415d559e0bb30ebf656c",
+  "attempt": 1,
+  "design": {
+    "concept": "One payment at a time, guided. The finance person sees the queue of approved expenses as a vertical list of cards with category pills above it. Picking a card starts a two-step wizard in scenes: Conferir (read-only expense, Continuar), then Data do pagamento (date and confirm). Success is its own scene with a single button back to the queue.",
+    "views": [
+      {
+        "id": "fila",
+        "purpose": "Queue of approved expenses: category pills, vertical card list, load more. Picking a card opens the wizard."
+      },
+      {
+        "id": "conferir",
+        "purpose": "Step 1 of 2: the expense read-only with every fact the contract gives, and one Continuar button."
+      },
+      {
+        "id": "pagamento",
+        "purpose": "Step 2 of 2: the payment date and the confirm button. Errors stay here with the date kept."
+      },
+      {
+        "id": "sucesso",
+        "purpose": "Large confirmation of what was paid and one button back to the queue."
+      }
+    ],
+    "decisions": "Followed the paymentWizard template: no table, no payment from the list, no form beside the list. The scene host (mode scenary) carries the four views, with back on the two wizard steps. The step indicator is the wizard-steps molecule, and its Label slot holds 'Passo 1 de 2' / 'Passo 2 de 2'. The category pills use the segmented control. The shared declares no category list, so the options are the distinct categories of the loaded rows plus 'Todas'. This is a presentation dedupe and not a business computation. I replaced the pagination control with a 'Carregar mais' button. The shared exposes only hasMore and no total of pages, and a load-more fits the card list better. The success scene opens when registrarPagamento resolves and registrarPagamentoStatus is 'success', through a promise callback because the page cannot be async. The confirm button stays disabled until the date is filled and names the outcome. Money values are shown as the backend sends them, because the contract gives no currency."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section filaPagamento needs an element with data-section-id=\"filaPagamento\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section analisePagamento needs an element with data-section-id=\"analisePagamento\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism despesasAprovadasLista (paginação) renders neither <grouptriggeraction--ml-pagination-control>."
+    }
+  ]
+}
