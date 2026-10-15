@@ -1,51 +1,53 @@
 {
   "attempt": "decision-1",
   "model": "claude-opus-5-5",
-  "promptChars": 95642,
-  "receivedAt": "2026-10-13T13:04:01.202Z",
+  "promptChars": 41480,
+  "receivedAt": "2026-10-15T13:22:25.528Z",
   "raw": {
     "type": "flexible",
     "result": {
       "toolName": "submitD2Pages",
       "arguments": {
-        "categoryReason": "O Painel do organizador é uma página fixa de acompanhamento, sem nenhuma gravação. Ela destaca os eventos lotados, as vagas restantes e o tamanho das listas de espera, e resume a ocupação total e as publicações recentes. Monitorar indicadores e exceções é a marca da categoria dashboardCommandCenter. As ações de cadastro, publicação e consulta de inscritos ficam na página Eventos.",
+        "categoryReason": "O Painel do organizador mostra indicadores de ocupação e alertas (eventos lotados, vagas restantes, lista de espera) e um resumo de totais e publicações recentes, sem nenhuma escrita. Por isso a categoria é dashboardCommandCenter: KPIs e alertas para monitorar, com navegação para a gestão de eventos quando é preciso agir.",
         "desktop": {
           "definition": {
             "template": {
               "category": "dashboardCommandCenter"
             },
-            "intent": "Dar ao organizador, em uma só tela, a situação de ocupação dos seus eventos publicados: quais já lotaram, quantas vagas ainda restam, quantas pessoas aguardam na lista de espera, o total de vagas ocupadas e o que foi publicado recentemente.",
+            "intent": "Dar ao organizador uma visão rápida da ocupação dos eventos publicados: quais estão lotados, quantas vagas restam, o tamanho da lista de espera de cada um, o total de vagas ocupadas e os eventos publicados recentemente.",
             "sections": [
               {
-                "id": "ocupacao",
+                "id": "alertasOcupacao",
                 "priority": "primary",
-                "purpose": "Mostrar primeiro os eventos que pedem atenção: lotados, com poucas vagas restantes ou com lista de espera crescendo.",
+                "purpose": "Destacar primeiro os eventos publicados que estão lotados ou quase sem vagas e o tamanho da lista de espera de cada um, para o organizador saber onde a demanda passou da capacidade.",
                 "organisms": [
-                  "destaquesOcupacao"
+                  "ocupacaoEventos"
                 ]
               },
               {
-                "id": "resumo",
+                "id": "resumoGeral",
                 "priority": "main",
-                "purpose": "Resumir o total de vagas ocupadas e listar os eventos publicados recentemente, com a data de publicação, para o organizador acompanhar o andamento das inscrições.",
+                "purpose": "Resumir o total de vagas ocupadas e listar os eventos publicados recentemente com a data de publicação, para acompanhar o movimento das inscrições.",
                 "organisms": [
                   "resumoPublicacoes"
                 ]
               }
             ],
-            "organisms": {
-              "destaquesOcupacao": {
+            "organisms": [
+              {
+                "id": "ocupacaoEventos",
                 "kind": "highlights",
-                "text": "Para cada evento publicado, mostra se está lotado, quantas vagas restam e o tamanho da lista de espera. Os lotados e os que têm fila aparecem em destaque para o organizador decidir onde agir.",
+                "text": "Para cada evento publicado: se está lotado, quantas vagas restam em relação ao número de vagas e quantas pessoas aguardam na lista de espera. Os eventos lotados e com fila ficam em destaque para o organizador agir.",
                 "intents": [
                   {
-                    "id": "abrirEventoNaGestao",
+                    "id": "abrirGestaoEvento",
                     "kind": "navigate",
                     "to": "gestao_eventos"
                   }
                 ]
               },
-              "resumoPublicacoes": {
+              {
+                "id": "resumoPublicacoes",
                 "kind": "summary",
                 "text": "Total de vagas ocupadas somando os eventos publicados e a lista dos eventos publicados recentemente, com a data de publicação de cada um.",
                 "intents": [
@@ -56,56 +58,68 @@
                   }
                 ]
               }
-            },
-            "molecules": {
-              "destaquesOcupacao": [
-                {
-                  "role": "Ocupação por evento publicado (lotado, vagas restantes, lista de espera)",
-                  "preferred": "groupviewtable--ml-data-table",
-                  "alternative": "groupviewdata--ml-card-grid"
-                },
-                {
-                  "role": "Vagas ocupadas em relação ao número de vagas de cada evento",
-                  "preferred": "groupshowprogress--ml-linear-progress",
-                  "alternative": "groupshowprogress--ml-circular-progress"
-                }
-              ],
-              "resumoPublicacoes": [
-                {
-                  "role": "Total de vagas ocupadas",
-                  "preferred": "groupviewmetric--ml-metric-big-number",
-                  "alternative": "groupviewmetric--ml-metric-card"
-                },
-                {
-                  "role": "Eventos publicados recentemente com data de publicação",
-                  "preferred": "groupviewdata--ml-vertical-record-list",
-                  "alternative": "groupviewtable--ml-data-table-minimal"
-                }
-              ]
-            }
+            ],
+            "molecules": [
+              {
+                "id": "ocupacaoEventos",
+                "recommendations": [
+                  {
+                    "role": "ocupação de cada evento em relação ao número de vagas",
+                    "preferred": "groupviewmetric--ml-metric-gauge",
+                    "alternative": "groupviewmetric--ml-metric-card"
+                  },
+                  {
+                    "role": "lista de eventos publicados com lotado, vagas restantes e lista de espera",
+                    "preferred": "groupviewtable--ml-data-table",
+                    "alternative": "groupviewtable--ml-view-table"
+                  },
+                  {
+                    "role": "barra de preenchimento das vagas por evento",
+                    "preferred": "groupshowprogress--ml-linear-progress",
+                    "alternative": "groupshowprogress--ml-circular-progress"
+                  }
+                ]
+              },
+              {
+                "id": "resumoPublicacoes",
+                "recommendations": [
+                  {
+                    "role": "total de vagas ocupadas",
+                    "preferred": "groupviewmetric--ml-metric-big-number",
+                    "alternative": "groupviewmetric--ml-metric-card"
+                  },
+                  {
+                    "role": "eventos publicados recentemente com data de publicação",
+                    "preferred": "groupviewtable--ml-data-table-minimal",
+                    "alternative": "groupviewtable--ml-view-table"
+                  }
+                ]
+              }
+            ]
           },
           "needs": {
-            "organisms": {
-              "destaquesOcupacao": {
+            "organisms": [
+              {
+                "id": "ocupacaoEventos",
                 "reads": [
                   "Evento.title",
                   "Evento.eventDate",
                   "Evento.status",
                   "Evento.details.capacity",
+                  "Evento.details.isFull",
                   "Evento.details.occupiedSeats",
                   "Evento.details.remainingSeats",
-                  "Evento.details.waitlistSize",
-                  "Evento.details.isFull"
+                  "Evento.details.waitlistSize"
                 ],
                 "edits": [],
                 "selects": "",
                 "submits": []
               },
-              "resumoPublicacoes": {
+              {
+                "id": "resumoPublicacoes",
                 "reads": [
                   "Evento.title",
                   "Evento.status",
-                  "Evento.eventDate",
                   "Evento.details.occupiedSeats",
                   "Evento.details.publishedAt"
                 ],
@@ -113,7 +127,7 @@
                 "selects": "",
                 "submits": []
               }
-            }
+            ]
           }
         },
         "mobile": {
@@ -121,40 +135,42 @@
             "template": {
               "category": "dashboardCommandCenter"
             },
-            "intent": "No celular, o organizador confere rapidamente quais eventos publicados lotaram, quantas vagas restam, o tamanho das listas de espera e o total de vagas ocupadas, em conteúdo fluido de coluna única pensado para cerca de 390px e utilizável entre 360px e 430px.",
+            "intent": "No celular, mostrar ao organizador num conteúdo estreito e fluido (cerca de 390px, também usável de 360px a 430px) quais eventos publicados estão lotados, quantas vagas restam, a lista de espera, o total de vagas ocupadas e as publicações recentes.",
             "sections": [
               {
-                "id": "ocupacao",
+                "id": "alertasOcupacao",
                 "priority": "primary",
-                "purpose": "Abrir a tela pelos eventos que pedem atenção: lotados ou com lista de espera, cada um em um item compacto e fácil de ler.",
+                "purpose": "Mostrar no topo, em blocos empilhados, os eventos lotados ou quase sem vagas e o tamanho da lista de espera, para leitura rápida com uma mão.",
                 "organisms": [
-                  "destaquesOcupacao"
+                  "ocupacaoEventos"
                 ]
               },
               {
-                "id": "resumo",
+                "id": "resumoGeral",
                 "priority": "main",
-                "purpose": "Mostrar o total de vagas ocupadas e, logo abaixo, os eventos publicados recentemente com a data de publicação.",
+                "purpose": "Logo abaixo, o total de vagas ocupadas em destaque e os eventos publicados recentemente com a data de publicação.",
                 "organisms": [
                   "resumoPublicacoes"
                 ]
               }
             ],
-            "organisms": {
-              "destaquesOcupacao": {
+            "organisms": [
+              {
+                "id": "ocupacaoEventos",
                 "kind": "highlights",
-                "text": "Para cada evento publicado, mostra se está lotado, as vagas restantes e quantas pessoas estão na lista de espera. Os eventos que pedem atenção vêm primeiro.",
+                "text": "Para cada evento publicado: se está lotado, quantas vagas restam em relação ao número de vagas e quantas pessoas aguardam na lista de espera. Os eventos lotados e com fila aparecem primeiro.",
                 "intents": [
                   {
-                    "id": "abrirEventoNaGestao",
+                    "id": "abrirGestaoEvento",
                     "kind": "navigate",
                     "to": "gestao_eventos"
                   }
                 ]
               },
-              "resumoPublicacoes": {
+              {
+                "id": "resumoPublicacoes",
                 "kind": "summary",
-                "text": "Total de vagas ocupadas nos eventos publicados e os eventos publicados recentemente, com a data de publicação.",
+                "text": "Total de vagas ocupadas somando os eventos publicados e os eventos publicados recentemente, com a data de publicação de cada um.",
                 "intents": [
                   {
                     "id": "verTodosEventos",
@@ -163,56 +179,68 @@
                   }
                 ]
               }
-            },
-            "molecules": {
-              "destaquesOcupacao": [
-                {
-                  "role": "Ocupação por evento publicado em itens empilhados",
-                  "preferred": "groupviewdata--ml-vertical-record-list",
-                  "alternative": "groupviewtable--ml-responsive-table"
-                },
-                {
-                  "role": "Vagas ocupadas em relação ao número de vagas de cada evento",
-                  "preferred": "groupshowprogress--ml-linear-progress",
-                  "alternative": ""
-                }
-              ],
-              "resumoPublicacoes": [
-                {
-                  "role": "Total de vagas ocupadas",
-                  "preferred": "groupviewmetric--ml-metric-card",
-                  "alternative": "groupviewmetric--ml-metric-big-number"
-                },
-                {
-                  "role": "Eventos publicados recentemente com data de publicação",
-                  "preferred": "groupviewdata--ml-vertical-record-list",
-                  "alternative": "groupviewtable--ml-responsive-data-table"
-                }
-              ]
-            }
+            ],
+            "molecules": [
+              {
+                "id": "ocupacaoEventos",
+                "recommendations": [
+                  {
+                    "role": "cartão de ocupação de cada evento",
+                    "preferred": "groupviewmetric--ml-metric-card",
+                    "alternative": "groupviewmetric--ml-metric-gauge"
+                  },
+                  {
+                    "role": "lista de eventos publicados em tela estreita",
+                    "preferred": "groupviewtable--ml-responsive-table",
+                    "alternative": "groupviewtable--ml-responsive-data-table"
+                  },
+                  {
+                    "role": "barra de preenchimento das vagas por evento",
+                    "preferred": "groupshowprogress--ml-linear-progress",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "resumoPublicacoes",
+                "recommendations": [
+                  {
+                    "role": "total de vagas ocupadas",
+                    "preferred": "groupviewmetric--ml-metric-big-number",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "eventos publicados recentemente com data de publicação",
+                    "preferred": "groupviewtable--ml-responsive-table",
+                    "alternative": "groupviewtable--ml-data-table-minimal"
+                  }
+                ]
+              }
+            ]
           },
           "needs": {
-            "organisms": {
-              "destaquesOcupacao": {
+            "organisms": [
+              {
+                "id": "ocupacaoEventos",
                 "reads": [
                   "Evento.title",
                   "Evento.eventDate",
                   "Evento.status",
                   "Evento.details.capacity",
+                  "Evento.details.isFull",
                   "Evento.details.occupiedSeats",
                   "Evento.details.remainingSeats",
-                  "Evento.details.waitlistSize",
-                  "Evento.details.isFull"
+                  "Evento.details.waitlistSize"
                 ],
                 "edits": [],
                 "selects": "",
                 "submits": []
               },
-              "resumoPublicacoes": {
+              {
+                "id": "resumoPublicacoes",
                 "reads": [
                   "Evento.title",
                   "Evento.status",
-                  "Evento.eventDate",
                   "Evento.details.occupiedSeats",
                   "Evento.details.publishedAt"
                 ],
@@ -220,7 +248,7 @@
                 "selects": "",
                 "submits": []
               }
-            }
+            ]
           }
         }
       }

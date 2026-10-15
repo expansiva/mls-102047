@@ -5,37 +5,37 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/orderManagement/page21.md",
     "experience": "orderDeskSplit"
   },
-  "intent": "Num celular, entre 360px e 430px de largura, mostrar à pessoa as suas inscrições, quais ocupam vaga e a posição na lista de espera. Ela encontra uma inscrição, confere os dados e pode cancelá-la para liberar a vaga. O conteúdo fica em uma única coluna que se ajusta à tela.",
+  "intent": "No celular, ver rapidamente se suas inscrições garantem vaga ou em que posição estão na lista de espera, abrir uma inscrição e cancelá-la com confirmação, em conteúdo fluido de coluna estreita (cerca de 390px, usável de 360px a 430px).",
   "sections": [
     {
-      "id": "panorama",
-      "priority": "secondary",
-      "purpose": "Mostra em poucas linhas a situação das suas inscrições.",
+      "id": "visaoGeral",
+      "priority": "primary",
+      "purpose": "Resumo compacto no topo: inscrições com vaga e posições na lista de espera.",
       "organisms": [
         "resumoInscricoes"
       ]
     },
     {
-      "id": "localizar",
-      "priority": "primary",
-      "purpose": "Mostra suas inscrições empilhadas, com busca pelo código ou pelo evento.",
+      "id": "localizarConferir",
+      "priority": "main",
+      "purpose": "Buscar a inscrição pelo código ou evento em uma lista empilhada e, ao tocar, ver o detalhe logo abaixo.",
       "organisms": [
-        "listaInscricoes"
+        "listaInscricoes",
+        "detalheInscricao"
       ]
     },
     {
-      "id": "inscricaoAberta",
+      "id": "cancelamento",
       "priority": "main",
-      "purpose": "Mostra a inscrição escolhida e, logo abaixo, a opção de cancelá-la.",
+      "purpose": "Ação de cancelar ao alcance do polegar, logo após o detalhe, com confirmação antes de liberar a vaga.",
       "organisms": [
-        "detalheInscricao",
         "acoesInscricao"
       ]
     },
     {
-      "id": "historico",
+      "id": "promocoes",
       "priority": "secondary",
-      "purpose": "Mostra quando você saiu da lista de espera e ganhou uma vaga.",
+      "purpose": "Histórico curto de quando você saiu da lista de espera e ganhou uma vaga.",
       "organisms": [
         "promocoesListaEspera"
       ]
@@ -44,28 +44,28 @@ export const definition = {
   "organisms": {
     "resumoInscricoes": {
       "kind": "summary",
-      "text": "Resume suas inscrições: quantas ocupam vaga e sua posição nas que estão em lista de espera.",
-      "intents": []
-    },
-    "listaInscricoes": {
-      "kind": "list",
-      "text": "Mostra suas inscrições em itens empilhados, cada um com código, evento, data e situação. Busque pelo código ou pelo evento e toque em um item para ver os detalhes.",
+      "text": "Suas inscrições em poucas linhas: quantas ocupam vaga e sua posição nas listas de espera, com atalho para encontrar novos eventos.",
       "intents": [
         {
-          "id": "buscarMaisEventos",
+          "id": "verEventosAbertos",
           "kind": "navigate",
           "to": "eventos_abertos"
         }
       ]
     },
+    "listaInscricoes": {
+      "kind": "list",
+      "text": "Lista empilhada das suas inscrições com código, evento, data e situação; busque pelo código ou pelo evento e toque para abrir.",
+      "intents": []
+    },
     "detalheInscricao": {
       "kind": "detail",
-      "text": "Mostra a inscrição escolhida: código, quando foi recebida, evento com data e local, se ocupa vaga e a posição na lista de espera.",
+      "text": "A inscrição aberta: código, recebida em, evento com data e local, se ocupa vaga e a posição na lista de espera.",
       "intents": []
     },
     "acoesInscricao": {
       "kind": "actions",
-      "text": "Cancela a inscrição escolhida. Se ela ocupava vaga, a vaga passa automaticamente para o primeiro da lista de espera.",
+      "text": "Cancelar minha inscrição, liberando a vaga para o primeiro da lista de espera; pede confirmação antes de concluir.",
       "intents": [
         {
           "id": "cancelarInscricao",
@@ -75,50 +75,52 @@ export const definition = {
     },
     "promocoesListaEspera": {
       "kind": "timeline",
-      "text": "Mostra quando você saiu da lista de espera e passou a ocupar uma vaga liberada, com o evento e o momento da promoção.",
+      "text": "Quando você sai da lista de espera e passa a ocupar uma vaga liberada, isso aparece aqui com o evento e o momento.",
       "intents": []
     }
   },
   "molecules": {
     "resumoInscricoes": [
       {
-        "role": "Indicadores compactos de inscrições com vaga e em espera",
-        "preferred": "groupviewmetric--ml-metric-card",
-        "alternative": "groupviewmetric--ml-compact-metric-sparkline"
+        "role": "indicador compacto de inscrições",
+        "preferred": "groupviewmetric--ml-metric-big-number",
+        "alternative": "groupviewmetric--ml-metric-card"
       }
     ],
     "listaInscricoes": [
       {
-        "role": "Busca por código ou evento",
+        "role": "busca por código ou evento",
         "preferred": "groupsearchcontent--ml-search-bar"
       },
       {
-        "role": "Lista empilhada de inscrições para tocar e abrir",
+        "role": "lista de inscrições em tela estreita",
         "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewtable--ml-responsive-table"
+        "alternative": "groupviewtable--ml-responsive-data-table"
       }
     ],
     "detalheInscricao": [
       {
-        "role": "Cartão com os dados da inscrição e do evento",
-        "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-horizontal"
+        "role": "cartão da inscrição",
+        "preferred": "groupviewcard--ml-vertical-card"
       }
     ],
     "acoesInscricao": [
       {
-        "role": "Botão de cancelar inscrição na largura da tela",
+        "role": "botão cancelar inscrição",
         "preferred": "grouptriggeraction--ml-button-standard"
       },
       {
-        "role": "Confirmação do cancelamento",
-        "preferred": "groupnotifyuser--ml-alert-modal",
-        "alternative": "groupnotifyuser--ml-toast-notification"
+        "role": "confirmação do cancelamento",
+        "preferred": "groupnotifyuser--ml-alert-modal"
+      },
+      {
+        "role": "aviso de cancelamento concluído",
+        "preferred": "groupnotifyuser--ml-toast-notification"
       }
     ],
     "promocoesListaEspera": [
       {
-        "role": "Linha do tempo das promoções",
+        "role": "linha do tempo de promoções",
         "preferred": "groupviewdata--ml-timeline-view",
         "alternative": "groupviewdata--ml-vertical-record-list"
       }

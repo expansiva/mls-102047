@@ -1,82 +1,86 @@
 {
   "attempt": "decision-1",
   "model": "claude-opus-5-5",
-  "promptChars": 157400,
-  "receivedAt": "2026-10-13T13:05:07.918Z",
+  "promptChars": 63431,
+  "receivedAt": "2026-10-15T13:22:54.753Z",
   "raw": {
     "type": "flexible",
     "result": {
       "toolName": "submitD2Pages",
       "arguments": {
-        "categoryReason": "A página gira em torno do registro Evento e do seu ciclo de vida: o organizador cadastra o evento como rascunho, revisa os dados e o publica. A lista de eventos serve só para localizar o registro, e as áreas de ocupação, inscritos, CSV e promoções acompanham o mesmo evento. Por isso a categoria escolhida é entityRecordManagement, e não um catálogo ou um painel.",
+        "categoryReason": "A página reúne num só lugar todo o ciclo do evento do organizador: localizar eventos, cadastrar um novo, revisar a ocupação, publicar e acompanhar os inscritos com exportação em CSV e promoções automáticas. Nenhuma categoria do catálogo cobre bem essa combinação: entityRecordManagement exclui a listagem, e reportExplorer e operationsQueue ignoram o cadastro e a publicação. Por isso a categoria é bespoke nos dois dispositivos.",
         "desktop": {
           "definition": {
             "template": {
-              "category": "entityRecordManagement"
+              "category": "bespoke"
             },
-            "intent": "Dar ao organizador um único lugar para encontrar seus eventos, cadastrar um novo, revisar os dados e a ocupação, publicá-lo para receber inscrições e acompanhar os inscritos, a lista de espera e as promoções automáticas, baixando a lista em CSV quando precisar.",
+            "intent": "Permitir ao organizador encontrar seus eventos, cadastrar novos, revisar dados e ocupação, publicar para abrir inscrições e acompanhar os inscritos, a lista de espera e as promoções automáticas.",
             "sections": [
               {
                 "id": "localizarEventos",
-                "priority": "secondary",
-                "purpose": "Encontrar rapidamente o evento a trabalhar, por título, data ou situação, já vendo vagas ocupadas e restantes.",
+                "priority": "primary",
+                "purpose": "Encontrar rapidamente o evento a trabalhar pelo título, data ou situação, vendo de relance vagas ocupadas e restantes.",
                 "organisms": [
                   "eventosList"
                 ]
               },
               {
-                "id": "eventoEmFoco",
-                "priority": "primary",
-                "purpose": "Revisar o evento escolhido, com dados cadastrados, data de publicação e ocupação, e publicá-lo quando estiver pronto.",
+                "id": "revisarPublicar",
+                "priority": "main",
+                "purpose": "Conferir os dados e a ocupação do evento selecionado e publicá-lo quando estiver pronto para receber inscrições.",
                 "organisms": [
                   "eventoDetail",
                   "publicarActions"
                 ]
               },
               {
-                "id": "cadastroEvento",
+                "id": "acompanharInscritos",
                 "priority": "main",
-                "purpose": "Cadastrar um novo evento como rascunho, informando título, descrição, data, local e número de vagas.",
-                "organisms": [
-                  "eventoForm"
-                ]
-              },
-              {
-                "id": "acompanhamentoInscritos",
-                "priority": "main",
-                "purpose": "Acompanhar quem se inscreveu no evento, quem ocupa vaga e a ordem na lista de espera, baixar a lista em CSV e ver as promoções automáticas.",
+                "purpose": "Acompanhar quem se inscreveu, quem ocupa vaga e a ordem da lista de espera, baixar a lista em CSV e ver as promoções automáticas.",
                 "organisms": [
                   "inscritosList",
                   "exportarCsvActions",
                   "promocoesTimeline"
                 ]
+              },
+              {
+                "id": "cadastrarEvento",
+                "priority": "secondary",
+                "purpose": "Cadastrar um novo evento como rascunho com título, descrição, data, local e número de vagas.",
+                "organisms": [
+                  "eventoForm"
+                ]
               }
             ],
-            "organisms": {
-              "eventosList": {
+            "organisms": [
+              {
+                "id": "eventosList",
                 "kind": "list",
-                "text": "Localize seus eventos por título, data ou situação (rascunho ou publicado), vendo para cada um as vagas ocupadas e as restantes; ao escolher um evento, ele abre para revisão.",
+                "text": "Localize seus eventos por título, data ou situação, com vagas ocupadas e restantes de cada um; ao escolher um evento, os dados, a ocupação e os inscritos dele aparecem ao lado.",
                 "intents": []
               },
-              "eventoForm": {
+              {
+                "id": "eventoForm",
                 "kind": "form",
-                "text": "Cadastre o evento com título, descrição, data, local e número de vagas; ele é salvo como rascunho e pode ser revisado antes da publicação.",
+                "text": "Cadastre o evento com título, descrição, data, local e número de vagas; ele é salvo como rascunho para revisão antes da publicação.",
                 "intents": [
                   {
-                    "id": "criarEvento",
+                    "id": "salvarEvento",
                     "kind": "submit",
                     "to": ""
                   }
                 ]
               },
-              "eventoDetail": {
+              {
+                "id": "eventoDetail",
                 "kind": "detail",
-                "text": "Revise o evento: dados cadastrados, situação, publicado em, vagas ocupadas, vagas restantes, se está lotado e o tamanho da lista de espera.",
+                "text": "Revise o evento: dados cadastrados, situação, publicado em, vagas ocupadas, vagas restantes, se está lotado e tamanho da lista de espera.",
                 "intents": []
               },
-              "publicarActions": {
+              {
+                "id": "publicarActions",
                 "kind": "actions",
-                "text": "Publique o evento para que ele ganhe uma página pública aberta a inscrições; só vale para eventos em rascunho com os dados completos.",
+                "text": "Publique o evento em rascunho para que a página pública passe a receber inscrições.",
                 "intents": [
                   {
                     "id": "publicarEvento",
@@ -85,185 +89,201 @@
                   }
                 ]
               },
-              "inscritosList": {
+              {
+                "id": "inscritosList",
                 "kind": "list",
-                "text": "Inscritos do evento com código da inscrição, nome, e-mail, recebida em, situação, se ocupa vaga e posição na lista de espera, em ordem de chegada.",
+                "text": "Inscritos do evento por ordem de chegada, com código da inscrição, nome, e-mail, recebida em, situação, se ocupa vaga e posição na lista de espera.",
                 "intents": []
               },
-              "exportarCsvActions": {
+              {
+                "id": "exportarCsvActions",
                 "kind": "actions",
                 "text": "Baixe a lista de inscritos do evento em CSV, com nome, e-mail, situação e ordem de chegada.",
                 "intents": []
               },
-              "promocoesTimeline": {
+              {
+                "id": "promocoesTimeline",
                 "kind": "timeline",
-                "text": "Promoções automáticas: quando uma inscrição com vaga é cancelada, a mais antiga da lista de espera passa a ocupar a vaga; aqui aparece quem foi promovido e quando.",
+                "text": "Promoções automáticas: quando uma inscrição com vaga é cancelada, a mais antiga da lista de espera passa a ocupar a vaga; cada promoção aparece aqui com o momento em que aconteceu.",
                 "intents": []
               }
-            },
-            "molecules": {
-              "eventosList": [
-                {
-                  "role": "Busca de eventos pelo título",
-                  "preferred": "groupsearchcontent--ml-search-filters",
-                  "alternative": "groupsearchcontent--ml-search-bar"
-                },
-                {
-                  "role": "Filtro por situação do evento",
-                  "preferred": "groupselectone--ml-segmented-control",
-                  "alternative": "groupselectone--ml-select"
-                },
-                {
-                  "role": "Filtro por período de data do evento",
-                  "preferred": "groupenterdateinterval--ml-date-interval-presets",
-                  "alternative": "groupenterdateinterval--ml-date-range-dual-calendar"
-                },
-                {
-                  "role": "Resultados com vagas ocupadas e restantes",
-                  "preferred": "groupviewtable--ml-data-table",
-                  "alternative": "groupviewdata--ml-vertical-record-list"
-                }
-              ],
-              "eventoForm": [
-                {
-                  "role": "Título do evento",
-                  "preferred": "groupentertext--ml-enter-text",
-                  "alternative": "groupentertext--ml-floating-text-input"
-                },
-                {
-                  "role": "Descrição do evento",
-                  "preferred": "groupentertext--ml-multiline-text",
-                  "alternative": ""
-                },
-                {
-                  "role": "Data do evento",
-                  "preferred": "groupenterdate--ml-date-picker",
-                  "alternative": "groupenterdate--ml-date-shortcut-picker"
-                },
-                {
-                  "role": "Nome e endereço do local",
-                  "preferred": "groupentertext--ml-address-field",
-                  "alternative": "groupentertext--ml-enter-text"
-                },
-                {
-                  "role": "Número de vagas",
-                  "preferred": "groupenternumber--ml-number-stepper",
-                  "alternative": "groupenternumber--ml-number-input"
-                },
-                {
-                  "role": "Salvar rascunho",
-                  "preferred": "grouptriggeraction--ml-button-standard",
-                  "alternative": ""
-                },
-                {
-                  "role": "Confirmação do cadastro",
-                  "preferred": "groupnotifyuser--ml-toast-notification",
-                  "alternative": "groupnotifyuser--ml-contextual-feedback"
-                }
-              ],
-              "eventoDetail": [
-                {
-                  "role": "Dados cadastrados do evento",
-                  "preferred": "groupviewcard--ml-vertical-card",
-                  "alternative": "groupviewcard--ml-view-card-horizontal"
-                },
-                {
-                  "role": "Vagas ocupadas frente ao total",
-                  "preferred": "groupviewmetric--ml-metric-gauge",
-                  "alternative": "groupviewmetric--ml-metric-card"
-                },
-                {
-                  "role": "Vagas restantes e lista de espera",
-                  "preferred": "groupviewmetric--ml-metric-card",
-                  "alternative": "groupviewmetric--ml-metric-big-number"
-                }
-              ],
-              "publicarActions": [
-                {
-                  "role": "Publicar evento",
-                  "preferred": "grouptriggeraction--ml-button-standard",
-                  "alternative": "grouptriggeraction--ml-split-button"
-                },
-                {
-                  "role": "Resultado da publicação",
-                  "preferred": "groupnotifyuser--ml-contextual-feedback",
-                  "alternative": "groupnotifyuser--ml-toast-notification"
-                }
-              ],
-              "inscritosList": [
-                {
-                  "role": "Tabela de inscritos em ordem de chegada",
-                  "preferred": "groupviewtable--ml-data-table",
-                  "alternative": "groupviewtable--ml-advanced-data-table"
-                }
-              ],
-              "exportarCsvActions": [
-                {
-                  "role": "Baixar CSV",
-                  "preferred": "grouptriggeraction--ml-button-standard",
-                  "alternative": "grouptriggeraction--ml-icon-button"
-                },
-                {
-                  "role": "Aviso de arquivo gerado",
-                  "preferred": "groupnotifyuser--ml-toast-notification",
-                  "alternative": ""
-                }
-              ],
-              "promocoesTimeline": [
-                {
-                  "role": "Linha do tempo das promoções",
-                  "preferred": "groupviewdata--ml-timeline-view",
-                  "alternative": "groupviewdata--ml-vertical-record-list"
-                }
-              ]
-            }
+            ],
+            "molecules": [
+              {
+                "id": "eventosList",
+                "recommendations": [
+                  {
+                    "role": "Buscar evento pelo título",
+                    "preferred": "groupsearchcontent--ml-search-filters",
+                    "alternative": "groupsearchcontent--ml-search-bar"
+                  },
+                  {
+                    "role": "Filtrar pela data do evento",
+                    "preferred": "groupenterdate--ml-date-picker",
+                    "alternative": "groupenterdate--ml-date-shortcut-picker"
+                  },
+                  {
+                    "role": "Filtrar por situação (rascunho ou publicado)",
+                    "preferred": "groupselectone--ml-segmented-control",
+                    "alternative": "groupselectone--ml-select"
+                  },
+                  {
+                    "role": "Tabela de eventos com vagas ocupadas e restantes",
+                    "preferred": "groupviewtable--ml-data-table",
+                    "alternative": "groupviewtable--ml-advanced-data-table"
+                  },
+                  {
+                    "role": "Indicador de ocupação por evento",
+                    "preferred": "groupshowprogress--ml-linear-progress",
+                    "alternative": "groupshowprogress--ml-circular-progress"
+                  }
+                ]
+              },
+              {
+                "id": "eventoForm",
+                "recommendations": [
+                  {
+                    "role": "Título e nome do local",
+                    "preferred": "groupentertext--ml-enter-text",
+                    "alternative": "groupentertext--ml-floating-text-input"
+                  },
+                  {
+                    "role": "Descrição do evento",
+                    "preferred": "groupentertext--ml-multiline-text",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "Data do evento",
+                    "preferred": "groupenterdate--ml-date-picker",
+                    "alternative": "groupenterdate--ml-compact-calendar"
+                  },
+                  {
+                    "role": "Número de vagas",
+                    "preferred": "groupenternumber--ml-number-input",
+                    "alternative": "groupenternumber--ml-number-stepper"
+                  },
+                  {
+                    "role": "Salvar rascunho",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "eventoDetail",
+                "recommendations": [
+                  {
+                    "role": "Dados cadastrados do evento",
+                    "preferred": "groupviewcard--ml-view-card-horizontal",
+                    "alternative": "groupviewcard--ml-vertical-card"
+                  },
+                  {
+                    "role": "Vagas ocupadas frente ao número de vagas",
+                    "preferred": "groupviewmetric--ml-metric-gauge",
+                    "alternative": "groupviewmetric--ml-metric-card"
+                  },
+                  {
+                    "role": "Vagas restantes e tamanho da lista de espera",
+                    "preferred": "groupviewmetric--ml-metric-card",
+                    "alternative": "groupviewmetric--ml-metric-big-number"
+                  },
+                  {
+                    "role": "Barra de ocupação",
+                    "preferred": "groupshowprogress--ml-linear-progress",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "publicarActions",
+                "recommendations": [
+                  {
+                    "role": "Publicar evento",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "Confirmação ou bloqueio da publicação",
+                    "preferred": "groupnotifyuser--ml-toast-notification",
+                    "alternative": "groupnotifyuser--ml-contextual-feedback"
+                  }
+                ]
+              },
+              {
+                "id": "inscritosList",
+                "recommendations": [
+                  {
+                    "role": "Tabela de inscritos por ordem de chegada",
+                    "preferred": "groupviewtable--ml-data-table",
+                    "alternative": "groupviewtable--ml-advanced-data-table"
+                  }
+                ]
+              },
+              {
+                "id": "exportarCsvActions",
+                "recommendations": [
+                  {
+                    "role": "Baixar CSV",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": "grouptriggeraction--ml-icon-button"
+                  }
+                ]
+              },
+              {
+                "id": "promocoesTimeline",
+                "recommendations": [
+                  {
+                    "role": "Linha do tempo das promoções",
+                    "preferred": "groupviewdata--ml-timeline-view",
+                    "alternative": "groupviewdata--ml-vertical-record-list"
+                  }
+                ]
+              }
+            ]
           },
           "needs": {
-            "organisms": {
-              "eventosList": {
+            "organisms": [
+              {
+                "id": "eventosList",
                 "reads": [
                   "Evento.title",
                   "Evento.eventDate",
                   "Evento.status",
                   "Evento.details.occupiedSeats",
-                  "Evento.details.remainingSeats"
+                  "Evento.details.remainingSeats",
+                  "Evento.details.capacity"
                 ],
                 "edits": [],
                 "selects": "eventoDetail",
                 "submits": []
               },
-              "eventoForm": {
+              {
+                "id": "eventoForm",
                 "reads": [],
                 "edits": [
                   "Evento.title",
-                  "Evento.eventDate",
                   "Evento.details.description",
+                  "Evento.eventDate",
                   "Evento.details.venue.name",
-                  "Evento.details.venue.address.line1",
-                  "Evento.details.venue.address.line2",
-                  "Evento.details.venue.address.city",
-                  "Evento.details.venue.address.stateOrProvince",
-                  "Evento.details.venue.address.postalCode",
-                  "Evento.details.venue.address.countryCode",
                   "Evento.details.capacity"
                 ],
-                "selects": "eventoDetail",
+                "selects": "",
                 "submits": [
                   {
-                    "intentId": "criarEvento",
+                    "intentId": "salvarEvento",
                     "write": "Evento.create"
                   }
                 ]
               },
-              "eventoDetail": {
+              {
+                "id": "eventoDetail",
                 "reads": [
                   "Evento.title",
-                  "Evento.eventDate",
-                  "Evento.status",
                   "Evento.details.description",
+                  "Evento.eventDate",
                   "Evento.details.venue.name",
-                  "Evento.details.venue.address.city",
                   "Evento.details.capacity",
+                  "Evento.status",
                   "Evento.details.publishedAt",
                   "Evento.details.occupiedSeats",
                   "Evento.details.remainingSeats",
@@ -274,10 +294,10 @@
                 "selects": "",
                 "submits": []
               },
-              "publicarActions": {
+              {
+                "id": "publicarActions",
                 "reads": [
-                  "Evento.status",
-                  "Evento.title"
+                  "Evento.status"
                 ],
                 "edits": [],
                 "selects": "",
@@ -288,7 +308,8 @@
                   }
                 ]
               },
-              "inscritosList": {
+              {
+                "id": "inscritosList",
                 "reads": [
                   "Inscricao.registrationCode",
                   "Inscricao.receivedAt",
@@ -302,7 +323,8 @@
                 "selects": "",
                 "submits": []
               },
-              "exportarCsvActions": {
+              {
+                "id": "exportarCsvActions",
                 "reads": [
                   "Inscricao.registrationCode",
                   "Inscricao.receivedAt",
@@ -314,48 +336,49 @@
                 "selects": "",
                 "submits": []
               },
-              "promocoesTimeline": {
+              {
+                "id": "promocoesTimeline",
                 "reads": [
                   "Inscricao.registrationCode",
                   "Inscricao.details.promotedAt",
-                  "Inscricao.receivedAt",
+                  "Inscricao.status",
                   "Participante.details.identification.name"
                 ],
                 "edits": [],
                 "selects": "",
                 "submits": []
               }
-            }
+            ]
           }
         },
         "mobile": {
           "definition": {
             "template": {
-              "category": "entityRecordManagement"
+              "category": "bespoke"
             },
-            "intent": "No celular, o organizador localiza um evento, vê primeiro a ocupação e a situação, publica com um toque, cadastra novos eventos e acompanha os inscritos e as promoções, numa coluna única e fluida pensada para cerca de 390px que continua legível em 360px e 430px.",
+            "intent": "No celular, o organizador localiza um evento, confere a ocupação e publica, acompanha inscritos e promoções e cadastra novos eventos, tudo em conteúdo fluido de coluna estreita (cerca de 390px, usável de 360px a 430px).",
             "sections": [
               {
                 "id": "localizarEventos",
-                "priority": "main",
-                "purpose": "Encontrar o evento por título, data ou situação numa lista compacta com vagas ocupadas e restantes.",
+                "priority": "primary",
+                "purpose": "Encontrar o evento pelo título, data ou situação, vendo vagas ocupadas e restantes em itens fáceis de tocar.",
                 "organisms": [
                   "eventosList"
                 ]
               },
               {
-                "id": "eventoEmFoco",
-                "priority": "primary",
-                "purpose": "Ver os números de ocupação e os dados do evento escolhido e publicá-lo quando estiver pronto.",
+                "id": "revisarPublicar",
+                "priority": "main",
+                "purpose": "Ver primeiro a ocupação e a situação do evento escolhido e publicá-lo com um toque quando estiver pronto.",
                 "organisms": [
                   "eventoDetail",
                   "publicarActions"
                 ]
               },
               {
-                "id": "acompanhamentoInscritos",
+                "id": "acompanharInscritos",
                 "priority": "main",
-                "purpose": "Conferir os inscritos em ordem de chegada, quem ocupa vaga e quem aguarda, baixar o CSV e ver as promoções automáticas.",
+                "purpose": "Ler os inscritos empilhados por ordem de chegada, baixar o CSV e acompanhar as promoções automáticas da lista de espera.",
                 "organisms": [
                   "inscritosList",
                   "exportarCsvActions",
@@ -363,39 +386,43 @@
                 ]
               },
               {
-                "id": "cadastroEvento",
+                "id": "cadastrarEvento",
                 "priority": "secondary",
-                "purpose": "Cadastrar um novo evento como rascunho com campos empilhados em coluna única.",
+                "purpose": "Cadastrar um novo evento em formulário de uma coluna, salvo como rascunho.",
                 "organisms": [
                   "eventoForm"
                 ]
               }
             ],
-            "organisms": {
-              "eventosList": {
+            "organisms": [
+              {
+                "id": "eventosList",
                 "kind": "list",
-                "text": "Localize seus eventos por título, data ou situação; cada item mostra data, situação, vagas ocupadas e restantes, e tocar abre o evento.",
+                "text": "Localize seus eventos por título, data ou situação, com vagas ocupadas e restantes de cada um; tocar num evento abre os dados, a ocupação e os inscritos dele.",
                 "intents": []
               },
-              "eventoForm": {
+              {
+                "id": "eventoForm",
                 "kind": "form",
-                "text": "Cadastre o evento com título, descrição, data, local e número de vagas; ele fica salvo como rascunho para revisão.",
+                "text": "Cadastre o evento com título, descrição, data, local e número de vagas; ele é salvo como rascunho para revisão antes da publicação.",
                 "intents": [
                   {
-                    "id": "criarEvento",
+                    "id": "salvarEvento",
                     "kind": "submit",
                     "to": ""
                   }
                 ]
               },
-              "eventoDetail": {
+              {
+                "id": "eventoDetail",
                 "kind": "detail",
-                "text": "Revise o evento começando pela ocupação (vagas ocupadas, restantes, lotado e lista de espera), seguida dos dados cadastrados e da data de publicação.",
+                "text": "Revise o evento: vagas ocupadas, vagas restantes, se está lotado e tamanho da lista de espera em destaque, seguidos dos dados cadastrados, da situação e da data de publicação.",
                 "intents": []
               },
-              "publicarActions": {
+              {
+                "id": "publicarActions",
                 "kind": "actions",
-                "text": "Publique o evento para abrir a página pública a inscrições; disponível para rascunhos com dados completos.",
+                "text": "Publique o evento em rascunho para que a página pública passe a receber inscrições.",
                 "intents": [
                   {
                     "id": "publicarEvento",
@@ -404,185 +431,196 @@
                   }
                 ]
               },
-              "inscritosList": {
+              {
+                "id": "inscritosList",
                 "kind": "list",
-                "text": "Inscritos em ordem de chegada, cada um com código, nome, e-mail, recebida em, se ocupa vaga e posição na lista de espera.",
+                "text": "Inscritos do evento por ordem de chegada, com código da inscrição, nome, e-mail, recebida em, situação, se ocupa vaga e posição na lista de espera.",
                 "intents": []
               },
-              "exportarCsvActions": {
+              {
+                "id": "exportarCsvActions",
                 "kind": "actions",
-                "text": "Baixe a lista de inscritos do evento em CSV.",
+                "text": "Baixe a lista de inscritos do evento em CSV, com nome, e-mail, situação e ordem de chegada.",
                 "intents": []
               },
-              "promocoesTimeline": {
+              {
+                "id": "promocoesTimeline",
                 "kind": "timeline",
-                "text": "Promoções automáticas: quem saiu da lista de espera e passou a ocupar uma vaga liberada por cancelamento, e quando.",
+                "text": "Promoções automáticas: quando uma inscrição com vaga é cancelada, a mais antiga da lista de espera passa a ocupar a vaga; cada promoção aparece aqui com o momento em que aconteceu.",
                 "intents": []
               }
-            },
-            "molecules": {
-              "eventosList": [
-                {
-                  "role": "Busca de eventos pelo título",
-                  "preferred": "groupsearchcontent--ml-search-bar",
-                  "alternative": "groupsearchcontent--ml-search-filters"
-                },
-                {
-                  "role": "Filtro por situação do evento",
-                  "preferred": "groupselectone--ml-segmented-control",
-                  "alternative": "groupselectone--ml-select-dropdown"
-                },
-                {
-                  "role": "Filtro por período de data do evento",
-                  "preferred": "groupenterdateinterval--ml-date-interval-presets",
-                  "alternative": ""
-                },
-                {
-                  "role": "Resultados com vagas ocupadas e restantes",
-                  "preferred": "groupviewdata--ml-vertical-record-list",
-                  "alternative": "groupviewtable--ml-responsive-data-table"
-                }
-              ],
-              "eventoForm": [
-                {
-                  "role": "Título do evento",
-                  "preferred": "groupentertext--ml-floating-text-input",
-                  "alternative": "groupentertext--ml-enter-text"
-                },
-                {
-                  "role": "Descrição do evento",
-                  "preferred": "groupentertext--ml-multiline-text",
-                  "alternative": ""
-                },
-                {
-                  "role": "Data do evento",
-                  "preferred": "groupenterdate--ml-date-picker",
-                  "alternative": "groupenterdate--ml-compact-calendar"
-                },
-                {
-                  "role": "Nome e endereço do local",
-                  "preferred": "groupentertext--ml-address-field",
-                  "alternative": "groupentertext--ml-enter-text"
-                },
-                {
-                  "role": "Número de vagas",
-                  "preferred": "groupenternumber--ml-number-stepper",
-                  "alternative": "groupenternumber--ml-floating-number-input"
-                },
-                {
-                  "role": "Salvar rascunho",
-                  "preferred": "grouptriggeraction--ml-button-standard",
-                  "alternative": ""
-                },
-                {
-                  "role": "Confirmação do cadastro",
-                  "preferred": "groupnotifyuser--ml-toast-notification",
-                  "alternative": ""
-                }
-              ],
-              "eventoDetail": [
-                {
-                  "role": "Vagas ocupadas frente ao total",
-                  "preferred": "groupviewmetric--ml-metric-gauge",
-                  "alternative": "groupviewmetric--ml-metric-big-number"
-                },
-                {
-                  "role": "Vagas restantes e lista de espera",
-                  "preferred": "groupviewmetric--ml-metric-card",
-                  "alternative": ""
-                },
-                {
-                  "role": "Dados cadastrados do evento",
-                  "preferred": "groupviewcard--ml-vertical-card",
-                  "alternative": ""
-                }
-              ],
-              "publicarActions": [
-                {
-                  "role": "Publicar evento",
-                  "preferred": "grouptriggeraction--ml-button-standard",
-                  "alternative": ""
-                },
-                {
-                  "role": "Resultado da publicação",
-                  "preferred": "groupnotifyuser--ml-toast-notification",
-                  "alternative": "groupnotifyuser--ml-contextual-feedback"
-                }
-              ],
-              "inscritosList": [
-                {
-                  "role": "Lista de inscritos em ordem de chegada",
-                  "preferred": "groupviewdata--ml-vertical-record-list",
-                  "alternative": "groupviewtable--ml-responsive-data-table"
-                }
-              ],
-              "exportarCsvActions": [
-                {
-                  "role": "Baixar CSV",
-                  "preferred": "grouptriggeraction--ml-button-standard",
-                  "alternative": "grouptriggeraction--ml-icon-button"
-                },
-                {
-                  "role": "Aviso de arquivo gerado",
-                  "preferred": "groupnotifyuser--ml-toast-notification",
-                  "alternative": ""
-                }
-              ],
-              "promocoesTimeline": [
-                {
-                  "role": "Linha do tempo das promoções",
-                  "preferred": "groupviewdata--ml-timeline-view",
-                  "alternative": "groupviewdata--ml-vertical-record-list"
-                }
-              ]
-            }
+            ],
+            "molecules": [
+              {
+                "id": "eventosList",
+                "recommendations": [
+                  {
+                    "role": "Buscar evento pelo título",
+                    "preferred": "groupsearchcontent--ml-search-bar",
+                    "alternative": "groupsearchcontent--ml-search-filters"
+                  },
+                  {
+                    "role": "Filtrar pela data do evento",
+                    "preferred": "groupenterdate--ml-date-shortcut-picker",
+                    "alternative": "groupenterdate--ml-date-picker"
+                  },
+                  {
+                    "role": "Filtrar por situação (rascunho ou publicado)",
+                    "preferred": "groupselectone--ml-segmented-control",
+                    "alternative": "groupselectone--ml-select-dropdown"
+                  },
+                  {
+                    "role": "Lista de eventos em tela estreita",
+                    "preferred": "groupviewtable--ml-responsive-data-table",
+                    "alternative": "groupviewtable--ml-responsive-table"
+                  },
+                  {
+                    "role": "Indicador de ocupação por evento",
+                    "preferred": "groupshowprogress--ml-linear-progress",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "eventoForm",
+                "recommendations": [
+                  {
+                    "role": "Título e nome do local",
+                    "preferred": "groupentertext--ml-floating-text-input",
+                    "alternative": "groupentertext--ml-enter-text"
+                  },
+                  {
+                    "role": "Descrição do evento",
+                    "preferred": "groupentertext--ml-multiline-text",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "Data do evento",
+                    "preferred": "groupenterdate--ml-date-picker",
+                    "alternative": "groupenterdate--ml-compact-calendar"
+                  },
+                  {
+                    "role": "Número de vagas",
+                    "preferred": "groupenternumber--ml-number-stepper",
+                    "alternative": "groupenternumber--ml-floating-number-input"
+                  },
+                  {
+                    "role": "Salvar rascunho",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "eventoDetail",
+                "recommendations": [
+                  {
+                    "role": "Vagas ocupadas frente ao número de vagas",
+                    "preferred": "groupviewmetric--ml-metric-gauge",
+                    "alternative": "groupviewmetric--ml-metric-big-number"
+                  },
+                  {
+                    "role": "Vagas restantes e tamanho da lista de espera",
+                    "preferred": "groupviewmetric--ml-metric-card",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "Dados cadastrados do evento",
+                    "preferred": "groupviewcard--ml-vertical-card",
+                    "alternative": "groupviewcard--ml-view-card-horizontal"
+                  }
+                ]
+              },
+              {
+                "id": "publicarActions",
+                "recommendations": [
+                  {
+                    "role": "Publicar evento",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "Confirmação ou bloqueio da publicação",
+                    "preferred": "groupnotifyuser--ml-toast-notification",
+                    "alternative": "groupnotifyuser--ml-notify-banner"
+                  }
+                ]
+              },
+              {
+                "id": "inscritosList",
+                "recommendations": [
+                  {
+                    "role": "Inscritos em tela estreita",
+                    "preferred": "groupviewtable--ml-responsive-data-table",
+                    "alternative": "groupviewtable--ml-responsive-table"
+                  }
+                ]
+              },
+              {
+                "id": "exportarCsvActions",
+                "recommendations": [
+                  {
+                    "role": "Baixar CSV",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": "grouptriggeraction--ml-icon-button"
+                  }
+                ]
+              },
+              {
+                "id": "promocoesTimeline",
+                "recommendations": [
+                  {
+                    "role": "Linha do tempo das promoções",
+                    "preferred": "groupviewdata--ml-timeline-view",
+                    "alternative": "groupviewdata--ml-vertical-record-list"
+                  }
+                ]
+              }
+            ]
           },
           "needs": {
-            "organisms": {
-              "eventosList": {
+            "organisms": [
+              {
+                "id": "eventosList",
                 "reads": [
                   "Evento.title",
                   "Evento.eventDate",
                   "Evento.status",
                   "Evento.details.occupiedSeats",
-                  "Evento.details.remainingSeats"
+                  "Evento.details.remainingSeats",
+                  "Evento.details.capacity"
                 ],
                 "edits": [],
                 "selects": "eventoDetail",
                 "submits": []
               },
-              "eventoForm": {
+              {
+                "id": "eventoForm",
                 "reads": [],
                 "edits": [
                   "Evento.title",
-                  "Evento.eventDate",
                   "Evento.details.description",
+                  "Evento.eventDate",
                   "Evento.details.venue.name",
-                  "Evento.details.venue.address.line1",
-                  "Evento.details.venue.address.line2",
-                  "Evento.details.venue.address.city",
-                  "Evento.details.venue.address.stateOrProvince",
-                  "Evento.details.venue.address.postalCode",
-                  "Evento.details.venue.address.countryCode",
                   "Evento.details.capacity"
                 ],
-                "selects": "eventoDetail",
+                "selects": "",
                 "submits": [
                   {
-                    "intentId": "criarEvento",
+                    "intentId": "salvarEvento",
                     "write": "Evento.create"
                   }
                 ]
               },
-              "eventoDetail": {
+              {
+                "id": "eventoDetail",
                 "reads": [
                   "Evento.title",
-                  "Evento.eventDate",
-                  "Evento.status",
                   "Evento.details.description",
+                  "Evento.eventDate",
                   "Evento.details.venue.name",
-                  "Evento.details.venue.address.city",
                   "Evento.details.capacity",
+                  "Evento.status",
                   "Evento.details.publishedAt",
                   "Evento.details.occupiedSeats",
                   "Evento.details.remainingSeats",
@@ -593,10 +631,10 @@
                 "selects": "",
                 "submits": []
               },
-              "publicarActions": {
+              {
+                "id": "publicarActions",
                 "reads": [
-                  "Evento.status",
-                  "Evento.title"
+                  "Evento.status"
                 ],
                 "edits": [],
                 "selects": "",
@@ -607,7 +645,8 @@
                   }
                 ]
               },
-              "inscritosList": {
+              {
+                "id": "inscritosList",
                 "reads": [
                   "Inscricao.registrationCode",
                   "Inscricao.receivedAt",
@@ -621,7 +660,8 @@
                 "selects": "",
                 "submits": []
               },
-              "exportarCsvActions": {
+              {
+                "id": "exportarCsvActions",
                 "reads": [
                   "Inscricao.registrationCode",
                   "Inscricao.receivedAt",
@@ -633,18 +673,19 @@
                 "selects": "",
                 "submits": []
               },
-              "promocoesTimeline": {
+              {
+                "id": "promocoesTimeline",
                 "reads": [
                   "Inscricao.registrationCode",
                   "Inscricao.details.promotedAt",
-                  "Inscricao.receivedAt",
+                  "Inscricao.status",
                   "Participante.details.identification.name"
                 ],
                 "edits": [],
                 "selects": "",
                 "submits": []
               }
-            }
+            ]
           }
         }
       }

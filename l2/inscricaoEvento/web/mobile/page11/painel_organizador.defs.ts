@@ -5,32 +5,32 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/dashboardCommandCenter/page21.md",
     "experience": "exceptionTriage"
   },
-  "intent": "No celular, o organizador confere rapidamente quais eventos publicados lotaram, quantas vagas restam, o tamanho das listas de espera e o total de vagas ocupadas, em conteúdo fluido de coluna única pensado para cerca de 390px e utilizável entre 360px e 430px.",
+  "intent": "No celular, mostrar ao organizador num conteúdo estreito e fluido (cerca de 390px, também usável de 360px a 430px) quais eventos publicados estão lotados, quantas vagas restam, a lista de espera, o total de vagas ocupadas e as publicações recentes.",
   "sections": [
     {
-      "id": "ocupacao",
+      "id": "alertasOcupacao",
       "priority": "primary",
-      "purpose": "Abrir a tela pelos eventos que pedem atenção: lotados ou com lista de espera, cada um em um item compacto e fácil de ler.",
+      "purpose": "Mostrar no topo, em blocos empilhados, os eventos lotados ou quase sem vagas e o tamanho da lista de espera, para leitura rápida com uma mão.",
       "organisms": [
-        "destaquesOcupacao"
+        "ocupacaoEventos"
       ]
     },
     {
-      "id": "resumo",
+      "id": "resumoGeral",
       "priority": "main",
-      "purpose": "Mostrar o total de vagas ocupadas e, logo abaixo, os eventos publicados recentemente com a data de publicação.",
+      "purpose": "Logo abaixo, o total de vagas ocupadas em destaque e os eventos publicados recentemente com a data de publicação.",
       "organisms": [
         "resumoPublicacoes"
       ]
     }
   ],
   "organisms": {
-    "destaquesOcupacao": {
+    "ocupacaoEventos": {
       "kind": "highlights",
-      "text": "Para cada evento publicado, mostra se está lotado, as vagas restantes e quantas pessoas estão na lista de espera. Os eventos que pedem atenção vêm primeiro.",
+      "text": "Para cada evento publicado: se está lotado, quantas vagas restam em relação ao número de vagas e quantas pessoas aguardam na lista de espera. Os eventos lotados e com fila aparecem primeiro.",
       "intents": [
         {
-          "id": "abrirEventoNaGestao",
+          "id": "abrirGestaoEvento",
           "kind": "navigate",
           "to": "gestao_eventos"
         }
@@ -38,7 +38,7 @@ export const definition = {
     },
     "resumoPublicacoes": {
       "kind": "summary",
-      "text": "Total de vagas ocupadas nos eventos publicados e os eventos publicados recentemente, com a data de publicação.",
+      "text": "Total de vagas ocupadas somando os eventos publicados e os eventos publicados recentemente, com a data de publicação de cada um.",
       "intents": [
         {
           "id": "verTodosEventos",
@@ -49,27 +49,31 @@ export const definition = {
     }
   },
   "molecules": {
-    "destaquesOcupacao": [
+    "ocupacaoEventos": [
       {
-        "role": "Ocupação por evento publicado em itens empilhados",
-        "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewtable--ml-responsive-table"
+        "role": "cartão de ocupação de cada evento",
+        "preferred": "groupviewmetric--ml-metric-card",
+        "alternative": "groupviewmetric--ml-metric-gauge"
       },
       {
-        "role": "Vagas ocupadas em relação ao número de vagas de cada evento",
+        "role": "lista de eventos publicados em tela estreita",
+        "preferred": "groupviewtable--ml-responsive-table",
+        "alternative": "groupviewtable--ml-responsive-data-table"
+      },
+      {
+        "role": "barra de preenchimento das vagas por evento",
         "preferred": "groupshowprogress--ml-linear-progress"
       }
     ],
     "resumoPublicacoes": [
       {
-        "role": "Total de vagas ocupadas",
-        "preferred": "groupviewmetric--ml-metric-card",
-        "alternative": "groupviewmetric--ml-metric-big-number"
+        "role": "total de vagas ocupadas",
+        "preferred": "groupviewmetric--ml-metric-big-number"
       },
       {
-        "role": "Eventos publicados recentemente com data de publicação",
-        "preferred": "groupviewdata--ml-vertical-record-list",
-        "alternative": "groupviewtable--ml-responsive-data-table"
+        "role": "eventos publicados recentemente com data de publicação",
+        "preferred": "groupviewtable--ml-responsive-table",
+        "alternative": "groupviewtable--ml-data-table-minimal"
       }
     ]
   }

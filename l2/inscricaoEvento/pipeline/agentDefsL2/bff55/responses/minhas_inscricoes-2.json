@@ -1,8 +1,8 @@
 {
   "attempt": "2",
   "model": "claude-opus-5-5",
-  "promptChars": 47045,
-  "receivedAt": "2026-10-13T13:06:34.805Z",
+  "promptChars": 48427,
+  "receivedAt": "2026-10-15T13:24:34.746Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -10,8 +10,24 @@
       "arguments": {
         "types": [
           {
-            "name": "EventoResumo",
-            "description": "Evento da inscrição como aparece na lista: título e data.",
+            "name": "EventoTitulo",
+            "description": "Evento reduzido ao título, para linhas de resumo e linha do tempo.",
+            "fields": [
+              {
+                "name": "title",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.title"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EventoItem",
+            "description": "Evento como aparece numa linha da lista de inscrições.",
             "fields": [
               {
                 "name": "title",
@@ -36,23 +52,7 @@
             ]
           },
           {
-            "name": "EventoTitulo",
-            "description": "Apenas o título do evento, para o resumo e o histórico de promoções.",
-            "fields": [
-              {
-                "name": "title",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.title"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "name": "EventoVenue",
+            "name": "LocalEvento",
             "description": "Local do evento.",
             "fields": [
               {
@@ -69,11 +69,11 @@
           },
           {
             "name": "EventoDetalheDetails",
-            "description": "Detalhes do evento usados no detalhe da inscrição.",
+            "description": "Detalhes do evento mostrados no detalhe da inscrição.",
             "fields": [
               {
                 "name": "venue",
-                "type": "EventoVenue",
+                "type": "LocalEvento",
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -85,7 +85,7 @@
           },
           {
             "name": "EventoDetalhe",
-            "description": "Evento da inscrição aberta: título, data e local.",
+            "description": "Evento com data e local, para o detalhe da inscrição.",
             "fields": [
               {
                 "name": "title",
@@ -120,7 +120,120 @@
             ]
           },
           {
-            "name": "InscricaoListaItem",
+            "name": "InscricaoSituacao",
+            "description": "Campos derivados da situação da inscrição: se ocupa vaga e a posição na lista de espera.",
+            "fields": [
+              {
+                "name": "ocupaVaga",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.details.ocupaVaga"
+                  ]
+                }
+              },
+              {
+                "name": "posicaoListaEspera",
+                "type": "number",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.details.posicaoListaEspera"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "InscricaoResumoItem",
+            "description": "Inscrição não cancelada no resumo, com sua situação e evento.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.id"
+                  ]
+                }
+              },
+              {
+                "name": "status",
+                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.status"
+                  ]
+                }
+              },
+              {
+                "name": "details",
+                "type": "InscricaoSituacao",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.details"
+                  ]
+                }
+              },
+              {
+                "name": "evento",
+                "type": "EventoTitulo",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.eventoId"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ResumoInscricoes",
+            "description": "Indicadores já calculados das inscrições da pessoa e as posições nas listas de espera.",
+            "fields": [
+              {
+                "name": "totalOcupandoVaga",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Inscricao.status",
+                    "Inscricao.details.ocupaVaga"
+                  ]
+                }
+              },
+              {
+                "name": "totalNaListaEspera",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Inscricao.status"
+                  ]
+                }
+              },
+              {
+                "name": "inscricoesAtivas",
+                "type": "InscricaoResumoItem[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Inscricao.status",
+                    "Inscricao.details.ocupaVaga",
+                    "Inscricao.details.posicaoListaEspera",
+                    "Evento.title"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "InscricaoItem",
             "description": "Linha da lista de inscrições da pessoa.",
             "fields": [
               {
@@ -154,16 +267,6 @@
                 }
               },
               {
-                "name": "status",
-                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.status"
-                  ]
-                }
-              },
-              {
                 "name": "receivedAt",
                 "type": "string",
                 "origin": {
@@ -174,8 +277,18 @@
                 }
               },
               {
+                "name": "status",
+                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.status"
+                  ]
+                }
+              },
+              {
                 "name": "evento",
-                "type": "EventoResumo",
+                "type": "EventoItem",
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -186,35 +299,8 @@
             ]
           },
           {
-            "name": "InscricaoDetalheDetails",
-            "description": "Campos derivados da inscrição: se ocupa vaga e posição na lista de espera.",
-            "fields": [
-              {
-                "name": "ocupaVaga",
-                "type": "boolean",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.details.ocupaVaga"
-                  ]
-                }
-              },
-              {
-                "name": "posicaoListaEspera",
-                "type": "number",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.details.posicaoListaEspera"
-                  ]
-                }
-              }
-            ]
-          },
-          {
             "name": "InscricaoDetalhe",
-            "description": "Inscrição aberta com seu evento, usada no detalhe e nas ações de cancelamento.",
+            "description": "Inscrição escolhida com evento, data, local e situação derivada.",
             "fields": [
               {
                 "name": "id",
@@ -223,16 +309,6 @@
                   "kind": "field",
                   "paths": [
                     "Inscricao.id"
-                  ]
-                }
-              },
-              {
-                "name": "version",
-                "type": "number",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.version"
                   ]
                 }
               },
@@ -247,16 +323,6 @@
                 }
               },
               {
-                "name": "status",
-                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.status"
-                  ]
-                }
-              },
-              {
                 "name": "receivedAt",
                 "type": "string",
                 "origin": {
@@ -267,8 +333,28 @@
                 }
               },
               {
+                "name": "eventoId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.eventoId"
+                  ]
+                }
+              },
+              {
+                "name": "status",
+                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.status"
+                  ]
+                }
+              },
+              {
                 "name": "details",
-                "type": "InscricaoDetalheDetails",
+                "type": "InscricaoSituacao",
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -283,97 +369,6 @@
                   "kind": "field",
                   "paths": [
                     "Inscricao.eventoId"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "name": "PosicaoEsperaDetails",
-            "description": "Posição da inscrição na fila.",
-            "fields": [
-              {
-                "name": "posicaoListaEspera",
-                "type": "number",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.details.posicaoListaEspera"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "name": "PosicaoEsperaItem",
-            "description": "Inscrição em lista de espera com a posição na fila e o evento.",
-            "fields": [
-              {
-                "name": "id",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.id"
-                  ]
-                }
-              },
-              {
-                "name": "details",
-                "type": "PosicaoEsperaDetails",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.details"
-                  ]
-                }
-              },
-              {
-                "name": "evento",
-                "type": "EventoTitulo",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.eventoId"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "name": "ResumoInscricoes",
-            "description": "Panorama das inscrições da pessoa: contagens e posições na lista de espera.",
-            "fields": [
-              {
-                "name": "totalOcupandoVaga",
-                "type": "number",
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Inscricao.status",
-                    "Inscricao.details.ocupaVaga"
-                  ]
-                }
-              },
-              {
-                "name": "totalEmListaEspera",
-                "type": "number",
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Inscricao.status"
-                  ]
-                }
-              },
-              {
-                "name": "emListaEspera",
-                "type": "PosicaoEsperaItem[]",
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Inscricao.status",
-                    "Inscricao.details.posicaoListaEspera",
-                    "Evento.title"
                   ]
                 }
               }
@@ -397,7 +392,7 @@
           },
           {
             "name": "PromocaoItem",
-            "description": "Evento do histórico: inscrição promovida da lista de espera.",
+            "description": "Evento da linha do tempo: inscrição da pessoa promovida da lista de espera.",
             "fields": [
               {
                 "name": "id",
@@ -416,6 +411,16 @@
                   "kind": "field",
                   "paths": [
                     "Inscricao.registrationCode"
+                  ]
+                }
+              },
+              {
+                "name": "status",
+                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.status"
                   ]
                 }
               },
@@ -447,7 +452,25 @@
             "id": "carregarMinhasInscricoes",
             "kind": "qry",
             "when": "onLoad",
-            "input": [],
+            "writes": "",
+            "input": [
+              {
+                "name": "page",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              },
+              {
+                "name": "pageSize",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              }
+            ],
             "output": [
               {
                 "name": "resumo",
@@ -464,7 +487,8 @@
               },
               {
                 "name": "inscricoes",
-                "type": "InscricaoListaItem[]",
+                "type": "InscricaoItem[]",
+                "paginated": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -476,9 +500,12 @@
                 "name": "promocoes",
                 "type": "PromocaoItem[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Inscricao.details.promotedAt"
+                    "Inscricao.details.promotedAt",
+                    "Inscricao.status",
+                    "Inscricao.registrationCode",
+                    "Evento.title"
                   ]
                 }
               }
@@ -488,20 +515,38 @@
               "ordemChegadaListaEspera"
             ],
             "jsdoc": {
-              "purpose": "Carrega de uma vez tudo que a página mostra ao abrir: o panorama das inscrições da pessoa, a lista das suas inscrições e o histórico de promoções da lista de espera.",
-              "input": "Sem parâmetros; o participante é identificado pela sessão do público (escopo own).",
-              "processing": "Lê as inscrições do participante da sessão com o título e a data do evento, ordenadas por recebimento (mais recente primeiro). Calcula no servidor: totalOcupandoVaga = inscrições com ocupaVaga verdadeiro (confirmadas); totalEmListaEspera = inscrições com status waitlisted; emListaEspera com a posição derivada por calculoPosicaoListaEspera (inscrições do mesmo evento em lista de espera recebidas antes, mais um, na ordem de ordemChegadaListaEspera). Monta promocoes com as inscrições que têm promotedAt preenchido, em ordem cronológica. Campos derivados são calculados, nunca gravados.",
-              "output": "resumo para o panorama, inscricoes para a lista e promocoes para a linha do tempo, já no formato que a página exibe."
+              "purpose": "Carrega de uma vez tudo o que a página Minhas inscrições mostra ao abrir: o resumo da situação, a primeira página da lista de inscrições e a linha do tempo de promoções.",
+              "input": "page e pageSize: página da lista de inscrições (a primeira na abertura). O participante vem da sessão (escopo own), nunca do cliente.",
+              "processing": "Filtra as inscrições do participante autenticado. Resumo: conta as que ocupam vaga (status confirmed, ocupaVaga verdadeiro) e as em lista de espera (waitlisted), e lista as não canceladas com título do evento, ocupaVaga e posicaoListaEspera calculada pela regra calculoPosicaoListaEspera (inscrições waitlisted do mesmo evento com receivedAt anterior, mais um, conforme ordemChegadaListaEspera); os derivados são calculados, nunca gravados. Lista: inscrições com evento (título e data), ordenadas por receivedAt da mais recente, paginada. Promoções: inscrições com promotedAt preenchido, ordenadas por promotedAt decrescente.",
+              "output": "resumo com os indicadores já calculados, inscricoes paginada ({ items, page, pageSize, hasMore }) e promocoes para a linha do tempo."
             }
           },
           {
-            "id": "buscarMinhasInscricoes",
+            "id": "buscarInscricoes",
             "kind": "qry",
             "when": "interaction",
+            "writes": "",
             "input": [
               {
-                "name": "texto",
+                "name": "busca",
                 "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              },
+              {
+                "name": "page",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              },
+              {
+                "name": "pageSize",
+                "type": "number",
                 "origin": {
                   "kind": "context",
                   "paths": []
@@ -511,7 +556,8 @@
             "output": [
               {
                 "name": "inscricoes",
-                "type": "InscricaoListaItem[]",
+                "type": "InscricaoItem[]",
+                "paginated": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -522,25 +568,24 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Filtra as inscrições da pessoa pelo código da inscrição ou pelo título do evento.",
-              "input": "texto: termo digitado na busca; compara com o código da inscrição ou com o título do evento.",
-              "processing": "Restringe às inscrições do participante da sessão (escopo own) e aplica o filtro por registrationCode ou Evento.title (sem distinção de maiúsculas), ordenando por recebimento.",
-              "output": "A lista filtrada, que substitui a lista exibida."
+              "purpose": "Busca as inscrições da própria pessoa pelo código ou pelo nome do evento e traz as páginas seguintes.",
+              "input": "busca: texto digitado, comparado ao código da inscrição ou ao título do evento; page e pageSize: página pedida.",
+              "processing": "Restringe às inscrições do participante da sessão; filtra por registrationCode igual/iniciando pelo texto ou Evento.title contendo o texto; ordena por receivedAt decrescente; pagina.",
+              "output": "inscricoes paginada que substitui a lista numa nova busca."
             }
           },
           {
             "id": "obterInscricao",
             "kind": "qry",
             "when": "interaction",
+            "writes": "",
             "input": [
               {
                 "name": "inscricaoId",
                 "type": "string",
                 "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.id"
-                  ]
+                  "kind": "context",
+                  "paths": []
                 }
               }
             ],
@@ -560,10 +605,10 @@
               "calculoPosicaoListaEspera"
             ],
             "jsdoc": {
-              "purpose": "Abre a inscrição escolhida na lista para a pessoa conferir os dados antes de decidir cancelar.",
+              "purpose": "Abre a inscrição escolhida na lista para a pessoa conferir antes de cancelar.",
               "input": "inscricaoId: id da inscrição selecionada na lista.",
-              "processing": "Lê a inscrição garantindo que pertence ao participante da sessão; compõe o evento com título, data e nome do local. ocupaVaga é derivado do status confirmado; posicaoListaEspera é calculada por calculoPosicaoListaEspera apenas quando a inscrição está em lista de espera. Devolve a versão para o cancelamento com concorrência otimista.",
-              "output": "A inscrição com seu evento e versão, usada pelo detalhe e pelas ações (que mostram o cancelamento só para confirmed ou waitlisted)."
+              "processing": "Lê a inscrição garantindo que pertence ao participante da sessão; compõe com o evento (título, data, nome do local); calcula ocupaVaga (confirmada) e posicaoListaEspera pela regra calculoPosicaoListaEspera apenas quando waitlisted.",
+              "output": "inscricao com código, recebida em, evento com data e local, situação, ocupaVaga e posição na fila; alimenta o detalhe e as ações."
             }
           },
           {
@@ -603,18 +648,40 @@
                     "Inscricao.id"
                   ]
                 }
+              },
+              {
+                "name": "item",
+                "type": "InscricaoItem",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.id"
+                  ]
+                }
+              },
+              {
+                "name": "resumo",
+                "type": "ResumoInscricoes",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Inscricao.status",
+                    "Inscricao.details.ocupaVaga",
+                    "Inscricao.details.posicaoListaEspera",
+                    "Evento.title"
+                  ]
+                }
               }
             ],
             "rules": [
               "cancelamentoSomentePropriaInscricao",
-              "promoverPrimeiroListaEsperaAoCancelar",
-              "ordemChegadaListaEspera"
+              "promoverPrimeiroListaEsperaAoCancelar"
             ],
             "jsdoc": {
-              "purpose": "Cancela a inscrição aberta pela pessoa, liberando a vaga quando ela a ocupava.",
-              "input": "inscricaoId: id da inscrição a cancelar. version: versão da inscrição lida no detalhe, para concorrência otimista (recusa se a inscrição mudou desde a leitura).",
-              "processing": "Aplica cancelamentoSomentePropriaInscricao: recusa se a inscrição não pertence ao participante da sessão ou se o status não é confirmed ou waitlisted. Confere a versão e executa a transição cancelar (status cancelled, registrando cancelledAt). Se a inscrição ocupava vaga, na mesma transação promove a primeira inscrição em lista de espera do mesmo evento por ordem de chegada (ordemChegadaListaEspera, promoverPrimeiroListaEsperaAoCancelar), registrando promotedAt. Tudo ou nada.",
-              "output": "A inscrição atualizada com seu evento e nova versão, para redesenhar o detalhe e as ações sem nova chamada."
+              "purpose": "Cancela a inscrição da própria pessoa, liberando a vaga para o primeiro da lista de espera.",
+              "input": "inscricaoId: id da inscrição a cancelar; version: versão da inscrição conhecida pela página quando a abriu, usada para controle de concorrência otimista (tratada como token opaco, não exibida ao público).",
+              "processing": "cancelamentoSomentePropriaInscricao: recusa se a inscrição não pertence ao participante da sessão ou se o status não é confirmed ou waitlisted. Recusa com conflito se version difere da versão atual. Executa a transição cancelar (status cancelled, registra cancelledAt). promoverPrimeiroListaEsperaAoCancelar: se a inscrição estava confirmada, na mesma transação promove a primeira inscrição waitlisted do mesmo evento por receivedAt, registrando promotedAt. Recalcula os derivados (ocupaVaga, posicaoListaEspera) sem gravá-los.",
+              "output": "inscricao atualizada para o detalhe, item para atualizar a linha da lista e resumo recalculado, para a página redesenhar sem nova chamada."
             }
           }
         ],
@@ -644,9 +711,7 @@
           "commands": [
             {
               "endpoint": "cancelarInscricao",
-              "refreshes": [
-                "carregarMinhasInscricoes"
-              ]
+              "refreshes": []
             }
           ],
           "selections": [
@@ -662,12 +727,12 @@
             {
               "step": "cancelarInscricao/localizarInscricao",
               "organisms": [
-                "resumoInscricoes",
-                "listaInscricoes"
+                "listaInscricoes",
+                "resumoInscricoes"
               ],
               "endpoints": [
                 "carregarMinhasInscricoes",
-                "buscarMinhasInscricoes"
+                "buscarInscricoes"
               ]
             },
             {
@@ -691,14 +756,24 @@
           ],
           "updates": [
             {
-              "endpoint": "buscarMinhasInscricoes",
+              "endpoint": "buscarInscricoes",
               "state": "carregarMinhasInscricoes.inscricoes",
               "mode": "replace"
             },
             {
               "endpoint": "cancelarInscricao",
               "state": "obterInscricao.inscricao",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cancelarInscricao",
+              "state": "carregarMinhasInscricoes.inscricoes",
               "mode": "upsert"
+            },
+            {
+              "endpoint": "cancelarInscricao",
+              "state": "carregarMinhasInscricoes.resumo",
+              "mode": "replace"
             }
           ]
         }

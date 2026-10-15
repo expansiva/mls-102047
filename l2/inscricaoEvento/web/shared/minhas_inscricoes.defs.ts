@@ -3,23 +3,25 @@
 export const definition = {
   "entry": {
     "params": {
-      "texto": {
+      "page": {
+        "type": "number",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "filter:resumoInscricoes",
+        "persist": true,
+        "required": false
+      },
+      "busca": {
         "type": "string",
         "sources": [
           "url",
           "localStorage"
         ],
         "effect": "filter:listaInscricoes",
-        "persist": true
-      },
-      "eventoId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "select:Evento",
-        "persist": true
+        "persist": true,
+        "required": false
       },
       "inscricaoId": {
         "type": "string",
@@ -28,11 +30,21 @@ export const definition = {
           "localStorage"
         ],
         "effect": "select:detalheInscricao",
-        "persist": true
+        "persist": true,
+        "required": false
+      },
+      "eventoId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "select:Evento",
+        "persist": true,
+        "required": false
       }
     }
   },
-  "forms": {},
   "requests": {
     "carregarMinhasInscricoes": {
       "kind": "qry",
@@ -43,9 +55,9 @@ export const definition = {
         "promocoes"
       ]
     },
-    "buscarMinhasInscricoes": {
+    "buscarInscricoes": {
       "kind": "qry",
-      "trigger": "buscarMinhasInscricoes",
+      "trigger": "buscarInscricoes",
       "returns": [
         "inscricoes"
       ]
@@ -61,7 +73,9 @@ export const definition = {
       "kind": "cmd",
       "trigger": "cancelarInscricao",
       "returns": [
-        "inscricao"
+        "inscricao",
+        "item",
+        "resumo"
       ],
       "writes": "Inscricao.cancelar"
     }
@@ -69,7 +83,7 @@ export const definition = {
   "states": {
     "resumo": {
       "source": "carregarMinhasInscricoes.resumo",
-      "description": "Panorama das inscrições da pessoa: contagens e posições na lista de espera.",
+      "description": "Indicadores já calculados das inscrições da pessoa e as posições nas listas de espera.",
       "organisms": [
         "resumoInscricoes"
       ]
@@ -83,7 +97,7 @@ export const definition = {
     },
     "inscricao": {
       "source": "obterInscricao.inscricao",
-      "description": "Inscrição aberta com seu evento, usada no detalhe e nas ações de cancelamento.",
+      "description": "Inscrição escolhida com evento, data, local e situação derivada.",
       "organisms": [
         "acoesInscricao",
         "detalheInscricao"
@@ -91,156 +105,53 @@ export const definition = {
     },
     "promocoes": {
       "source": "carregarMinhasInscricoes.promocoes",
-      "description": "Evento do histórico: inscrição promovida da lista de espera.",
+      "description": "Evento da linha do tempo: inscrição da pessoa promovida da lista de espera.",
       "organisms": [
         "promocoesListaEspera"
       ]
     },
     "selectedInscricao": {
       "source": "entry.params.inscricaoId",
-      "description": "Inscrição aberta com seu evento, usada no detalhe e nas ações de cancelamento.",
+      "description": "Inscrição escolhida com evento, data, local e situação derivada.",
       "organisms": [
         "detalheInscricao",
         "listaInscricoes"
       ]
     }
   },
-  "functions": {
-    "carregarMinhasInscricoes": {
-      "description": "Carrega de uma vez tudo que a página mostra ao abrir: o panorama das inscrições da pessoa, a lista das suas inscrições e o histórico de promoções da lista de espera.",
-      "calls": "carregarMinhasInscricoes",
-      "sets": "resumo",
-      "updates": [
-        "inscricoes",
-        "promocoes"
-      ]
-    },
-    "buscarMinhasInscricoes": {
-      "description": "Filtra as inscrições da pessoa pelo código da inscrição ou pelo título do evento.",
-      "calls": "buscarMinhasInscricoes",
-      "sets": "inscricoes"
-    },
-    "obterInscricao": {
-      "description": "Abre a inscrição escolhida na lista para a pessoa conferir os dados antes de decidir cancelar.",
-      "calls": "obterInscricao",
-      "sets": "inscricao"
-    },
-    "cancelarInscricao": {
-      "description": "Cancela a inscrição aberta pela pessoa, liberando a vaga quando ela a ocupava. (inscricao: upsert)",
-      "calls": "cancelarInscricao",
-      "updates": [
-        "inscricao",
-        "resumo",
-        "inscricoes",
-        "promocoes"
-      ]
-    },
-    "buscarMaisEventos": {
-      "description": "Lista suas inscrições com código, evento, data do evento, situação e data de recebimento. Você pode buscar pelo código ou pelo nome do evento e escolher uma para ver os detalhes.",
-      "navigate": "eventos_abertos",
-      "carries": {
-        "inscricaoId": "selectedInscricao.id"
-      }
-    }
-  },
   "journeys": [
     {
       "step": "cancelarInscricao/localizarInscricao",
       "organisms": [
-        "resumoInscricoes",
-        "listaInscricoes"
-      ],
-      "functions": [
-        "carregarMinhasInscricoes",
-        "buscarMinhasInscricoes"
+        "listaInscricoes",
+        "resumoInscricoes"
       ]
     },
     {
       "step": "cancelarInscricao/verInscricao",
       "organisms": [
         "detalheInscricao"
-      ],
-      "functions": [
-        "obterInscricao"
       ]
     },
     {
       "step": "cancelarInscricao/cancelar",
       "organisms": [
         "acoesInscricao"
-      ],
-      "functions": [
-        "cancelarInscricao"
       ]
     }
   ],
-  "rules": {
-    "carregarMinhasInscricoes": [
-      "calculoPosicaoListaEspera",
-      "ordemChegadaListaEspera"
-    ],
-    "buscarMinhasInscricoes": [],
-    "obterInscricao": [
-      "calculoPosicaoListaEspera"
-    ],
-    "cancelarInscricao": [
-      "cancelamentoSomentePropriaInscricao",
-      "promoverPrimeiroListaEsperaAoCancelar",
-      "ordemChegadaListaEspera"
-    ]
-  },
+  "rules": [
+    "calculoPosicaoListaEspera",
+    "cancelamentoSomentePropriaInscricao",
+    "ordemChegadaListaEspera",
+    "promoverPrimeiroListaEsperaAoCancelar"
+  ],
   "access": {
     "actors": [
       "publico"
     ],
     "grants": [
       "publicoMinhasInscricoes"
-    ]
-  },
-  "fields": {
-    "Evento.details.venue.name": [
-      "detalheInscricao"
-    ],
-    "Evento.eventDate": [
-      "detalheInscricao",
-      "listaInscricoes"
-    ],
-    "Evento.title": [
-      "detalheInscricao",
-      "listaInscricoes",
-      "promocoesListaEspera",
-      "resumoInscricoes"
-    ],
-    "Inscricao.details.ocupaVaga": [
-      "acoesInscricao",
-      "detalheInscricao",
-      "resumoInscricoes"
-    ],
-    "Inscricao.details.posicaoListaEspera": [
-      "detalheInscricao",
-      "resumoInscricoes"
-    ],
-    "Inscricao.details.promotedAt": [
-      "promocoesListaEspera"
-    ],
-    "Inscricao.eventoId": [
-      "listaInscricoes"
-    ],
-    "Inscricao.receivedAt": [
-      "detalheInscricao",
-      "listaInscricoes"
-    ],
-    "Inscricao.registrationCode": [
-      "acoesInscricao",
-      "detalheInscricao",
-      "listaInscricoes",
-      "promocoesListaEspera"
-    ],
-    "Inscricao.status": [
-      "acoesInscricao",
-      "detalheInscricao",
-      "listaInscricoes",
-      "resumoInscricoes"
     ]
   }
 } as const;

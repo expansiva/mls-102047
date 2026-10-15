@@ -1,7 +1,7 @@
 /// <mls fileReference="_102047_/l2/inscricaoEvento/web/contracts/painel_organizador.defs.ts" enhancement="_blank"/>
 
-/** Números de ocupação de um evento publicado, todos calculados pelo servidor a partir das inscrições. */
-export interface EventoOcupacaoDetails {
+/** Números de ocupação do evento, calculados a partir das inscrições. */
+export interface OcupacaoEventoDetails {
   details: {
     capacity: number;
     readonly occupiedSeats: number;
@@ -11,43 +11,42 @@ export interface EventoOcupacaoDetails {
   };
 }
 
-/** Evento publicado com sua situação de ocupação, para os destaques do painel. */
-export interface EventoOcupacao {
+/** Evento publicado com sua ocupação, para os destaques do painel. */
+export interface OcupacaoEvento {
   id: string;
   title: string;
   eventDate: string;
   status: 'draft' | 'published';
-  details: EventoOcupacaoDetails;
+  details: OcupacaoEventoDetails;
 }
 
-/** Data de publicação e vagas ocupadas de um evento publicado recentemente. */
-export interface EventoPublicadoDetails {
+/** Data de publicação e vagas ocupadas do evento publicado recentemente. */
+export interface PublicacaoRecenteDetails {
   details: {
     readonly publishedAt: string;
     readonly occupiedSeats: number;
   };
 }
 
-/** Evento publicado recentemente, para o resumo de publicações. */
-export interface EventoPublicado {
+/** Evento publicado recentemente, para o resumo do painel. */
+export interface PublicacaoRecente {
   id: string;
   title: string;
-  eventDate: string;
   status: 'draft' | 'published';
-  details: EventoPublicadoDetails;
+  details: PublicacaoRecenteDetails;
 }
 
 export interface Painel_organizadorContracts {
   /**
-   * Finalidade: Carrega, em uma única chamada ao abrir o painel, a situação de ocupação dos eventos publicados da organização do organizador, o total de vagas ocupadas e os eventos publicados recentemente.
-   * Entrada: Sem parâmetros: a organização vem do contexto do organizador autenticado (grant organizadorEventos, escopo organização).
-   * Processamento: Seleciona os eventos da organização com status ’published’. Para cada um calcula, a partir das inscrições: occupiedSeats = inscrições confirmadas, sem canceladas nem em lista de espera (calculoVagasOcupadas); remainingSeats = capacity - occupiedSeats, nunca abaixo de zero (calculoVagasRestantes); waitlistSize = inscrições em lista de espera; isFull verdadeiro quando occupiedSeats alcança capacity (listaEsperaQuandoVagasEsgotadas). Esses campos são derivados, calculados na leitura e nunca gravados. destaques: ordena primeiro os lotados, depois os com lista de espera maior, depois os com menos vagas restantes, limitado aos primeiros (ex.: 10). totalVagasOcupadas: soma de occupiedSeats de todos os eventos publicados. recentes: eventos publicados ordenados por publishedAt decrescente, limitado aos mais recentes (ex.: 5).
-   * Saída: destaques com título, data, situação e números de ocupação de cada evento que pede atenção; totalVagasOcupadas já somado para o resumo; recentes com título, data, situação, data de publicação e vagas ocupadas. O id de cada evento permite navegar para a gestão de eventos.
+   * Finalidade: Carrega numa só chamada tudo o que o painel do organizador mostra ao abrir: a ocupação de cada evento publicado, o total de vagas ocupadas e os eventos publicados recentemente.
+   * Entrada: Nenhuma entrada; o escopo é a organização do organizador autenticado.
+   * Processamento: Filtra os eventos da organização com status ’published’. Para cada um calcula a partir das inscrições (nunca grava): occupiedSeats = inscrições confirmadas, sem canceladas nem em lista de espera (calculoVagasOcupadas); remainingSeats = capacity - occupiedSeats, nunca abaixo de zero (calculoVagasRestantes); waitlistSize = inscrições em lista de espera; isFull = occupiedSeats >= capacity (listaEsperaQuandoVagasEsgotadas). Ordena eventosOcupacao colocando primeiro os lotados e com fila (isFull desc, waitlistSize desc), depois os com menos vagas restantes, e por eventDate. totalVagasOcupadas é a soma de occupiedSeats dos eventos publicados, calculada no servidor. publicacoesRecentes traz os eventos publicados mais recentes ordenados por publishedAt decrescente, limitados a um número curto (ex.: 5).
+   * Saída: eventosOcupacao para os destaques de ocupação; totalVagasOcupadas já somado para o resumo; publicacoesRecentes com a data de publicação. Os ids permitem navegar para a gestão do evento.
    */
   'inscricaoEvento.painel_organizador.qryPainelOrganizador': {
     kind: 'qry';
     input: {};
-    output: { destaques: EventoOcupacao[]; readonly totalVagasOcupadas: number; recentes: EventoPublicado[] };
+    output: { eventosOcupacao: OcupacaoEvento[]; readonly totalVagasOcupadas: number; publicacoesRecentes: PublicacaoRecente[] };
     rules: ['calculoVagasOcupadas', 'calculoVagasRestantes', 'listaEsperaQuandoVagasEsgotadas'];
     access: { actors: ['organizador']; grants: ['organizadorEventos']; scope: 'organization' };
   };

@@ -26,8 +26,44 @@ export interface LocalEvento {
   address?: EnderecoLocal;
 }
 
-/** Detalhes do evento com disponibilidade já calculada. */
-export interface DadosEventoDetalhe {
+/** Local do evento na lista: nome e cidade. */
+export interface LocalResumo {
+  details: {
+    venue: {
+      name: string;
+    };
+  };
+  address?: CidadeLocal;
+}
+
+/** Cidade do local do evento. */
+export interface CidadeLocal {
+  details: {
+    venue: {
+      address: {
+        city?: string;
+      };
+    };
+  };
+}
+
+/** Local e disponibilidade de vagas de um evento na lista. */
+export interface EventoResumoDetails {
+  venue: LocalResumo;
+  readonly remainingSeats: number;
+  readonly isFull: boolean;
+}
+
+/** Item da lista de eventos publicados. */
+export interface EventoResumo {
+  id: string;
+  title: string;
+  eventDate: string;
+  details: EventoResumoDetails;
+}
+
+/** Descrição, local e disponibilidade de vagas do evento. */
+export interface EventoDetalheDetails {
   details: {
     description: string;
     capacity: number;
@@ -38,89 +74,98 @@ export interface DadosEventoDetalhe {
   readonly waitlistSize: number;
 }
 
-/** Evento publicado aberto na página pública, com descrição, local e disponibilidade. */
+/** Evento publicado completo para leitura e inscrição. */
 export interface EventoDetalhe {
   id: string;
   title: string;
   eventDate: string;
-  details: DadosEventoDetalhe;
+  details: EventoDetalheDetails;
 }
 
-/** Nome do local para a linha da lista. */
-export interface LocalResumo {
-  details: {
-    venue: {
-      name: string;
-    };
-  };
-}
-
-/** Dados resumidos do evento para a lista. */
-export interface DadosEventoResumo {
-  venue: LocalResumo;
-  readonly isFull: boolean;
-}
-
-/** Linha da lista de eventos publicados. */
-export interface EventoResumo {
-  id: string;
-  title: string;
-  eventDate: string;
-  details: DadosEventoResumo;
-}
-
-/** Resultado da inscrição: vaga ou posição na lista de espera. */
-export interface DadosInscricaoResultado {
+/** Se a inscrição ocupa vaga ou sua posição na lista de espera. */
+export interface InscricaoResultadoDetails {
   readonly ocupaVaga: boolean;
   readonly posicaoListaEspera?: number;
 }
 
-/** Inscrição recém-criada mostrada à pessoa. */
+/** Lotação do evento após a inscrição. */
+export interface EventoInscricaoDetails {
+  readonly isFull: boolean;
+}
+
+/** Evento no qual a pessoa se inscreveu. */
+export interface EventoInscricao {
+  title: string;
+  details: EventoInscricaoDetails;
+}
+
+/** Contato com que a pessoa se inscreveu. */
+export interface ParticipanteBase {
+  details: {
+    base: {
+      readonly contacts: string;
+    };
+  };
+}
+
+/** Dados do participante mostrados no resultado. */
+export interface ParticipanteInscricaoDetails {
+  base: ParticipanteBase;
+}
+
+/** Participante da inscrição. */
+export interface ParticipanteInscricao {
+  details: ParticipanteInscricaoDetails;
+}
+
+/** Resultado da inscrição: código, chegada, vaga ou posição na lista de espera, evento e e-mail. */
 export interface InscricaoResultado {
   id: string;
   readonly registrationCode: string;
   readonly receivedAt: string;
-  details: DadosInscricaoResultado;
+  details: InscricaoResultadoDetails;
+  evento: EventoInscricao;
+  participante: ParticipanteInscricao;
 }
 
 export interface Eventos_abertosContracts {
   /**
-   * Finalidade: Carrega e busca a lista paginada de eventos publicados para a pessoa escolher qual abrir.
-   * Entrada: page e pageSize: página pedida e tamanho; texto: termo opcional buscado no título e no nome do local; dataInicio/dataFim: intervalo opcional sobre a data do evento.
-   * Processamento: Filtra apenas eventos com situação publicado (inscricaoSomenteEventoPublicado; a situação não é exposta), aplica o texto sobre título e nome do local e o intervalo sobre eventDate, ordena por data. Calcula isFull por evento contando as inscrições confirmadas (calculoVagasOcupadas) e comparando com o número de vagas (listaEsperaQuandoVagasEsgotadas); o campo é derivado, nunca gravado.
-   * Saída: { items, page, pageSize, hasMore } com id, título, data, nome do local e indicador de lotado, para a lista e para abrir o evento.
+   * Finalidade: Carrega, ao abrir a página e a cada busca, a lista paginada de eventos publicados para a pessoa escolher qual conhecer.
+   * Entrada: texto: trecho do título; dataInicio/dataFim: intervalo de data do evento; local: trecho do nome do local ou da cidade; page/pageSize: página pedida.
+   * Processamento: Filtra apenas eventos com situação publicada, aplica os filtros de título, intervalo de data e local (nome ou cidade) e ordena por data do evento crescente. Para cada evento calcula vagas ocupadas (calculoVagasOcupadas: inscrições confirmadas), vagas restantes (calculoVagasRestantes: vagas menos ocupadas, nunca abaixo de zero) e lotado (listaEsperaQuandoVagasEsgotadas: ocupadas alcançaram as vagas); campos derivados, nunca gravados.
+   * Saída: Página { items, page, pageSize, hasMore } de eventos com título, data, local (nome e cidade), vagas restantes e indicador de lotado, prontos para a lista.
    */
-  'inscricaoEvento.eventos_abertos.qryEventosPublicados': {
+  'inscricaoEvento.eventos_abertos.listarEventosPublicados': {
     kind: 'qry';
-    input: { texto?: string; dataInicio?: string; dataFim?: string; page: number; pageSize: number };
+    input: { texto?: string; dataInicio?: string; dataFim?: string; local?: string; page: number; pageSize: number };
     output: { eventos: { items: EventoResumo[]; page: number; pageSize: number; hasMore: boolean } };
-    rules: ['inscricaoSomenteEventoPublicado', 'calculoVagasOcupadas', 'listaEsperaQuandoVagasEsgotadas'];
+    rules: ['calculoVagasOcupadas', 'calculoVagasRestantes', 'listaEsperaQuandoVagasEsgotadas'];
     access: { actors: ['publico']; grants: ['publicoMinhasInscricoes', 'publicoMeuCadastro']; scope: 'own' };
   };
   /**
-   * Finalidade: Abre a página pública do evento escolhido com descrição, local e disponibilidade de vagas.
-   * Entrada: eventoId: id do evento selecionado na lista ou vindo da URL.
-   * Processamento: Lê o evento pelo id e recusa (não encontrado) se não estiver publicado (inscricaoSomenteEventoPublicado). Conta inscrições confirmadas para vagas ocupadas (calculoVagasOcupadas), calcula vagas restantes = vagas − ocupadas, nunca abaixo de zero (calculoVagasRestantes), isFull quando ocupadas alcançam as vagas (listaEsperaQuandoVagasEsgotadas) e o tamanho da lista de espera contando inscrições em espera. Tudo calculado, nada gravado.
-   * Saída: O evento com título, data, descrição, local e endereço, vagas, vagas restantes, lotado e tamanho da lista de espera, usado pelo detalhe e pela ação de inscrição.
+   * Finalidade: Carrega o evento escolhido na lista (ou aberto pela URL) com tudo que a pessoa precisa para decidir se inscrever.
+   * Entrada: eventoId: id do evento selecionado na lista ou vindo da URL da página pública.
+   * Processamento: Lê o evento pelo id e só o devolve se estiver publicado (caso contrário, não encontrado). Calcula vagas ocupadas (calculoVagasOcupadas), vagas restantes (calculoVagasRestantes, nunca abaixo de zero), lotado (listaEsperaQuandoVagasEsgotadas) e o tamanho da lista de espera contando as inscrições em espera do evento; tudo derivado, nada gravado.
+   * Saída: O evento com título, data, descrição, local com endereço completo, número de vagas, vagas restantes, lotado e tamanho da lista de espera; também alimenta o título e o aviso de lotado na ação de inscrição.
    */
-  'inscricaoEvento.eventos_abertos.qryDetalheEvento': {
+  'inscricaoEvento.eventos_abertos.obterEventoPublico': {
     kind: 'qry';
     input: { eventoId: string };
     output: { evento: EventoDetalhe };
-    rules: ['inscricaoSomenteEventoPublicado', 'calculoVagasOcupadas', 'calculoVagasRestantes', 'listaEsperaQuandoVagasEsgotadas'];
+    rules: ['calculoVagasOcupadas', 'calculoVagasRestantes', 'listaEsperaQuandoVagasEsgotadas'];
     access: { actors: ['publico']; grants: ['publicoMinhasInscricoes', 'publicoMeuCadastro']; scope: 'own' };
   };
   /**
-   * Finalidade: Inscreve a pessoa no evento aberto com nome e e-mail, garantindo vaga ou lugar na lista de espera.
-   * Entrada: eventoId: evento da página; name: nome informado; email: e-mail de contato da pessoa; countryCode: país (ISO 3166-1 alfa-2); privacyConsent: aceite LGPD/GDPR, exigido conforme o país.
-   * Processamento: Recusa se o evento não estiver publicado (inscricaoSomenteEventoPublicado). Localiza ou cria o participante pelo e-mail (register.createOrAttach, link.contact) gravando o consentimento. Recusa se o e-mail já tiver inscrição confirmada ou em lista de espera no evento (inscricaoUnicaPorEmailEvento, umaInscricaoPorEmailPorEvento). Dentro da mesma transação conta as vagas ocupadas (calculoVagasOcupadas): se houver vaga restante cria como confirmada, senão como em lista de espera (inscricaoExcedenteVaiParaListaEspera, listaEsperaQuandoVagasEsgotadas). O sistema registra receivedAt e emite o código da inscrição. Calcula ocupaVaga e a posição na lista de espera pelas inscrições em espera que chegaram antes, mais um (ordemChegadaListaEspera, calculoPosicaoListaEspera), e recalcula a disponibilidade do evento (calculoVagasRestantes); derivados nunca são gravados.
-   * Saída: A inscrição criada (código, recebida em, ocupa vaga, posição na lista de espera) para mostrar o resultado, e o evento com disponibilidade atualizada para redesenhar o detalhe sem nova chamada.
+   * Finalidade: Inscreve a pessoa no evento aberto com nome e e-mail, garantindo vaga ou lugar na lista de espera, e devolve o resultado para exibir na hora.
+   * Entrada: eventoId: evento em que a pessoa se inscreve; name: nome informado; email: e-mail informado, usado para localizar ou criar o participante; countryCode: país da pessoa (ISO 3166-1 alfa-2); privacyConsent: consentimento de privacidade dado ao enviar os dados (exigido para BR/UE).
+   * Processamento: Recusa se o evento não estiver publicado (inscricaoSomenteEventoPublicado). Localiza o participante pelo e-mail ou cria-o (register.createOrAttach) e liga o e-mail como contato. Recusa se o mesmo e-mail já tiver inscrição confirmada ou em lista de espera no evento (inscricaoUnicaPorEmailEvento, umaInscricaoPorEmailPorEvento). Na mesma transação, cria a inscrição como confirmada se houver vaga restante, senão em lista de espera (inscricaoExcedenteVaiParaListaEspera, listaEsperaQuandoVagasEsgotadas); o sistema registra o momento de chegada e emite o código. Calcula, sem gravar, ocupaVaga e a posição na lista de espera (calculoPosicaoListaEspera, ordemChegadaListaEspera: em espera do mesmo evento que chegaram antes, mais um) e recalcula vagas ocupadas, restantes, lotado e tamanho da fila do evento.
+   * Saída: A inscrição com código, momento de chegada, se ocupa vaga ou a posição na lista de espera, título e lotação do evento e o e-mail usado; além do evento atualizado (detalhe e item de lista) para redesenhar a disponibilidade sem nova chamada.
    */
-  'inscricaoEvento.eventos_abertos.cmdInscreverMe': {
+  'inscricaoEvento.eventos_abertos.inscreverEmEvento': {
     kind: 'cmd';
     writes: 'Inscricao.create';
     input: { eventoId: string; participante: { details: { identification: { name: string; countryCode: string }; base: { contacts: string }; person: { privacyConsent?: string } } } };
-    output: { inscricao: InscricaoResultado; evento: EventoDetalhe };
+    output: { inscricao: InscricaoResultado; evento: EventoDetalhe; eventoResumo: EventoResumo };
     rules: ['inscricaoSomenteEventoPublicado', 'inscricaoUnicaPorEmailEvento', 'umaInscricaoPorEmailPorEvento', 'inscricaoExcedenteVaiParaListaEspera', 'listaEsperaQuandoVagasEsgotadas', 'ordemChegadaListaEspera', 'calculoPosicaoListaEspera', 'calculoVagasOcupadas', 'calculoVagasRestantes'];
     access: { actors: ['publico']; grants: ['publicoMinhasInscricoes', 'publicoMeuCadastro']; scope: 'own' };
   };

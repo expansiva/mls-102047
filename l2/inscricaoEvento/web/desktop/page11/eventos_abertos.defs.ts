@@ -5,50 +5,50 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/contentLanding/page11.md",
     "experience": "contentFirstConvert"
   },
-  "intent": "Ajudar quem visita a encontrar um evento publicado, entender do que se trata e se ainda há vagas, e se inscrever com nome e e-mail, garantindo uma vaga ou um lugar na lista de espera.",
+  "intent": "Ajudar a pessoa a encontrar um evento publicado, entender do que se trata, quando e onde acontece e se ainda há vagas, e se inscrever garantindo uma vaga ou um lugar na lista de espera.",
   "sections": [
     {
-      "id": "encontrarEventos",
+      "id": "descobrirEventos",
       "priority": "main",
-      "purpose": "Localizar rapidamente um evento publicado pelo título, pela data ou pelo local, para abrir a página dele.",
+      "purpose": "Permitir localizar rapidamente os eventos publicados por título, data ou local, para escolher qual conhecer.",
       "organisms": [
-        "eventosPublicados"
+        "listaEventosPublicados"
       ]
     },
     {
       "id": "conhecerEvento",
       "priority": "primary",
-      "purpose": "Apresentar o evento escolhido com descrição, data, local e disponibilidade: vagas restantes, se está lotado e quantas pessoas já aguardam na lista de espera.",
+      "purpose": "Apresentar o evento escolhido com descrição, data, local e a disponibilidade de vagas, deixando claro se está lotado e quantas pessoas aguardam na lista de espera.",
       "organisms": [
         "detalheEvento"
       ]
     },
     {
       "id": "inscrever",
-      "priority": "primary",
-      "purpose": "Concluir a inscrição logo após ler o evento, deixando claro se a pessoa ficará com vaga confirmada ou entrará na lista de espera.",
+      "priority": "secondary",
+      "purpose": "Concluir a inscrição com nome e e-mail e mostrar o resultado: vaga confirmada ou posição na lista de espera.",
       "organisms": [
-        "acaoInscricao"
+        "acaoInscrever"
       ]
     }
   ],
   "organisms": {
-    "eventosPublicados": {
+    "listaEventosPublicados": {
       "kind": "list",
-      "text": "Eventos publicados que você pode buscar por título, data ou local, cada um com título, data e local, para escolher qual abrir.",
+      "text": "Encontre eventos publicados por título, data ou local e escolha um para ver os detalhes.",
       "intents": []
     },
     "detalheEvento": {
       "kind": "detail",
-      "text": "O evento escolhido: descrição, data, local, vagas restantes, se está lotado e tamanho da lista de espera, para você decidir se quer se inscrever.",
+      "text": "Veja o evento: descrição, data, local, vagas restantes, se está lotado e tamanho da lista de espera, para decidir se vale se inscrever.",
       "intents": []
     },
-    "acaoInscricao": {
+    "acaoInscrever": {
       "kind": "actions",
-      "text": "Inscrever-me com nome e e-mail: se houver vaga ela é garantida; se o evento estiver lotado, você entra na lista de espera por ordem de chegada e vê sua posição. Depois você pode acompanhar a inscrição em Minhas inscrições.",
+      "text": "Inscrever-me: informo nome e e-mail e garanto uma vaga, ou entro na lista de espera por ordem de chegada se estiver lotado; depois posso acompanhar em Minhas inscrições.",
       "intents": [
         {
-          "id": "inscreverMe",
+          "id": "inscreverEmEvento",
           "kind": "submit"
         },
         {
@@ -60,49 +60,53 @@ export const definition = {
     }
   },
   "molecules": {
-    "eventosPublicados": [
+    "listaEventosPublicados": [
       {
-        "role": "Buscar evento pelo título ou local",
-        "preferred": "groupsearchcontent--ml-search-bar",
-        "alternative": "groupsearchcontent--ml-search-filters"
+        "role": "busca de eventos por título ou local",
+        "preferred": "groupsearchcontent--ml-search-filters",
+        "alternative": "groupsearchcontent--ml-search-bar"
       },
       {
-        "role": "Filtrar pela data do evento",
+        "role": "filtro por data do evento",
         "preferred": "groupenterdate--ml-date-picker",
         "alternative": "groupenterdate--ml-date-shortcut-picker"
       },
       {
-        "role": "Mostrar os eventos encontrados para escolha",
+        "role": "coleção de eventos publicados",
         "preferred": "groupviewdata--ml-card-grid",
         "alternative": "groupviewdata--ml-vertical-record-list"
       }
     ],
     "detalheEvento": [
       {
-        "role": "Apresentar o evento com descrição, data e local",
+        "role": "apresentação do evento",
         "preferred": "groupviewcard--ml-view-card-media",
         "alternative": "groupviewcard--ml-vertical-card"
       },
       {
-        "role": "Destacar as vagas restantes do evento",
+        "role": "vagas restantes frente à capacidade",
         "preferred": "groupviewmetric--ml-metric-gauge",
         "alternative": "groupviewmetric--ml-metric-card"
       },
       {
-        "role": "Avisar que o evento está lotado e informar o tamanho da lista de espera",
-        "preferred": "groupnotifyuser--ml-contextual-feedback",
-        "alternative": "groupnotifyuser--ml-notify-banner"
+        "role": "tamanho da lista de espera",
+        "preferred": "groupviewmetric--ml-metric-card",
+        "alternative": "groupviewmetric--ml-metric-big-number"
       }
     ],
-    "acaoInscricao": [
+    "acaoInscrever": [
       {
-        "role": "Confirmar a inscrição",
+        "role": "confirmar inscrição",
         "preferred": "grouptriggeraction--ml-button-standard"
       },
       {
-        "role": "Informar o resultado: vaga confirmada ou posição na lista de espera",
+        "role": "resultado da inscrição (vaga ou posição na espera)",
         "preferred": "groupnotifyuser--ml-notify-banner",
         "alternative": "groupnotifyuser--ml-toast-notification"
+      },
+      {
+        "role": "aviso de evento lotado ou e-mail já inscrito",
+        "preferred": "groupnotifyuser--ml-contextual-feedback"
       }
     ]
   }

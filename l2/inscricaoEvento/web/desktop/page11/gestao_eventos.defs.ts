@@ -2,71 +2,71 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/entityRecordManagement/page21.md",
-    "experience": "focusedRecordForm"
+    "category": "bespoke",
+    "experience": "none"
   },
-  "intent": "Dar ao organizador um único lugar para encontrar seus eventos, cadastrar um novo, revisar os dados e a ocupação, publicá-lo para receber inscrições e acompanhar os inscritos, a lista de espera e as promoções automáticas, baixando a lista em CSV quando precisar.",
+  "intent": "Permitir ao organizador encontrar seus eventos, cadastrar novos, revisar dados e ocupação, publicar para abrir inscrições e acompanhar os inscritos, a lista de espera e as promoções automáticas.",
   "sections": [
     {
       "id": "localizarEventos",
-      "priority": "secondary",
-      "purpose": "Encontrar rapidamente o evento a trabalhar, por título, data ou situação, já vendo vagas ocupadas e restantes.",
+      "priority": "primary",
+      "purpose": "Encontrar rapidamente o evento a trabalhar pelo título, data ou situação, vendo de relance vagas ocupadas e restantes.",
       "organisms": [
         "eventosList"
       ]
     },
     {
-      "id": "eventoEmFoco",
-      "priority": "primary",
-      "purpose": "Revisar o evento escolhido, com dados cadastrados, data de publicação e ocupação, e publicá-lo quando estiver pronto.",
+      "id": "revisarPublicar",
+      "priority": "main",
+      "purpose": "Conferir os dados e a ocupação do evento selecionado e publicá-lo quando estiver pronto para receber inscrições.",
       "organisms": [
         "eventoDetail",
         "publicarActions"
       ]
     },
     {
-      "id": "cadastroEvento",
+      "id": "acompanharInscritos",
       "priority": "main",
-      "purpose": "Cadastrar um novo evento como rascunho, informando título, descrição, data, local e número de vagas.",
-      "organisms": [
-        "eventoForm"
-      ]
-    },
-    {
-      "id": "acompanhamentoInscritos",
-      "priority": "main",
-      "purpose": "Acompanhar quem se inscreveu no evento, quem ocupa vaga e a ordem na lista de espera, baixar a lista em CSV e ver as promoções automáticas.",
+      "purpose": "Acompanhar quem se inscreveu, quem ocupa vaga e a ordem da lista de espera, baixar a lista em CSV e ver as promoções automáticas.",
       "organisms": [
         "inscritosList",
         "exportarCsvActions",
         "promocoesTimeline"
+      ]
+    },
+    {
+      "id": "cadastrarEvento",
+      "priority": "secondary",
+      "purpose": "Cadastrar um novo evento como rascunho com título, descrição, data, local e número de vagas.",
+      "organisms": [
+        "eventoForm"
       ]
     }
   ],
   "organisms": {
     "eventosList": {
       "kind": "list",
-      "text": "Localize seus eventos por título, data ou situação (rascunho ou publicado), vendo para cada um as vagas ocupadas e as restantes; ao escolher um evento, ele abre para revisão.",
+      "text": "Localize seus eventos por título, data ou situação, com vagas ocupadas e restantes de cada um; ao escolher um evento, os dados, a ocupação e os inscritos dele aparecem ao lado.",
       "intents": []
     },
     "eventoForm": {
       "kind": "form",
-      "text": "Cadastre o evento com título, descrição, data, local e número de vagas; ele é salvo como rascunho e pode ser revisado antes da publicação.",
+      "text": "Cadastre o evento com título, descrição, data, local e número de vagas; ele é salvo como rascunho para revisão antes da publicação.",
       "intents": [
         {
-          "id": "criarEvento",
+          "id": "salvarEvento",
           "kind": "submit"
         }
       ]
     },
     "eventoDetail": {
       "kind": "detail",
-      "text": "Revise o evento: dados cadastrados, situação, publicado em, vagas ocupadas, vagas restantes, se está lotado e o tamanho da lista de espera.",
+      "text": "Revise o evento: dados cadastrados, situação, publicado em, vagas ocupadas, vagas restantes, se está lotado e tamanho da lista de espera.",
       "intents": []
     },
     "publicarActions": {
       "kind": "actions",
-      "text": "Publique o evento para que ele ganhe uma página pública aberta a inscrições; só vale para eventos em rascunho com os dados completos.",
+      "text": "Publique o evento em rascunho para que a página pública passe a receber inscrições.",
       "intents": [
         {
           "id": "publicarEvento",
@@ -76,7 +76,7 @@ export const definition = {
     },
     "inscritosList": {
       "kind": "list",
-      "text": "Inscritos do evento com código da inscrição, nome, e-mail, recebida em, situação, se ocupa vaga e posição na lista de espera, em ordem de chegada.",
+      "text": "Inscritos do evento por ordem de chegada, com código da inscrição, nome, e-mail, recebida em, situação, se ocupa vaga e posição na lista de espera.",
       "intents": []
     },
     "exportarCsvActions": {
@@ -86,36 +86,41 @@ export const definition = {
     },
     "promocoesTimeline": {
       "kind": "timeline",
-      "text": "Promoções automáticas: quando uma inscrição com vaga é cancelada, a mais antiga da lista de espera passa a ocupar a vaga; aqui aparece quem foi promovido e quando.",
+      "text": "Promoções automáticas: quando uma inscrição com vaga é cancelada, a mais antiga da lista de espera passa a ocupar a vaga; cada promoção aparece aqui com o momento em que aconteceu.",
       "intents": []
     }
   },
   "molecules": {
     "eventosList": [
       {
-        "role": "Busca de eventos pelo título",
+        "role": "Buscar evento pelo título",
         "preferred": "groupsearchcontent--ml-search-filters",
         "alternative": "groupsearchcontent--ml-search-bar"
       },
       {
-        "role": "Filtro por situação do evento",
+        "role": "Filtrar pela data do evento",
+        "preferred": "groupenterdate--ml-date-picker",
+        "alternative": "groupenterdate--ml-date-shortcut-picker"
+      },
+      {
+        "role": "Filtrar por situação (rascunho ou publicado)",
         "preferred": "groupselectone--ml-segmented-control",
         "alternative": "groupselectone--ml-select"
       },
       {
-        "role": "Filtro por período de data do evento",
-        "preferred": "groupenterdateinterval--ml-date-interval-presets",
-        "alternative": "groupenterdateinterval--ml-date-range-dual-calendar"
+        "role": "Tabela de eventos com vagas ocupadas e restantes",
+        "preferred": "groupviewtable--ml-data-table",
+        "alternative": "groupviewtable--ml-advanced-data-table"
       },
       {
-        "role": "Resultados com vagas ocupadas e restantes",
-        "preferred": "groupviewtable--ml-data-table",
-        "alternative": "groupviewdata--ml-vertical-record-list"
+        "role": "Indicador de ocupação por evento",
+        "preferred": "groupshowprogress--ml-linear-progress",
+        "alternative": "groupshowprogress--ml-circular-progress"
       }
     ],
     "eventoForm": [
       {
-        "role": "Título do evento",
+        "role": "Título e nome do local",
         "preferred": "groupentertext--ml-enter-text",
         "alternative": "groupentertext--ml-floating-text-input"
       },
@@ -126,60 +131,53 @@ export const definition = {
       {
         "role": "Data do evento",
         "preferred": "groupenterdate--ml-date-picker",
-        "alternative": "groupenterdate--ml-date-shortcut-picker"
-      },
-      {
-        "role": "Nome e endereço do local",
-        "preferred": "groupentertext--ml-address-field",
-        "alternative": "groupentertext--ml-enter-text"
+        "alternative": "groupenterdate--ml-compact-calendar"
       },
       {
         "role": "Número de vagas",
-        "preferred": "groupenternumber--ml-number-stepper",
-        "alternative": "groupenternumber--ml-number-input"
+        "preferred": "groupenternumber--ml-number-input",
+        "alternative": "groupenternumber--ml-number-stepper"
       },
       {
         "role": "Salvar rascunho",
         "preferred": "grouptriggeraction--ml-button-standard"
-      },
-      {
-        "role": "Confirmação do cadastro",
-        "preferred": "groupnotifyuser--ml-toast-notification",
-        "alternative": "groupnotifyuser--ml-contextual-feedback"
       }
     ],
     "eventoDetail": [
       {
         "role": "Dados cadastrados do evento",
-        "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-horizontal"
+        "preferred": "groupviewcard--ml-view-card-horizontal",
+        "alternative": "groupviewcard--ml-vertical-card"
       },
       {
-        "role": "Vagas ocupadas frente ao total",
+        "role": "Vagas ocupadas frente ao número de vagas",
         "preferred": "groupviewmetric--ml-metric-gauge",
         "alternative": "groupviewmetric--ml-metric-card"
       },
       {
-        "role": "Vagas restantes e lista de espera",
+        "role": "Vagas restantes e tamanho da lista de espera",
         "preferred": "groupviewmetric--ml-metric-card",
         "alternative": "groupviewmetric--ml-metric-big-number"
+      },
+      {
+        "role": "Barra de ocupação",
+        "preferred": "groupshowprogress--ml-linear-progress"
       }
     ],
     "publicarActions": [
       {
         "role": "Publicar evento",
-        "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-split-button"
+        "preferred": "grouptriggeraction--ml-button-standard"
       },
       {
-        "role": "Resultado da publicação",
-        "preferred": "groupnotifyuser--ml-contextual-feedback",
-        "alternative": "groupnotifyuser--ml-toast-notification"
+        "role": "Confirmação ou bloqueio da publicação",
+        "preferred": "groupnotifyuser--ml-toast-notification",
+        "alternative": "groupnotifyuser--ml-contextual-feedback"
       }
     ],
     "inscritosList": [
       {
-        "role": "Tabela de inscritos em ordem de chegada",
+        "role": "Tabela de inscritos por ordem de chegada",
         "preferred": "groupviewtable--ml-data-table",
         "alternative": "groupviewtable--ml-advanced-data-table"
       }
@@ -189,10 +187,6 @@ export const definition = {
         "role": "Baixar CSV",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-icon-button"
-      },
-      {
-        "role": "Aviso de arquivo gerado",
-        "preferred": "groupnotifyuser--ml-toast-notification"
       }
     ],
     "promocoesTimeline": [

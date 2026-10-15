@@ -10,7 +10,8 @@ export const definition = {
           "localStorage"
         ],
         "effect": "filter:eventosList",
-        "persist": true
+        "persist": true,
+        "required": false
       },
       "status": {
         "type": "string",
@@ -19,25 +20,18 @@ export const definition = {
           "localStorage"
         ],
         "effect": "filter:eventosList",
-        "persist": true
+        "persist": true,
+        "required": false
       },
-      "dataDe": {
+      "eventDate": {
         "type": "string",
         "sources": [
           "url",
           "localStorage"
         ],
         "effect": "filter:eventosList",
-        "persist": true
-      },
-      "dataAte": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:eventosList",
-        "persist": true
+        "persist": true,
+        "required": false
       },
       "page": {
         "type": "number",
@@ -46,7 +40,8 @@ export const definition = {
           "localStorage"
         ],
         "effect": "filter:eventosList",
-        "persist": true
+        "persist": true,
+        "required": false
       },
       "eventoId": {
         "type": "string",
@@ -55,35 +50,30 @@ export const definition = {
           "localStorage"
         ],
         "effect": "select:eventoDetail",
-        "persist": true
+        "persist": true,
+        "required": false
       }
     }
   },
-  "forms": {
-    "criarEvento": {
-      "organism": "eventoForm",
-      "submit": "criarEvento"
-    }
-  },
   "requests": {
-    "qryListarEventos": {
+    "qryEventos": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
         "eventos"
       ]
     },
-    "qryAbrirEvento": {
+    "qryEventoPainel": {
       "kind": "qry",
-      "trigger": "qryAbrirEvento",
+      "trigger": "qryEventoPainel",
       "returns": [
         "evento",
         "promocoes"
       ]
     },
-    "qryListarInscritos": {
+    "qryInscritosEvento": {
       "kind": "qry",
-      "trigger": "qryListarInscritos",
+      "trigger": "qryInscritosEvento",
       "returns": [
         "inscritos"
       ]
@@ -92,14 +82,15 @@ export const definition = {
       "kind": "qry",
       "trigger": "qryExportarInscritosCsv",
       "returns": [
-        "linhas",
-        "nomeArquivo"
+        "nomeArquivo",
+        "conteudoCsv"
       ]
     },
-    "cmdCriarEvento": {
+    "cmdSalvarEvento": {
       "kind": "cmd",
-      "trigger": "criarEvento",
+      "trigger": "salvarEvento",
       "returns": [
+        "resumo",
         "evento"
       ],
       "writes": "Evento.create"
@@ -108,6 +99,7 @@ export const definition = {
       "kind": "cmd",
       "trigger": "publicarEvento",
       "returns": [
+        "resumo",
         "evento"
       ],
       "writes": "Evento.publicar"
@@ -115,99 +107,54 @@ export const definition = {
   },
   "states": {
     "eventos": {
-      "source": "qryListarEventos.eventos",
-      "description": "Linha da lista de eventos do organizador, com a ocupação já calculada.",
+      "source": "qryEventos.eventos",
+      "description": "Linha da lista de eventos do organizador.",
       "organisms": [
         "eventosList"
       ]
     },
     "evento": {
-      "source": "qryAbrirEvento.evento",
-      "description": "Evento em foco com dados cadastrados, publicação e indicadores de ocupação já calculados; também é o que os comandos devolvem.",
+      "source": "qryEventoPainel.evento",
+      "description": "Evento completo para revisão e publicação.",
       "organisms": [
         "eventoDetail",
         "publicarActions"
       ]
     },
-    "promocoes": {
-      "source": "qryAbrirEvento.promocoes",
-      "description": "Inscrição promovida automaticamente da lista de espera para vaga confirmada.",
-      "organisms": [
-        "promocoesTimeline"
-      ]
-    },
     "inscritos": {
-      "source": "qryListarInscritos.inscritos",
-      "description": "Inscrição do evento com nome e e-mail do participante, ocupação de vaga e posição na lista de espera.",
+      "source": "qryInscritosEvento.inscritos",
+      "description": "Linha da lista de inscritos do evento.",
       "organisms": [
         "inscritosList"
       ]
     },
-    "linhas": {
-      "source": "qryExportarInscritosCsv.linhas",
-      "description": "Linha do arquivo CSV de inscritos.",
+    "conteudoCsv": {
+      "source": "qryExportarInscritosCsv.conteudoCsv",
+      "description": "Nome do arquivo e conteúdo CSV, que a página entrega como download.",
       "organisms": [
         "exportarCsvActions"
       ]
     },
     "nomeArquivo": {
       "source": "qryExportarInscritosCsv.nomeArquivo",
-      "description": "linhas com código, nome, e-mail, situação e recebida em, e nomeArquivo, para exportarCsvActions montar o download.",
+      "description": "Nome do arquivo e conteúdo CSV, que a página entrega como download.",
       "organisms": [
         "exportarCsvActions"
       ]
     },
+    "promocoes": {
+      "source": "qryEventoPainel.promocoes",
+      "description": "Item da linha do tempo de promoções automáticas.",
+      "organisms": [
+        "promocoesTimeline"
+      ]
+    },
     "selectedEvento": {
       "source": "entry.params.eventoId",
-      "description": "Evento em foco com dados cadastrados, publicação e indicadores de ocupação já calculados; também é o que os comandos devolvem.",
+      "description": "Evento completo para revisão e publicação.",
       "organisms": [
         "eventoDetail",
-        "eventoForm",
         "eventosList"
-      ]
-    }
-  },
-  "functions": {
-    "qryListarEventos": {
-      "description": "Lista os eventos da organização do organizador para ele localizar o evento a trabalhar, já com a ocupação de cada um.",
-      "calls": "qryListarEventos",
-      "sets": "eventos"
-    },
-    "qryAbrirEvento": {
-      "description": "Abre o evento escolhido para revisão, com dados, publicação, ocupação e o histórico de promoções automáticas.",
-      "calls": "qryAbrirEvento",
-      "sets": "evento",
-      "updates": [
-        "promocoes"
-      ]
-    },
-    "qryListarInscritos": {
-      "description": "Lista os inscritos do evento em foco em ordem de chegada, com quem ocupa vaga e a posição na lista de espera. (inscritos.items: append)",
-      "calls": "qryListarInscritos",
-      "sets": "inscritos"
-    },
-    "qryExportarInscritosCsv": {
-      "description": "Gera o conteúdo do CSV com todos os inscritos do evento para o organizador baixar.",
-      "calls": "qryExportarInscritosCsv",
-      "sets": "linhas",
-      "updates": [
-        "nomeArquivo"
-      ]
-    },
-    "cmdCriarEvento": {
-      "description": "Cadastra um novo evento como rascunho e o deixa em foco para revisão.",
-      "calls": "cmdCriarEvento",
-      "sets": "evento",
-      "updates": [
-        "eventos"
-      ]
-    },
-    "cmdPublicarEvento": {
-      "description": "Publica o evento em foco para abrir sua página pública a inscrições.",
-      "calls": "cmdPublicarEvento",
-      "sets": "evento",
-      "updates": [
-        "eventos"
       ]
     }
   },
@@ -216,18 +163,12 @@ export const definition = {
       "step": "acompanharInscritos/localizarEventoOrg",
       "organisms": [
         "eventosList"
-      ],
-      "functions": [
-        "qryListarEventos"
       ]
     },
     {
       "step": "acompanharInscritos/verOcupacao",
       "organisms": [
         "eventoDetail"
-      ],
-      "functions": [
-        "qryAbrirEvento"
       ]
     },
     {
@@ -235,76 +176,42 @@ export const definition = {
       "organisms": [
         "inscritosList",
         "promocoesTimeline"
-      ],
-      "functions": [
-        "qryListarInscritos",
-        "qryAbrirEvento"
       ]
     },
     {
       "step": "acompanharInscritos/baixarCsv",
       "organisms": [
         "exportarCsvActions"
-      ],
-      "functions": [
-        "qryExportarInscritosCsv"
       ]
     },
     {
       "step": "cadastrarPublicarEvento/criarEvento",
       "organisms": [
         "eventoForm"
-      ],
-      "functions": [
-        "cmdCriarEvento"
       ]
     },
     {
       "step": "cadastrarPublicarEvento/revisarEvento",
       "organisms": [
         "eventoDetail"
-      ],
-      "functions": [
-        "qryAbrirEvento"
       ]
     },
     {
       "step": "cadastrarPublicarEvento/publicarEvento",
       "organisms": [
         "publicarActions"
-      ],
-      "functions": [
-        "cmdPublicarEvento"
       ]
     }
   ],
-  "rules": {
-    "qryListarEventos": [
-      "calculoVagasOcupadas",
-      "calculoVagasRestantes"
-    ],
-    "qryAbrirEvento": [
-      "calculoVagasOcupadas",
-      "calculoVagasRestantes",
-      "listaEsperaQuandoVagasEsgotadas",
-      "promoverPrimeiroListaEsperaAoCancelar"
-    ],
-    "qryListarInscritos": [
-      "ordemChegadaListaEspera",
-      "calculoPosicaoListaEspera",
-      "calculoVagasOcupadas"
-    ],
-    "qryExportarInscritosCsv": [
-      "ordemChegadaListaEspera"
-    ],
-    "cmdCriarEvento": [
-      "calculoVagasOcupadas",
-      "calculoVagasRestantes"
-    ],
-    "cmdPublicarEvento": [
-      "publicarExigeDadosCompletos"
-    ]
-  },
+  "rules": [
+    "calculoPosicaoListaEspera",
+    "calculoVagasOcupadas",
+    "calculoVagasRestantes",
+    "listaEsperaQuandoVagasEsgotadas",
+    "ordemChegadaListaEspera",
+    "promoverPrimeiroListaEsperaAoCancelar",
+    "publicarExigeDadosCompletos"
+  ],
   "access": {
     "actors": [
       "organizador"
@@ -312,104 +219,6 @@ export const definition = {
     "grants": [
       "organizadorEventos",
       "organizadorInscritos"
-    ]
-  },
-  "fields": {
-    "EmailParticipante.details.contactChannel.value": [
-      "exportarCsvActions",
-      "inscritosList"
-    ],
-    "Evento.details.capacity": [
-      "eventoDetail",
-      "eventoForm"
-    ],
-    "Evento.details.description": [
-      "eventoDetail",
-      "eventoForm"
-    ],
-    "Evento.details.isFull": [
-      "eventoDetail"
-    ],
-    "Evento.details.occupiedSeats": [
-      "eventoDetail",
-      "eventosList"
-    ],
-    "Evento.details.publishedAt": [
-      "eventoDetail"
-    ],
-    "Evento.details.remainingSeats": [
-      "eventoDetail",
-      "eventosList"
-    ],
-    "Evento.details.venue.address.city": [
-      "eventoDetail",
-      "eventoForm"
-    ],
-    "Evento.details.venue.address.countryCode": [
-      "eventoForm"
-    ],
-    "Evento.details.venue.address.line1": [
-      "eventoForm"
-    ],
-    "Evento.details.venue.address.line2": [
-      "eventoForm"
-    ],
-    "Evento.details.venue.address.postalCode": [
-      "eventoForm"
-    ],
-    "Evento.details.venue.address.stateOrProvince": [
-      "eventoForm"
-    ],
-    "Evento.details.venue.name": [
-      "eventoDetail",
-      "eventoForm"
-    ],
-    "Evento.details.waitlistSize": [
-      "eventoDetail"
-    ],
-    "Evento.eventDate": [
-      "eventoDetail",
-      "eventoForm",
-      "eventosList"
-    ],
-    "Evento.status": [
-      "eventoDetail",
-      "eventosList",
-      "publicarActions"
-    ],
-    "Evento.title": [
-      "eventoDetail",
-      "eventoForm",
-      "eventosList",
-      "publicarActions"
-    ],
-    "Inscricao.details.ocupaVaga": [
-      "inscritosList"
-    ],
-    "Inscricao.details.posicaoListaEspera": [
-      "inscritosList"
-    ],
-    "Inscricao.details.promotedAt": [
-      "promocoesTimeline"
-    ],
-    "Inscricao.receivedAt": [
-      "exportarCsvActions",
-      "inscritosList",
-      "promocoesTimeline"
-    ],
-    "Inscricao.registrationCode": [
-      "exportarCsvActions",
-      "inscritosList",
-      "promocoesTimeline"
-    ],
-    "Inscricao.status": [
-      "exportarCsvActions",
-      "inscritosList"
-    ],
-    "Participante.details.identification.name": [
-      "exportarCsvActions",
-      "inscritosList",
-      "promocoesTimeline"
     ]
   }
 } as const;

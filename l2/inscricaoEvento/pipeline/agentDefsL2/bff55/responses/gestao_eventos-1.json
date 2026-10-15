@@ -1,8 +1,8 @@
 {
   "attempt": "1",
   "model": "claude-opus-5-5",
-  "promptChars": 41147,
-  "receivedAt": "2026-10-13T13:06:16.647Z",
+  "promptChars": 40530,
+  "receivedAt": "2026-10-15T13:24:06.050Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -10,8 +10,44 @@
       "arguments": {
         "types": [
           {
+            "name": "EventoResumoDetalhes",
+            "description": "Ocupação resumida do evento na lista.",
+            "fields": [
+              {
+                "name": "capacity",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.capacity"
+                  ]
+                }
+              },
+              {
+                "name": "occupiedSeats",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.occupiedSeats"
+                  ]
+                }
+              },
+              {
+                "name": "remainingSeats",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.remainingSeats"
+                  ]
+                }
+              }
+            ]
+          },
+          {
             "name": "EventoResumo",
-            "description": "Linha da lista de eventos do organizador, com a ocupação já calculada.",
+            "description": "Linha da lista de eventos do organizador.",
             "fields": [
               {
                 "name": "id",
@@ -54,14 +90,85 @@
                 }
               },
               {
+                "name": "details",
+                "type": "EventoResumoDetalhes",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EventoLocal",
+            "description": "Local do evento.",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.venue.name"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EventoDetalheDetalhes",
+            "description": "Dados cadastrados e ocupação do evento.",
+            "fields": [
+              {
+                "name": "description",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.description"
+                  ]
+                }
+              },
+              {
+                "name": "venue",
+                "type": "EventoLocal",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.venue"
+                  ]
+                }
+              },
+              {
+                "name": "capacity",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.capacity"
+                  ]
+                }
+              },
+              {
+                "name": "publishedAt",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.publishedAt"
+                  ]
+                }
+              },
+              {
                 "name": "occupiedSeats",
                 "type": "number",
                 "origin": {
-                  "kind": "aggregate",
+                  "kind": "field",
                   "paths": [
-                    "Evento.details.occupiedSeats",
-                    "Inscricao.status",
-                    "Inscricao.eventoId"
+                    "Evento.details.occupiedSeats"
                   ]
                 }
               },
@@ -69,11 +176,29 @@
                 "name": "remainingSeats",
                 "type": "number",
                 "origin": {
-                  "kind": "aggregate",
+                  "kind": "field",
                   "paths": [
-                    "Evento.details.remainingSeats",
-                    "Evento.details.capacity",
-                    "Evento.details.occupiedSeats"
+                    "Evento.details.remainingSeats"
+                  ]
+                }
+              },
+              {
+                "name": "isFull",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.isFull"
+                  ]
+                }
+              },
+              {
+                "name": "waitlistSize",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.details.waitlistSize"
                   ]
                 }
               }
@@ -81,7 +206,7 @@
           },
           {
             "name": "EventoDetalhe",
-            "description": "Evento em foco com dados cadastrados, publicação e indicadores de ocupação já calculados; também é o que os comandos devolvem.",
+            "description": "Evento completo para revisão e publicação.",
             "fields": [
               {
                 "name": "id",
@@ -134,159 +259,124 @@
                 }
               },
               {
-                "name": "description",
-                "type": "string",
+                "name": "details",
+                "type": "EventoDetalheDetalhes",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Evento.details.description"
-                  ]
-                }
-              },
-              {
-                "name": "venueName",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.venue.name"
-                  ]
-                }
-              },
-              {
-                "name": "city",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.venue.address.city"
-                  ]
-                }
-              },
-              {
-                "name": "capacity",
-                "type": "number",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.capacity"
-                  ]
-                }
-              },
-              {
-                "name": "publishedAt",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.publishedAt"
-                  ]
-                }
-              },
-              {
-                "name": "occupiedSeats",
-                "type": "number",
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Evento.details.occupiedSeats",
-                    "Inscricao.status",
-                    "Inscricao.eventoId"
-                  ]
-                }
-              },
-              {
-                "name": "remainingSeats",
-                "type": "number",
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Evento.details.remainingSeats",
-                    "Evento.details.capacity",
-                    "Evento.details.occupiedSeats"
-                  ]
-                }
-              },
-              {
-                "name": "isFull",
-                "type": "boolean",
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Evento.details.isFull",
-                    "Evento.details.capacity",
-                    "Evento.details.occupiedSeats"
-                  ]
-                }
-              },
-              {
-                "name": "waitlistSize",
-                "type": "number",
-                "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Evento.details.waitlistSize",
-                    "Inscricao.status",
-                    "Inscricao.eventoId"
+                    "Evento.details"
                   ]
                 }
               }
             ]
           },
           {
-            "name": "InscritoItem",
-            "description": "Inscrição do evento com nome e e-mail do participante, ocupação de vaga e posição na lista de espera.",
+            "name": "ParticipanteIdentificacao",
+            "description": "Identificação do participante.",
             "fields": [
               {
-                "name": "id",
+                "name": "name",
                 "type": "string",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Inscricao.id"
+                    "Participante.details.identification.name"
                   ]
                 }
-              },
+              }
+            ]
+          },
+          {
+            "name": "ParticipanteDetalhes",
+            "description": "Detalhes do participante.",
+            "fields": [
               {
-                "name": "registrationCode",
+                "name": "identification",
+                "type": "ParticipanteIdentificacao",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.details.identification"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ParticipanteRef",
+            "description": "Nome do participante inscrito.",
+            "fields": [
+              {
+                "name": "details",
+                "type": "ParticipanteDetalhes",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.details"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EmailCanal",
+            "description": "Canal de e-mail.",
+            "fields": [
+              {
+                "name": "value",
                 "type": "string",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Inscricao.registrationCode"
+                    "EmailParticipante.details.contactChannel.value"
                   ]
                 }
-              },
+              }
+            ]
+          },
+          {
+            "name": "EmailDetalhes",
+            "description": "Detalhes do e-mail.",
+            "fields": [
               {
-                "name": "receivedAt",
-                "type": "string",
+                "name": "contactChannel",
+                "type": "EmailCanal",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Inscricao.receivedAt"
+                    "EmailParticipante.details.contactChannel"
                   ]
                 }
-              },
+              }
+            ]
+          },
+          {
+            "name": "EmailRef",
+            "description": "E-mail do participante inscrito.",
+            "fields": [
               {
-                "name": "status",
-                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
+                "name": "details",
+                "type": "EmailDetalhes",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Inscricao.status"
+                    "EmailParticipante.details"
                   ]
                 }
-              },
+              }
+            ]
+          },
+          {
+            "name": "InscritoDetalhes",
+            "description": "Vaga e posição na lista de espera.",
+            "fields": [
               {
                 "name": "ocupaVaga",
                 "type": "boolean",
                 "origin": {
-                  "kind": "aggregate",
+                  "kind": "field",
                   "paths": [
-                    "Inscricao.details.ocupaVaga",
-                    "Inscricao.status"
+                    "Inscricao.details.ocupaVaga"
                   ]
                 }
               },
@@ -295,96 +385,17 @@
                 "type": "number",
                 "optional": true,
                 "origin": {
-                  "kind": "aggregate",
-                  "paths": [
-                    "Inscricao.details.posicaoListaEspera",
-                    "Inscricao.status",
-                    "Inscricao.receivedAt",
-                    "Inscricao.eventoId"
-                  ]
-                }
-              },
-              {
-                "name": "participanteName",
-                "type": "string",
-                "origin": {
                   "kind": "field",
                   "paths": [
-                    "Participante.details.identification.name"
-                  ]
-                }
-              },
-              {
-                "name": "emailParticipanteValue",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "EmailParticipante.details.contactChannel.value"
+                    "Inscricao.details.posicaoListaEspera"
                   ]
                 }
               }
             ]
           },
           {
-            "name": "InscritoCsv",
-            "description": "Linha do arquivo CSV de inscritos.",
-            "fields": [
-              {
-                "name": "registrationCode",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.registrationCode"
-                  ]
-                }
-              },
-              {
-                "name": "receivedAt",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.receivedAt"
-                  ]
-                }
-              },
-              {
-                "name": "status",
-                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.status"
-                  ]
-                }
-              },
-              {
-                "name": "participanteName",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Participante.details.identification.name"
-                  ]
-                }
-              },
-              {
-                "name": "emailParticipanteValue",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "EmailParticipante.details.contactChannel.value"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "name": "PromocaoItem",
-            "description": "Inscrição promovida automaticamente da lista de espera para vaga confirmada.",
+            "name": "Inscrito",
+            "description": "Linha da lista de inscritos do evento.",
             "fields": [
               {
                 "name": "id",
@@ -416,6 +427,52 @@
                   ]
                 }
               },
+              {
+                "name": "status",
+                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.status"
+                  ]
+                }
+              },
+              {
+                "name": "details",
+                "type": "InscritoDetalhes",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.details"
+                  ]
+                }
+              },
+              {
+                "name": "participante",
+                "type": "ParticipanteRef",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.details"
+                  ]
+                }
+              },
+              {
+                "name": "emailParticipante",
+                "type": "EmailRef",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "EmailParticipante.details"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "PromocaoDetalhes",
+            "description": "Momento da promoção.",
+            "fields": [
               {
                 "name": "promotedAt",
                 "type": "string",
@@ -425,14 +482,60 @@
                     "Inscricao.details.promotedAt"
                   ]
                 }
-              },
+              }
+            ]
+          },
+          {
+            "name": "Promocao",
+            "description": "Item da linha do tempo de promoções automáticas.",
+            "fields": [
               {
-                "name": "participanteName",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Participante.details.identification.name"
+                    "Inscricao.id"
+                  ]
+                }
+              },
+              {
+                "name": "registrationCode",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.registrationCode"
+                  ]
+                }
+              },
+              {
+                "name": "status",
+                "type": "'confirmed' | 'waitlisted' | 'cancelled'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.status"
+                  ]
+                }
+              },
+              {
+                "name": "details",
+                "type": "PromocaoDetalhes",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.details"
+                  ]
+                }
+              },
+              {
+                "name": "participante",
+                "type": "ParticipanteRef",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.details"
                   ]
                 }
               }
@@ -441,7 +544,7 @@
         ],
         "endpoints": [
           {
-            "id": "qryListarEventos",
+            "id": "qryEventos",
             "kind": "qry",
             "when": "onLoad",
             "input": [
@@ -459,8 +562,10 @@
                 "type": "'draft' | 'published'",
                 "optional": true,
                 "origin": {
-                  "kind": "context",
-                  "paths": []
+                  "kind": "field",
+                  "paths": [
+                    "Evento.status"
+                  ]
                 }
               },
               {
@@ -468,8 +573,10 @@
                 "type": "string",
                 "optional": true,
                 "origin": {
-                  "kind": "context",
-                  "paths": []
+                  "kind": "field",
+                  "paths": [
+                    "Evento.eventDate"
+                  ]
                 }
               },
               {
@@ -477,8 +584,10 @@
                 "type": "string",
                 "optional": true,
                 "origin": {
-                  "kind": "context",
-                  "paths": []
+                  "kind": "field",
+                  "paths": [
+                    "Evento.eventDate"
+                  ]
                 }
               },
               {
@@ -516,14 +625,14 @@
               "calculoVagasRestantes"
             ],
             "jsdoc": {
-              "purpose": "Lista os eventos da organização do organizador para ele localizar o evento a trabalhar, já com a ocupação de cada um.",
+              "purpose": "Lista os eventos da organização do organizador para localizar o evento a trabalhar, já com a ocupação de cada um.",
               "input": "busca: trecho do título; status: filtra rascunho ou publicado; dataDe/dataAte: intervalo da data do evento; page/pageSize: paginação.",
-              "processing": "Filtra os eventos do escopo da organização por título (contém, sem distinção de maiúsculas), situação e intervalo de data; ordena por data do evento. Para cada evento calcula vagas ocupadas (calculoVagasOcupadas: inscrições confirmadas, sem canceladas nem em espera) e vagas restantes (calculoVagasRestantes: vagas menos ocupadas, nunca abaixo de zero). Os derivados são calculados, não gravados.",
-              "output": "Página de eventos { items, page, pageSize, hasMore } com título, data, situação, vagas ocupadas e restantes."
+              "processing": "Filtra os eventos do escopo da organização por título (contém, sem diferenciar maiúsculas), situação e intervalo de data, ordenando pela data do evento. Para cada evento calcula vagas ocupadas (calculoVagasOcupadas: inscrições confirmadas, sem canceladas nem lista de espera) e vagas restantes (calculoVagasRestantes: vagas menos ocupadas, nunca abaixo de zero); valores derivados, nunca gravados.",
+              "output": "Página de eventos com título, data, situação, número de vagas, vagas ocupadas e restantes, para a lista de localização."
             }
           },
           {
-            "id": "qryAbrirEvento",
+            "id": "qryEventoPainel",
             "kind": "qry",
             "when": "interaction",
             "input": [
@@ -531,8 +640,10 @@
                 "name": "eventoId",
                 "type": "string",
                 "origin": {
-                  "kind": "context",
-                  "paths": []
+                  "kind": "field",
+                  "paths": [
+                    "Evento.id"
+                  ]
                 }
               }
             ],
@@ -549,7 +660,7 @@
               },
               {
                 "name": "promocoes",
-                "type": "PromocaoItem[]",
+                "type": "Promocao[]",
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -565,14 +676,14 @@
               "promoverPrimeiroListaEsperaAoCancelar"
             ],
             "jsdoc": {
-              "purpose": "Abre o evento escolhido para revisão, com dados, publicação, ocupação e o histórico de promoções automáticas.",
-              "input": "eventoId: evento selecionado na lista ou recém-cadastrado.",
-              "processing": "Lê o evento por id no escopo da organização. Calcula vagas ocupadas (calculoVagasOcupadas), restantes (calculoVagasRestantes), lotado quando ocupadas alcançam as vagas (listaEsperaQuandoVagasEsgotadas) e tamanho da lista de espera (inscrições waitlisted). Lista as inscrições do evento com promovida em preenchida (registradas por promoverPrimeiroListaEsperaAoCancelar), com o nome do participante, ordenadas pela promoção mais recente.",
-              "output": "evento: detalhe com indicadores prontos para eventoDetail e publicarActions; promocoes: linha do tempo de quem foi promovido e quando."
+              "purpose": "Carrega o evento escolhido para revisão, ocupação e publicação, junto com as promoções automáticas da lista de espera.",
+              "input": "eventoId: id do evento selecionado na lista.",
+              "processing": "Lê o evento pelo id (escopo da organização). Calcula vagas ocupadas (calculoVagasOcupadas), vagas restantes (calculoVagasRestantes), lotado quando ocupadas alcançam o número de vagas (listaEsperaQuandoVagasEsgotadas) e tamanho da lista de espera (contagem das inscrições em lista de espera); todos derivados, nunca gravados. Compõe as promoções: inscrições do evento com promotedAt preenchido (registrado por promoverPrimeiroListaEsperaAoCancelar), com nome do participante, ordenadas da mais recente para a mais antiga.",
+              "output": "O evento com dados cadastrados, situação, publicado em e indicadores de ocupação, mais a linha do tempo de promoções; versão incluída para publicar."
             }
           },
           {
-            "id": "qryListarInscritos",
+            "id": "qryInscritosEvento",
             "kind": "qry",
             "when": "interaction",
             "input": [
@@ -580,8 +691,10 @@
                 "name": "eventoId",
                 "type": "string",
                 "origin": {
-                  "kind": "context",
-                  "paths": []
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.eventoId"
+                  ]
                 }
               },
               {
@@ -604,7 +717,7 @@
             "output": [
               {
                 "name": "inscritos",
-                "type": "InscritoItem[]",
+                "type": "Inscrito[]",
                 "paginated": true,
                 "origin": {
                   "kind": "field",
@@ -616,14 +729,13 @@
             ],
             "rules": [
               "ordemChegadaListaEspera",
-              "calculoPosicaoListaEspera",
-              "calculoVagasOcupadas"
+              "calculoPosicaoListaEspera"
             ],
             "jsdoc": {
-              "purpose": "Lista os inscritos do evento em foco em ordem de chegada, com quem ocupa vaga e a posição na lista de espera.",
-              "input": "eventoId: evento em foco; page/pageSize: paginação, pois um evento pode ter muitos inscritos.",
-              "processing": "Lista as inscrições do evento ordenadas por recebida em (ordemChegadaListaEspera), compondo nome do participante e e-mail do cadastro mestre. ocupaVaga é verdadeiro para confirmadas (calculoVagasOcupadas); posicaoListaEspera, só para waitlisted, é o número de inscrições em espera do mesmo evento recebidas antes, mais um (calculoPosicaoListaEspera). Derivados calculados, não gravados.",
-              "output": "Página { items, page, pageSize, hasMore } de inscritos para inscritosList."
+              "purpose": "Lista os inscritos do evento selecionado por ordem de chegada.",
+              "input": "eventoId: evento selecionado; page/pageSize: paginação.",
+              "processing": "Lista as inscrições do evento ordenadas por receivedAt ascendente (ordemChegadaListaEspera), compondo nome do participante e e-mail do cadastro mestre. Calcula ocupaVaga (inscrição confirmada) e posicaoListaEspera (calculoPosicaoListaEspera: quantas em lista de espera do mesmo evento chegaram antes, mais um; vazio fora da lista); derivados, nunca gravados.",
+              "output": "Página de inscritos com código, nome, e-mail, recebida em, situação, se ocupa vaga e posição na lista de espera."
             }
           },
           {
@@ -635,29 +747,33 @@
                 "name": "eventoId",
                 "type": "string",
                 "origin": {
-                  "kind": "context",
-                  "paths": []
+                  "kind": "field",
+                  "paths": [
+                    "Inscricao.eventoId"
+                  ]
                 }
               }
             ],
             "output": [
               {
-                "name": "linhas",
-                "type": "InscritoCsv[]",
+                "name": "nomeArquivo",
+                "type": "string",
                 "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Inscricao.id"
-                  ]
+                  "kind": "context",
+                  "paths": []
                 }
               },
               {
-                "name": "nomeArquivo",
+                "name": "conteudoCsv",
                 "type": "string",
                 "origin": {
                   "kind": "aggregate",
                   "paths": [
-                    "Evento.title"
+                    "Inscricao.registrationCode",
+                    "Inscricao.receivedAt",
+                    "Inscricao.status",
+                    "Participante.details.identification.name",
+                    "EmailParticipante.details.contactChannel.value"
                   ]
                 }
               }
@@ -666,16 +782,16 @@
               "ordemChegadaListaEspera"
             ],
             "jsdoc": {
-              "purpose": "Gera o conteúdo do CSV com todos os inscritos do evento para o organizador baixar.",
-              "input": "eventoId: evento em foco.",
-              "processing": "Lê todas as inscrições do evento (sem paginação), compõe nome e e-mail do participante e ordena por recebida em (ordemChegadaListaEspera). O nome do arquivo deriva do título do evento.",
-              "output": "linhas com código, nome, e-mail, situação e recebida em, e nomeArquivo, para exportarCsvActions montar o download."
+              "purpose": "Gera o CSV com todos os inscritos do evento para o organizador baixar.",
+              "input": "eventoId: evento selecionado.",
+              "processing": "Lê todas as inscrições do evento (sem paginação) por ordem de chegada (ordemChegadaListaEspera), compõe nome e e-mail do participante e monta o CSV com código, nome, e-mail, situação e recebida em.",
+              "output": "Nome do arquivo e conteúdo CSV, que a página entrega como download."
             }
           },
           {
-            "id": "cmdCriarEvento",
+            "id": "cmdSalvarEvento",
             "kind": "cmd",
-            "when": "criarEvento",
+            "when": "salvarEvento",
             "writes": "Evento.create",
             "input": [
               {
@@ -685,16 +801,6 @@
                   "kind": "field",
                   "paths": [
                     "Evento.title"
-                  ]
-                }
-              },
-              {
-                "name": "eventDate",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.eventDate"
                   ]
                 }
               },
@@ -709,78 +815,22 @@
                 }
               },
               {
+                "name": "eventDate",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.eventDate"
+                  ]
+                }
+              },
+              {
                 "name": "venueName",
                 "type": "string",
                 "origin": {
                   "kind": "field",
                   "paths": [
                     "Evento.details.venue.name"
-                  ]
-                }
-              },
-              {
-                "name": "line1",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.venue.address.line1"
-                  ]
-                }
-              },
-              {
-                "name": "line2",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.venue.address.line2"
-                  ]
-                }
-              },
-              {
-                "name": "city",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.venue.address.city"
-                  ]
-                }
-              },
-              {
-                "name": "stateOrProvince",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.venue.address.stateOrProvince"
-                  ]
-                }
-              },
-              {
-                "name": "postalCode",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.venue.address.postalCode"
-                  ]
-                }
-              },
-              {
-                "name": "countryCode",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Evento.details.venue.address.countryCode"
                   ]
                 }
               },
@@ -797,6 +847,16 @@
             ],
             "output": [
               {
+                "name": "resumo",
+                "type": "EventoResumo",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.id"
+                  ]
+                }
+              },
+              {
                 "name": "evento",
                 "type": "EventoDetalhe",
                 "origin": {
@@ -807,15 +867,12 @@
                 }
               }
             ],
-            "rules": [
-              "calculoVagasOcupadas",
-              "calculoVagasRestantes"
-            ],
+            "rules": [],
             "jsdoc": {
-              "purpose": "Cadastra um novo evento como rascunho e o deixa em foco para revisão.",
-              "input": "Título, data, descrição, nome do local, endereço (opcional) e número de vagas informados no formulário.",
-              "processing": "Cria o Evento na organização do organizador com situação draft. Não grava derivados: publicado em fica vazio; vagas ocupadas (calculoVagasOcupadas) e restantes (calculoVagasRestantes) são calculadas na resposta (zero ocupadas, restantes = vagas).",
-              "output": "evento: detalhe do evento criado, que substitui o evento em foco sem nova chamada."
+              "purpose": "Cadastra um novo evento como rascunho.",
+              "input": "title, description, eventDate, venueName (nome do local) e capacity (número de vagas) informados no formulário.",
+              "processing": "Cria o evento na organização do organizador com situação draft. Ocupação é derivada (zero vagas ocupadas, restantes iguais às vagas, lista de espera vazia), nunca gravada.",
+              "output": "O evento criado no formato da lista (inserido nela) e no formato de detalhe (exibido para revisão), sem nova chamada."
             }
           },
           {
@@ -825,7 +882,7 @@
             "writes": "Evento.publicar",
             "input": [
               {
-                "name": "eventoId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -847,6 +904,16 @@
             ],
             "output": [
               {
+                "name": "resumo",
+                "type": "EventoResumo",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Evento.id"
+                  ]
+                }
+              },
+              {
                 "name": "evento",
                 "type": "EventoDetalhe",
                 "origin": {
@@ -861,10 +928,10 @@
               "publicarExigeDadosCompletos"
             ],
             "jsdoc": {
-              "purpose": "Publica o evento em foco para abrir sua página pública a inscrições.",
-              "input": "eventoId e version do evento em foco (concorrência otimista).",
-              "processing": "Executa a transição publicar (draft → published). Recusa se o evento não estiver em rascunho ou se faltar título, descrição, data, local ou número de vagas, ou se as vagas não forem maiores que zero (publicarExigeDadosCompletos). Recusa versão divergente. Publicado em é registrado pelo sistema.",
-              "output": "evento: detalhe atualizado com situação publicado e publicado em, que redesenha o evento em foco."
+              "purpose": "Publica o evento em rascunho, abrindo a página pública para inscrições.",
+              "input": "id e version do evento (concorrência otimista).",
+              "processing": "Aplica a transição publicar (draft → published). Recusa se o evento não tiver título, descrição, data, local e número de vagas preenchidos ou se as vagas não forem maiores que zero (publicarExigeDadosCompletos). publishedAt é registrado pelo sistema na transição.",
+              "output": "O evento atualizado no formato da lista e do detalhe, com situação publicado e data de publicação, para redesenhar sem nova chamada."
             }
           }
         ],
@@ -872,45 +939,43 @@
           "organisms": [
             {
               "organism": "eventosList",
-              "reads": "qryListarEventos.eventos"
+              "reads": "qryEventos.eventos"
             },
             {
               "organism": "eventoDetail",
-              "reads": "qryAbrirEvento.evento"
+              "reads": "qryEventoPainel.evento"
             },
             {
               "organism": "publicarActions",
-              "reads": "qryAbrirEvento.evento"
-            },
-            {
-              "organism": "promocoesTimeline",
-              "reads": "qryAbrirEvento.promocoes"
+              "reads": "qryEventoPainel.evento"
             },
             {
               "organism": "inscritosList",
-              "reads": "qryListarInscritos.inscritos"
+              "reads": "qryInscritosEvento.inscritos"
             },
             {
               "organism": "exportarCsvActions",
-              "reads": "qryExportarInscritosCsv.linhas"
+              "reads": "qryExportarInscritosCsv.conteudoCsv"
             },
             {
               "organism": "exportarCsvActions",
               "reads": "qryExportarInscritosCsv.nomeArquivo"
+            },
+            {
+              "organism": "promocoesTimeline",
+              "reads": "qryEventoPainel.promocoes"
             }
           ],
           "commands": [
             {
-              "endpoint": "cmdCriarEvento",
+              "endpoint": "cmdSalvarEvento",
               "refreshes": [
-                "qryListarEventos"
+                "qryInscritosEvento"
               ]
             },
             {
               "endpoint": "cmdPublicarEvento",
-              "refreshes": [
-                "qryListarEventos"
-              ]
+              "refreshes": []
             }
           ],
           "selections": [
@@ -918,37 +983,30 @@
               "organism": "eventosList",
               "via": {
                 "kind": "query",
-                "ref": "qryAbrirEvento"
-              }
-            },
-            {
-              "organism": "eventoForm",
-              "via": {
-                "kind": "query",
-                "ref": "qryAbrirEvento"
+                "ref": "qryEventoPainel"
               }
             }
           ],
           "updates": [
             {
-              "endpoint": "cmdCriarEvento",
-              "state": "qryAbrirEvento.evento",
+              "endpoint": "cmdSalvarEvento",
+              "state": "qryEventos.eventos",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "cmdSalvarEvento",
+              "state": "qryEventoPainel.evento",
               "mode": "replace"
             },
             {
               "endpoint": "cmdPublicarEvento",
-              "state": "qryAbrirEvento.evento",
-              "mode": "replace"
+              "state": "qryEventos.eventos",
+              "mode": "upsert"
             },
             {
-              "endpoint": "qryListarEventos",
-              "state": "qryListarEventos.eventos",
+              "endpoint": "cmdPublicarEvento",
+              "state": "qryEventoPainel.evento",
               "mode": "replace"
-            },
-            {
-              "endpoint": "qryListarInscritos",
-              "state": "qryListarInscritos.inscritos",
-              "mode": "append"
             }
           ],
           "journeys": [
@@ -958,7 +1016,7 @@
                 "eventosList"
               ],
               "endpoints": [
-                "qryListarEventos"
+                "qryEventos"
               ]
             },
             {
@@ -967,7 +1025,7 @@
                 "eventoDetail"
               ],
               "endpoints": [
-                "qryAbrirEvento"
+                "qryEventoPainel"
               ]
             },
             {
@@ -977,8 +1035,8 @@
                 "promocoesTimeline"
               ],
               "endpoints": [
-                "qryListarInscritos",
-                "qryAbrirEvento"
+                "qryInscritosEvento",
+                "qryEventoPainel"
               ]
             },
             {
@@ -996,7 +1054,7 @@
                 "eventoForm"
               ],
               "endpoints": [
-                "cmdCriarEvento"
+                "cmdSalvarEvento"
               ]
             },
             {
@@ -1005,7 +1063,7 @@
                 "eventoDetail"
               ],
               "endpoints": [
-                "qryAbrirEvento"
+                "qryEventoPainel"
               ]
             },
             {
