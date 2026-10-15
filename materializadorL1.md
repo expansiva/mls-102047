@@ -55,7 +55,7 @@ E a fonte que manda em tudo isso: o **contrato da página**, `l2/<mod>/web/contr
   - o **inventário** do def, isto é, que entidades, portas, usecases (entidade + operação), serviços de pedido e controllers existem, e a autoridade de
     cada rota.
 - **Pista** (ajuda, não manda): os campos de implementação do def, ou seja, os `uses` e os `params` do serviço de pedido, a árvore `output`, as regras
-  por usecase (`rules`/`rulesApplied`/`rulePlan`), as listas de `input`/`output` do usecase e a `sequence`. **Onde a pista diverge do contrato ou do l4,
+  por usecase (`rules`/`rulePlan`; o `rulesApplied` passou a compromisso em 15/10, §10), as listas de `input`/`output` do usecase e a `sequence`. **Onde a pista diverge do contrato ou do l4,
   vale o contrato e o l4.** Campo vazio ou `unresolved` não quer dizer "não existe": quer dizer "decida pelo contrato e pelo l4".
 - Exemplos reais (comandaRestaurante, bancada `c0f25ee`), todos casos de "vale o l4":
   1. entradas do contrato sem `params` (o `doc` diz o que cada uma filtra);
@@ -107,7 +107,7 @@ Decisões de 04/10, registradas em `todo/gerarApp/l4/docs/como-deve-ser-o-l2.md`
   saídas compostas e agregadas, o corpo do endpoint precisa ser escrito a partir do JSDoc** (por LLM ou pelo time).
 - **O usecase recebe LLM só quando não é derivável:** mais de uma porta, operação fora das derivadas, regra local
   (`handlers/behavior/emitBehavior.ts:121-133`, `behaviorNeedsLlm`).
-- **Regras:** o usecase traz `rulePlan`. Uma regra `pending` com `gap: RULE_UNBOUND` é uma regra do negócio que o D1 não conseguiu amarrar. Ela tem de
+- **Regras (até 15/10; ver §10):** o usecase trazia `rulePlan`. Uma regra `pending` com `gap: RULE_UNBOUND` é uma regra do negócio que o D1 não conseguiu amarrar. Ela tem de
   ser implementada lendo o texto em `l4/<mod>/rules.defs.ts`, e não ignorada. Exemplo do comandaRestaurante: `umaComandaAbertaPorMesa` e
   `mesaDisponivelParaAbrirComanda` no `createComanda`.
 - **Campo que o sistema preenche:** por exemplo, o `precoUnitario` do item da comanda é o preço vigente do cardápio no lançamento
@@ -177,4 +177,65 @@ O que precisa mudar no materializador L1 (mesma coisa na cópia `handlers/struct
    `sessionContext.actorScope` já chega ao handler em `execBff.ts:263`); sem papel, fecha;
 3. `scopeParams` aplica `own` só para o grant do papel que a pessoa tem;
 4. testes com quem chama tendo **um** papel só (`testing/obligations.ts:298` hoje dá todos).
-Depois disso o D1 passa a decidir por papel (`l1_d1_70`, que espera esta mudança: antes dela, a união vazaria campos para quem não tem grant).
+O D1 já decide por papel desde 15/10 (`l1_d1_70`): a rota leva o campo que algum papel vê; filtrar por quem chama é esta mudança do materializador.
+
+## 10. O usecase fica só com a intenção (Wagner, 15/10/2026)
+
+*"acho melhor corrigirmos agora"* · *"as regras usadas são importantes, sobre a manutenção do agentMaterializadorL1, será feito, e tem um arquivo no
+root do 102047 para passar informações para a equipe"*. Mesmo caminho do shared do L2 (`materializadorL2.md` §10). Spec do gerador:
+`todo/gerarApp/how/tasks/backlog/l1_d1_74_usecase_so_intencao.md` (roda depois que o inscricaoEvento for gerado e materializado no formato de hoje).
+
+### O def de usecase depois da troca
+```
+data: {
+  usecaseId,          // também o nome da função
+  entityId, operation,
+  transitionRef?,     // só em transição; payload e regras da transição: l4/<mod>/ontology/<Entidade>.defs.ts
+  rulesApplied,       // ids que o usecase TEM de cumprir: os locais + os pendentes RULE_UNBOUND; o texto: l4/<mod>/rules.defs.ts
+  effects,            // como hoje: { eventId, path, symbol }[]
+  mdm?                // como hoje
+}
+```
+**Saem:** `ports`, `functions`, `portCalls`, `transactional`, `sequence`, `uses`, `rules`, `rulePlan`, `transaction`, `lifecycle`. O `schemaVersion` fica
+(`2026-09-24-d1-definition-v2`); os outros tipos de def não mudam. Alpha: uma versão só, sem leitor duplo. **Os defs L1 de hoje** (agendaClinica,
+comandaRestaurante, reembolsoDespesas, inscricaoEvento) **ficam inválidos** até serem regerados: o validador é o mesmo para o D1 e para vocês
+(`mls-102021/l2/helpers/l1Defs/definition.ts:78-82`, `DATA_KEYS`).
+
+### Onde cada informação passa a estar
+| antes (no usecase) | agora |
+|---|---|
+| `functions[0].functionName` | `usecaseId` |
+| `functions[].input`/`output` | a operação, a entidade (`layer_3_domain/entities/<e>.defs.ts`) e as rotas que chamam o usecase (`requestService` + contrato L2) |
+| `ports` | a entidade: `storageTarget: 'moduleDatabase'` ⇒ a porta da entidade (`layer_2_application/ports/`); continua nas `dependencies` do def |
+| `portCalls`, `transaction`, `transactional` | a operação (`list`/`get` leem; `create`/`update`/transição gravam numa transação); a transação do comando está no `requestService` |
+| `uses` (filter/selector/concurrency) | a operação: `id` filtra em leitura e seleciona em update/transição; `version` é concorrência em update/transição |
+| `lifecycle` (payload da transição) | `transitionRef` + a transição no L4 |
+| `rulePlan` / `rules` | `rulesApplied` + o texto da regra no L4. As linhas de **chave única** (`#uniqueKeys`) saem do `rulePlan`: as chaves estão no def `table` (`uniqueKeys`) e no L4 |
+| `sequence` | não há roteiro: a ordem é decisão de vocês, com o texto das regras e o `doc` da rota |
+
+### O que muda no `agentMaterializeL1` (medido em 15/10, `mls-102021`)
+1. **Validador:** `helpers/m12Units.ts:73-76` carrega cada def por `readDefinition` (o mesmo `DATA_KEYS`): os defs novos passam, os antigos não.
+   `parseDefinitionExport` (`emitters/emit.ts:1213-1226`, usado no `loadUses`) não valida chave: conferir que nada dependa disso.
+2. **Nome e tipos da função:** `readFunction` (`emitters/emit.ts:1235-1242`), `emittedValueExports` (`:1027-1039`), `emitUsecase` (`:201-205`, `:216-250`,
+   `:272-273`), `loadUses` do serviço de pedido (`:855-859`), `steps/usecases40/context.ts:172-175` (`FUNCTION_MISSING`), `emitBehavior.ts:302`,
+   `:316-324`, `:1419-1465` (`signaturePaths`, `inputNames`, `outputNames`, `firstFunctionName`): nome pelo `usecaseId`; entrada/saída pela operação, pela
+   entidade e pelas rotas.
+3. **Porta:** `emit.ts:219-226` (`PORT_UNBOUND`), `:251-275` (scaffold), `:642-652` (`portBindings`, precisa da dependência `/ports/`, que continua),
+   `:866-870`, `:1002-1004`; `emitBehavior.ts:127,131,297,874`: porta pela entidade.
+4. **Regras:** `helpers/m12Materialize.ts:172-191` (`rulesToEnforce`, `RULE_NOT_EMITTED`), `steps/usecases40/context.ts:178-188`, `:199-201`, `:238-241`,
+   `:406,415`; `emitBehavior.ts:133`, `:1280-1285`, `:1606-1626`: a lista a cumprir é o `rulesApplied`, e o texto vem de `l4/<mod>/rules.defs.ts`
+   (isso também resolve o §2.2: rematerializar passa a ler o texto atual). **Sem isso, as regras deixam de ser cumpridas sem erro.**
+5. **Chaves únicas:** `emitBehavior.ts:1475-1481` (`readUniqueKeys`), `:1519-1522` (`constraintRuleId`, `UNIQUE_RULE_UNNAMED`): pelo def `table`.
+6. **Transição:** `steps/usecases40/context.ts:260-267` (`transitionOf` lê `lifecycle.transitionId`) → `transitionRef`; `emitBehavior.ts:1255-1281`
+   (`planTransition`: payload, `portCalls`, `uses`): payload pelo L4, método da porta pela operação, seletor `id`.
+7. **Update/seletor:** `emitBehavior.ts:132` (rota de update pelo primeiro `portCalls`), `:1348-1353` (`selectorField` pelo `uses`): pela operação.
+8. **MDM:** `steps/usecases40/context.ts:308-311` e `emitters/context.ts:25-27` (`usesMdm` olha `sequence` com `kind:'mdm'`): fica só a dependência da
+   ontologia MDM / o `mdm` do def.
+9. **Prompt e fluxo:** `steps/usecases40/prompt.md:13,29,35,43,55-56,60-61` citam `ports`/`uses`/`rulePlan`/`sequence`/`transaction`; o título da seção
+   em `context.ts:193` ("rulePlan and sequence are hints"); `flow.json:54,115,120` (`RULE_NOT_EMITTED`).
+10. **Testes que vão quebrar (esperado):** o da bancada que valida o comandaRestaurante do 102047 (`agentMaterializeL1.test.ts`, ~:374, e os casos
+    `RULE_NOT_EMITTED`/`UNIQUE_RULE_UNNAMED` ~:446-447), os de `rulesToEnforce`/`rulePlan` (~:213-224) e o de `usesMdm` (~:642-645). O caso
+    `listBuoyPending` de `fixtures/cases.ts` é ajustado pelo D1 nesta task (dado de teste compartilhado com os testes do D1).
+
+O que **não** muda para vocês: `domainEntity`, `requestService`, `accessScope`, `httpController`, persistência, `authorityMap`, `integrationOutbound`.
+
