@@ -1,0 +1,3736 @@
+{
+  "schemaVersion": "2026-10-01-d1-usecases-v2",
+  "project": 102047,
+  "moduleName": "inscricaoEvento",
+  "llmCalls": 2,
+  "ok": true,
+  "enumerations": [
+    {
+      "entityId": "EmailParticipante",
+      "path": "details.contactChannel.contactType",
+      "values": [
+        "Email"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "EmailParticipante",
+      "path": "details.identification.status",
+      "values": [
+        "Active",
+        "Inactive",
+        "Merged",
+        "Blocked"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "EmailParticipante",
+      "path": "details.identification.subtype",
+      "values": [
+        "ContactChannel"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Evento",
+      "path": "status",
+      "values": [
+        "draft",
+        "published"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Inscricao",
+      "path": "status",
+      "values": [
+        "confirmed",
+        "waitlisted",
+        "cancelled"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Participante",
+      "path": "details.identification.status",
+      "values": [
+        "Active",
+        "Inactive",
+        "Merged",
+        "Blocked"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Participante",
+      "path": "details.identification.subtype",
+      "values": [
+        "Person"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    }
+  ],
+  "usecases": [
+    {
+      "usecaseId": "cancelar",
+      "entityId": "Inscricao",
+      "operation": "transition",
+      "defPath": "l1/inscricaoEvento/layer_2_application/usecases/cancelar.defs.ts",
+      "routes": [
+        "inscricaoEvento.minhas_inscricoes.cancelarInscricao"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "transition",
+          "transitionId": "cancelar",
+          "payload": []
+        },
+        {
+          "kind": "port",
+          "call": "transition",
+          "port": "InscricaoRepository"
+        },
+        {
+          "kind": "effect",
+          "eventId": "inscricaoCancelada"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "cancelar",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/integration.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "cancelar",
+          "entityId": "Inscricao",
+          "operation": "transition",
+          "ports": [
+            "InscricaoRepository"
+          ],
+          "rulesApplied": [
+            "cancelamentoSomentePropriaInscricao",
+            "promoverPrimeiroListaEsperaAoCancelar"
+          ],
+          "functions": [
+            {
+              "functionName": "cancelar",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.version"
+                },
+                {
+                  "name": "registrationCode",
+                  "type": "string",
+                  "fieldRef": "Inscricao.registrationCode"
+                },
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "receivedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.receivedAt"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                },
+                {
+                  "name": "details.posicaoListaEspera",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.details.posicaoListaEspera"
+                },
+                {
+                  "name": "details.ocupaVaga",
+                  "type": "boolean",
+                  "fieldRef": "Inscricao.details.ocupaVaga"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "transition"
+          ],
+          "transactional": false,
+          "effects": [
+            {
+              "eventId": "inscricaoCancelada",
+              "path": "l4/inscricaoEvento/integration.defs.ts",
+              "symbol": "inscricaoCancelada"
+            }
+          ],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "cancelamentoSomentePropriaInscricao"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar"
+            },
+            {
+              "kind": "transition",
+              "transitionId": "cancelar",
+              "payload": []
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "InscricaoRepository"
+            },
+            {
+              "kind": "effect",
+              "eventId": "inscricaoCancelada"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [
+            {
+              "ruleId": "cancelamentoSomentePropriaInscricao",
+              "path": "l4/inscricaoEvento/rules.defs.ts",
+              "symbol": "cancelamentoSomentePropriaInscricao"
+            },
+            {
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+              "path": "l4/inscricaoEvento/rules.defs.ts",
+              "symbol": "promoverPrimeiroListaEsperaAoCancelar"
+            }
+          ],
+          "rulePlan": [
+            {
+              "ruleId": "cancelamentoSomentePropriaInscricao",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#transitions.cancelar.ruleRefs",
+              "consumer": "usecase:cancelar",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#transitions.cancelar.ruleRefs",
+              "consumer": "usecase:cancelar",
+              "enforcement": "local",
+              "gap": ""
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "transitionRef": "cancelar",
+          "lifecycle": {
+            "transitionId": "cancelar",
+            "payload": [],
+            "sourcePath": "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
+            "symbol": "cancelar"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "createEvento",
+      "entityId": "Evento",
+      "operation": "create",
+      "defPath": "l1/inscricaoEvento/layer_2_application/usecases/createEvento.defs.ts",
+      "routes": [
+        "inscricaoEvento.gestao_eventos.cmdSalvarEvento"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "create",
+          "port": "EventoRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createEvento",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createEvento",
+          "entityId": "Evento",
+          "operation": "create",
+          "ports": [
+            "EventoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createEvento",
+              "input": [
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Evento.version"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                },
+                {
+                  "name": "details.publishedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.details.publishedAt"
+                },
+                {
+                  "name": "details.occupiedSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.occupiedSeats"
+                },
+                {
+                  "name": "details.remainingSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.remainingSeats"
+                },
+                {
+                  "name": "details.waitlistSize",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.waitlistSize"
+                },
+                {
+                  "name": "details.isFull",
+                  "type": "boolean",
+                  "fieldRef": "Evento.details.isFull"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "EventoRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "inscricaoExcedenteVaiParaListaEspera",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#inscricaoExcedenteVaiParaListaEspera",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "inscricaoSomenteEventoPublicado",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#inscricaoSomenteEventoPublicado",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "vagasNaoMenorQueOcupadas",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#vagasNaoMenorQueOcupadas",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "createInscricao",
+      "entityId": "Inscricao",
+      "operation": "create",
+      "defPath": "l1/inscricaoEvento/layer_2_application/usecases/createInscricao.defs.ts",
+      "routes": [
+        "inscricaoEvento.eventos_abertos.inscreverEmEvento"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "create",
+          "port": "InscricaoRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createInscricao",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createInscricao",
+          "entityId": "Inscricao",
+          "operation": "create",
+          "ports": [
+            "InscricaoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createInscricao",
+              "input": [
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.version"
+                },
+                {
+                  "name": "registrationCode",
+                  "type": "string",
+                  "fieldRef": "Inscricao.registrationCode"
+                },
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "receivedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.receivedAt"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                },
+                {
+                  "name": "details.posicaoListaEspera",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.details.posicaoListaEspera"
+                },
+                {
+                  "name": "details.ocupaVaga",
+                  "type": "boolean",
+                  "fieldRef": "Inscricao.details.ocupaVaga"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "InscricaoRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "inscricaoSomenteEventoPublicado",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#inscricaoSomenteEventoPublicado",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "inscricaoUnicaPorEmailEvento",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#inscricaoUnicaPorEmailEvento",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#uniqueKeys",
+              "consumer": "operation:create",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "listaEsperaQuandoVagasEsgotadas",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#listaEsperaQuandoVagasEsgotadas",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "getEvento",
+      "entityId": "Evento",
+      "operation": "get",
+      "defPath": "l1/inscricaoEvento/layer_2_application/usecases/getEvento.defs.ts",
+      "routes": [
+        "inscricaoEvento.eventos_abertos.inscreverEmEvento",
+        "inscricaoEvento.eventos_abertos.listarEventosPublicados",
+        "inscricaoEvento.eventos_abertos.obterEventoPublico",
+        "inscricaoEvento.gestao_eventos.qryEventoPainel",
+        "inscricaoEvento.minhas_inscricoes.buscarInscricoes",
+        "inscricaoEvento.minhas_inscricoes.cancelarInscricao",
+        "inscricaoEvento.minhas_inscricoes.carregarMinhasInscricoes",
+        "inscricaoEvento.minhas_inscricoes.obterInscricao"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "get",
+          "port": "EventoRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getEvento",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getEvento",
+          "entityId": "Evento",
+          "operation": "get",
+          "ports": [
+            "EventoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getEvento",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Evento.version"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                },
+                {
+                  "name": "details.publishedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.details.publishedAt"
+                },
+                {
+                  "name": "details.occupiedSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.occupiedSeats"
+                },
+                {
+                  "name": "details.remainingSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.remainingSeats"
+                },
+                {
+                  "name": "details.waitlistSize",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.waitlistSize"
+                },
+                {
+                  "name": "details.isFull",
+                  "type": "boolean",
+                  "fieldRef": "Evento.details.isFull"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "EventoRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "publicarExigeDadosCompletos",
+              "origin": "l4/inscricaoEvento/ontology/Evento.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "getInscricao",
+      "entityId": "Inscricao",
+      "operation": "get",
+      "defPath": "l1/inscricaoEvento/layer_2_application/usecases/getInscricao.defs.ts",
+      "routes": [
+        "inscricaoEvento.minhas_inscricoes.obterInscricao"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "get",
+          "port": "InscricaoRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getInscricao",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Inscricao.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getInscricao",
+          "entityId": "Inscricao",
+          "operation": "get",
+          "ports": [
+            "InscricaoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getInscricao",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.version"
+                },
+                {
+                  "name": "registrationCode",
+                  "type": "string",
+                  "fieldRef": "Inscricao.registrationCode"
+                },
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "receivedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.receivedAt"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                },
+                {
+                  "name": "details.posicaoListaEspera",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.details.posicaoListaEspera"
+                },
+                {
+                  "name": "details.ocupaVaga",
+                  "type": "boolean",
+                  "fieldRef": "Inscricao.details.ocupaVaga"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "InscricaoRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "cancelamentoSomentePropriaInscricao",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "ordemChegadaListaEspera",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listEvento",
+      "entityId": "Evento",
+      "operation": "list",
+      "defPath": "l1/inscricaoEvento/layer_2_application/usecases/listEvento.defs.ts",
+      "routes": [
+        "inscricaoEvento.eventos_abertos.listarEventosPublicados",
+        "inscricaoEvento.gestao_eventos.qryEventos",
+        "inscricaoEvento.painel_organizador.qryPainelOrganizador"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "list",
+          "port": "EventoRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listEvento",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listEvento",
+          "entityId": "Evento",
+          "operation": "list",
+          "ports": [
+            "EventoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listEvento",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                },
+                {
+                  "name": "details.publishedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.details.publishedAt"
+                },
+                {
+                  "name": "details.occupiedSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.occupiedSeats"
+                },
+                {
+                  "name": "details.remainingSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.remainingSeats"
+                },
+                {
+                  "name": "details.waitlistSize",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.waitlistSize"
+                },
+                {
+                  "name": "details.isFull",
+                  "type": "boolean",
+                  "fieldRef": "Evento.details.isFull"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "Evento"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "EventoRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.isFull",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.occupiedSeats",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.publishedAt",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.remainingSeats",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.waitlistSize",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "publicarExigeDadosCompletos",
+              "origin": "l4/inscricaoEvento/ontology/Evento.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listInscricao",
+      "entityId": "Inscricao",
+      "operation": "list",
+      "defPath": "l1/inscricaoEvento/layer_2_application/usecases/listInscricao.defs.ts",
+      "routes": [
+        "inscricaoEvento.gestao_eventos.qryEventoPainel",
+        "inscricaoEvento.gestao_eventos.qryInscritosEvento",
+        "inscricaoEvento.minhas_inscricoes.buscarInscricoes",
+        "inscricaoEvento.minhas_inscricoes.carregarMinhasInscricoes"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "port",
+          "call": "list",
+          "port": "InscricaoRepository"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listInscricao",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Inscricao.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listInscricao",
+          "entityId": "Inscricao",
+          "operation": "list",
+          "ports": [
+            "InscricaoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listInscricao",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "registrationCode",
+                  "type": "string",
+                  "fieldRef": "Inscricao.registrationCode"
+                },
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "receivedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.receivedAt"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                },
+                {
+                  "name": "details.posicaoListaEspera",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.details.posicaoListaEspera"
+                },
+                {
+                  "name": "details.ocupaVaga",
+                  "type": "boolean",
+                  "fieldRef": "Inscricao.details.ocupaVaga"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "Inscricao"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "InscricaoRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.ocupaVaga",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.posicaoListaEspera",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "receivedAt",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "registrationCode",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "cancelamentoSomentePropriaInscricao",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "ordemChegadaListaEspera",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "publicar",
+      "entityId": "Evento",
+      "operation": "transition",
+      "defPath": "l1/inscricaoEvento/layer_2_application/usecases/publicar.defs.ts",
+      "routes": [
+        "inscricaoEvento.gestao_eventos.cmdPublicarEvento"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [
+        {
+          "kind": "context",
+          "source": "ctx"
+        },
+        {
+          "kind": "transition",
+          "transitionId": "publicar",
+          "payload": []
+        },
+        {
+          "kind": "port",
+          "call": "transition",
+          "port": "EventoRepository"
+        },
+        {
+          "kind": "effect",
+          "eventId": "eventoPublicado"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "publicar",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/integration.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "publicar",
+          "entityId": "Evento",
+          "operation": "transition",
+          "ports": [
+            "EventoRepository"
+          ],
+          "rulesApplied": [
+            "publicarExigeDadosCompletos"
+          ],
+          "functions": [
+            {
+              "functionName": "publicar",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Evento.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Evento.version"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                },
+                {
+                  "name": "details.publishedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.details.publishedAt"
+                },
+                {
+                  "name": "details.occupiedSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.occupiedSeats"
+                },
+                {
+                  "name": "details.remainingSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.remainingSeats"
+                },
+                {
+                  "name": "details.waitlistSize",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.waitlistSize"
+                },
+                {
+                  "name": "details.isFull",
+                  "type": "boolean",
+                  "fieldRef": "Evento.details.isFull"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "transition"
+          ],
+          "transactional": false,
+          "effects": [
+            {
+              "eventId": "eventoPublicado",
+              "path": "l4/inscricaoEvento/integration.defs.ts",
+              "symbol": "eventoPublicado"
+            }
+          ],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "publicarExigeDadosCompletos"
+            },
+            {
+              "kind": "transition",
+              "transitionId": "publicar",
+              "payload": []
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "EventoRepository"
+            },
+            {
+              "kind": "effect",
+              "eventId": "eventoPublicado"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [
+            {
+              "ruleId": "publicarExigeDadosCompletos",
+              "path": "l4/inscricaoEvento/rules.defs.ts",
+              "symbol": "publicarExigeDadosCompletos"
+            }
+          ],
+          "rulePlan": [
+            {
+              "ruleId": "publicarExigeDadosCompletos",
+              "origin": "l4/inscricaoEvento/ontology/Evento.defs.ts#transitions.publicar.ruleRefs",
+              "consumer": "usecase:publicar",
+              "enforcement": "local",
+              "gap": ""
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "transitionRef": "publicar",
+          "lifecycle": {
+            "transitionId": "publicar",
+            "payload": [],
+            "sourcePath": "l4/inscricaoEvento/ontology/Evento.defs.ts",
+            "symbol": "publicar"
+          }
+        }
+      }
+    }
+  ],
+  "problems": [],
+  "normalizations": [
+    {
+      "code": "DERIVED_SELECTOR",
+      "path": "cancelar.id",
+      "detail": "Inscricao.id is a selector of cancelar."
+    },
+    {
+      "code": "DERIVED_CONCURRENCY",
+      "path": "cancelar.version",
+      "detail": "Inscricao.version is a concurrency of cancelar."
+    },
+    {
+      "code": "RULE_RESTORED",
+      "path": "cancelar",
+      "detail": "cancelamentoSomentePropriaInscricao"
+    },
+    {
+      "code": "RULE_RESTORED",
+      "path": "cancelar",
+      "detail": "promoverPrimeiroListaEsperaAoCancelar"
+    },
+    {
+      "code": "ENUMERATIONS_NOT_CONSUMED",
+      "path": "domain30.enumerations",
+      "detail": "7 enum values stay on the domain draft. usecases50 does not copy them."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "getEvento.id",
+      "detail": "Evento.id is a filter of getEvento."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "getInscricao.id",
+      "detail": "Inscricao.id is a filter of getInscricao."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listEvento.details.isFull",
+      "detail": "Evento.details.isFull is a filter of listEvento."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listEvento.details.occupiedSeats",
+      "detail": "Evento.details.occupiedSeats is a filter of listEvento."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listEvento.details.publishedAt",
+      "detail": "Evento.details.publishedAt is a filter of listEvento."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listEvento.details.remainingSeats",
+      "detail": "Evento.details.remainingSeats is a filter of listEvento."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listEvento.details.waitlistSize",
+      "detail": "Evento.details.waitlistSize is a filter of listEvento."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listEvento.id",
+      "detail": "Evento.id is a filter of listEvento."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listInscricao.details.ocupaVaga",
+      "detail": "Inscricao.details.ocupaVaga is a filter of listInscricao."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listInscricao.details.posicaoListaEspera",
+      "detail": "Inscricao.details.posicaoListaEspera is a filter of listInscricao."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listInscricao.id",
+      "detail": "Inscricao.id is a filter of listInscricao."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listInscricao.receivedAt",
+      "detail": "Inscricao.receivedAt is a filter of listInscricao."
+    },
+    {
+      "code": "DERIVED_FILTER",
+      "path": "listInscricao.registrationCode",
+      "detail": "Inscricao.registrationCode is a filter of listInscricao."
+    },
+    {
+      "code": "DERIVED_SELECTOR",
+      "path": "publicar.id",
+      "detail": "Evento.id is a selector of publicar."
+    },
+    {
+      "code": "DERIVED_CONCURRENCY",
+      "path": "publicar.version",
+      "detail": "Evento.version is a concurrency of publicar."
+    },
+    {
+      "code": "RULE_RESTORED",
+      "path": "publicar",
+      "detail": "publicarExigeDadosCompletos"
+    }
+  ],
+  "emit": [
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "cancelar",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/integration.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "cancelar",
+          "entityId": "Inscricao",
+          "operation": "transition",
+          "ports": [
+            "InscricaoRepository"
+          ],
+          "rulesApplied": [
+            "cancelamentoSomentePropriaInscricao",
+            "promoverPrimeiroListaEsperaAoCancelar"
+          ],
+          "functions": [
+            {
+              "functionName": "cancelar",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.version"
+                },
+                {
+                  "name": "registrationCode",
+                  "type": "string",
+                  "fieldRef": "Inscricao.registrationCode"
+                },
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "receivedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.receivedAt"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                },
+                {
+                  "name": "details.posicaoListaEspera",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.details.posicaoListaEspera"
+                },
+                {
+                  "name": "details.ocupaVaga",
+                  "type": "boolean",
+                  "fieldRef": "Inscricao.details.ocupaVaga"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "transition"
+          ],
+          "transactional": false,
+          "effects": [
+            {
+              "eventId": "inscricaoCancelada",
+              "path": "l4/inscricaoEvento/integration.defs.ts",
+              "symbol": "inscricaoCancelada"
+            }
+          ],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "cancelamentoSomentePropriaInscricao"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar"
+            },
+            {
+              "kind": "transition",
+              "transitionId": "cancelar",
+              "payload": []
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "InscricaoRepository"
+            },
+            {
+              "kind": "effect",
+              "eventId": "inscricaoCancelada"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [
+            {
+              "ruleId": "cancelamentoSomentePropriaInscricao",
+              "path": "l4/inscricaoEvento/rules.defs.ts",
+              "symbol": "cancelamentoSomentePropriaInscricao"
+            },
+            {
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+              "path": "l4/inscricaoEvento/rules.defs.ts",
+              "symbol": "promoverPrimeiroListaEsperaAoCancelar"
+            }
+          ],
+          "rulePlan": [
+            {
+              "ruleId": "cancelamentoSomentePropriaInscricao",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#transitions.cancelar.ruleRefs",
+              "consumer": "usecase:cancelar",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#transitions.cancelar.ruleRefs",
+              "consumer": "usecase:cancelar",
+              "enforcement": "local",
+              "gap": ""
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "transitionRef": "cancelar",
+          "lifecycle": {
+            "transitionId": "cancelar",
+            "payload": [],
+            "sourcePath": "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
+            "symbol": "cancelar"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/usecase/cancelar",
+          "type": "usecase",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/cancelar.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/cancelar.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+            "l4/inscricaoEvento/integration.defs.ts",
+            "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
+            "l4/inscricaoEvento/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Inscricao",
+            "102047/inscricaoEvento/repositoryPort/InscricaoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createEvento",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createEvento",
+          "entityId": "Evento",
+          "operation": "create",
+          "ports": [
+            "EventoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createEvento",
+              "input": [
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Evento.version"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                },
+                {
+                  "name": "details.publishedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.details.publishedAt"
+                },
+                {
+                  "name": "details.occupiedSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.occupiedSeats"
+                },
+                {
+                  "name": "details.remainingSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.remainingSeats"
+                },
+                {
+                  "name": "details.waitlistSize",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.waitlistSize"
+                },
+                {
+                  "name": "details.isFull",
+                  "type": "boolean",
+                  "fieldRef": "Evento.details.isFull"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "EventoRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "inscricaoExcedenteVaiParaListaEspera",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#inscricaoExcedenteVaiParaListaEspera",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "inscricaoSomenteEventoPublicado",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#inscricaoSomenteEventoPublicado",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "vagasNaoMenorQueOcupadas",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#vagasNaoMenorQueOcupadas",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/usecase/createEvento",
+          "type": "usecase",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/createEvento.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/createEvento.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+            "l4/inscricaoEvento/ontology/Evento.defs.ts",
+            "l4/inscricaoEvento/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Evento",
+            "102047/inscricaoEvento/repositoryPort/EventoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createInscricao",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createInscricao",
+          "entityId": "Inscricao",
+          "operation": "create",
+          "ports": [
+            "InscricaoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "createInscricao",
+              "input": [
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.version"
+                },
+                {
+                  "name": "registrationCode",
+                  "type": "string",
+                  "fieldRef": "Inscricao.registrationCode"
+                },
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "receivedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.receivedAt"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                },
+                {
+                  "name": "details.posicaoListaEspera",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.details.posicaoListaEspera"
+                },
+                {
+                  "name": "details.ocupaVaga",
+                  "type": "boolean",
+                  "fieldRef": "Inscricao.details.ocupaVaga"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "create"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "create",
+              "port": "InscricaoRepository"
+            }
+          ],
+          "uses": [],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "inscricaoSomenteEventoPublicado",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#inscricaoSomenteEventoPublicado",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "inscricaoUnicaPorEmailEvento",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#inscricaoUnicaPorEmailEvento",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            },
+            {
+              "ruleId": "",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#uniqueKeys",
+              "consumer": "operation:create",
+              "enforcement": "local",
+              "gap": ""
+            },
+            {
+              "ruleId": "listaEsperaQuandoVagasEsgotadas",
+              "origin": "l4/inscricaoEvento/rules.defs.ts#listaEsperaQuandoVagasEsgotadas",
+              "consumer": "operation:create",
+              "enforcement": "pending",
+              "gap": "RULE_UNBOUND"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/usecase/createInscricao",
+          "type": "usecase",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/createInscricao.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/createInscricao.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+            "l4/inscricaoEvento/ontology/Inscricao.defs.ts",
+            "l4/inscricaoEvento/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Inscricao",
+            "102047/inscricaoEvento/repositoryPort/InscricaoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getEvento",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getEvento",
+          "entityId": "Evento",
+          "operation": "get",
+          "ports": [
+            "EventoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getEvento",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Evento.version"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                },
+                {
+                  "name": "details.publishedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.details.publishedAt"
+                },
+                {
+                  "name": "details.occupiedSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.occupiedSeats"
+                },
+                {
+                  "name": "details.remainingSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.remainingSeats"
+                },
+                {
+                  "name": "details.waitlistSize",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.waitlistSize"
+                },
+                {
+                  "name": "details.isFull",
+                  "type": "boolean",
+                  "fieldRef": "Evento.details.isFull"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "EventoRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "publicarExigeDadosCompletos",
+              "origin": "l4/inscricaoEvento/ontology/Evento.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/usecase/getEvento",
+          "type": "usecase",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/getEvento.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/getEvento.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+            "l4/inscricaoEvento/ontology/Evento.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Evento",
+            "102047/inscricaoEvento/repositoryPort/EventoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getInscricao",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Inscricao.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getInscricao",
+          "entityId": "Inscricao",
+          "operation": "get",
+          "ports": [
+            "InscricaoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "getInscricao",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.version"
+                },
+                {
+                  "name": "registrationCode",
+                  "type": "string",
+                  "fieldRef": "Inscricao.registrationCode"
+                },
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "receivedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.receivedAt"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                },
+                {
+                  "name": "details.posicaoListaEspera",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.details.posicaoListaEspera"
+                },
+                {
+                  "name": "details.ocupaVaga",
+                  "type": "boolean",
+                  "fieldRef": "Inscricao.details.ocupaVaga"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "get"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "get",
+              "port": "InscricaoRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "cancelamentoSomentePropriaInscricao",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "ordemChegadaListaEspera",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:get",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/usecase/getInscricao",
+          "type": "usecase",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/getInscricao.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/getInscricao.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+            "l4/inscricaoEvento/ontology/Inscricao.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Inscricao",
+            "102047/inscricaoEvento/repositoryPort/InscricaoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listEvento",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listEvento",
+          "entityId": "Evento",
+          "operation": "list",
+          "ports": [
+            "EventoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listEvento",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                },
+                {
+                  "name": "details.publishedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.details.publishedAt"
+                },
+                {
+                  "name": "details.occupiedSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.occupiedSeats"
+                },
+                {
+                  "name": "details.remainingSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.remainingSeats"
+                },
+                {
+                  "name": "details.waitlistSize",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.waitlistSize"
+                },
+                {
+                  "name": "details.isFull",
+                  "type": "boolean",
+                  "fieldRef": "Evento.details.isFull"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "Evento"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "EventoRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.isFull",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.occupiedSeats",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.publishedAt",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.remainingSeats",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.waitlistSize",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "publicarExigeDadosCompletos",
+              "origin": "l4/inscricaoEvento/ontology/Evento.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/usecase/listEvento",
+          "type": "usecase",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/listEvento.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/listEvento.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+            "l4/inscricaoEvento/ontology/Evento.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Evento",
+            "102047/inscricaoEvento/repositoryPort/EventoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listInscricao",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Inscricao.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listInscricao",
+          "entityId": "Inscricao",
+          "operation": "list",
+          "ports": [
+            "InscricaoRepository"
+          ],
+          "rulesApplied": [],
+          "functions": [
+            {
+              "functionName": "listInscricao",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Inscricao.id"
+                },
+                {
+                  "name": "registrationCode",
+                  "type": "string",
+                  "fieldRef": "Inscricao.registrationCode"
+                },
+                {
+                  "name": "eventoId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.eventoId"
+                },
+                {
+                  "name": "participanteId",
+                  "type": "record",
+                  "fieldRef": "Inscricao.participanteId"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Inscricao.status"
+                },
+                {
+                  "name": "receivedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.receivedAt"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Inscricao.details"
+                },
+                {
+                  "name": "details.promotedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.promotedAt"
+                },
+                {
+                  "name": "details.cancelledAt",
+                  "type": "timestamp",
+                  "fieldRef": "Inscricao.details.cancelledAt"
+                },
+                {
+                  "name": "details.posicaoListaEspera",
+                  "type": "integer",
+                  "fieldRef": "Inscricao.details.posicaoListaEspera"
+                },
+                {
+                  "name": "details.ocupaVaga",
+                  "type": "boolean",
+                  "fieldRef": "Inscricao.details.ocupaVaga"
+                },
+                {
+                  "name": "page",
+                  "type": "number"
+                },
+                {
+                  "name": "pageSize",
+                  "type": "number"
+                }
+              ],
+              "output": [
+                {
+                  "name": "items",
+                  "type": "Inscricao"
+                },
+                {
+                  "name": "hasMore",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "list"
+          ],
+          "transactional": false,
+          "effects": [],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "port",
+              "call": "list",
+              "port": "InscricaoRepository"
+            }
+          ],
+          "uses": [
+            {
+              "path": "details.ocupaVaga",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "details.posicaoListaEspera",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "id",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "receivedAt",
+              "role": "filter",
+              "source": "input"
+            },
+            {
+              "path": "registrationCode",
+              "role": "filter",
+              "source": "input"
+            }
+          ],
+          "rules": [],
+          "rulePlan": [
+            {
+              "ruleId": "cancelamentoSomentePropriaInscricao",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "ordemChegadaListaEspera",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            },
+            {
+              "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+              "origin": "l4/inscricaoEvento/ontology/Inscricao.defs.ts#rules",
+              "consumer": "operation:list",
+              "enforcement": "pending",
+              "gap": "APPLICABILITY_UNDECLARED"
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/usecase/listInscricao",
+          "type": "usecase",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/listInscricao.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/listInscricao.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_2_application/ports/inscricaoRepository.defs.ts",
+            "l4/inscricaoEvento/ontology/Inscricao.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Inscricao",
+            "102047/inscricaoEvento/repositoryPort/InscricaoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "publicar",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/integration.defs.ts",
+          "_102047_/l4/inscricaoEvento/ontology/Evento.defs.ts",
+          "_102047_/l4/inscricaoEvento/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "publicar",
+          "entityId": "Evento",
+          "operation": "transition",
+          "ports": [
+            "EventoRepository"
+          ],
+          "rulesApplied": [
+            "publicarExigeDadosCompletos"
+          ],
+          "functions": [
+            {
+              "functionName": "publicar",
+              "input": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Evento.version"
+                }
+              ],
+              "output": [
+                {
+                  "name": "id",
+                  "type": "uuid",
+                  "fieldRef": "Evento.id"
+                },
+                {
+                  "name": "version",
+                  "type": "integer",
+                  "fieldRef": "Evento.version"
+                },
+                {
+                  "name": "title",
+                  "type": "string",
+                  "fieldRef": "Evento.title"
+                },
+                {
+                  "name": "eventDate",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.eventDate"
+                },
+                {
+                  "name": "status",
+                  "type": "enum",
+                  "fieldRef": "Evento.status"
+                },
+                {
+                  "name": "details",
+                  "type": "object",
+                  "fieldRef": "Evento.details"
+                },
+                {
+                  "name": "details.description",
+                  "type": "text",
+                  "fieldRef": "Evento.details.description"
+                },
+                {
+                  "name": "details.venue",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue"
+                },
+                {
+                  "name": "details.venue.name",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.name"
+                },
+                {
+                  "name": "details.venue.address",
+                  "type": "object",
+                  "fieldRef": "Evento.details.venue.address"
+                },
+                {
+                  "name": "details.venue.address.line1",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line1"
+                },
+                {
+                  "name": "details.venue.address.line2",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.line2"
+                },
+                {
+                  "name": "details.venue.address.city",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.city"
+                },
+                {
+                  "name": "details.venue.address.stateOrProvince",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.stateOrProvince"
+                },
+                {
+                  "name": "details.venue.address.postalCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.postalCode"
+                },
+                {
+                  "name": "details.venue.address.countryCode",
+                  "type": "string",
+                  "fieldRef": "Evento.details.venue.address.countryCode"
+                },
+                {
+                  "name": "details.capacity",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.capacity"
+                },
+                {
+                  "name": "details.publishedAt",
+                  "type": "timestamp",
+                  "fieldRef": "Evento.details.publishedAt"
+                },
+                {
+                  "name": "details.occupiedSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.occupiedSeats"
+                },
+                {
+                  "name": "details.remainingSeats",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.remainingSeats"
+                },
+                {
+                  "name": "details.waitlistSize",
+                  "type": "integer",
+                  "fieldRef": "Evento.details.waitlistSize"
+                },
+                {
+                  "name": "details.isFull",
+                  "type": "boolean",
+                  "fieldRef": "Evento.details.isFull"
+                }
+              ]
+            }
+          ],
+          "portCalls": [
+            "transition"
+          ],
+          "transactional": false,
+          "effects": [
+            {
+              "eventId": "eventoPublicado",
+              "path": "l4/inscricaoEvento/integration.defs.ts",
+              "symbol": "eventoPublicado"
+            }
+          ],
+          "sequence": [
+            {
+              "kind": "context",
+              "source": "ctx"
+            },
+            {
+              "kind": "rule",
+              "ruleId": "publicarExigeDadosCompletos"
+            },
+            {
+              "kind": "transition",
+              "transitionId": "publicar",
+              "payload": []
+            },
+            {
+              "kind": "port",
+              "call": "transition",
+              "port": "EventoRepository"
+            },
+            {
+              "kind": "effect",
+              "eventId": "eventoPublicado"
+            }
+          ],
+          "uses": [
+            {
+              "path": "id",
+              "role": "selector",
+              "source": "input"
+            },
+            {
+              "path": "version",
+              "role": "concurrency",
+              "source": "input"
+            }
+          ],
+          "rules": [
+            {
+              "ruleId": "publicarExigeDadosCompletos",
+              "path": "l4/inscricaoEvento/rules.defs.ts",
+              "symbol": "publicarExigeDadosCompletos"
+            }
+          ],
+          "rulePlan": [
+            {
+              "ruleId": "publicarExigeDadosCompletos",
+              "origin": "l4/inscricaoEvento/ontology/Evento.defs.ts#transitions.publicar.ruleRefs",
+              "consumer": "usecase:publicar",
+              "enforcement": "local",
+              "gap": ""
+            }
+          ],
+          "transaction": {
+            "boundary": "none"
+          },
+          "transitionRef": "publicar",
+          "lifecycle": {
+            "transitionId": "publicar",
+            "payload": [],
+            "sourcePath": "l4/inscricaoEvento/ontology/Evento.defs.ts",
+            "symbol": "publicar"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/usecase/publicar",
+          "type": "usecase",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/publicar.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_2_application/usecases/publicar.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_2_application/ports/eventoRepository.defs.ts",
+            "l4/inscricaoEvento/integration.defs.ts",
+            "l4/inscricaoEvento/ontology/Evento.defs.ts",
+            "l4/inscricaoEvento/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Evento",
+            "102047/inscricaoEvento/repositoryPort/EventoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/usecase.md"
+          ]
+        }
+      ]
+    }
+  ]
+}

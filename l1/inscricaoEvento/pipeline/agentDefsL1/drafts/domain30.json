@@ -1,0 +1,1710 @@
+{
+  "schemaVersion": "2026-09-21-d1-domain-v1",
+  "project": 102047,
+  "moduleName": "inscricaoEvento",
+  "llmCalls": 0,
+  "ok": true,
+  "entities": [
+    {
+      "entityId": "EmailParticipante",
+      "action": "create",
+      "defPath": "l1/inscricaoEvento/layer_3_domain/entities/emailParticipante.defs.ts",
+      "storageTarget": "mdm",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [],
+      "enumerations": [
+        {
+          "path": "details.identification.subtype",
+          "values": [
+            "ContactChannel"
+          ]
+        },
+        {
+          "path": "details.identification.status",
+          "values": [
+            "Active",
+            "Inactive",
+            "Merged",
+            "Blocked"
+          ]
+        },
+        {
+          "path": "details.contactChannel.contactType",
+          "values": [
+            "Email"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "rule-contact-value-unique-per-type",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-identity-never-in-namespace",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-foreign-namespace-refused",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-delete-blocked-by-relationships",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-document-shape-validated",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "umaInscricaoPorEmailPorEvento",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "EmailParticipante",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "EmailParticipante",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.createdAt",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.identification.updatedAt",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.base.relationshipRefs",
+              "type": "object",
+              "derived": true
+            },
+            {
+              "name": "details.contactChannel",
+              "type": "object"
+            },
+            {
+              "name": "details.contactChannel.contactType",
+              "type": "enum"
+            },
+            {
+              "name": "details.contactChannel.value",
+              "type": "string"
+            },
+            {
+              "name": "details.contactChannel.isVerified",
+              "type": "boolean"
+            },
+            {
+              "name": "details.contactChannel.verifiedAt",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.inscricaoEvento",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "umaInscricaoPorEmailPorEvento"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "Evento",
+      "action": "create",
+      "defPath": "l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": "draft",
+      "uniqueKeys": [],
+      "enumerations": [
+        {
+          "path": "status",
+          "values": [
+            "draft",
+            "published"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "publicarExigeDadosCompletos",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "inscricaoSomenteEventoPublicado",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "vagasNaoMenorQueOcupadas",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "inscricaoExcedenteVaiParaListaEspera",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Evento",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Evento",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "eventDate",
+              "type": "timestamp"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.description",
+              "type": "text"
+            },
+            {
+              "name": "details.venue",
+              "type": "object"
+            },
+            {
+              "name": "details.venue.name",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address",
+              "type": "object"
+            },
+            {
+              "name": "details.venue.address.line1",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.line2",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.city",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.stateOrProvince",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.postalCode",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.capacity",
+              "type": "integer"
+            },
+            {
+              "name": "details.publishedAt",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details.occupiedSeats",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.remainingSeats",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.waitlistSize",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.isFull",
+              "type": "boolean",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "draft",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "published",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "publicar",
+                "from": [
+                  "draft"
+                ],
+                "to": "published",
+                "by": [
+                  "organizador"
+                ],
+                "ruleRefs": [
+                  "publicarExigeDadosCompletos"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "publicarExigeDadosCompletos",
+            "inscricaoSomenteEventoPublicado",
+            "vagasNaoMenorQueOcupadas",
+            "inscricaoExcedenteVaiParaListaEspera"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "Inscricao",
+      "action": "create",
+      "defPath": "l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": "waitlisted",
+      "uniqueKeys": [
+        [
+          "eventoId",
+          "participanteId"
+        ]
+      ],
+      "enumerations": [
+        {
+          "path": "status",
+          "values": [
+            "confirmed",
+            "waitlisted",
+            "cancelled"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "inscricaoUnicaPorEmailEvento",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "inscricaoSomenteEventoPublicado",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "listaEsperaQuandoVagasEsgotadas",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "ordemChegadaListaEspera",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "promoverPrimeiroListaEsperaAoCancelar",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "cancelamentoSomentePropriaInscricao",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "application"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Inscricao",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Inscricao",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "registrationCode",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "eventoId",
+              "type": "record",
+              "ref": "Evento"
+            },
+            {
+              "name": "participanteId",
+              "type": "record",
+              "ref": "Participante"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "receivedAt",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.promotedAt",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.cancelledAt",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.posicaoListaEspera",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.ocupaVaga",
+              "type": "boolean",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "confirmed",
+                "reachedBy": "command"
+              },
+              {
+                "state": "waitlisted",
+                "reachedBy": "command"
+              },
+              {
+                "state": "cancelled",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "cancelar",
+                "from": [
+                  "confirmed",
+                  "waitlisted"
+                ],
+                "to": "cancelled",
+                "by": [
+                  "publico"
+                ],
+                "ruleRefs": [
+                  "cancelamentoSomentePropriaInscricao",
+                  "promoverPrimeiroListaEsperaAoCancelar"
+                ]
+              },
+              {
+                "transitionId": "promover",
+                "from": [
+                  "waitlisted"
+                ],
+                "to": "confirmed",
+                "by": [],
+                "ruleRefs": [
+                  "ordemChegadaListaEspera",
+                  "promoverPrimeiroListaEsperaAoCancelar"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "inscricaoUnicaPorEmailEvento",
+            "inscricaoSomenteEventoPublicado",
+            "listaEsperaQuandoVagasEsgotadas",
+            "promoverPrimeiroListaEsperaAoCancelar"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "Participante",
+      "action": "create",
+      "defPath": "l1/inscricaoEvento/layer_3_domain/entities/participante.defs.ts",
+      "storageTarget": "mdm",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [],
+      "enumerations": [
+        {
+          "path": "details.identification.subtype",
+          "values": [
+            "Person"
+          ]
+        },
+        {
+          "path": "details.identification.status",
+          "values": [
+            "Active",
+            "Inactive",
+            "Merged",
+            "Blocked"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "rule-foreign-namespace-refused",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-identity-never-in-namespace",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-document-shape-validated",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-person-privacy-consent-required-br-eu",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-delete-blocked-by-relationships",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "umaInscricaoPorEmailPorEvento",
+          "owner": "module",
+          "source": "l4/inscricaoEvento/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Participante",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Participante",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.tags",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.identification.createdAt",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.identification.updatedAt",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.base.contacts",
+              "type": "object",
+              "derived": true
+            },
+            {
+              "name": "details.person",
+              "type": "object"
+            },
+            {
+              "name": "details.person.privacyConsent",
+              "type": "object"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.inscricaoEvento",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "umaInscricaoPorEmailPorEvento"
+          ],
+          "imports": []
+        }
+      }
+    }
+  ],
+  "valueObjects": [],
+  "problems": [],
+  "normalizations": [
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.base.relationshipRefs",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "EmailParticipante.record.fields.details.base.relationshipRefs",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.base",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.contactChannel.contactType",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.contactChannel.isVerified",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.contactChannel.value",
+      "detail": "description,maxLength,pattern,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.contactChannel.verifiedAt",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.contactChannel",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.general",
+      "detail": "description,open,owner"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "EmailParticipante.record.fields.details.general",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.identification.countryCode",
+      "detail": "default,description,indexed,maxLength,pattern,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.identification.createdAt",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.identification.name",
+      "detail": "description,indexed,maxLength,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.identification.status",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.identification.subtype",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.identification.updatedAt",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.identification",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details.inscricaoEvento",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.details",
+      "detail": "description,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.id",
+      "detail": "description,indexed,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "EmailParticipante.record.fields.version",
+      "detail": "description,required,writePrecondition"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "EmailParticipante",
+      "detail": "no lifecycleStates and no transitions"
+    },
+    {
+      "code": "ROLE_STORAGE_MDM",
+      "path": "EmailParticipante",
+      "detail": "kind role has no storage target"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.capacity",
+      "detail": "description,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.description",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.isFull",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.occupiedSeats",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.publishedAt",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.remainingSeats",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue.address.city",
+      "detail": "title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue.address.countryCode",
+      "detail": "title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue.address.line1",
+      "detail": "title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue.address.line2",
+      "detail": "title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue.address.postalCode",
+      "detail": "title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue.address.stateOrProvince",
+      "detail": "title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue.address",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Evento.record.fields.details.venue.address",
+      "detail": "Address"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue.name",
+      "detail": "description,maxLength,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.venue",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details.waitlistSize",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.details",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.eventDate",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.status",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.title",
+      "detail": "description,indexed,maxLength,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Evento.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Evento.transitions.0",
+      "detail": "description,payload"
+    },
+    {
+      "code": "INITIAL_STATE_DERIVED",
+      "path": "Evento",
+      "detail": "draft"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.details.cancelledAt",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.details.ocupaVaga",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.details.posicaoListaEspera",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.details.promotedAt",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.details",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.eventoId",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.participanteId",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.receivedAt",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.registrationCode",
+      "detail": "description,indexed,maxLength,required,title,unique"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.status",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Inscricao.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Inscricao.transitions.0",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Inscricao.transitions.1",
+      "detail": "description,payload"
+    },
+    {
+      "code": "NESTED_KEPT",
+      "path": "inscricaoEvento",
+      "detail": "No nested object is the target of a record reference. Nested fields stay on the entity."
+    },
+    {
+      "code": "INITIAL_STATE_DERIVED",
+      "path": "Inscricao",
+      "detail": "waitlisted"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.base.contacts",
+      "detail": "collection,description,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Participante.record.fields.details.base.contacts",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "Participante.record.fields.details.base.contacts",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.base",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.general",
+      "detail": "description,open,owner"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "Participante.record.fields.details.general",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.identification.countryCode",
+      "detail": "default,description,indexed,maxLength,pattern,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.identification.createdAt",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.identification.name",
+      "detail": "description,indexed,maxLength,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.identification.status",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.identification.subtype",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.identification.tags",
+      "detail": "collection,description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.identification.updatedAt",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.identification",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.inscricaoEvento",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.person.privacyConsent",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "Participante.record.fields.details.person.privacyConsent",
+      "detail": "PrivacyConsent"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "Participante.record.fields.details.person.privacyConsent",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details.person",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.details",
+      "detail": "description,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.id",
+      "detail": "description,indexed,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Participante.record.fields.version",
+      "detail": "description,required,writePrecondition"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "Participante",
+      "detail": "no lifecycleStates and no transitions"
+    },
+    {
+      "code": "ROLE_STORAGE_MDM",
+      "path": "Participante",
+      "detail": "kind role has no storage target"
+    }
+  ],
+  "preserved": [],
+  "removed": [],
+  "emit": [
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "EmailParticipante",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "EmailParticipante",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.createdAt",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.identification.updatedAt",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.base.relationshipRefs",
+              "type": "object",
+              "derived": true
+            },
+            {
+              "name": "details.contactChannel",
+              "type": "object"
+            },
+            {
+              "name": "details.contactChannel.contactType",
+              "type": "enum"
+            },
+            {
+              "name": "details.contactChannel.value",
+              "type": "string"
+            },
+            {
+              "name": "details.contactChannel.isVerified",
+              "type": "boolean"
+            },
+            {
+              "name": "details.contactChannel.verifiedAt",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.inscricaoEvento",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "umaInscricaoPorEmailPorEvento"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/domainEntity/EmailParticipante",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_3_domain/entities/emailParticipante.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_3_domain/entities/emailParticipante.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Evento",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Evento",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "eventDate",
+              "type": "timestamp"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.description",
+              "type": "text"
+            },
+            {
+              "name": "details.venue",
+              "type": "object"
+            },
+            {
+              "name": "details.venue.name",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address",
+              "type": "object"
+            },
+            {
+              "name": "details.venue.address.line1",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.line2",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.city",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.stateOrProvince",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.postalCode",
+              "type": "string"
+            },
+            {
+              "name": "details.venue.address.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.capacity",
+              "type": "integer"
+            },
+            {
+              "name": "details.publishedAt",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details.occupiedSeats",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.remainingSeats",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.waitlistSize",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.isFull",
+              "type": "boolean",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "draft",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "published",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "publicar",
+                "from": [
+                  "draft"
+                ],
+                "to": "published",
+                "by": [
+                  "organizador"
+                ],
+                "ruleRefs": [
+                  "publicarExigeDadosCompletos"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "publicarExigeDadosCompletos",
+            "inscricaoSomenteEventoPublicado",
+            "vagasNaoMenorQueOcupadas",
+            "inscricaoExcedenteVaiParaListaEspera"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/domainEntity/Evento",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Inscricao",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+          "_102047_/l1/inscricaoEvento/layer_3_domain/entities/participante.defs.ts"
+        ],
+        "data": {
+          "entityId": "Inscricao",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "registrationCode",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "eventoId",
+              "type": "record",
+              "ref": "Evento"
+            },
+            {
+              "name": "participanteId",
+              "type": "record",
+              "ref": "Participante"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "receivedAt",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.promotedAt",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.cancelledAt",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.posicaoListaEspera",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.ocupaVaga",
+              "type": "boolean",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "confirmed",
+                "reachedBy": "command"
+              },
+              {
+                "state": "waitlisted",
+                "reachedBy": "command"
+              },
+              {
+                "state": "cancelled",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "cancelar",
+                "from": [
+                  "confirmed",
+                  "waitlisted"
+                ],
+                "to": "cancelled",
+                "by": [
+                  "publico"
+                ],
+                "ruleRefs": [
+                  "cancelamentoSomentePropriaInscricao",
+                  "promoverPrimeiroListaEsperaAoCancelar"
+                ]
+              },
+              {
+                "transitionId": "promover",
+                "from": [
+                  "waitlisted"
+                ],
+                "to": "confirmed",
+                "by": [],
+                "ruleRefs": [
+                  "ordemChegadaListaEspera",
+                  "promoverPrimeiroListaEsperaAoCancelar"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "inscricaoUnicaPorEmailEvento",
+            "inscricaoSomenteEventoPublicado",
+            "listaEsperaQuandoVagasEsgotadas",
+            "promoverPrimeiroListaEsperaAoCancelar"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/domainEntity/Inscricao",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_3_domain/entities/inscricao.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/evento.defs.ts",
+            "_102047_/l1/inscricaoEvento/layer_3_domain/entities/participante.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/inscricaoEvento/domainEntity/Evento",
+            "102047/inscricaoEvento/domainEntity/Participante"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Participante",
+        "moduleName": "inscricaoEvento",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Participante",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.tags",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.identification.createdAt",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.identification.updatedAt",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.base.contacts",
+              "type": "object",
+              "derived": true
+            },
+            {
+              "name": "details.person",
+              "type": "object"
+            },
+            {
+              "name": "details.person.privacyConsent",
+              "type": "object"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.inscricaoEvento",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "umaInscricaoPorEmailPorEvento"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/inscricaoEvento/domainEntity/Participante",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/inscricaoEvento/layer_3_domain/entities/participante.defs.ts",
+          "outputPath": "_102047_/l1/inscricaoEvento/layer_3_domain/entities/participante.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    }
+  ]
+}
