@@ -42,23 +42,6 @@ export const definition = {
         "mechanism": "",
         "consumer": "createInscricao"
       }
-    ],
-    "processes": [
-      {
-        "processId": "promoverListaEspera",
-        "operations": [
-          "Inscricao.promover"
-        ],
-        "mechanism": "",
-        "consumer": "promoverListaEspera"
-      }
-    ],
-    "gaps": [
-      {
-        "itemId": "promoverListaEspera",
-        "kind": "process",
-        "code": "POOL_ABSENT"
-      }
     ]
   }
 } as const;

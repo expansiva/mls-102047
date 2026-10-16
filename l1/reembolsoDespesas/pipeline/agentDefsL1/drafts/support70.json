@@ -434,6 +434,18 @@
         "defPath": "_102047_/l1/reembolsoDespesas/layer_2_application/scope/accessScope.defs.ts",
         "outputPath": "_102047_/l1/reembolsoDespesas/layer_2_application/scope/accessScope.ts",
         "registers": "scope grants"
+      },
+      {
+        "artifactType": "workflowProcess",
+        "defPath": "_102047_/l1/reembolsoDespesas/layer_2_application/workflows/aprovarDespesaEnviada.defs.ts",
+        "outputPath": "_102047_/l1/reembolsoDespesas/layer_2_application/workflows/aprovarDespesaEnviada.ts",
+        "registers": "workflow process"
+      },
+      {
+        "artifactType": "workflowProcess",
+        "defPath": "_102047_/l1/reembolsoDespesas/layer_2_application/workflows/aprovarDespesaReenviada.defs.ts",
+        "outputPath": "_102047_/l1/reembolsoDespesas/layer_2_application/workflows/aprovarDespesaReenviada.ts",
+        "registers": "workflow process"
       }
     ],
     "later": []
@@ -492,32 +504,8 @@
     {
       "severity": "review",
       "code": "INTEGRATION_UNBOUND",
-      "path": "aprovarDespesaEnviada",
-      "message": "aprovarDespesaEnviada is preserved. No runtime mechanism is named."
-    },
-    {
-      "severity": "review",
-      "code": "POOL_ABSENT",
-      "path": "aprovarDespesaEnviada",
-      "message": "process aprovarDespesaEnviada is not in the selected pool. It was kept and no endpoint was added."
-    },
-    {
-      "severity": "review",
-      "code": "INTEGRATION_UNBOUND",
       "path": "aprovarDespesa",
       "message": "aprovarDespesa is preserved. No runtime mechanism is named."
-    },
-    {
-      "severity": "review",
-      "code": "INTEGRATION_UNBOUND",
-      "path": "aprovarDespesaReenviada",
-      "message": "aprovarDespesaReenviada is preserved. No runtime mechanism is named."
-    },
-    {
-      "severity": "review",
-      "code": "POOL_ABSENT",
-      "path": "aprovarDespesaReenviada",
-      "message": "process aprovarDespesaReenviada is not in the selected pool. It was kept and no endpoint was added."
     }
   ],
   "normalizations": [
@@ -552,36 +540,6 @@
               "entityId": "Despesa",
               "mechanism": "",
               "consumer": "aprovarDespesa"
-            }
-          ],
-          "processes": [
-            {
-              "processId": "aprovarDespesaEnviada",
-              "operations": [
-                "analisarDecidirDespesa"
-              ],
-              "mechanism": "",
-              "consumer": "aprovarDespesaEnviada"
-            },
-            {
-              "processId": "aprovarDespesaReenviada",
-              "operations": [
-                "analisarDecidirDespesa"
-              ],
-              "mechanism": "",
-              "consumer": "aprovarDespesaReenviada"
-            }
-          ],
-          "gaps": [
-            {
-              "itemId": "aprovarDespesaEnviada",
-              "kind": "process",
-              "code": "POOL_ABSENT"
-            },
-            {
-              "itemId": "aprovarDespesaReenviada",
-              "kind": "process",
-              "code": "POOL_ABSENT"
             }
           ]
         }
@@ -1087,6 +1045,81 @@
             "_102021_/l2/agentDefsL1/skills/architecture.md",
             "_102021_/l2/agentDefsL1/skills/accessScope.md"
           ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "workflowProcess",
+        "artifactId": "aprovarDespesaEnviada",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l4/reembolsoDespesas/journeys/analisarDecidirDespesa.defs.ts",
+          "_102047_/l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+          "_102047_/l4/reembolsoDespesas/workflows.defs.ts"
+        ],
+        "data": {
+          "processId": "aprovarDespesaEnviada",
+          "trigger": {
+            "kind": "event",
+            "event": "Despesa.enviarParaAprovacao"
+          },
+          "functions": [],
+          "operations": [],
+          "occurrence": {
+            "entityId": "Despesa"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/reembolsoDespesas/workflowProcess/aprovarDespesaEnviada",
+          "type": "workflowProcess",
+          "defPath": "_102047_/l1/reembolsoDespesas/layer_2_application/workflows/aprovarDespesaEnviada.defs.ts",
+          "outputPath": "_102047_/l1/reembolsoDespesas/layer_2_application/workflows/aprovarDespesaEnviada.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": []
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "workflowProcess",
+        "artifactId": "aprovarDespesaReenviada",
+        "moduleName": "reembolsoDespesas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l4/reembolsoDespesas/ontology/Despesa.defs.ts",
+          "_102047_/l4/reembolsoDespesas/workflows.defs.ts"
+        ],
+        "data": {
+          "processId": "aprovarDespesaReenviada",
+          "trigger": {
+            "kind": "event",
+            "event": "Despesa.reenviarParaAprovacao"
+          },
+          "functions": [],
+          "operations": [],
+          "occurrence": {
+            "entityId": "Despesa"
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/reembolsoDespesas/workflowProcess/aprovarDespesaReenviada",
+          "type": "workflowProcess",
+          "defPath": "_102047_/l1/reembolsoDespesas/layer_2_application/workflows/aprovarDespesaReenviada.defs.ts",
+          "outputPath": "_102047_/l1/reembolsoDespesas/layer_2_application/workflows/aprovarDespesaReenviada.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": []
         }
       ]
     }

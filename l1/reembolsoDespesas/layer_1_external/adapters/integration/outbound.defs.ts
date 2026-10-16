@@ -19,36 +19,6 @@ export const definition = {
         "mechanism": "",
         "consumer": "aprovarDespesa"
       }
-    ],
-    "processes": [
-      {
-        "processId": "aprovarDespesaEnviada",
-        "operations": [
-          "analisarDecidirDespesa"
-        ],
-        "mechanism": "",
-        "consumer": "aprovarDespesaEnviada"
-      },
-      {
-        "processId": "aprovarDespesaReenviada",
-        "operations": [
-          "analisarDecidirDespesa"
-        ],
-        "mechanism": "",
-        "consumer": "aprovarDespesaReenviada"
-      }
-    ],
-    "gaps": [
-      {
-        "itemId": "aprovarDespesaEnviada",
-        "kind": "process",
-        "code": "POOL_ABSENT"
-      },
-      {
-        "itemId": "aprovarDespesaReenviada",
-        "kind": "process",
-        "code": "POOL_ABSENT"
-      }
     ]
   }
 } as const;
