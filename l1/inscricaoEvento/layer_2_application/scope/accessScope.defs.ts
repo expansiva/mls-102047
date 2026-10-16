@@ -145,8 +145,21 @@ export const definition = {
           },
           {
             "entityId": "Evento",
-            "steps": [],
-            "pending": "ANCHOR_UNRESOLVED"
+            "steps": [
+              {
+                "relationshipId": "inscricaoEvento",
+                "from": "Evento",
+                "to": "Inscricao",
+                "field": "Inscricao.eventoId"
+              },
+              {
+                "relationshipId": "inscricaoParticipante",
+                "from": "Inscricao",
+                "to": "Participante",
+                "field": "Inscricao.participanteId"
+              }
+            ],
+            "pending": ""
           }
         ],
         "pending": "ACCESS_ANCHOR"
