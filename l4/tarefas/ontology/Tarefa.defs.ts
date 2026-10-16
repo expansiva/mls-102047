@@ -1,0 +1,418 @@
+/// <mls fileReference="_102047_/l4/tarefas/ontology/Tarefa.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const tarefasEntityTarefa = {
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+  "moduleName": "tarefas",
+  "entityId": "Tarefa",
+  "title": "Tarefa",
+  "description": "Tarefa com título, descrição, prioridade, prazo, lista, responsável, criador, tarefa pai opcional, etiquetas e motivo de devolução; percorre as situações a fazer, em andamento, em revisão, concluída e cancelada. Anexos e discussão são serviços da plataforma (anexos e task-room da Task).",
+  "displayField": "titulo",
+  "relationships": {
+    "lista": {
+      "relationshipId": "tarefaLista",
+      "to": "Lista",
+      "via": "Tarefa.listaId",
+      "cardinality": "N:1",
+      "title": "Lista da tarefa",
+      "description": "A tarefa pertence a uma lista (projeto ou área).",
+      "mode": "fk",
+      "required": true
+    },
+    "responsavel": {
+      "relationshipId": "tarefaResponsavel",
+      "to": "MembroEquipe",
+      "via": "Tarefa.responsavelId",
+      "cardinality": "N:1",
+      "title": "Responsável",
+      "description": "Pessoa da equipe que executa a tarefa.",
+      "mode": "fk",
+      "required": true
+    },
+    "criador": {
+      "relationshipId": "tarefaCriador",
+      "to": "MembroEquipe",
+      "via": "Tarefa.criadorId",
+      "cardinality": "N:1",
+      "title": "Criador",
+      "description": "Pessoa da equipe que criou e revisa a tarefa.",
+      "mode": "fk",
+      "required": true
+    },
+    "tarefaPai": {
+      "relationshipId": "tarefaPai",
+      "to": "Tarefa",
+      "via": "Tarefa.tarefaPaiId",
+      "cardinality": "N:1",
+      "title": "Tarefa pai",
+      "description": "Tarefa da qual esta é subtarefa.",
+      "mode": "fk",
+      "required": "quando a tarefa é uma subtarefa"
+    },
+    "itensChecklist": {
+      "relationshipId": "itemChecklistTarefa",
+      "to": "ItemChecklist",
+      "via": "ItemChecklist.tarefaId",
+      "cardinality": "1:N",
+      "title": "Itens da checklist",
+      "description": "Itens marcáveis da checklist desta tarefa.",
+      "mode": "fk",
+      "direction": "to",
+      "required": true
+    }
+  },
+  "capabilities": {
+    "read.byId": "Abre a tarefa pelo id vindo do aviso, do quadro ou da lista, para o responsável, o criador ou o gestor consultar descrição, prazo, checklist e anexos.",
+    "locate.byColumn": "Lista tarefas filtradas por lista, responsável, criador, prioridade, prazo e situação, paginadas; serve às minhas tarefas, às que criei em revisão e ao acompanhamento do gestor.",
+    "locate.byText": "Busca tarefas pelo texto do título na caixa de pesquisa das listas do membro e do gestor.",
+    "count": "Conta as tarefas por situação para os cabeçalhos das colunas do quadro e os totais do acompanhamento do gestor.",
+    "listByForeignKey": "Lista as tarefas de uma lista, de um responsável ou as subtarefas de uma tarefa pai, carregando várias de uma vez para o quadro.",
+    "create": "Registra a nova tarefa em a fazer com o membro da sessão como criador; com a mesma chave de criação vira upsert, para que o reenvio após erro de rede não duplique.",
+    "update": "Altera título, descrição, prioridade, prazo, lista e tarefa pai sem mudar a situação, por qualquer um que veja a tarefa; a troca de responsável só pelo criador ou pelo gestor.",
+    "transition": "Move a tarefa entre a fazer, em andamento, em revisão, concluída e cancelada, com a regra de quem pode cada passo verificada pelo módulo.",
+    "uniqueKey": "Recusa uma segunda tarefa com a mesma chave de criação, garantindo que o reenvio da criação não gere duplicata.",
+    "transaction": "Grava a tarefa e seus itens de checklist iniciais de uma só vez, tudo ou nada, na criação.",
+    "read.mdmRecord": "Lê no cadastro mestre o nome do responsável e do criador para exibir nas listas, no quadro e no detalhe.",
+    "attach.document": "Guarda os anexos da tarefa (arquivos e imagens) ligados à linha, enviados por quem cria ou ajusta a tarefa.",
+    "tag": "Marca a tarefa com etiquetas livres no espaço do módulo e encontra todas as tarefas com uma etiqueta.",
+    "tarefas.reatribuir": "Troca o responsável da tarefa, pelo criador ou pelo gestor; quem age agora passa a ser o novo responsável, que é avisado.",
+    "tarefas.quadroPorSituacao": "Mostra as tarefas visíveis agrupadas em colunas por situação, com os mesmos filtros da lista, para o gestor e o membro."
+  },
+  "rules": [
+    "criacaoIdempotente",
+    "somenteResponsavelExecuta",
+    "somenteCriadorRevisa",
+    "devolucaoExigeMotivo",
+    "cancelamentoPorCriadorOuGestor",
+    "reatribuicaoPorCriadorOuGestor",
+    "edicaoNaoMudaSituacao",
+    "tarefaPaiNaoPodeSerElaMesma",
+    "tarefaEncerradaNaoTransiciona"
+  ],
+  "kind": "entity",
+  "class": "core",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "tarefas_tarefa",
+    "kind": "relational"
+  },
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "derived": true,
+        "indexed": true,
+        "title": "Id"
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true
+      },
+      "titulo": {
+        "type": "string",
+        "required": true,
+        "indexed": true,
+        "title": "Título",
+        "description": "Título curto da tarefa, usado na busca e exibido nas listas e no quadro.",
+        "maxLength": 200
+      },
+      "status": {
+        "type": "enum",
+        "required": true,
+        "indexed": true,
+        "values": [
+          {
+            "value": "aFazer",
+            "title": "A fazer"
+          },
+          {
+            "value": "emAndamento",
+            "title": "Em andamento"
+          },
+          {
+            "value": "emRevisao",
+            "title": "Em revisão"
+          },
+          {
+            "value": "concluida",
+            "title": "Concluída"
+          },
+          {
+            "value": "cancelada",
+            "title": "Cancelada"
+          }
+        ],
+        "title": "Situação",
+        "description": "Situação atual da tarefa no seu ciclo; muda só pelas transições, nunca pela edição de campos."
+      },
+      "prioridade": {
+        "type": "enum",
+        "required": true,
+        "indexed": true,
+        "values": [
+          {
+            "value": "low",
+            "title": "Baixa"
+          },
+          {
+            "value": "medium",
+            "title": "Média"
+          },
+          {
+            "value": "high",
+            "title": "Alta"
+          }
+        ],
+        "title": "Prioridade",
+        "description": "Prioridade da tarefa; o gestor filtra e ordena por ela."
+      },
+      "prazo": {
+        "type": "date",
+        "required": true,
+        "indexed": true,
+        "title": "Prazo",
+        "description": "Data limite da tarefa; usada no acompanhamento e no aviso diário das tarefas que vencem hoje ou estão atrasadas."
+      },
+      "listaId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "to": [
+          "Lista"
+        ],
+        "title": "Lista",
+        "description": "Lista (projeto ou área) à qual a tarefa pertence."
+      },
+      "responsavelId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "to": [
+          "MembroEquipe"
+        ],
+        "title": "Responsável",
+        "description": "Pessoa da equipe que executa a tarefa; só o criador ou o gestor a troca."
+      },
+      "criadorId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "to": [
+          "MembroEquipe"
+        ],
+        "title": "Criada por",
+        "description": "Pessoa da equipe que criou a tarefa e é quem a revisa; preenchida com a pessoa da sessão na criação."
+      },
+      "tarefaPaiId": {
+        "type": "record",
+        "indexed": true,
+        "to": [
+          "Tarefa"
+        ],
+        "title": "Tarefa pai",
+        "description": "Tarefa da qual esta é subtarefa, quando houver."
+      },
+      "chaveCriacao": {
+        "type": "uuid",
+        "required": true,
+        "unique": true,
+        "indexed": true,
+        "title": "Chave de criação",
+        "description": "Chave gerada pela tela ao abrir o formulário de criação; reenviar após erro de rede com a mesma chave não cria uma segunda tarefa."
+      },
+      "criadaEm": {
+        "type": "timestamp",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "title": "Criada em",
+        "description": "Momento em que a tarefa foi registrada, gravado pelo sistema."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "title": "Detalhes",
+        "description": "Conteúdo da tarefa que não é filtrado.",
+        "fields": {
+          "descricao": {
+            "type": "text",
+            "title": "Descrição",
+            "description": "Descrição do que deve ser feito na tarefa."
+          },
+          "motivoDevolucao": {
+            "type": "text",
+            "title": "Motivo da devolução",
+            "description": "Motivo informado pelo criador na última devolução para ajuste; lido pelo responsável ao retomar.",
+            "maxLength": 2000
+          },
+          "devolvidaEm": {
+            "type": "timestamp",
+            "title": "Devolvida em",
+            "description": "Momento da última devolução para ajuste."
+          },
+          "concluidaEm": {
+            "type": "timestamp",
+            "title": "Concluída em",
+            "description": "Momento em que o criador aceitou a entrega."
+          },
+          "canceladaEm": {
+            "type": "timestamp",
+            "title": "Cancelada em",
+            "description": "Momento em que a tarefa foi cancelada."
+          },
+          "aberta": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Aberta",
+            "description": "A tarefa está a fazer, em andamento ou em revisão, ou seja, nem concluída nem cancelada."
+          },
+          "venceHoje": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Vence hoje",
+            "description": "Tarefa aberta cujo prazo é hoje."
+          },
+          "atrasada": {
+            "type": "boolean",
+            "derived": true,
+            "title": "Atrasada",
+            "description": "Tarefa aberta cujo prazo é anterior a hoje."
+          },
+          "quantidadeSubtarefas": {
+            "type": "integer",
+            "derived": true,
+            "title": "Subtarefas",
+            "description": "Quantidade de tarefas que têm esta tarefa como tarefa pai."
+          },
+          "progressoChecklist": {
+            "type": "string",
+            "derived": true,
+            "title": "Progresso da checklist",
+            "description": "Quantos itens da checklist desta tarefa estão marcados como feitos, do total de itens."
+          }
+        }
+      }
+    }
+  },
+  "uniqueKeys": [
+    [
+      "chaveCriacao"
+    ]
+  ],
+  "lifecycleStates": [
+    {
+      "state": "aFazer",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "emAndamento",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "emRevisao",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "concluida",
+      "reachedBy": "actor"
+    },
+    {
+      "state": "cancelada",
+      "reachedBy": "actor"
+    }
+  ],
+  "transitions": [
+    {
+      "transitionId": "iniciar",
+      "from": [
+        "aFazer"
+      ],
+      "to": "emAndamento",
+      "by": [
+        "membroEquipe",
+        "gestor"
+      ],
+      "description": "O responsável inicia a tarefa; a sala de discussão recebe a mensagem da mudança.",
+      "payload": [],
+      "ruleRefs": [
+        "somenteResponsavelExecuta"
+      ]
+    },
+    {
+      "transitionId": "enviarParaRevisao",
+      "from": [
+        "emAndamento"
+      ],
+      "to": "emRevisao",
+      "by": [
+        "membroEquipe",
+        "gestor"
+      ],
+      "description": "O responsável envia a tarefa para revisão; o criador passa a ser quem age agora e é avisado.",
+      "payload": [],
+      "ruleRefs": [
+        "somenteResponsavelExecuta"
+      ]
+    },
+    {
+      "transitionId": "aceitar",
+      "from": [
+        "emRevisao"
+      ],
+      "to": "concluida",
+      "by": [
+        "membroEquipe",
+        "gestor"
+      ],
+      "description": "O criador aceita a entrega e a tarefa é concluída.",
+      "payload": [],
+      "ruleRefs": [
+        "somenteCriadorRevisa"
+      ]
+    },
+    {
+      "transitionId": "devolver",
+      "from": [
+        "emRevisao"
+      ],
+      "to": "emAndamento",
+      "by": [
+        "membroEquipe",
+        "gestor"
+      ],
+      "description": "O criador devolve a tarefa para ajuste com o motivo; o responsável volta a ser quem age agora e é avisado.",
+      "payload": [
+        "details.motivoDevolucao"
+      ],
+      "ruleRefs": [
+        "somenteCriadorRevisa",
+        "devolucaoExigeMotivo"
+      ]
+    },
+    {
+      "transitionId": "cancelar",
+      "from": [
+        "aFazer",
+        "emAndamento",
+        "emRevisao"
+      ],
+      "to": "cancelada",
+      "by": [
+        "membroEquipe",
+        "gestor"
+      ],
+      "description": "O criador ou o gestor cancela a tarefa; a sala de discussão recebe a mensagem.",
+      "payload": [],
+      "ruleRefs": [
+        "cancelamentoPorCriadorOuGestor"
+      ]
+    }
+  ]
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+
+export type TarefasEntityTarefaType = typeof tarefasEntityTarefa;
+
+export default tarefasEntityTarefa;

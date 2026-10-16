@@ -1,0 +1,110 @@
+/// <mls fileReference="_102047_/l4/tarefas/ontology/ItemChecklist.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const tarefasEntityItemChecklist = {
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+  "moduleName": "tarefas",
+  "entityId": "ItemChecklist",
+  "title": "Item da checklist",
+  "description": "Item marcável da checklist de uma tarefa, com descrição e indicação de feito.",
+  "displayField": "details.descricao",
+  "relationships": {
+    "tarefa": {
+      "relationshipId": "itemChecklistTarefa",
+      "to": "Tarefa",
+      "via": "ItemChecklist.tarefaId",
+      "cardinality": "N:1",
+      "title": "Tarefa do item",
+      "description": "Cada item da checklist pertence a uma única tarefa.",
+      "mode": "fk",
+      "required": true
+    }
+  },
+  "capabilities": {
+    "read.byId": "Lê um item da checklist pelo id ao marcar ou editar o item na tela da tarefa; usado por membros e pelo gestor.",
+    "listByForeignKey": "Lista os itens da checklist de uma tarefa pela coluna tarefaId, ordenados por ordem, e preenche de uma vez as checklists das tarefas de uma lista; usado na tela da tarefa por membros e gestor.",
+    "locate.byColumn": "Filtra os itens de uma tarefa por feito (pendentes ou feitos) com ordenação por ordem; usado pelo responsável ao executar a tarefa.",
+    "count": "Conta os itens de uma tarefa, no total e os feitos, para mostrar o progresso da checklist no card da tarefa e no quadro do gestor.",
+    "create": "Adiciona um item à checklist de uma tarefa visível, ao criar ou editar a tarefa; usado por qualquer membro que veja a tarefa e pelo gestor.",
+    "update": "Altera a descrição, a ordem ou marca/desmarca o item como feito, sem mudar a situação da tarefa; usado pelo responsável ao executar e por quem edita a tarefa.",
+    "delete": "Remove um item da checklist ao editar a tarefa; usado por quem pode ver e editar a tarefa.",
+    "transaction": "Grava a tarefa e os itens da sua checklist juntos, tudo ou nada, ao criar a tarefa com a checklist."
+  },
+  "rules": [
+    "checklistNaoMudaSituacao",
+    "editarSomenteTarefaVisivel"
+  ],
+  "kind": "entity",
+  "class": "supporting",
+  "storage": {
+    "target": "moduleDatabase",
+    "table": "tarefas_itemchecklist",
+    "kind": "relational"
+  },
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "derived": true,
+        "indexed": true,
+        "title": "Id"
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true
+      },
+      "tarefaId": {
+        "type": "record",
+        "required": true,
+        "indexed": true,
+        "to": [
+          "Tarefa"
+        ],
+        "title": "Tarefa",
+        "description": "Tarefa a que o item da checklist pertence."
+      },
+      "ordem": {
+        "type": "integer",
+        "required": true,
+        "indexed": true,
+        "title": "Ordem",
+        "description": "Posição do item na checklist da tarefa; a checklist é exibida nessa ordem.",
+        "min": 0
+      },
+      "feito": {
+        "type": "boolean",
+        "required": true,
+        "indexed": true,
+        "title": "Feito",
+        "description": "Indica se o item já foi marcado como feito; é uma coluna porque o progresso da checklist conta os itens feitos de cada tarefa."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "title": "Detalhes",
+        "description": "Conteúdo do item da checklist.",
+        "fields": {
+          "descricao": {
+            "type": "string",
+            "required": true,
+            "title": "Descrição",
+            "description": "O que precisa ser feito neste item da checklist.",
+            "maxLength": 300
+          },
+          "marcadoEm": {
+            "type": "timestamp",
+            "title": "Marcado em",
+            "description": "Momento em que o item foi marcado como feito pela última vez; vazio enquanto não estiver feito."
+          }
+        }
+      }
+    }
+  }
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+
+export type TarefasEntityItemChecklistType = typeof tarefasEntityItemChecklist;
+
+export default tarefasEntityItemChecklist;

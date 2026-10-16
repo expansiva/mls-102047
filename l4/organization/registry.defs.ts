@@ -785,6 +785,66 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-13T01:09:01.349Z"
+    },
+    {
+      "moduleName": "tarefas",
+      "actors": [
+        {
+          "actorId": "membroEquipe",
+          "kind": "internal"
+        },
+        {
+          "actorId": "gestor",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Person",
+          "roleTag": "tarefas.MembroEquipe",
+          "namespace": "tarefas"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "MembroEquipe",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Lista",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "Tarefa",
+          "kind": "entity",
+          "class": "core"
+        },
+        {
+          "entityId": "ItemChecklist",
+          "kind": "entity",
+          "class": "supporting"
+        },
+        {
+          "entityId": "AvisoVencimento",
+          "kind": "entity",
+          "class": "event"
+        }
+      ],
+      "events": [
+        {
+          "eventId": "tarefaConcluida",
+          "on": "Tarefa.aceitar"
+        },
+        {
+          "eventId": "tarefaCancelada",
+          "on": "Tarefa.cancelar"
+        }
+      ],
+      "updatedAt": "2026-10-16T07:05:56.587Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;
