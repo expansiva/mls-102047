@@ -1,0 +1,508 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 69099,
+  "receivedAt": "2026-10-16T07:57:21.083Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "A página é uma fila operacional do gestor: acompanha todas as tarefas da equipe por situação, prioridade e prazo, abre uma tarefa e age sobre ela (reatribuir ou cancelar). Não há arrastar entre colunas nem criação/planejamento, por isso operationsQueue serve melhor que kanbanBoardView ou workPlanningBoard, nos dois dispositivos.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "operationsQueue"
+            },
+            "intent": "Dar ao gestor a visão de todas as tarefas da equipe, com filtros por lista, responsável, prioridade, prazo e situação, e permitir abrir uma tarefa para ver o andamento, trocar o responsável ou cancelá-la.",
+            "sections": [
+              {
+                "id": "secaoQuadroEquipe",
+                "priority": "primary",
+                "purpose": "Mostrar todas as tarefas da equipe filtradas, destacando situação, prazo, atrasos e progresso da checklist, para o gestor localizar onde precisa agir.",
+                "organisms": [
+                  "quadroTarefasEquipe"
+                ]
+              },
+              {
+                "id": "secaoTarefaSelecionada",
+                "priority": "main",
+                "purpose": "Exibir a tarefa escolhida no quadro, com quem criou, quem é responsável, prazo, situação, subtarefas e checklist, junto das ações do gestor sobre ela.",
+                "organisms": [
+                  "detalheTarefa",
+                  "acoesGestorTarefa"
+                ]
+              },
+              {
+                "id": "secaoHistoricoTarefa",
+                "priority": "secondary",
+                "purpose": "Contar o que já aconteceu com a tarefa escolhida para o gestor entender o contexto antes de decidir.",
+                "organisms": [
+                  "historicoTarefa"
+                ]
+              }
+            ],
+            "organisms": [
+              {
+                "id": "quadroTarefasEquipe",
+                "kind": "list",
+                "text": "Quadro com todas as tarefas da equipe: título, lista, responsável, prioridade, prazo, situação, indicação de vence hoje ou atrasada e progresso da checklist. O gestor filtra por lista, responsável, prioridade, período de prazo e situação, busca pelo título e escolhe uma tarefa para ver o detalhe.",
+                "intents": []
+              },
+              {
+                "id": "detalheTarefa",
+                "kind": "detail",
+                "text": "Detalhe da tarefa escolhida: título, descrição, lista, quem criou, responsável atual, prazo, situação, tarefa pai quando houver, quantidade de subtarefas e a checklist com os itens feitos e pendentes.",
+                "intents": []
+              },
+              {
+                "id": "acoesGestorTarefa",
+                "kind": "actions",
+                "text": "Ações do gestor sobre a tarefa escolhida: trocar o responsável escolhendo pelo nome uma pessoa ativa da equipe, que passa a agir agora e é avisada, ou cancelar a tarefa enquanto ainda estiver aberta, com confirmação antes de cancelar.",
+                "intents": [
+                  {
+                    "id": "reatribuirTarefa",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "cancelarTarefa",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              {
+                "id": "historicoTarefa",
+                "kind": "timeline",
+                "text": "Histórico da tarefa escolhida em ordem de tempo: criação, início, envios para revisão, devoluções com motivo, reatribuições com aviso ao novo responsável, conclusão e cancelamento.",
+                "intents": []
+              }
+            ],
+            "molecules": [
+              {
+                "id": "quadroTarefasEquipe",
+                "recommendations": [
+                  {
+                    "role": "tabela de tarefas da equipe com ordenação e agrupamento por situação",
+                    "preferred": "groupviewtable--ml-advanced-data-table",
+                    "alternative": "groupviewtable--ml-grouping-table"
+                  },
+                  {
+                    "role": "filtro por lista ou responsável",
+                    "preferred": "groupselectone--ml-combobox",
+                    "alternative": "groupselectone--ml-select"
+                  },
+                  {
+                    "role": "filtro por prioridade ou situação",
+                    "preferred": "groupselectone--ml-segmented-control",
+                    "alternative": "groupselectone--ml-select-dropdown"
+                  },
+                  {
+                    "role": "filtro por período de prazo",
+                    "preferred": "groupenterdateinterval--ml-date-interval-presets",
+                    "alternative": "groupenterdateinterval--ml-date-range-dual-calendar"
+                  },
+                  {
+                    "role": "busca pelo título da tarefa",
+                    "preferred": "groupsearchcontent--ml-search-filters",
+                    "alternative": "groupsearchcontent--ml-search-bar"
+                  }
+                ]
+              },
+              {
+                "id": "detalheTarefa",
+                "recommendations": [
+                  {
+                    "role": "cartão com os dados da tarefa",
+                    "preferred": "groupviewcard--ml-view-card-horizontal",
+                    "alternative": "groupviewcard--ml-vertical-card"
+                  },
+                  {
+                    "role": "itens da checklist marcados como feitos ou pendentes, somente leitura",
+                    "preferred": "groupenterboolean--ml-checkbox-preference",
+                    "alternative": "groupenterboolean--ml-toggle-icon"
+                  }
+                ]
+              },
+              {
+                "id": "acoesGestorTarefa",
+                "recommendations": [
+                  {
+                    "role": "escolha do novo responsável pelo nome",
+                    "preferred": "groupselectone--ml-select-one-autocomplete",
+                    "alternative": "groupselectone--ml-combobox"
+                  },
+                  {
+                    "role": "botões de reatribuir e cancelar",
+                    "preferred": "grouptriggeraction--ml-button-group",
+                    "alternative": "grouptriggeraction--ml-button-standard"
+                  },
+                  {
+                    "role": "confirmação antes de cancelar",
+                    "preferred": "groupnotifyuser--ml-alert-modal",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "retorno da reatribuição ou do cancelamento",
+                    "preferred": "groupnotifyuser--ml-toast-notification",
+                    "alternative": "groupnotifyuser--ml-contextual-feedback"
+                  }
+                ]
+              },
+              {
+                "id": "historicoTarefa",
+                "recommendations": [
+                  {
+                    "role": "linha do tempo dos eventos da tarefa",
+                    "preferred": "groupviewdata--ml-timeline-view",
+                    "alternative": "groupviewdata--ml-vertical-record-list"
+                  }
+                ]
+              }
+            ]
+          },
+          "needs": {
+            "organisms": [
+              {
+                "id": "quadroTarefasEquipe",
+                "reads": [
+                  "Tarefa.id",
+                  "Tarefa.titulo",
+                  "Tarefa.status",
+                  "Tarefa.prioridade",
+                  "Tarefa.prazo",
+                  "Tarefa.listaId",
+                  "Tarefa.responsavelId",
+                  "Tarefa.details.aberta",
+                  "Tarefa.details.venceHoje",
+                  "Tarefa.details.atrasada",
+                  "Tarefa.details.progressoChecklist",
+                  "Lista.nome",
+                  "MembroEquipe.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "detalheTarefa",
+                "submits": []
+              },
+              {
+                "id": "detalheTarefa",
+                "reads": [
+                  "Tarefa.titulo",
+                  "Tarefa.details.descricao",
+                  "Tarefa.listaId",
+                  "Tarefa.criadorId",
+                  "Tarefa.responsavelId",
+                  "Tarefa.prazo",
+                  "Tarefa.status",
+                  "Tarefa.tarefaPaiId",
+                  "Tarefa.details.quantidadeSubtarefas",
+                  "Tarefa.details.progressoChecklist",
+                  "Lista.nome",
+                  "MembroEquipe.details.identification.name",
+                  "ItemChecklist.ordem",
+                  "ItemChecklist.feito",
+                  "ItemChecklist.details.descricao"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "acoesGestorTarefa",
+                "reads": [
+                  "Tarefa.id",
+                  "Tarefa.version",
+                  "Tarefa.status",
+                  "Tarefa.responsavelId",
+                  "MembroEquipe.id",
+                  "MembroEquipe.details.identification.name",
+                  "MembroEquipe.details.identification.status"
+                ],
+                "edits": [
+                  "Tarefa.responsavelId"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "reatribuirTarefa",
+                    "write": "Tarefa.update"
+                  },
+                  {
+                    "intentId": "cancelarTarefa",
+                    "write": "Tarefa.cancelar"
+                  }
+                ]
+              },
+              {
+                "id": "historicoTarefa",
+                "reads": [
+                  "Tarefa.criadaEm",
+                  "Tarefa.status",
+                  "Tarefa.responsavelId",
+                  "Tarefa.details.devolvidaEm",
+                  "Tarefa.details.motivoDevolucao",
+                  "Tarefa.details.concluidaEm",
+                  "Tarefa.details.canceladaEm",
+                  "MembroEquipe.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            ]
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "operationsQueue"
+            },
+            "intent": "No celular, em conteúdo fluido estreito (referência de 390px, usável de 360px a 430px), o gestor percorre as tarefas da equipe filtradas, abre uma tarefa e, logo abaixo do detalhe, troca o responsável ou cancela; o histórico fica por último.",
+            "sections": [
+              {
+                "id": "secaoQuadroEquipe",
+                "priority": "primary",
+                "purpose": "Lista empilhada das tarefas da equipe com filtros recolhíveis, mostrando primeiro situação, prazo e atraso para o gestor achar rápido onde agir.",
+                "organisms": [
+                  "quadroTarefasEquipe"
+                ]
+              },
+              {
+                "id": "secaoTarefaSelecionada",
+                "priority": "main",
+                "purpose": "Detalhe da tarefa aberta em uma coluna, seguido das ações do gestor ao alcance do polegar.",
+                "organisms": [
+                  "detalheTarefa",
+                  "acoesGestorTarefa"
+                ]
+              },
+              {
+                "id": "secaoHistoricoTarefa",
+                "priority": "secondary",
+                "purpose": "Histórico da tarefa abaixo do detalhe, para consulta quando o gestor precisar de contexto.",
+                "organisms": [
+                  "historicoTarefa"
+                ]
+              }
+            ],
+            "organisms": [
+              {
+                "id": "quadroTarefasEquipe",
+                "kind": "list",
+                "text": "Tarefas da equipe em linhas compactas com título, responsável, prazo, situação, prioridade, aviso de vence hoje ou atrasada e progresso da checklist; filtros por lista, responsável, prioridade, prazo e situação e busca pelo título ficam recolhidos acima da lista. Tocar numa tarefa abre o detalhe.",
+                "intents": []
+              },
+              {
+                "id": "detalheTarefa",
+                "kind": "detail",
+                "text": "Detalhe da tarefa aberta: título, situação e prazo em destaque, depois responsável, quem criou, lista, descrição, tarefa pai, quantidade de subtarefas e checklist com itens feitos e pendentes.",
+                "intents": []
+              },
+              {
+                "id": "acoesGestorTarefa",
+                "kind": "actions",
+                "text": "Trocar o responsável escolhendo pelo nome uma pessoa ativa da equipe, que é avisada, ou cancelar a tarefa aberta após confirmação.",
+                "intents": [
+                  {
+                    "id": "reatribuirTarefa",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "cancelarTarefa",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              {
+                "id": "historicoTarefa",
+                "kind": "timeline",
+                "text": "Histórico da tarefa: criação, início, revisões, devoluções com motivo, reatribuições com aviso ao novo responsável, conclusão e cancelamento.",
+                "intents": []
+              }
+            ],
+            "molecules": [
+              {
+                "id": "quadroTarefasEquipe",
+                "recommendations": [
+                  {
+                    "role": "lista de tarefas adaptada a tela estreita",
+                    "preferred": "groupviewtable--ml-responsive-data-table",
+                    "alternative": "groupviewtable--ml-responsive-table"
+                  },
+                  {
+                    "role": "filtro por lista ou responsável",
+                    "preferred": "groupselectone--ml-select-one-autocomplete",
+                    "alternative": "groupselectone--ml-select"
+                  },
+                  {
+                    "role": "filtro por prioridade ou situação",
+                    "preferred": "groupselectone--ml-select-dropdown",
+                    "alternative": "groupselectone--ml-segmented-control"
+                  },
+                  {
+                    "role": "filtro por período de prazo",
+                    "preferred": "groupenterdateinterval--ml-date-interval-presets",
+                    "alternative": "groupenterdateinterval--ml-date-interval-drag"
+                  },
+                  {
+                    "role": "busca pelo título",
+                    "preferred": "groupsearchcontent--ml-search-bar",
+                    "alternative": "groupsearchcontent--ml-search-filters"
+                  }
+                ]
+              },
+              {
+                "id": "detalheTarefa",
+                "recommendations": [
+                  {
+                    "role": "cartão com os dados da tarefa",
+                    "preferred": "groupviewcard--ml-vertical-card",
+                    "alternative": "groupviewcard--ml-view-card-horizontal"
+                  },
+                  {
+                    "role": "itens da checklist somente leitura",
+                    "preferred": "groupenterboolean--ml-checkbox-preference",
+                    "alternative": "groupenterboolean--ml-toggle-icon"
+                  }
+                ]
+              },
+              {
+                "id": "acoesGestorTarefa",
+                "recommendations": [
+                  {
+                    "role": "escolha do novo responsável pelo nome",
+                    "preferred": "groupselectone--ml-select-one-autocomplete",
+                    "alternative": "groupselectone--ml-combobox"
+                  },
+                  {
+                    "role": "botões de reatribuir e cancelar",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": "grouptriggeraction--ml-kebab-action-trigger"
+                  },
+                  {
+                    "role": "confirmação antes de cancelar",
+                    "preferred": "groupnotifyuser--ml-alert-modal",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "retorno da ação",
+                    "preferred": "groupnotifyuser--ml-toast-notification",
+                    "alternative": "groupnotifyuser--ml-contextual-feedback"
+                  }
+                ]
+              },
+              {
+                "id": "historicoTarefa",
+                "recommendations": [
+                  {
+                    "role": "linha do tempo dos eventos da tarefa",
+                    "preferred": "groupviewdata--ml-timeline-view",
+                    "alternative": "groupviewdata--ml-vertical-record-list"
+                  }
+                ]
+              }
+            ]
+          },
+          "needs": {
+            "organisms": [
+              {
+                "id": "quadroTarefasEquipe",
+                "reads": [
+                  "Tarefa.id",
+                  "Tarefa.titulo",
+                  "Tarefa.status",
+                  "Tarefa.prioridade",
+                  "Tarefa.prazo",
+                  "Tarefa.listaId",
+                  "Tarefa.responsavelId",
+                  "Tarefa.details.aberta",
+                  "Tarefa.details.venceHoje",
+                  "Tarefa.details.atrasada",
+                  "Tarefa.details.progressoChecklist",
+                  "Lista.nome",
+                  "MembroEquipe.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "detalheTarefa",
+                "submits": []
+              },
+              {
+                "id": "detalheTarefa",
+                "reads": [
+                  "Tarefa.titulo",
+                  "Tarefa.details.descricao",
+                  "Tarefa.listaId",
+                  "Tarefa.criadorId",
+                  "Tarefa.responsavelId",
+                  "Tarefa.prazo",
+                  "Tarefa.status",
+                  "Tarefa.tarefaPaiId",
+                  "Tarefa.details.quantidadeSubtarefas",
+                  "Tarefa.details.progressoChecklist",
+                  "Lista.nome",
+                  "MembroEquipe.details.identification.name",
+                  "ItemChecklist.ordem",
+                  "ItemChecklist.feito",
+                  "ItemChecklist.details.descricao"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "acoesGestorTarefa",
+                "reads": [
+                  "Tarefa.id",
+                  "Tarefa.version",
+                  "Tarefa.status",
+                  "Tarefa.responsavelId",
+                  "MembroEquipe.id",
+                  "MembroEquipe.details.identification.name",
+                  "MembroEquipe.details.identification.status"
+                ],
+                "edits": [
+                  "Tarefa.responsavelId"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "reatribuirTarefa",
+                    "write": "Tarefa.update"
+                  },
+                  {
+                    "intentId": "cancelarTarefa",
+                    "write": "Tarefa.cancelar"
+                  }
+                ]
+              },
+              {
+                "id": "historicoTarefa",
+                "reads": [
+                  "Tarefa.criadaEm",
+                  "Tarefa.status",
+                  "Tarefa.responsavelId",
+                  "Tarefa.details.devolvidaEm",
+                  "Tarefa.details.motivoDevolucao",
+                  "Tarefa.details.concluidaEm",
+                  "Tarefa.details.canceladaEm",
+                  "MembroEquipe.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            ]
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 18,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

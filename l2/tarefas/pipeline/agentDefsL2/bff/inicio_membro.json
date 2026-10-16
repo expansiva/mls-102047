@@ -1,0 +1,930 @@
+{
+  "types": [
+    {
+      "name": "ListaNome",
+      "description": "Nome da lista à qual a tarefa pertence.",
+      "fields": [
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.nome"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TarefaResumoDetalhes",
+      "description": "Campos calculados da tarefa usados no panorama.",
+      "fields": [
+        {
+          "name": "details.aberta",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.aberta"
+            ]
+          }
+        },
+        {
+          "name": "details.venceHoje",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.venceHoje"
+            ]
+          }
+        },
+        {
+          "name": "details.atrasada",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.atrasada"
+            ]
+          }
+        },
+        {
+          "name": "details.progressoChecklist",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.progressoChecklist"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TarefaResumo",
+      "description": "Tarefa aberta do membro no panorama, com a lista e o progresso da checklist.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.id"
+            ]
+          }
+        },
+        {
+          "name": "titulo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.titulo"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.status"
+            ]
+          }
+        },
+        {
+          "name": "prazo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.prazo"
+            ]
+          }
+        },
+        {
+          "name": "prioridade",
+          "type": "'low' | 'medium' | 'high'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.prioridade"
+            ]
+          }
+        },
+        {
+          "name": "listaId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.listaId"
+            ]
+          }
+        },
+        {
+          "name": "lista",
+          "type": "ListaNome"
+        },
+        {
+          "name": "details",
+          "type": "TarefaResumoDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "ResumoMinhasTarefas",
+      "description": "Indicadores já calculados das tarefas abertas do membro e a lista dessas tarefas.",
+      "fields": [
+        {
+          "name": "quantidadeAbertas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Tarefa.details.aberta",
+              "Tarefa.responsavelId"
+            ]
+          }
+        },
+        {
+          "name": "quantidadeVencemHoje",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Tarefa.details.venceHoje",
+              "Tarefa.responsavelId"
+            ]
+          }
+        },
+        {
+          "name": "quantidadeAtrasadas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Tarefa.details.atrasada",
+              "Tarefa.responsavelId"
+            ]
+          }
+        },
+        {
+          "name": "tarefas",
+          "type": "TarefaResumo[]"
+        }
+      ]
+    },
+    {
+      "name": "AvisoTarefa",
+      "description": "Tarefa incluída no aviso diário, com o prazo e a situação do prazo no momento do aviso.",
+      "fields": [
+        {
+          "name": "details.tarefas.tarefaId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.tarefas.tarefaId"
+            ]
+          }
+        },
+        {
+          "name": "details.tarefas.prazo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.tarefas.prazo"
+            ]
+          }
+        },
+        {
+          "name": "details.tarefas.situacaoPrazo",
+          "type": "'dueToday' | 'overdue'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.tarefas.situacaoPrazo"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AvisoDetalhes",
+      "description": "Detalhes do aviso diário: geração, contagens e tarefas.",
+      "fields": [
+        {
+          "name": "details.geradoEm",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.geradoEm"
+            ]
+          }
+        },
+        {
+          "name": "details.quantidadeTarefas",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.quantidadeTarefas"
+            ]
+          }
+        },
+        {
+          "name": "details.quantidadeAtrasadas",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.quantidadeAtrasadas"
+            ]
+          }
+        },
+        {
+          "name": "tarefas",
+          "type": "AvisoTarefa[]"
+        }
+      ]
+    },
+    {
+      "name": "AvisoDoDia",
+      "description": "Aviso diário de vencimentos de hoje do membro.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.id"
+            ]
+          }
+        },
+        {
+          "name": "dataReferencia",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.dataReferencia"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'pending' | 'completed' | 'failed'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "AvisoDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "MembroNomeIdentificacao",
+      "description": "Identificação do membro: apenas o nome.",
+      "fields": [
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "MembroEquipe.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MembroNomeDetalhes",
+      "description": "Detalhes do membro reduzidos à identificação.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "MembroNomeIdentificacao"
+        }
+      ]
+    },
+    {
+      "name": "MembroNome",
+      "description": "Membro da equipe com o nome a exibir.",
+      "fields": [
+        {
+          "name": "details",
+          "type": "MembroNomeDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "PendenciaDetalhes",
+      "description": "Detalhes da tarefa pendente: progresso da checklist e dados da última devolução.",
+      "fields": [
+        {
+          "name": "details.progressoChecklist",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.progressoChecklist"
+            ]
+          }
+        },
+        {
+          "name": "details.motivoDevolucao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.motivoDevolucao"
+            ]
+          }
+        },
+        {
+          "name": "details.devolvidaEm",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.devolvidaEm"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pendencia",
+      "description": "Tarefa que espera uma ação do membro, com a ação esperada, os nomes do responsável e do criador e a versão para os comandos.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.version"
+            ]
+          }
+        },
+        {
+          "name": "titulo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.titulo"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.status"
+            ]
+          }
+        },
+        {
+          "name": "prazo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.prazo"
+            ]
+          }
+        },
+        {
+          "name": "prioridade",
+          "type": "'low' | 'medium' | 'high'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.prioridade"
+            ]
+          }
+        },
+        {
+          "name": "responsavelId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.responsavelId"
+            ]
+          }
+        },
+        {
+          "name": "criadorId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.criadorId"
+            ]
+          }
+        },
+        {
+          "name": "responsavel",
+          "type": "MembroNome"
+        },
+        {
+          "name": "criador",
+          "type": "MembroNome"
+        },
+        {
+          "name": "acaoEsperada",
+          "type": "string",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Tarefa.status",
+              "Tarefa.responsavelId",
+              "Tarefa.criadorId",
+              "Tarefa.details.devolvidaEm"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "PendenciaDetalhes"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "qryInicioMembro",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "resumo",
+          "type": "ResumoMinhasTarefas"
+        },
+        {
+          "name": "avisoHoje",
+          "type": "AvisoDoDia",
+          "optional": true
+        },
+        {
+          "name": "pendencias",
+          "type": "Pendencia[]"
+        }
+      ],
+      "rules": [
+        "avisoUnicoPorResponsavelEDia",
+        "avisoSomenteTarefasAbertasVencendo",
+        "somenteResponsavelExecuta",
+        "somenteCriadorRevisa"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega de uma vez tudo o que a tela inicial do membro mostra ao abrir: o panorama das suas tarefas abertas, o aviso diário de hoje e a caixa do que espera por uma ação dele.",
+        "input": "Sem parâmetros: o membro é resolvido pela sessão e a data de hoje pelo servidor.",
+        "processing": "Resumo: filtra as tarefas cujo responsável é o membro da sessão e que estão abertas (details.aberta, calculado: aFazer, emAndamento ou emRevisao); conta no servidor o total de abertas, as que vencem hoje (details.venceHoje) e as atrasadas (details.atrasada); lista essas tarefas ordenadas por prazo, com o nome da lista e o progresso da checklist (details.progressoChecklist, calculado pela contagem de itens feitos sobre o total). Campos derivados são calculados, nunca gravados. Aviso: lê o aviso do membro com dataReferencia igual a hoje; pela regra avisoUnicoPorResponsavelEDia há no máximo um; ele traz apenas tarefas abertas que vencem hoje ou estão atrasadas (avisoSomenteTarefasAbertasVencendo); se o processo das 8h ainda não gerou, volta vazio. Pendências: junta as tarefas em que o membro é responsável e está em aFazer (acaoEsperada 'iniciar') ou emAndamento (acaoEsperada 'enviarParaRevisao', ou 'ajustar' quando há devolvidaEm), conforme somenteResponsavelExecuta, e as tarefas que ele criou em emRevisao (acaoEsperada 'revisar'), conforme somenteCriadorRevisa; inclui motivo e data da devolução, nomes do responsável e do criador lidos do cadastro mestre, e a versão para os comandos; ordena por prazo e prioridade.",
+        "output": "resumo com os três indicadores já calculados e as tarefas abertas; avisoHoje com data, situação, contagens e tarefas do aviso (opcional); pendencias com cada tarefa e a ação esperada, para a página exibir a ação certa em cada item."
+      }
+    },
+    {
+      "id": "cmdIniciarTarefa",
+      "kind": "cmd",
+      "when": "iniciarTarefa",
+      "writes": "Tarefa.iniciar",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.version"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "resumo",
+          "type": "ResumoMinhasTarefas"
+        },
+        {
+          "name": "pendencias",
+          "type": "Pendencia[]"
+        }
+      ],
+      "rules": [
+        "somenteResponsavelExecuta",
+        "tarefaEncerradaNaoTransiciona"
+      ],
+      "jsdoc": {
+        "purpose": "Inicia uma tarefa atribuída ao membro, passando-a de a fazer para em andamento.",
+        "input": "tarefaId: tarefa a iniciar; version: versão lida, para controle de concorrência.",
+        "processing": "Aplica a transição iniciar (aFazer → emAndamento). Recusa se o membro da sessão não for o responsável (somenteResponsavelExecuta) e se a tarefa estiver concluída ou cancelada (tarefaEncerradaNaoTransiciona); recusa se a versão estiver desatualizada. A sala de discussão recebe a mensagem da mudança. Depois recompõe o resumo e as pendências como em qryInicioMembro.",
+        "output": "resumo e pendencias atualizados, para a página redesenhar o panorama e a caixa sem nova chamada (a tarefa passa a esperar o envio para revisão)."
+      }
+    },
+    {
+      "id": "cmdEnviarParaRevisao",
+      "kind": "cmd",
+      "when": "enviarParaRevisao",
+      "writes": "Tarefa.enviarParaRevisao",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.version"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "resumo",
+          "type": "ResumoMinhasTarefas"
+        },
+        {
+          "name": "pendencias",
+          "type": "Pendencia[]"
+        }
+      ],
+      "rules": [
+        "somenteResponsavelExecuta",
+        "tarefaEncerradaNaoTransiciona"
+      ],
+      "jsdoc": {
+        "purpose": "Envia para revisão do criador uma tarefa em andamento do membro, inclusive uma tarefa devolvida já ajustada.",
+        "input": "tarefaId: tarefa a enviar; version: versão lida, para controle de concorrência.",
+        "processing": "Aplica a transição enviarParaRevisao (emAndamento → emRevisao). Recusa se o membro da sessão não for o responsável (somenteResponsavelExecuta) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. O criador passa a ser quem age agora e é avisado. Recompõe resumo e pendências.",
+        "output": "resumo e pendencias atualizados; a tarefa sai da caixa do membro, salvo se ele também for o criador, quando aparece para revisar."
+      }
+    },
+    {
+      "id": "cmdAceitarEntrega",
+      "kind": "cmd",
+      "when": "aceitarEntrega",
+      "writes": "Tarefa.aceitar",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.version"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "resumo",
+          "type": "ResumoMinhasTarefas"
+        },
+        {
+          "name": "pendencias",
+          "type": "Pendencia[]"
+        }
+      ],
+      "rules": [
+        "somenteCriadorRevisa",
+        "tarefaEncerradaNaoTransiciona"
+      ],
+      "jsdoc": {
+        "purpose": "Aceita a entrega de uma tarefa criada pelo membro e que está em revisão, concluindo-a.",
+        "input": "tarefaId: tarefa a aceitar; version: versão lida, para controle de concorrência.",
+        "processing": "Aplica a transição aceitar (emRevisao → concluida), registrando concluidaEm. Recusa se o membro da sessão não for o criador (somenteCriadorRevisa) ou se a tarefa já estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. A sala recebe a mensagem. Recompõe resumo e pendências.",
+        "output": "resumo e pendencias atualizados; a tarefa concluída sai da caixa e das abertas."
+      }
+    },
+    {
+      "id": "cmdDevolverComMotivo",
+      "kind": "cmd",
+      "when": "devolverComMotivo",
+      "writes": "Tarefa.devolver",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.version"
+            ]
+          }
+        },
+        {
+          "name": "details.motivoDevolucao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.motivoDevolucao"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "resumo",
+          "type": "ResumoMinhasTarefas"
+        },
+        {
+          "name": "pendencias",
+          "type": "Pendencia[]"
+        }
+      ],
+      "rules": [
+        "somenteCriadorRevisa",
+        "devolucaoExigeMotivo",
+        "tarefaEncerradaNaoTransiciona"
+      ],
+      "jsdoc": {
+        "purpose": "Devolve para ajuste, com o motivo, uma tarefa criada pelo membro que está em revisão.",
+        "input": "tarefaId: tarefa a devolver; version: versão lida; motivoDevolucao: texto do motivo, obrigatório.",
+        "processing": "Aplica a transição devolver (emRevisao → emAndamento). Recusa se o membro da sessão não for o criador (somenteCriadorRevisa), se o motivo estiver vazio (devolucaoExigeMotivo) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. Grava o motivo e devolvidaEm na tarefa; o responsável volta a ser quem age agora e é avisado. Recompõe resumo e pendências.",
+        "output": "resumo e pendencias atualizados; a tarefa sai da revisão do membro, salvo se ele também for o responsável, quando aparece para ajustar."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "resumoMinhasTarefas",
+        "reads": "qryInicioMembro.resumo"
+      },
+      {
+        "organism": "alertaAvisoDiario",
+        "reads": "qryInicioMembro.avisoHoje"
+      },
+      {
+        "organism": "caixaPendencias",
+        "reads": "qryInicioMembro.pendencias"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "cmdIniciarTarefa",
+        "refreshes": []
+      },
+      {
+        "endpoint": "cmdEnviarParaRevisao",
+        "refreshes": []
+      },
+      {
+        "endpoint": "cmdAceitarEntrega",
+        "refreshes": []
+      },
+      {
+        "endpoint": "cmdDevolverComMotivo",
+        "refreshes": []
+      }
+    ],
+    "selections": [],
+    "journeys": [
+      {
+        "step": "avisoDiarioVencimentos/abrirAviso",
+        "organisms": [
+          "alertaAvisoDiario"
+        ],
+        "endpoints": [
+          "qryInicioMembro"
+        ]
+      },
+      {
+        "step": "avisoDiarioVencimentos/verVencendo",
+        "organisms": [
+          "alertaAvisoDiario"
+        ],
+        "endpoints": [
+          "qryInicioMembro"
+        ],
+        "continuesIn": "meus_avisos"
+      },
+      {
+        "step": "executarTarefa/abrirMinhaTarefa",
+        "organisms": [
+          "caixaPendencias",
+          "resumoMinhasTarefas"
+        ],
+        "endpoints": [
+          "qryInicioMembro"
+        ]
+      },
+      {
+        "step": "executarTarefa/verTarefa",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "minhas_tarefas"
+      },
+      {
+        "step": "executarTarefa/iniciarTarefa",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "cmdIniciarTarefa"
+        ]
+      },
+      {
+        "step": "executarTarefa/marcarChecklist",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "minhas_tarefas"
+      },
+      {
+        "step": "executarTarefa/enviarRevisao",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "cmdEnviarParaRevisao"
+        ]
+      },
+      {
+        "step": "retomarTarefaDevolvida/abrirDevolvida",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "qryInicioMembro"
+        ]
+      },
+      {
+        "step": "retomarTarefaDevolvida/lerMotivo",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "qryInicioMembro"
+        ]
+      },
+      {
+        "step": "retomarTarefaDevolvida/ajustarCampos",
+        "organisms": [],
+        "endpoints": [],
+        "continuesIn": "minhas_tarefas"
+      },
+      {
+        "step": "retomarTarefaDevolvida/reenviarRevisao",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "cmdEnviarParaRevisao"
+        ]
+      },
+      {
+        "step": "revisarTarefa/abrirTarefaRevisao",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "qryInicioMembro"
+        ]
+      },
+      {
+        "step": "revisarTarefa/conferirEntrega",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "qryInicioMembro"
+        ],
+        "continuesIn": "minhas_tarefas"
+      },
+      {
+        "step": "revisarTarefa/aceitarTarefa",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "cmdAceitarEntrega"
+        ]
+      },
+      {
+        "step": "revisarTarefa/devolverTarefa",
+        "organisms": [
+          "caixaPendencias"
+        ],
+        "endpoints": [
+          "cmdDevolverComMotivo"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "cmdIniciarTarefa",
+        "state": "qryInicioMembro.pendencias",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cmdIniciarTarefa",
+        "state": "qryInicioMembro.resumo",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cmdEnviarParaRevisao",
+        "state": "qryInicioMembro.pendencias",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cmdEnviarParaRevisao",
+        "state": "qryInicioMembro.resumo",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cmdAceitarEntrega",
+        "state": "qryInicioMembro.pendencias",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cmdAceitarEntrega",
+        "state": "qryInicioMembro.resumo",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cmdDevolverComMotivo",
+        "state": "qryInicioMembro.pendencias",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "cmdDevolverComMotivo",
+        "state": "qryInicioMembro.resumo",
+        "mode": "replace"
+      }
+    ]
+  }
+}

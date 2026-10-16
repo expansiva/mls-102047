@@ -1,0 +1,402 @@
+{
+  "types": [
+    {
+      "name": "AvisoResumoDetalhes",
+      "description": "Totais e datas de envio de um aviso, para a lista e o histórico.",
+      "fields": [
+        {
+          "name": "details.quantidadeTarefas",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.quantidadeTarefas"
+            ]
+          }
+        },
+        {
+          "name": "details.quantidadeAtrasadas",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.quantidadeAtrasadas"
+            ]
+          }
+        },
+        {
+          "name": "details.geradoEm",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.geradoEm"
+            ]
+          }
+        },
+        {
+          "name": "details.finalizadoEm",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.finalizadoEm"
+            ]
+          }
+        },
+        {
+          "name": "details.motivoFalha",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.motivoFalha"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AvisoResumo",
+      "description": "Um aviso diário na lista e no histórico de envio.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.id"
+            ]
+          }
+        },
+        {
+          "name": "dataReferencia",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.dataReferencia"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'pending' | 'completed' | 'failed'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "AvisoResumoDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "TarefaResumo",
+      "description": "Dados atuais da tarefa incluída no aviso.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.id"
+            ]
+          }
+        },
+        {
+          "name": "titulo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.titulo"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.status"
+            ]
+          }
+        },
+        {
+          "name": "prazo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.prazo"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TarefaAviso",
+      "description": "Linha do aviso: tarefa com o prazo e a situação do prazo no dia do aviso.",
+      "fields": [
+        {
+          "name": "details.tarefas.tarefaId",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.tarefas.tarefaId"
+            ]
+          }
+        },
+        {
+          "name": "details.tarefas.prazo",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.tarefas.prazo"
+            ]
+          }
+        },
+        {
+          "name": "details.tarefas.situacaoPrazo",
+          "type": "'dueToday' | 'overdue'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.tarefas.situacaoPrazo"
+            ]
+          }
+        },
+        {
+          "name": "tarefa",
+          "type": "TarefaResumo"
+        }
+      ]
+    },
+    {
+      "name": "AvisoDetalheDetalhes",
+      "description": "Totais e linhas do aviso aberto.",
+      "fields": [
+        {
+          "name": "details.quantidadeTarefas",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.quantidadeTarefas"
+            ]
+          }
+        },
+        {
+          "name": "details.quantidadeAtrasadas",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.details.quantidadeAtrasadas"
+            ]
+          }
+        },
+        {
+          "name": "tarefas",
+          "type": "TarefaAviso[]"
+        }
+      ]
+    },
+    {
+      "name": "AvisoDetalhe",
+      "description": "Aviso aberto com suas tarefas que vencem hoje ou estão atrasadas.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.id"
+            ]
+          }
+        },
+        {
+          "name": "dataReferencia",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.dataReferencia"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'pending' | 'completed' | 'failed'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "AvisoVencimento.status"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "AvisoDetalheDetalhes"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "carregarMeusAvisos",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [
+        {
+          "name": "responsavelId",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "avisos",
+          "type": "AvisoResumo[]",
+          "paginated": true
+        },
+        {
+          "name": "avisoAberto",
+          "type": "AvisoDetalhe",
+          "optional": true
+        }
+      ],
+      "rules": [
+        "avisoUnicoPorResponsavelEDia",
+        "avisoSomenteTarefasAbertasVencendo"
+      ],
+      "jsdoc": {
+        "purpose": "Abre a página Meus avisos de uma vez: a lista paginada dos avisos diários do usuário da sessão, que também alimenta o histórico de envio, e o aviso mais recente (o de hoje) já aberto com as suas tarefas.",
+        "input": "responsavelId: membro da sessão (vem do contexto, nunca da tela); page e pageSize: página da lista de avisos.",
+        "processing": "Filtra AvisoVencimento pelo responsável da sessão (escopo own) e ordena por dataReferencia decrescente, com o aviso de hoje primeiro; pela regra avisoUnicoPorResponsavelEDia há no máximo um aviso por data, sem agrupamento. Para cada aviso devolve status, geradoEm, finalizadoEm, motivoFalha e os totais quantidadeTarefas e quantidadeAtrasadas, que são calculados pelo servidor a partir das linhas (contagem total e contagem com situacaoPrazo = overdue), nunca gravados pelo endpoint. Para o aviso mais recente compõe as linhas details.tarefas (tarefaId, prazo, situacaoPrazo) com título, situação e prazo atuais de cada Tarefa; as linhas são as que o processo gravou segundo avisoSomenteTarefasAbertasVencendo (tarefas abertas com prazo no dia ou vencido).",
+        "output": "avisos: página { items, page, pageSize, hasMore } para a lista e o histórico; avisoAberto: o aviso de hoje (ou o mais recente) com totais e linhas, ausente se o usuário ainda não recebeu aviso."
+      }
+    },
+    {
+      "id": "abrirAviso",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "avisoId",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "aviso",
+          "type": "AvisoDetalhe"
+        }
+      ],
+      "rules": [
+        "avisoSomenteTarefasAbertasVencendo"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega o aviso que o usuário escolheu na lista, com as tarefas que ele trouxe.",
+        "input": "avisoId: id do aviso selecionado na lista.",
+        "processing": "Lê o AvisoVencimento por id e recusa se não pertencer ao responsável da sessão (escopo own). Compõe as linhas details.tarefas (tarefaId, prazo e situacaoPrazo do momento do aviso) com título, situação e prazo atuais de cada Tarefa. As linhas são as gravadas pelo processo diário conforme avisoSomenteTarefasAbertasVencendo. quantidadeTarefas e quantidadeAtrasadas são calculadas pelo servidor a partir das linhas.",
+        "output": "aviso: o aviso com data, situação, totais e linhas, para substituir o aviso aberto no detalhe."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "listaAvisos",
+        "reads": "carregarMeusAvisos.avisos"
+      },
+      {
+        "organism": "historicoAvisos",
+        "reads": "carregarMeusAvisos.avisos"
+      },
+      {
+        "organism": "detalheAviso",
+        "reads": "carregarMeusAvisos.avisoAberto"
+      }
+    ],
+    "commands": [],
+    "selections": [
+      {
+        "organism": "listaAvisos",
+        "via": {
+          "query": "abrirAviso"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "avisoDiarioVencimentos/abrirAviso",
+        "organisms": [
+          "listaAvisos",
+          "detalheAviso"
+        ],
+        "endpoints": [
+          "carregarMeusAvisos",
+          "abrirAviso"
+        ]
+      },
+      {
+        "step": "avisoDiarioVencimentos/verVencendo",
+        "organisms": [
+          "detalheAviso"
+        ],
+        "endpoints": [
+          "abrirAviso"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "abrirAviso",
+        "state": "carregarMeusAvisos.avisoAberto",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "carregarMeusAvisos",
+        "state": "carregarMeusAvisos.avisos",
+        "mode": "append"
+      }
+    ]
+  }
+}

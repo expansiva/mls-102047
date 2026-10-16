@@ -1,0 +1,291 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 35623,
+  "receivedAt": "2026-10-16T07:56:56.383Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "MembroEquipe é um dado mestre de pessoas compartilhado por todo o módulo (responsável, criador e destinatário de avisos); a página mantém esse cadastro base com lista e formulário de criação/edição, o que corresponde a Master Data Management nos dois dispositivos.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "masterDataManagement"
+            },
+            "intent": "O gestor consulta todas as pessoas da equipe que podem criar tarefas e ser responsáveis, e cadastra uma nova pessoa ou corrige o nome e o país de quem já está na equipe.",
+            "sections": [
+              {
+                "id": "equipeCadastrada",
+                "priority": "primary",
+                "purpose": "Mostrar quem faz parte da equipe, com nome, situação no cadastro, país e contatos, para o gestor saber quem pode receber tarefas e escolher quem atualizar.",
+                "organisms": [
+                  "pessoasEquipe"
+                ]
+              },
+              {
+                "id": "manutencaoPessoa",
+                "priority": "main",
+                "purpose": "Cadastrar uma nova pessoa na equipe ou atualizar o nome e o país da pessoa selecionada, mantendo correto como ela aparece nas tarefas.",
+                "organisms": [
+                  "cadastroPessoa"
+                ]
+              }
+            ],
+            "organisms": [
+              {
+                "id": "pessoasEquipe",
+                "kind": "list",
+                "text": "Pessoas da equipe que podem criar tarefas e ser responsáveis, com nome, situação no cadastro (ativas recebem tarefas), país e contatos; ao escolher uma pessoa, seus dados abrem no cadastro ao lado.",
+                "intents": []
+              },
+              {
+                "id": "cadastroPessoa",
+                "kind": "form",
+                "text": "Cadastrar ou atualizar o nome e os dados de uma pessoa da equipe: nome como aparece nas tarefas e país que define as regras de privacidade.",
+                "intents": [
+                  {
+                    "id": "cadastrarPessoa",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "salvarAlteracoesPessoa",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              }
+            ],
+            "molecules": [
+              {
+                "id": "pessoasEquipe",
+                "recommendations": [
+                  {
+                    "role": "tabela de pessoas da equipe",
+                    "preferred": "groupviewtable--ml-data-table",
+                    "alternative": "groupviewtable--ml-side-detail-table"
+                  },
+                  {
+                    "role": "busca por nome na lista",
+                    "preferred": "groupsearchcontent--ml-search-filters",
+                    "alternative": "groupsearchcontent--ml-search-bar"
+                  },
+                  {
+                    "role": "paginação da lista",
+                    "preferred": "grouptriggeraction--ml-pagination-control",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "cadastroPessoa",
+                "recommendations": [
+                  {
+                    "role": "nome e país da pessoa",
+                    "preferred": "groupentertext--ml-enter-text",
+                    "alternative": "groupentertext--ml-floating-text-input"
+                  },
+                  {
+                    "role": "salvar cadastro",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "confirmação ou erro ao salvar",
+                    "preferred": "groupnotifyuser--ml-toast-notification",
+                    "alternative": "groupnotifyuser--ml-contextual-feedback"
+                  }
+                ]
+              }
+            ]
+          },
+          "needs": {
+            "organisms": [
+              {
+                "id": "pessoasEquipe",
+                "reads": [
+                  "MembroEquipe.id",
+                  "MembroEquipe.details.identification.name",
+                  "MembroEquipe.details.identification.status",
+                  "MembroEquipe.details.identification.countryCode",
+                  "MembroEquipe.details.identification.tags",
+                  "MembroEquipe.details.base.contacts"
+                ],
+                "edits": [],
+                "selects": "cadastroPessoa",
+                "submits": []
+              },
+              {
+                "id": "cadastroPessoa",
+                "reads": [
+                  "MembroEquipe.id",
+                  "MembroEquipe.version",
+                  "MembroEquipe.details.identification.name",
+                  "MembroEquipe.details.identification.countryCode",
+                  "MembroEquipe.details.identification.status"
+                ],
+                "edits": [
+                  "MembroEquipe.details.identification.name",
+                  "MembroEquipe.details.identification.countryCode"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "cadastrarPessoa",
+                    "write": "MembroEquipe.create"
+                  },
+                  {
+                    "intentId": "salvarAlteracoesPessoa",
+                    "write": "MembroEquipe.update"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "masterDataManagement"
+            },
+            "intent": "Em tela estreita e fluida (cerca de 390px, também usável em 360px e 430px), o gestor percorre as pessoas da equipe e abre uma delas para corrigir nome e país, ou cadastra uma nova pessoa.",
+            "sections": [
+              {
+                "id": "equipeCadastrada",
+                "priority": "primary",
+                "purpose": "Lista compacta das pessoas da equipe, com nome e situação em destaque e país e contatos em segundo plano, para achar rapidamente quem atualizar.",
+                "organisms": [
+                  "pessoasEquipe"
+                ]
+              },
+              {
+                "id": "manutencaoPessoa",
+                "priority": "main",
+                "purpose": "Formulário em coluna única para cadastrar uma pessoa ou atualizar a selecionada, com o botão de salvar sempre ao alcance.",
+                "organisms": [
+                  "cadastroPessoa"
+                ]
+              }
+            ],
+            "organisms": [
+              {
+                "id": "pessoasEquipe",
+                "kind": "list",
+                "text": "Pessoas da equipe que podem criar tarefas e ser responsáveis, mostrando nome e situação no cadastro; tocar em uma pessoa abre seus dados para edição.",
+                "intents": []
+              },
+              {
+                "id": "cadastroPessoa",
+                "kind": "form",
+                "text": "Cadastrar ou atualizar o nome e os dados de uma pessoa da equipe: nome como aparece nas tarefas e país.",
+                "intents": [
+                  {
+                    "id": "cadastrarPessoa",
+                    "kind": "submit",
+                    "to": ""
+                  },
+                  {
+                    "id": "salvarAlteracoesPessoa",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              }
+            ],
+            "molecules": [
+              {
+                "id": "pessoasEquipe",
+                "recommendations": [
+                  {
+                    "role": "lista de pessoas em tela estreita",
+                    "preferred": "groupviewtable--ml-responsive-data-table",
+                    "alternative": "groupviewtable--ml-responsive-table"
+                  },
+                  {
+                    "role": "busca por nome",
+                    "preferred": "groupsearchcontent--ml-search-bar",
+                    "alternative": "groupsearchcontent--ml-search-filters"
+                  },
+                  {
+                    "role": "paginação da lista",
+                    "preferred": "grouptriggeraction--ml-pagination-control",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "cadastroPessoa",
+                "recommendations": [
+                  {
+                    "role": "nome e país da pessoa",
+                    "preferred": "groupentertext--ml-floating-text-input",
+                    "alternative": "groupentertext--ml-enter-text"
+                  },
+                  {
+                    "role": "salvar cadastro",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "confirmação ou erro ao salvar",
+                    "preferred": "groupnotifyuser--ml-toast-notification",
+                    "alternative": "groupnotifyuser--ml-contextual-feedback"
+                  }
+                ]
+              }
+            ]
+          },
+          "needs": {
+            "organisms": [
+              {
+                "id": "pessoasEquipe",
+                "reads": [
+                  "MembroEquipe.id",
+                  "MembroEquipe.details.identification.name",
+                  "MembroEquipe.details.identification.status",
+                  "MembroEquipe.details.identification.countryCode",
+                  "MembroEquipe.details.base.contacts"
+                ],
+                "edits": [],
+                "selects": "cadastroPessoa",
+                "submits": []
+              },
+              {
+                "id": "cadastroPessoa",
+                "reads": [
+                  "MembroEquipe.id",
+                  "MembroEquipe.version",
+                  "MembroEquipe.details.identification.name",
+                  "MembroEquipe.details.identification.countryCode",
+                  "MembroEquipe.details.identification.status"
+                ],
+                "edits": [
+                  "MembroEquipe.details.identification.name",
+                  "MembroEquipe.details.identification.countryCode"
+                ],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "cadastrarPessoa",
+                    "write": "MembroEquipe.create"
+                  },
+                  {
+                    "intentId": "salvarAlteracoesPessoa",
+                    "write": "MembroEquipe.update"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 19,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

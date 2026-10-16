@@ -1,0 +1,439 @@
+{
+  "types": [
+    {
+      "name": "ListaResumoDetalhes",
+      "description": "Detalhes da lista exibidos no cadastro: tipo e tarefas abertas.",
+      "fields": [
+        {
+          "name": "details.tipo",
+          "type": "'project' | 'area'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.details.tipo"
+            ]
+          }
+        },
+        {
+          "name": "quantidadeTarefasAbertas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Lista.details.quantidadeTarefasAbertas",
+              "Tarefa.listaId",
+              "Tarefa.status"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ListaResumo",
+      "description": "Linha do cadastro de listas.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.id"
+            ]
+          }
+        },
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.nome"
+            ]
+          }
+        },
+        {
+          "name": "ativa",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.ativa"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "ListaResumoDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "ListaEdicaoDetalhes",
+      "description": "Detalhes editáveis da lista.",
+      "fields": [
+        {
+          "name": "details.tipo",
+          "type": "'project' | 'area'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.details.tipo"
+            ]
+          }
+        },
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.details.descricao"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ListaEdicao",
+      "description": "Registro da lista carregado no formulário de edição.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.version"
+            ]
+          }
+        },
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.nome"
+            ]
+          }
+        },
+        {
+          "name": "ativa",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.ativa"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "ListaEdicaoDetalhes"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "listarListas",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "listas",
+          "type": "ListaResumo[]"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Carrega, ao abrir a página, todas as listas da organização para o gestor escolher qual manter.",
+        "input": "Nenhuma entrada; o escopo é a organização do gestor da sessão.",
+        "processing": "Busca todas as listas (ativas e inativas) ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista e situação aFazer, emAndamento ou emRevisao; é um campo derivado, calculado na consulta e nunca gravado. Lista não paginada, pois o número de listas de projetos e áreas cabe numa tela.",
+        "output": "Lista de ListaResumo com id, nome, ativa, tipo e quantidade de tarefas abertas, no formato que o cadastro exibe."
+      }
+    },
+    {
+      "id": "obterLista",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "listaId",
+          "type": "string",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "lista",
+          "type": "ListaEdicao"
+        }
+      ],
+      "rules": [],
+      "jsdoc": {
+        "purpose": "Abre os dados de uma lista escolhida no cadastro para edição no formulário.",
+        "input": "listaId: id da lista selecionada no cadastro.",
+        "processing": "Lê a lista pelo id (read.byId) dentro da organização do gestor.",
+        "output": "ListaEdicao com id, version, nome, ativa, tipo e descrição, para preencher o formulário e enviar a versão ao salvar."
+      }
+    },
+    {
+      "id": "criarLista",
+      "kind": "cmd",
+      "when": "criarLista",
+      "writes": "Lista.create",
+      "input": [
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.nome"
+            ]
+          }
+        },
+        {
+          "name": "ativa",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.ativa"
+            ]
+          }
+        },
+        {
+          "name": "details.tipo",
+          "type": "'project' | 'area'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.details.tipo"
+            ]
+          }
+        },
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.details.descricao"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "lista",
+          "type": "ListaResumo"
+        },
+        {
+          "name": "registro",
+          "type": "ListaEdicao"
+        }
+      ],
+      "rules": [
+        "listaMantidaPorGestor",
+        "listaNomeUnico"
+      ],
+      "jsdoc": {
+        "purpose": "Cadastra uma nova lista de projeto ou área.",
+        "input": "nome: nome da lista; ativa: se recebe novas tarefas; tipo: project ou area; descricao: texto livre opcional.",
+        "processing": "listaMantidaPorGestor: recusa se o usuário da sessão não for gestor. listaNomeUnico: recusa se já existir lista com o mesmo nome. Grava a lista; id e version são gerados pelo sistema; quantidadeTarefasAbertas é calculada (zero para lista nova), nunca gravada.",
+        "output": "lista: a linha ListaResumo para inserir no cadastro; registro: ListaEdicao com id e version para o formulário continuar em edição sem nova chamada."
+      }
+    },
+    {
+      "id": "salvarLista",
+      "kind": "cmd",
+      "when": "salvarLista",
+      "writes": "Lista.update",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.version"
+            ]
+          }
+        },
+        {
+          "name": "nome",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.nome"
+            ]
+          }
+        },
+        {
+          "name": "ativa",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.ativa"
+            ]
+          }
+        },
+        {
+          "name": "details.tipo",
+          "type": "'project' | 'area'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.details.tipo"
+            ]
+          }
+        },
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.details.descricao"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "lista",
+          "type": "ListaResumo"
+        },
+        {
+          "name": "registro",
+          "type": "ListaEdicao"
+        }
+      ],
+      "rules": [
+        "listaMantidaPorGestor",
+        "listaNomeUnico"
+      ],
+      "jsdoc": {
+        "purpose": "Altera nome, tipo, descrição e situação ativa de uma lista existente.",
+        "input": "id e version: lista editada e versão lida (controle de concorrência); nome, ativa, tipo, descricao: novos valores.",
+        "processing": "listaMantidaPorGestor: recusa se o usuário não for gestor. listaNomeUnico: recusa se outra lista já tiver o mesmo nome. Recusa se a version não for a atual. Ao inativar, a lista deixa de aparecer na escolha ao criar tarefas. quantidadeTarefasAbertas é recalculada na resposta, nunca gravada.",
+        "output": "lista: a linha ListaResumo atualizada para substituir no cadastro; registro: ListaEdicao com a nova version para o formulário."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "listasCadastradas",
+        "reads": "listarListas.listas"
+      },
+      {
+        "organism": "formularioLista",
+        "reads": "obterLista.lista"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "criarLista",
+        "refreshes": []
+      },
+      {
+        "endpoint": "salvarLista",
+        "refreshes": []
+      }
+    ],
+    "selections": [
+      {
+        "organism": "listasCadastradas",
+        "via": {
+          "query": "obterLista"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "manterListas/verListas",
+        "organisms": [
+          "listasCadastradas"
+        ],
+        "endpoints": [
+          "listarListas"
+        ]
+      },
+      {
+        "step": "manterListas/criarLista",
+        "organisms": [
+          "formularioLista"
+        ],
+        "endpoints": [
+          "criarLista"
+        ]
+      },
+      {
+        "step": "manterListas/editarLista",
+        "organisms": [
+          "listasCadastradas",
+          "formularioLista"
+        ],
+        "endpoints": [
+          "obterLista",
+          "salvarLista"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "criarLista",
+        "state": "listarListas.listas",
+        "mode": "upsert"
+      },
+      {
+        "endpoint": "criarLista",
+        "state": "obterLista.lista",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "salvarLista",
+        "state": "listarListas.listas",
+        "mode": "upsert"
+      },
+      {
+        "endpoint": "salvarLista",
+        "state": "obterLista.lista",
+        "mode": "replace"
+      }
+    ]
+  }
+}
