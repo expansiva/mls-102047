@@ -239,3 +239,92 @@ comandaRestaurante, reembolsoDespesas, inscricaoEvento) **ficam inválidos** at�
 
 O que **não** muda para vocês: `domainEntity`, `requestService`, `accessScope`, `httpController`, persistência, `authorityMap`, `integrationOutbound`.
 
+
+## 11. Serviço de workflow no L1: o def `workflowProcess` (How planner, 16/10/2026; direção aprovada pelo Wagner em 15/10)
+
+Módulos com processo no L4 (`l4/<mod>/workflows.defs.ts`) passam a ter **um def por processo** em
+`l1/<mod>/layer_2_application/workflows/<processId>.defs.ts`. É o 14º tipo de artefato (`artifactType: 'workflowProcess'`). Desenho do How:
+`todo/gerarApp/how/docs/l1/workflow_servico_no_l1_20261016.md`; spec do gerador: `how/tasks/backlog/l1_d1_75_def_do_processo_de_workflow.md`.
+Piloto: `tarefas` (`l4/tarefas`, gerado em `7495be0`), o primeiro L4 com `functions` por processo.
+
+### O def
+```
+data: {
+  processId,
+  trigger,       // { kind: 'manual'|'event'|'scheduled', actorRef? | event? | schedule? } copiado do L4
+  occurrence?,   // { entityId }: o registro de negócio que a Task referencia (ausente quando o processo não cria registro, ex.: aviso recorrente)
+  functions,     // os functionId do L4; a prosa de cada um (quem chama, o que valida, grava, avisa, devolve e o que acontece ao repetir) está em
+                 // l4/<mod>/workflows.defs.ts processes[].functions[].description — é a fonte, leiam lá
+  operations     // [{ operation: 'Entidade.<op>' | 'Entidade.<transição>', steps: ['journey:<j>/<step>' | 'task:<taskId>'] }]: as operações de
+                 // entidade alcançadas de etapas do processo; uma operação sem usecase no pool fica listada, com aviso POOL_ABSENT no run
+}
+```
+`integrationOutbound` **perde** `processes[]` (vocês não liam) e o aviso `SCHEDULER_NOT_WRITTEN`.
+
+### O que o def quer dizer (intenção, não roteiro)
+- **Há um serviço de workflow na camada de aplicação**, ao lado dos usecases de entidade e dos serviços de página, **uma função por `functionId`**.
+  Não é outro usecase de entidade nem um endpoint próprio: o BFF da página da jornada chama a função; **a função decide** se abre a ocorrência ou
+  avança a etapa (Wagner, 15/10: *"a tela chama a função pelo BFF, e a função decide"*). O BFF não cria Task nem mensagem por conta própria.
+- **As `operations` dizem quais handlers passam pelo serviço:** o handler da rota cujo usecase é uma dessas operações chama a função do processo
+  (qual função: pela prosa do L4, que diz *"Chamada pelas telas de execução, revisão, retomada e cancelamento"*), e a função reaproveita o usecase e
+  a porta da entidade, sem contornar identidade, autoridade e escopo. Uma operação que serve jornada em processo e jornada fora (`Tarefa.update`:
+  reatribuir × editar) é uma função só que decide (`reatribuirQuemAge` só age quando o responsável muda).
+- **`occurrence` é o vínculo registro ↔ Task:** o registro fica na tabela do módulo; a Task guarda a referência `{ project, module, entity,
+  recordId, processId, workflowVersion }` e o andamento `{ etapa, quem age agora, histórico }`. Nada do negócio é copiado para a Task, nada do
+  andamento vai para a tabela, salvo campo que o L4 declare.
+- **Chave de idempotência da criação:** `ctx.requestMeta.requestId`. A página manda uma chave por submissão (§11 do `materializadorL2.md`;
+  aviso ao runtime `todo/runtime/tasks/backlog/fromHow_chave_de_submissao_no_bff.md`). `abrirOcorrencia*` com a mesma chave devolve o mesmo registro
+  e a mesma Task.
+- **`trigger.kind: 'scheduled'`** roda no `onTick` do módulo (`mls-102034/l1/server/layer_2_application/tick/moduleTick.ts`, a cada minuto) com
+  `evaluateSchedule` lendo a prosa do `schedule`; o `lastRun` fica na `tdm` do módulo (no `tarefas`, o próprio `AvisoVencimento` por responsável e dia).
+- **Transições de sistema sem jornada e sem evento** (`AvisoVencimento.concluirAviso`/`falharAviso`, `by: []`) não têm usecase: a função
+  (`gerarAvisosDiarios`) as aplica pela entidade e pela porta (precedente d1_73).
+- **Os compromissos da direção** valem para a função, não para o def: não duplicar ao reenviar, não misturar ocorrências, não adiantar etapa,
+  recuperar a falha parcial entre o app e o collab-messages sem presumir transação única, prender a ocorrência à versão do workflow, nenhuma espera
+  segura request/transação/navegador, um só motor com o andamento.
+
+### Collab-messages: o que ainda não existe
+`TaskData` não tem campo para a referência nem para o andamento; abrir ocorrência hoje são três passos (`addMessage` → `createDynamicWorkflowTask` →
+`ensureTaskRoom`). Os pontos estão nomeados em `todo/collabMessages/tasks/backlog/fromHow_task_da_ocorrencia_de_modulo.md`; até o contrato sair, a
+chamada ao `msg` é o ponto a isolar (um adaptador em `layer_1_external`), e o resto do serviço não espera por ele.
+
+### O que muda no `agentMaterializeL1` (medido em 16/10, `mls-102021` `b74df2f`)
+1. `helpers/m12Core.ts:68-84` (`LAYER_OF_TYPE`): sem entrada, o def sai como `TYPE_UNPLANNED` (`m12Units.ts:81`); `m12Materialize.ts:46` e
+   `core/registry.ts:50,67`/`emitters/registry.ts:50,67` (handler por tipo). Camada sugerida: `usecases` (aplicação).
+2. `emitters/emitPersistence.ts:303-313` (`emitOutbound`): continua lendo só `events`; nada a fazer por `processes` sair.
+3. O serviço, o adaptador do `msg` e o `onTick` são código novo de vocês; o def diz o quê, o L4 diz a prosa, o contrato da rota diz a entrada e a saída.
+
+## 12. O que o D1 passou a entregar desde 15/10 e muda a leitura (l1Supervisor, 16/10/2026)
+
+Medido nos defs gerados do `inscricaoEvento` e do `reembolsoDespesas` (102047 `c0029de`). Gerador: `mls-102021` `aeccbec`, `5988189`, `0658ff7`, `e43830d`
+(d1_73) e `f990ecf`…`2c87dae` (d1_75).
+
+### Evento com `consumer` que não é usecase
+- Em `layer_1_external/adapters/integration/outbound.defs.ts`, `events[].consumer` é o usecase que dispara o evento. **Quando nenhum usecase selecionado
+  executa a transição**, o `consumer` fica com o nome da transição (`"Entidade.transição"`), sem dependência para usecase, e o run traz o aviso `POOL_ABSENT`.
+- Caso real: `inscricaoPromovida` com `consumer: "Inscricao.promover"`. A transição é de sistema (`by: []` no L4) e quem a aplica é o processo
+  `promoverListaEspera` (§11: `operations` = `Inscricao.promover` [`task:promoverPrimeiraDaFila`]), disparado pelo evento `Inscricao.cancelar`. Publiquem o
+  evento onde a transição acontece, na função do processo.
+- Evento em operação (`on: "Inscricao.create"`) liga ao usecase da mesma entidade e operação (`consumer: "createInscricao"`); sem esse usecase, cai no caso
+  acima (`"Entidade.create"` + `POOL_ABSENT`).
+
+### Transição sem ator (`by: []`)
+O def de entidade (`layer_3_domain/entities/<e>.defs.ts`, `lifecycle.transitions[]`) traz a transição com `by: []` e os `ruleRefs`. Não há usecase nem rota
+para ela: quem a aplica é a regra ou a função do processo (ver §11, `AvisoVencimento`).
+
+### Rota do contrato sem handler (lacuna de rota)
+Uma rota do contrato L2 que o D1 não consegue ligar a um usecase com autoridade sai **declarada como lacuna** e **sem handler no controller**:
+no `layer_2_application/requests/<página>.defs.ts`, o item de `requests[]` da rota tem `output: [{ kind: "unresolved", path: <rota>, reason }]`, e o run
+traz o aviso `ROUTE_UNRESOLVED`. Caso real: `inscricaoEvento.gestao_eventos.qryExportarInscritosCsv` (saída `{ nomeArquivo, conteudoCsv }`, sem entidade →
+`AUTHORITY_REQUIRED`). **O handler é de vocês:** entrada, saída, regras e `access` estão no contrato da rota (`l2/<mod>/web/contracts/<página>.defs.ts`); a
+autorização segue o `access` dela, sem atalho.
+
+### Processo sem operações no `reembolsoDespesas`
+`aprovarDespesaEnviada` e `aprovarDespesaReenviada` saem com `occurrence: Despesa` e `operations: []`. A jornada de decisão do L4
+(`l4/reembolsoDespesas/journeys/analisarDecidirDespesa.defs.ts`) só tem passos `locate`/`inspect`/`decide`, sem `act`, e o `aprovarDespesaReenviada` não tem
+jornada em `journeyDecisions`. A aprovação/rejeição (`Despesa`) está na jornada, não no def; o aviso foi ao How planner
+(`todo/gerarApp/how/tasks/backlog/toPlanner_d1_75_reembolso_processo_sem_passo_act.md`) e pode mudar quando o L4 for regerado.
+
+### Sem efeito para vocês
+- Grant `fieldsOnly` só com `deniedFields`: o D1 resolve a negação numa lista permitida e grava `allowedFields` como antes (d1_69).
+- "Derivado na entrada de uma leitura é filtro" (d1_73): o usecase já não traz entrada (§10).

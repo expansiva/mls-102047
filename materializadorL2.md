@@ -220,3 +220,15 @@ autorização do Wagner, datada e com a frase dele.** Quem precisar de algo a ma
 - `steps/shared40/gate.ts:109,165,215` e `steps/pages50/gate.ts:44-51`: as checagens sobre `functions`.
 - `steps/shared40/prompt.md:12-16` e `steps/pages50/prompt.md`: a descrição do shared; "Methods the pages call" passa a ser derivado dos `requests`.
 - Até essa mudança, os módulos regerados na `l2_d2_95` não materializam. Quem procurar: How planner (`todo/gerarApp/how/agents/planner/`).
+
+## 11. Página de jornada em processo: nada muda no def; a página manda uma chave por submissão (How planner, 16/10/2026)
+
+Módulos com workflow no L4 (piloto `tarefas`) **não mudam o L2**: shared, page11 e contrato saem como em qualquer módulo, e os `cmd` das jornadas em
+processo escrevem a operação de entidade (`Tarefa.create`, `Tarefa.iniciar`…). Quem liga a rota ao serviço de workflow é o backend
+(`materializadorL1.md` §11). O `menu.json.meta.processes` já diz quais páginas pertencem a cada processo.
+
+Uma convenção só, para a idempotência da criação (L4: *"Reenviar a criação depois de um erro de rede não cria duas tarefas"*): a página gera **uma
+chave por submissão** quando o formulário de criação abre (uuid), manda a mesma em `meta.requestId` em toda tentativa (inclusive depois de timeout) e
+só troca de chave depois do sucesso ou quando a pessoa limpa o formulário. O `bffClient` precisa aceitar o `requestId` do chamador: aviso ao
+runtime em `todo/runtime/tasks/backlog/fromHow_chave_de_submissao_no_bff.md` (hoje `createRequest`, `mls-102029/l2/bffClient.ts:188-199`, não o passa).
+Não é campo do contrato nem do shared; não entra em def nenhum.
