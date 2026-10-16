@@ -1,0 +1,274 @@
+/// <mls fileReference="_102047_/l2/tarefas/web/shared/inicio_gestor.ts" enhancement="_102020_/l2/enhancementAura"/>
+import { property } from 'lit/decorators.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import { execBff } from '/_102029_/l2/bffClient.js';
+import { getState, setState, subscribe, unsubscribe } from '/_102029_/l2/collabState.js';
+import { auraNavigate } from '/_102033_/l2/shared/layout/auraNavigate.js';
+import type { Inicio_gestorContracts, TotaisEquipe, ListaAbertas } from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
+export type {
+Inicio_gestorContracts,
+TotaisEquipe,
+ListaAbertasDetails,
+ListaAbertas,
+TarefaAcaoDetails,
+ListaRef,
+MembroRefIdentification,
+MembroRefDetails,
+MembroRef,
+TarefaAcao,
+} from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
+export type ErrorState = { code: string; message: string; details?: unknown } | null;
+type Input<R extends keyof Inicio_gestorContracts> = Inicio_gestorContracts[R]['input'];
+type Output<R extends keyof Inicio_gestorContracts> = Inicio_gestorContracts[R]['output'];
+type TarefasPage = Output<'tarefas.inicio_gestor.qryTarefasPedemAcao'>['tarefas'];
+type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+type StateMember =
+| 'totais'
+| 'listas'
+| 'tarefas'
+| 'page'
+| 'pageStatus'
+| 'qryPanoramaEquipeStatus'
+| 'qryPanoramaEquipeError'
+| 'qryTarefasPedemAcaoStatus'
+| 'qryTarefasPedemAcaoError'
+| 'scenary';
+const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
+'ui.tarefas.inicio_gestor.totais': 'totais',
+'ui.tarefas.inicio_gestor.listas': 'listas',
+'ui.tarefas.inicio_gestor.tarefas': 'tarefas',
+'ui.tarefas.inicio_gestor.page': 'page',
+'ui.tarefas.inicio_gestor.pageStatus': 'pageStatus',
+'ui.tarefas.inicio_gestor.qryPanoramaEquipeStatus': 'qryPanoramaEquipeStatus',
+'ui.tarefas.inicio_gestor.qryPanoramaEquipeError': 'qryPanoramaEquipeError',
+'ui.tarefas.inicio_gestor.qryTarefasPedemAcaoStatus': 'qryTarefasPedemAcaoStatus',
+'ui.tarefas.inicio_gestor.qryTarefasPedemAcaoError': 'qryTarefasPedemAcaoError',
+'ui.tarefas.inicio_gestor.scenary': 'scenary',
+};
+const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
+const PAGE_STORAGE_KEY = 'tarefas.inicio_gestor.page';
+const PAGE_SIZE = 20;
+export class TarefasInicio_gestorShared extends StateLitElement {
+/** state totais — team indicators already computed on the server (open, due today, overdue, checklist progress); source qryPanoramaEquipe.totais; organism destaquesEquipe */
+@property({ attribute: false }) totais: TotaisEquipe | null = null;
+/** state listas — active lists with their count of open tasks; source qryPanoramaEquipe.listas; organism destaquesEquipe */
+@property({ attribute: false }) listas: ListaAbertas[] = [];
+/** state tarefas — page { items, page, pageSize, hasMore } of open tasks that are overdue or due today, with list and assignee; source qryTarefasPedemAcao.tarefas; organism tarefasPedemAcao */
+@property({ attribute: false }) tarefas: TarefasPage | null = null;
+/** state page — the page of the inbox the person went to with a pager (a "load more" never writes it); source entry.params.page; organism tarefasPedemAcao; persisted */
+@property({ attribute: false }) page: number | null = null;
+/** state pageStatus — overall status of the page: loading while a request runs, error if one failed, empty when every list is empty, success otherwise; source page */
+@property({ attribute: false }) pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error' = 'idle';
+/** state qryPanoramaEquipeStatus — status of the team overview request; source qryPanoramaEquipe */
+@property({ attribute: false }) qryPanoramaEquipeStatus: RequestStatus = 'idle';
+/** state qryPanoramaEquipeError — error of the team overview request, null when none; source qryPanoramaEquipe */
+@property({ attribute: false }) qryPanoramaEquipeError: ErrorState = null;
+/** state qryTarefasPedemAcaoStatus — status of the inbox request (also used by navigation errors); source qryTarefasPedemAcao */
+@property({ attribute: false }) qryTarefasPedemAcaoStatus: RequestStatus = 'idle';
+/** state qryTarefasPedemAcaoError — error of the inbox request, null when none; source qryTarefasPedemAcao */
+@property({ attribute: false }) qryTarefasPedemAcaoError: ErrorState = null;
+/** state scenary — the visible scene of the page; '' until the page shows its first scene */
+@property({ attribute: false }) scenary = '';
+private publish<M extends StateMember>(member: M, value: this[M]): void {
+(this as unknown as Record<string, unknown>)[member] = value;
+setState(`ui.tarefas.inicio_gestor.${member}`, value);
+if (member === 'page') {
+try {
+if (value === null || value === undefined) {
+window.localStorage.removeItem(PAGE_STORAGE_KEY);
+} else {
+window.localStorage.setItem(PAGE_STORAGE_KEY, String(value));
+}
+} catch {
+// storage unavailable: the value stays in memory only
+}
+}
+}
+private assignState(key: string, value: unknown): void {
+const member = STATE_MEMBER_BY_KEY[key];
+if (member) (this as unknown as Record<string, unknown>)[member] = value;
+}
+public connectedCallback(): void {
+super.connectedCallback();
+this.hydrateData();
+this.resetVisit();
+subscribe([...STATE_KEYS], this);
+this.applyEntryParams();
+void this.loadInitial();
+}
+public disconnectedCallback(): void {
+unsubscribe([...STATE_KEYS], this);
+super.disconnectedCallback();
+}
+public handleIcaStateChange(key: string, value: any): void {
+if (!STATE_MEMBER_BY_KEY[key]) {
+super.handleIcaStateChange(key, value);
+return;
+}
+if (value === undefined) return;
+this.assignState(key, value);
+this.requestUpdate();
+}
+private hydrateData(): void {
+const totais = getState('ui.tarefas.inicio_gestor.totais');
+if (totais !== undefined) this.assignState('ui.tarefas.inicio_gestor.totais', totais);
+const listas = getState('ui.tarefas.inicio_gestor.listas');
+if (listas !== undefined) this.assignState('ui.tarefas.inicio_gestor.listas', listas);
+const tarefas = getState('ui.tarefas.inicio_gestor.tarefas');
+if (tarefas !== undefined) this.assignState('ui.tarefas.inicio_gestor.tarefas', tarefas);
+}
+private resetVisit(): void {
+this.publish('pageStatus', 'idle');
+this.publish('qryPanoramaEquipeStatus', 'idle');
+this.publish('qryPanoramaEquipeError', null);
+this.publish('qryTarefasPedemAcaoStatus', 'idle');
+this.publish('qryTarefasPedemAcaoError', null);
+this.publish('scenary', '');
+}
+private applyEntryParams(): void {
+let raw: string | null = new URLSearchParams(window.location.search).get('page');
+if (raw === null) {
+try {
+raw = window.localStorage.getItem(PAGE_STORAGE_KEY);
+} catch {
+raw = null;
+}
+}
+let value: number | null = null;
+if (raw !== null && raw !== '') {
+const parsed = Number(raw);
+if (Number.isFinite(parsed) && parsed >= 1) value = parsed;
+}
+this.publish('page', value);
+}
+private async loadInitial(): Promise<void> {
+await Promise.all([this.qryPanoramaEquipe(), this.qryTarefasPedemAcao()]);
+}
+private updatePageStatus(): void {
+const a = this.qryPanoramaEquipeStatus;
+const b = this.qryTarefasPedemAcaoStatus;
+if (a === 'loading' || b === 'loading') {
+this.publish('pageStatus', 'loading');
+return;
+}
+if (a === 'error' || b === 'error') {
+this.publish('pageStatus', 'error');
+return;
+}
+if (a === 'success' && b === 'success') {
+const noTasks = this.tarefas === null || this.tarefas.items.length === 0;
+this.publish('pageStatus', this.listas.length === 0 && noTasks ? 'empty' : 'success');
+}
+}
+private unexpectedError(error: unknown): ErrorState {
+const name = error instanceof Error ? error.name : 'unknown';
+return { code: 'client.unexpected', message: '', details: { name } };
+}
+/** setScenario — publishes the visible scene of the page (scenary); not persisted, not in the URL; scene: the scene name */
+public setScenario(value: string): void {
+this.publish('scenary', value);
+}
+/** request qryPanoramaEquipe — loads the team overview (totals of open, due today and overdue tasks, checklist progress, open tasks per list); redraws totais (replace) and listas (replace); no arguments; also the method to reload the overview */
+public async qryPanoramaEquipe(): Promise<void> {
+if (this.qryPanoramaEquipeStatus === 'loading') return;
+this.publish('qryPanoramaEquipeStatus', 'loading');
+this.publish('qryPanoramaEquipeError', null);
+this.updatePageStatus();
+try {
+const input: Input<'tarefas.inicio_gestor.qryPanoramaEquipe'> = {};
+const response = await execBff<Output<'tarefas.inicio_gestor.qryPanoramaEquipe'>>(
+'tarefas.inicio_gestor.qryPanoramaEquipe',
+input,
+{ mode: 'silent' },
+);
+if (!response.ok || !response.data) {
+this.publish('qryPanoramaEquipeError', response.error ?? this.unexpectedError(null));
+this.publish('qryPanoramaEquipeStatus', 'error');
+} else {
+this.publish('totais', response.data.totais);
+this.publish('listas', response.data.listas);
+this.publish('qryPanoramaEquipeStatus', 'success');
+}
+} catch (error) {
+this.publish('qryPanoramaEquipeError', this.unexpectedError(error));
+this.publish('qryPanoramaEquipeStatus', 'error');
+}
+this.updatePageStatus();
+}
+/** request qryTarefasPedemAcao — loads the inbox of open tasks that are overdue or due today (overdue first); redraws tarefas (replace the page, or append the next page to items when append is true; append keeps page/hasMore inside tarefas and never writes the page state; a pager call with append false publishes the page state); page: page to load (default: the page state, else 1; with append, the next page); append: add the next page to the loaded items, ignored unless tarefas.hasMore */
+public async qryTarefasPedemAcao(page?: number, append = false): Promise<void> {
+if (this.qryTarefasPedemAcaoStatus === 'loading') return;
+const current = this.tarefas;
+if (append && (current === null || !current.hasMore)) return;
+let target = 1;
+if (page !== undefined) {
+target = page;
+} else if (append && current !== null) {
+target = current.page + 1;
+} else if (this.page !== null) {
+target = this.page;
+}
+if (!Number.isFinite(target) || target < 1) target = 1;
+if (!append && page !== undefined) this.publish('page', target);
+this.publish('qryTarefasPedemAcaoStatus', 'loading');
+this.publish('qryTarefasPedemAcaoError', null);
+if (!append) this.updatePageStatus();
+try {
+const input: Input<'tarefas.inicio_gestor.qryTarefasPedemAcao'> = { page: target, pageSize: PAGE_SIZE };
+const response = await execBff<Output<'tarefas.inicio_gestor.qryTarefasPedemAcao'>>(
+'tarefas.inicio_gestor.qryTarefasPedemAcao',
+input,
+{ mode: 'silent' },
+);
+if (!response.ok || !response.data) {
+this.publish('qryTarefasPedemAcaoError', response.error ?? this.unexpectedError(null));
+this.publish('qryTarefasPedemAcaoStatus', 'error');
+} else {
+const loaded = response.data.tarefas;
+if (append && current !== null) {
+this.publish('tarefas', {
+items: [...current.items, ...loaded.items],
+page: loaded.page,
+pageSize: loaded.pageSize,
+hasMore: loaded.hasMore,
+});
+} else {
+this.publish('tarefas', loaded);
+}
+this.publish('qryTarefasPedemAcaoStatus', 'success');
+}
+} catch (error) {
+this.publish('qryTarefasPedemAcaoError', this.unexpectedError(error));
+this.publish('qryTarefasPedemAcaoStatus', 'error');
+}
+this.updatePageStatus();
+}
+/** navigate abrirTarefasEquipe — opens the team tasks page (board/list); listaId: optional list the person picked, carried as the listaId param of tarefas_equipe (omit to open it unfiltered) */
+public abrirTarefasEquipe(listaId?: string | null): void {
+if (listaId !== undefined && listaId !== null && listaId !== '') {
+auraNavigate(`/tarefas/tarefas_equipe?listaId=${encodeURIComponent(listaId)}`, { basePath: '/tarefas' });
+return;
+}
+auraNavigate('/tarefas/tarefas_equipe', { basePath: '/tarefas' });
+}
+/** navigate abrirListas — opens the lists page; listaId: optional list the person picked, carried as the listaId param of listas (omit to just open it) */
+public abrirListas(listaId?: string | null): void {
+if (listaId !== undefined && listaId !== null && listaId !== '') {
+auraNavigate(`/tarefas/listas?listaId=${encodeURIComponent(listaId)}`, { basePath: '/tarefas' });
+return;
+}
+auraNavigate('/tarefas/listas', { basePath: '/tarefas' });
+}
+/** navigate agirNaTarefa — opens the team tasks page on the chosen inbox task to reassign or cancel it; tarefaId: id of the task the person picked (null refuses with client.preconditionMissing in qryTarefasPedemAcaoError) */
+public agirNaTarefa(tarefaId: string | null): void {
+if (tarefaId === null || tarefaId === '') {
+this.publish('qryTarefasPedemAcaoError', {
+code: 'client.preconditionMissing',
+message: '',
+details: { params: ['tarefaId'] },
+});
+return;
+}
+auraNavigate(`/tarefas/tarefas_equipe?tarefaId=${encodeURIComponent(tarefaId)}`, { basePath: '/tarefas' });
+}
+}

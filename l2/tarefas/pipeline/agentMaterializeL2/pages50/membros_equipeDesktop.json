@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "tarefas",
+  "pageId": "membros_equipe",
+  "device": "desktop",
+  "contextHash": "sha256:e5c6be049e2296b9e16c284b4d66208e3cc60098692f6959f015d70dd9953e59",
+  "sourcePath": "l2/tarefas/web/desktop/page11/membros_equipe.ts",
+  "sourceHash": "sha256:50cf7fa73e35f145ddaf175427909ce60f927454b88e1c1a2abeed64a373b096",
+  "attempt": 1,
+  "design": {
+    "concept": "Uma superfície de consulta calma: a tabela da equipe à esquerda é o foco, com busca discreta e o botão \"Nova pessoa\" acima. Ao escolher uma linha (ou criar), o cadastro abre ao lado, sem cobrir a tabela, e a linha escolhida permanece marcada.",
+    "views": [
+      {
+        "id": "vazio",
+        "purpose": "Estado quieto do painel: orienta a escolher uma pessoa ou iniciar um cadastro novo."
+      },
+      {
+        "id": "cadastro",
+        "purpose": "Painel de cadastro: formulário vazio para pessoa nova ou formulário preenchido da pessoa selecionada, com Situação, Papéis e Contatos apenas para leitura."
+      }
+    ],
+    "decisions": "Segui o template compactCrudTable: tabela primeiro, busca, botão de criar e painel lateral. O painel é uma região controlada pelo host de cenas (modo scenary) ao lado da tabela, que fica fora do host e sempre visível. Mantive uma única cena de cadastro: o formulário de criação ou de edição depende da pessoa selecionada, assim o aviso de sucesso do cadastro não é apagado ao trocar de cena (setScenario zera os resultados dos comandos). A paginação usa botões Anterior/Próxima com hasMore, pois o backend não entrega o total de páginas que o controle de paginação exigiria. A busca usa o evento search com debounce e o clear. As colunas não são ordenáveis, porque a ordenação interna reordenaria os índices de seleção. Salvar fica desabilitado até os campos obrigatórios estarem preenchidos. O erro de comando aparece dentro do painel, acima do botão. O sucesso é local, no painel. Não implementei a confirmação ao fechar com alterações não salvas, porque ela exigiria a página comparar o rascunho com o registro, e o brief proíbe cálculos na página. Situação e Papéis são somente leitura, exibidos como o backend entrega."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section equipeCadastrada needs an element with data-section-id=\"equipeCadastrada\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section manutencaoPessoa needs an element with data-section-id=\"manutencaoPessoa\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism pessoasEquipe (paginação da lista) renders neither <grouptriggeraction--ml-pagination-control>."
+    }
+  ]
+}

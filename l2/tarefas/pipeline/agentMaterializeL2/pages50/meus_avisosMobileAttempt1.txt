@@ -1,0 +1,416 @@
+/* refused: M4_SHARED_INPUT_MISSING: input20 must run first. */
+
+/// <mls fileReference="_102047_/l2/tarefas/web/mobile/page11/meus_avisos.ts" enhancement="_102020_/l2/enhancementAura"/>
+
+import { html, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { TarefasMeus_avisosShared } from '/_102047_/l2/tarefas/web/shared/meus_avisos.js';
+import type { AvisoResumo, AvisoDetalhe, TarefaAviso, ErrorState } from '/_102047_/l2/tarefas/web/shared/meus_avisos.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
+import '/_102040_/l2/molecules/groupviewdata/ml-timeline-view.js';
+import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
+import '/_102040_/l2/molecules/groupviewmetric/ml-metric-big-number.js';
+import '/_102040_/l2/molecules/groupviewtable/ml-responsive-table.js';
+
+/// **collab_i18n_start**
+const pageMessage_pt_br = {
+  sceneAviso: 'Aviso do dia',
+  sceneLista: 'Meus avisos',
+  back: 'Voltar ao aviso',
+  seeAll: 'Ver todos os meus avisos',
+  loading: 'Carregando seus avisos…',
+  emptyTitle: 'Você ainda não recebeu avisos',
+  emptyText: 'O aviso diário das 8h aparece aqui assim que for gerado.',
+  noOpen: 'Nenhum aviso aberto. Escolha um na lista de avisos.',
+  errorTitle: 'Não foi possível carregar seus avisos',
+  errorText: 'Tente de novo em instantes.',
+  errorOpen: 'Não foi possível abrir este aviso.',
+  missingTitle: 'Faltam informações para abrir esta página',
+  missingText: 'Esta página precisa ser aberta a partir do seu painel de tarefas, para saber de quem são os avisos.',
+  goBack: 'Voltar',
+  retry: 'Tentar de novo',
+  metricTasks: 'Tarefas no aviso',
+  metricOverdue: 'Atrasadas',
+  metricTasksHelper: 'vencem hoje ou já passaram',
+  metricOverdueHelper: 'prazo anterior ao dia do aviso',
+  tasksCaption: 'Tarefas para acompanhar',
+  colTask: 'Tarefa',
+  colDeadline: 'Prazo',
+  colSituation: 'Prazo hoje?',
+  colStatus: 'Situação da tarefa',
+  noTasks: 'Este aviso não tem tarefas vencendo ou atrasadas.',
+  dueToday: 'Vence hoje',
+  overdue: 'Atrasada',
+  taskTodo: 'A fazer',
+  taskDoing: 'Em andamento',
+  taskReview: 'Em revisão',
+  taskDone: 'Concluída',
+  taskCanceled: 'Cancelada',
+  statusPending: 'Aguardando envio',
+  statusCompleted: 'Enviado',
+  statusFailed: 'Envio falhou',
+  colNotice: 'Aviso',
+  colDelivery: 'Envio',
+  totalLabel: 'Tarefas',
+  overdueLabel: 'Atrasadas',
+  loadMore: 'Carregar avisos mais antigos',
+  loadingMore: 'Carregando…',
+  historyTitle: 'Envio dos avisos',
+  historyEmpty: 'Sem envios registrados.',
+  generatedAt: 'Gerado em',
+  finishedAt: 'Finalizado em',
+  failureReason: 'Motivo da falha',
+  colWhen: 'Gerado',
+  colWhat: 'Aviso',
+  selected: 'Aberto'
+};
+type PageMessageType = typeof pageMessage_pt_br;
+const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
+/// **collab_i18n_end**
+
+function lang(): string | undefined {
+  return document.documentElement.lang || undefined;
+}
+
+function parseDate(value: string): Date {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return new Date(value);
+}
+
+function formatDay(value: string | undefined | null): string {
+  if (!value) return '';
+  const d = parseDate(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat(lang(), { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }).format(d);
+}
+
+function formatMoment(value: string | undefined | null): string {
+  if (!value) return '';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat(lang(), { dateStyle: 'short', timeStyle: 'short' }).format(d);
+}
+
+function formatNumber(n: number): string {
+  return new Intl.NumberFormat(lang()).format(n);
+}
+
+function itemsOf(page: unknown): AvisoResumo[] {
+  if (Array.isArray(page)) return page as AvisoResumo[];
+  const box = page as { items?: AvisoResumo[] } | null | undefined;
+  return box?.items ?? [];
+}
+
+const chipBase = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap';
+
+function noticeChipClass(status: AvisoResumo['status'] | AvisoDetalhe['status']): string {
+  if (status === 'completed') return `${chipBase} bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]`;
+  if (status === 'failed') return `${chipBase} bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]`;
+  return `${chipBase} bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]`;
+}
+
+function noticeStatusLabel(msg: PageMessageType, status: AvisoResumo['status'] | AvisoDetalhe['status']): string {
+  if (status === 'completed') return msg.statusCompleted;
+  if (status === 'failed') return msg.statusFailed;
+  return msg.statusPending;
+}
+
+function taskStatusLabel(msg: PageMessageType, status: TarefaAviso['tarefa']['status']): string {
+  switch (status) {
+    case 'emAndamento': return msg.taskDoing;
+    case 'emRevisao': return msg.taskReview;
+    case 'concluida': return msg.taskDone;
+    case 'cancelada': return msg.taskCanceled;
+    default: return msg.taskTodo;
+  }
+}
+
+const btnSecondary =
+  'min-h-11 w-full rounded-lg border border-[var(--button-secondary-border,currentColor)] bg-[var(--button-secondary-bg,transparent)] px-4 text-sm font-medium text-[var(--button-secondary-text,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] disabled:opacity-60';
+
+@customElement('tarefas--web--mobile--page11--meus_avisos-102047')
+export class TarefasMobilePage11Meus_avisosPage extends TarefasMeus_avisosShared {
+  private msg: PageMessageType = pageMessage_pt_br;
+
+  render() {
+    this.msg = pageMessages[this.getMessageKey(pageMessages)];
+    return html`
+      <div class="mx-auto w-full max-w-[430px] min-h-screen bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] px-4 py-4">
+        <molecules--ml-scenary-102020
+          mode="scenary"
+          .backLabel=${this.msg.back}
+          .value=${this.scenary || 'aviso'}
+          @change=${(e: CustomEvent<{ value: string }>) => {
+            if (e.target === e.currentTarget) this.setScenario(e.detail.value);
+          }}
+        >
+          <Scene value="aviso" title=${this.msg.sceneAviso}>${this.renderAviso()}</Scene>
+          <Scene value="lista" title=${this.msg.sceneLista} nav="back" backTo="aviso">
+            ${this.renderLista()} ${this.renderHistorico()}
+          </Scene>
+        </molecules--ml-scenary-102020>
+      </div>
+    `;
+  }
+
+  private renderSkeleton() {
+    return html`
+      <div class="space-y-3" role="status" aria-busy="true" aria-live="polite">
+        <span class="sr-only">${this.msg.loading}</span>
+        ${[0, 1, 2].map(
+          () => html`<div class="h-16 animate-pulse rounded-lg bg-[var(--surface-alt-bg,transparent)]"></div>`
+        )}
+      </div>
+    `;
+  }
+
+  private renderError(error: ErrorState, title: string, retry: () => void) {
+    const missing = error?.code === 'client.preconditionMissing';
+    return html`
+      <div
+        class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 space-y-3"
+        role="alert"
+        aria-live="polite"
+      >
+        <p class="font-semibold text-[var(--text-strong,currentColor)]">${missing ? this.msg.missingTitle : title}</p>
+        <p class="text-sm text-[var(--text-muted,currentColor)]">${missing ? this.msg.missingText : this.msg.errorText}</p>
+        <div class="flex flex-col gap-2">
+          ${missing
+            ? html`<button type="button" class=${btnSecondary} @click=${() => history.back()}>${this.msg.goBack}</button>`
+            : html`<button type="button" class=${btnSecondary} @click=${retry}>${this.msg.retry}</button>`}
+        </div>
+      </div>
+    `;
+  }
+
+  private renderEmpty() {
+    return html`
+      <div class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] p-6 text-center space-y-1">
+        <p class="font-semibold text-[var(--text-strong,currentColor)]">${this.msg.emptyTitle}</p>
+        <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.emptyText}</p>
+      </div>
+    `;
+  }
+
+  /* ---------- detalheAviso ---------- */
+
+  private renderAviso() {
+    return html`
+      <section data-organism-id="detalheAviso" class="space-y-4">${this.renderAvisoBody()}</section>
+    `;
+  }
+
+  private renderAvisoBody() {
+    if (this.pageStatus === 'loading' || this.abrirAvisoStatus === 'loading') return this.renderSkeleton();
+    if (this.pageStatus === 'error') {
+      return this.renderError(this.carregarMeusAvisosError, this.msg.errorTitle, () => {
+        this.carregarMeusAvisos();
+      });
+    }
+    if (this.abrirAvisoStatus === 'error') {
+      const id = this.selectedAvisoVencimento;
+      return html`
+        ${this.renderError(this.abrirAvisoError, this.msg.errorOpen, () => {
+          if (id) this.abrirAviso(id);
+        })}
+        ${this.renderSeeAll()}
+      `;
+    }
+    if (this.pageStatus === 'empty') return this.renderEmpty();
+    const aviso = this.avisoAberto;
+    if (!aviso) {
+      return html`
+        <p class="rounded-lg bg-[var(--surface-alt-bg,transparent)] p-4 text-sm text-[var(--text-muted,currentColor)]">
+          ${this.msg.noOpen}
+        </p>
+        ${this.renderSeeAll()}
+      `;
+    }
+    const tarefas = aviso.details.tarefas;
+    return html`
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-base font-semibold capitalize text-[var(--text-strong,currentColor)]">${formatDay(aviso.dataReferencia)}</p>
+        <span class=${noticeChipClass(aviso.status)}>${noticeStatusLabel(this.msg, aviso.status)}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-3">
+          <groupviewmetric--ml-metric-big-number>
+            <Label>${this.msg.metricTasks}</Label>
+            <Value>${formatNumber(aviso.details.details.quantidadeTarefas)}</Value>
+            <Helper>${this.msg.metricTasksHelper}</Helper>
+          </groupviewmetric--ml-metric-big-number>
+        </div>
+        <div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-3">
+          <groupviewmetric--ml-metric-big-number>
+            <Label>${this.msg.metricOverdue}</Label>
+            <Value>${formatNumber(aviso.details.details.quantidadeAtrasadas)}</Value>
+            <Helper>${this.msg.metricOverdueHelper}</Helper>
+          </groupviewmetric--ml-metric-big-number>
+        </div>
+      </div>
+      <groupviewtable--ml-responsive-table>
+        <TableCaption>${this.msg.tasksCaption}</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead key="titulo">${this.msg.colTask}</TableHead>
+            <TableHead key="prazo">${this.msg.colDeadline}</TableHead>
+            <TableHead key="situacao">${this.msg.colSituation}</TableHead>
+            <TableHead key="status">${this.msg.colStatus}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          ${tarefas.map(
+            (t) => html`
+              <TableRow key=${t.details.tarefas.tarefaId}>
+                <TableCell><span class="font-medium text-[var(--text-strong,currentColor)]">${t.tarefa.titulo}</span></TableCell>
+                <TableCell>${formatDay(t.details.tarefas.prazo)}</TableCell>
+                <TableCell>
+                  <span
+                    class="${chipBase} ${t.details.tarefas.situacaoPrazo === 'overdue'
+                      ? 'bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]'
+                      : 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]'}"
+                    >${t.details.tarefas.situacaoPrazo === 'overdue' ? this.msg.overdue : this.msg.dueToday}</span
+                  >
+                </TableCell>
+                <TableCell>${taskStatusLabel(this.msg, t.tarefa.status)}</TableCell>
+              </TableRow>
+            `
+          )}
+        </TableBody>
+        <Empty>${this.msg.noTasks}</Empty>
+      </groupviewtable--ml-responsive-table>
+      ${this.renderSeeAll()}
+    `;
+  }
+
+  private renderSeeAll() {
+    return html`
+      <button type="button" class=${btnSecondary} @click=${() => this.setScenario('lista')}>${this.msg.seeAll}</button>
+    `;
+  }
+
+  /* ---------- listaAvisos ---------- */
+
+  private renderLista() {
+    return html`
+      <section data-organism-id="listaAvisos" class="space-y-3">${this.renderListaBody()}</section>
+    `;
+  }
+
+  private renderListaBody() {
+    if (this.pageStatus === 'loading') return this.renderSkeleton();
+    if (this.pageStatus === 'error') {
+      return this.renderError(this.carregarMeusAvisosError, this.msg.errorTitle, () => {
+        this.carregarMeusAvisos();
+      });
+    }
+    if (this.pageStatus === 'empty') return this.renderEmpty();
+    const items = itemsOf(this.avisos);
+    const loadingMore = this.carregarMeusAvisosStatus === 'loading';
+    return html`
+      <groupviewdata--ml-vertical-record-list
+        .hoverable=${true}
+        @row-click=${(e: CustomEvent<{ index: number }>) => {
+          const row = items[e.detail.index];
+          if (!row) return;
+          this.selectAvisoVencimento(row.id);
+          this.setScenario('aviso');
+        }}
+      >
+        <Columns>
+          <Column field="aviso" header=${this.msg.colNotice} />
+          <Column field="envio" header=${this.msg.colDelivery} align="right" />
+        </Columns>
+        <Rows>
+          ${items.map(
+            (a) => html`
+              <Row ?selected=${a.id === this.selectedAvisoVencimento}>
+                <Cell>
+                  <div class="min-h-11 py-1">
+                    <div class="font-semibold capitalize text-[var(--text-strong,currentColor)]">${formatDay(a.dataReferencia)}</div>
+                    <div class="text-sm text-[var(--text-muted,currentColor)]">
+                      ${this.msg.totalLabel}: ${formatNumber(a.details.details.quantidadeTarefas)} ·
+                      ${this.msg.overdueLabel}: ${formatNumber(a.details.details.quantidadeAtrasadas)}
+                    </div>
+                  </div>
+                </Cell>
+                <Cell>
+                  <span class=${noticeChipClass(a.status)}>${noticeStatusLabel(this.msg, a.status)}</span>
+                </Cell>
+              </Row>
+            `
+          )}
+        </Rows>
+        <Empty><div class="py-6 text-center text-[var(--text-muted,currentColor)]">${this.msg.emptyTitle}</div></Empty>
+      </groupviewdata--ml-vertical-record-list>
+      ${items.length
+        ? html`
+            <button
+              type="button"
+              class="${btnSecondary} border-transparent bg-transparent"
+              ?disabled=${loadingMore}
+              aria-busy=${loadingMore ? 'true' : 'false'}
+              @click=${() => {
+                this.carregarMeusAvisos(null, true);
+              }}
+            >
+              ${loadingMore ? this.msg.loadingMore : this.msg.loadMore}
+            </button>
+          `
+        : nothing}
+    `;
+  }
+
+  /* ---------- historicoAvisos ---------- */
+
+  private renderHistorico() {
+    const items = this.pageStatus === 'success' ? itemsOf(this.avisos) : [];
+    return html`
+      <section data-organism-id="historicoAvisos" class="mt-6 space-y-2">
+        ${items.length
+          ? html`
+              <h2 class="text-sm font-semibold text-[var(--text-strong,currentColor)]">${this.msg.historyTitle}</h2>
+              <groupviewdata--ml-timeline-view>
+                <Columns>
+                  <Column field="quando" header=${this.msg.colWhen} />
+                  <Column field="aviso" header=${this.msg.colWhat} />
+                </Columns>
+                <Rows>
+                  ${items.map(
+                    (a) => html`
+                      <Row>
+                        <Cell>
+                          <span class="text-xs text-[var(--text-muted,currentColor)]">${formatMoment(a.details.details.geradoEm)}</span>
+                        </Cell>
+                        <Cell>
+                          <div class="space-y-0.5 pb-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                              <span class="text-sm font-medium capitalize text-[var(--text-strong,currentColor)]">${formatDay(a.dataReferencia)}</span>
+                              <span class=${noticeChipClass(a.status)}>${noticeStatusLabel(this.msg, a.status)}</span>
+                            </div>
+                            <div class="text-xs text-[var(--text-muted,currentColor)]">
+                              ${this.msg.generatedAt} ${formatMoment(a.details.details.geradoEm)}${a.details.details.finalizadoEm
+                                ? html` · ${this.msg.finishedAt} ${formatMoment(a.details.details.finalizadoEm)}`
+                                : nothing}
+                            </div>
+                            ${a.details.details.motivoFalha
+                              ? html`<div class="text-xs text-[var(--status-error-text,currentColor)]">
+                                  ${this.msg.failureReason}: ${a.details.details.motivoFalha}
+                                </div>`
+                              : nothing}
+                          </div>
+                        </Cell>
+                      </Row>
+                    `
+                  )}
+                </Rows>
+                <Empty><div class="py-4 text-center text-[var(--text-muted,currentColor)]">${this.msg.historyEmpty}</div></Empty>
+              </groupviewdata--ml-timeline-view>
+            `
+          : nothing}
+      </section>
+    `;
+  }
+}
+

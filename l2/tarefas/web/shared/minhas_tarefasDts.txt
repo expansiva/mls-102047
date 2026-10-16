@@ -1,0 +1,218 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { Minhas_tarefasContracts, TarefaResumo, TarefaAberta, ListaOpcao, MembroOpcao } from '/_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.js';
+export type { Minhas_tarefasContracts, ListaNome, MembroIdentificacao, MembroNomeDetalhes, MembroNome, MembroOpcao, ListaOpcaoDetalhes, ListaOpcao, TarefaResumoDetalhes, TarefaResumo, ItemChecklistLinhaDetalhes, ItemChecklistLinha, TarefaAbertaDetalhes, TarefaAberta, ItemChecklistEntradaDetalhes, ItemChecklistEntrada } from '/_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.js';
+type Output<R extends keyof Minhas_tarefasContracts> = Minhas_tarefasContracts[R]['output'];
+/** Error published by a request: a backend error stored whole or a client code (client.*). */
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+/** Status of one request. */
+export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+/** Status of the whole page. */
+export type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
+/** Situation of a task, as the contract names it. */
+export type TarefaStatus = TarefaResumo['status'];
+/** Priority of a task, as the contract names it. */
+export type TarefaPrioridade = TarefaResumo['prioridade'];
+/** Page of task rows: { items, page, pageSize, hasMore }. */
+export type TarefasPage = Output<'tarefas.minhas_tarefas.minhasTarefas'>['tarefas'];
+/** Filters the person can change on the task list; null clears a filter, undefined leaves it as it is. */
+export type TarefasFiltroChange = {
+    criadasPorMim?: boolean | null;
+    atribuidasAMim?: boolean | null;
+    status?: TarefaStatus | null;
+    somenteDevolvidas?: boolean | null;
+};
+/** One checklist row of a form draft; id and version are null for a new item. */
+export type ItemChecklistDraft = {
+    id: string | null;
+    version: number | null;
+    ordem: number | null;
+    details: {
+        details: {
+            descricao: string | null;
+        };
+    };
+};
+/** Draft of the create-task form (input of salvarNovaTarefa; the creator comes from the session). */
+export type SalvarNovaTarefaDraft = {
+    chaveCriacao: string | null;
+    listaId: string | null;
+    titulo: string | null;
+    details: {
+        descricao: string | null;
+    };
+    prioridade: TarefaPrioridade | null;
+    prazo: string | null;
+    responsavelId: string | null;
+    checklist: ItemChecklistDraft[];
+};
+/** Draft of the edit-task form (input of salvarEdicaoTarefa), filled from the open task. */
+export type SalvarEdicaoTarefaDraft = {
+    id: string | null;
+    version: number | null;
+    listaId: string | null;
+    titulo: string | null;
+    details: {
+        descricao: string | null;
+    };
+    prioridade: TarefaPrioridade | null;
+    prazo: string | null;
+    responsavelId: string | null;
+    checklist: ItemChecklistDraft[];
+};
+/** Draft of the return-with-reason action (input of devolverComMotivo). */
+export type DevolverComMotivoDraft = {
+    details: {
+        motivoDevolucao: string | null;
+    };
+};
+export declare class TarefasMinhas_tarefasShared extends StateLitElement {
+    /** state tarefas — rows of my tasks (created by me or assigned to me) with list, owner and creator names, due-today/overdue flags, subtask count and checklist progress, as a page { items, page, pageSize, hasMore }; also updated per row after a command; source minhasTarefas.tarefas; organism tarefasLista */
+    tarefas: TarefasPage | null;
+    /** state tarefa — the open task with names, checklist and history milestones; serves detail, actions, history and the edit form; source tarefaAberta.tarefa; organisms tarefaAcoes, tarefaDetalhe, tarefaForm, tarefaHistorico */
+    tarefa: TarefaAberta | null;
+    /** state listas — active lists that can receive the task, for the form selector; source opcoesFormulario.listas; organism tarefaForm */
+    listas: ListaOpcao[];
+    /** state membros — active members found by name that can be chosen as owner; source buscarResponsaveis.membros; organism tarefaForm */
+    membros: MembroOpcao[];
+    /** state selectedTarefa — id of the selected task; the selected record itself is in `tarefa` (loaded by tarefaAberta); source entry.params.tarefaId; organisms tarefaDetalhe, tarefasLista; persisted */
+    selectedTarefa: string | null;
+    /** filter — only tasks created by the session member (null = no filter); source entry.params.criadasPorMim; organism tarefasLista; persisted; change it through minhasTarefas({ criadasPorMim }) */
+    criadasPorMim: boolean | null;
+    /** filter — only tasks assigned to the session member (null = no filter); source entry.params.atribuidasAMim; organism tarefasLista; persisted; change it through minhasTarefas({ atribuidasAMim }) */
+    atribuidasAMim: boolean | null;
+    /** filter — situation filter of the list, e.g. emRevisao (null = every situation); source entry.params.status; organism tarefasLista; persisted; change it through minhasTarefas({ status }) */
+    status: TarefaStatus | null;
+    /** filter — only returned tasks that are still in progress (null = no filter); source entry.params.somenteDevolvidas; organism tarefasLista; persisted; change it through minhasTarefas({ somenteDevolvidas }) */
+    somenteDevolvidas: boolean | null;
+    /** filter — the page the person went to with a pager (a "load more" never writes it); source entry.params.page; organism tarefasLista; persisted; change it through minhasTarefas(undefined, page) */
+    page: number | null;
+    /** filter — the name fragment typed to search owners; source entry.params.termo; organism tarefaForm; persisted; change it through buscarResponsaveis(termo) */
+    termo: string | null;
+    /** draft — create-task form (list, title, description, priority, due date, owner, checklist) with the idempotency key generated when the draft starts; prefilled from the params listaId and responsavelId; source salvarNovaTarefa.input; organism tarefaForm */
+    salvarNovaTarefaDraft: SalvarNovaTarefaDraft;
+    /** draft — edit-task form, filled from the open task and again from every record a command returns; source salvarEdicaoTarefa.input; organism tarefaForm */
+    salvarEdicaoTarefaDraft: SalvarEdicaoTarefaDraft;
+    /** draft — the reason typed to return a task in review for adjustment; source devolverComMotivo.input; organism tarefaAcoes */
+    devolverComMotivoDraft: DevolverComMotivoDraft;
+    /** state pageStatus — status of the page as a whole: loading while the initial loads run, error if one failed, empty when every loaded list is empty, success otherwise */
+    pageStatus: PageStatus;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    /** state minhasTarefasStatus — status of the request minhasTarefas */
+    minhasTarefasStatus: RequestStatus;
+    /** state minhasTarefasError — error of the request minhasTarefas; null when none */
+    minhasTarefasError: ErrorState;
+    /** state tarefaAbertaStatus — status of the request tarefaAberta */
+    tarefaAbertaStatus: RequestStatus;
+    /** state tarefaAbertaError — error of the request tarefaAberta; null when none */
+    tarefaAbertaError: ErrorState;
+    /** state opcoesFormularioStatus — status of the request opcoesFormulario */
+    opcoesFormularioStatus: RequestStatus;
+    /** state opcoesFormularioError — error of the request opcoesFormulario; null when none */
+    opcoesFormularioError: ErrorState;
+    /** state buscarResponsaveisStatus — status of the request buscarResponsaveis */
+    buscarResponsaveisStatus: RequestStatus;
+    /** state buscarResponsaveisError — error of the request buscarResponsaveis; null when none */
+    buscarResponsaveisError: ErrorState;
+    /** state salvarNovaTarefaStatus — status of the command salvarNovaTarefa */
+    salvarNovaTarefaStatus: RequestStatus;
+    /** state salvarNovaTarefaError — error of the command salvarNovaTarefa; null when none */
+    salvarNovaTarefaError: ErrorState;
+    /** state salvarEdicaoTarefaStatus — status of the command salvarEdicaoTarefa */
+    salvarEdicaoTarefaStatus: RequestStatus;
+    /** state salvarEdicaoTarefaError — error of the command salvarEdicaoTarefa; null when none */
+    salvarEdicaoTarefaError: ErrorState;
+    /** state iniciarTarefaStatus — status of the command iniciarTarefa */
+    iniciarTarefaStatus: RequestStatus;
+    /** state iniciarTarefaError — error of the command iniciarTarefa; null when none */
+    iniciarTarefaError: ErrorState;
+    /** state marcarItemChecklistStatus — status of the command marcarItemChecklist */
+    marcarItemChecklistStatus: RequestStatus;
+    /** state marcarItemChecklistError — error of the command marcarItemChecklist; null when none */
+    marcarItemChecklistError: ErrorState;
+    /** state enviarParaRevisaoStatus — status of the command enviarParaRevisao */
+    enviarParaRevisaoStatus: RequestStatus;
+    /** state enviarParaRevisaoError — error of the command enviarParaRevisao; null when none */
+    enviarParaRevisaoError: ErrorState;
+    /** state aceitarEntregaStatus — status of the command aceitarEntrega */
+    aceitarEntregaStatus: RequestStatus;
+    /** state aceitarEntregaError — error of the command aceitarEntrega; null when none */
+    aceitarEntregaError: ErrorState;
+    /** state devolverComMotivoStatus — status of the command devolverComMotivo */
+    devolverComMotivoStatus: RequestStatus;
+    /** state devolverComMotivoError — error of the command devolverComMotivo; null when none */
+    devolverComMotivoError: ErrorState;
+    /** state cancelarTarefaStatus — status of the command cancelarTarefa */
+    cancelarTarefaStatus: RequestStatus;
+    /** state cancelarTarefaError — error of the command cancelarTarefa; null when none */
+    cancelarTarefaError: ErrorState;
+    private tarefaAbertaPending;
+    private buscarResponsaveisPending;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private hydrateData;
+    private resetVisit;
+    private resetCommandResults;
+    private readParam;
+    private readTextParam;
+    private readBooleanParam;
+    private readNumberParam;
+    private applyEntryParams;
+    private clientError;
+    private unexpectedError;
+    private startRequest;
+    private failRequest;
+    private failMissing;
+    private finishRequest;
+    private refreshPageStatus;
+    /** scene — publishes the visible scene of the page (any string the page uses to name a scene); clears the results of every command */
+    setScenario(value: string): void;
+    /** draft — replaces the whole create-task form draft (keep chaveCriacao as it came); clears the results of every command */
+    setSalvarNovaTarefaDraft(value: SalvarNovaTarefaDraft): void;
+    /** draft — replaces the whole edit-task form draft; clears the results of every command */
+    setSalvarEdicaoTarefaDraft(value: SalvarEdicaoTarefaDraft): void;
+    /** draft — replaces the return-reason draft; clears the results of every command */
+    setDevolverComMotivoDraft(value: DevolverComMotivoDraft): void;
+    /** draft — clears the create-task form (empty fields) and generates a new idempotency key; clears the results of every command */
+    limparSalvarNovaTarefaDraft(): void;
+    /** draft — discards the edits and fills the edit form again from the open task (empty when no task is open); clears the results of every command */
+    restaurarSalvarEdicaoTarefaDraft(): void;
+    /** select — selects the task with this id (opens it through tarefaAberta and keeps it in `tarefa`) or clears the selection with null; an empty id publishes client.selectionInvalid in minhasTarefasError */
+    selectTarefa(tarefaId: string | null): Promise<void>;
+    /** request minhasTarefas — loads the page of tasks I created or am responsible for, with list, owner and creator names and the derived indicators; redraws tarefas (replace, or append the next page when append is true); filters: values the person changed (null clears one; a filter change loads from the first page); page: the page to load (default: the current page param, or the first page after a filter change); append: true adds the next page to the items ("load more") and never writes the page param; also the method to reload, filter and page the list */
+    minhasTarefas(filters?: TarefasFiltroChange, page?: number, append?: boolean): Promise<void>;
+    private applyFiltros;
+    /** request tarefaAberta — opens a task with names, checklist and history milestones; selects it (selectedTarefa) and redraws tarefa (replace) and the edit form draft (filled from the record); tarefaId: id of the task picked in the list or from a notice */
+    tarefaAberta(tarefaId: string): Promise<void>;
+    /** request opcoesFormulario — loads the active lists that can receive a task, ordered by name; redraws listas (replace); no arguments */
+    opcoesFormulario(): Promise<void>;
+    /** request buscarResponsaveis — searches active members by name to choose the owner; redraws membros (replace) and records the typed fragment in termo; termo: fragment of the name typed (empty publishes client.requiredMissing and does not call) */
+    buscarResponsaveis(termo: string): Promise<void>;
+    private belongsToList;
+    private upsertResumo;
+    private applyTarefaResult;
+    private currentTarefaRef;
+    /** request salvarNovaTarefa — creates the task with its initial checklist and assigns it to the chosen owner (the creator is the session member; the idempotency key stays in the draft and is reused on every retry); redraws tarefa (the new task), selectedTarefa, the edit draft, tarefas (the summary row is inserted, or left out when it does not belong to the current filter) and resets the create draft with a new key; no arguments, reads salvarNovaTarefaDraft */
+    salvarNovaTarefa(): Promise<void>;
+    /** request salvarEdicaoTarefa — saves the edit of the open task (fields, owner change, checklist; never changes the situation); redraws tarefa and the edit draft from the returned record and upserts the row in tarefas; no arguments, reads salvarEdicaoTarefaDraft (id and version come with it) */
+    salvarEdicaoTarefa(): Promise<void>;
+    /** request iniciarTarefa — starts the open task (a fazer → em andamento; only the owner); redraws tarefa, the edit draft and upserts the row in tarefas; no arguments, uses the open task and its version */
+    iniciarTarefa(): Promise<void>;
+    /** request marcarItemChecklist — checks or unchecks one checklist item of the open task (the situation never changes); redraws tarefa (checklist and progress), the edit draft and upserts the row in tarefas; itemId: id of the checklist item of the open task; feito: the new state of the item */
+    marcarItemChecklist(itemId: string, feito: boolean): Promise<void>;
+    /** request enviarParaRevisao — sends or resends the open task to the creator's review (em andamento → em revisão; only the owner); redraws tarefa, the edit draft and upserts the row in tarefas; no arguments, uses the open task and its version */
+    enviarParaRevisao(): Promise<void>;
+    /** request aceitarEntrega — accepts the delivery of the open task in review, concluding it (only the creator); redraws tarefa, the edit draft and upserts the row in tarefas (removed from the list when it no longer matches the status filter); no arguments, uses the open task and its version */
+    aceitarEntrega(): Promise<void>;
+    /** request devolverComMotivo — returns the open task in review to the owner for adjustment with a reason (only the creator; empty reason publishes client.requiredMissing and does not call); redraws tarefa (reason and date), the edit draft and upserts the row in tarefas, then clears devolverComMotivoDraft; no arguments, reads devolverComMotivoDraft */
+    devolverComMotivo(): Promise<void>;
+    /** request cancelarTarefa — cancels the open task that I created (only the creator, only while not concluded); redraws tarefa, the edit draft and upserts the row in tarefas (removed from the list when it no longer matches the status filter); no arguments, uses the open task and its version */
+    cancelarTarefa(): Promise<void>;
+}

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "tarefas",
+  "pageId": "tarefas_equipe",
+  "device": "desktop",
+  "contextHash": "sha256:4375ed88926d562ebf21bb8bd96c7258c75b4013fe2bfcfc168dad35c97d15c0",
+  "sourcePath": "l2/tarefas/web/desktop/page11/tarefas_equipe.ts",
+  "sourceHash": "sha256:e15b2ff2c7b3e33daa235a7adcfc9b818b6e13100e6d72d1ec709e3f4e8fd5c9",
+  "attempt": 1,
+  "design": {
+    "concept": "Uma mesa de operação em duas regiões sempre visíveis: à esquerda o quadro de tarefas da equipe com a lente de filtros, à direita o painel da tarefa escolhida. O gestor localiza, abre sem perder o lugar no quadro, lê o andamento e age (trocar responsável ou cancelar) ali mesmo.",
+    "views": [
+      {
+        "id": "detalhe",
+        "purpose": "Aba do painel lateral: dados da tarefa escolhida, checklist e as ações do gestor (reatribuir e cancelar com confirmação)."
+      },
+      {
+        "id": "historico",
+        "purpose": "Aba do painel lateral: linha do tempo dos marcos da tarefa escolhida, para entender o contexto antes de decidir."
+      }
+    ],
+    "decisions": "Seguí o template workQueueSplit: fila à esquerda (prioridade primária), painel à direita (principal), histórico demovido a uma aba do painel (secundário) usando o scene host em mode=tabs só nessa região — o quadro nunca sai de cena. O quadro usa a tabela avançada sem ordenação interna para que o índice da linha clicada seja sempre o da lista carregada; a ordem vem do backend. Filtros: busca por título, lista e responsável em combobox, situação e prioridade em controle segmentado, prazo em calendário; 'Limpar filtros' sempre disponível. Ações aparecem só quando a tarefa está aberta (campo aberta do backend); o cancelamento é a única ação de perigo e passa por um modal que nomeia a tarefa; o modal é aberto por referência ao elemento, pois a página não guarda estado. Sucesso e erro dos comandos aparecem dentro do painel, acima das ações, em feedback contextual, sem toast de página. Alarme de cor só em 'Atrasada' (erro) e 'Vence hoje' (aviso), usando os campos prontos do backend. Estados de carregando, vazio, erro e pré-condição ausente (com botão para voltar) foram desenhados para o quadro e para o painel."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section secaoQuadroEquipe needs an element with data-section-id=\"secaoQuadroEquipe\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section secaoTarefaSelecionada needs an element with data-section-id=\"secaoTarefaSelecionada\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section secaoHistoricoTarefa needs an element with data-section-id=\"secaoHistoricoTarefa\"."
+    }
+  ]
+}

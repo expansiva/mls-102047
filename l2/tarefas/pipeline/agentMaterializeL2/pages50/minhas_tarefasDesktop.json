@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "tarefas",
+  "pageId": "minhas_tarefas",
+  "device": "desktop",
+  "contextHash": "sha256:cff863fa3006e50af37fc91a11066ebac4052f0c8ecb6304fc3d9dc5ae8f7b55",
+  "sourcePath": "l2/tarefas/web/desktop/page11/minhas_tarefas.ts",
+  "sourceHash": "sha256:ade5c7049e693aeb8ed8e6dda631d4c21f3a9ae9fddc0056eb65b63c7cb27f14",
+  "attempt": 1,
+  "design": {
+    "concept": "A master-detail work queue. The task list is always on the left, with filter pills above it. A working panel sits beside it and changes between the open task, the edit form and the create form. The person scans the list, picks a row, and reads, executes, reviews or adjusts the task without leaving the screen.",
+    "views": [
+      {
+        "id": "detalhe",
+        "purpose": "Opens the selected task. It shows the summary, return reason, checklist (tickable), the actions that fit the current situation, and the history timeline."
+      },
+      {
+        "id": "editar",
+        "purpose": "Edit form for the open task (list, title, description, priority, deadline, owner, checklist). It has a back control to the task and saving never changes the situation."
+      },
+      {
+        "id": "nova",
+        "purpose": "Create form opened from the single 'Nova tarefa' button. After saving it returns to the new task, which the list absorbs and marks as selected."
+      }
+    ],
+    "decisions": "Followed the timelineList template: list first, detail panel beside it, one create button above. The panel is a scene host (mode scenary) that covers only the right region, so the list and the selected row stay visible while the panel changes. The three views are scenes with back to the task. Filters are navigate-pills with empty tabs, driving minhasTarefas. The request params are the single source of truth for the active pill. The list uses the advanced data table with the selected row marked by index. The overdue date takes the error colour and nothing else does. 'Due today' and 'returned' are plain labels. Checklist progress is shown as the backend string, with no percentage computed on the page. Actions follow the situation (start, send or resend for review, accept, return with a typed reason). Cancel is a quiet ghost button behind a native confirm that names the task. Results are local: a success or error feedback sits inside the actions region and form errors sit above the save button. Saving a form returns to the task view only if the command ended in success. The page cannot know the session member, so it does not hide actions by role. The backend rejects invalid ones and the page says so in plain words. Inline quick-assign was left out because the shared has no assign command. The owner is chosen in the form with a searching combobox. A search-by-title field was left out because the shared has no search parameter. The precondition-missing and generic error states have their own message with a way back or a retry."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section secTarefas needs an element with data-section-id=\"secTarefas\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section secTarefaAberta needs an element with data-section-id=\"secTarefaAberta\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section secEdicao needs an element with data-section-id=\"secEdicao\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section secHistorico needs an element with data-section-id=\"secHistorico\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasLista (progresso da checklist na linha) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasLista (busca pelo título) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefaDetalhe (resumo da tarefa aberta) renders neither <groupviewcard--ml-view-card-horizontal> nor <groupviewcard--ml-vertical-card>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefaDetalhe (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-segmented-progress>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefaAcoes (ações secundárias como cancelar) renders neither <grouptriggeraction--ml-kebab-action-trigger> nor <grouptriggeraction--ml-icon-button>."
+    }
+  ]
+}

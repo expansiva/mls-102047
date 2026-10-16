@@ -1,0 +1,263 @@
+/* refused: M4_SHARED_INPUT_MISSING: input20 must run first. */
+
+/// <mls fileReference="_102047_/l2/tarefas/web/mobile/page11/listas.ts" enhancement="_102020_/l2/enhancementAura"/>
+
+import { html, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { TarefasListasShared, emptyCriarListaDraft } from '/_102047_/l2/tarefas/web/shared/listas.js';
+import '/_102040_/l2/molecules/groupentertext/ml-floating-text-input.js';
+import '/_102040_/l2/molecules/groupentertext/ml-multiline-text.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
+import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
+
+/// **collab_i18n_start**
+const pageMessage_pt_br = {
+  tituloLista: 'Listas da equipe',
+  voltar: 'Voltar às listas',
+  colNome: 'Lista',
+  colAbertas: 'Tarefas abertas',
+  tipoProject: 'Projeto',
+  tipoArea: 'Área',
+  ativa: 'Ativa',
+  inativa: 'Inativa',
+  abertas: 'abertas',
+  carregandoListas: 'Carregando as listas…',
+  vazioTitulo: 'Nenhuma lista cadastrada ainda.',
+  vazioDica: 'Cadastre a primeira lista para agrupar as tarefas por projeto ou área.',
+  novaLista: 'Nova lista',
+  erroListas: 'Não foi possível carregar as listas.',
+  erroPrecondicao: 'Esta tela foi aberta sem as informações de que precisa. Volte à página anterior e abra as listas de novo.',
+  tentarNovamente: 'Tentar novamente',
+  tituloNova: 'Dados da nova lista',
+  tituloEdicao: 'Dados da lista',
+  carregandoLista: 'Abrindo a lista…',
+  erroLista: 'Não foi possível abrir esta lista.',
+  campoNome: 'Nome da lista',
+  campoTipo: 'Tipo',
+  escolhaTipo: 'Escolha o tipo',
+  ajudaTipo: 'Projeto ou área da equipe que a lista agrupa.',
+  campoDescricao: 'Descrição',
+  campoAtiva: 'Ativa',
+  ajudaAtiva: 'Listas inativas deixam de aparecer na escolha ao criar tarefas.',
+  cadastrar: 'Cadastrar lista',
+  salvar: 'Salvar alterações',
+  erroSalvar: 'Não foi possível salvar a lista.'
+};
+type PageMessageType = typeof pageMessage_pt_br;
+const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
+/// **collab_i18n_end**
+
+@customElement('tarefas--web--mobile--page11--listas-102047')
+export class TarefasMobilePage11ListasPage extends TarefasListasShared {
+  private msg: PageMessageType = pageMessage_pt_br;
+
+  private tipoLabel(tipo: 'project' | 'area' | null) {
+    if (tipo === 'project') return this.msg['tipoProject'];
+    if (tipo === 'area') return this.msg['tipoArea'];
+    return '';
+  }
+
+  private openLista(index: number) {
+    const row = this.listas[index];
+    if (!row) return;
+    this.setScenario('registro');
+    this.obterLista(row.id);
+  }
+
+  private openNova() {
+    this.obterLista(null);
+    this.setCriarListaDraft({ ...emptyCriarListaDraft(), ativa: true });
+    this.setScenario('registro');
+  }
+
+  private patch(
+    editing: boolean,
+    p: { nome?: string | null; ativa?: boolean | null; tipo?: 'project' | 'area' | null; descricao?: string | null }
+  ) {
+    const d = editing ? this.salvarListaDraft : this.criarListaDraft;
+    const nome = p.nome !== undefined ? p.nome : d.nome;
+    const ativa = p.ativa !== undefined ? p.ativa : d.ativa;
+    const details = {
+      tipo: p.tipo !== undefined ? p.tipo : d.details.tipo,
+      descricao: p.descricao !== undefined ? p.descricao : d.details.descricao
+    };
+    if (editing) this.setSalvarListaDraft({ ...this.salvarListaDraft, nome, ativa, details });
+    else this.setCriarListaDraft({ ...this.criarListaDraft, nome, ativa, details });
+  }
+
+  private submit(editing: boolean) {
+    if (editing) {
+      return this.salvarLista().then(() => {
+        if (this.salvarListaStatus === 'success') this.setScenario('lista');
+      });
+    }
+    return this.criarLista().then(() => {
+      if (this.criarListaStatus === 'success') this.setScenario('lista');
+    });
+  }
+
+  private renderListaScene() {
+    const loading = this.pageStatus === 'loading' || this.pageStatus === 'idle';
+    const error = this.pageStatus === 'error';
+    const precondition = error && this.listarListasError?.code === 'client.preconditionMissing';
+    return html`
+      <div data-organism-id="listasCadastradas" class="px-4 pt-2 pb-2">
+        ${error
+          ? html`<div role="alert" class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 text-[var(--text-default,currentColor)]">
+              <p class="mb-3 text-base">${precondition ? this.msg['erroPrecondicao'] : this.msg['erroListas']}</p>
+              ${precondition
+                ? nothing
+                : html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${() => this.listarListas()}>
+                    <Label>${this.msg['tentarNovamente']}</Label>
+                  </grouptriggeraction--ml-button-standard>`}
+            </div>`
+          : html`<groupviewdata--ml-vertical-record-list .loading=${loading} .hoverable=${true}
+              @row-click=${(e: CustomEvent<{ index: number }>) => this.openLista(e.detail.index)}>
+              <Columns>
+                <Column field="nome" header=${this.msg['colNome']} />
+                <Column field="abertas" header=${this.msg['colAbertas']} align="right" width="96px" />
+              </Columns>
+              <Rows>
+                ${this.listas.map(
+                  (l) => html`<Row ?selected=${l.id === this.selectedLista}>
+                    <Cell>
+                      <div class="flex min-h-[56px] flex-col justify-center py-1">
+                        <span class="text-base font-semibold break-words ${l.ativa ? 'text-[var(--text-strong,currentColor)]' : 'text-[var(--text-muted,currentColor)]'}">${l.nome}</span>
+                        <span class="mt-1 flex items-center gap-2 text-sm text-[var(--text-muted,currentColor)]">
+                          <span>${this.tipoLabel(l.details.details.tipo)}</span>
+                          <span class="rounded-full px-2 py-0.5 text-xs ${l.ativa ? 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]' : 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]'}">${l.ativa ? this.msg['ativa'] : this.msg['inativa']}</span>
+                        </span>
+                      </div>
+                    </Cell>
+                    <Cell>
+                      <div class="flex min-h-[56px] flex-col items-end justify-center">
+                        <span class="text-lg font-semibold ${l.ativa ? 'text-[var(--text-strong,currentColor)]' : 'text-[var(--text-muted,currentColor)]'}">${l.details.quantidadeTarefasAbertas}</span>
+                        <span class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['abertas']}</span>
+                      </div>
+                    </Cell>
+                  </Row>`
+                )}
+              </Rows>
+              <Empty>
+                <div class="px-4 py-10 text-center">
+                  <p class="text-base font-medium text-[var(--text-strong,currentColor)]">${this.msg['vazioTitulo']}</p>
+                  <p class="mt-2 text-sm text-[var(--text-muted,currentColor)]">${this.msg['vazioDica']}</p>
+                </div>
+              </Empty>
+              <Loading>
+                <div class="px-4 py-10 text-center text-[var(--text-muted,currentColor)]" aria-live="polite">${this.msg['carregandoListas']}</div>
+              </Loading>
+            </groupviewdata--ml-vertical-record-list>`}
+      </div>
+      <div class="sticky bottom-0 bg-[var(--page-bg,transparent)] px-4 py-3">
+        <grouptriggeraction--ml-button-standard data-variant="primary" size="lg" data-class="w-full min-h-[48px]" @action=${() => this.openNova()}>
+          <Label>${this.msg['novaLista']}</Label>
+        </grouptriggeraction--ml-button-standard>
+      </div>
+    `;
+  }
+
+  private renderFormScene(editing: boolean) {
+    const d = editing ? this.salvarListaDraft : this.criarListaDraft;
+    const opening = editing && this.obterListaStatus === 'loading';
+    const openError = editing && this.obterListaStatus === 'error';
+    const status = editing ? this.salvarListaStatus : this.criarListaStatus;
+    const cmdError = editing ? this.salvarListaError : this.criarListaError;
+    const ready = !!d.nome?.trim() && d.details.tipo !== null && d.ativa !== null && (!editing || (this.salvarListaDraft.id !== null && this.salvarListaDraft.version !== null));
+
+    if (opening) {
+      return html`<div data-organism-id="formularioLista" class="px-4 py-10 text-center text-[var(--text-muted,currentColor)]" aria-live="polite" aria-busy="true">${this.msg['carregandoLista']}</div>`;
+    }
+    if (openError) {
+      return html`<div data-organism-id="formularioLista" class="px-4 py-4">
+        <div role="alert" class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 text-[var(--text-default,currentColor)]">
+          <p class="mb-3 text-base">${this.msg['erroLista']}</p>
+          <grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${() => this.obterLista(this.selectedLista)}>
+            <Label>${this.msg['tentarNovamente']}</Label>
+          </grouptriggeraction--ml-button-standard>
+        </div>
+      </div>`;
+    }
+
+    return html`
+      <form data-organism-id="formularioLista" class="flex flex-col gap-5 px-4 py-4 pb-8"
+        @submit=${(e: Event) => { e.preventDefault(); if (ready) this.submit(editing); }}>
+        <groupentertext--ml-floating-text-input
+          name="nome"
+          required
+          .value=${d.nome ?? ''}
+          @input=${(e: CustomEvent<{ value: string }>) => this.patch(editing, { nome: e.detail.value })}
+          @change=${(e: CustomEvent<{ value: string }>) => this.patch(editing, { nome: e.detail.value })}>
+          <Label>${this.msg['campoNome']}</Label>
+        </groupentertext--ml-floating-text-input>
+
+        <div class="flex flex-col gap-1">
+          <label for="lista-tipo" class="text-sm font-medium text-[var(--text-default,currentColor)]">${this.msg['campoTipo']}</label>
+          <select id="lista-tipo" required
+            class="min-h-[48px] w-full rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] px-3 text-base text-[var(--text-strong,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
+            @change=${(e: Event) => {
+              const v = (e.target as HTMLSelectElement).value;
+              this.patch(editing, { tipo: v === 'project' || v === 'area' ? v : null });
+            }}>
+            <option value="" ?selected=${d.details.tipo === null}>${this.msg['escolhaTipo']}</option>
+            <option value="project" ?selected=${d.details.tipo === 'project'}>${this.msg['tipoProject']}</option>
+            <option value="area" ?selected=${d.details.tipo === 'area'}>${this.msg['tipoArea']}</option>
+          </select>
+          <span class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['ajudaTipo']}</span>
+        </div>
+
+        <groupentertext--ml-multiline-text
+          name="descricao"
+          rows="4"
+          .value=${d.details.descricao ?? ''}
+          @input=${(e: CustomEvent<{ value: string }>) => this.patch(editing, { descricao: e.detail.value })}
+          @change=${(e: CustomEvent<{ value: string }>) => this.patch(editing, { descricao: e.detail.value })}>
+          <Label>${this.msg['campoDescricao']}</Label>
+        </groupentertext--ml-multiline-text>
+
+        <label class="flex min-h-[56px] cursor-pointer items-center gap-3 rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] px-3 py-2">
+          <input type="checkbox" class="h-6 w-6 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
+            .checked=${d.ativa === true}
+            @change=${(e: Event) => this.patch(editing, { ativa: (e.target as HTMLInputElement).checked })} />
+          <span class="flex flex-col">
+            <span class="text-base font-medium text-[var(--text-strong,currentColor)]">${this.msg['campoAtiva']}</span>
+            <span class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['ajudaAtiva']}</span>
+          </span>
+        </label>
+
+        <div aria-live="polite">
+          <groupnotifyuser--ml-contextual-feedback type="error" .visible=${status === 'error'} .dismissible=${false}>
+            <Message>${this.msg['erroSalvar']} ${cmdError?.message ?? ''}</Message>
+          </groupnotifyuser--ml-contextual-feedback>
+        </div>
+
+        <grouptriggeraction--ml-button-standard
+          data-variant="primary" size="lg" type="submit" data-class="w-full min-h-[48px]"
+          ?disabled=${!ready}
+          ?loading=${status === 'loading'}
+          @action=${() => { if (ready) this.submit(editing); }}>
+          <Label>${editing ? this.msg['salvar'] : this.msg['cadastrar']}</Label>
+        </grouptriggeraction--ml-button-standard>
+      </form>
+    `;
+  }
+
+  render() {
+    this.msg = pageMessages[this.getMessageKey(pageMessages)];
+    const editing = !!this.selectedLista;
+    const formTitle = editing ? this.lista?.nome || this.msg['tituloEdicao'] : this.msg['tituloNova'];
+    return html`
+      <div class="mx-auto w-full max-w-[430px] bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)]">
+        <molecules--ml-scenary-102020 mode="scenary" backLabel=${this.msg['voltar']}
+          .value=${this.scenary || 'lista'}
+          @change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}>
+          <Scene value="lista" title=${this.msg['tituloLista']}>${this.renderListaScene()}</Scene>
+          <Scene value="registro" title=${formTitle} nav="back" backTo="lista">${this.renderFormScene(editing)}</Scene>
+        </molecules--ml-scenary-102020>
+      </div>
+    `;
+  }
+}
+

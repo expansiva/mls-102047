@@ -1,0 +1,405 @@
+/* refused: M4_SHARED_INPUT_MISSING: input20 must run first. */
+
+/// <mls fileReference="_102047_/l2/tarefas/web/desktop/page11/inicio_membro.ts" enhancement="_102020_/l2/enhancementAura"/>
+
+import { html, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { TarefasInicio_membroShared } from '/_102047_/l2/tarefas/web/shared/inicio_membro.js';
+import type { Pendencia, MembroNome, ResumoMinhasTarefas } from '/_102047_/l2/tarefas/web/shared/inicio_membro.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-notify-banner.js';
+import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
+
+/// **collab_i18n_start**
+const pageMessage_pt_br = {
+  pageTitle: 'Meu dia',
+  reload: 'Atualizar painel',
+  headlineGood: 'Nada precisa de atenção agora.',
+  headlineDeadlines: 'Prazos: {atrasadas} em atraso e {hoje} vencendo hoje.',
+  inboxTitle: 'Esperam por você',
+  inboxEmpty: 'Nenhuma tarefa espera uma ação sua neste momento.',
+  statusAFazer: 'A fazer',
+  statusEmAndamento: 'Em andamento',
+  statusEmRevisao: 'Em revisão',
+  statusConcluida: 'Concluída',
+  statusCancelada: 'Cancelada',
+  prioLow: 'Prioridade baixa',
+  prioMedium: 'Prioridade média',
+  prioHigh: 'Prioridade alta',
+  prazoLabel: 'Prazo',
+  checklistLabel: 'Checklist',
+  responsavelLabel: 'Responsável',
+  criadorLabel: 'Criada por',
+  returnedLabel: 'Devolvida para ajuste',
+  returnedAt: 'em',
+  actStart: 'Iniciar tarefa',
+  actSend: 'Enviar para revisão',
+  actResend: 'Reenviar para revisão',
+  actAccept: 'Aceitar entrega',
+  actReturn: 'Devolver com motivo',
+  actAdjust: 'Ajustar tarefa',
+  actConfirmReturn: 'Devolver tarefa',
+  returnReasonLabel: 'Motivo da devolução',
+  returnReasonHint: 'Explique o que precisa ser ajustado. O motivo é obrigatório.',
+  returnReasonPlaceholder: 'O que precisa ser ajustado?',
+  okStart: 'Tarefa iniciada.',
+  okSend: 'Tarefa enviada para revisão.',
+  okAccept: 'Entrega aceita. A tarefa está concluída.',
+  okReturn: 'Tarefa devolvida com o motivo informado.',
+  errAction: 'Não foi possível concluir a ação.',
+  avisoTitle: 'Aviso das 8h',
+  avisoBannerMsg: 'Aviso de {data}: {total} no aviso, {atrasadas} em atraso.',
+  avisoFailed: 'O aviso de hoje não foi gerado.',
+  avisoOpen: 'Abrir aviso de hoje',
+  avisoNone: 'Nenhum aviso gerado hoje.',
+  avisoTaskFallback: 'Tarefa do aviso',
+  colTarefa: 'Tarefa',
+  colPrazo: 'Prazo',
+  colChecklist: 'Checklist',
+  colLista: 'Lista',
+  dueToday: 'Vence hoje',
+  overdue: 'Em atraso',
+  stripLabel: 'Panorama das minhas tarefas',
+  stripAbertas: 'Abertas',
+  stripHoje: 'Vencem hoje',
+  stripAtrasadas: 'Atrasadas',
+  browseSummary: 'Ver tarefas abertas',
+  openAll: 'Abrir minhas tarefas',
+  listEmpty: 'Nenhuma tarefa aberta.',
+  loadingLabel: 'Carregando seu painel',
+  errorTitle: 'Não foi possível carregar o painel.',
+  errorRetry: 'Tentar novamente',
+  missingTitle: 'Faltam informações para abrir esta página.',
+  missingBody: 'Volte para as suas tarefas e abra o painel novamente.',
+  backToTasks: 'Ir para minhas tarefas',
+};
+type PageMessageType = typeof pageMessage_pt_br;
+const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
+/// **collab_i18n_end**
+
+function tpl(text: string, vars: Record<string, string | number>) {
+  return text.replace(/\{(\w+)\}/g, (_m, k: string) => String(vars[k] ?? ''));
+}
+
+function formatDate(value: string) {
+  if (!value) return '';
+  const lang = document.documentElement.lang || undefined;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat(lang, { day: '2-digit', month: 'short' }).format(d);
+}
+
+function formatNumber(n: number) {
+  return new Intl.NumberFormat(document.documentElement.lang || undefined).format(n);
+}
+
+function nomeDe(m: MembroNome) {
+  return m?.details?.identification?.details?.identification?.name ?? '';
+}
+
+function tituloDe(resumo: ResumoMinhasTarefas | null, id: string) {
+  return resumo?.tarefas.find((t) => t.id === id)?.titulo ?? '';
+}
+
+const btnBase =
+  'inline-flex min-h-10 items-center justify-center rounded-md px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] disabled:cursor-not-allowed disabled:opacity-50';
+const btnPrimary = 'bg-[var(--button-primary-bg,transparent)] text-[var(--button-primary-text,currentColor)]';
+const btnSecondary =
+  'bg-[var(--button-secondary-bg,transparent)] text-[var(--button-secondary-text,currentColor)] border border-[var(--button-secondary-border,currentColor)]';
+
+@customElement('tarefas--web--desktop--page11--inicio_membro-102047')
+export class TarefasDesktopPage11Inicio_membroPage extends TarefasInicio_membroShared {
+  private msg: PageMessageType = pageMessage_pt_br;
+
+  private t(key: keyof PageMessageType) {
+    return this.msg[key];
+  }
+
+  private statusLabel(s: Pendencia['status']) {
+    const m: Record<Pendencia['status'], string> = {
+      aFazer: this.msg.statusAFazer,
+      emAndamento: this.msg.statusEmAndamento,
+      emRevisao: this.msg.statusEmRevisao,
+      concluida: this.msg.statusConcluida,
+      cancelada: this.msg.statusCancelada,
+    };
+    return m[s];
+  }
+
+  private prioLabel(p: Pendencia['prioridade']) {
+    const m: Record<Pendencia['prioridade'], string> = {
+      low: this.msg.prioLow,
+      medium: this.msg.prioMedium,
+      high: this.msg.prioHigh,
+    };
+    return m[p];
+  }
+
+  private btn(label: string, variant: 'primary' | 'secondary', onClick: () => void, disabled: boolean) {
+    return html`<button
+      type="button"
+      class="${btnBase} ${variant === 'primary' ? btnPrimary : btnSecondary}"
+      ?disabled=${disabled}
+      aria-busy=${disabled ? 'true' : 'false'}
+      @click=${onClick}
+    >${label}</button>`;
+  }
+
+  private renderFeedback() {
+    const cmds: Array<[string, { message: string } | null, keyof PageMessageType]> = [
+      [this.cmdIniciarTarefaStatus, this.cmdIniciarTarefaError, 'okStart'],
+      [this.cmdEnviarParaRevisaoStatus, this.cmdEnviarParaRevisaoError, 'okSend'],
+      [this.cmdAceitarEntregaStatus, this.cmdAceitarEntregaError, 'okAccept'],
+      [this.cmdDevolverComMotivoStatus, this.cmdDevolverComMotivoError, 'okReturn'],
+    ];
+    return html`<div aria-live="polite" class="space-y-2">
+      ${cmds.map(([status, error, ok]) =>
+        status === 'success'
+          ? html`<p class="rounded-md bg-[var(--status-success-bg,transparent)] px-3 py-2 text-sm text-[var(--status-success-text,currentColor)]">${this.t(ok)}</p>`
+          : status === 'error'
+            ? html`<p class="rounded-md bg-[var(--status-error-bg,transparent)] px-3 py-2 text-sm text-[var(--status-error-text,currentColor)]">${this.msg.errAction}${error?.message ? html` <span class="opacity-80">${error.message}</span>` : nothing}</p>`
+            : nothing,
+      )}
+    </div>`;
+  }
+
+  private renderReturnForm(p: Pendencia, busy: boolean) {
+    const d = this.cmdDevolverComMotivoDraft;
+    const reason = d.details.motivoDevolucao ?? '';
+    return html`<details class="w-full rounded-md border border-[var(--border-subtle,currentColor)] bg-[var(--surface-alt-bg,transparent)]">
+      <summary class="flex min-h-10 cursor-pointer items-center px-4 text-sm font-medium text-[var(--text-strong,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${this.msg.actReturn}</summary>
+      <div class="space-y-2 border-t border-[var(--border-subtle,currentColor)] p-4">
+        <label class="block text-sm font-medium text-[var(--text-strong,currentColor)]" for="motivo-${p.id}">${this.msg.returnReasonLabel}</label>
+        <p class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.returnReasonHint}</p>
+        <textarea
+          id="motivo-${p.id}"
+          rows="3"
+          required
+          class="w-full rounded-md border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] p-2 text-sm text-[var(--text-default,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
+          placeholder=${this.msg.returnReasonPlaceholder}
+          .value=${reason}
+          @input=${(e: Event) =>
+            this.setCmdDevolverComMotivoDraft({
+              ...d,
+              details: { ...d.details, motivoDevolucao: (e.target as HTMLTextAreaElement).value },
+            })}
+        ></textarea>
+        <div class="flex justify-end">
+          ${this.btn(this.msg.actConfirmReturn, 'primary', () => this.cmdDevolverComMotivo(p.id), busy || !reason.trim())}
+        </div>
+      </div>
+    </details>`;
+  }
+
+  private renderActions(p: Pendencia, busy: boolean) {
+    if (p.status === 'aFazer') {
+      return this.btn(this.msg.actStart, 'primary', () => this.cmdIniciarTarefa(p.id), busy);
+    }
+    if (p.status === 'emAndamento') {
+      const returned = !!p.details?.details?.motivoDevolucao;
+      return returned
+        ? html`${this.btn(this.msg.actAdjust, 'secondary', () => this.abrirTarefaParaAjustar(p.id), false)}
+            ${this.btn(this.msg.actResend, 'primary', () => this.cmdEnviarParaRevisao(p.id), busy)}`
+        : this.btn(this.msg.actSend, 'primary', () => this.cmdEnviarParaRevisao(p.id), busy);
+    }
+    if (p.status === 'emRevisao') {
+      return this.btn(this.msg.actAccept, 'primary', () => this.cmdAceitarEntrega(p.id), busy);
+    }
+    return nothing;
+  }
+
+  private renderPendencia(p: Pendencia, busy: boolean) {
+    const motivo = p.details?.details?.motivoDevolucao;
+    const devolvidaEm = p.details?.details?.devolvidaEm;
+    return html`<li class="px-5 py-4">
+      <div class="flex items-start justify-between gap-6">
+        <div class="min-w-0 flex-1">
+          <p class="text-base font-semibold text-[var(--text-strong,currentColor)]">${p.titulo}</p>
+          <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--text-muted,currentColor)]">
+            <span class="rounded-full bg-[var(--status-neutral-bg,transparent)] px-2 py-0.5 text-[var(--status-neutral-text,currentColor)]">${this.statusLabel(p.status)}</span>
+            <span>${this.prioLabel(p.prioridade)}</span>
+            <span>${this.msg.checklistLabel}: ${p.details?.details?.progressoChecklist ?? ''}</span>
+            <span>${this.msg.responsavelLabel}: ${nomeDe(p.responsavel)}</span>
+            <span>${this.msg.criadorLabel}: ${nomeDe(p.criador)}</span>
+          </p>
+        </div>
+        <p class="shrink-0 text-right text-sm tabular-nums text-[var(--text-strong,currentColor)]">
+          <span class="block text-xs text-[var(--text-muted,currentColor)]">${this.msg.prazoLabel}</span>
+          ${formatDate(p.prazo)}
+        </p>
+      </div>
+      ${motivo
+        ? html`<div class="mt-3 rounded-md bg-[var(--status-warning-bg,transparent)] px-3 py-2 text-sm text-[var(--status-warning-text,currentColor)]">
+            <p class="font-medium">${this.msg.returnedLabel}${devolvidaEm ? html` ${this.msg.returnedAt} ${formatDate(devolvidaEm)}` : nothing}</p>
+            <p class="mt-0.5">${motivo}</p>
+          </div>`
+        : nothing}
+      <div class="mt-3 flex flex-wrap items-start gap-2">
+        ${this.renderActions(p, busy)}
+        ${p.status === 'emRevisao' ? this.renderReturnForm(p, busy) : nothing}
+      </div>
+    </li>`;
+  }
+
+  private renderInbox() {
+    const busy = [
+      this.cmdIniciarTarefaStatus,
+      this.cmdEnviarParaRevisaoStatus,
+      this.cmdAceitarEntregaStatus,
+      this.cmdDevolverComMotivoStatus,
+    ].includes('loading');
+    return html`<section data-organism-id="caixaPendencias" aria-labelledby="inbox-title" class="space-y-3">
+      <h2 id="inbox-title" class="text-lg font-semibold text-[var(--text-strong,currentColor)]">${this.msg.inboxTitle}</h2>
+      ${this.renderFeedback()}
+      ${this.pendencias.length === 0
+        ? html`<p class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] px-5 py-8 text-center text-sm text-[var(--text-muted,currentColor)]">${this.msg.inboxEmpty}</p>`
+        : html`<ul class="divide-y divide-[var(--border-subtle,currentColor)] rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)]">
+            ${this.pendencias.map((p) => this.renderPendencia(p, busy))}
+          </ul>`}
+    </section>`;
+  }
+
+  private renderAviso() {
+    const a = this.avisoHoje;
+    return html`<section data-organism-id="alertaAvisoDiario" aria-labelledby="aviso-title" class="space-y-3">
+      <h2 id="aviso-title" class="text-lg font-semibold text-[var(--text-strong,currentColor)]">${this.msg.avisoTitle}</h2>
+      ${a
+        ? html`
+          <groupnotifyuser--ml-notify-banner
+            type=${a.status === 'failed' ? 'error' : 'warning'}
+            .visible=${true}
+            .dismissible=${false}
+            @action=${() => this.abrirMeusAvisos()}
+          >
+            <Message>${a.status === 'failed'
+              ? this.msg.avisoFailed
+              : tpl(this.msg.avisoBannerMsg, {
+                  data: formatDate(a.dataReferencia),
+                  total: formatNumber(a.details.details.quantidadeTarefas),
+                  atrasadas: formatNumber(a.details.details.quantidadeAtrasadas),
+                })}</Message>
+            <Action><button type="button">${this.msg.avisoOpen}</button></Action>
+          </groupnotifyuser--ml-notify-banner>
+          <groupviewdata--ml-vertical-record-list @row-click=${() => this.abrirMeusAvisos()}>
+            <Columns>
+              <Column field="tarefa" header=${this.msg.colTarefa}></Column>
+              <Column field="prazo" header=${this.msg.colPrazo} align="right"></Column>
+            </Columns>
+            <Rows>
+              ${a.details.tarefas.map((x) => {
+                const titulo = tituloDe(this.resumo, x.details.tarefas.tarefaId) || this.msg.avisoTaskFallback;
+                const late = x.details.tarefas.situacaoPrazo === 'overdue';
+                return html`<Row>
+                  <Cell>${titulo}</Cell>
+                  <Cell>
+                    <div class="text-right tabular-nums">
+                      <div>${formatDate(x.details.tarefas.prazo)}</div>
+                      <div class="text-xs ${late ? 'text-[var(--status-error-text,currentColor)]' : 'text-[var(--text-muted,currentColor)]'}">${late ? this.msg.overdue : this.msg.dueToday}</div>
+                    </div>
+                  </Cell>
+                </Row>`;
+              })}
+            </Rows>
+          </groupviewdata--ml-vertical-record-list>`
+        : html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.avisoNone}</p>`}
+    </section>`;
+  }
+
+  private renderResumo() {
+    const r = this.resumo;
+    if (!r) return nothing;
+    return html`<section data-organism-id="resumoMinhasTarefas" aria-label=${this.msg.stripLabel} class="space-y-3 border-t border-[var(--border-subtle,currentColor)] pt-5">
+      <dl class="flex flex-wrap items-baseline gap-x-8 gap-y-2 text-sm">
+        <div class="flex items-baseline gap-2"><dd class="font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${formatNumber(r.quantidadeAbertas)}</dd><dt class="text-[var(--text-muted,currentColor)]">${this.msg.stripAbertas}</dt></div>
+        <div class="flex items-baseline gap-2"><dd class="font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${formatNumber(r.quantidadeVencemHoje)}</dd><dt class="text-[var(--text-muted,currentColor)]">${this.msg.stripHoje}</dt></div>
+        <div class="flex items-baseline gap-2"><dd class="font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${formatNumber(r.quantidadeAtrasadas)}</dd><dt class="text-[var(--text-muted,currentColor)]">${this.msg.stripAtrasadas}</dt></div>
+        <button type="button" class="ml-auto min-h-10 rounded-md px-2 text-sm text-[var(--link-text,currentColor)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.abrirMinhasTarefas()}>${this.msg.openAll}</button>
+      </dl>
+      <details class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)]">
+        <summary class="flex min-h-10 cursor-pointer items-center px-4 text-sm font-medium text-[var(--text-default,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${this.msg.browseSummary}</summary>
+        <groupviewdata--ml-vertical-record-list @row-click=${() => this.abrirMinhasTarefas()}>
+          <Columns>
+            <Column field="tarefa" header=${this.msg.colTarefa}></Column>
+            <Column field="lista" header=${this.msg.colLista}></Column>
+            <Column field="checklist" header=${this.msg.colChecklist}></Column>
+            <Column field="prazo" header=${this.msg.colPrazo} align="right"></Column>
+          </Columns>
+          <Rows>
+            ${r.tarefas.map((t) => html`<Row>
+              <Cell>${t.titulo}</Cell>
+              <Cell>${t.lista?.nome ?? ''}</Cell>
+              <Cell>${t.details.details.progressoChecklist}</Cell>
+              <Cell>
+                <div class="text-right tabular-nums">
+                  <div>${formatDate(t.prazo)}</div>
+                  ${t.details.details.atrasada
+                    ? html`<div class="text-xs text-[var(--status-error-text,currentColor)]">${this.msg.overdue}</div>`
+                    : t.details.details.venceHoje
+                      ? html`<div class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.dueToday}</div>`
+                      : nothing}
+                </div>
+              </Cell>
+            </Row>`)}
+          </Rows>
+          <Empty><div class="py-6 text-center text-sm">${this.msg.listEmpty}</div></Empty>
+        </groupviewdata--ml-vertical-record-list>
+      </details>
+    </section>`;
+  }
+
+  private renderLoading() {
+    return html`<div role="status" aria-busy="true" aria-label=${this.msg.loadingLabel} class="space-y-3">
+      ${[0, 1, 2].map(() => html`<div class="h-20 animate-pulse rounded-lg bg-[var(--surface-alt-bg,transparent)]"></div>`)}
+    </div>`;
+  }
+
+  private renderError() {
+    const missing = this.qryInicioMembroError?.code === 'client.preconditionMissing';
+    return html`<div role="alert" class="space-y-3 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6">
+      <p class="font-semibold text-[var(--text-strong,currentColor)]">${missing ? this.msg.missingTitle : this.msg.errorTitle}</p>
+      ${missing ? html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.missingBody}</p>` : nothing}
+      <div class="flex gap-2">
+        ${this.btn(this.msg.errorRetry, 'primary', () => this.qryInicioMembro(), false)}
+        ${this.btn(this.msg.backToTasks, 'secondary', () => this.abrirMinhasTarefas(), false)}
+      </div>
+    </div>`;
+  }
+
+  private renderBody() {
+    const r = this.resumo;
+    return html`
+      <p class="text-xl text-[var(--text-strong,currentColor)]">
+        ${this.pageStatus === 'empty' || !r
+          ? this.msg.headlineGood
+          : tpl(this.msg.headlineDeadlines, {
+              atrasadas: formatNumber(r.quantidadeAtrasadas),
+              hoje: formatNumber(r.quantidadeVencemHoje),
+            })}
+      </p>
+      <div class="grid grid-cols-[minmax(0,1fr)_22rem] items-start gap-8">
+        ${this.renderInbox()}
+        ${this.renderAviso()}
+      </div>
+      ${this.renderResumo()}`;
+  }
+
+  render() {
+    this.msg = pageMessages[this.getMessageKey(pageMessages)];
+    const status = this.pageStatus;
+    const loading = status === 'loading' || status === 'idle' || this.qryInicioMembroStatus === 'loading';
+    return html`<div class="min-h-full bg-[var(--page-bg,transparent)] p-8 text-[var(--text-default,currentColor)]">
+      <div class="mx-auto max-w-6xl space-y-6">
+        <header class="flex items-center justify-between gap-4">
+          <h1 class="text-2xl font-bold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
+          ${this.btn(this.msg.reload, 'secondary', () => this.qryInicioMembro(), loading)}
+        </header>
+        ${status === 'error'
+          ? this.renderError()
+          : loading && !this.resumo
+            ? this.renderLoading()
+            : this.renderBody()}
+      </div>
+    </div>`;
+  }
+}
+

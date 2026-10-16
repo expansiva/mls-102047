@@ -1,0 +1,358 @@
+/* refused: M4_SHARED_INPUT_MISSING: input20 must run first. */
+
+/// <mls fileReference="_102047_/l2/tarefas/web/mobile/page11/inicio_membro.ts" enhancement="_102020_/l2/enhancementAura"/>
+
+import { html, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { TarefasInicio_membroShared } from '/_102047_/l2/tarefas/web/shared/inicio_membro.js';
+import type { Pendencia, TarefaResumo } from '/_102047_/l2/tarefas/web/shared/inicio_membro.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-notify-banner.js';
+
+/// **collab_i18n_start**
+const pageMessage_pt_br = {
+  headlineAttention: 'O que depende de você agora',
+  headlineClear: 'Nada precisa de atenção agora',
+  headlineLoading: 'Verificando o que depende de você…',
+  headlineError: 'Não foi possível carregar sua pauta',
+  reload: 'Atualizar',
+  retry: 'Tentar de novo',
+  errorBody: 'Não conseguimos buscar suas tarefas agora. Tente de novo em instantes.',
+  preconditionBody: 'Esta página foi aberta sem a informação de que precisa para carregar sua pauta. Volte para as suas tarefas e abra o início novamente.',
+  goTasks: 'Ir para minhas tarefas',
+  queueLabel: 'Pendências com você',
+  seeRest: 'Ver as demais pendências',
+  statusAFazer: 'A fazer',
+  statusEmAndamento: 'Em andamento',
+  statusEmRevisao: 'Em revisão',
+  statusConcluida: 'Concluída',
+  statusCancelada: 'Cancelada',
+  statusDevolvida: 'Devolvida para ajuste',
+  priorityLow: 'Prioridade baixa',
+  priorityMedium: 'Prioridade média',
+  priorityHigh: 'Prioridade alta',
+  dueLabel: 'Prazo',
+  createdBy: 'Criada por {name}',
+  deliveredBy: 'Entregue por {name}',
+  checklist: 'Checklist {value}',
+  openTaskAria: 'Abrir a tarefa {title}',
+  reasonLabel: 'Motivo da devolução',
+  returnedAt: 'Devolvida em {date}',
+  start: 'Iniciar tarefa',
+  starting: 'Iniciando…',
+  sendReview: 'Enviar para revisão',
+  resendReview: 'Reenviar para revisão',
+  sending: 'Enviando…',
+  adjust: 'Ajustar tarefa',
+  accept: 'Aceitar entrega',
+  accepting: 'Aceitando…',
+  returnWith: 'Devolver com motivo',
+  returnReasonLabel: 'Por que está devolvendo?',
+  returnReasonPlaceholder: 'Explique o que precisa ser ajustado',
+  confirmReturn: 'Confirmar devolução',
+  returning: 'Devolvendo…',
+  success: 'Pronto. Sua pauta foi atualizada.',
+  avisoTitle: 'Aviso das 8h de {date}',
+  avisoMessage: '{total} tarefas no aviso, {late} atrasadas.',
+  avisoOpen: 'Abrir aviso de hoje',
+  avisoNone: 'Nenhum aviso gerado hoje.',
+  avisoAll: 'Ver meus avisos',
+  stripLabel: 'Situação dos meus prazos',
+  stripOpen: 'abertas',
+  stripToday: 'vencem hoje',
+  stripLate: 'atrasadas',
+  openTasksSummary: 'Tarefas abertas e checklists',
+  flagLate: 'Atrasada',
+  flagToday: 'Vence hoje',
+  noOpenTasks: 'Nenhuma tarefa aberta.',
+  seeAllTasks: 'Ver todas as minhas tarefas'
+};
+type PageMessageType = typeof pageMessage_pt_br;
+const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
+/// **collab_i18n_end**
+
+function lang() {
+  return document.documentElement.lang || undefined;
+}
+
+function fill(text: string, vars: Record<string, string | number>) {
+  return Object.keys(vars).reduce((acc, k) => acc.split('{' + k + '}').join(String(vars[k])), text);
+}
+
+function parseDate(v: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function fmtDate(v: string | undefined | null) {
+  if (!v) return '';
+  const d = parseDate(v);
+  return d ? new Intl.DateTimeFormat(lang(), { day: '2-digit', month: 'short' }).format(d) : v;
+}
+
+function fmtNumber(n: number) {
+  return new Intl.NumberFormat(lang()).format(n);
+}
+
+const btnBase =
+  'min-h-[44px] w-full rounded-lg px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 ring-[color:var(--focus-ring,currentColor)] disabled:opacity-60 disabled:cursor-not-allowed';
+const btnPrimary = btnBase + ' bg-[var(--button-primary-bg,transparent)] text-[var(--button-primary-text,currentColor)]';
+const btnSecondary =
+  btnBase +
+  ' bg-[var(--button-secondary-bg,transparent)] text-[var(--button-secondary-text,currentColor)] border border-[var(--button-secondary-border,currentColor)]';
+const linkBtn =
+  'min-h-[44px] inline-flex items-center text-sm font-medium text-[var(--link-text,currentColor)] underline focus-visible:outline-none focus-visible:ring-2 ring-[color:var(--focus-ring,currentColor)] rounded';
+
+@customElement('tarefas--web--mobile--page11--inicio_membro-102047')
+export class TarefasMobilePage11Inicio_membroPage extends TarefasInicio_membroShared {
+  private msg: PageMessageType = pageMessage_pt_br;
+
+  private isBusy() {
+    return (
+      this.cmdIniciarTarefaStatus === 'loading' ||
+      this.cmdEnviarParaRevisaoStatus === 'loading' ||
+      this.cmdAceitarEntregaStatus === 'loading' ||
+      this.cmdDevolverComMotivoStatus === 'loading'
+    );
+  }
+
+  private statusLabel(s: Pendencia['status'], returned: boolean) {
+    if (s === 'emAndamento' && returned) return this.msg.statusDevolvida;
+    switch (s) {
+      case 'aFazer': return this.msg.statusAFazer;
+      case 'emAndamento': return this.msg.statusEmAndamento;
+      case 'emRevisao': return this.msg.statusEmRevisao;
+      case 'concluida': return this.msg.statusConcluida;
+      default: return this.msg.statusCancelada;
+    }
+  }
+
+  private priorityLabel(p: Pendencia['prioridade']) {
+    if (p === 'high') return this.msg.priorityHigh;
+    if (p === 'medium') return this.msg.priorityMedium;
+    return this.msg.priorityLow;
+  }
+
+  private headline() {
+    if (this.pageStatus === 'error') return this.msg.headlineError;
+    if (this.pageStatus === 'empty') return this.msg.headlineClear;
+    if (this.pageStatus === 'success') return this.msg.headlineAttention;
+    return this.msg.headlineLoading;
+  }
+
+  private renderFeedback() {
+    const err =
+      this.cmdIniciarTarefaError ||
+      this.cmdEnviarParaRevisaoError ||
+      this.cmdAceitarEntregaError ||
+      this.cmdDevolverComMotivoError;
+    const ok =
+      this.cmdIniciarTarefaStatus === 'success' ||
+      this.cmdEnviarParaRevisaoStatus === 'success' ||
+      this.cmdAceitarEntregaStatus === 'success' ||
+      this.cmdDevolverComMotivoStatus === 'success';
+    return html`<div aria-live="polite">
+      ${err
+        ? html`<p role="alert" class="rounded-lg px-3 py-2 text-sm bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]">${err.message}</p>`
+        : ok
+          ? html`<p class="rounded-lg px-3 py-2 text-sm bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]">${this.msg.success}</p>`
+          : nothing}
+    </div>`;
+  }
+
+  private renderAcoes(p: Pendencia) {
+    const busy = this.isBusy();
+    const returned = !!p.details?.details?.motivoDevolucao;
+    if (p.status === 'aFazer') {
+      return html`<div class="flex flex-col gap-2">
+        <button type="button" class=${btnPrimary} ?disabled=${busy} aria-busy=${this.cmdIniciarTarefaStatus === 'loading' ? 'true' : 'false'}
+          @click=${() => this.cmdIniciarTarefa(p.id)}>${this.cmdIniciarTarefaStatus === 'loading' ? this.msg.starting : this.msg.start}</button>
+      </div>`;
+    }
+    if (p.status === 'emAndamento') {
+      const sending = this.cmdEnviarParaRevisaoStatus === 'loading';
+      return html`<div class="flex flex-col gap-2">
+        <button type="button" class=${btnPrimary} ?disabled=${busy} aria-busy=${sending ? 'true' : 'false'}
+          @click=${() => this.cmdEnviarParaRevisao(p.id)}>${sending ? this.msg.sending : returned ? this.msg.resendReview : this.msg.sendReview}</button>
+        ${returned
+          ? html`<button type="button" class=${btnSecondary} @click=${() => this.abrirTarefaParaAjustar(p.id)}>${this.msg.adjust}</button>`
+          : nothing}
+      </div>`;
+    }
+    if (p.status === 'emRevisao') {
+      const draft = this.cmdDevolverComMotivoDraft;
+      const reason = draft?.details?.motivoDevolucao ?? '';
+      const accepting = this.cmdAceitarEntregaStatus === 'loading';
+      const returning = this.cmdDevolverComMotivoStatus === 'loading';
+      const fid = 'motivo-' + p.id;
+      return html`<div class="flex flex-col gap-2">
+        <button type="button" class=${btnPrimary} ?disabled=${busy} aria-busy=${accepting ? 'true' : 'false'}
+          @click=${() => this.cmdAceitarEntrega(p.id)}>${accepting ? this.msg.accepting : this.msg.accept}</button>
+        <details name="devolver" class="rounded-lg border border-[var(--border-default,currentColor)]">
+          <summary class="min-h-[44px] flex items-center px-4 text-sm font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden focus-visible:outline-none focus-visible:ring-2 ring-[color:var(--focus-ring,currentColor)] rounded-lg">${this.msg.returnWith}</summary>
+          <div class="flex flex-col gap-2 px-4 pb-4">
+            <label for=${fid} class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.returnReasonLabel}</label>
+            <textarea id=${fid} rows="3" required
+              class="w-full rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] text-[var(--text-default,currentColor)] p-3 text-base focus-visible:outline-none focus-visible:ring-2 ring-[color:var(--focus-ring,currentColor)]"
+              placeholder=${this.msg.returnReasonPlaceholder}
+              .value=${reason}
+              @input=${(e: Event) => this.setCmdDevolverComMotivoDraft({
+                ...draft,
+                details: { ...draft.details, motivoDevolucao: (e.target as HTMLTextAreaElement).value }
+              })}></textarea>
+            <button type="button" class=${btnSecondary} ?disabled=${busy || !reason.trim()} aria-busy=${returning ? 'true' : 'false'}
+              @click=${() => this.cmdDevolverComMotivo(p.id)}>${returning ? this.msg.returning : this.msg.confirmReturn}</button>
+          </div>
+        </details>
+      </div>`;
+    }
+    return nothing;
+  }
+
+  private renderPendencia(p: Pendencia) {
+    const returned = p.status === 'emAndamento' && !!p.details?.details?.motivoDevolucao;
+    const who = p.status === 'emRevisao'
+      ? fill(this.msg.deliveredBy, { name: p.responsavel?.details?.identification?.details?.identification?.name ?? '' })
+      : fill(this.msg.createdBy, { name: p.criador?.details?.identification?.details?.identification?.name ?? '' });
+    const progress = p.details?.details?.progressoChecklist;
+    return html`<li class="flex flex-col gap-3 px-4 py-3 border-b border-[var(--border-subtle,currentColor)] last:border-b-0">
+      <button type="button" class="w-full min-h-[44px] flex items-start justify-between gap-3 text-left focus-visible:outline-none focus-visible:ring-2 ring-[color:var(--focus-ring,currentColor)] rounded"
+        aria-label=${fill(this.msg.openTaskAria, { title: p.titulo })}
+        @click=${() => this.abrirTarefaParaAjustar(p.id)}>
+        <span class="flex flex-col gap-1 min-w-0">
+          <span class="font-medium text-[var(--text-strong,currentColor)] break-words">${p.titulo}</span>
+          <span class="text-xs text-[var(--text-muted,currentColor)]">${this.statusLabel(p.status, returned)} · ${this.priorityLabel(p.prioridade)}</span>
+          <span class="text-xs text-[var(--text-muted,currentColor)]">${who}${progress ? ' · ' + fill(this.msg.checklist, { value: progress }) : ''}</span>
+        </span>
+        <span class="shrink-0 text-right text-sm tabular-nums text-[var(--text-strong,currentColor)]">
+          <span class="block text-xs text-[var(--text-muted,currentColor)]">${this.msg.dueLabel}</span>
+          ${fmtDate(p.prazo)}
+        </span>
+      </button>
+      ${returned
+        ? html`<div class="rounded-lg px-3 py-2 text-sm bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]">
+            <p class="font-medium">${this.msg.reasonLabel}</p>
+            <p class="break-words">${p.details?.details?.motivoDevolucao}</p>
+            ${p.details?.details?.devolvidaEm
+              ? html`<p class="text-xs mt-1">${fill(this.msg.returnedAt, { date: fmtDate(p.details.details.devolvidaEm) })}</p>`
+              : nothing}
+          </div>`
+        : nothing}
+      ${this.renderAcoes(p)}
+    </li>`;
+  }
+
+  private renderSkeleton() {
+    return html`<div class="flex flex-col gap-3" aria-busy="true">
+      ${[0, 1, 2].map(() => html`<div class="h-24 rounded-lg animate-pulse bg-[var(--surface-alt-bg,transparent)]"></div>`)}
+    </div>`;
+  }
+
+  private renderCaixa() {
+    const loading = this.pageStatus === 'idle' || this.pageStatus === 'loading';
+    if (loading) return this.renderSkeleton();
+    if (this.pageStatus === 'error') {
+      const missing = this.qryInicioMembroError?.code === 'client.preconditionMissing';
+      return html`<div role="alert" class="flex flex-col gap-3 rounded-lg p-4 bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]">
+        <p class="text-sm">${missing ? this.msg.preconditionBody : this.msg.errorBody}</p>
+        ${missing
+          ? html`<button type="button" class=${btnSecondary} @click=${() => this.abrirMinhasTarefas()}>${this.msg.goTasks}</button>`
+          : html`<button type="button" class=${btnSecondary} @click=${() => this.qryInicioMembro()}>${this.msg.retry}</button>`}
+      </div>`;
+    }
+    if (!this.pendencias.length) return nothing;
+    const first = this.pendencias.slice(0, 3);
+    const rest = this.pendencias.slice(3);
+    return html`<div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]" role="region" aria-label=${this.msg.queueLabel}>
+      <ul>${first.map((p) => this.renderPendencia(p))}</ul>
+      ${rest.length
+        ? html`<details class="border-t border-[var(--border-subtle,currentColor)]">
+            <summary class="min-h-[44px] flex items-center justify-center px-4 text-sm font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden text-[var(--link-text,currentColor)] focus-visible:outline-none focus-visible:ring-2 ring-[color:var(--focus-ring,currentColor)] rounded-b-lg">${this.msg.seeRest}</summary>
+            <ul class="border-t border-[var(--border-subtle,currentColor)]">${rest.map((p) => this.renderPendencia(p))}</ul>
+          </details>`
+        : nothing}
+    </div>`;
+  }
+
+  private renderAviso() {
+    const a = this.avisoHoje;
+    if (!a) {
+      if (this.pageStatus === 'idle' || this.pageStatus === 'loading') return nothing;
+      return html`<div class="flex items-center justify-between gap-3 text-sm text-[var(--text-muted,currentColor)]">
+        <span>${this.msg.avisoNone}</span>
+        <button type="button" class=${linkBtn} @click=${() => this.abrirMeusAvisos()}>${this.msg.avisoAll}</button>
+      </div>`;
+    }
+    return html`<groupnotifyuser--ml-notify-banner type="warning" .visible=${true} .dismissible=${false}
+      @action=${() => this.abrirMeusAvisos()}>
+      <Title>${fill(this.msg.avisoTitle, { date: fmtDate(a.dataReferencia) })}</Title>
+      <Message>${fill(this.msg.avisoMessage, {
+        total: fmtNumber(a.details.details.quantidadeTarefas),
+        late: fmtNumber(a.details.details.quantidadeAtrasadas)
+      })}</Message>
+      <Action><button type="button" class="min-h-[44px] px-2 underline font-medium">${this.msg.avisoOpen}</button></Action>
+    </groupnotifyuser--ml-notify-banner>`;
+  }
+
+  private renderTarefaAberta(t: TarefaResumo) {
+    const progress = t.details?.details?.progressoChecklist;
+    return html`<li class="flex items-start justify-between gap-3 px-4 py-3 border-b border-[var(--border-subtle,currentColor)] last:border-b-0">
+      <span class="flex flex-col gap-0.5 min-w-0">
+        <span class="text-sm font-medium text-[var(--text-strong,currentColor)] break-words">${t.titulo}</span>
+        <span class="text-xs text-[var(--text-muted,currentColor)]">${t.lista?.nome ?? ''}${progress ? ' · ' + fill(this.msg.checklist, { value: progress }) : ''}</span>
+      </span>
+      <span class="shrink-0 text-right text-xs tabular-nums">
+        <span class="block text-[var(--text-default,currentColor)]">${fmtDate(t.prazo)}</span>
+        ${t.details?.details?.atrasada
+          ? html`<span class="block font-medium text-[var(--status-error-text,currentColor)]">${this.msg.flagLate}</span>`
+          : t.details?.details?.venceHoje
+            ? html`<span class="block font-medium text-[var(--status-warning-text,currentColor)]">${this.msg.flagToday}</span>`
+            : nothing}
+      </span>
+    </li>`;
+  }
+
+  private renderResumo() {
+    const r = this.resumo;
+    if (!r) {
+      if (this.pageStatus === 'idle' || this.pageStatus === 'loading') {
+        return html`<div class="h-10 rounded-lg animate-pulse bg-[var(--surface-alt-bg,transparent)]" aria-busy="true"></div>`;
+      }
+      return nothing;
+    }
+    const pair = (value: number, label: string) => html`<div class="flex items-baseline gap-1.5">
+      <dd class="order-1 text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${fmtNumber(value)}</dd>
+      <dt class="order-2 text-sm text-[var(--text-muted,currentColor)]">${label}</dt>
+    </div>`;
+    return html`<div class="flex flex-col gap-3">
+      <dl class="flex flex-wrap gap-x-6 gap-y-2" aria-label=${this.msg.stripLabel}>
+        ${pair(r.quantidadeAbertas, this.msg.stripOpen)}
+        ${pair(r.quantidadeVencemHoje, this.msg.stripToday)}
+        ${pair(r.quantidadeAtrasadas, this.msg.stripLate)}
+      </dl>
+      <details class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
+        <summary class="min-h-[44px] flex items-center px-4 text-sm font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden focus-visible:outline-none focus-visible:ring-2 ring-[color:var(--focus-ring,currentColor)] rounded-lg">${this.msg.openTasksSummary}</summary>
+        ${r.tarefas.length
+          ? html`<ul class="border-t border-[var(--border-subtle,currentColor)]">${r.tarefas.map((t) => this.renderTarefaAberta(t))}</ul>`
+          : html`<p class="px-4 pb-3 text-sm text-[var(--text-muted,currentColor)]">${this.msg.noOpenTasks}</p>`}
+      </details>
+      <button type="button" class=${linkBtn} @click=${() => this.abrirMinhasTarefas()}>${this.msg.seeAllTasks}</button>
+    </div>`;
+  }
+
+  render() {
+    this.msg = pageMessages[this.getMessageKey(pageMessages)];
+    const loading = this.pageStatus === 'loading' || this.pageStatus === 'idle';
+    return html`<main class="mx-auto w-full max-w-[430px] min-h-screen box-border px-4 py-5 flex flex-col gap-5 bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)]" aria-busy=${loading ? 'true' : 'false'}>
+      <header class="flex items-start justify-between gap-3">
+        <h1 class="text-xl font-semibold leading-snug text-[var(--text-strong,currentColor)]">${this.headline()}</h1>
+        <button type="button" class="${linkBtn} shrink-0" ?disabled=${loading} @click=${() => this.qryInicioMembro()}>${this.msg.reload}</button>
+      </header>
+      ${this.renderFeedback()}
+      <section data-organism-id="caixaPendencias">${this.renderCaixa()}</section>
+      <section data-organism-id="alertaAvisoDiario">${this.renderAviso()}</section>
+      <section data-organism-id="resumoMinhasTarefas">${this.renderResumo()}</section>
+    </main>`;
+  }
+}
+

@@ -1,0 +1,56 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { Inicio_gestorContracts, TotaisEquipe, ListaAbertas } from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
+export type { Inicio_gestorContracts, TotaisEquipe, ListaAbertasDetails, ListaAbertas, TarefaAcaoDetails, ListaRef, MembroRefIdentification, MembroRefDetails, MembroRef, TarefaAcao, } from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+type Output<R extends keyof Inicio_gestorContracts> = Inicio_gestorContracts[R]['output'];
+type TarefasPage = Output<'tarefas.inicio_gestor.qryTarefasPedemAcao'>['tarefas'];
+type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export declare class TarefasInicio_gestorShared extends StateLitElement {
+    /** state totais — team indicators already computed on the server (open, due today, overdue, checklist progress); source qryPanoramaEquipe.totais; organism destaquesEquipe */
+    totais: TotaisEquipe | null;
+    /** state listas — active lists with their count of open tasks; source qryPanoramaEquipe.listas; organism destaquesEquipe */
+    listas: ListaAbertas[];
+    /** state tarefas — page { items, page, pageSize, hasMore } of open tasks that are overdue or due today, with list and assignee; source qryTarefasPedemAcao.tarefas; organism tarefasPedemAcao */
+    tarefas: TarefasPage | null;
+    /** state page — the page of the inbox the person went to with a pager (a "load more" never writes it); source entry.params.page; organism tarefasPedemAcao; persisted */
+    page: number | null;
+    /** state pageStatus — overall status of the page: loading while a request runs, error if one failed, empty when every list is empty, success otherwise; source page */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state qryPanoramaEquipeStatus — status of the team overview request; source qryPanoramaEquipe */
+    qryPanoramaEquipeStatus: RequestStatus;
+    /** state qryPanoramaEquipeError — error of the team overview request, null when none; source qryPanoramaEquipe */
+    qryPanoramaEquipeError: ErrorState;
+    /** state qryTarefasPedemAcaoStatus — status of the inbox request (also used by navigation errors); source qryTarefasPedemAcao */
+    qryTarefasPedemAcaoStatus: RequestStatus;
+    /** state qryTarefasPedemAcaoError — error of the inbox request, null when none; source qryTarefasPedemAcao */
+    qryTarefasPedemAcaoError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private hydrateData;
+    private resetVisit;
+    private applyEntryParams;
+    private loadInitial;
+    private updatePageStatus;
+    private unexpectedError;
+    /** setScenario — publishes the visible scene of the page (scenary); not persisted, not in the URL; scene: the scene name */
+    setScenario(value: string): void;
+    /** request qryPanoramaEquipe — loads the team overview (totals of open, due today and overdue tasks, checklist progress, open tasks per list); redraws totais (replace) and listas (replace); no arguments; also the method to reload the overview */
+    qryPanoramaEquipe(): Promise<void>;
+    /** request qryTarefasPedemAcao — loads the inbox of open tasks that are overdue or due today (overdue first); redraws tarefas (replace the page, or append the next page to items when append is true; append keeps page/hasMore inside tarefas and never writes the page state; a pager call with append false publishes the page state); page: page to load (default: the page state, else 1; with append, the next page); append: add the next page to the loaded items, ignored unless tarefas.hasMore */
+    qryTarefasPedemAcao(page?: number, append?: boolean): Promise<void>;
+    /** navigate abrirTarefasEquipe — opens the team tasks page (board/list); listaId: optional list the person picked, carried as the listaId param of tarefas_equipe (omit to open it unfiltered) */
+    abrirTarefasEquipe(listaId?: string | null): void;
+    /** navigate abrirListas — opens the lists page; listaId: optional list the person picked, carried as the listaId param of listas (omit to just open it) */
+    abrirListas(listaId?: string | null): void;
+    /** navigate agirNaTarefa — opens the team tasks page on the chosen inbox task to reassign or cancel it; tarefaId: id of the task the person picked (null refuses with client.preconditionMissing in qryTarefasPedemAcaoError) */
+    agirNaTarefa(tarefaId: string | null): void;
+}

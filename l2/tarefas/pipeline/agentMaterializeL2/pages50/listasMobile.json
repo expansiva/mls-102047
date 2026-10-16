@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "tarefas",
+  "pageId": "listas",
+  "device": "mobile",
+  "contextHash": "sha256:19189c6c30c7c8f2d99a855b01104e059463d1e1bde172769206b6899e80711e",
+  "sourcePath": "l2/tarefas/web/mobile/page11/listas.ts",
+  "sourceHash": "sha256:36402a44b021ee929e7dac275abe49ec864e32898415a91840747f321b3f37f7",
+  "attempt": 1,
+  "design": {
+    "concept": "Duas cenas em coluna estreita: a lista das equipes (cada lista com nome grande, tipo/estado pequenos e a contagem de tarefas abertas) e a ficha da lista, aberta ao tocar numa linha ou em \"Nova lista\". A ficha tem um campo por linha e o botão de salvar no pé, ao alcance do polegar; ao salvar, volta à lista com a linha marcada e um aviso rápido.",
+    "views": [
+      {
+        "id": "lista",
+        "purpose": "Ver as listas empilhadas, tocar numa para editar, ou cadastrar uma nova pelo botão fixo no pé. Cobre carregando, vazio, erro e pré-condição ausente."
+      },
+      {
+        "id": "registro",
+        "purpose": "Ficha de uma lista: nome, tipo, descrição e ativa. Serve para criar (vazia) ou salvar (preenchida); o título é o nome da lista; voltar pelo host de cenas."
+      }
+    ],
+    "decisions": "Segui a variante mobile do template: lista e formulário nunca empilhados, cada um numa cena do ml-scenary em modo scenary, com back na ficha. O título da cena 'lista' é o título único da página; o da ficha é a identidade do registro (nome da lista) ou 'Dados da nova lista', sem repetir rótulo de botão. A paginação foi omitida: o shared não expõe página e o template proíbe chrome de paginação. Não há busca nem filtro porque o contrato não os declara. Listas inativas continuam na lista, com texto atenuado e selo neutro. Um mesmo formulário serve criar e salvar conforme selectedLista; o botão fica desabilitado até os obrigatórios estarem preenchidos. Erros de comando aparecem dentro da ficha, acima do botão (feedback contextual); o sucesso aparece como toast na lista, depois de voltar da cena, e o dispensar limpa o resultado reescrevendo o rascunho. Após criar ou salvar com sucesso, a página volta para a lista; a linha da lista permanece marcada porque selectedLista continua apontando para ela. Voltar com alterações não salvas usa o back do host, sem confirmação, porque o host não permite interceptá-lo."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section cadastroListas needs an element with data-section-id=\"cadastroListas\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section manutencaoLista needs an element with data-section-id=\"manutencaoLista\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism listasCadastradas (paginação das listas) renders neither <grouptriggeraction--ml-pagination-control>."
+    }
+  ]
+}

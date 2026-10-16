@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "2026-10-05-materialize-l2-v4-page-v1",
+  "project": 102047,
+  "module": "tarefas",
+  "pageId": "meus_avisos",
+  "device": "mobile",
+  "contextHash": "sha256:358d43f3cbbe0f4fc8e86efdeef09b461644a0e6e2887b245110a303d36593a0",
+  "sourcePath": "l2/tarefas/web/mobile/page11/meus_avisos.ts",
+  "sourceHash": "sha256:f049b2d0bcf40db7e807a8efa886f0435054087e8286199a001e0c08a124360c",
+  "attempt": 1,
+  "design": {
+    "concept": "Uma mesa de triagem de bolso: ao abrir, a pessoa vê o aviso de hoje com o total de tarefas, o total de atrasadas e cada tarefa com prazo e situação. A lista de avisos anteriores e o histórico de envio ficam a um toque, em outra cena com botão de voltar.",
+    "views": [
+      {
+        "id": "aviso",
+        "purpose": "Cena inicial: o aviso aberto (o de hoje por padrão) com os dois totais no topo e as tarefas que vencem hoje ou estão atrasadas, em cartões curtos."
+      },
+      {
+        "id": "avisos",
+        "purpose": "Cena com voltar: lista empilhada dos meus avisos por data de referência (tocar abre o aviso e volta para a cena do aviso) e, no fim, a linha do tempo compacta de geração e finalização."
+      }
+    ],
+    "decisions": "Segui a intenção mobile (aviso de hoje primeiro) em vez da ordem das seções: a lista é primária em prioridade, mas o aviso aberto já vem carregado e é o que a pessoa quer ver; a lista fica a um toque. Duas cenas em ml-scenary (modo scenary) mantêm uma coisa por vez sem perder o lugar. Selecionar na lista chama abrirAviso e volta ao detalhe, fechando o ciclo selecionar-ler. Totais vêm prontos do backend e são só exibidos (metric-big-number). Tarefas usam responsive-table, que vira cartões em tela estreita. O histórico usa timeline-view com duas colunas para ficar vertical e fica no fim da cena da lista, de forma secundária. Filtro de período foi omitido: o contrato não tem entrada de filtro. Carregar mais é discreto, só quando há mais páginas. Estados de carregando, vazio e erro são desenhados; a falta de pré-condição explica em palavras e oferece voltar. Cores só por tokens; situação atrasada usa aviso (warning), não alarme."
+  },
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section avisosRecebidos needs an element with data-section-id=\"avisosRecebidos\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section avisoAberto needs an element with data-section-id=\"avisoAberto\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section envioDosAvisos needs an element with data-section-id=\"envioDosAvisos\"."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism listaAvisos (Filtro rápido de período) renders neither <groupenterdateinterval--ml-date-interval-presets>."
+    }
+  ]
+}
