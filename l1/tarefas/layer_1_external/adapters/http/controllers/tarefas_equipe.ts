@@ -136,17 +136,19 @@ function validateInput(params: unknown, fields: readonly string[], allowed: read
   const invalid = invalidPath(body, ''); if (invalid) return new AppError('VALIDATION_ERROR', invalid, 400);
   for (const field of fields) {
     // A required member of an absent optional parent is not required; a required parent has its own entry.
-    const parts = field.split('.');
-    let value: unknown = body;
-    let parentAbsent = false;
-    for (const [index, part] of parts.entries()) {
-      if (index > 0 && (value === undefined || value === null)) { parentAbsent = true; break; }
-      value = value && typeof value === 'object' ? (value as Record<string, unknown>)[part] : undefined;
-    }
-    if (parentAbsent) continue;
-    if (value === undefined || (value === null && !nullable.includes(field)) || value === '') {
-      return new AppError('VALIDATION_ERROR', `${field} is required.`, 400);
-    }
+    // A list on the way applies the rest of the path to each of its items: an empty list requires nothing.
+    const missing = (value: unknown, parts: readonly string[], path: string, top: boolean): string => {
+      if (parts.length === 0) return value === undefined || (value === null && !nullable.includes(field)) || value === '' ? path : '';
+      if (!top && (value === undefined || value === null)) return '';
+      if (Array.isArray(value)) {
+        for (const [index, item] of value.entries()) { const found = missing(item, parts, `${path}[${index}]`, false); if (found) return found; }
+        return '';
+      }
+      const next = value && typeof value === 'object' ? (value as Record<string, unknown>)[parts[0]] : undefined;
+      return missing(next, parts.slice(1), path ? `${path}.${parts[0]}` : parts[0], false);
+    };
+    const found = missing(body, field.split('.'), '', true);
+    if (found) return new AppError('VALIDATION_ERROR', `${found} is required.`, 400);
   }
   return null;
 }

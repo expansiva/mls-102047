@@ -5,71 +5,61 @@ import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repos
 import type { AvisoVencimentoRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/avisoVencimentoRepository.js';
 
 export interface GetAvisoVencimentoInput extends Record<string, unknown> {
-  id: string;
+id: string;
 }
 
 export interface GetAvisoVencimentoOutput extends Record<string, unknown> {
-  id: string;
-  version: number;
-  responsavelId: string;
-  dataReferencia: string;
-  status: string;
-  details: {
-    geradoEm: string;
-    finalizadoEm?: string;
-    motivoFalha?: string;
-    tarefas: {
-      tarefaId: string;
-      prazo: string;
-      situacaoPrazo: string;
-    }[];
-    quantidadeTarefas?: number;
-    quantidadeAtrasadas?: number;
-  };
+id: string;
+version: number;
+responsavelId: string;
+dataReferencia: string;
+status: string;
+details: {
+geradoEm: string;
+finalizadoEm?: string;
+motivoFalha?: string;
+tarefas: {
+tarefaId: string;
+prazo: string;
+situacaoPrazo: string;
+}[];
+quantidadeTarefas?: number;
+quantidadeAtrasadas?: number;
+};
 }
 
 export async function getAvisoVencimento(input: GetAvisoVencimentoInput, ctx: RequestContext): Promise<GetAvisoVencimentoOutput> {
-  const id = typeof input.id === 'string' ? input.id.trim() : '';
-  if (!id) {
-    throw new AppError('VALIDATION_ERROR', 'id is required to get an AvisoVencimento.', 400);
-  }
-  const repository = resolveRepository<AvisoVencimentoRepository>(ctx, 'AvisoVencimentoRepository');
-  const found = await repository.get(id);
-  if (!found) {
-    throw new AppError('NOT_FOUND', 'AvisoVencimento not found: ' + id, 404);
-  }
-
-  // Derived fields are calculated, never read from storage.
-  // geradoEm: the daily process generates the notice at 8h of the reference day.
-  const geradoEm = String(found.dataReferencia) + 'T08:00:00';
-
-  // quantidadeTarefas / quantidadeAtrasadas: counted from the tarefas of the notice.
-  const rawTarefas: unknown = found.details.tarefas;
-  let list: { situacaoPrazo?: unknown }[] = [];
-  if (Array.isArray(rawTarefas)) {
-    list = rawTarefas as { situacaoPrazo?: unknown }[];
-  } else if (rawTarefas) {
-    list = [rawTarefas as { situacaoPrazo?: unknown }];
-  }
-  const quantidadeTarefas = list.length;
-  const quantidadeAtrasadas = list.filter((t) => t.situacaoPrazo === 'overdue').length;
-
-  const details: GetAvisoVencimentoOutput['details'] = {
-    geradoEm,
-    tarefas: found.details.tarefas,
-    quantidadeTarefas,
-    quantidadeAtrasadas,
-  };
-  if (found.details.motivoFalha !== undefined) {
-    details.motivoFalha = found.details.motivoFalha;
-  }
-
-  return {
-    id: found.id,
-    version: found.version,
-    responsavelId: found.responsavelId,
-    dataReferencia: found.dataReferencia,
-    status: found.status,
-    details,
-  };
+const id = typeof input.id === 'string' ? input.id.trim() : '';
+if (!id) {
+throw new AppError('INVALID_INPUT', 'The id of the aviso is required.', 400);
+}
+const repository = resolveRepository<AvisoVencimentoRepository>(ctx, 'AvisoVencimentoRepository');
+const found = await repository.get(id);
+if (!found) {
+throw new AppError('NOT_FOUND', 'AvisoVencimento not found: ' + id, 404);
+}
+const tarefas = (found.details?.tarefas ?? []).map((t) => ({
+tarefaId: t.tarefaId,
+prazo: t.prazo,
+situacaoPrazo: t.situacaoPrazo,
+}));
+// Derived counts are computed every time, never read from storage.
+const quantidadeTarefas = tarefas.length;
+const quantidadeAtrasadas = tarefas.filter((t) => t.situacaoPrazo === 'overdue').length;
+// The timestamps of the event (generation and end of the sending) are recorded by the daily process
+// and carried over as the stored detail group; the counts and the task list are rebuilt here.
+const details: GetAvisoVencimentoOutput['details'] = {
+...found.details,
+tarefas,
+quantidadeTarefas,
+quantidadeAtrasadas,
+};
+return {
+id: found.id,
+version: found.version,
+responsavelId: found.responsavelId,
+dataReferencia: found.dataReferencia,
+status: found.status,
+details,
+};
 }

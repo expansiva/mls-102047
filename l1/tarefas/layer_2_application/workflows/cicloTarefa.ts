@@ -1,22 +1,25 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/workflows/cicloTarefa.ts" enhancement="_blank"/>
 
-import { AppError, type RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
-import { taskOccurrence, type OccurrenceRef, type TaskOccurrence } from '/_102047_/l1/tarefas/layer_1_external/adapters/workflow/taskOccurrence.js';
-import type { Tarefa } from '/_102047_/l1/tarefas/layer_3_domain/entities/tarefa.js';
+import { taskOccurrence } from '/_102047_/l1/tarefas/layer_1_external/adapters/workflow/taskOccurrence.js';
+import type { OccurrenceRef, TaskOccurrence } from '/_102047_/l1/tarefas/layer_1_external/adapters/workflow/taskOccurrence.js';
 import type { TarefaRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.js';
 import type { ListaRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/listaRepository.js';
-import { createTarefa, type CreateTarefaInput } from '/_102047_/l1/tarefas/layer_2_application/usecases/createTarefa.js';
-import { updateTarefa, type UpdateTarefaInput } from '/_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.js';
+import type { Tarefa } from '/_102047_/l1/tarefas/layer_3_domain/entities/tarefa.js';
+import { createTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/createTarefa.js';
+import { updateTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.js';
+import type { UpdateTarefaInput } from '/_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.js';
 import { iniciar } from '/_102047_/l1/tarefas/layer_2_application/usecases/iniciar.js';
 import { enviarParaRevisao } from '/_102047_/l1/tarefas/layer_2_application/usecases/enviarParaRevisao.js';
 import { aceitar } from '/_102047_/l1/tarefas/layer_2_application/usecases/aceitar.js';
 import { devolver } from '/_102047_/l1/tarefas/layer_2_application/usecases/devolver.js';
 import { cancelar } from '/_102047_/l1/tarefas/layer_2_application/usecases/cancelar.js';
 
-// Posting to the task-room / thread and notifying the person are not reachable from the ports
-// and platform files this module gives to the workflow service; the progress (step, actorNow,
-// history) is what this service records, through taskOccurrence.
+// The process keeps, in the Task, only the reference and the progress (step, actorNow, history).
+// The message of origin, the task-room posts and the notices of "who acts now" have no port in this module:
+// the Task step/actorNow/history written here is what those services read.
 
 const PROJECT = 102047;
 const MODULE = 'tarefas';
@@ -24,152 +27,157 @@ const ENTITY = 'Tarefa';
 const PROCESS_ID = 'cicloTarefa';
 const WORKFLOW_VERSION = '1';
 
-type TarefaStatus = Tarefa['status'];
-export type TransicaoTarefa = 'iniciar' | 'enviarParaRevisao' | 'aceitar' | 'devolver' | 'cancelar';
-
-type OccurrenceKey = Omit<OccurrenceRef, 'workflowVersion'>;
-
 const STEP_AGUARDAR_INICIO = 'aguardarInicio';
 const STEP_EXECUTAR = 'executar';
 const STEP_REVISAR = 'revisar';
 const STEP_AGUARDAR_AJUSTE = 'aguardarAjuste';
 const STEP_RETOMAR = 'retomar';
 const STEP_CONCLUIDA = 'concluida';
-const STEP_CANCELAR_CRIADOR = 'cancelarCriador';
-const STEP_CANCELAR_GESTOR = 'cancelarGestor';
+const STEP_CANCELADA = 'cancelada';
 
-const TERMINAL_STEPS: readonly string[] = [STEP_CONCLUIDA, STEP_CANCELAR_CRIADOR, STEP_CANCELAR_GESTOR];
+const RESPONSAVEL_STEPS: string[] = [STEP_AGUARDAR_INICIO, STEP_EXECUTAR, STEP_RETOMAR, STEP_AGUARDAR_AJUSTE];
+const CRIADOR_STEPS: string[] = [STEP_REVISAR, STEP_CONCLUIDA, STEP_CANCELADA];
 
-interface TransitionSpec {
-  from: readonly TarefaStatus[];
-  to: TarefaStatus;
-  fromSteps: readonly string[];
-  doneSteps: readonly string[];
+const PRIORIDADES: Tarefa['prioridade'][] = ['low', 'medium', 'high'];
+
+type TransitionId = 'iniciar' | 'enviarParaRevisao' | 'aceitar' | 'devolver' | 'cancelar';
+
+interface TransitionRule {
+  fromStatus: Tarefa['status'][];
+  toStatus: Tarefa['status'];
+  fromSteps: string[];
+  toStep: string;
+  who: 'responsavel' | 'criador' | 'criadorOuGestor';
+  ruleId: string;
 }
 
-const TRANSITIONS: Record<TransicaoTarefa, TransitionSpec> = {
+const TRANSITIONS: Record<TransitionId, TransitionRule> = {
   iniciar: {
-    from: ['aFazer'],
-    to: 'emAndamento',
+    fromStatus: ['aFazer'],
+    toStatus: 'emAndamento',
     fromSteps: [STEP_AGUARDAR_INICIO],
-    doneSteps: [STEP_EXECUTAR],
+    toStep: STEP_EXECUTAR,
+    who: 'responsavel',
+    ruleId: 'somenteResponsavelExecuta',
   },
   enviarParaRevisao: {
-    from: ['emAndamento'],
-    to: 'emRevisao',
-    fromSteps: [STEP_EXECUTAR, STEP_AGUARDAR_AJUSTE, STEP_RETOMAR],
-    doneSteps: [STEP_REVISAR],
+    fromStatus: ['emAndamento'],
+    toStatus: 'emRevisao',
+    fromSteps: [STEP_EXECUTAR, STEP_RETOMAR, STEP_AGUARDAR_AJUSTE],
+    toStep: STEP_REVISAR,
+    who: 'responsavel',
+    ruleId: 'somenteResponsavelExecuta',
   },
   aceitar: {
-    from: ['emRevisao'],
-    to: 'concluida',
+    fromStatus: ['emRevisao'],
+    toStatus: 'concluida',
     fromSteps: [STEP_REVISAR],
-    doneSteps: [STEP_CONCLUIDA],
+    toStep: STEP_CONCLUIDA,
+    who: 'criador',
+    ruleId: 'somenteCriadorRevisa',
   },
   devolver: {
-    from: ['emRevisao'],
-    to: 'emAndamento',
+    fromStatus: ['emRevisao'],
+    toStatus: 'emAndamento',
     fromSteps: [STEP_REVISAR],
-    doneSteps: [STEP_AGUARDAR_AJUSTE],
+    toStep: STEP_AGUARDAR_AJUSTE,
+    who: 'criador',
+    ruleId: 'somenteCriadorRevisa',
   },
   cancelar: {
-    from: ['aFazer', 'emAndamento', 'emRevisao'],
-    to: 'cancelada',
+    fromStatus: ['aFazer', 'emAndamento', 'emRevisao'],
+    toStatus: 'cancelada',
     fromSteps: [STEP_AGUARDAR_INICIO, STEP_EXECUTAR, STEP_REVISAR, STEP_AGUARDAR_AJUSTE, STEP_RETOMAR],
-    doneSteps: [STEP_CANCELAR_CRIADOR, STEP_CANCELAR_GESTOR],
+    toStep: STEP_CANCELADA,
+    who: 'criadorOuGestor',
+    ruleId: 'cancelamentoPorCriadorOuGestor',
   },
 };
 
-const PRIORIDADES: readonly string[] = ['low', 'medium', 'high'];
+function isTransitionId(value: string): value is TransitionId {
+  return Object.prototype.hasOwnProperty.call(TRANSITIONS, value);
+}
 
-// ---------------------------------------------------------------- helpers
-
-function occurrenceKey(recordId: string): OccurrenceKey {
+function refOf(recordId: string): Omit<OccurrenceRef, 'workflowVersion'> {
   return { project: PROJECT, module: MODULE, entity: ENTITY, recordId, processId: PROCESS_ID };
 }
 
-function requireText(value: unknown, field: string, ruleId: string): string {
+function requireText(value: string | undefined, field: string): string {
   if (typeof value !== 'string' || value.trim() === '') {
-    throw new AppError('INVALID_INPUT', `The field ${field} is required.`, 400, { ruleId });
+    throw new AppError('FIELD_REQUIRED', `The field ${field} is required.`, 400, { field });
   }
   return value;
 }
 
-function callerId(ctx: RequestContext): string {
-  const id = ctx.sessionContext.person?.mdmId;
-  if (id === undefined || id === '') {
-    throw new AppError('CALLER_NOT_IDENTIFIED', 'The caller is not identified as a team member.', 403, { ruleId: 'somenteResponsavelExecuta' });
+function requireActor(ctx: RequestContext, ruleId: string): string {
+  const actor = ctx.sessionContext.person?.mdmId;
+  if (actor === undefined || actor === '') {
+    throw new AppError('ACTOR_NOT_RESOLVED', 'The session has no team member who can act on the task.', 403, { ruleId });
   }
-  return id;
+  return actor;
 }
 
 function isGestor(ctx: RequestContext): boolean {
-  const scope: string[] = [...(ctx.sessionContext.actorScope ?? []), ...(ctx.sessionContext.actorSession.scope ?? [])];
-  const actorId = ctx.sessionContext.actorId ?? ctx.sessionContext.actorSession.actorId;
-  return actorId === 'gestor' || actorId === 'tarefas:gestor' || scope.includes('gestor') || scope.includes('tarefas:gestor');
+  const scope = ctx.sessionContext.actorScope ?? [];
+  if (ctx.sessionContext.actorId === 'gestor') return true;
+  return scope.some((entry) => entry === 'gestor' || entry.endsWith(':gestor'));
 }
 
-function tarefaRepository(ctx: RequestContext): TarefaRepository {
-  return resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+function writableDetails(tarefa: Tarefa): UpdateTarefaInput['details'] {
+  const d = tarefa.details;
+  return {
+    ...(d.descricao !== undefined ? { descricao: d.descricao } : {}),
+    ...(d.motivoDevolucao !== undefined ? { motivoDevolucao: d.motivoDevolucao } : {}),
+    ...(d.devolvidaEm !== undefined ? { devolvidaEm: d.devolvidaEm } : {}),
+    ...(d.concluidaEm !== undefined ? { concluidaEm: d.concluidaEm } : {}),
+    ...(d.canceladaEm !== undefined ? { canceladaEm: d.canceladaEm } : {}),
+  };
 }
 
-async function requireOccurrence(ctx: RequestContext, recordId: string): Promise<TaskOccurrence> {
-  const occurrence = await taskOccurrence.find(ctx, occurrenceKey(recordId));
+async function findOccurrence(ctx: RequestContext, tarefaId: string): Promise<TaskOccurrence> {
+  const occurrence = await taskOccurrence.find(ctx, refOf(tarefaId));
   if (occurrence === null) {
-    throw new AppError('OCCURRENCE_NOT_FOUND', `No occurrence of ${PROCESS_ID} was opened for the task ${recordId}.`, 404, { ruleId: 'criacaoIdempotente' });
+    throw new AppError('OCCURRENCE_NOT_FOUND', `The task ${tarefaId} has no open occurrence of the process ${PROCESS_ID}.`, 404);
   }
   return occurrence;
 }
 
-function detailsForUpdate(details: Tarefa['details']): UpdateTarefaInput['details'] {
-  const out: UpdateTarefaInput['details'] = {};
-  if (details.descricao !== undefined) out.descricao = details.descricao;
-  if (details.motivoDevolucao !== undefined) out.motivoDevolucao = details.motivoDevolucao;
-  if (details.devolvidaEm !== undefined) out.devolvidaEm = details.devolvidaEm;
-  if (details.concluidaEm !== undefined) out.concluidaEm = details.concluidaEm;
-  if (details.canceladaEm !== undefined) out.canceladaEm = details.canceladaEm;
-  return out;
-}
-
-// ---------------------------------------------------------------- resolverQuemAgeAgora
+// ---------------------------------------------------------------------------------------------
+// resolverQuemAgeAgora
+// ---------------------------------------------------------------------------------------------
 
 export interface ResolverQuemAgeAgoraInput {
+  tarefaId: string;
   etapa: string;
-  responsavelId: string;
-  criadorId: string;
 }
 
 export interface ResolverQuemAgeAgoraOutput {
-  quemAgeAgora: string;
+  quemAgeId: string;
 }
 
 export async function resolverQuemAgeAgora(input: ResolverQuemAgeAgoraInput, ctx: RequestContext): Promise<ResolverQuemAgeAgoraOutput> {
-  void ctx;
-  const etapa = requireText(input.etapa, 'etapa', 'somenteResponsavelExecuta');
-  const responsavelId = requireText(input.responsavelId, 'responsavelId', 'somenteResponsavelExecuta');
-  const criadorId = requireText(input.criadorId, 'criadorId', 'somenteCriadorRevisa');
-  if (etapa === STEP_AGUARDAR_INICIO || etapa === STEP_EXECUTAR || etapa === STEP_RETOMAR || etapa === STEP_AGUARDAR_AJUSTE) {
-    return { quemAgeAgora: responsavelId };
-  }
-  if (etapa === STEP_REVISAR) {
-    return { quemAgeAgora: criadorId };
-  }
-  throw new AppError('STEP_HAS_NO_ACTOR', `The step ${etapa} has no person who acts now.`, 400, { ruleId: 'somenteResponsavelExecuta' });
+  const tarefaId = requireText(input.tarefaId, 'tarefaId');
+  const etapa = requireText(input.etapa, 'etapa');
+  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const tarefa = await repository.get(tarefaId);
+  if (RESPONSAVEL_STEPS.includes(etapa)) return { quemAgeId: tarefa.responsavelId };
+  if (CRIADOR_STEPS.includes(etapa)) return { quemAgeId: tarefa.criadorId };
+  throw new AppError('STEP_UNKNOWN', `The step ${etapa} does not belong to the process ${PROCESS_ID}.`, 400);
 }
 
-// ---------------------------------------------------------------- abrirOcorrenciaTarefa
+// ---------------------------------------------------------------------------------------------
+// abrirOcorrenciaTarefa
+// ---------------------------------------------------------------------------------------------
 
 export interface AbrirOcorrenciaTarefaInput {
   titulo: string;
-  prioridade: string;
+  prioridade: Tarefa['prioridade'];
   prazo: string;
   listaId: string;
   responsavelId: string;
   tarefaPaiId?: string;
   chaveCriacao: string;
-  details?: {
-    descricao?: string;
-  };
+  details?: { descricao?: string };
 }
 
 export interface AbrirOcorrenciaTarefaOutput {
@@ -180,58 +188,75 @@ export interface AbrirOcorrenciaTarefaOutput {
 export async function abrirOcorrenciaTarefa(input: AbrirOcorrenciaTarefaInput, ctx: RequestContext): Promise<AbrirOcorrenciaTarefaOutput> {
   const key = ctx.requestMeta?.requestId;
   if (key === undefined || key === '') {
-    throw new AppError('IDEMPOTENCY_KEY_REQUIRED', 'The request has no idempotency key (requestId).', 400, { ruleId: 'criacaoIdempotente' });
+    throw new AppError('IDEMPOTENCY_KEY_REQUIRED', 'The request has no requestId to use as the idempotency key.', 400, { ruleId: 'criacaoIdempotente' });
   }
-  const titulo = requireText(input.titulo, 'titulo', 'criacaoIdempotente');
-  const prazo = requireText(input.prazo, 'prazo', 'criacaoIdempotente');
-  const listaId = requireText(input.listaId, 'listaId', 'listaInativaNaoRecebeTarefa');
-  const responsavelId = requireText(input.responsavelId, 'responsavelId', 'responsavelDeveSerMembroAtivo');
-  const chaveCriacao = requireText(input.chaveCriacao, 'chaveCriacao', 'criacaoIdempotente');
-  const prioridade = requireText(input.prioridade, 'prioridade', 'criacaoIdempotente');
-  if (!PRIORIDADES.includes(prioridade)) {
-    throw new AppError('INVALID_PRIORITY', `The priority ${prioridade} is not low, medium or high.`, 400, { ruleId: 'criacaoIdempotente' });
+  const titulo = requireText(input.titulo, 'titulo');
+  const prazo = requireText(input.prazo, 'prazo');
+  const listaId = requireText(input.listaId, 'listaId');
+  const responsavelId = requireText(input.responsavelId, 'responsavelId');
+  const chaveCriacao = requireText(input.chaveCriacao, 'chaveCriacao');
+  if (!PRIORIDADES.includes(input.prioridade)) {
+    throw new AppError('PRIORIDADE_INVALID', 'The priority must be low, medium or high.', 400);
   }
 
-  const repository = tarefaRepository(ctx);
+  const tarefas = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
 
-  // The record the same creation key already wrote (a retry) is reused, never created twice.
-  const existing = (await repository.list({ chaveCriacao })).find((t) => t.chaveCriacao === chaveCriacao);
-
-  let tarefa: Tarefa;
+  // Same key again: the task already written is returned; only what is missing (the Task) is finished.
+  const existing = (await tarefas.list({ chaveCriacao })).find((t) => t.chaveCriacao === chaveCriacao);
   if (existing !== undefined) {
-    tarefa = existing;
-    const opened = await taskOccurrence.find(ctx, occurrenceKey(tarefa.id));
-    if (opened !== null) {
-      return { tarefa, task: opened };
-    }
-  } else {
-    const listaRepository = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
-    const lista = await listaRepository.get(listaId);
-    if (!lista.ativa) {
-      throw new AppError('LIST_INACTIVE', 'An inactive list cannot receive new tasks.', 409, { ruleId: 'listaInativaNaoRecebeTarefa' });
-    }
-    // The usecase applies the active-member rule of the responsible person and the creator of the session.
-    const createInput: CreateTarefaInput = { titulo, prioridade, prazo, listaId, responsavelId, chaveCriacao };
-    if (input.tarefaPaiId !== undefined) createInput.tarefaPaiId = input.tarefaPaiId;
-    if (input.details !== undefined) createInput.details = input.details;
-    const created = await createTarefa(createInput, ctx);
-    tarefa = await repository.get(created.id);
+    const task = await taskOccurrence.open(
+      ctx,
+      { ...refOf(existing.id), workflowVersion: WORKFLOW_VERSION },
+      STEP_AGUARDAR_INICIO,
+      existing.responsavelId,
+      key,
+    );
+    return { tarefa: existing, task };
   }
 
-  const ref: OccurrenceRef = { ...occurrenceKey(tarefa.id), workflowVersion: WORKFLOW_VERSION };
-  const { quemAgeAgora } = await resolverQuemAgeAgora(
-    { etapa: STEP_AGUARDAR_INICIO, responsavelId: tarefa.responsavelId, criadorId: tarefa.criadorId },
+  const criadorId = requireActor(ctx, 'criacaoIdempotente');
+
+  const listas = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
+  const lista = await listas.get(listaId);
+  if (!lista.ativa) {
+    throw new AppError('LISTA_INATIVA', 'An inactive list cannot receive new tasks.', 409, { ruleId: 'listaInativaNaoRecebeTarefa' });
+  }
+
+  // The active-member check of the responsible (responsavelDeveSerMembroAtivo) is applied by the usecase.
+  const created = await createTarefa(
+    {
+      titulo,
+      status: 'aFazer',
+      prioridade: input.prioridade,
+      prazo,
+      listaId,
+      responsavelId,
+      criadorId,
+      chaveCriacao,
+      ...(input.tarefaPaiId !== undefined ? { tarefaPaiId: input.tarefaPaiId } : {}),
+      details: input.details?.descricao !== undefined ? { descricao: input.details.descricao } : {},
+    },
     ctx,
   );
-  const task = await taskOccurrence.open(ctx, ref, STEP_AGUARDAR_INICIO, quemAgeAgora, key);
+
+  const tarefa = await tarefas.get(created.id);
+  const task = await taskOccurrence.open(
+    ctx,
+    { ...refOf(tarefa.id), workflowVersion: WORKFLOW_VERSION },
+    STEP_AGUARDAR_INICIO,
+    tarefa.responsavelId,
+    key,
+  );
   return { tarefa, task };
 }
 
-// ---------------------------------------------------------------- avancarEtapaTarefa
+// ---------------------------------------------------------------------------------------------
+// avancarEtapaTarefa
+// ---------------------------------------------------------------------------------------------
 
 export interface AvancarEtapaTarefaInput {
-  tarefaId: string;
-  transicao: TransicaoTarefa;
+  id: string;
+  transicao: 'iniciar' | 'enviarParaRevisao' | 'aceitar' | 'devolver' | 'cancelar';
   motivoDevolucao?: string;
 }
 
@@ -240,120 +265,108 @@ export interface AvancarEtapaTarefaOutput {
   task: TaskOccurrence;
 }
 
-function stepsAfter(transicao: TransicaoTarefa, currentStep: string, byCreator: boolean): string[] {
+async function applyTransition(
+  transicao: TransitionId,
+  tarefa: Tarefa,
+  motivoDevolucao: string | undefined,
+  ctx: RequestContext,
+): Promise<void> {
+  const base = { id: tarefa.id, version: tarefa.version };
   switch (transicao) {
     case 'iniciar':
-      return [STEP_EXECUTAR];
+      await iniciar(base, ctx);
+      return;
     case 'enviarParaRevisao':
-      return currentStep === STEP_AGUARDAR_AJUSTE ? [STEP_RETOMAR, STEP_REVISAR] : [STEP_REVISAR];
+      await enviarParaRevisao(base, ctx);
+      return;
     case 'aceitar':
-      return [STEP_CONCLUIDA];
+      await aceitar(base, ctx);
+      return;
     case 'devolver':
-      return [STEP_AGUARDAR_AJUSTE];
+      await devolver({ ...base, details: { motivoDevolucao: requireText(motivoDevolucao, 'motivoDevolucao') } }, ctx);
+      return;
     case 'cancelar':
-      return [byCreator ? STEP_CANCELAR_CRIADOR : STEP_CANCELAR_GESTOR];
-  }
-}
-
-function assertCallerMayApply(transicao: TransicaoTarefa, tarefa: Tarefa, caller: string, ctx: RequestContext): void {
-  if (transicao === 'iniciar' || transicao === 'enviarParaRevisao') {
-    if (caller !== tarefa.responsavelId) {
-      throw new AppError('ONLY_RESPONSIBLE_EXECUTES', 'Only the responsible person can start the task or send it to review.', 403, { ruleId: 'somenteResponsavelExecuta' });
-    }
-    return;
-  }
-  if (transicao === 'aceitar' || transicao === 'devolver') {
-    if (caller !== tarefa.criadorId) {
-      throw new AppError('ONLY_CREATOR_REVIEWS', 'Only the creator of the task can accept or return it.', 403, { ruleId: 'somenteCriadorRevisa' });
-    }
-    return;
-  }
-  if (caller !== tarefa.criadorId && !isGestor(ctx)) {
-    throw new AppError('ONLY_CREATOR_OR_MANAGER_CANCELS', 'Only the creator or the manager can cancel the task.', 403, { ruleId: 'cancelamentoPorCriadorOuGestor' });
+      await cancelar(base, ctx);
+      return;
   }
 }
 
 export async function avancarEtapaTarefa(input: AvancarEtapaTarefaInput, ctx: RequestContext): Promise<AvancarEtapaTarefaOutput> {
-  const tarefaId = requireText(input.tarefaId, 'tarefaId', 'tarefaEncerradaNaoTransiciona');
-  const transicao = input.transicao;
-  const spec: TransitionSpec | undefined = TRANSITIONS[transicao];
-  if (spec === undefined) {
-    throw new AppError('UNKNOWN_TRANSITION', `The transition ${String(transicao)} does not exist.`, 400, { ruleId: 'tarefaEncerradaNaoTransiciona' });
+  const id = requireText(input.id, 'id');
+  const transicaoName: string = input.transicao;
+  if (!isTransitionId(transicaoName)) {
+    throw new AppError('TRANSITION_UNKNOWN', `The transition ${transicaoName} is not part of the process.`, 400);
   }
-  let motivo = '';
-  if (transicao === 'devolver') {
-    motivo = requireText(input.motivoDevolucao, 'motivoDevolucao', 'devolucaoExigeMotivo').trim();
-  }
-
-  const caller = callerId(ctx);
-  const repository = tarefaRepository(ctx);
-  const tarefa = await repository.get(tarefaId);
-  const occurrence = await requireOccurrence(ctx, tarefaId);
-  assertCallerMayApply(transicao, tarefa, caller, ctx);
-
-  let mustApply = false;
-  if (tarefa.status === spec.to) {
-    if (spec.doneSteps.includes(occurrence.step)) {
-      // Already applied and recorded: nothing to do.
-      return { tarefa, task: occurrence };
-    }
-    if (!spec.fromSteps.includes(occurrence.step)) {
-      throw new AppError('STEP_CONFLICT', `The task is in ${tarefa.status} but its occurrence is in the step ${occurrence.step}.`, 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
-    }
-    // The record already has the transition; only the Task is behind and is finished below.
-  } else if (spec.from.includes(tarefa.status)) {
-    if (!spec.fromSteps.includes(occurrence.step)) {
-      throw new AppError('STEP_CONFLICT', `The occurrence is in the step ${occurrence.step}, which does not allow ${transicao}.`, 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
-    }
-    mustApply = true;
-  } else {
-    throw new AppError('TRANSITION_NOT_ALLOWED', `The transition ${transicao} is not allowed from ${tarefa.status}.`, 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
-  }
-
-  if (mustApply) {
-    const base = { id: tarefa.id, version: tarefa.version };
-    switch (transicao) {
-      case 'iniciar':
-        await iniciar(base, ctx);
-        break;
-      case 'enviarParaRevisao':
-        await enviarParaRevisao(base, ctx);
-        break;
-      case 'aceitar':
-        await aceitar(base, ctx);
-        break;
-      case 'devolver':
-        await devolver({ ...base, details: { motivoDevolucao: motivo } }, ctx);
-        break;
-      case 'cancelar':
-        await cancelar(base, ctx);
-        break;
+  const rule = TRANSITIONS[transicaoName];
+  if (transicaoName === 'devolver') {
+    if (input.motivoDevolucao === undefined || input.motivoDevolucao.trim() === '') {
+      throw new AppError('MOTIVO_REQUIRED', 'Returning a task requires the reason.', 400, { ruleId: 'devolucaoExigeMotivo' });
     }
   }
 
-  const updated = await repository.get(tarefaId);
-  const ref = occurrenceKey(tarefaId);
-  const steps = stepsAfter(transicao, occurrence.step, caller === tarefa.criadorId);
+  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const tarefa = await repository.get(id);
+  const occurrence = await findOccurrence(ctx, id);
+
+  const actor = requireActor(ctx, rule.ruleId);
+  const allowed =
+    rule.who === 'responsavel'
+      ? actor === tarefa.responsavelId
+      : rule.who === 'criador'
+        ? actor === tarefa.criadorId
+        : actor === tarefa.criadorId || isGestor(ctx);
+  if (!allowed) {
+    throw new AppError('ACTOR_NOT_ALLOWED', `The caller cannot apply ${transicaoName} on this task.`, 403, { ruleId: rule.ruleId });
+  }
+
+  // Already applied and the Task already moved: nothing to do, the current state is returned.
+  if (tarefa.status === rule.toStatus && occurrence.step === rule.toStep) {
+    return { tarefa, task: occurrence };
+  }
+
+  if (!rule.fromSteps.includes(occurrence.step)) {
+    throw new AppError(
+      'STEP_CONFLICT',
+      `The occurrence is in the step ${occurrence.step}, which does not accept ${transicaoName}.`,
+      409,
+      { ruleId: rule.ruleId },
+    );
+  }
+
+  if (rule.fromStatus.includes(tarefa.status)) {
+    await applyTransition(transicaoName, tarefa, input.motivoDevolucao, ctx);
+  } else if (tarefa.status !== rule.toStatus) {
+    const ruleId = tarefa.status === 'concluida' || tarefa.status === 'cancelada' ? 'tarefaEncerradaNaoTransiciona' : rule.ruleId;
+    throw new AppError(
+      'STATE_CONFLICT',
+      `The task is ${tarefa.status} and cannot receive ${transicaoName}.`,
+      409,
+      { ruleId },
+    );
+  }
+  // else: the record already carries the target status (a previous call stopped before the Task moved): finish the Task.
+
+  const path: string[] =
+    transicaoName === 'enviarParaRevisao' && occurrence.step === STEP_AGUARDAR_AJUSTE
+      ? [STEP_RETOMAR, rule.toStep]
+      : [rule.toStep];
+
   let task = occurrence;
-  for (const step of steps) {
-    let actorNow = caller;
-    if (!TERMINAL_STEPS.includes(step)) {
-      const resolved = await resolverQuemAgeAgora(
-        { etapa: step, responsavelId: updated.responsavelId, criadorId: updated.criadorId },
-        ctx,
-      );
-      actorNow = resolved.quemAgeAgora;
-    }
-    task = await taskOccurrence.advance(ctx, ref, step, actorNow);
+  for (const step of path) {
+    const { quemAgeId } = await resolverQuemAgeAgora({ tarefaId: id, etapa: step }, ctx);
+    task = await taskOccurrence.advance(ctx, refOf(id), step, quemAgeId);
   }
-  return { tarefa: updated, task };
+
+  return { tarefa: await repository.get(id), task };
 }
 
-// ---------------------------------------------------------------- reatribuirQuemAge
+// ---------------------------------------------------------------------------------------------
+// reatribuirQuemAge
+// ---------------------------------------------------------------------------------------------
 
 export interface ReatribuirQuemAgeInput {
-  tarefaId: string;
-  novoResponsavelId: string;
+  id: string;
+  responsavelId: string;
 }
 
 export interface ReatribuirQuemAgeOutput {
@@ -362,53 +375,51 @@ export interface ReatribuirQuemAgeOutput {
 }
 
 export async function reatribuirQuemAge(input: ReatribuirQuemAgeInput, ctx: RequestContext): Promise<ReatribuirQuemAgeOutput> {
-  const tarefaId = requireText(input.tarefaId, 'tarefaId', 'reatribuicaoPorCriadorOuGestor');
-  const novoResponsavelId = requireText(input.novoResponsavelId, 'novoResponsavelId', 'responsavelDeveSerMembroAtivo');
+  const id = requireText(input.id, 'id');
+  const novoResponsavelId = requireText(input.responsavelId, 'responsavelId');
 
-  const caller = callerId(ctx);
-  const repository = tarefaRepository(ctx);
-  const tarefa = await repository.get(tarefaId);
-  const occurrence = await requireOccurrence(ctx, tarefaId);
+  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const tarefa = await repository.get(id);
+  const occurrence = await findOccurrence(ctx, id);
 
-  if (caller !== tarefa.criadorId && !isGestor(ctx)) {
-    throw new AppError('ONLY_CREATOR_OR_MANAGER_REASSIGNS', 'Only the creator or the manager can change the responsible person.', 403, { ruleId: 'reatribuicaoPorCriadorOuGestor' });
+  const actor = requireActor(ctx, 'reatribuicaoPorCriadorOuGestor');
+  if (actor !== tarefa.criadorId && !isGestor(ctx)) {
+    throw new AppError('ACTOR_NOT_ALLOWED', 'Only the creator or the manager can change the responsible.', 403, {
+      ruleId: 'reatribuicaoPorCriadorOuGestor',
+    });
   }
   if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
-    throw new AppError('TASK_CLOSED', 'A completed or cancelled task cannot be reassigned.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
+    throw new AppError('STATE_CONFLICT', `The task is ${tarefa.status} and cannot be reassigned.`, 409, {
+      ruleId: 'tarefaEncerradaNaoTransiciona',
+    });
   }
 
-  const responsibleTurn = occurrence.step !== STEP_REVISAR;
-  const ref = occurrenceKey(tarefaId);
+  const responsavelTurn = RESPONSAVEL_STEPS.includes(occurrence.step);
 
-  if (tarefa.responsavelId === novoResponsavelId) {
-    // Same responsible person: no new write and no new notice. Only a Task left behind by an
-    // earlier call (still pointing at the previous person) is finished.
-    if (responsibleTurn && occurrence.actorNow !== novoResponsavelId) {
-      const task = await taskOccurrence.advance(ctx, ref, occurrence.step, novoResponsavelId);
-      return { tarefa, task };
-    }
-    return { tarefa, task: occurrence };
+  if (tarefa.responsavelId !== novoResponsavelId) {
+    // The active-member check of the new responsible (responsavelDeveSerMembroAtivo) is applied by the usecase.
+    const payload: UpdateTarefaInput = {
+      id: tarefa.id,
+      version: tarefa.version,
+      titulo: tarefa.titulo,
+      status: tarefa.status,
+      prioridade: tarefa.prioridade,
+      prazo: tarefa.prazo,
+      listaId: tarefa.listaId,
+      responsavelId: novoResponsavelId,
+      criadorId: tarefa.criadorId,
+      chaveCriacao: tarefa.chaveCriacao,
+      ...(tarefa.tarefaPaiId !== undefined ? { tarefaPaiId: tarefa.tarefaPaiId } : {}),
+      details: writableDetails(tarefa),
+    };
+    await updateTarefa(payload, ctx);
   }
 
-  // The usecase applies the rule that the new responsible person is an active team member.
-  const updateInput: UpdateTarefaInput = {
-    id: tarefa.id,
-    version: tarefa.version,
-    titulo: tarefa.titulo,
-    status: tarefa.status,
-    prioridade: tarefa.prioridade,
-    prazo: tarefa.prazo,
-    listaId: tarefa.listaId,
-    responsavelId: novoResponsavelId,
-    criadorId: tarefa.criadorId,
-    chaveCriacao: tarefa.chaveCriacao,
-    details: detailsForUpdate(tarefa.details),
-  };
-  if (tarefa.tarefaPaiId !== undefined) updateInput.tarefaPaiId = tarefa.tarefaPaiId;
-  await updateTarefa(updateInput, ctx);
+  // Record written; the Task follows. A repeated call finds the record done and only finishes the Task.
+  let task = occurrence;
+  if (responsavelTurn && occurrence.actorNow !== novoResponsavelId) {
+    task = await taskOccurrence.advance(ctx, refOf(id), occurrence.step, novoResponsavelId);
+  }
 
-  const updated = await repository.get(tarefaId);
-  const actorNow = responsibleTurn ? novoResponsavelId : occurrence.actorNow;
-  const task = await taskOccurrence.advance(ctx, ref, occurrence.step, actorNow);
-  return { tarefa: updated, task };
+  return { tarefa: await repository.get(id), task };
 }

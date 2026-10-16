@@ -1,150 +1,105 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/requests/tarefas_equipe.ts" enhancement="_blank"/>
-import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+
+import type { Tarefas_equipeContracts, TarefaQuadroItem, TarefaDetalhe, TarefaDetalheDetails, MembroResumo, ListaResumo, ItemChecklistLinha } from '/_102047_/l2/tarefas/web/contracts/tarefas_equipe.defs.js';
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type {
-  Tarefas_equipeContracts,
-  TarefaQuadroItem,
-  TarefaDetalhe,
-  TarefaDetalheDetails,
-  MembroResumo,
-  MembroIdentificacao,
-  ListaResumo,
-  ItemChecklistLinha,
-} from '/_102047_/l2/tarefas/web/contracts/tarefas_equipe.defs.js';
-import { listTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
-import type { ListTarefaOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { getTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/getTarefa.js';
-import type { GetTarefaOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/getTarefa.js';
 import { getLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/getLista.js';
-import { listLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/listLista.js';
 import { getMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.js';
+import { listTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
+import type { ListTarefaInput, ListTarefaOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
+import { listLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/listLista.js';
+import type { ListListaOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/listLista.js';
 import { listMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.js';
+import type { ListMembroEquipeOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.js';
 import { listItemChecklist } from '/_102047_/l1/tarefas/layer_2_application/usecases/listItemChecklist.js';
 import type { ListItemChecklistOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/listItemChecklist.js';
-import {
-  reatribuirQuemAge,
-  avancarEtapaTarefa,
-} from '/_102047_/l1/tarefas/layer_2_application/workflows/cicloTarefa.js';
+import { reatribuirQuemAge, avancarEtapaTarefa } from '/_102047_/l1/tarefas/layer_2_application/workflows/cicloTarefa.js';
 
 type Status = TarefaQuadroItem['status'];
 type Prioridade = TarefaQuadroItem['prioridade'];
-type MembroStatus = NonNullable<MembroIdentificacao['details']['identification']['status']>;
+type StatusMembro = NonNullable<MembroResumo['details']['identification']['details']['identification']['status']>;
 
-const STATUS_VALIDOS: readonly Status[] = ['aFazer', 'emAndamento', 'emRevisao', 'concluida', 'cancelada'];
-const PRIORIDADES_VALIDAS: readonly Prioridade[] = ['low', 'medium', 'high'];
-const MEMBRO_STATUS_VALIDOS: readonly MembroStatus[] = ['Active', 'Inactive', 'Merged', 'Blocked'];
+const STATUS_VALIDOS: Status[] = ['aFazer', 'emAndamento', 'emRevisao', 'concluida', 'cancelada'];
+const PRIORIDADES_VALIDAS: Prioridade[] = ['low', 'medium', 'high'];
+const STATUS_MEMBRO_VALIDOS: StatusMembro[] = ['Active', 'Inactive', 'Merged', 'Blocked'];
+const STATUS_ABERTOS: string[] = ['aFazer', 'emAndamento', 'emRevisao'];
 const RANK_PRIORIDADE: Record<Prioridade, number> = { high: 0, medium: 1, low: 2 };
-const LIMITE_MEMBROS = 30;
 
-interface QuadroBase {
+interface TarefaRegistro {
   id: string;
+  version: number;
   titulo: string;
   status: string;
   prioridade: string;
   prazo: string;
   listaId: string;
   responsavelId: string;
+  criadorId: string;
+  tarefaPaiId?: string | null;
+  criadaEm: string;
+  details: {
+    descricao?: string | null;
+    motivoDevolucao?: string | null;
+    devolvidaEm?: string | null;
+    concluidaEm?: string | null;
+    canceladaEm?: string | null;
+  };
 }
 
-interface MembroFonte {
+interface MembroRegistro {
   id: string;
-  details: { identification: { name: string; status?: string | null } };
+  details: { identification: { name: string; status: string } };
 }
 
-type ChecklistFonte = ListItemChecklistOutput['items'][number];
+interface Resolvers {
+  lista(id: string): Promise<ListaResumo>;
+  membro(id: string): Promise<MembroResumo>;
+}
 
 function asStatus(v: string): Status {
   const f = STATUS_VALIDOS.find((s) => s === v);
-  if (f === undefined) throw new AppError('INVALID_DATA', `situação de tarefa desconhecida: ${v}`, 500);
+  if (f === undefined) throw new AppError('INVALID_DATA', `Situação de tarefa desconhecida: ${v}`, 500);
   return f;
 }
 
 function asPrioridade(v: string): Prioridade {
   const f = PRIORIDADES_VALIDAS.find((s) => s === v);
-  if (f === undefined) throw new AppError('INVALID_DATA', `prioridade de tarefa desconhecida: ${v}`, 500);
+  if (f === undefined) throw new AppError('INVALID_DATA', `Prioridade de tarefa desconhecida: ${v}`, 500);
   return f;
 }
 
-function asMembroStatus(v: string | null | undefined): MembroStatus | undefined {
+function asStatusMembro(v: string | null | undefined): StatusMembro | undefined {
   if (v == null) return undefined;
-  const f = MEMBRO_STATUS_VALIDOS.find((s) => s === v);
-  if (f === undefined) throw new AppError('INVALID_DATA', `situação de membro desconhecida: ${v}`, 500);
-  return f;
+  return STATUS_MEMBRO_VALIDOS.find((s) => s === v);
 }
 
-function isAberta(status: Status): boolean {
-  return status === 'aFazer' || status === 'emAndamento' || status === 'emRevisao';
-}
-
-function has(v: string | undefined | null): v is string {
-  return v != null && v !== '';
-}
-
-function normalizar(s: string): string {
+function normalizarTexto(s: string): string {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-function hoje(ctx: RequestContext): string {
-  const tz = ctx.organization.timezone;
+function resolverPagina(page: number | undefined, pageSize: number | undefined): { page: number; pageSize: number } {
+  const p = typeof page === 'number' && Number.isInteger(page) && page >= 1 ? page : 1;
+  const sRaw = typeof pageSize === 'number' && Number.isInteger(pageSize) && pageSize >= 1 ? pageSize : 20;
+  return { page: p, pageSize: Math.min(sRaw, 200) };
+}
+
+function hojeDe(ctx: RequestContext): string {
   const iso = ctx.clock.nowIso();
-  if (has(tz)) {
+  const tz = ctx.organization.timezone;
+  if (tz) {
     return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
   }
   return iso.slice(0, 10);
 }
 
 function ehGestor(ctx: RequestContext): boolean {
-  const scope = ctx.sessionContext.actorScope ?? [];
-  return scope.some((s) => s === 'gestor' || s.endsWith(':gestor'));
+  const escopo = ctx.sessionContext.actorScope ?? [];
+  return escopo.some((s) => s === 'gestor' || s.endsWith(':gestor'));
 }
 
-function ehCriador(ctx: RequestContext, criadorId: string): boolean {
-  const s = ctx.sessionContext;
-  return s.person?.mdmId === criadorId || s.actorId === criadorId;
-}
-
-function paginar<T>(todos: T[], pageIn: number, pageSizeIn: number): { items: T[]; page: number; pageSize: number; hasMore: boolean } {
-  const page = Number.isFinite(pageIn) && pageIn >= 1 ? Math.floor(pageIn) : 1;
-  const pageSize = Number.isFinite(pageSizeIn) && pageSizeIn >= 1 ? Math.min(Math.floor(pageSizeIn), 200) : 20;
-  const inicio = (page - 1) * pageSize;
-  return {
-    items: todos.slice(inicio, inicio + pageSize),
-    page,
-    pageSize,
-    hasMore: inicio + pageSize < todos.length,
-  };
-}
-
-async function listarTodasTarefas(
-  filtro: { listaId?: string; responsavelId?: string; prioridade?: string; prazo?: string; tarefaPaiId?: string },
-  ctx: RequestContext,
-): Promise<ListTarefaOutput['items']> {
-  const todas: ListTarefaOutput['items'] = [];
-  for (let page = 1; ; page++) {
-    const r = await listTarefa({ ...filtro, page, pageSize: 200 }, ctx);
-    todas.push(...r.items);
-    if (!r.hasMore) break;
-  }
-  return todas;
-}
-
-async function listarChecklist(tarefaId: string, ctx: RequestContext): Promise<ChecklistFonte[]> {
-  const todos: ChecklistFonte[] = [];
-  for (let page = 1; ; page++) {
-    const r = await listItemChecklist({ tarefaId, page, pageSize: 200 }, ctx);
-    todos.push(...r.items);
-    if (!r.hasMore) break;
-  }
-  return todos;
-}
-
-function progresso(itens: ChecklistFonte[]): string {
-  const feitos = itens.filter((i) => i.feito).length;
-  return `${feitos}/${itens.length}`;
-}
-
-function membroResumo(m: MembroFonte): MembroResumo {
-  const status = asMembroStatus(m.details.identification.status);
+function toMembroResumo(m: MembroRegistro): MembroResumo {
+  const status = asStatusMembro(m.details.identification.status);
   return {
     id: m.id,
     details: {
@@ -160,7 +115,7 @@ function membroResumo(m: MembroFonte): MembroResumo {
   };
 }
 
-function criarLeitores(ctx: RequestContext) {
+function criarResolvers(ctx: RequestContext): Resolvers {
   const listas = new Map<string, Promise<ListaResumo>>();
   const membros = new Map<string, Promise<MembroResumo>>();
   return {
@@ -175,7 +130,7 @@ function criarLeitores(ctx: RequestContext) {
     membro(id: string): Promise<MembroResumo> {
       let p = membros.get(id);
       if (p === undefined) {
-        p = getMembroEquipe({ id }, ctx).then((m) => membroResumo(m));
+        p = getMembroEquipe({ id }, ctx).then((m) => toMembroResumo(m));
         membros.set(id, p);
       }
       return p;
@@ -183,31 +138,74 @@ function criarLeitores(ctx: RequestContext) {
   };
 }
 
-type Leitores = ReturnType<typeof criarLeitores>;
+async function listarTodasTarefas(
+  filtros: { listaId?: string; responsavelId?: string; prioridade?: string; tarefaPaiId?: string },
+  ctx: RequestContext,
+): Promise<ListTarefaOutput['items']> {
+  const todas: ListTarefaOutput['items'] = [];
+  let page = 1;
+  for (;;) {
+    const entrada: ListTarefaInput = { page, pageSize: 200 };
+    if (filtros.listaId != null) entrada.listaId = filtros.listaId;
+    if (filtros.responsavelId != null) entrada.responsavelId = filtros.responsavelId;
+    if (filtros.prioridade != null) entrada.prioridade = filtros.prioridade;
+    if (filtros.tarefaPaiId != null) entrada.tarefaPaiId = filtros.tarefaPaiId;
+    const r = await listTarefa(entrada, ctx);
+    todas.push(...r.items);
+    if (!r.hasMore) break;
+    page += 1;
+  }
+  return todas;
+}
 
-function montarItemQuadro(
-  t: QuadroBase,
-  lista: ListaResumo,
-  responsavel: MembroResumo,
-  progressoChecklist: string,
-  dataHoje: string,
-): TarefaQuadroItem {
-  const status = asStatus(t.status);
-  const aberta = isAberta(status);
-  const prazoDia = t.prazo.slice(0, 10);
+async function carregarChecklist(tarefaId: string, ctx: RequestContext): Promise<ListItemChecklistOutput['items']> {
+  const todos: ListItemChecklistOutput['items'] = [];
+  let page = 1;
+  for (;;) {
+    const r = await listItemChecklist({ tarefaId, page, pageSize: 200 }, ctx);
+    todos.push(...r.items);
+    if (!r.hasMore) break;
+    page += 1;
+  }
+  return todos.slice().sort((a, b) => a.ordem - b.ordem);
+}
+
+function textoProgresso(itens: ListItemChecklistOutput['items']): string {
+  const feitos = itens.filter((i) => i.feito).length;
+  return `${feitos}/${itens.length}`;
+}
+
+function calcularIndicadores(tarefa: TarefaRegistro, hoje: string): { aberta: boolean; venceHoje: boolean; atrasada: boolean } {
+  const aberta = STATUS_ABERTOS.includes(tarefa.status);
+  const dia = tarefa.prazo.slice(0, 10);
   return {
-    id: t.id,
-    titulo: t.titulo,
-    status,
-    prioridade: asPrioridade(t.prioridade),
-    prazo: t.prazo,
-    listaId: t.listaId,
-    responsavelId: t.responsavelId,
+    aberta,
+    venceHoje: aberta && dia === hoje,
+    atrasada: aberta && dia < hoje,
+  };
+}
+
+async function montarItemQuadro(
+  tarefa: TarefaRegistro,
+  progressoChecklist: string,
+  hoje: string,
+  res: Resolvers,
+): Promise<TarefaQuadroItem> {
+  const [lista, responsavel] = await Promise.all([res.lista(tarefa.listaId), res.membro(tarefa.responsavelId)]);
+  const ind = calcularIndicadores(tarefa, hoje);
+  return {
+    id: tarefa.id,
+    titulo: tarefa.titulo,
+    status: asStatus(tarefa.status),
+    prioridade: asPrioridade(tarefa.prioridade),
+    prazo: tarefa.prazo,
+    listaId: tarefa.listaId,
+    responsavelId: tarefa.responsavelId,
     details: {
       details: {
-        aberta,
-        venceHoje: aberta && prazoDia === dataHoje,
-        atrasada: aberta && prazoDia < dataHoje,
+        aberta: ind.aberta,
+        venceHoje: ind.venceHoje,
+        atrasada: ind.atrasada,
         progressoChecklist,
       },
     },
@@ -216,239 +214,212 @@ function montarItemQuadro(
   };
 }
 
-async function montarDetalhe(t: GetTarefaOutput, ctx: RequestContext, leitores: Leitores): Promise<TarefaDetalhe> {
-  const [lista, responsavel, criador, pai, itens, subtarefas] = await Promise.all([
-    leitores.lista(t.listaId),
-    leitores.membro(t.responsavelId),
-    leitores.membro(t.criadorId),
-    t.tarefaPaiId != null ? getTarefa({ id: t.tarefaPaiId }, ctx) : Promise.resolve(null),
-    listarChecklist(t.id, ctx),
-    listarTodasTarefas({ tarefaPaiId: t.id }, ctx),
+async function montarDetalhe(tarefa: TarefaRegistro, ctx: RequestContext, res: Resolvers): Promise<TarefaDetalhe> {
+  const [lista, responsavel, criador, checklistItens, subtarefas, tarefaPai] = await Promise.all([
+    res.lista(tarefa.listaId),
+    res.membro(tarefa.responsavelId),
+    res.membro(tarefa.criadorId),
+    carregarChecklist(tarefa.id, ctx),
+    listarTodasTarefas({ tarefaPaiId: tarefa.id }, ctx),
+    tarefa.tarefaPaiId != null ? getTarefa({ id: tarefa.tarefaPaiId }, ctx) : Promise.resolve(null),
   ]);
-  const status = asStatus(t.status);
-  const d = t.details;
-  const detalhes: TarefaDetalheDetails['details'] = {
-    aberta: isAberta(status),
+
+  const checklist: ItemChecklistLinha[] = checklistItens.map((i) => ({
+    id: i.id,
+    ordem: i.ordem,
+    feito: i.feito,
+    details: { details: { descricao: i.details.descricao } },
+  }));
+
+  const ind = calcularIndicadores(tarefa, hojeDe(ctx));
+  // aberta, quantidadeSubtarefas e progressoChecklist são derivados: calculados aqui, nunca lidos do armazenamento.
+  const interno: TarefaDetalheDetails['details'] = {
+    aberta: ind.aberta,
     quantidadeSubtarefas: subtarefas.length,
-    progressoChecklist: progresso(itens),
-    ...(d.descricao != null ? { descricao: d.descricao } : {}),
-    ...(d.motivoDevolucao != null ? { motivoDevolucao: d.motivoDevolucao } : {}),
-    ...(d.devolvidaEm != null ? { devolvidaEm: d.devolvidaEm } : {}),
-    ...(d.concluidaEm != null ? { concluidaEm: d.concluidaEm } : {}),
-    ...(d.canceladaEm != null ? { canceladaEm: d.canceladaEm } : {}),
+    progressoChecklist: textoProgresso(checklistItens),
   };
-  const checklist: ItemChecklistLinha[] = [...itens]
-    .sort((a, b) => Number(a.ordem) - Number(b.ordem))
-    .map((i) => ({
-      id: i.id,
-      ordem: Number(i.ordem),
-      feito: i.feito,
-      details: { details: { descricao: i.details.descricao } },
-    }));
-  return {
-    id: t.id,
-    version: Number(t.version),
-    titulo: t.titulo,
-    status,
-    prioridade: asPrioridade(t.prioridade),
-    prazo: t.prazo,
-    listaId: t.listaId,
-    responsavelId: t.responsavelId,
-    criadorId: t.criadorId,
-    criadaEm: t.criadaEm,
-    details: { details: detalhes },
+  if (tarefa.details.descricao != null) interno.descricao = tarefa.details.descricao;
+  if (tarefa.details.motivoDevolucao != null) interno.motivoDevolucao = tarefa.details.motivoDevolucao;
+  if (tarefa.details.devolvidaEm != null) interno.devolvidaEm = tarefa.details.devolvidaEm;
+  if (tarefa.details.concluidaEm != null) interno.concluidaEm = tarefa.details.concluidaEm;
+  if (tarefa.details.canceladaEm != null) interno.canceladaEm = tarefa.details.canceladaEm;
+
+  const detalhe: TarefaDetalhe = {
+    id: tarefa.id,
+    version: tarefa.version,
+    titulo: tarefa.titulo,
+    status: asStatus(tarefa.status),
+    prioridade: asPrioridade(tarefa.prioridade),
+    prazo: tarefa.prazo,
+    listaId: tarefa.listaId,
+    responsavelId: tarefa.responsavelId,
+    criadorId: tarefa.criadorId,
+    criadaEm: tarefa.criadaEm,
+    details: { details: interno },
     lista,
     responsavel,
     criador,
     checklist,
-    ...(t.tarefaPaiId != null && pai != null
-      ? { tarefaPaiId: t.tarefaPaiId, tarefaPai: { id: pai.id, titulo: pai.titulo } }
-      : {}),
   };
-}
-
-function itemQuadroDeDetalhe(d: TarefaDetalhe, dataHoje: string): TarefaQuadroItem {
-  return montarItemQuadro(d, d.lista, d.responsavel, d.details.details.progressoChecklist, dataHoje);
+  if (tarefa.tarefaPaiId != null) detalhe.tarefaPaiId = tarefa.tarefaPaiId;
+  if (tarefaPai != null) detalhe.tarefaPai = { id: tarefaPai.id, titulo: tarefaPai.titulo };
+  return detalhe;
 }
 
 export const requests: { [K in keyof Tarefas_equipeContracts]: (input: Tarefas_equipeContracts[K]['input'], ctx: RequestContext) => Promise<Tarefas_equipeContracts[K]['output']> } = {
   'tarefas.tarefas_equipe.qryTarefasEquipe': async function (input, ctx) {
-    // editarSomenteTarefaVisivel: o gestor (escopo organização) vê todas as tarefas da equipe, sem estreitar por dono.
-    const filtro: { listaId?: string; responsavelId?: string; prioridade?: string; prazo?: string } = {};
-    if (has(input.listaId)) filtro.listaId = input.listaId;
-    if (has(input.responsavelId)) filtro.responsavelId = input.responsavelId;
-    if (has(input.prioridade)) filtro.prioridade = input.prioridade;
-    if (has(input.prazo)) filtro.prazo = input.prazo;
+    const { page, pageSize } = resolverPagina(input.page, input.pageSize);
+    const hoje = hojeDe(ctx);
 
-    let tarefas = await listarTodasTarefas(filtro, ctx);
+    // editarSomenteTarefaVisivel: o gestor (escopo organização) vê todas as tarefas da equipe; nenhum recorte por criador/responsável.
+    const todas = await listarTodasTarefas(
+      { listaId: input.listaId, responsavelId: input.responsavelId, prioridade: input.prioridade },
+      ctx,
+    );
 
-    const statusDesejados = input.status;
-    if (statusDesejados != null && statusDesejados.length > 0) {
-      tarefas = tarefas.filter((t) => statusDesejados.some((s) => s === t.status));
-    }
-    if (has(input.titulo)) {
-      const termo = normalizar(input.titulo);
-      tarefas = tarefas.filter((t) => normalizar(t.titulo).includes(termo));
-    }
+    const termo = input.titulo != null && input.titulo.trim() !== '' ? normalizarTexto(input.titulo.trim()) : null;
+    const statusDesejados = input.status != null && input.status.length > 0 ? input.status : null;
+    const diaPrazo = input.prazo != null && input.prazo !== '' ? input.prazo.slice(0, 10) : null;
 
-    tarefas.sort((a, b) => {
+    const filtradas = todas.filter((t) => {
+      if (statusDesejados !== null && !statusDesejados.some((s) => s === t.status)) return false;
+      if (diaPrazo !== null && t.prazo.slice(0, 10) !== diaPrazo) return false;
+      if (termo !== null && !normalizarTexto(t.titulo).includes(termo)) return false;
+      return true;
+    });
+
+    filtradas.sort((a, b) => {
       const pa = a.prazo.slice(0, 10);
       const pb = b.prazo.slice(0, 10);
       if (pa !== pb) return pa < pb ? -1 : 1;
-      const ra = RANK_PRIORIDADE[asPrioridade(a.prioridade)];
-      const rb = RANK_PRIORIDADE[asPrioridade(b.prioridade)];
-      if (ra !== rb) return ra - rb;
-      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+      return RANK_PRIORIDADE[asPrioridade(a.prioridade)] - RANK_PRIORIDADE[asPrioridade(b.prioridade)];
     });
 
-    const pagina = paginar(tarefas, input.page, input.pageSize);
-    const leitores = criarLeitores(ctx);
-    const dataHoje = hoje(ctx);
+    const inicio = (page - 1) * pageSize;
+    const pagina = filtradas.slice(inicio, inicio + pageSize);
+    const hasMore = inicio + pageSize < filtradas.length;
 
+    const res = criarResolvers(ctx);
     const items = await Promise.all(
-      pagina.items.map(async (t) => {
-        const [lista, responsavel, itens] = await Promise.all([
-          leitores.lista(t.listaId),
-          leitores.membro(t.responsavelId),
-          listarChecklist(t.id, ctx),
-        ]);
-        return montarItemQuadro(t, lista, responsavel, progresso(itens), dataHoje);
+      pagina.map(async (t) => {
+        const checklist = await carregarChecklist(t.id, ctx);
+        return montarItemQuadro(t, textoProgresso(checklist), hoje, res);
       }),
     );
 
-    return { tarefas: { items, page: pagina.page, pageSize: pagina.pageSize, hasMore: pagina.hasMore } };
+    return { tarefas: { items, page, pageSize, hasMore } };
   },
 
   'tarefas.tarefas_equipe.qryListasFiltro': async function (_input, ctx) {
-    const todas: ListaResumo[] = [];
-    for (let page = 1; ; page++) {
+    const todas: ListListaOutput['items'] = [];
+    let page = 1;
+    for (;;) {
       const r = await listLista({ page, pageSize: 200 }, ctx);
-      for (const l of r.items) todas.push({ id: l.id, nome: l.nome });
+      todas.push(...r.items);
       if (!r.hasMore) break;
+      page += 1;
     }
-    todas.sort((a, b) => a.nome.localeCompare(b.nome));
-    return { listas: todas };
+    const listas: ListaResumo[] = todas
+      .map((l) => ({ id: l.id, nome: l.nome }))
+      .sort((a, b) => a.nome.localeCompare(b.nome));
+    return { listas };
   },
 
   'tarefas.tarefas_equipe.qryBuscarMembros': async function (input, ctx) {
     const nome = input.details.identification.name;
-    const somenteAtivos = input.somenteAtivos === true;
-    const encontrados: MembroFonte[] = [];
-    for (let page = 1; ; page++) {
-      const r = await listMembroEquipe(
-        somenteAtivos
-          ? { details: { identification: { status: 'Active' } }, page, pageSize: 200 }
-          : { page, pageSize: 200 },
-        ctx,
-      );
-      encontrados.push(...r.items);
+    const termo = nome != null && nome.trim() !== '' ? normalizarTexto(nome.trim()) : null;
+
+    const todos: ListMembroEquipeOutput['items'] = [];
+    let page = 1;
+    for (;;) {
+      const r = await listMembroEquipe({ page, pageSize: 200 }, ctx);
+      todos.push(...r.items);
       if (!r.hasMore) break;
+      page += 1;
     }
-    let membros = encontrados;
-    // responsavelDeveSerMembroAtivo: com somenteAtivos só a situação Active é devolvida.
-    if (somenteAtivos) membros = membros.filter((m) => m.details.identification.status === 'Active');
-    if (has(nome)) {
-      const termo = normalizar(nome);
-      membros = membros.filter((m) => normalizar(m.details.identification.name).includes(termo));
-    }
-    membros = [...membros]
-      .sort((a, b) => a.details.identification.name.localeCompare(b.details.identification.name))
-      .slice(0, LIMITE_MEMBROS);
-    return { membros: membros.map((m) => membroResumo(m)) };
+
+    const encontrados = todos.filter((m) => {
+      // responsavelDeveSerMembroAtivo: na escolha do novo responsável só entra situação Active.
+      if (input.somenteAtivos === true && m.details.identification.status !== 'Active') return false;
+      if (termo !== null && !normalizarTexto(m.details.identification.name).includes(termo)) return false;
+      return true;
+    });
+    encontrados.sort((a, b) => a.details.identification.name.localeCompare(b.details.identification.name));
+
+    const membros: MembroResumo[] = encontrados.slice(0, 30).map((m) => toMembroResumo(m));
+    return { membros };
   },
 
   'tarefas.tarefas_equipe.qryDetalheTarefa': async function (input, ctx) {
-    // editarSomenteTarefaVisivel: o gestor vê todas as tarefas; a leitura por id não é estreitada.
-    const t = await getTarefa({ id: input.tarefaId }, ctx);
-    const tarefa = await montarDetalhe(t, ctx, criarLeitores(ctx));
-    return { tarefa };
+    // editarSomenteTarefaVisivel: o gestor vê todas as tarefas; a tarefa é lida pelo id sem recorte.
+    const tarefa = await getTarefa({ id: input.tarefaId }, ctx);
+    const detalhe = await montarDetalhe(tarefa, ctx, criarResolvers(ctx));
+    return { tarefa: detalhe };
   },
 
   'tarefas.tarefas_equipe.cmdReatribuirTarefa': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      // editarSomenteTarefaVisivel: o gestor vê todas as tarefas, então a tarefa é lida sem estreitar por dono.
+
+      // editarSomenteTarefaVisivel: o gestor vê e edita todas as tarefas da equipe.
       const atual = await getTarefa({ id: input.id }, bound);
-      if (Number(atual.version) !== input.version) {
-        throw new AppError(
-          'VERSION_CONFLICT',
-          'A tarefa foi alterada por outra pessoa; recarregue e tente novamente.',
-          409,
-        );
+      if (atual.version !== Number(input.version)) {
+        throw new AppError('VERSION_CONFLICT', 'A tarefa foi alterada por outra pessoa; recarregue antes de reatribuir.', 409);
       }
+
       // reatribuicaoPorCriadorOuGestor
-      if (!ehGestor(bound) && !ehCriador(bound, atual.criadorId)) {
-        throw new AppError(
-          'FORBIDDEN',
-          'Somente quem criou a tarefa ou o gestor pode trocar o responsável.',
-          403,
-          { ruleId: 'reatribuicaoPorCriadorOuGestor' },
-        );
+      if (!ehGestor(bound) && bound.sessionContext.actorId !== atual.criadorId) {
+        throw new AppError('FORBIDDEN', 'Somente o criador da tarefa ou o gestor pode trocar o responsável.', 403, { ruleId: 'reatribuicaoPorCriadorOuGestor' });
       }
+
       // responsavelDeveSerMembroAtivo
-      const novo = await getMembroEquipe({ id: input.responsavelId }, bound);
+      const novo = await getMembroEquipe({ id: String(input.responsavelId) }, bound);
       if (novo.details.identification.status !== 'Active') {
-        throw new AppError(
-          'RESPONSAVEL_INATIVO',
-          'O novo responsável deve ser um membro da equipe ativo.',
-          422,
-          { ruleId: 'responsavelDeveSerMembroAtivo' },
-        );
+        throw new AppError('RESPONSAVEL_INATIVO', 'O novo responsável deve ser um membro ativo da equipe.', 422, { ruleId: 'responsavelDeveSerMembroAtivo' });
       }
 
-      await reatribuirQuemAge({ tarefaId: input.id, novoResponsavelId: input.responsavelId }, bound);
+      const resultado = await reatribuirQuemAge({ id: input.id, responsavelId: String(input.responsavelId) }, bound);
 
-      const depois = await getTarefa({ id: input.id }, bound);
-      // edicaoNaoMudaSituacao: a reatribuição grava só o responsável; a situação não pode ter mudado.
-      if (depois.status !== atual.status) {
-        throw new AppError(
-          'STATUS_CHANGED_BY_EDIT',
-          'A reatribuição não pode alterar a situação da tarefa.',
-          409,
-          { ruleId: 'edicaoNaoMudaSituacao' },
-        );
+      // edicaoNaoMudaSituacao: a reatribuição grava só o responsável; a situação deve permanecer a mesma.
+      if (resultado.tarefa.status !== atual.status) {
+        throw new AppError('SITUACAO_ALTERADA', 'A reatribuição não pode alterar a situação da tarefa.', 409, { ruleId: 'edicaoNaoMudaSituacao' });
       }
-      const tarefa = await montarDetalhe(depois, bound, criarLeitores(bound));
-      return { tarefa, itemQuadro: itemQuadroDeDetalhe(tarefa, hoje(bound)) };
+
+      const res = criarResolvers(bound);
+      const detalhe = await montarDetalhe(resultado.tarefa, bound, res);
+      const itemQuadro = await montarItemQuadro(resultado.tarefa, detalhe.details.details.progressoChecklist, hojeDe(bound), res);
+      return { tarefa: detalhe, itemQuadro };
     });
   },
 
   'tarefas.tarefas_equipe.cmdCancelarTarefa': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
+
       const atual = await getTarefa({ id: input.id }, bound);
-      if (Number(atual.version) !== input.version) {
-        throw new AppError(
-          'VERSION_CONFLICT',
-          'A tarefa foi alterada por outra pessoa; recarregue e tente novamente.',
-          409,
-        );
+      if (atual.version !== Number(input.version)) {
+        throw new AppError('VERSION_CONFLICT', 'A tarefa foi alterada por outra pessoa; recarregue antes de cancelar.', 409);
       }
-      const status = asStatus(atual.status);
+
       // tarefaEncerradaNaoTransiciona
-      if (status === 'concluida' || status === 'cancelada') {
-        throw new AppError(
-          'TAREFA_ENCERRADA',
-          'Uma tarefa concluída ou cancelada não muda mais de situação.',
-          409,
-          { ruleId: 'tarefaEncerradaNaoTransiciona' },
-        );
-      }
-      // cancelamentoPorCriadorOuGestor
-      if (!ehGestor(bound) && !ehCriador(bound, atual.criadorId)) {
-        throw new AppError(
-          'FORBIDDEN',
-          'Somente quem criou a tarefa ou o gestor pode cancelá-la.',
-          403,
-          { ruleId: 'cancelamentoPorCriadorOuGestor' },
-        );
+      if (atual.status === 'concluida' || atual.status === 'cancelada') {
+        throw new AppError('TAREFA_ENCERRADA', 'Uma tarefa concluída ou cancelada não muda mais de situação.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
       }
 
-      await avancarEtapaTarefa({ tarefaId: input.id, transicao: 'cancelar' }, bound);
+      // cancelamentoPorCriadorOuGestor: só criador ou gestor, e só a partir de a fazer, em andamento ou em revisão.
+      if (!ehGestor(bound) && bound.sessionContext.actorId !== atual.criadorId) {
+        throw new AppError('FORBIDDEN', 'Somente o criador da tarefa ou o gestor pode cancelá-la.', 403, { ruleId: 'cancelamentoPorCriadorOuGestor' });
+      }
+      if (!STATUS_ABERTOS.includes(atual.status)) {
+        throw new AppError('TRANSICAO_INVALIDA', 'A tarefa só pode ser cancelada a partir de a fazer, em andamento ou em revisão.', 409, { ruleId: 'cancelamentoPorCriadorOuGestor' });
+      }
 
-      const depois = await getTarefa({ id: input.id }, bound);
-      const tarefa = await montarDetalhe(depois, bound, criarLeitores(bound));
-      return { tarefa, itemQuadro: itemQuadroDeDetalhe(tarefa, hoje(bound)) };
+      const resultado = await avancarEtapaTarefa({ id: input.id, transicao: 'cancelar' }, bound);
+
+      const res = criarResolvers(bound);
+      const detalhe = await montarDetalhe(resultado.tarefa, bound, res);
+      const itemQuadro = await montarItemQuadro(resultado.tarefa, detalhe.details.details.progressoChecklist, hojeDe(bound), res);
+      return { tarefa: detalhe, itemQuadro };
     });
   },
 };

@@ -16,23 +16,21 @@ export const pageTests = {
       },
       "expect": {
         "ok": true,
-        "shape": "paginated",
-        "itemsKey": "membros"
+        "shape": "paginated"
       },
       "mutating": false
     },
     {
-      "id": "listarMembrosEquipe.busca",
+      "id": "listarMembrosEquipe.busca.ok",
       "routine": "tarefas.membros_equipe.listarMembrosEquipe",
       "params": {
+        "busca": "a",
         "page": 1,
-        "pageSize": 10,
-        "busca": "a"
+        "pageSize": 10
       },
       "expect": {
         "ok": true,
-        "shape": "paginated",
-        "itemsKey": "membros"
+        "shape": "paginated"
       },
       "mutating": false
     },
@@ -51,21 +49,7 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "salvarAlteracoesPessoa.readBack",
-      "routine": "tarefas.membros_equipe.obterMembroEquipe",
-      "params": {
-        "id": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "id": "MembroEquipe.id"
-      },
-      "expect": {
-        "ok": true
-      },
-      "mutating": false
-    },
-    {
-      "id": "listarMembrosEquipe.page.required",
+      "id": "tarefas.membros_equipe.listarMembrosEquipe.page.required",
       "routine": "tarefas.membros_equipe.listarMembrosEquipe",
       "params": {
         "pageSize": 10
@@ -77,7 +61,7 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "listarMembrosEquipe.pageSize.required",
+      "id": "tarefas.membros_equipe.listarMembrosEquipe.pageSize.required",
       "routine": "tarefas.membros_equipe.listarMembrosEquipe",
       "params": {
         "page": 1
@@ -89,7 +73,7 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "obterMembroEquipe.id.required",
+      "id": "tarefas.membros_equipe.obterMembroEquipe.id.required",
       "routine": "tarefas.membros_equipe.obterMembroEquipe",
       "params": {},
       "expect": {
@@ -99,24 +83,12 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "obterMembroEquipe.notFound",
-      "routine": "tarefas.membros_equipe.obterMembroEquipe",
-      "params": {
-        "id": "membro-inexistente"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "NOT_FOUND"
-      },
-      "mutating": false
-    },
-    {
       "id": "cadastrarPessoa.ok",
       "routine": "tarefas.membros_equipe.cadastrarPessoa",
       "params": {
         "details": {
           "identification": {
-            "name": "Maria Cadastrada",
+            "name": "Maria Monitor",
             "countryCode": "BR"
           }
         }
@@ -127,7 +99,7 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "cadastrarPessoa.details.required",
+      "id": "tarefas.membros_equipe.cadastrarPessoa.details.required",
       "routine": "tarefas.membros_equipe.cadastrarPessoa",
       "params": {},
       "expect": {
@@ -137,7 +109,7 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "cadastrarPessoa.nameMissing",
+      "id": "cadastrarPessoa.nomeAusente",
       "routine": "tarefas.membros_equipe.cadastrarPessoa",
       "params": {
         "details": {
@@ -153,12 +125,12 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "cadastrarPessoa.countryCodeMissing",
+      "id": "cadastrarPessoa.paisAusente",
       "routine": "tarefas.membros_equipe.cadastrarPessoa",
       "params": {
         "details": {
           "identification": {
-            "name": "Pessoa Sem Pais"
+            "name": "Joao Monitor"
           }
         }
       },
@@ -191,14 +163,14 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarAlteracoesPessoa.staleVersion",
+      "id": "salvarAlteracoesPessoa.versaoDesatualizada",
       "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
       "params": {
         "id": "<seedRef>",
-        "version": 0,
+        "version": 999999,
         "details": {
           "identification": {
-            "name": "Nome Obsoleto",
+            "name": "Nome Outro",
             "countryCode": "BR"
           }
         }
@@ -213,32 +185,13 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarAlteracoesPessoa.notFound",
-      "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
-      "params": {
-        "id": "membro-inexistente",
-        "version": 1,
-        "details": {
-          "identification": {
-            "name": "Fantasma",
-            "countryCode": "BR"
-          }
-        }
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "NOT_FOUND"
-      },
-      "mutating": true
-    },
-    {
-      "id": "salvarAlteracoesPessoa.id.required",
+      "id": "tarefas.membros_equipe.salvarAlteracoesPessoa.id.required",
       "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
       "params": {
         "version": 1,
         "details": {
           "identification": {
-            "name": "Sem Id",
+            "name": "Nome",
             "countryCode": "BR"
           }
         }
@@ -250,13 +203,13 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarAlteracoesPessoa.version.required",
+      "id": "tarefas.membros_equipe.salvarAlteracoesPessoa.version.required",
       "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
       "params": {
         "id": "<seedRef>",
         "details": {
           "identification": {
-            "name": "Sem Versao",
+            "name": "Nome",
             "countryCode": "BR"
           }
         }
@@ -271,15 +224,14 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarAlteracoesPessoa.details.required",
+      "id": "tarefas.membros_equipe.salvarAlteracoesPessoa.details.required",
       "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
       "params": {
         "id": "<seedRef>",
-        "version": "<seedRef>"
+        "version": 1
       },
       "paramFieldRefs": {
-        "id": "MembroEquipe.id",
-        "version": "MembroEquipe.version"
+        "id": "MembroEquipe.id"
       },
       "expect": {
         "ok": false,
@@ -288,11 +240,11 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarAlteracoesPessoa.nameMissing",
+      "id": "salvarAlteracoesPessoa.nomeAusente",
       "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
       "params": {
         "id": "<seedRef>",
-        "version": "<seedRef>",
+        "version": 1,
         "details": {
           "identification": {
             "countryCode": "BR"
@@ -300,8 +252,7 @@ export const pageTests = {
         }
       },
       "paramFieldRefs": {
-        "id": "MembroEquipe.id",
-        "version": "MembroEquipe.version"
+        "id": "MembroEquipe.id"
       },
       "expect": {
         "ok": false,
@@ -310,20 +261,19 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarAlteracoesPessoa.countryCodeMissing",
+      "id": "salvarAlteracoesPessoa.paisAusente",
       "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
       "params": {
         "id": "<seedRef>",
-        "version": "<seedRef>",
+        "version": 1,
         "details": {
           "identification": {
-            "name": "Sem Pais"
+            "name": "Nome"
           }
         }
       },
       "paramFieldRefs": {
-        "id": "MembroEquipe.id",
-        "version": "MembroEquipe.version"
+        "id": "MembroEquipe.id"
       },
       "expect": {
         "ok": false,

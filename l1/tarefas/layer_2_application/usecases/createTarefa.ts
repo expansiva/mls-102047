@@ -9,14 +9,20 @@ import type { Tarefa } from '/_102047_/l1/tarefas/layer_3_domain/entities/tarefa
 
 export interface CreateTarefaInput extends Record<string, unknown> {
   titulo: string;
+  status: string;
   prioridade: string;
   prazo: string;
   listaId: string;
   responsavelId: string;
+  criadorId: string;
   tarefaPaiId?: string;
   chaveCriacao: string;
-  details?: {
+  details: {
     descricao?: string;
+    motivoDevolucao?: string;
+    devolvidaEm?: string;
+    concluidaEm?: string;
+    canceladaEm?: string;
   };
 }
 
@@ -47,24 +53,39 @@ export interface CreateTarefaOutput extends Record<string, unknown> {
   };
 }
 
-const PRIORIDADES: ReadonlyArray<Tarefa['prioridade']> = ['low', 'medium', 'high'];
+const PRIORIDADES = ['low', 'medium', 'high'] as const;
 
-function requiredText(value: unknown, name: string): string {
+function requiredText(value: unknown, field: string): string {
   const text = typeof value === 'string' ? value.trim() : '';
   if (!text) {
-    throw new AppError('INVALID_INPUT', `${name} is required.`, 400);
+    throw new AppError('VALIDATION_ERROR', `${field} is required.`, 400);
   }
   return text;
 }
 
-async function toOutput(tarefa: Tarefa, ctx: RequestContext, tarefaRepository: TarefaRepository): Promise<CreateTarefaOutput> {
+async function toOutput(tarefa: Tarefa, ctx: RequestContext): Promise<CreateTarefaOutput> {
+  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
   const itemRepository = resolveRepository<ItemChecklistRepository>(ctx, 'ItemChecklistRepository');
+  const today = ctx.clock.nowIso().slice(0, 10);
   const subtarefas = await tarefaRepository.list({ tarefaPaiId: tarefa.id });
   const itens = await itemRepository.list({ tarefaId: tarefa.id });
-  const feitos = itens.filter((item) => item.feito).length;
-  const hoje = ctx.clock.nowIso().slice(0, 10);
-  const prazoDia = tarefa.prazo.slice(0, 10);
+  const feitos = itens.filter((item) => item.feito === true).length;
   const aberta = tarefa.status === 'aFazer' || tarefa.status === 'emAndamento' || tarefa.status === 'emRevisao';
+  const prazoDia = String(tarefa.prazo).slice(0, 10);
+
+  const details: CreateTarefaOutput['details'] = {};
+  if (tarefa.details?.descricao !== undefined) details.descricao = tarefa.details.descricao;
+  if (tarefa.details?.motivoDevolucao !== undefined) details.motivoDevolucao = tarefa.details.motivoDevolucao;
+  if (tarefa.details?.devolvidaEm !== undefined) details.devolvidaEm = tarefa.details.devolvidaEm;
+  if (tarefa.details?.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
+  if (tarefa.details?.canceladaEm !== undefined) details.canceladaEm = tarefa.details.canceladaEm;
+  // Derived values are calculated here every time, never stored.
+  details.aberta = aberta;
+  details.venceHoje = aberta && prazoDia === today;
+  details.atrasada = aberta && prazoDia < today;
+  details.quantidadeSubtarefas = subtarefas.length;
+  details.progressoChecklist = `${feitos}/${itens.length}`;
+
   const output: CreateTarefaOutput = {
     id: tarefa.id,
     version: tarefa.version,
@@ -77,20 +98,9 @@ async function toOutput(tarefa: Tarefa, ctx: RequestContext, tarefaRepository: T
     criadorId: tarefa.criadorId,
     chaveCriacao: tarefa.chaveCriacao,
     criadaEm: tarefa.criadaEm,
-    details: {
-      descricao: tarefa.details?.descricao,
-      motivoDevolucao: tarefa.details?.motivoDevolucao,
-      devolvidaEm: tarefa.details?.devolvidaEm,
-      concluidaEm: tarefa.details?.concluidaEm,
-      canceladaEm: tarefa.details?.canceladaEm,
-      aberta,
-      venceHoje: aberta && prazoDia === hoje,
-      atrasada: aberta && prazoDia < hoje,
-      quantidadeSubtarefas: subtarefas.length,
-      progressoChecklist: `${feitos}/${itens.length}`,
-    },
+    details,
   };
-  if (tarefa.tarefaPaiId) {
+  if (tarefa.tarefaPaiId !== undefined) {
     output.tarefaPaiId = tarefa.tarefaPaiId;
   }
   return output;
@@ -98,56 +108,59 @@ async function toOutput(tarefa: Tarefa, ctx: RequestContext, tarefaRepository: T
 
 export async function createTarefa(input: CreateTarefaInput, ctx: RequestContext): Promise<CreateTarefaOutput> {
   const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-  const listaRepository = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
 
-  const chaveCriacao = requiredText(input.chaveCriacao, 'chaveCriacao');
+  // criacaoIdempotente: the creation key identifies the creation; without it a resend could not be recognized.
+  const chaveText = typeof input.chaveCriacao === 'string' ? input.chaveCriacao.trim() : '';
+  if (!chaveText) {
+    throw new AppError('CHAVE_CRIACAO_OBRIGATORIA', 'chaveCriacao is required so that a resend does not create a second task.', 400, {
+      ruleId: 'criacaoIdempotente',
+    });
+  }
+  const chaveCriacao = chaveText;
 
   // criacaoIdempotente: the same creation key returns the task already created.
   const existentes = await tarefaRepository.list({ chaveCriacao });
-  if (existentes.length > 0) {
-    const existente = existentes[0];
-    if (existente.chaveCriacao !== chaveCriacao) {
-      throw new AppError('IDEMPOTENCY_MISMATCH', 'The stored task does not match the creation key.', 409, { ruleId: 'criacaoIdempotente' });
-    }
-    return toOutput(existente, ctx, tarefaRepository);
+  const existente = existentes.find((item) => item.chaveCriacao === chaveCriacao);
+  if (existente) {
+    return toOutput(existente, ctx);
   }
 
   const titulo = requiredText(input.titulo, 'titulo');
   if (titulo.length > 200) {
-    throw new AppError('INVALID_INPUT', 'titulo must have at most 200 characters.', 400);
-  }
-  const prioridadeText = requiredText(input.prioridade, 'prioridade');
-  const prioridade = PRIORIDADES.find((p) => p === prioridadeText);
-  if (!prioridade) {
-    throw new AppError('INVALID_INPUT', 'prioridade must be low, medium or high.', 400);
+    throw new AppError('VALIDATION_ERROR', 'titulo must have at most 200 characters.', 400);
   }
   const prazo = requiredText(input.prazo, 'prazo');
   const listaId = requiredText(input.listaId, 'listaId');
   const responsavelId = requiredText(input.responsavelId, 'responsavelId');
-  const tarefaPaiId = typeof input.tarefaPaiId === 'string' && input.tarefaPaiId.trim() ? input.tarefaPaiId.trim() : undefined;
-
-  const criadorId = ctx.sessionContext.person?.mdmId;
-  if (!criadorId) {
-    throw new AppError('UNAUTHENTICATED', 'The session has no team member to be the creator of the task.', 401);
+  const prioridadeText = requiredText(input.prioridade, 'prioridade');
+  const prioridade = PRIORIDADES.find((value) => value === prioridadeText);
+  if (!prioridade) {
+    throw new AppError('VALIDATION_ERROR', 'prioridade must be low, medium or high.', 400);
   }
 
-  // listaInativaNaoRecebeTarefa
+  // The creator is the session member, set by the system.
+  const criadorId = ctx.sessionContext.person?.mdmId;
+  if (!criadorId) {
+    throw new AppError('VALIDATION_ERROR', 'The session has no team member to be the creator of the task.', 400);
+  }
+
+  // listaInativaNaoRecebeTarefa: the list must exist and be active.
+  const listaRepository = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
   const lista = await listaRepository.get(listaId);
   if (!lista) {
     throw new AppError('NOT_FOUND', 'Lista not found.', 404);
   }
-  if (!lista.ativa) {
+  if (lista.ativa !== true) {
     throw new AppError('LISTA_INATIVA', 'An inactive list cannot receive new tasks.', 409, { ruleId: 'listaInativaNaoRecebeTarefa' });
   }
 
   const id = ctx.idGenerator.newId();
-
-  // tarefaPaiNaoPodeSerElaMesma
-  if (tarefaPaiId !== undefined) {
-    if (tarefaPaiId === id) {
+  const tarefaPaiText = typeof input.tarefaPaiId === 'string' ? input.tarefaPaiId.trim() : '';
+  if (tarefaPaiText) {
+    if (tarefaPaiText === id) {
       throw new AppError('TAREFA_PAI_INVALIDA', 'The parent task cannot be the task itself.', 400, { ruleId: 'tarefaPaiNaoPodeSerElaMesma' });
     }
-    const pai = await tarefaRepository.get(tarefaPaiId);
+    const pai = await tarefaRepository.get(tarefaPaiText);
     if (!pai) {
       throw new AppError('NOT_FOUND', 'Parent task not found.', 404);
     }
@@ -169,13 +182,13 @@ export async function createTarefa(input: CreateTarefaInput, ctx: RequestContext
     criadaEm: ctx.clock.nowIso(),
     details: {},
   };
-  if (tarefaPaiId !== undefined) {
-    nova.tarefaPaiId = tarefaPaiId;
+  if (tarefaPaiText) {
+    nova.tarefaPaiId = tarefaPaiText;
   }
   if (descricao !== undefined) {
     nova.details.descricao = descricao;
   }
 
   const criada = await tarefaRepository.create(nova);
-  return toOutput(criada, ctx, tarefaRepository);
+  return toOutput(criada, ctx);
 }

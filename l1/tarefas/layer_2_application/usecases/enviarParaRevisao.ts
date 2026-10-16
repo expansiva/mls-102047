@@ -37,22 +37,18 @@ export interface EnviarParaRevisaoOutput extends Record<string, unknown> {
   };
 }
 
-export async function enviarParaRevisao(input: EnviarParaRevisaoInput, ctx: RequestContext): Promise<EnviarParaRevisaoOutput> {
+export async function enviarParaRevisao(input: Record<string, unknown>, ctx: RequestContext): Promise<EnviarParaRevisaoOutput> {
   const id = String(input.id ?? '');
   if (!id) {
     throw new AppError('INVALID_INPUT', 'id is required.', 400);
   }
-  const version = Number(input.version);
-  if (!Number.isFinite(version)) {
-    throw new AppError('INVALID_INPUT', 'version is required.', 400);
-  }
-
   const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-  const tarefa = await repository.get(id);
+  const tarefa: Tarefa = await repository.get(id);
   if (!tarefa) {
     throw new AppError('NOT_FOUND', 'Tarefa not found.', 404);
   }
-  if (tarefa.version !== version) {
+
+  if (input.version !== undefined && input.version !== null && Number(input.version) !== tarefa.version) {
     throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
   }
 
@@ -65,32 +61,53 @@ export async function enviarParaRevisao(input: EnviarParaRevisaoInput, ctx: Requ
 
   const actorId = ctx.sessionContext.person?.mdmId;
   if (!actorId) {
-    throw new AppError('FORBIDDEN', 'The session has no identified team member.', 403, { ruleId: 'somenteResponsavelExecuta' });
+    throw new AppError('FORBIDDEN', 'The session has no team member identified.', 403, { ruleId: 'somenteResponsavelExecuta' });
   }
   if (actorId !== tarefa.responsavelId) {
     throw new AppError('FORBIDDEN', 'Only the task assignee can send it to review.', 403, { ruleId: 'somenteResponsavelExecuta' });
   }
 
-  const {
-    aberta: _aberta,
-    venceHoje: _venceHoje,
-    atrasada: _atrasada,
-    quantidadeSubtarefas: _quantidadeSubtarefas,
-    progressoChecklist: _progressoChecklist,
-    ...storedDetails
-  } = tarefa.details;
-  void _aberta;
-  void _venceHoje;
-  void _atrasada;
-  void _quantidadeSubtarefas;
-  void _progressoChecklist;
+  const details: Tarefa['details'] = {};
+  if (tarefa.details.descricao !== undefined) details.descricao = tarefa.details.descricao;
+  if (tarefa.details.motivoDevolucao !== undefined) details.motivoDevolucao = tarefa.details.motivoDevolucao;
+  if (tarefa.details.devolvidaEm !== undefined) details.devolvidaEm = tarefa.details.devolvidaEm;
+  if (tarefa.details.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
+  if (tarefa.details.canceladaEm !== undefined) details.canceladaEm = tarefa.details.canceladaEm;
 
-  const next: Tarefa = {
-    ...tarefa,
+  const toStore: Tarefa = {
+    id: tarefa.id,
+    version: tarefa.version,
+    titulo: tarefa.titulo,
     status: 'emRevisao',
-    details: storedDetails,
+    prioridade: tarefa.prioridade,
+    prazo: tarefa.prazo,
+    listaId: tarefa.listaId,
+    responsavelId: tarefa.responsavelId,
+    criadorId: tarefa.criadorId,
+    chaveCriacao: tarefa.chaveCriacao,
+    criadaEm: tarefa.criadaEm,
+    details,
   };
-  const saved = await repository.transition(next, 'enviarParaRevisao');
+  if (tarefa.tarefaPaiId !== undefined) toStore.tarefaPaiId = tarefa.tarefaPaiId;
+
+  const saved = await repository.transition(toStore, 'enviarParaRevisao');
+
+  const subtarefas = await repository.list({ tarefaPaiId: saved.id });
+  const today = ctx.clock.nowIso().slice(0, 10);
+  const prazoDay = String(saved.prazo).slice(0, 10);
+  const aberta = saved.status === 'aFazer' || saved.status === 'emAndamento' || saved.status === 'emRevisao';
+
+  const outDetails: EnviarParaRevisaoOutput['details'] = {
+    aberta,
+    venceHoje: aberta && prazoDay === today,
+    atrasada: aberta && prazoDay < today,
+    quantidadeSubtarefas: subtarefas.length,
+  };
+  if (saved.details.descricao !== undefined) outDetails.descricao = saved.details.descricao;
+  if (saved.details.motivoDevolucao !== undefined) outDetails.motivoDevolucao = saved.details.motivoDevolucao;
+  if (saved.details.devolvidaEm !== undefined) outDetails.devolvidaEm = saved.details.devolvidaEm;
+  if (saved.details.concluidaEm !== undefined) outDetails.concluidaEm = saved.details.concluidaEm;
+  if (saved.details.canceladaEm !== undefined) outDetails.canceladaEm = saved.details.canceladaEm;
 
   const output: EnviarParaRevisaoOutput = {
     id: saved.id,
@@ -104,17 +121,8 @@ export async function enviarParaRevisao(input: EnviarParaRevisaoInput, ctx: Requ
     criadorId: saved.criadorId,
     chaveCriacao: saved.chaveCriacao,
     criadaEm: saved.criadaEm,
-    details: {
-      descricao: saved.details?.descricao,
-      motivoDevolucao: saved.details?.motivoDevolucao,
-      devolvidaEm: saved.details?.devolvidaEm,
-      concluidaEm: saved.details?.concluidaEm,
-      canceladaEm: saved.details?.canceladaEm,
-      aberta: saved.status !== 'concluida' && saved.status !== 'cancelada',
-    },
+    details: outDetails,
   };
-  if (saved.tarefaPaiId !== undefined) {
-    output.tarefaPaiId = saved.tarefaPaiId;
-  }
+  if (saved.tarefaPaiId !== undefined) output.tarefaPaiId = saved.tarefaPaiId;
   return output;
 }

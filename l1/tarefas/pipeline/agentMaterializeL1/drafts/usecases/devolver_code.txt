@@ -40,31 +40,56 @@ export interface DevolverOutput extends Record<string, unknown> {
   };
 }
 
-function storedDetails(details: Tarefa['details']): Tarefa['details'] {
-  const out: Tarefa['details'] = {};
-  if (details.descricao !== undefined) out.descricao = details.descricao;
-  if (details.motivoDevolucao !== undefined) out.motivoDevolucao = details.motivoDevolucao;
-  if (details.devolvidaEm !== undefined) out.devolvidaEm = details.devolvidaEm;
-  if (details.concluidaEm !== undefined) out.concluidaEm = details.concluidaEm;
-  if (details.canceladaEm !== undefined) out.canceladaEm = details.canceladaEm;
-  return out;
-}
+export async function devolver(input: DevolverInput, ctx: RequestContext): Promise<DevolverOutput> {
+  const id = String(input.id ?? '').trim();
+  if (!id) {
+    throw new AppError('INVALID_INPUT', 'The task id is required.', 400);
+  }
 
-function toOutput(tarefa: Tarefa, todayIso: string): DevolverOutput {
-  const aberta = tarefa.status === 'aFazer' || tarefa.status === 'emAndamento' || tarefa.status === 'emRevisao';
-  const prazoDay = String(tarefa.prazo).slice(0, 10);
-  const today = todayIso.slice(0, 10);
-  const details: DevolverOutput['details'] = {
-    ...storedDetails(tarefa.details),
-    aberta,
-    venceHoje: aberta && prazoDay === today,
-    atrasada: aberta && prazoDay < today,
+  const motivoRaw = (input.details as { motivoDevolucao?: unknown } | undefined)?.motivoDevolucao;
+  const motivo = typeof motivoRaw === 'string' ? motivoRaw.trim() : '';
+  if (!motivo) {
+    throw new AppError('REASON_REQUIRED', 'Returning a task for adjustment requires the reason.', 400, { ruleId: 'devolucaoExigeMotivo' });
+  }
+  if (motivo.length > 2000) {
+    throw new AppError('INVALID_INPUT', 'The return reason must have at most 2000 characters.', 400, { ruleId: 'devolucaoExigeMotivo' });
+  }
+
+  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const tarefa = await repository.get(id);
+  if (!tarefa) {
+    throw new AppError('NOT_FOUND', 'Task not found.', 404);
+  }
+
+  if (input.version !== undefined && input.version !== null && Number(input.version) !== tarefa.version) {
+    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
+  }
+
+  if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
+    throw new AppError('TASK_CLOSED', 'A completed or cancelled task no longer changes status.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
+  }
+  if (tarefa.status !== 'emRevisao') {
+    throw new AppError('INVALID_STATE', 'Only a task in review can be returned for adjustment.', 409, { ruleId: 'somenteCriadorRevisa' });
+  }
+
+  const actorId = ctx.sessionContext.person?.mdmId;
+  if (!actorId || actorId !== tarefa.criadorId) {
+    throw new AppError('FORBIDDEN', 'Only the creator of the task can return it for adjustment.', 403, { ruleId: 'somenteCriadorRevisa' });
+  }
+
+  const details: Tarefa['details'] = {
+    motivoDevolucao: motivo,
+    devolvidaEm: ctx.clock.nowIso(),
   };
-  const out: DevolverOutput = {
+  if (tarefa.details?.descricao !== undefined) details.descricao = tarefa.details.descricao;
+  if (tarefa.details?.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
+  if (tarefa.details?.canceladaEm !== undefined) details.canceladaEm = tarefa.details.canceladaEm;
+
+  const next: Tarefa = {
     id: tarefa.id,
     version: tarefa.version,
     titulo: tarefa.titulo,
-    status: tarefa.status,
+    status: 'emAndamento',
     prioridade: tarefa.prioridade,
     prazo: tarefa.prazo,
     listaId: tarefa.listaId,
@@ -74,63 +99,31 @@ function toOutput(tarefa: Tarefa, todayIso: string): DevolverOutput {
     criadaEm: tarefa.criadaEm,
     details,
   };
-  if (tarefa.tarefaPaiId !== undefined) out.tarefaPaiId = tarefa.tarefaPaiId;
-  return out;
-}
-
-export async function devolver(input: DevolverInput, ctx: RequestContext): Promise<DevolverOutput> {
-  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-
-  const id = String(input.id ?? '');
-  if (id === '') {
-    throw new AppError('INVALID_INPUT', 'id is required.', 400);
-  }
-  const inputVersion = Number(input.version);
-  if (!Number.isFinite(inputVersion)) {
-    throw new AppError('INVALID_INPUT', 'version is required.', 400);
-  }
-
-  const motivoRaw = input.details?.motivoDevolucao;
-  const motivo = typeof motivoRaw === 'string' ? motivoRaw.trim() : '';
-  if (motivo === '') {
-    throw new AppError('MOTIVO_REQUIRED', 'Returning a task for adjustment requires the reason.', 400, { ruleId: 'devolucaoExigeMotivo' });
-  }
-  if (motivo.length > 2000) {
-    throw new AppError('MOTIVO_TOO_LONG', 'The return reason must have at most 2000 characters.', 400, { ruleId: 'devolucaoExigeMotivo' });
-  }
-
-  const current = await repository.get(id);
-  if (!current) {
-    throw new AppError('NOT_FOUND', 'Tarefa not found.', 404);
-  }
-
-  if (current.status === 'concluida' || current.status === 'cancelada') {
-    throw new AppError('TAREFA_ENCERRADA', 'A completed or cancelled task no longer changes status.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
-  }
-  if (current.status !== 'emRevisao') {
-    throw new AppError('INVALID_STATE', 'Only a task under review can be returned for adjustment.', 409, { ruleId: 'somenteCriadorRevisa' });
-  }
-
-  const actorId = ctx.sessionContext.person?.mdmId;
-  if (!actorId || actorId !== current.criadorId) {
-    throw new AppError('FORBIDDEN', 'Only the creator of the task can return it for adjustment.', 403, { ruleId: 'somenteCriadorRevisa' });
-  }
-
-  if (inputVersion !== current.version) {
-    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
-  }
-
-  const now = ctx.clock.nowIso();
-  const next: Tarefa = {
-    ...current,
-    status: 'emAndamento',
-    details: {
-      ...storedDetails(current.details),
-      motivoDevolucao: motivo,
-      devolvidaEm: now,
-    },
-  };
+  if (tarefa.tarefaPaiId !== undefined) next.tarefaPaiId = tarefa.tarefaPaiId;
 
   const saved = await repository.transition(next, 'devolver');
-  return toOutput(saved, now);
+
+  const out: DevolverOutput = {
+    id: saved.id,
+    version: saved.version,
+    titulo: saved.titulo,
+    status: saved.status,
+    prioridade: saved.prioridade,
+    prazo: saved.prazo,
+    listaId: saved.listaId,
+    responsavelId: saved.responsavelId,
+    criadorId: saved.criadorId,
+    chaveCriacao: saved.chaveCriacao,
+    criadaEm: saved.criadaEm,
+    details: {
+      aberta: saved.status === 'aFazer' || saved.status === 'emAndamento' || saved.status === 'emRevisao',
+    },
+  };
+  if (saved.tarefaPaiId !== undefined) out.tarefaPaiId = saved.tarefaPaiId;
+  if (saved.details?.descricao !== undefined) out.details.descricao = saved.details.descricao;
+  if (saved.details?.motivoDevolucao !== undefined) out.details.motivoDevolucao = saved.details.motivoDevolucao;
+  if (saved.details?.devolvidaEm !== undefined) out.details.devolvidaEm = saved.details.devolvidaEm;
+  if (saved.details?.concluidaEm !== undefined) out.details.concluidaEm = saved.details.concluidaEm;
+  if (saved.details?.canceladaEm !== undefined) out.details.canceladaEm = saved.details.canceladaEm;
+  return out;
 }

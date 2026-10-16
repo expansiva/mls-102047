@@ -1,10 +1,8 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/usecases/listLista.ts" enhancement="_blank"/>
-import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
 import type { Lista } from '/_102047_/l1/tarefas/layer_3_domain/entities/lista.js';
 import type { ListaRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/listaRepository.js';
-import type { TarefaRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.js';
 
 export interface ListListaInput extends Record<string, unknown> {
   id?: string;
@@ -25,59 +23,43 @@ export interface ListListaOutput extends Record<string, unknown> {
 }
 
 function normalize(text: string): string {
-  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function hasText(value: unknown): value is string {
+  return typeof value === 'string' && value.trim() !== '';
 }
 
 export async function listLista(input: ListListaInput, ctx: RequestContext): Promise<ListListaOutput> {
-  const listaRepository = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
-  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const repository = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
 
+  // Exact filters go to the repository.
   const where: Record<string, unknown> = {};
-  if (input.id !== undefined && input.id !== null && String(input.id) !== '') {
-    where.id = String(input.id);
-  }
+  if (hasText(input.id)) where.id = input.id;
   if (input.ativa !== undefined && input.ativa !== null) {
     const raw: unknown = input.ativa;
-    if (typeof raw === 'boolean') {
-      where.ativa = raw;
-    } else if (raw === 'true' || raw === 'false') {
-      where.ativa = raw === 'true';
-    } else {
-      throw new AppError('INVALID_FILTER', 'ativa must be a boolean.', 400);
-    }
+    where.ativa = typeof raw === 'string' ? raw === 'true' : Boolean(raw);
   }
 
-  const found = await listaRepository.list(where);
+  const found = await repository.list(where);
 
-  const term = typeof input.nome === 'string' ? normalize(input.nome) : '';
-  const tipo = input.details?.tipo;
-  const kept = found
-    .filter((lista) => term === '' || normalize(String(lista.nome)).includes(term))
-    .filter((lista) => tipo === undefined || tipo === null || tipo === '' || lista.details?.tipo === tipo)
-    .sort((a, b) => String(a.nome).localeCompare(String(b.nome)));
+  // Text searches (contains, accent/case-insensitive) and the enum filter are applied here.
+  const nomeTerm = hasText(input.nome) ? normalize(input.nome.trim()) : '';
+  const descricaoTerm = hasText(input.details?.descricao) ? normalize(String(input.details?.descricao).trim()) : '';
+  const tipo = hasText(input.details?.tipo) ? String(input.details?.tipo) : '';
+
+  const kept = found.filter((lista: Lista): boolean => {
+    if (nomeTerm !== '' && !normalize(String(lista.nome ?? '')).includes(nomeTerm)) return false;
+    if (descricaoTerm !== '' && !normalize(String(lista.details?.descricao ?? '')).includes(descricaoTerm)) return false;
+    if (tipo !== '' && lista.details?.tipo !== tipo) return false;
+    return true;
+  });
+
+  kept.sort((a: Lista, b: Lista): number => String(a.nome).localeCompare(String(b.nome)));
 
   const page = Math.max(1, Math.trunc(Number(input.page)) || 1);
   const size = Math.min(200, Math.max(1, Math.trunc(Number(input.pageSize)) || 20));
   const start = (page - 1) * size;
-  const pageRows = kept.slice(start, start + size);
-
-  const openStatuses = ['aFazer', 'emAndamento', 'emRevisao'];
-  const items: Lista[] = [];
-  for (const lista of pageRows) {
-    const tarefas = await tarefaRepository.list({ listaId: lista.id });
-    const quantidadeTarefasAbertas = tarefas.filter((tarefa) => openStatuses.includes(tarefa.status)).length;
-    items.push({
-      id: lista.id,
-      version: lista.version,
-      nome: lista.nome,
-      ativa: lista.ativa,
-      details: {
-        tipo: lista.details.tipo,
-        descricao: lista.details.descricao,
-        quantidadeTarefasAbertas,
-      },
-    });
-  }
-
+  const items = kept.slice(start, start + size);
   return { items, hasMore: start + size < kept.length };
 }

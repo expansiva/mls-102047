@@ -12,7 +12,7 @@ export const pageTests = {
       "routine": "tarefas.minhas_tarefas.minhasTarefas",
       "params": {
         "page": 1,
-        "pageSize": 20
+        "pageSize": 10
       },
       "expect": {
         "ok": true
@@ -25,7 +25,7 @@ export const pageTests = {
       "params": {
         "criadasPorMim": true,
         "page": 1,
-        "pageSize": 20
+        "pageSize": 10
       },
       "expect": {
         "ok": true
@@ -38,7 +38,7 @@ export const pageTests = {
       "params": {
         "atribuidasAMim": true,
         "page": 1,
-        "pageSize": 20
+        "pageSize": 10
       },
       "expect": {
         "ok": true
@@ -46,12 +46,12 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "minhasTarefas.emRevisao",
+      "id": "minhasTarefas.statusEmRevisao",
       "routine": "tarefas.minhas_tarefas.minhasTarefas",
       "params": {
         "status": "emRevisao",
         "page": 1,
-        "pageSize": 20
+        "pageSize": 10
       },
       "expect": {
         "ok": true
@@ -64,7 +64,7 @@ export const pageTests = {
       "params": {
         "somenteDevolvidas": true,
         "page": 1,
-        "pageSize": 20
+        "pageSize": 10
       },
       "expect": {
         "ok": true
@@ -109,7 +109,19 @@ export const pageTests = {
       "id": "minhasTarefas.page.required",
       "routine": "tarefas.minhas_tarefas.minhasTarefas",
       "params": {
-        "pageSize": 20
+        "pageSize": 10
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": false
+    },
+    {
+      "id": "minhasTarefas.pageSize.required",
+      "routine": "tarefas.minhas_tarefas.minhasTarefas",
+      "params": {
+        "page": 1
       },
       "expect": {
         "ok": false,
@@ -141,23 +153,21 @@ export const pageTests = {
       "id": "salvarNovaTarefa.ok",
       "routine": "tarefas.minhas_tarefas.salvarNovaTarefa",
       "params": {
-        "chaveCriacao": "monitor-chave-001",
+        "chaveCriacao": "chave-monitor-001",
         "listaId": "<seedRef>",
         "titulo": "Tarefa do monitor",
         "details": {
           "descricao": "Criada pelo monitor"
         },
         "prioridade": "medium",
-        "prazo": "2026-12-31",
+        "prazo": "2026-12-01",
         "responsavelId": "<seedRef>",
         "criadorId": "<seedRef>",
         "checklist": [
           {
             "ordem": 1,
             "details": {
-              "details": {
-                "descricao": "Primeiro item"
-              }
+              "descricao": "Primeiro item"
             }
           }
         ]
@@ -176,23 +186,21 @@ export const pageTests = {
       "id": "salvarNovaTarefa.idempotente",
       "routine": "tarefas.minhas_tarefas.salvarNovaTarefa",
       "params": {
-        "chaveCriacao": "monitor-chave-001",
+        "chaveCriacao": "chave-monitor-001",
         "listaId": "<seedRef>",
         "titulo": "Tarefa do monitor",
         "details": {
           "descricao": "Criada pelo monitor"
         },
         "prioridade": "medium",
-        "prazo": "2026-12-31",
+        "prazo": "2026-12-01",
         "responsavelId": "<seedRef>",
         "criadorId": "<seedRef>",
         "checklist": [
           {
             "ordem": 1,
             "details": {
-              "details": {
-                "descricao": "Primeiro item"
-              }
+              "descricao": "Primeiro item"
             }
           }
         ]
@@ -215,12 +223,34 @@ export const pageTests = {
         "titulo": "Sem chave",
         "details": {},
         "prioridade": "low",
-        "prazo": "2026-12-31",
+        "prazo": "2026-12-01",
         "responsavelId": "<seedRef>",
         "criadorId": "<seedRef>"
       },
       "paramFieldRefs": {
         "listaId": "Lista.id",
+        "responsavelId": "MembroEquipe.id",
+        "criadorId": "MembroEquipe.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "salvarNovaTarefa.listaId.required",
+      "routine": "tarefas.minhas_tarefas.salvarNovaTarefa",
+      "params": {
+        "chaveCriacao": "chave-monitor-002",
+        "titulo": "Sem lista",
+        "details": {},
+        "prioridade": "low",
+        "prazo": "2026-12-01",
+        "responsavelId": "<seedRef>",
+        "criadorId": "<seedRef>"
+      },
+      "paramFieldRefs": {
         "responsavelId": "MembroEquipe.id",
         "criadorId": "MembroEquipe.id"
       },
@@ -234,11 +264,11 @@ export const pageTests = {
       "id": "salvarNovaTarefa.titulo.required",
       "routine": "tarefas.minhas_tarefas.salvarNovaTarefa",
       "params": {
-        "chaveCriacao": "monitor-chave-002",
+        "chaveCriacao": "chave-monitor-003",
         "listaId": "<seedRef>",
         "details": {},
         "prioridade": "low",
-        "prazo": "2026-12-31",
+        "prazo": "2026-12-01",
         "responsavelId": "<seedRef>",
         "criadorId": "<seedRef>"
       },
@@ -254,25 +284,69 @@ export const pageTests = {
       "mutating": true
     },
     {
+      "id": "salvarNovaTarefa.responsavelId.required",
+      "routine": "tarefas.minhas_tarefas.salvarNovaTarefa",
+      "params": {
+        "chaveCriacao": "chave-monitor-004",
+        "listaId": "<seedRef>",
+        "titulo": "Sem responsavel",
+        "details": {},
+        "prioridade": "low",
+        "prazo": "2026-12-01",
+        "criadorId": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "listaId": "Lista.id",
+        "criadorId": "MembroEquipe.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "salvarNovaTarefa.criadorId.required",
+      "routine": "tarefas.minhas_tarefas.salvarNovaTarefa",
+      "params": {
+        "chaveCriacao": "chave-monitor-005",
+        "listaId": "<seedRef>",
+        "titulo": "Sem criador",
+        "details": {},
+        "prioridade": "low",
+        "prazo": "2026-12-01",
+        "responsavelId": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "listaId": "Lista.id",
+        "responsavelId": "MembroEquipe.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
       "id": "salvarEdicaoTarefa.ok",
       "routine": "tarefas.minhas_tarefas.salvarEdicaoTarefa",
       "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
+        "id": "<seedSpare>",
+        "version": "<seedSpare>",
         "listaId": "<seedRef>",
-        "titulo": "Titulo editado pelo monitor",
+        "titulo": "Titulo editado",
         "details": {
-          "descricao": "Editada"
+          "descricao": "Editada pelo monitor"
         },
         "prioridade": "high",
-        "prazo": "2026-12-31",
+        "prazo": "2026-12-15",
         "responsavelId": "<seedRef>"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
         "version": "Tarefa.version",
-        "listaId": "Tarefa.listaId",
-        "responsavelId": "Tarefa.responsavelId"
+        "listaId": "Lista.id",
+        "responsavelId": "MembroEquipe.id"
       },
       "expect": {
         "ok": true
@@ -286,16 +360,16 @@ export const pageTests = {
         "id": "<seedRef>",
         "version": 9999,
         "listaId": "<seedRef>",
-        "titulo": "Titulo conflito",
+        "titulo": "Titulo editado",
         "details": {},
-        "prioridade": "low",
-        "prazo": "2026-12-31",
+        "prioridade": "high",
+        "prazo": "2026-12-15",
         "responsavelId": "<seedRef>"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
-        "listaId": "Tarefa.listaId",
-        "responsavelId": "Tarefa.responsavelId"
+        "listaId": "Lista.id",
+        "responsavelId": "MembroEquipe.id"
       },
       "expect": {
         "ok": false,
@@ -312,12 +386,12 @@ export const pageTests = {
         "titulo": "Sem id",
         "details": {},
         "prioridade": "low",
-        "prazo": "2026-12-31",
+        "prazo": "2026-12-15",
         "responsavelId": "<seedRef>"
       },
       "paramFieldRefs": {
-        "listaId": "Tarefa.listaId",
-        "responsavelId": "Tarefa.responsavelId"
+        "listaId": "Lista.id",
+        "responsavelId": "MembroEquipe.id"
       },
       "expect": {
         "ok": false,
@@ -357,8 +431,8 @@ export const pageTests = {
       "id": "marcarItemChecklist.ok",
       "routine": "tarefas.minhas_tarefas.marcarItemChecklist",
       "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
+        "id": "<seedSpare>",
+        "version": "<seedSpare>",
         "feito": true
       },
       "paramFieldRefs": {
@@ -376,6 +450,22 @@ export const pageTests = {
       "params": {
         "version": 1,
         "feito": true
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "marcarItemChecklist.feito.required",
+      "routine": "tarefas.minhas_tarefas.marcarItemChecklist",
+      "params": {
+        "id": "<seedRef>",
+        "version": 1
+      },
+      "paramFieldRefs": {
+        "id": "ItemChecklist.id"
       },
       "expect": {
         "ok": false,
@@ -446,7 +536,7 @@ export const pageTests = {
         "id": "<seedSpare>",
         "version": "<seedSpare>",
         "details": {
-          "motivoDevolucao": "Ajustar a entrega conforme combinado"
+          "motivoDevolucao": "Ajustar a descricao e revisar o checklist"
         }
       },
       "paramFieldRefs": {

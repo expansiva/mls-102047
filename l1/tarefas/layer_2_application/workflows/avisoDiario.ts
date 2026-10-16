@@ -1,5 +1,4 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/workflows/avisoDiario.ts" enhancement="_blank"/>
-
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
@@ -13,27 +12,33 @@ import type { Tarefa } from '/_102047_/l1/tarefas/layer_3_domain/entities/tarefa
 
 const PROJECT = 102047;
 const MODULE = 'tarefas';
-const ENTITY = 'AvisoVencimento';
 const PROCESS_ID = 'avisoDiario';
 const WORKFLOW_VERSION = '1';
 const SCHEDULE = 'Todo dia às 8h';
 const STEP_GERAR = 'gerarAvisos';
 const STEP_AVISAR = 'avisarResponsavel';
 const SYSTEM_ACTOR = 'system';
-const OPEN_STATUSES: ReadonlyArray<Tarefa['status']> = ['aFazer', 'emAndamento', 'emRevisao'];
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const OPEN_STATUSES: Tarefa['status'][] = ['aFazer', 'emAndamento', 'emRevisao'];
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-export interface TarefaDoAviso {
-  tarefaId: string;
-  prazo: string;
-  situacaoPrazo: 'dueToday' | 'overdue';
-}
+type AvisoTarefa = AvisoVencimento['details']['tarefas'][number];
 
 export interface ResponsavelComVencimento {
   responsavelId: string;
-  tarefas: TarefaDoAviso[];
-  quantidadeTarefas: number;
-  quantidadeAtrasadas: number;
+  tarefas: AvisoTarefa[];
+}
+
+export interface GerarAvisosDiariosInput {
+  /** Reference day (YYYY-MM-DD); when absent, the day of `agora` (or of the clock) in the organization timezone. */
+  dataReferencia?: string;
+  /** Moment of the run (ISO); when absent, the request clock. */
+  agora?: string;
+}
+
+export interface GerarAvisosDiariosOutput {
+  dataReferencia: string;
+  quantidadeAvisos: number;
+  quantidadeFalhas: number;
 }
 
 export interface ResolverResponsaveisComVencimentoInput {
@@ -45,217 +50,232 @@ export interface ResolverResponsaveisComVencimentoOutput {
   responsaveis: ResponsavelComVencimento[];
 }
 
-export interface GerarAvisosDiariosInput {
-  dataReferencia: string;
+function isoDate(date: Date, timeZone: string | undefined): string {
+  if (timeZone) {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
+  }
+  return date.toISOString().slice(0, 10);
 }
 
-export interface GerarAvisosDiariosOutput {
-  dataReferencia: string;
-  /** false when the notice of a previous day has not finished, so no new run was started. */
-  iniciado: boolean;
-  motivo?: string;
-  /** Notices of the reference day (new ones and the ones already stored by an earlier call). */
-  quantidadeAvisos: number;
-  avisosNovos: number;
-  avisosFalhos: number;
-}
-
-function assertDataReferencia(value: string): void {
-  if (typeof value !== 'string' || !DATE_PATTERN.test(value)) {
-    throw new AppError('INVALID_REFERENCE_DATE', 'dataReferencia must be a date in the format YYYY-MM-DD', 400, {
+function parseNow(ctx: RequestContext, agora: string | undefined): Date {
+  const date = new Date(agora ?? ctx.clock.nowIso());
+  if (Number.isNaN(date.getTime())) {
+    throw new AppError('INVALID_MOMENT', 'The moment of the run is not a valid date.', 400, {
       ruleId: 'avisoSomenteTarefasAbertasVencendo',
     });
   }
+  return date;
 }
 
-function dateOnly(value: string): string {
-  return value.slice(0, 10);
-}
-
-function referenceDateOf(ctx: RequestContext, now: Date): string {
-  const timeZone = ctx.organization.timezone ?? 'UTC';
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(now);
-}
-
-function refOf(recordId: string): Omit<OccurrenceRef, 'workflowVersion'> {
-  return { project: PROJECT, module: MODULE, entity: ENTITY, recordId, processId: PROCESS_ID };
+function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 export async function resolverResponsaveisComVencimento(
   input: ResolverResponsaveisComVencimentoInput,
   ctx: RequestContext,
 ): Promise<ResolverResponsaveisComVencimentoOutput> {
-  assertDataReferencia(input.dataReferencia);
+  if (typeof input.dataReferencia !== 'string' || !ISO_DATE.test(input.dataReferencia)) {
+    throw new AppError('INVALID_REFERENCE_DATE', 'dataReferencia must be a date in the format YYYY-MM-DD.', 400, {
+      ruleId: 'avisoSomenteTarefasAbertasVencendo',
+    });
+  }
+  const hoje = input.dataReferencia;
   const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-  const tarefas = await tarefaRepository.list({});
+  const byResponsavel = new Map<string, AvisoTarefa[]>();
 
-  const grupos = new Map<string, TarefaDoAviso[]>();
-  for (const tarefa of tarefas) {
-    if (!OPEN_STATUSES.includes(tarefa.status)) continue;
-    const prazo = dateOnly(tarefa.prazo);
-    if (prazo > input.dataReferencia) continue;
-    const item: TarefaDoAviso = {
-      tarefaId: tarefa.id,
-      prazo,
-      situacaoPrazo: prazo === input.dataReferencia ? 'dueToday' : 'overdue',
-    };
-    const lista = grupos.get(tarefa.responsavelId);
-    if (lista) lista.push(item);
-    else grupos.set(tarefa.responsavelId, [item]);
+  for (const status of OPEN_STATUSES) {
+    const tarefas = await tarefaRepository.list({ status });
+    for (const tarefa of tarefas) {
+      if (!OPEN_STATUSES.includes(tarefa.status)) continue;
+      const prazo = tarefa.prazo.slice(0, 10);
+      if (prazo > hoje) continue;
+      const situacaoPrazo: AvisoTarefa['situacaoPrazo'] = prazo === hoje ? 'dueToday' : 'overdue';
+      const list = byResponsavel.get(tarefa.responsavelId) ?? [];
+      list.push({ tarefaId: tarefa.id, prazo, situacaoPrazo });
+      byResponsavel.set(tarefa.responsavelId, list);
+    }
   }
 
   const responsaveis: ResponsavelComVencimento[] = [];
-  for (const [responsavelId, lista] of grupos) {
-    const ordenadas = [...lista].sort((a, b) =>
+  for (const responsavelId of [...byResponsavel.keys()].sort()) {
+    const tarefas = [...(byResponsavel.get(responsavelId) ?? [])].sort((a, b) =>
       a.prazo === b.prazo ? a.tarefaId.localeCompare(b.tarefaId) : a.prazo.localeCompare(b.prazo),
     );
-    responsaveis.push({
-      responsavelId,
-      tarefas: ordenadas,
-      quantidadeTarefas: ordenadas.length,
-      quantidadeAtrasadas: ordenadas.filter((t) => t.situacaoPrazo === 'overdue').length,
-    });
+    responsaveis.push({ responsavelId, tarefas });
   }
-  responsaveis.sort((a, b) => a.responsavelId.localeCompare(b.responsavelId));
-
-  return { dataReferencia: input.dataReferencia, responsaveis };
+  return { dataReferencia: hoje, responsaveis };
 }
 
-/**
- * Runs the steps of one notice: opens (or finds) its occurrence, moves it to the alert step with the
- * responsible as the one who acts now, and ends the notice. Safe to call again on the same notice.
- */
-async function processarAviso(
+async function entregarAviso(
   ctx: RequestContext,
   repository: AvisoVencimentoRepository,
   aviso: AvisoVencimento,
-): Promise<'completed' | 'failed'> {
-  if (aviso.status === 'completed') return 'completed';
-  if (aviso.status === 'failed') return 'failed';
-
-  const ref = refOf(aviso.id);
-  try {
-    const key = `${PROCESS_ID}:${aviso.dataReferencia}:${aviso.responsavelId}`;
-    const occurrence = await taskOccurrence.open(
+  key: string,
+  now: Date,
+): Promise<void> {
+  const ref: Omit<OccurrenceRef, 'workflowVersion'> = {
+    project: PROJECT,
+    module: MODULE,
+    entity: 'AvisoVencimento',
+    recordId: aviso.id,
+    processId: PROCESS_ID,
+  };
+  let occurrence = await taskOccurrence.find(ctx, ref);
+  if (!occurrence) {
+    occurrence = await taskOccurrence.open(
       ctx,
       { ...ref, workflowVersion: WORKFLOW_VERSION },
       STEP_GERAR,
       SYSTEM_ACTOR,
       key,
     );
-    if (occurrence.step === STEP_GERAR) {
-      await taskOccurrence.advance(ctx, ref, STEP_AVISAR, aviso.responsavelId);
-    } else if (occurrence.step !== STEP_AVISAR) {
-      throw new AppError(
-        'OCCURRENCE_STEP_INVALID',
-        `Occurrence of notice ${aviso.id} is in step ${occurrence.step}, expected ${STEP_GERAR} or ${STEP_AVISAR}`,
-        409,
-        { ruleId: 'avisoNaoIniciaSemConcluirAnterior' },
-      );
-    }
-  } catch (error) {
-    const motivoFalha = error instanceof Error ? error.message : String(error);
-    const falho: AvisoVencimento = {
-      ...aviso,
-      // The transition writes the state it leads to (l4: falharAviso → failed).
-      status: 'failed',
-      details: { ...aviso.details, finalizadoEm: ctx.clock.nowIso(), motivoFalha },
-    };
-    await repository.transition(falho, 'falharAviso');
-    return 'failed';
   }
-
+  if (occurrence.step === STEP_GERAR) {
+    occurrence = await taskOccurrence.advance(ctx, ref, STEP_AVISAR, aviso.responsavelId);
+  }
+  if (occurrence.step !== STEP_AVISAR) {
+    throw new AppError(
+      'OCCURRENCE_STEP_UNEXPECTED',
+      `The occurrence of aviso ${aviso.id} is in step ${occurrence.step}, expected ${STEP_AVISAR}.`,
+      409,
+      { ruleId: 'avisoNaoIniciaSemConcluirAnterior' },
+    );
+  }
   const concluido: AvisoVencimento = {
     ...aviso,
-    // The transition writes the state it leads to (l4: concluirAviso → completed).
     status: 'completed',
-    details: { ...aviso.details, finalizadoEm: ctx.clock.nowIso() },
+    details: { ...aviso.details, finalizadoEm: now.toISOString() },
   };
   await repository.transition(concluido, 'concluirAviso');
-  return 'completed';
+}
+
+async function registrarFalha(
+  repository: AvisoVencimentoRepository,
+  aviso: AvisoVencimento,
+  motivo: string,
+  now: Date,
+): Promise<void> {
+  const falho: AvisoVencimento = {
+    ...aviso,
+    status: 'failed',
+    details: { ...aviso.details, finalizadoEm: now.toISOString(), motivoFalha: motivo },
+  };
+  await repository.transition(falho, 'falharAviso');
 }
 
 export async function gerarAvisosDiarios(
   input: GerarAvisosDiariosInput,
   ctx: RequestContext,
 ): Promise<GerarAvisosDiariosOutput> {
-  assertDataReferencia(input.dataReferencia);
-  const dataReferencia = input.dataReferencia;
+  const now = parseNow(ctx, input.agora);
+  const hoje = input.dataReferencia ?? isoDate(now, ctx.organization.timezone);
+  if (!ISO_DATE.test(hoje)) {
+    throw new AppError('INVALID_REFERENCE_DATE', 'dataReferencia must be a date in the format YYYY-MM-DD.', 400, {
+      ruleId: 'avisoUnicoPorResponsavelEDia',
+    });
+  }
+
   const repository = resolveRepository<AvisoVencimentoRepository>(ctx, 'AvisoVencimentoRepository');
 
   const emEnvio = await repository.list({ status: 'pending' });
-  const anteriorPendente = emEnvio.find((a) => a.status === 'pending' && a.dataReferencia < dataReferencia);
-  if (anteriorPendente) {
-    return {
-      dataReferencia,
-      iniciado: false,
-      motivo: `The notice ${anteriorPendente.id} of ${anteriorPendente.dataReferencia} has not finished`,
-      quantidadeAvisos: 0,
-      avisosNovos: 0,
-      avisosFalhos: 0,
-    };
+  const anterior = emEnvio.find((aviso) => aviso.status === 'pending' && aviso.dataReferencia < hoje);
+  if (anterior) {
+    throw new AppError(
+      'AVISO_ANTERIOR_EM_ENVIO',
+      `The aviso ${anterior.id} of ${anterior.dataReferencia} is still being sent; a new run does not start.`,
+      409,
+      { ruleId: 'avisoNaoIniciaSemConcluirAnterior' },
+    );
   }
 
-  const { responsaveis } = await resolverResponsaveisComVencimento({ dataReferencia }, ctx);
-
-  const doDia = await repository.list({ dataReferencia });
+  const doDia = await repository.list({ dataReferencia: hoje });
   const existentes = new Map<string, AvisoVencimento>();
   for (const aviso of doDia) {
-    if (aviso.dataReferencia === dataReferencia) existentes.set(aviso.responsavelId, aviso);
+    if (aviso.dataReferencia === hoje) existentes.set(aviso.responsavelId, aviso);
   }
 
+  const { responsaveis } = await resolverResponsaveisComVencimento({ dataReferencia: hoje }, ctx);
+  const requestKey = ctx.requestMeta?.requestId ?? PROCESS_ID;
   let quantidadeAvisos = 0;
-  let avisosNovos = 0;
-  let avisosFalhos = 0;
+  let quantidadeFalhas = 0;
+
+  const processar = async (aviso: AvisoVencimento): Promise<void> => {
+    quantidadeAvisos += 1;
+    if (aviso.status === 'completed') return;
+    if (aviso.status === 'failed') {
+      quantidadeFalhas += 1;
+      return;
+    }
+    const key = `${requestKey}:${hoje}:${aviso.responsavelId}`;
+    try {
+      await entregarAviso(ctx, repository, aviso, key, now);
+    } catch (error) {
+      const motivo = messageOf(error);
+      ctx.log.error('avisoDiario: delivery failed', { avisoId: aviso.id, responsavelId: aviso.responsavelId, motivo });
+      await registrarFalha(repository, aviso, motivo, now);
+      quantidadeFalhas += 1;
+    }
+  };
 
   for (const responsavel of responsaveis) {
-    let aviso = existentes.get(responsavel.responsavelId);
-    if (!aviso) {
-      // details.tarefas is a collection (l4 `collection: true`): every open task of the responsible that is due.
-      if (responsavel.tarefas.length === 0) continue;
-      const novo: AvisoVencimento = {
-        id: ctx.idGenerator.newId(),
-        version: 1,
-        responsavelId: responsavel.responsavelId,
-        dataReferencia,
-        status: 'pending',
-        details: {
-          geradoEm: ctx.clock.nowIso(),
-          tarefas: responsavel.tarefas,
-          quantidadeTarefas: responsavel.quantidadeTarefas,
-          quantidadeAtrasadas: responsavel.quantidadeAtrasadas,
-        },
-      };
-      aviso = await repository.create(novo);
-      avisosNovos += 1;
+    const existente = existentes.get(responsavel.responsavelId);
+    if (existente) {
+      existentes.delete(responsavel.responsavelId);
+      await processar(existente);
+      continue;
     }
-
-    const resultado = await processarAviso(ctx, repository, aviso);
-    quantidadeAvisos += 1;
-    if (resultado === 'failed') avisosFalhos += 1;
+    const quantidadeAtrasadas = responsavel.tarefas.filter((t) => t.situacaoPrazo === 'overdue').length;
+    const novo: AvisoVencimento = {
+      id: ctx.idGenerator.newId(),
+      version: 1,
+      responsavelId: responsavel.responsavelId,
+      dataReferencia: hoje,
+      status: 'pending',
+      details: {
+        geradoEm: now.toISOString(),
+        tarefas: responsavel.tarefas,
+        quantidadeTarefas: responsavel.tarefas.length,
+        quantidadeAtrasadas,
+      },
+    };
+    const criado = await repository.create(novo);
+    await processar(criado);
   }
 
-  return { dataReferencia, iniciado: true, quantidadeAvisos, avisosNovos, avisosFalhos };
+  // Avisos of the day written by an earlier call whose responsável no longer has due tasks: finish what was left pending.
+  for (const restante of existentes.values()) {
+    if (restante.status === 'pending') await processar(restante);
+  }
+
+  return { dataReferencia: hoje, quantidadeAvisos, quantidadeFalhas };
 }
 
 export async function onTick(ctx: RequestContext, now: Date): Promise<void> {
   const repository = resolveRepository<AvisoVencimentoRepository>(ctx, 'AvisoVencimentoRepository');
-  const avisos = await repository.list({});
-
+  const hoje = isoDate(now, ctx.organization.timezone);
+  const doDia = await repository.list({ dataReferencia: hoje });
   let lastRun: Date | null = null;
-  for (const aviso of avisos) {
+  for (const aviso of doDia) {
+    if (aviso.dataReferencia !== hoje) continue;
     const geradoEm = new Date(aviso.details.geradoEm);
     if (Number.isNaN(geradoEm.getTime())) continue;
     if (lastRun === null || geradoEm.getTime() > lastRun.getTime()) lastRun = geradoEm;
   }
-
   const due = evaluateSchedule(SCHEDULE, now, lastRun);
   if (due === null) return;
-
-  await gerarAvisosDiarios({ dataReferencia: referenceDateOf(ctx, now) }, ctx);
+  try {
+    await gerarAvisosDiarios({ dataReferencia: hoje, agora: now.toISOString() }, ctx);
+  } catch (error) {
+    if (error instanceof AppError && error.code === 'AVISO_ANTERIOR_EM_ENVIO') {
+      ctx.log.error('avisoDiario: run skipped, previous aviso not finished', { message: error.message });
+      return;
+    }
+    throw error;
+  }
 }

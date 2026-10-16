@@ -1,360 +1,310 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/requests/inicio_membro.ts" enhancement="_blank"/>
-import type { Inicio_membroContracts } from '/_102047_/l2/tarefas/web/contracts/inicio_membro.defs.js';
-import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+
+import type { Inicio_membroContracts, ResumoMinhasTarefas, TarefaResumo, AvisoDoDia, AvisoTarefa, Pendencia } from '/_102047_/l2/tarefas/web/contracts/inicio_membro.defs.js';
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { listTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
+import type { ListTarefaOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
 import { getTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/getTarefa.js';
 import { getLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/getLista.js';
 import { getMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.js';
-import { listAvisoVencimento } from '/_102047_/l1/tarefas/layer_2_application/usecases/listAvisoVencimento.js';
 import { listItemChecklist } from '/_102047_/l1/tarefas/layer_2_application/usecases/listItemChecklist.js';
+import { listAvisoVencimento } from '/_102047_/l1/tarefas/layer_2_application/usecases/listAvisoVencimento.js';
 import { avancarEtapaTarefa } from '/_102047_/l1/tarefas/layer_2_application/workflows/cicloTarefa.js';
-import type { TransicaoTarefa } from '/_102047_/l1/tarefas/layer_2_application/workflows/cicloTarefa.js';
 
-type QryOutput = Inicio_membroContracts['tarefas.inicio_membro.qryInicioMembro']['output'];
-type Resumo = QryOutput['resumo'];
-type TarefaResumo = Resumo['tarefas'][number];
-type Pendencia = QryOutput['pendencias'][number];
-type AvisoDoDia = NonNullable<QryOutput['avisoHoje']>;
-type AvisoTarefa = AvisoDoDia['details']['tarefas'][number];
-type StatusTarefa = TarefaResumo['status'];
-type Prioridade = TarefaResumo['prioridade'];
+type TarefaRec = ListTarefaOutput['items'][number];
+type TarefaStatus = TarefaResumo['status'];
+type TarefaPrioridade = TarefaResumo['prioridade'];
+type AvisoStatus = AvisoDoDia['status'];
 type SituacaoPrazo = AvisoTarefa['details']['tarefas']['situacaoPrazo'];
-type StatusAviso = AvisoDoDia['status'];
-type TarefaItem = Awaited<ReturnType<typeof listTarefa>>['items'][number];
-type ResumoEPendencias = { resumo: Resumo; pendencias: Pendencia[] };
+type Transicao = 'iniciar' | 'enviarParaRevisao' | 'aceitar' | 'devolver';
 
-const PAGE_SIZE_MAX = 200;
+const STATUS_VALUES: TarefaStatus[] = ['aFazer', 'emAndamento', 'emRevisao', 'concluida', 'cancelada'];
+const PRIORIDADE_VALUES: TarefaPrioridade[] = ['low', 'medium', 'high'];
+const AVISO_STATUS_VALUES: AvisoStatus[] = ['pending', 'completed', 'failed'];
+const SITUACAO_VALUES: SituacaoPrazo[] = ['dueToday', 'overdue'];
+const PRIORIDADE_RANK: Record<TarefaPrioridade, number> = { high: 0, medium: 1, low: 2 };
+const PAGE_SIZE = 200;
 
-function asStatus(value: string): StatusTarefa {
-  switch (value) {
-    case 'aFazer':
-    case 'emAndamento':
-    case 'emRevisao':
-    case 'concluida':
-    case 'cancelada':
-      return value;
-    default:
-      throw new AppError('INVALID_DATA', `Tarefa com situação desconhecida: ${value}`, 500);
-  }
+function toStatus(v: string): TarefaStatus {
+  const found = STATUS_VALUES.find((s) => s === v);
+  if (found === undefined) throw new AppError('INVALID_DATA', `status de tarefa desconhecido: ${v}`, 500);
+  return found;
 }
 
-function asPrioridade(value: string): Prioridade {
-  switch (value) {
-    case 'low':
-    case 'medium':
-    case 'high':
-      return value;
-    default:
-      throw new AppError('INVALID_DATA', `Tarefa com prioridade desconhecida: ${value}`, 500);
-  }
+function toPrioridade(v: string): TarefaPrioridade {
+  const found = PRIORIDADE_VALUES.find((s) => s === v);
+  if (found === undefined) throw new AppError('INVALID_DATA', `prioridade de tarefa desconhecida: ${v}`, 500);
+  return found;
 }
 
-function asStatusAviso(value: string): StatusAviso {
-  switch (value) {
-    case 'pending':
-    case 'completed':
-    case 'failed':
-      return value;
-    default:
-      throw new AppError('INVALID_DATA', `Aviso com situação desconhecida: ${value}`, 500);
-  }
+function toAvisoStatus(v: string): AvisoStatus {
+  const found = AVISO_STATUS_VALUES.find((s) => s === v);
+  if (found === undefined) throw new AppError('INVALID_DATA', `situacao de aviso desconhecida: ${v}`, 500);
+  return found;
 }
 
-function asSituacaoPrazo(value: unknown): SituacaoPrazo {
-  if (value === 'dueToday' || value === 'overdue') return value;
-  throw new AppError('INVALID_DATA', `Tarefa do aviso com situação de prazo desconhecida: ${String(value)}`, 500);
+function toSituacao(v: string): SituacaoPrazo {
+  const found = SITUACAO_VALUES.find((s) => s === v);
+  if (found === undefined) throw new AppError('INVALID_DATA', `situacao de prazo desconhecida: ${v}`, 500);
+  return found;
 }
 
-function prioridadePeso(p: string): number {
-  if (p === 'high') return 0;
-  if (p === 'medium') return 1;
-  return 2;
-}
-
-function diaDe(valor: string): string {
-  return valor.slice(0, 10);
-}
-
-function hojeIso(ctx: RequestContext): string {
-  const agora = ctx.clock.nowIso();
-  const tz = ctx.organization.timezone;
-  if (tz) {
-    return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(agora));
-  }
-  return diaDe(agora);
-}
-
-function membroDaSessao(ctx: RequestContext): string {
+function callerId(ctx: RequestContext): string {
   const id = ctx.sessionContext.actorId;
-  if (!id) throw new AppError('UNAUTHORIZED', 'Membro da sessão não identificado', 401);
+  if (id == null || id === '') throw new AppError('UNAUTHENTICATED', 'membro da sessão não identificado', 401);
   return id;
 }
 
-function ehAberta(status: string): boolean {
+function todayOf(ctx: RequestContext): string {
+  return ctx.clock.nowIso().slice(0, 10);
+}
+
+function dayOf(v: string): string {
+  return v.slice(0, 10);
+}
+
+function isAberta(status: TarefaStatus): boolean {
   return status === 'aFazer' || status === 'emAndamento' || status === 'emRevisao';
 }
 
-async function listarTodasTarefas(ctx: RequestContext, filtro: { responsavelId?: string; criadorId?: string }): Promise<TarefaItem[]> {
-  const todas: TarefaItem[] = [];
+async function collect<T>(fetchPage: (page: number) => Promise<{ items: T[]; hasMore: boolean }>): Promise<T[]> {
+  const all: T[] = [];
   let page = 1;
   for (;;) {
-    const res = await listTarefa({ ...filtro, page, pageSize: PAGE_SIZE_MAX }, ctx);
-    todas.push(...res.items);
+    const res = await fetchPage(page);
+    for (const it of res.items) all.push(it);
     if (!res.hasMore) break;
     page += 1;
   }
-  return todas;
+  return all;
 }
 
-async function progressoChecklist(ctx: RequestContext, cache: Map<string, string>, tarefaId: string): Promise<string> {
-  const cached = cache.get(tarefaId);
-  if (cached !== undefined) return cached;
-  let total = 0;
-  let feitos = 0;
-  let page = 1;
-  for (;;) {
-    const res = await listItemChecklist({ tarefaId, page, pageSize: PAGE_SIZE_MAX }, ctx);
-    for (const item of res.items) {
-      total += 1;
-      if (item.feito) feitos += 1;
-    }
-    if (!res.hasMore) break;
-    page += 1;
-  }
-  const texto = `${feitos}/${total}`;
-  cache.set(tarefaId, texto);
-  return texto;
+async function progressoChecklist(tarefaId: string, ctx: RequestContext): Promise<string> {
+  const itens = await collect((page) => listItemChecklist({ tarefaId, page, pageSize: PAGE_SIZE }, ctx));
+  const feitos = itens.filter((i) => i.feito).length;
+  return `${feitos}/${itens.length}`;
 }
 
-async function nomeMembro(ctx: RequestContext, cache: Map<string, string>, id: string): Promise<string> {
-  const cached = cache.get(id);
-  if (cached !== undefined) return cached;
-  const membro = await getMembroEquipe({ id }, ctx);
-  const nome = membro.details.identification.name;
-  cache.set(id, nome);
-  return nome;
+function byPrazo(a: { prazo: string }, b: { prazo: string }): number {
+  const da = dayOf(a.prazo);
+  const db = dayOf(b.prazo);
+  return da < db ? -1 : da > db ? 1 : 0;
 }
 
-function montarResumoPessoa(name: string): Pendencia['responsavel'] {
-  return { details: { identification: { details: { identification: { name } } } } };
-}
-
-function lerTarefasDoAviso(raw: unknown): AvisoTarefa[] {
-  const lista: unknown[] = Array.isArray(raw) ? raw : raw == null ? [] : [raw];
-  return lista.map((item) => {
-    if (typeof item !== 'object' || item === null) {
-      throw new AppError('INVALID_DATA', 'Tarefa do aviso em formato inválido', 500);
-    }
-    const r = item as { tarefaId?: unknown; prazo?: unknown; situacaoPrazo?: unknown };
-    if (typeof r.tarefaId !== 'string' || typeof r.prazo !== 'string') {
-      throw new AppError('INVALID_DATA', 'Tarefa do aviso sem tarefaId ou prazo', 500);
-    }
-    return {
-      details: {
-        tarefas: {
-          tarefaId: r.tarefaId,
-          prazo: r.prazo,
-          situacaoPrazo: asSituacaoPrazo(r.situacaoPrazo),
-        },
-      },
-    };
-  });
-}
-
-async function comporResumoEPendencias(ctx: RequestContext, membroId: string): Promise<ResumoEPendencias> {
-  const hoje = hojeIso(ctx);
-  const checklistCache = new Map<string, string>();
-  const nomesCache = new Map<string, string>();
-  const listasCache = new Map<string, string>();
-
-  const comoResponsavel = await listarTodasTarefas(ctx, { responsavelId: membroId });
-  const comoCriador = await listarTodasTarefas(ctx, { criadorId: membroId });
-
-  // Resumo: tarefas abertas do membro (details.aberta, venceHoje, atrasada calculados, nunca lidos).
-  const abertas = comoResponsavel
-    .filter((t) => ehAberta(t.status))
-    .sort((a, b) => (diaDe(a.prazo) < diaDe(b.prazo) ? -1 : diaDe(a.prazo) > diaDe(b.prazo) ? 1 : 0));
-
-  let quantidadeVencemHoje = 0;
-  let quantidadeAtrasadas = 0;
-  const tarefasResumo: TarefaResumo[] = [];
+async function montarResumo(myTasks: TarefaRec[], today: string, ctx: RequestContext): Promise<ResumoMinhasTarefas> {
+  const abertas = myTasks.filter((t) => isAberta(toStatus(t.status))).sort(byPrazo);
+  const listaNomes = new Map<string, string>();
+  const tarefas: TarefaResumo[] = [];
+  let vencemHoje = 0;
+  let atrasadas = 0;
   for (const t of abertas) {
-    const prazo = diaDe(t.prazo);
-    const venceHoje = prazo === hoje;
-    const atrasada = prazo < hoje;
-    if (venceHoje) quantidadeVencemHoje += 1;
-    if (atrasada) quantidadeAtrasadas += 1;
-    let nomeLista = listasCache.get(t.listaId);
+    const status = toStatus(t.status);
+    // derived fields are calculated here, never read from storage
+    const aberta = isAberta(status);
+    const venceHoje = aberta && dayOf(t.prazo) === today;
+    const atrasada = aberta && dayOf(t.prazo) < today;
+    if (venceHoje) vencemHoje += 1;
+    if (atrasada) atrasadas += 1;
+    let nomeLista = listaNomes.get(t.listaId);
     if (nomeLista === undefined) {
       const lista = await getLista({ id: t.listaId }, ctx);
       nomeLista = lista.nome;
-      listasCache.set(t.listaId, nomeLista);
+      listaNomes.set(t.listaId, nomeLista);
     }
-    tarefasResumo.push({
+    tarefas.push({
       id: t.id,
       titulo: t.titulo,
-      status: asStatus(t.status),
+      status,
       prazo: t.prazo,
-      prioridade: asPrioridade(t.prioridade),
+      prioridade: toPrioridade(t.prioridade),
       listaId: t.listaId,
       lista: { nome: nomeLista },
       details: {
         details: {
-          aberta: true,
+          aberta,
           venceHoje,
           atrasada,
-          progressoChecklist: await progressoChecklist(ctx, checklistCache, t.id),
+          progressoChecklist: await progressoChecklist(t.id, ctx),
         },
       },
     });
   }
-
-  const resumo: Resumo = {
-    quantidadeAbertas: abertas.length,
-    quantidadeVencemHoje,
-    quantidadeAtrasadas,
-    tarefas: tarefasResumo,
+  return {
+    quantidadeAbertas: tarefas.length,
+    quantidadeVencemHoje: vencemHoje,
+    quantidadeAtrasadas: atrasadas,
+    tarefas,
   };
+}
 
-  // Pendências: somenteResponsavelExecuta (responsável em aFazer/emAndamento) e somenteCriadorRevisa (criador em emRevisao).
-  const candidatas: { tarefa: TarefaItem; acao: string }[] = [];
-  for (const t of comoResponsavel) {
-    if (t.status === 'aFazer') {
-      candidatas.push({ tarefa: t, acao: 'iniciar' });
-    } else if (t.status === 'emAndamento') {
-      candidatas.push({ tarefa: t, acao: t.details.devolvidaEm ? 'ajustar' : 'enviarParaRevisao' });
-    }
+function acaoEsperada(t: TarefaRec, souResponsavel: boolean): string | null {
+  const status = toStatus(t.status);
+  // somenteResponsavelExecuta: the responsible executes (iniciar / enviarParaRevisao / ajustar)
+  if (souResponsavel && status === 'aFazer') return 'iniciar';
+  if (souResponsavel && status === 'emAndamento') {
+    return t.details.devolvidaEm != null ? 'ajustar' : 'enviarParaRevisao';
   }
-  for (const t of comoCriador) {
-    if (t.status === 'emRevisao') {
-      candidatas.push({ tarefa: t, acao: 'revisar' });
-    }
+  return null;
+}
+
+async function montarPendencias(me: string, myTasks: TarefaRec[], ctx: RequestContext): Promise<Pendencia[]> {
+  const candidatas = new Map<string, { t: TarefaRec; acao: string }>();
+  for (const t of myTasks) {
+    if (t.responsavelId !== me) continue;
+    const acao = acaoEsperada(t, true);
+    if (acao !== null) candidatas.set(t.id, { t, acao });
   }
-  candidatas.sort((a, b) => {
-    const pa = diaDe(a.tarefa.prazo);
-    const pb = diaDe(b.tarefa.prazo);
-    if (pa !== pb) return pa < pb ? -1 : 1;
-    return prioridadePeso(a.tarefa.prioridade) - prioridadePeso(b.tarefa.prioridade);
+  // somenteCriadorRevisa: the creator reviews tasks in emRevisao
+  const criadas = await collect((page) => listTarefa({ criadorId: me, status: 'emRevisao', page, pageSize: PAGE_SIZE }, ctx));
+  for (const t of criadas) {
+    if (t.criadorId !== me) continue;
+    if (toStatus(t.status) !== 'emRevisao') continue;
+    candidatas.set(t.id, { t, acao: 'revisar' });
+  }
+  const nomes = new Map<string, string>();
+  const nomeDe = async (id: string): Promise<string> => {
+    const cached = nomes.get(id);
+    if (cached !== undefined) return cached;
+    const m = await getMembroEquipe({ id }, ctx);
+    const nome = m.details.identification.name;
+    nomes.set(id, nome);
+    return nome;
+  };
+  const ordenadas = Array.from(candidatas.values()).sort((a, b) => {
+    const p = byPrazo(a.t, b.t);
+    if (p !== 0) return p;
+    return PRIORIDADE_RANK[toPrioridade(a.t.prioridade)] - PRIORIDADE_RANK[toPrioridade(b.t.prioridade)];
   });
-
-  const pendencias: Pendencia[] = [];
-  for (const c of candidatas) {
-    const t = c.tarefa;
+  const out: Pendencia[] = [];
+  for (const { t, acao } of ordenadas) {
+    const nomeResp = await nomeDe(t.responsavelId);
+    const nomeCriador = await nomeDe(t.criadorId);
     const detalhes: Pendencia['details']['details'] = {
-      progressoChecklist: await progressoChecklist(ctx, checklistCache, t.id),
+      progressoChecklist: await progressoChecklist(t.id, ctx),
     };
     if (t.details.motivoDevolucao != null) detalhes.motivoDevolucao = t.details.motivoDevolucao;
     if (t.details.devolvidaEm != null) detalhes.devolvidaEm = t.details.devolvidaEm;
-    pendencias.push({
+    out.push({
       id: t.id,
-      version: t.version,
+      version: Number(t.version),
       titulo: t.titulo,
-      status: asStatus(t.status),
+      status: toStatus(t.status),
       prazo: t.prazo,
-      prioridade: asPrioridade(t.prioridade),
+      prioridade: toPrioridade(t.prioridade),
       responsavelId: t.responsavelId,
       criadorId: t.criadorId,
-      responsavel: montarResumoPessoa(await nomeMembro(ctx, nomesCache, t.responsavelId)),
-      criador: montarResumoPessoa(await nomeMembro(ctx, nomesCache, t.criadorId)),
-      acaoEsperada: c.acao,
+      responsavel: { details: { identification: { details: { identification: { name: nomeResp } } } } },
+      criador: { details: { identification: { details: { identification: { name: nomeCriador } } } } },
+      acaoEsperada: acao,
       details: { details: detalhes },
     });
   }
+  return out;
+}
 
+async function recompor(me: string, ctx: RequestContext): Promise<{ resumo: ResumoMinhasTarefas; pendencias: Pendencia[] }> {
+  const myTasks = await collect((page) => listTarefa({ responsavelId: me, page, pageSize: PAGE_SIZE }, ctx));
+  const resumo = await montarResumo(myTasks, todayOf(ctx), ctx);
+  const pendencias = await montarPendencias(me, myTasks, ctx);
   return { resumo, pendencias };
+}
+
+async function montarAviso(me: string, today: string, ctx: RequestContext): Promise<AvisoDoDia | null> {
+  const res = await listAvisoVencimento({ responsavelId: me, dataReferencia: today, page: 1, pageSize: 20 }, ctx);
+  // avisoUnicoPorResponsavelEDia: at most one notice per member and day
+  const aviso = res.items.find((a) => a.responsavelId === me && dayOf(a.dataReferencia) === today);
+  if (aviso === undefined) return null;
+  // avisoSomenteTarefasAbertasVencendo: the notice carries only open tasks due today or overdue
+  const tarefas: AvisoTarefa[] = aviso.details.tarefas.map((t) => ({
+    details: {
+      tarefas: {
+        tarefaId: t.tarefaId,
+        prazo: t.prazo,
+        situacaoPrazo: toSituacao(t.situacaoPrazo),
+      },
+    },
+  }));
+  const atrasadas = tarefas.filter((t) => t.details.tarefas.situacaoPrazo === 'overdue').length;
+  return {
+    id: aviso.id,
+    dataReferencia: aviso.dataReferencia,
+    status: toAvisoStatus(aviso.status),
+    details: {
+      details: {
+        geradoEm: aviso.details.geradoEm,
+        quantidadeTarefas: tarefas.length,
+        quantidadeAtrasadas: atrasadas,
+      },
+      tarefas,
+    },
+  };
 }
 
 async function executarTransicao(
   ctx: RequestContext,
-  entrada: { id: string; version: number },
-  transicao: TransicaoTarefa,
-  quem: 'responsavel' | 'criador',
+  id: string,
+  version: number,
+  transicao: Transicao,
   motivoDevolucao?: string,
-): Promise<ResumoEPendencias> {
-  const membroId = membroDaSessao(ctx);
+): Promise<{ resumo: ResumoMinhasTarefas; pendencias: Pendencia[] }> {
   return ctx.data.moduleData.runInTransaction(async (tx) => {
     const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-    const tarefa = await getTarefa({ id: String(entrada.id) }, bound);
-
-    // tarefaEncerradaNaoTransiciona
-    if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
-      throw new AppError('TAREFA_ENCERRADA', 'Uma tarefa concluída ou cancelada não muda mais de situação', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
+    const me = callerId(bound);
+    const tarefa = await getTarefa({ id }, bound);
+    const status = toStatus(tarefa.status);
+    if (status === 'concluida' || status === 'cancelada') {
+      throw new AppError('TAREFA_ENCERRADA', 'Tarefa concluída ou cancelada não muda de situação.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
     }
-    if (quem === 'responsavel') {
-      // somenteResponsavelExecuta
-      if (tarefa.responsavelId !== membroId) {
-        throw new AppError('FORBIDDEN', 'Somente o responsável da tarefa pode executar esta transição', 403, { ruleId: 'somenteResponsavelExecuta' });
+    if (transicao === 'iniciar' || transicao === 'enviarParaRevisao') {
+      if (tarefa.responsavelId !== me) {
+        throw new AppError('FORBIDDEN', 'Somente o responsável da tarefa pode iniciá-la ou enviá-la para revisão.', 403, { ruleId: 'somenteResponsavelExecuta' });
       }
     } else {
-      // somenteCriadorRevisa
-      if (tarefa.criadorId !== membroId) {
-        throw new AppError('FORBIDDEN', 'Somente quem criou a tarefa pode aceitá-la ou devolvê-la', 403, { ruleId: 'somenteCriadorRevisa' });
+      if (tarefa.criadorId !== me) {
+        throw new AppError('FORBIDDEN', 'Somente o criador da tarefa pode aceitá-la ou devolvê-la.', 403, { ruleId: 'somenteCriadorRevisa' });
       }
     }
-    if (tarefa.version !== Number(entrada.version)) {
-      throw new AppError('VERSION_CONFLICT', 'A tarefa foi alterada: versão desatualizada', 409);
+    if (transicao === 'devolver' && (motivoDevolucao == null || motivoDevolucao.trim() === '')) {
+      throw new AppError('VALIDATION_ERROR', 'Informe o motivo da devolução.', 400, { ruleId: 'devolucaoExigeMotivo' });
     }
-
-    if (motivoDevolucao !== undefined) {
-      await avancarEtapaTarefa({ tarefaId: tarefa.id, transicao, motivoDevolucao }, bound);
+    if (Number(tarefa.version) !== version) {
+      throw new AppError('VERSION_CONFLICT', 'A tarefa foi alterada: versão desatualizada.', 409);
+    }
+    if (transicao === 'devolver') {
+      await avancarEtapaTarefa({ id, transicao, motivoDevolucao: (motivoDevolucao ?? '').trim() }, bound);
     } else {
-      await avancarEtapaTarefa({ tarefaId: tarefa.id, transicao }, bound);
+      await avancarEtapaTarefa({ id, transicao }, bound);
     }
-    return comporResumoEPendencias(bound, membroId);
+    return recompor(me, bound);
   });
 }
 
 export const requests: { [K in keyof Inicio_membroContracts]: (input: Inicio_membroContracts[K]['input'], ctx: RequestContext) => Promise<Inicio_membroContracts[K]['output']> } = {
   'tarefas.inicio_membro.qryInicioMembro': async function (input, ctx) {
-    const membroId = membroDaSessao(ctx);
-    const hoje = hojeIso(ctx);
-    const { resumo, pendencias } = await comporResumoEPendencias(ctx, membroId);
-
-    // avisoUnicoPorResponsavelEDia: no máximo um aviso por responsável e dia; lê o do membro com dataReferencia = hoje.
-    const avisos = await listAvisoVencimento({ responsavelId: membroId, dataReferencia: hoje, page: 1, pageSize: 1 }, ctx);
-    const aviso = avisos.items.length > 0 ? avisos.items[0] : undefined;
-
-    const saida: QryOutput = { resumo, pendencias };
-    if (aviso !== undefined) {
-      // avisoSomenteTarefasAbertasVencendo: o aviso guarda só tarefas abertas que vencem hoje ou atrasadas, como no momento da geração.
-      const tarefasAviso = lerTarefasDoAviso(aviso.details.tarefas);
-      const atrasadas = tarefasAviso.filter((t) => t.details.tarefas.situacaoPrazo === 'overdue').length;
-      saida.avisoHoje = {
-        id: aviso.id,
-        dataReferencia: aviso.dataReferencia,
-        status: asStatusAviso(aviso.status),
-        details: {
-          details: {
-            geradoEm: aviso.details.geradoEm,
-            quantidadeTarefas: tarefasAviso.length,
-            quantidadeAtrasadas: atrasadas,
-          },
-          tarefas: tarefasAviso,
-        },
-      };
+    const me = callerId(ctx);
+    const today = todayOf(ctx);
+    const { resumo, pendencias } = await recompor(me, ctx);
+    const aviso = await montarAviso(me, today, ctx);
+    if (aviso === null) {
+      return { resumo, pendencias };
     }
-    return saida;
+    return { resumo, avisoHoje: aviso, pendencias };
   },
 
   'tarefas.inicio_membro.cmdIniciarTarefa': async function (input, ctx) {
-    return executarTransicao(ctx, { id: input.id, version: input.version }, 'iniciar', 'responsavel');
+    return executarTransicao(ctx, String(input.id), Number(input.version), 'iniciar');
   },
 
   'tarefas.inicio_membro.cmdEnviarParaRevisao': async function (input, ctx) {
-    return executarTransicao(ctx, { id: input.id, version: input.version }, 'enviarParaRevisao', 'responsavel');
+    return executarTransicao(ctx, String(input.id), Number(input.version), 'enviarParaRevisao');
   },
 
   'tarefas.inicio_membro.cmdAceitarEntrega': async function (input, ctx) {
-    return executarTransicao(ctx, { id: input.id, version: input.version }, 'aceitar', 'criador');
+    return executarTransicao(ctx, String(input.id), Number(input.version), 'aceitar');
   },
 
   'tarefas.inicio_membro.cmdDevolverComMotivo': async function (input, ctx) {
-    const motivo = typeof input.details.motivoDevolucao === 'string' ? input.details.motivoDevolucao.trim() : '';
-    // devolucaoExigeMotivo
-    if (motivo === '') {
-      throw new AppError('MOTIVO_OBRIGATORIO', 'Devolver uma tarefa para ajuste exige informar o motivo', 400, { ruleId: 'devolucaoExigeMotivo' });
-    }
-    return executarTransicao(ctx, { id: input.id, version: input.version }, 'devolver', 'criador', motivo);
+    return executarTransicao(ctx, String(input.id), Number(input.version), 'devolver', input.details.motivoDevolucao);
   },
 };

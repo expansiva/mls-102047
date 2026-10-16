@@ -29,7 +29,8 @@ export const pageTests = {
         "version": "Tarefa.version"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": true
     },
@@ -75,7 +76,8 @@ export const pageTests = {
         "version": "Tarefa.version"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": true
     },
@@ -121,7 +123,8 @@ export const pageTests = {
         "version": "Tarefa.version"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": true
     },
@@ -162,7 +165,7 @@ export const pageTests = {
         "id": "<seedSpare>",
         "version": "<seedValue>",
         "details": {
-          "motivoDevolucao": "Ajustar a descrição e a checklist"
+          "motivoDevolucao": "Ajustar a checklist antes de reenviar."
         }
       },
       "paramFieldRefs": {
@@ -170,7 +173,28 @@ export const pageTests = {
         "version": "Tarefa.version"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
+      },
+      "mutating": true
+    },
+    {
+      "id": "cmdDevolverComMotivo.motivoVazio",
+      "routine": "tarefas.inicio_membro.cmdDevolverComMotivo",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedValue>",
+        "details": {
+          "motivoDevolucao": ""
+        }
+      },
+      "paramFieldRefs": {
+        "id": "Tarefa.id",
+        "version": "Tarefa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
       },
       "mutating": true
     },
@@ -180,7 +204,7 @@ export const pageTests = {
       "params": {
         "version": "<seedValue>",
         "details": {
-          "motivoDevolucao": "Ajustar"
+          "motivoDevolucao": "Motivo da devolução"
         }
       },
       "paramFieldRefs": {
@@ -198,7 +222,7 @@ export const pageTests = {
       "params": {
         "id": "<seedRef>",
         "details": {
-          "motivoDevolucao": "Ajustar"
+          "motivoDevolucao": "Motivo da devolução"
         }
       },
       "paramFieldRefs": {
@@ -211,14 +235,12 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "cmdDevolverComMotivo.devolucaoExigeMotivo.empty",
+      "id": "cmdDevolverComMotivo.motivoAusente",
       "routine": "tarefas.inicio_membro.cmdDevolverComMotivo",
       "params": {
         "id": "<seedRef>",
         "version": "<seedValue>",
-        "details": {
-          "motivoDevolucao": ""
-        }
+        "details": {}
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",

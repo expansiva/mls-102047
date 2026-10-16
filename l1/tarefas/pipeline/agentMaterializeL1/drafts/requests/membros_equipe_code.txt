@@ -1,82 +1,57 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/requests/membros_equipe.ts" enhancement="_blank"/>
-import type { Membros_equipeContracts, MembroEquipeResumo } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
-import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { Membros_equipeContracts, MembroEquipeResumo, MembroEquipeIdentificacao } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import { createMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/createMembroEquipe.js';
-import { getMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.js';
+import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { listMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.js';
-import type { ListMembroEquipeOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.js';
+import { getMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.js';
+import type { GetMembroEquipeOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.js';
+import { createMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/createMembroEquipe.js';
 import { updateMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/updateMembroEquipe.js';
 
-type Status = 'Active' | 'Inactive' | 'Merged' | 'Blocked';
+type MembroStatus = MembroEquipeIdentificacao['details']['identification']['status'];
 
-interface MembroFonte {
-  id: string;
-  version: number;
-  details: {
-    identification: {
-      name: string;
-      status: string;
-      countryCode: string;
-      tags: unknown;
-    };
-    base: {
-      contacts: unknown;
-    };
-  };
-}
+const ROLE_TAG = 'tarefas.MembroEquipe';
+const STATUS_VALUES: readonly string[] = ['Active', 'Inactive', 'Merged', 'Blocked'];
 
-type MembroListado = ListMembroEquipeOutput['items'][number];
-
-function toStatus(value: string): Status {
+function toStatus(value: string): MembroStatus {
   if (value === 'Active' || value === 'Inactive' || value === 'Merged' || value === 'Blocked') return value;
-  throw new AppError('INVALID_STATUS', 'Situação do cadastro desconhecida: ' + String(value), 500);
+  throw new AppError('INVALID_MEMBER_STATUS', 'unsupported member status: ' + String(value) + ' (expected one of ' + STATUS_VALUES.join(', ') + ')', 500);
 }
 
-function contactToText(contact: unknown): string {
-  if (typeof contact === 'string') return contact;
-  if (contact !== null && typeof contact === 'object') {
-    const c = contact as { [key: string]: unknown };
-    const kind = typeof c['kind'] === 'string' ? c['kind'] : typeof c['type'] === 'string' ? c['type'] : '';
-    const value = typeof c['value'] === 'string' ? c['value'] : typeof c['address'] === 'string' ? c['address'] : '';
-    if (value) return kind ? kind + ': ' + value : value;
-    return JSON.stringify(contact);
+function contactText(contact: Record<string, unknown>): string {
+  const candidates = [contact['value'], contact['address'], contact['email'], contact['phone']];
+  for (const c of candidates) {
+    if (typeof c === 'string' && c !== '') {
+      const kind = contact['type'] ?? contact['kind'];
+      return typeof kind === 'string' && kind !== '' ? kind + ': ' + c : c;
+    }
   }
-  return String(contact);
+  return JSON.stringify(contact);
 }
 
-function contactsSummary(contacts: unknown): string {
-  if (contacts == null) return '';
-  if (Array.isArray(contacts)) return contacts.map(contactToText).join(', ');
-  return contactToText(contacts);
-}
-
-function tagsText(tags: unknown): string {
-  if (tags == null) return '';
-  if (Array.isArray(tags)) return tags.map((t) => String(t)).join(',');
-  return String(tags);
-}
-
-// Builds the page shape field by field; the privacy consent (denied to the manager) is never copied.
-function toResumo(m: MembroFonte): MembroEquipeResumo {
+// Derived fields (status, tags, contacts) are read from the master record, never calculated or written here.
+function toResumo(m: GetMembroEquipeOutput): MembroEquipeResumo {
+  const ident = m.details.identification;
+  const tags = ident.tags == null ? [] : ident.tags;
+  const contacts = m.details.base == null || m.details.base.contacts == null ? [] : m.details.base.contacts;
   return {
-    id: m.id,
-    version: m.version,
+    id: String(m.id),
+    version: Number(m.version),
     details: {
       identification: {
         details: {
           identification: {
-            name: m.details.identification.name,
-            status: toStatus(m.details.identification.status),
-            countryCode: m.details.identification.countryCode,
-            tags: tagsText(m.details.identification.tags),
+            name: ident.name,
+            status: toStatus(ident.status),
+            countryCode: ident.countryCode,
+            tags: tags.join(', '),
           },
         },
       },
       base: {
         details: {
           base: {
-            contacts: contactsSummary(m.details.base.contacts),
+            contacts: contacts.map(contactText).join('; '),
           },
         },
       },
@@ -84,37 +59,40 @@ function toResumo(m: MembroFonte): MembroEquipeResumo {
   };
 }
 
-function normalizeText(value: string): string {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function normalizeText(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 export const requests: { [K in keyof Membros_equipeContracts]: (input: Membros_equipeContracts[K]['input'], ctx: RequestContext) => Promise<Membros_equipeContracts[K]['output']> } = {
-  "tarefas.membros_equipe.listarMembrosEquipe": async function (input, ctx) {
-    const page = input.page >= 1 ? Math.floor(input.page) : 1;
-    const requestedSize = input.pageSize >= 1 ? Math.floor(input.pageSize) : 20;
+  'tarefas.membros_equipe.listarMembrosEquipe': async function (input, ctx) {
+    const page = input.page != null && input.page >= 1 ? Math.floor(input.page) : 1;
+    const requestedSize = input.pageSize != null && input.pageSize >= 1 ? Math.floor(input.pageSize) : 20;
     const pageSize = Math.min(requestedSize, 200);
-    const term = input.busca != null && input.busca.trim() !== '' ? normalizeText(input.busca.trim()) : '';
 
-    // The usecase lists the members of the tarefas.MembroEquipe role; the name search is a
-    // case/accent-insensitive "contains", so every record is read and filtered here.
-    const all: MembroListado[] = [];
-    let current = 1;
-    let more = true;
-    while (more) {
-      const res = await listMembroEquipe({ page: current, pageSize: 200 }, ctx);
+    // List every member (no filter: name search is a contains search, not an exact match), then filter here.
+    const all: GetMembroEquipeOutput[] = [];
+    let cursor = 1;
+    for (;;) {
+      const res = await listMembroEquipe({ page: cursor, pageSize: 200 }, ctx);
       for (const item of res.items) all.push(item);
-      more = res.hasMore;
-      current += 1;
+      if (!res.hasMore || res.items.length === 0) break;
+      cursor += 1;
     }
 
-    const kept = all.filter((m) => term === '' || normalizeText(String(m.details.identification.name)).includes(term));
-    kept.sort((a, b) => String(a.details.identification.name).localeCompare(String(b.details.identification.name), 'pt'));
+    const term = input.busca == null ? '' : normalizeText(input.busca.trim());
+    const kept = all.filter((m) => {
+      const tags = m.details.identification.tags == null ? [] : m.details.identification.tags;
+      if (!tags.includes(ROLE_TAG)) return false;
+      if (term === '') return true;
+      return normalizeText(m.details.identification.name).includes(term);
+    });
+    kept.sort((a, b) => a.details.identification.name.localeCompare(b.details.identification.name, 'pt-BR', { sensitivity: 'base' }));
 
     const start = (page - 1) * pageSize;
     const slice = kept.slice(start, start + pageSize);
     return {
       membros: {
-        items: slice.map((m) => toResumo(m)),
+        items: slice.map(toResumo),
         page,
         pageSize,
         hasMore: start + pageSize < kept.length,
@@ -122,41 +100,50 @@ export const requests: { [K in keyof Membros_equipeContracts]: (input: Membros_e
     };
   },
 
-  "tarefas.membros_equipe.obterMembroEquipe": async function (input, ctx) {
+  'tarefas.membros_equipe.obterMembroEquipe': async function (input, ctx) {
     const membro = await getMembroEquipe({ id: String(input.id) }, ctx);
+    if (membro == null) {
+      throw new AppError('NOT_FOUND', 'membro da equipe não encontrado: ' + String(input.id), 404);
+    }
     return { membro: toResumo(membro) };
   },
 
-  "tarefas.membros_equipe.cadastrarPessoa": async function (input, ctx) {
+  'tarefas.membros_equipe.cadastrarPessoa': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const created = await createMembroEquipe({
-        details: {
-          identification: {
-            name: input.details.identification.name,
-            countryCode: input.details.identification.countryCode,
+      const created = await createMembroEquipe(
+        {
+          details: {
+            identification: {
+              name: input.details.identification.name,
+              countryCode: input.details.identification.countryCode,
+            },
+            base: {},
           },
-          base: {},
         },
-      }, bound);
+        bound,
+      );
       return { membro: toResumo(created) };
     });
   },
 
-  "tarefas.membros_equipe.salvarAlteracoesPessoa": async function (input, ctx) {
+  'tarefas.membros_equipe.salvarAlteracoesPessoa': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const updated = await updateMembroEquipe({
-        id: String(input.id),
-        version: Number(input.version),
-        details: {
-          identification: {
-            name: input.details.identification.name,
-            countryCode: input.details.identification.countryCode,
+      const updated = await updateMembroEquipe(
+        {
+          id: String(input.id),
+          version: Number(input.version),
+          details: {
+            identification: {
+              name: input.details.identification.name,
+              countryCode: input.details.identification.countryCode,
+            },
+            base: {},
           },
-          base: {},
         },
-      }, bound);
+        bound,
+      );
       return { membro: toResumo(updated) };
     });
   },

@@ -31,11 +31,11 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "qryTarefasPedemAcao.page2",
+      "id": "qryTarefasPedemAcao.secondPage",
       "routine": "tarefas.inicio_gestor.qryTarefasPedemAcao",
       "params": {
         "page": 2,
-        "pageSize": 5
+        "pageSize": 1
       },
       "expect": {
         "ok": true,

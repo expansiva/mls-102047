@@ -29,8 +29,10 @@ export interface UpdateListaOutput extends Record<string, unknown> {
 }
 
 function isGestor(ctx: RequestContext): boolean {
-  const scope = ctx.sessionContext.actorScope ?? ctx.sessionContext.actorSession.scope ?? [];
-  return scope.some((authority) => authority === 'gestor' || authority.endsWith(':gestor'));
+  const scope: string[] = ctx.sessionContext.actorScope ?? ctx.sessionContext.actorSession?.scope ?? [];
+  if (scope.includes('tarefas:gestor') || scope.includes('gestor')) return true;
+  const actorId = ctx.sessionContext.actorId ?? ctx.sessionContext.actorSession?.actorId;
+  return actorId === 'gestor';
 }
 
 export async function updateLista(input: UpdateListaInput, ctx: RequestContext): Promise<UpdateListaOutput> {
@@ -40,49 +42,56 @@ export async function updateLista(input: UpdateListaInput, ctx: RequestContext):
 
   const repository = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
 
-  const id = String(input.id ?? '');
+  const id = String(input.id ?? '').trim();
   if (!id) {
-    throw new AppError('INVALID_INPUT', 'The list id is required.', 400);
+    throw new AppError('VALIDATION_ERROR', 'The list id is required.', 400);
+  }
+  const version = Number(input.version);
+  if (!Number.isInteger(version)) {
+    throw new AppError('VALIDATION_ERROR', 'The list version is required.', 400);
   }
   const nome = typeof input.nome === 'string' ? input.nome.trim() : '';
   if (!nome) {
-    throw new AppError('INVALID_INPUT', 'The list name is required.', 400);
+    throw new AppError('VALIDATION_ERROR', 'The list name is required.', 400);
   }
   if (nome.length > 120) {
-    throw new AppError('INVALID_INPUT', 'The list name must have at most 120 characters.', 400);
+    throw new AppError('VALIDATION_ERROR', 'The list name must have at most 120 characters.', 400);
   }
   if (typeof input.ativa !== 'boolean') {
-    throw new AppError('INVALID_INPUT', 'The field ativa must be true or false.', 400);
+    throw new AppError('VALIDATION_ERROR', 'The field ativa must be true or false.', 400);
   }
-  const tipo = input.details?.tipo;
-  if (tipo !== 'project' && tipo !== 'area') {
-    throw new AppError('INVALID_INPUT', 'The list type must be project or area.', 400);
+  const tipoRaw = input.details?.tipo;
+  if (tipoRaw !== 'project' && tipoRaw !== 'area') {
+    throw new AppError('VALIDATION_ERROR', 'The list type must be project or area.', 400);
   }
-  const descricao = input.details?.descricao;
-  if (descricao !== undefined && descricao !== null && typeof descricao !== 'string') {
-    throw new AppError('INVALID_INPUT', 'The description must be a text.', 400);
-  }
-  if (typeof descricao === 'string' && descricao.length > 2000) {
-    throw new AppError('INVALID_INPUT', 'The description must have at most 2000 characters.', 400);
+  const tipo: 'project' | 'area' = tipoRaw;
+  const descricaoRaw = input.details?.descricao;
+  let descricao: string | undefined;
+  if (descricaoRaw !== undefined && descricaoRaw !== null) {
+    if (typeof descricaoRaw !== 'string') {
+      throw new AppError('VALIDATION_ERROR', 'The list description must be text.', 400);
+    }
+    if (descricaoRaw.length > 2000) {
+      throw new AppError('VALIDATION_ERROR', 'The list description must have at most 2000 characters.', 400);
+    }
+    descricao = descricaoRaw;
   }
 
   const current = await repository.get(id);
   if (!current) {
     throw new AppError('NOT_FOUND', 'List not found.', 404);
   }
-  if (Number(input.version) !== current.version) {
+  if (current.version !== version) {
     throw new AppError('CONCURRENCY_CONFLICT', 'The list was changed by someone else; reload and try again.', 409);
   }
 
   const sameName = await repository.list({ nome });
   if (sameName.some((other) => other.id !== current.id && other.nome === nome)) {
-    throw new AppError('DUPLICATE_NAME', 'There is already a list with this name.', 409, { ruleId: 'listaNomeUnico' });
+    throw new AppError('CONFLICT', 'There is already a list with this name.', 409, { ruleId: 'listaNomeUnico' });
   }
 
   const details: Lista['details'] = { tipo };
-  if (typeof descricao === 'string') {
-    details.descricao = descricao;
-  }
+  if (descricao !== undefined) details.descricao = descricao;
 
   const next: Lista = {
     id: current.id,
@@ -95,9 +104,8 @@ export async function updateLista(input: UpdateListaInput, ctx: RequestContext):
   const saved = await repository.update(next);
 
   const outDetails: UpdateListaOutput['details'] = { tipo: saved.details.tipo };
-  if (saved.details.descricao !== undefined) {
-    outDetails.descricao = saved.details.descricao;
-  }
+  if (saved.details.descricao !== undefined) outDetails.descricao = saved.details.descricao;
+
   return {
     id: saved.id,
     version: saved.version,

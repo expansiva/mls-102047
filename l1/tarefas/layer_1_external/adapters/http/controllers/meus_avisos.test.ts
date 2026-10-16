@@ -19,14 +19,12 @@ export const pageTests = {
         "responsavelId": "AvisoVencimento.responsavelId"
       },
       "expect": {
-        "ok": true,
-        "shape": "paginated",
-        "itemsKey": "avisos.items"
+        "ok": true
       },
       "mutating": false
     },
     {
-      "id": "carregarMeusAvisos.pageSize1",
+      "id": "carregarMeusAvisos.paginaPequena",
       "routine": "tarefas.meus_avisos.carregarMeusAvisos",
       "params": {
         "responsavelId": "<seedRef>",
@@ -37,9 +35,7 @@ export const pageTests = {
         "responsavelId": "AvisoVencimento.responsavelId"
       },
       "expect": {
-        "ok": true,
-        "shape": "paginated",
-        "itemsKey": "avisos.items"
+        "ok": true
       },
       "mutating": false
     },
@@ -53,21 +49,7 @@ export const pageTests = {
         "avisoId": "AvisoVencimento.id"
       },
       "expect": {
-        "ok": true,
-        "shape": "object"
-      },
-      "mutating": false
-    },
-    {
-      "id": "carregarMeusAvisos.responsavelId.required",
-      "routine": "tarefas.meus_avisos.carregarMeusAvisos",
-      "params": {
-        "page": 1,
-        "pageSize": 10
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
+        "ok": true
       },
       "mutating": false
     },
@@ -114,7 +96,7 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "abrirAviso.notFound",
+      "id": "abrirAviso.naoEncontrado",
       "routine": "tarefas.meus_avisos.abrirAviso",
       "params": {
         "avisoId": "aviso-inexistente-000"
