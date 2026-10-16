@@ -73,8 +73,16 @@ process.env.COLLAB_PROJECT_ID ??= projectId;
 if (!process.env.DATABASE_URL_TEST && dotenv.PGUSER && dotenv.PGPASSWORD) {
   const host = dotenv.PGHOST || '127.0.0.1';
   const port = dotenv.PGPORT || '5432';
-  process.env.DATABASE_URL_TEST = `postgres://${encodeURIComponent(dotenv.PGUSER)}:${encodeURIComponent(dotenv.PGPASSWORD)}@${host}:${port}/collab_test`;
+  // The app's own test database (rt54 s5: collab_app_test, created by migrate), named in scripts/runtime/vmApps.mjs.
+  let testDatabase = 'collab_app_test';
+  try {
+    testDatabase = (await import(pathToFileURL(join(ROOT, 'scripts', 'runtime', 'vmApps.mjs')).href)).TEST_DATABASE_NAME || testDatabase;
+  } catch {
+    // vmApps.mjs missing or not loadable here: keep the default.
+  }
+  process.env.DATABASE_URL_TEST = `postgres://${encodeURIComponent(dotenv.PGUSER)}:${encodeURIComponent(dotenv.PGPASSWORD)}@${host}:${port}/${testDatabase}`;
 }
+console.log(`test database: ${new URL(process.env.DATABASE_URL_TEST ?? 'postgres://x/?').pathname.slice(1) || '(unset)'}`);
 
 const config = JSON.parse(readFileSync('config.json', 'utf8'));
 const masterBackendId = Object.entries(config.projects ?? {}).find(([, project]) => project?.type === 'master backend')?.[0];
