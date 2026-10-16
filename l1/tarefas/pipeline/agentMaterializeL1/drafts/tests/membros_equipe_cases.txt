@@ -1,0 +1,326 @@
+[
+  {
+    "id": "listarMembrosEquipe.ok",
+    "routine": "tarefas.membros_equipe.listarMembrosEquipe",
+    "params": {
+      "page": 1,
+      "pageSize": 10
+    },
+    "expect": {
+      "ok": true,
+      "shape": "paginated",
+      "itemsKey": "membros"
+    },
+    "mutating": false
+  },
+  {
+    "id": "listarMembrosEquipe.busca",
+    "routine": "tarefas.membros_equipe.listarMembrosEquipe",
+    "params": {
+      "page": 1,
+      "pageSize": 10,
+      "busca": "a"
+    },
+    "expect": {
+      "ok": true,
+      "shape": "paginated",
+      "itemsKey": "membros"
+    },
+    "mutating": false
+  },
+  {
+    "id": "listarMembrosEquipe.page.required",
+    "routine": "tarefas.membros_equipe.listarMembrosEquipe",
+    "params": {
+      "pageSize": 10
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": false
+  },
+  {
+    "id": "listarMembrosEquipe.pageSize.required",
+    "routine": "tarefas.membros_equipe.listarMembrosEquipe",
+    "params": {
+      "page": 1
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": false
+  },
+  {
+    "id": "obterMembroEquipe.ok",
+    "routine": "tarefas.membros_equipe.obterMembroEquipe",
+    "params": {
+      "id": "<seedRef>"
+    },
+    "paramFieldRefs": {
+      "id": "MembroEquipe.id"
+    },
+    "expect": {
+      "ok": true
+    },
+    "mutating": false
+  },
+  {
+    "id": "obterMembroEquipe.id.required",
+    "routine": "tarefas.membros_equipe.obterMembroEquipe",
+    "params": {},
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": false
+  },
+  {
+    "id": "obterMembroEquipe.notFound",
+    "routine": "tarefas.membros_equipe.obterMembroEquipe",
+    "params": {
+      "id": "membro-inexistente"
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "NOT_FOUND"
+    },
+    "mutating": false
+  },
+  {
+    "id": "cadastrarPessoa.ok",
+    "routine": "tarefas.membros_equipe.cadastrarPessoa",
+    "params": {
+      "details": {
+        "identification": {
+          "name": "Maria Cadastrada",
+          "countryCode": "BR"
+        }
+      }
+    },
+    "expect": {
+      "ok": true
+    },
+    "mutating": true
+  },
+  {
+    "id": "cadastrarPessoa.details.required",
+    "routine": "tarefas.membros_equipe.cadastrarPessoa",
+    "params": {},
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true
+  },
+  {
+    "id": "cadastrarPessoa.nameMissing",
+    "routine": "tarefas.membros_equipe.cadastrarPessoa",
+    "params": {
+      "details": {
+        "identification": {
+          "countryCode": "BR"
+        }
+      }
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true
+  },
+  {
+    "id": "cadastrarPessoa.countryCodeMissing",
+    "routine": "tarefas.membros_equipe.cadastrarPessoa",
+    "params": {
+      "details": {
+        "identification": {
+          "name": "Pessoa Sem Pais"
+        }
+      }
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true
+  },
+  {
+    "id": "salvarAlteracoesPessoa.ok",
+    "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+    "params": {
+      "id": "<seedRef>",
+      "version": "<seedRef>",
+      "details": {
+        "identification": {
+          "name": "Nome Corrigido",
+          "countryCode": "BR"
+        }
+      }
+    },
+    "paramFieldRefs": {
+      "id": "MembroEquipe.id",
+      "version": "MembroEquipe.version"
+    },
+    "expect": {
+      "ok": true
+    },
+    "mutating": true
+  },
+  {
+    "id": "salvarAlteracoesPessoa.readBack",
+    "routine": "tarefas.membros_equipe.obterMembroEquipe",
+    "params": {
+      "id": "<seedRef>"
+    },
+    "paramFieldRefs": {
+      "id": "MembroEquipe.id"
+    },
+    "expect": {
+      "ok": true
+    },
+    "mutating": false
+  },
+  {
+    "id": "salvarAlteracoesPessoa.staleVersion",
+    "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+    "params": {
+      "id": "<seedRef>",
+      "version": 0,
+      "details": {
+        "identification": {
+          "name": "Nome Obsoleto",
+          "countryCode": "BR"
+        }
+      }
+    },
+    "paramFieldRefs": {
+      "id": "MembroEquipe.id"
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "CONFLICT"
+    },
+    "mutating": true
+  },
+  {
+    "id": "salvarAlteracoesPessoa.notFound",
+    "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+    "params": {
+      "id": "membro-inexistente",
+      "version": 1,
+      "details": {
+        "identification": {
+          "name": "Fantasma",
+          "countryCode": "BR"
+        }
+      }
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "NOT_FOUND"
+    },
+    "mutating": true
+  },
+  {
+    "id": "salvarAlteracoesPessoa.id.required",
+    "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+    "params": {
+      "version": 1,
+      "details": {
+        "identification": {
+          "name": "Sem Id",
+          "countryCode": "BR"
+        }
+      }
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true
+  },
+  {
+    "id": "salvarAlteracoesPessoa.version.required",
+    "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+    "params": {
+      "id": "<seedRef>",
+      "details": {
+        "identification": {
+          "name": "Sem Versao",
+          "countryCode": "BR"
+        }
+      }
+    },
+    "paramFieldRefs": {
+      "id": "MembroEquipe.id"
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true
+  },
+  {
+    "id": "salvarAlteracoesPessoa.details.required",
+    "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+    "params": {
+      "id": "<seedRef>",
+      "version": "<seedRef>"
+    },
+    "paramFieldRefs": {
+      "id": "MembroEquipe.id",
+      "version": "MembroEquipe.version"
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true
+  },
+  {
+    "id": "salvarAlteracoesPessoa.nameMissing",
+    "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+    "params": {
+      "id": "<seedRef>",
+      "version": "<seedRef>",
+      "details": {
+        "identification": {
+          "countryCode": "BR"
+        }
+      }
+    },
+    "paramFieldRefs": {
+      "id": "MembroEquipe.id",
+      "version": "MembroEquipe.version"
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true
+  },
+  {
+    "id": "salvarAlteracoesPessoa.countryCodeMissing",
+    "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+    "params": {
+      "id": "<seedRef>",
+      "version": "<seedRef>",
+      "details": {
+        "identification": {
+          "name": "Sem Pais"
+        }
+      }
+    },
+    "paramFieldRefs": {
+      "id": "MembroEquipe.id",
+      "version": "MembroEquipe.version"
+    },
+    "expect": {
+      "ok": false,
+      "errorCode": "VALIDATION_ERROR"
+    },
+    "mutating": true
+  }
+]

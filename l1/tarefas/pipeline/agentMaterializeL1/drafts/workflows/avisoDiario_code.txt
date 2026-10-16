@@ -1,0 +1,259 @@
+/// <mls fileReference="_102047_/l1/tarefas/layer_2_application/workflows/avisoDiario.ts" enhancement="_blank"/>
+
+import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
+import { evaluateSchedule } from '/_102034_/l1/server/layer_2_application/schedule/evaluateSchedule.js';
+import { taskOccurrence } from '/_102047_/l1/tarefas/layer_1_external/adapters/workflow/taskOccurrence.js';
+import type { OccurrenceRef } from '/_102047_/l1/tarefas/layer_1_external/adapters/workflow/taskOccurrence.js';
+import type { AvisoVencimentoRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/avisoVencimentoRepository.js';
+import type { TarefaRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.js';
+import type { AvisoVencimento } from '/_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.js';
+import type { Tarefa } from '/_102047_/l1/tarefas/layer_3_domain/entities/tarefa.js';
+
+const PROJECT = 102047;
+const MODULE = 'tarefas';
+const ENTITY = 'AvisoVencimento';
+const PROCESS_ID = 'avisoDiario';
+const WORKFLOW_VERSION = '1';
+const SCHEDULE = 'Todo dia às 8h';
+const STEP_GERAR = 'gerarAvisos';
+const STEP_AVISAR = 'avisarResponsavel';
+const SYSTEM_ACTOR = 'system';
+const OPEN_STATUSES: ReadonlyArray<Tarefa['status']> = ['aFazer', 'emAndamento', 'emRevisao'];
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+export interface TarefaDoAviso {
+  tarefaId: string;
+  prazo: string;
+  situacaoPrazo: 'dueToday' | 'overdue';
+}
+
+export interface ResponsavelComVencimento {
+  responsavelId: string;
+  tarefas: TarefaDoAviso[];
+  quantidadeTarefas: number;
+  quantidadeAtrasadas: number;
+}
+
+export interface ResolverResponsaveisComVencimentoInput {
+  dataReferencia: string;
+}
+
+export interface ResolverResponsaveisComVencimentoOutput {
+  dataReferencia: string;
+  responsaveis: ResponsavelComVencimento[];
+}
+
+export interface GerarAvisosDiariosInput {
+  dataReferencia: string;
+}
+
+export interface GerarAvisosDiariosOutput {
+  dataReferencia: string;
+  /** false when the notice of a previous day has not finished, so no new run was started. */
+  iniciado: boolean;
+  motivo?: string;
+  /** Notices of the reference day (new ones and the ones already stored by an earlier call). */
+  quantidadeAvisos: number;
+  avisosNovos: number;
+  avisosFalhos: number;
+}
+
+function assertDataReferencia(value: string): void {
+  if (typeof value !== 'string' || !DATE_PATTERN.test(value)) {
+    throw new AppError('INVALID_REFERENCE_DATE', 'dataReferencia must be a date in the format YYYY-MM-DD', 400, {
+      ruleId: 'avisoSomenteTarefasAbertasVencendo',
+    });
+  }
+}
+
+function dateOnly(value: string): string {
+  return value.slice(0, 10);
+}
+
+function referenceDateOf(ctx: RequestContext, now: Date): string {
+  const timeZone = ctx.organization.timezone ?? 'UTC';
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+}
+
+function refOf(recordId: string): Omit<OccurrenceRef, 'workflowVersion'> {
+  return { project: PROJECT, module: MODULE, entity: ENTITY, recordId, processId: PROCESS_ID };
+}
+
+export async function resolverResponsaveisComVencimento(
+  input: ResolverResponsaveisComVencimentoInput,
+  ctx: RequestContext,
+): Promise<ResolverResponsaveisComVencimentoOutput> {
+  assertDataReferencia(input.dataReferencia);
+  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const tarefas = await tarefaRepository.list({});
+
+  const grupos = new Map<string, TarefaDoAviso[]>();
+  for (const tarefa of tarefas) {
+    if (!OPEN_STATUSES.includes(tarefa.status)) continue;
+    const prazo = dateOnly(tarefa.prazo);
+    if (prazo > input.dataReferencia) continue;
+    const item: TarefaDoAviso = {
+      tarefaId: tarefa.id,
+      prazo,
+      situacaoPrazo: prazo === input.dataReferencia ? 'dueToday' : 'overdue',
+    };
+    const lista = grupos.get(tarefa.responsavelId);
+    if (lista) lista.push(item);
+    else grupos.set(tarefa.responsavelId, [item]);
+  }
+
+  const responsaveis: ResponsavelComVencimento[] = [];
+  for (const [responsavelId, lista] of grupos) {
+    const ordenadas = [...lista].sort((a, b) =>
+      a.prazo === b.prazo ? a.tarefaId.localeCompare(b.tarefaId) : a.prazo.localeCompare(b.prazo),
+    );
+    responsaveis.push({
+      responsavelId,
+      tarefas: ordenadas,
+      quantidadeTarefas: ordenadas.length,
+      quantidadeAtrasadas: ordenadas.filter((t) => t.situacaoPrazo === 'overdue').length,
+    });
+  }
+  responsaveis.sort((a, b) => a.responsavelId.localeCompare(b.responsavelId));
+
+  return { dataReferencia: input.dataReferencia, responsaveis };
+}
+
+/**
+ * Runs the steps of one notice: opens (or finds) its occurrence, moves it to the alert step with the
+ * responsible as the one who acts now, and ends the notice. Safe to call again on the same notice.
+ */
+async function processarAviso(
+  ctx: RequestContext,
+  repository: AvisoVencimentoRepository,
+  aviso: AvisoVencimento,
+): Promise<'completed' | 'failed'> {
+  if (aviso.status === 'completed') return 'completed';
+  if (aviso.status === 'failed') return 'failed';
+
+  const ref = refOf(aviso.id);
+  try {
+    const key = `${PROCESS_ID}:${aviso.dataReferencia}:${aviso.responsavelId}`;
+    const occurrence = await taskOccurrence.open(
+      ctx,
+      { ...ref, workflowVersion: WORKFLOW_VERSION },
+      STEP_GERAR,
+      SYSTEM_ACTOR,
+      key,
+    );
+    if (occurrence.step === STEP_GERAR) {
+      await taskOccurrence.advance(ctx, ref, STEP_AVISAR, aviso.responsavelId);
+    } else if (occurrence.step !== STEP_AVISAR) {
+      throw new AppError(
+        'OCCURRENCE_STEP_INVALID',
+        `Occurrence of notice ${aviso.id} is in step ${occurrence.step}, expected ${STEP_GERAR} or ${STEP_AVISAR}`,
+        409,
+        { ruleId: 'avisoNaoIniciaSemConcluirAnterior' },
+      );
+    }
+  } catch (error) {
+    const motivoFalha = error instanceof Error ? error.message : String(error);
+    const falho: AvisoVencimento = {
+      ...aviso,
+      details: { ...aviso.details, finalizadoEm: ctx.clock.nowIso(), motivoFalha },
+    };
+    await repository.transition(falho, 'falharAviso');
+    return 'failed';
+  }
+
+  const concluido: AvisoVencimento = {
+    ...aviso,
+    details: { ...aviso.details, finalizadoEm: ctx.clock.nowIso() },
+  };
+  await repository.transition(concluido, 'concluirAviso');
+  return 'completed';
+}
+
+export async function gerarAvisosDiarios(
+  input: GerarAvisosDiariosInput,
+  ctx: RequestContext,
+): Promise<GerarAvisosDiariosOutput> {
+  assertDataReferencia(input.dataReferencia);
+  const dataReferencia = input.dataReferencia;
+  const repository = resolveRepository<AvisoVencimentoRepository>(ctx, 'AvisoVencimentoRepository');
+
+  const emEnvio = await repository.list({ status: 'pending' });
+  const anteriorPendente = emEnvio.find((a) => a.status === 'pending' && a.dataReferencia < dataReferencia);
+  if (anteriorPendente) {
+    return {
+      dataReferencia,
+      iniciado: false,
+      motivo: `The notice ${anteriorPendente.id} of ${anteriorPendente.dataReferencia} has not finished`,
+      quantidadeAvisos: 0,
+      avisosNovos: 0,
+      avisosFalhos: 0,
+    };
+  }
+
+  const { responsaveis } = await resolverResponsaveisComVencimento({ dataReferencia }, ctx);
+
+  const doDia = await repository.list({ dataReferencia });
+  const existentes = new Map<string, AvisoVencimento>();
+  for (const aviso of doDia) {
+    if (aviso.dataReferencia === dataReferencia) existentes.set(aviso.responsavelId, aviso);
+  }
+
+  let quantidadeAvisos = 0;
+  let avisosNovos = 0;
+  let avisosFalhos = 0;
+
+  for (const responsavel of responsaveis) {
+    let aviso = existentes.get(responsavel.responsavelId);
+    if (!aviso) {
+      // The declared type of details.tarefas holds a single item: the earliest due task represents the notice;
+      // the counts below cover every task of the responsible.
+      const [primeira] = responsavel.tarefas;
+      if (!primeira) continue;
+      const novo: AvisoVencimento = {
+        id: ctx.idGenerator.newId(),
+        version: 1,
+        responsavelId: responsavel.responsavelId,
+        dataReferencia,
+        status: 'pending',
+        details: {
+          geradoEm: ctx.clock.nowIso(),
+          tarefas: primeira,
+          quantidadeTarefas: responsavel.quantidadeTarefas,
+          quantidadeAtrasadas: responsavel.quantidadeAtrasadas,
+        },
+      };
+      aviso = await repository.create(novo);
+      avisosNovos += 1;
+    }
+
+    const resultado = await processarAviso(ctx, repository, aviso);
+    quantidadeAvisos += 1;
+    if (resultado === 'failed') avisosFalhos += 1;
+  }
+
+  return { dataReferencia, iniciado: true, quantidadeAvisos, avisosNovos, avisosFalhos };
+}
+
+export async function onTick(ctx: RequestContext, now: Date): Promise<void> {
+  const repository = resolveRepository<AvisoVencimentoRepository>(ctx, 'AvisoVencimentoRepository');
+  const avisos = await repository.list({});
+
+  let lastRun: Date | null = null;
+  for (const aviso of avisos) {
+    const geradoEm = new Date(aviso.details.geradoEm);
+    if (Number.isNaN(geradoEm.getTime())) continue;
+    if (lastRun === null || geradoEm.getTime() > lastRun.getTime()) lastRun = geradoEm;
+  }
+
+  const due = evaluateSchedule(SCHEDULE, now, lastRun);
+  if (due === null) return;
+
+  await gerarAvisosDiarios({ dataReferencia: referenceDateOf(ctx, now) }, ctx);
+}
