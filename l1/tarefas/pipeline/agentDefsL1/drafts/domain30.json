@@ -1,0 +1,1954 @@
+{
+  "schemaVersion": "2026-09-21-d1-domain-v1",
+  "project": 102047,
+  "moduleName": "tarefas",
+  "llmCalls": 0,
+  "ok": true,
+  "entities": [
+    {
+      "entityId": "AvisoVencimento",
+      "action": "create",
+      "defPath": "l1/tarefas/layer_3_domain/entities/avisoVencimento.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": "pending",
+      "uniqueKeys": [
+        [
+          "responsavelId",
+          "dataReferencia"
+        ]
+      ],
+      "enumerations": [
+        {
+          "path": "status",
+          "values": [
+            "pending",
+            "completed",
+            "failed"
+          ]
+        },
+        {
+          "path": "details.tarefas.situacaoPrazo",
+          "values": [
+            "dueToday",
+            "overdue"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "avisoUnicoPorResponsavelEDia",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "avisoNaoIniciaSemConcluirAnterior",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "avisoSomenteTarefasAbertasVencendo",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "AvisoVencimento",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "AvisoVencimento",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "responsavelId",
+              "type": "record",
+              "ref": "MembroEquipe"
+            },
+            {
+              "name": "dataReferencia",
+              "type": "date",
+              "derived": true
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.geradoEm",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details.finalizadoEm",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details.motivoFalha",
+              "type": "text"
+            },
+            {
+              "name": "details.tarefas",
+              "type": "object"
+            },
+            {
+              "name": "details.tarefas.tarefaId",
+              "type": "record",
+              "ref": "Tarefa"
+            },
+            {
+              "name": "details.tarefas.prazo",
+              "type": "date"
+            },
+            {
+              "name": "details.tarefas.situacaoPrazo",
+              "type": "enum"
+            },
+            {
+              "name": "details.quantidadeTarefas",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.quantidadeAtrasadas",
+              "type": "integer",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "pending",
+                "reachedBy": "command"
+              },
+              {
+                "state": "completed",
+                "reachedBy": "command"
+              },
+              {
+                "state": "failed",
+                "reachedBy": "command"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "concluirAviso",
+                "from": [
+                  "pending"
+                ],
+                "to": "completed",
+                "by": [],
+                "ruleRefs": [
+                  "avisoNaoIniciaSemConcluirAnterior"
+                ]
+              },
+              {
+                "transitionId": "falharAviso",
+                "from": [
+                  "pending"
+                ],
+                "to": "failed",
+                "by": [],
+                "ruleRefs": [
+                  "avisoNaoIniciaSemConcluirAnterior"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "avisoUnicoPorResponsavelEDia",
+            "avisoNaoIniciaSemConcluirAnterior",
+            "avisoSomenteTarefasAbertasVencendo"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "ItemChecklist",
+      "action": "create",
+      "defPath": "l1/tarefas/layer_3_domain/entities/itemChecklist.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [],
+      "enumerations": [],
+      "rules": [
+        {
+          "ruleId": "checklistNaoMudaSituacao",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "editarSomenteTarefaVisivel",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "ItemChecklist",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "ItemChecklist",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "tarefaId",
+              "type": "record",
+              "ref": "Tarefa"
+            },
+            {
+              "name": "ordem",
+              "type": "integer"
+            },
+            {
+              "name": "feito",
+              "type": "boolean"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.descricao",
+              "type": "string"
+            },
+            {
+              "name": "details.marcadoEm",
+              "type": "timestamp"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "checklistNaoMudaSituacao",
+            "editarSomenteTarefaVisivel"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "Lista",
+      "action": "create",
+      "defPath": "l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [
+        [
+          "nome"
+        ]
+      ],
+      "enumerations": [
+        {
+          "path": "details.tipo",
+          "values": [
+            "project",
+            "area"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "listaNomeUnico",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "listaMantidaPorGestor",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "listaInativaNaoRecebeTarefa",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Lista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Lista",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "nome",
+              "type": "string"
+            },
+            {
+              "name": "ativa",
+              "type": "boolean"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.tipo",
+              "type": "enum"
+            },
+            {
+              "name": "details.descricao",
+              "type": "text"
+            },
+            {
+              "name": "details.quantidadeTarefasAbertas",
+              "type": "integer",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "listaNomeUnico",
+            "listaMantidaPorGestor",
+            "listaInativaNaoRecebeTarefa"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "MembroEquipe",
+      "action": "create",
+      "defPath": "l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+      "storageTarget": "mdm",
+      "emitsLocalPersistence": false,
+      "derivedInitial": null,
+      "uniqueKeys": [],
+      "enumerations": [
+        {
+          "path": "details.identification.subtype",
+          "values": [
+            "Person"
+          ]
+        },
+        {
+          "path": "details.identification.status",
+          "values": [
+            "Active",
+            "Inactive",
+            "Merged",
+            "Blocked"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "rule-foreign-namespace-refused",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-identity-never-in-namespace",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-document-shape-validated",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-person-privacy-consent-required-br-eu",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "rule-delete-blocked-by-relationships",
+          "owner": "platform",
+          "source": "/_102034_/l4/ontology/mdm.defs.ts",
+          "placement": "platform"
+        },
+        {
+          "ruleId": "responsavelDeveSerMembroAtivo",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "MembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "MembroEquipe",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.tags",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.base.contacts",
+              "type": "object",
+              "derived": true
+            },
+            {
+              "name": "details.person",
+              "type": "object"
+            },
+            {
+              "name": "details.person.privacyConsent",
+              "type": "object"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.tarefas",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "responsavelDeveSerMembroAtivo"
+          ],
+          "imports": []
+        }
+      }
+    },
+    {
+      "entityId": "Tarefa",
+      "action": "create",
+      "defPath": "l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+      "storageTarget": "moduleDatabase",
+      "emitsLocalPersistence": false,
+      "derivedInitial": "aFazer",
+      "uniqueKeys": [
+        [
+          "chaveCriacao"
+        ]
+      ],
+      "enumerations": [
+        {
+          "path": "status",
+          "values": [
+            "aFazer",
+            "emAndamento",
+            "emRevisao",
+            "concluida",
+            "cancelada"
+          ]
+        },
+        {
+          "path": "prioridade",
+          "values": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      ],
+      "rules": [
+        {
+          "ruleId": "criacaoIdempotente",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "somenteResponsavelExecuta",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "somenteCriadorRevisa",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "devolucaoExigeMotivo",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "cancelamentoPorCriadorOuGestor",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "application"
+        },
+        {
+          "ruleId": "reatribuicaoPorCriadorOuGestor",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "edicaoNaoMudaSituacao",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "tarefaPaiNaoPodeSerElaMesma",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        },
+        {
+          "ruleId": "tarefaEncerradaNaoTransiciona",
+          "owner": "module",
+          "source": "l4/tarefas/rules.defs.ts",
+          "placement": "invariant"
+        }
+      ],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Tarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Tarefa",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "titulo",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "prioridade",
+              "type": "enum"
+            },
+            {
+              "name": "prazo",
+              "type": "date"
+            },
+            {
+              "name": "listaId",
+              "type": "record",
+              "ref": "Lista"
+            },
+            {
+              "name": "responsavelId",
+              "type": "record",
+              "ref": "MembroEquipe"
+            },
+            {
+              "name": "criadorId",
+              "type": "record",
+              "ref": "MembroEquipe"
+            },
+            {
+              "name": "tarefaPaiId",
+              "type": "record",
+              "ref": "Tarefa"
+            },
+            {
+              "name": "chaveCriacao",
+              "type": "uuid"
+            },
+            {
+              "name": "criadaEm",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.descricao",
+              "type": "text"
+            },
+            {
+              "name": "details.motivoDevolucao",
+              "type": "text"
+            },
+            {
+              "name": "details.devolvidaEm",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.concluidaEm",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.canceladaEm",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.aberta",
+              "type": "boolean",
+              "derived": true
+            },
+            {
+              "name": "details.venceHoje",
+              "type": "boolean",
+              "derived": true
+            },
+            {
+              "name": "details.atrasada",
+              "type": "boolean",
+              "derived": true
+            },
+            {
+              "name": "details.quantidadeSubtarefas",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.progressoChecklist",
+              "type": "string",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "aFazer",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "emAndamento",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "emRevisao",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "concluida",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "cancelada",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "iniciar",
+                "from": [
+                  "aFazer"
+                ],
+                "to": "emAndamento",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "somenteResponsavelExecuta"
+                ]
+              },
+              {
+                "transitionId": "enviarParaRevisao",
+                "from": [
+                  "emAndamento"
+                ],
+                "to": "emRevisao",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "somenteResponsavelExecuta"
+                ]
+              },
+              {
+                "transitionId": "aceitar",
+                "from": [
+                  "emRevisao"
+                ],
+                "to": "concluida",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "somenteCriadorRevisa"
+                ]
+              },
+              {
+                "transitionId": "devolver",
+                "from": [
+                  "emRevisao"
+                ],
+                "to": "emAndamento",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "somenteCriadorRevisa",
+                  "devolucaoExigeMotivo"
+                ]
+              },
+              {
+                "transitionId": "cancelar",
+                "from": [
+                  "aFazer",
+                  "emAndamento",
+                  "emRevisao"
+                ],
+                "to": "cancelada",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "cancelamentoPorCriadorOuGestor"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "criacaoIdempotente",
+            "reatribuicaoPorCriadorOuGestor",
+            "edicaoNaoMudaSituacao",
+            "tarefaPaiNaoPodeSerElaMesma",
+            "tarefaEncerradaNaoTransiciona"
+          ],
+          "imports": []
+        }
+      }
+    }
+  ],
+  "valueObjects": [],
+  "problems": [],
+  "normalizations": [
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.dataReferencia",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.finalizadoEm",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.geradoEm",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.motivoFalha",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.quantidadeAtrasadas",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.quantidadeTarefas",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.tarefas.prazo",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.tarefas.situacaoPrazo",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.tarefas.tarefaId",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details.tarefas",
+      "detail": "collection,description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.details",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.responsavelId",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.status",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "AvisoVencimento.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "AvisoVencimento.transitions.0",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "AvisoVencimento.transitions.1",
+      "detail": "description,payload"
+    },
+    {
+      "code": "INITIAL_STATE_DERIVED",
+      "path": "AvisoVencimento",
+      "detail": "pending"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemChecklist.record.fields.details.descricao",
+      "detail": "description,maxLength,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemChecklist.record.fields.details.marcadoEm",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemChecklist.record.fields.details",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemChecklist.record.fields.feito",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemChecklist.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemChecklist.record.fields.ordem",
+      "detail": "description,indexed,min,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemChecklist.record.fields.tarefaId",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "ItemChecklist.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "ItemChecklist",
+      "detail": "no lifecycleStates and no transitions"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Lista.record.fields.ativa",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Lista.record.fields.details.descricao",
+      "detail": "description,maxLength,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Lista.record.fields.details.quantidadeTarefasAbertas",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Lista.record.fields.details.tipo",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Lista.record.fields.details",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Lista.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Lista.record.fields.nome",
+      "detail": "description,indexed,maxLength,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Lista.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "Lista",
+      "detail": "no lifecycleStates and no transitions"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.base.contacts",
+      "detail": "collection,description,required,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "MembroEquipe.record.fields.details.base.contacts",
+      "detail": "ContactSummary"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "MembroEquipe.record.fields.details.base.contacts",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.base",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.general",
+      "detail": "description,open,owner"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "MembroEquipe.record.fields.details.general",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.identification.countryCode",
+      "detail": "default,description,indexed,maxLength,pattern,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.identification.name",
+      "detail": "description,indexed,maxLength,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.identification.status",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.identification.subtype",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.identification.tags",
+      "detail": "collection,description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.identification",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.person.privacyConsent",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_OF_NOT_REFERENCE",
+      "path": "MembroEquipe.record.fields.details.person.privacyConsent",
+      "detail": "PrivacyConsent"
+    },
+    {
+      "code": "OBJECT_LEAF",
+      "path": "MembroEquipe.record.fields.details.person.privacyConsent",
+      "detail": "no nested field map"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.person",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details.tarefas",
+      "detail": "description,owner"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.details",
+      "detail": "description,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.id",
+      "detail": "description,indexed,required"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "MembroEquipe.record.fields.version",
+      "detail": "description,required,writePrecondition"
+    },
+    {
+      "code": "NO_LIFECYCLE",
+      "path": "MembroEquipe",
+      "detail": "no lifecycleStates and no transitions"
+    },
+    {
+      "code": "ROLE_STORAGE_MDM",
+      "path": "MembroEquipe",
+      "detail": "kind role has no storage target"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.chaveCriacao",
+      "detail": "description,indexed,required,title,unique"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.criadaEm",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.criadorId",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.aberta",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.atrasada",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.canceladaEm",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.concluidaEm",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.descricao",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.devolvidaEm",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.motivoDevolucao",
+      "detail": "description,maxLength,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.progressoChecklist",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.quantidadeSubtarefas",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details.venceHoje",
+      "detail": "description,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.details",
+      "detail": "description,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.id",
+      "detail": "indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.listaId",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.prazo",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.prioridade",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.responsavelId",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.status",
+      "detail": "description,indexed,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.tarefaPaiId",
+      "detail": "description,indexed,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.titulo",
+      "detail": "description,indexed,maxLength,required,title"
+    },
+    {
+      "code": "FIELD_KEYS_OMITTED",
+      "path": "Tarefa.record.fields.version",
+      "detail": "required"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Tarefa.transitions.0",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Tarefa.transitions.1",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Tarefa.transitions.2",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Tarefa.transitions.3",
+      "detail": "description,payload"
+    },
+    {
+      "code": "TRANSITION_KEYS_OMITTED",
+      "path": "Tarefa.transitions.4",
+      "detail": "description,payload"
+    },
+    {
+      "code": "INITIAL_STATE_DERIVED",
+      "path": "Tarefa",
+      "detail": "aFazer"
+    },
+    {
+      "code": "NESTED_KEPT",
+      "path": "tarefas",
+      "detail": "No nested object is the target of a record reference. Nested fields stay on the entity."
+    }
+  ],
+  "preserved": [],
+  "removed": [],
+  "emit": [
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "AvisoVencimento",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts"
+        ],
+        "data": {
+          "entityId": "AvisoVencimento",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "responsavelId",
+              "type": "record",
+              "ref": "MembroEquipe"
+            },
+            {
+              "name": "dataReferencia",
+              "type": "date",
+              "derived": true
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.geradoEm",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details.finalizadoEm",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details.motivoFalha",
+              "type": "text"
+            },
+            {
+              "name": "details.tarefas",
+              "type": "object"
+            },
+            {
+              "name": "details.tarefas.tarefaId",
+              "type": "record",
+              "ref": "Tarefa"
+            },
+            {
+              "name": "details.tarefas.prazo",
+              "type": "date"
+            },
+            {
+              "name": "details.tarefas.situacaoPrazo",
+              "type": "enum"
+            },
+            {
+              "name": "details.quantidadeTarefas",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.quantidadeAtrasadas",
+              "type": "integer",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "pending",
+                "reachedBy": "command"
+              },
+              {
+                "state": "completed",
+                "reachedBy": "command"
+              },
+              {
+                "state": "failed",
+                "reachedBy": "command"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "concluirAviso",
+                "from": [
+                  "pending"
+                ],
+                "to": "completed",
+                "by": [],
+                "ruleRefs": [
+                  "avisoNaoIniciaSemConcluirAnterior"
+                ]
+              },
+              {
+                "transitionId": "falharAviso",
+                "from": [
+                  "pending"
+                ],
+                "to": "failed",
+                "by": [],
+                "ruleRefs": [
+                  "avisoNaoIniciaSemConcluirAnterior"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "avisoUnicoPorResponsavelEDia",
+            "avisoNaoIniciaSemConcluirAnterior",
+            "avisoSomenteTarefasAbertasVencendo"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/domainEntity/AvisoVencimento",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/MembroEquipe",
+            "102047/tarefas/domainEntity/Tarefa"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "ItemChecklist",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts"
+        ],
+        "data": {
+          "entityId": "ItemChecklist",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "tarefaId",
+              "type": "record",
+              "ref": "Tarefa"
+            },
+            {
+              "name": "ordem",
+              "type": "integer"
+            },
+            {
+              "name": "feito",
+              "type": "boolean"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.descricao",
+              "type": "string"
+            },
+            {
+              "name": "details.marcadoEm",
+              "type": "timestamp"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "checklistNaoMudaSituacao",
+            "editarSomenteTarefaVisivel"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/domainEntity/ItemChecklist",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/tarefas/layer_3_domain/entities/itemChecklist.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_3_domain/entities/itemChecklist.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Lista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "Lista",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "nome",
+              "type": "string"
+            },
+            {
+              "name": "ativa",
+              "type": "boolean"
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.tipo",
+              "type": "enum"
+            },
+            {
+              "name": "details.descricao",
+              "type": "text"
+            },
+            {
+              "name": "details.quantidadeTarefasAbertas",
+              "type": "integer",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "listaNomeUnico",
+            "listaMantidaPorGestor",
+            "listaInativaNaoRecebeTarefa"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/domainEntity/Lista",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_3_domain/entities/lista.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "MembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [],
+        "data": {
+          "entityId": "MembroEquipe",
+          "storageTarget": "mdm",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.identification",
+              "type": "object"
+            },
+            {
+              "name": "details.identification.subtype",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.name",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.status",
+              "type": "enum",
+              "derived": true
+            },
+            {
+              "name": "details.identification.countryCode",
+              "type": "string"
+            },
+            {
+              "name": "details.identification.tags",
+              "type": "string",
+              "derived": true
+            },
+            {
+              "name": "details.base",
+              "type": "object"
+            },
+            {
+              "name": "details.base.contacts",
+              "type": "object",
+              "derived": true
+            },
+            {
+              "name": "details.person",
+              "type": "object"
+            },
+            {
+              "name": "details.person.privacyConsent",
+              "type": "object"
+            },
+            {
+              "name": "details.general",
+              "type": "object"
+            },
+            {
+              "name": "details.tarefas",
+              "type": "object"
+            }
+          ],
+          "lifecycle": {
+            "states": [],
+            "transitions": []
+          },
+          "invariants": [
+            "responsavelDeveSerMembroAtivo"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/domainEntity/MembroEquipe",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [],
+          "dependsOn": [],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "domainEntity",
+        "artifactId": "Tarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+        ],
+        "data": {
+          "entityId": "Tarefa",
+          "storageTarget": "moduleDatabase",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid",
+              "derived": true
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "titulo",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "type": "enum"
+            },
+            {
+              "name": "prioridade",
+              "type": "enum"
+            },
+            {
+              "name": "prazo",
+              "type": "date"
+            },
+            {
+              "name": "listaId",
+              "type": "record",
+              "ref": "Lista"
+            },
+            {
+              "name": "responsavelId",
+              "type": "record",
+              "ref": "MembroEquipe"
+            },
+            {
+              "name": "criadorId",
+              "type": "record",
+              "ref": "MembroEquipe"
+            },
+            {
+              "name": "tarefaPaiId",
+              "type": "record",
+              "ref": "Tarefa"
+            },
+            {
+              "name": "chaveCriacao",
+              "type": "uuid"
+            },
+            {
+              "name": "criadaEm",
+              "type": "timestamp",
+              "derived": true
+            },
+            {
+              "name": "details",
+              "type": "object"
+            },
+            {
+              "name": "details.descricao",
+              "type": "text"
+            },
+            {
+              "name": "details.motivoDevolucao",
+              "type": "text"
+            },
+            {
+              "name": "details.devolvidaEm",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.concluidaEm",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.canceladaEm",
+              "type": "timestamp"
+            },
+            {
+              "name": "details.aberta",
+              "type": "boolean",
+              "derived": true
+            },
+            {
+              "name": "details.venceHoje",
+              "type": "boolean",
+              "derived": true
+            },
+            {
+              "name": "details.atrasada",
+              "type": "boolean",
+              "derived": true
+            },
+            {
+              "name": "details.quantidadeSubtarefas",
+              "type": "integer",
+              "derived": true
+            },
+            {
+              "name": "details.progressoChecklist",
+              "type": "string",
+              "derived": true
+            }
+          ],
+          "lifecycle": {
+            "states": [
+              {
+                "state": "aFazer",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "emAndamento",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "emRevisao",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "concluida",
+                "reachedBy": "actor"
+              },
+              {
+                "state": "cancelada",
+                "reachedBy": "actor"
+              }
+            ],
+            "transitions": [
+              {
+                "transitionId": "iniciar",
+                "from": [
+                  "aFazer"
+                ],
+                "to": "emAndamento",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "somenteResponsavelExecuta"
+                ]
+              },
+              {
+                "transitionId": "enviarParaRevisao",
+                "from": [
+                  "emAndamento"
+                ],
+                "to": "emRevisao",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "somenteResponsavelExecuta"
+                ]
+              },
+              {
+                "transitionId": "aceitar",
+                "from": [
+                  "emRevisao"
+                ],
+                "to": "concluida",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "somenteCriadorRevisa"
+                ]
+              },
+              {
+                "transitionId": "devolver",
+                "from": [
+                  "emRevisao"
+                ],
+                "to": "emAndamento",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "somenteCriadorRevisa",
+                  "devolucaoExigeMotivo"
+                ]
+              },
+              {
+                "transitionId": "cancelar",
+                "from": [
+                  "aFazer",
+                  "emAndamento",
+                  "emRevisao"
+                ],
+                "to": "cancelada",
+                "by": [
+                  "membroEquipe",
+                  "gestor"
+                ],
+                "ruleRefs": [
+                  "cancelamentoPorCriadorOuGestor"
+                ]
+              }
+            ]
+          },
+          "invariants": [
+            "criacaoIdempotente",
+            "reatribuicaoPorCriadorOuGestor",
+            "edicaoNaoMudaSituacao",
+            "tarefaPaiNaoPodeSerElaMesma",
+            "tarefaEncerradaNaoTransiciona"
+          ],
+          "imports": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/domainEntity/Tarefa",
+          "type": "domainEntity",
+          "defPath": "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+            "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Lista",
+            "102047/tarefas/domainEntity/MembroEquipe"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md",
+            "_102021_/l2/agentDefsL1/skills/domainEntity.md"
+          ]
+        }
+      ]
+    }
+  ]
+}

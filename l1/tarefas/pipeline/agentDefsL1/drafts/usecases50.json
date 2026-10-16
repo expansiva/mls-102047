@@ -1,0 +1,2649 @@
+{
+  "schemaVersion": "2026-10-01-d1-usecases-v2",
+  "project": 102047,
+  "moduleName": "tarefas",
+  "llmCalls": 0,
+  "ok": true,
+  "enumerations": [
+    {
+      "entityId": "AvisoVencimento",
+      "path": "details.tarefas.situacaoPrazo",
+      "values": [
+        "dueToday",
+        "overdue"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "AvisoVencimento",
+      "path": "status",
+      "values": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Lista",
+      "path": "details.tipo",
+      "values": [
+        "project",
+        "area"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "MembroEquipe",
+      "path": "details.identification.status",
+      "values": [
+        "Active",
+        "Inactive",
+        "Merged",
+        "Blocked"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "MembroEquipe",
+      "path": "details.identification.subtype",
+      "values": [
+        "Person"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Tarefa",
+      "path": "prioridade",
+      "values": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    },
+    {
+      "entityId": "Tarefa",
+      "path": "status",
+      "values": [
+        "aFazer",
+        "emAndamento",
+        "emRevisao",
+        "concluida",
+        "cancelada"
+      ],
+      "consumed": false,
+      "source": "domain30.enumerations",
+      "reason": "Usecase projection has no values slot. Enum values stay on the domain draft."
+    }
+  ],
+  "usecases": [
+    {
+      "usecaseId": "aceitar",
+      "entityId": "Tarefa",
+      "operation": "transition",
+      "defPath": "l1/tarefas/layer_2_application/usecases/aceitar.defs.ts",
+      "routes": [
+        "tarefas.inicio_membro.cmdAceitarEntrega",
+        "tarefas.minhas_tarefas.aceitarEntrega"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "aceitar",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/integration.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "aceitar",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "somenteCriadorRevisa"
+          ],
+          "effects": [
+            {
+              "eventId": "tarefaConcluida",
+              "path": "l4/tarefas/integration.defs.ts",
+              "symbol": "tarefaConcluida"
+            }
+          ],
+          "transitionRef": "aceitar"
+        }
+      }
+    },
+    {
+      "usecaseId": "cancelar",
+      "entityId": "Tarefa",
+      "operation": "transition",
+      "defPath": "l1/tarefas/layer_2_application/usecases/cancelar.defs.ts",
+      "routes": [
+        "tarefas.minhas_tarefas.cancelarTarefa",
+        "tarefas.tarefas_equipe.cmdCancelarTarefa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "cancelar",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/integration.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "cancelar",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "cancelamentoPorCriadorOuGestor"
+          ],
+          "effects": [
+            {
+              "eventId": "tarefaCancelada",
+              "path": "l4/tarefas/integration.defs.ts",
+              "symbol": "tarefaCancelada"
+            }
+          ],
+          "transitionRef": "cancelar"
+        }
+      }
+    },
+    {
+      "usecaseId": "createLista",
+      "entityId": "Lista",
+      "operation": "create",
+      "defPath": "l1/tarefas/layer_2_application/usecases/createLista.defs.ts",
+      "routes": [
+        "tarefas.listas.criarLista"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createLista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createLista",
+          "entityId": "Lista",
+          "operation": "create",
+          "rulesApplied": [
+            "listaInativaNaoRecebeTarefa",
+            "listaMantidaPorGestor",
+            "listaNomeUnico"
+          ],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "createMembroEquipe",
+      "entityId": "MembroEquipe",
+      "operation": "create",
+      "defPath": "l1/tarefas/layer_2_application/usecases/createMembroEquipe.defs.ts",
+      "routes": [
+        "tarefas.membros_equipe.cadastrarPessoa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": {
+        "namespace": "tarefas",
+        "role": "tarefas.MembroEquipe",
+        "atomic": false,
+        "calls": [
+          {
+            "id": "createPerson",
+            "method": "create",
+            "target": "entity",
+            "shape": "write",
+            "capabilities": [
+              "register.createOrAttach"
+            ],
+            "alternative": false,
+            "when": [],
+            "arguments": [
+              {
+                "name": "countryCode",
+                "role": "patch",
+                "path": "details.identification.countryCode",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.identification.countryCode"
+                },
+                "capability": "register.createOrAttach"
+              },
+              {
+                "name": "name",
+                "role": "patch",
+                "path": "details.identification.name",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.identification.name"
+                },
+                "capability": "register.createOrAttach"
+              },
+              {
+                "name": "privacyConsent",
+                "role": "patch",
+                "path": "details.person.privacyConsent",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.person.privacyConsent"
+                },
+                "capability": "register.createOrAttach"
+              }
+            ],
+            "result": [
+              "mdmId",
+              "version",
+              "alreadyExists"
+            ]
+          },
+          {
+            "id": "attachRole",
+            "method": "attachRole",
+            "target": "entity",
+            "shape": "write",
+            "capabilities": [
+              "register.createOrAttach"
+            ],
+            "alternative": false,
+            "when": [],
+            "arguments": [
+              {
+                "name": "mdmId",
+                "role": "selector",
+                "origin": {
+                  "kind": "prior",
+                  "path": "mdmId",
+                  "calls": [
+                    "createPerson"
+                  ]
+                }
+              },
+              {
+                "name": "role",
+                "role": "parameter",
+                "value": "tarefas.MembroEquipe",
+                "origin": {
+                  "kind": "literal",
+                  "evidence": "role"
+                }
+              }
+            ],
+            "result": [
+              "mdmId",
+              "version"
+            ]
+          }
+        ],
+        "gaps": [],
+        "skipped": []
+      },
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createMembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createMembroEquipe",
+          "entityId": "MembroEquipe",
+          "operation": "create",
+          "rulesApplied": [
+            "responsavelDeveSerMembroAtivo"
+          ],
+          "effects": [],
+          "mdm": {
+            "namespace": "tarefas",
+            "role": "tarefas.MembroEquipe",
+            "atomic": false,
+            "calls": [
+              {
+                "id": "createPerson",
+                "method": "create",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "register.createOrAttach"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "countryCode",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.countryCode"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.identification.countryCode"
+                  },
+                  {
+                    "name": "name",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.identification.name"
+                  },
+                  {
+                    "name": "privacyConsent",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.person.privacyConsent"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.person.privacyConsent"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "alreadyExists"
+                ]
+              },
+              {
+                "id": "attachRole",
+                "method": "attachRole",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "register.createOrAttach"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "prior",
+                      "path": "mdmId",
+                      "calls": [
+                        "createPerson"
+                      ]
+                    }
+                  },
+                  {
+                    "name": "role",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "literal",
+                      "evidence": "role"
+                    },
+                    "value": "tarefas.MembroEquipe"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "createTarefa",
+      "entityId": "Tarefa",
+      "operation": "create",
+      "defPath": "l1/tarefas/layer_2_application/usecases/createTarefa.defs.ts",
+      "routes": [
+        "tarefas.minhas_tarefas.salvarNovaTarefa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createTarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createTarefa",
+          "entityId": "Tarefa",
+          "operation": "create",
+          "rulesApplied": [
+            "criacaoIdempotente",
+            "edicaoNaoMudaSituacao",
+            "reatribuicaoPorCriadorOuGestor",
+            "tarefaEncerradaNaoTransiciona",
+            "tarefaPaiNaoPodeSerElaMesma"
+          ],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "devolver",
+      "entityId": "Tarefa",
+      "operation": "transition",
+      "defPath": "l1/tarefas/layer_2_application/usecases/devolver.defs.ts",
+      "routes": [
+        "tarefas.inicio_membro.cmdDevolverComMotivo",
+        "tarefas.minhas_tarefas.devolverComMotivo"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "devolver",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "devolver",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "devolucaoExigeMotivo",
+            "somenteCriadorRevisa"
+          ],
+          "effects": [],
+          "transitionRef": "devolver"
+        }
+      }
+    },
+    {
+      "usecaseId": "enviarParaRevisao",
+      "entityId": "Tarefa",
+      "operation": "transition",
+      "defPath": "l1/tarefas/layer_2_application/usecases/enviarParaRevisao.defs.ts",
+      "routes": [
+        "tarefas.inicio_membro.cmdEnviarParaRevisao",
+        "tarefas.minhas_tarefas.enviarParaRevisao"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "enviarParaRevisao",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "enviarParaRevisao",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "somenteResponsavelExecuta"
+          ],
+          "effects": [],
+          "transitionRef": "enviarParaRevisao"
+        }
+      }
+    },
+    {
+      "usecaseId": "getAvisoVencimento",
+      "entityId": "AvisoVencimento",
+      "operation": "get",
+      "defPath": "l1/tarefas/layer_2_application/usecases/getAvisoVencimento.defs.ts",
+      "routes": [
+        "tarefas.inicio_membro.qryInicioMembro",
+        "tarefas.meus_avisos.abrirAviso",
+        "tarefas.meus_avisos.carregarMeusAvisos"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getAvisoVencimento",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/avisoVencimentoRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getAvisoVencimento",
+          "entityId": "AvisoVencimento",
+          "operation": "get",
+          "rulesApplied": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "getLista",
+      "entityId": "Lista",
+      "operation": "get",
+      "defPath": "l1/tarefas/layer_2_application/usecases/getLista.defs.ts",
+      "routes": [
+        "tarefas.inicio_gestor.qryTarefasPedemAcao",
+        "tarefas.inicio_membro.cmdAceitarEntrega",
+        "tarefas.inicio_membro.cmdDevolverComMotivo",
+        "tarefas.inicio_membro.cmdEnviarParaRevisao",
+        "tarefas.inicio_membro.cmdIniciarTarefa",
+        "tarefas.inicio_membro.qryInicioMembro",
+        "tarefas.listas.obterLista",
+        "tarefas.minhas_tarefas.aceitarEntrega",
+        "tarefas.minhas_tarefas.cancelarTarefa",
+        "tarefas.minhas_tarefas.devolverComMotivo",
+        "tarefas.minhas_tarefas.enviarParaRevisao",
+        "tarefas.minhas_tarefas.iniciarTarefa",
+        "tarefas.minhas_tarefas.marcarItemChecklist",
+        "tarefas.minhas_tarefas.minhasTarefas",
+        "tarefas.minhas_tarefas.salvarEdicaoTarefa",
+        "tarefas.minhas_tarefas.salvarNovaTarefa",
+        "tarefas.minhas_tarefas.tarefaAberta",
+        "tarefas.tarefas_equipe.cmdCancelarTarefa",
+        "tarefas.tarefas_equipe.cmdReatribuirTarefa",
+        "tarefas.tarefas_equipe.qryDetalheTarefa",
+        "tarefas.tarefas_equipe.qryTarefasEquipe"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getLista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getLista",
+          "entityId": "Lista",
+          "operation": "get",
+          "rulesApplied": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "getMembroEquipe",
+      "entityId": "MembroEquipe",
+      "operation": "get",
+      "defPath": "l1/tarefas/layer_2_application/usecases/getMembroEquipe.defs.ts",
+      "routes": [
+        "tarefas.membros_equipe.listarMembrosEquipe",
+        "tarefas.membros_equipe.obterMembroEquipe",
+        "tarefas.tarefas_equipe.cmdCancelarTarefa",
+        "tarefas.tarefas_equipe.cmdReatribuirTarefa",
+        "tarefas.tarefas_equipe.qryBuscarMembros",
+        "tarefas.tarefas_equipe.qryDetalheTarefa",
+        "tarefas.tarefas_equipe.qryTarefasEquipe"
+      ],
+      "trustedContext": "ctx",
+      "mdm": {
+        "namespace": "tarefas",
+        "role": "tarefas.MembroEquipe",
+        "atomic": true,
+        "calls": [
+          {
+            "id": "get",
+            "method": "get",
+            "target": "entity",
+            "shape": "point",
+            "capabilities": [
+              "read.byId"
+            ],
+            "alternative": false,
+            "when": [],
+            "arguments": [
+              {
+                "name": "mdmId",
+                "role": "selector",
+                "path": "id",
+                "origin": {
+                  "kind": "contract",
+                  "path": "id"
+                }
+              }
+            ],
+            "result": [
+              "mdmId",
+              "version",
+              "details"
+            ]
+          }
+        ],
+        "gaps": [],
+        "skipped": [
+          {
+            "capability": "listLinks",
+            "code": "RESULT_UNUSED",
+            "evidence": "listLinks result (mdmId, relationshipId, type, direction) has no output field and no later prior."
+          }
+        ]
+      },
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getMembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getMembroEquipe",
+          "entityId": "MembroEquipe",
+          "operation": "get",
+          "rulesApplied": [],
+          "effects": [],
+          "mdm": {
+            "namespace": "tarefas",
+            "role": "tarefas.MembroEquipe",
+            "atomic": true,
+            "calls": [
+              {
+                "id": "get",
+                "method": "get",
+                "target": "entity",
+                "shape": "point",
+                "capabilities": [
+                  "read.byId"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "id"
+                    },
+                    "path": "id"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "details"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "getTarefa",
+      "entityId": "Tarefa",
+      "operation": "get",
+      "defPath": "l1/tarefas/layer_2_application/usecases/getTarefa.defs.ts",
+      "routes": [
+        "tarefas.meus_avisos.abrirAviso",
+        "tarefas.meus_avisos.carregarMeusAvisos",
+        "tarefas.minhas_tarefas.marcarItemChecklist",
+        "tarefas.minhas_tarefas.tarefaAberta",
+        "tarefas.tarefas_equipe.qryDetalheTarefa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getTarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getTarefa",
+          "entityId": "Tarefa",
+          "operation": "get",
+          "rulesApplied": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "iniciar",
+      "entityId": "Tarefa",
+      "operation": "transition",
+      "defPath": "l1/tarefas/layer_2_application/usecases/iniciar.defs.ts",
+      "routes": [
+        "tarefas.inicio_membro.cmdIniciarTarefa",
+        "tarefas.minhas_tarefas.iniciarTarefa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "iniciar",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "iniciar",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "somenteResponsavelExecuta"
+          ],
+          "effects": [],
+          "transitionRef": "iniciar"
+        }
+      }
+    },
+    {
+      "usecaseId": "listAvisoVencimento",
+      "entityId": "AvisoVencimento",
+      "operation": "list",
+      "defPath": "l1/tarefas/layer_2_application/usecases/listAvisoVencimento.defs.ts",
+      "routes": [
+        "tarefas.inicio_membro.qryInicioMembro",
+        "tarefas.meus_avisos.abrirAviso",
+        "tarefas.meus_avisos.carregarMeusAvisos"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listAvisoVencimento",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/avisoVencimentoRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listAvisoVencimento",
+          "entityId": "AvisoVencimento",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "listItemChecklist",
+      "entityId": "ItemChecklist",
+      "operation": "list",
+      "defPath": "l1/tarefas/layer_2_application/usecases/listItemChecklist.defs.ts",
+      "routes": [
+        "tarefas.minhas_tarefas.aceitarEntrega",
+        "tarefas.minhas_tarefas.cancelarTarefa",
+        "tarefas.minhas_tarefas.devolverComMotivo",
+        "tarefas.minhas_tarefas.enviarParaRevisao",
+        "tarefas.minhas_tarefas.iniciarTarefa",
+        "tarefas.minhas_tarefas.salvarEdicaoTarefa",
+        "tarefas.minhas_tarefas.salvarNovaTarefa",
+        "tarefas.minhas_tarefas.tarefaAberta",
+        "tarefas.tarefas_equipe.cmdCancelarTarefa",
+        "tarefas.tarefas_equipe.cmdReatribuirTarefa",
+        "tarefas.tarefas_equipe.qryDetalheTarefa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listItemChecklist",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/itemChecklistRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/itemChecklist.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listItemChecklist",
+          "entityId": "ItemChecklist",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "listLista",
+      "entityId": "Lista",
+      "operation": "list",
+      "defPath": "l1/tarefas/layer_2_application/usecases/listLista.defs.ts",
+      "routes": [
+        "tarefas.inicio_gestor.qryPanoramaEquipe",
+        "tarefas.listas.listarListas",
+        "tarefas.tarefas_equipe.qryListasFiltro"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listLista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listLista",
+          "entityId": "Lista",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "listMembroEquipe",
+      "entityId": "MembroEquipe",
+      "operation": "list",
+      "defPath": "l1/tarefas/layer_2_application/usecases/listMembroEquipe.defs.ts",
+      "routes": [
+        "tarefas.membros_equipe.listarMembrosEquipe",
+        "tarefas.tarefas_equipe.qryBuscarMembros"
+      ],
+      "trustedContext": "ctx",
+      "mdm": {
+        "namespace": "tarefas",
+        "role": "tarefas.MembroEquipe",
+        "atomic": false,
+        "calls": [
+          {
+            "id": "get",
+            "method": "get",
+            "target": "entity",
+            "shape": "point",
+            "capabilities": [
+              "read.byId"
+            ],
+            "alternative": false,
+            "when": [],
+            "arguments": [
+              {
+                "name": "mdmId",
+                "role": "selector",
+                "path": "id",
+                "origin": {
+                  "kind": "contract",
+                  "path": "id"
+                }
+              }
+            ],
+            "result": [
+              "mdmId",
+              "version",
+              "details"
+            ]
+          },
+          {
+            "id": "listByName",
+            "method": "listByType",
+            "target": "collection",
+            "shape": "collection",
+            "capabilities": [
+              "locate.byName"
+            ],
+            "alternative": false,
+            "when": [
+              {
+                "kind": "contract",
+                "path": "details.identification.name",
+                "present": true
+              }
+            ],
+            "arguments": [
+              {
+                "name": "type",
+                "role": "parameter",
+                "value": "tarefas.MembroEquipe",
+                "origin": {
+                  "kind": "literal",
+                  "evidence": "role"
+                }
+              },
+              {
+                "name": "name",
+                "role": "selector",
+                "path": "details.identification.name",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.identification.name"
+                }
+              }
+            ],
+            "result": [
+              "items",
+              "page",
+              "pageSize",
+              "total"
+            ]
+          }
+        ],
+        "gaps": [],
+        "skipped": [
+          {
+            "capability": "listLinks",
+            "code": "RESULT_UNUSED",
+            "evidence": "listLinks result (mdmId, relationshipId, type, direction) has no output field and no later prior."
+          }
+        ]
+      },
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listMembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listMembroEquipe",
+          "entityId": "MembroEquipe",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": [],
+          "mdm": {
+            "namespace": "tarefas",
+            "role": "tarefas.MembroEquipe",
+            "atomic": false,
+            "calls": [
+              {
+                "id": "get",
+                "method": "get",
+                "target": "entity",
+                "shape": "point",
+                "capabilities": [
+                  "read.byId"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "id"
+                    },
+                    "path": "id"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "details"
+                ]
+              },
+              {
+                "id": "listByName",
+                "method": "listByType",
+                "target": "collection",
+                "shape": "collection",
+                "capabilities": [
+                  "locate.byName"
+                ],
+                "alternative": false,
+                "when": [
+                  {
+                    "kind": "contract",
+                    "path": "details.identification.name",
+                    "present": true
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "type",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "literal",
+                      "evidence": "role"
+                    },
+                    "value": "tarefas.MembroEquipe"
+                  },
+                  {
+                    "name": "name",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "path": "details.identification.name"
+                  }
+                ],
+                "result": [
+                  "items",
+                  "page",
+                  "pageSize",
+                  "total"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "listTarefa",
+      "entityId": "Tarefa",
+      "operation": "list",
+      "defPath": "l1/tarefas/layer_2_application/usecases/listTarefa.defs.ts",
+      "routes": [
+        "tarefas.inicio_gestor.qryTarefasPedemAcao",
+        "tarefas.inicio_membro.qryInicioMembro",
+        "tarefas.minhas_tarefas.minhasTarefas",
+        "tarefas.tarefas_equipe.qryTarefasEquipe"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listTarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listTarefa",
+          "entityId": "Tarefa",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "updateItemChecklist",
+      "entityId": "ItemChecklist",
+      "operation": "update",
+      "defPath": "l1/tarefas/layer_2_application/usecases/updateItemChecklist.defs.ts",
+      "routes": [
+        "tarefas.minhas_tarefas.marcarItemChecklist"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateItemChecklist",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/itemChecklistRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/itemChecklist.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateItemChecklist",
+          "entityId": "ItemChecklist",
+          "operation": "update",
+          "rulesApplied": [
+            "checklistNaoMudaSituacao",
+            "editarSomenteTarefaVisivel"
+          ],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "updateLista",
+      "entityId": "Lista",
+      "operation": "update",
+      "defPath": "l1/tarefas/layer_2_application/usecases/updateLista.defs.ts",
+      "routes": [
+        "tarefas.listas.salvarLista"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateLista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateLista",
+          "entityId": "Lista",
+          "operation": "update",
+          "rulesApplied": [
+            "listaInativaNaoRecebeTarefa",
+            "listaMantidaPorGestor",
+            "listaNomeUnico"
+          ],
+          "effects": []
+        }
+      }
+    },
+    {
+      "usecaseId": "updateMembroEquipe",
+      "entityId": "MembroEquipe",
+      "operation": "update",
+      "defPath": "l1/tarefas/layer_2_application/usecases/updateMembroEquipe.defs.ts",
+      "routes": [
+        "tarefas.membros_equipe.salvarAlteracoesPessoa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": {
+        "namespace": "tarefas",
+        "role": "tarefas.MembroEquipe",
+        "atomic": true,
+        "calls": [
+          {
+            "id": "update",
+            "method": "update",
+            "target": "entity",
+            "shape": "write",
+            "capabilities": [
+              "edit.platformFields"
+            ],
+            "alternative": false,
+            "when": [],
+            "arguments": [
+              {
+                "name": "mdmId",
+                "role": "selector",
+                "path": "id",
+                "origin": {
+                  "kind": "contract",
+                  "path": "id"
+                }
+              },
+              {
+                "name": "expectedVersion",
+                "role": "parameter",
+                "path": "version",
+                "origin": {
+                  "kind": "contract",
+                  "path": "version",
+                  "evidence": "writePrecondition"
+                }
+              },
+              {
+                "name": "countryCode",
+                "role": "patch",
+                "path": "details.identification.countryCode",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.identification.countryCode"
+                },
+                "capability": "edit.platformFields"
+              },
+              {
+                "name": "name",
+                "role": "patch",
+                "path": "details.identification.name",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.identification.name"
+                },
+                "capability": "edit.platformFields"
+              },
+              {
+                "name": "privacyConsent",
+                "role": "patch",
+                "path": "details.person.privacyConsent",
+                "origin": {
+                  "kind": "contract",
+                  "path": "details.person.privacyConsent"
+                },
+                "capability": "edit.platformFields"
+              }
+            ],
+            "result": [
+              "mdmId",
+              "version",
+              "details"
+            ]
+          }
+        ],
+        "gaps": [],
+        "skipped": []
+      },
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateMembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateMembroEquipe",
+          "entityId": "MembroEquipe",
+          "operation": "update",
+          "rulesApplied": [
+            "responsavelDeveSerMembroAtivo"
+          ],
+          "effects": [],
+          "mdm": {
+            "namespace": "tarefas",
+            "role": "tarefas.MembroEquipe",
+            "atomic": true,
+            "calls": [
+              {
+                "id": "update",
+                "method": "update",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "edit.platformFields"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "id"
+                    },
+                    "path": "id"
+                  },
+                  {
+                    "name": "expectedVersion",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "version",
+                      "evidence": "writePrecondition"
+                    },
+                    "path": "version"
+                  },
+                  {
+                    "name": "countryCode",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.countryCode"
+                    },
+                    "capability": "edit.platformFields",
+                    "path": "details.identification.countryCode"
+                  },
+                  {
+                    "name": "name",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "capability": "edit.platformFields",
+                    "path": "details.identification.name"
+                  },
+                  {
+                    "name": "privacyConsent",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.person.privacyConsent"
+                    },
+                    "capability": "edit.platformFields",
+                    "path": "details.person.privacyConsent"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "details"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "usecaseId": "updateTarefa",
+      "entityId": "Tarefa",
+      "operation": "update",
+      "defPath": "l1/tarefas/layer_2_application/usecases/updateTarefa.defs.ts",
+      "routes": [
+        "tarefas.minhas_tarefas.salvarEdicaoTarefa",
+        "tarefas.tarefas_equipe.cmdReatribuirTarefa"
+      ],
+      "trustedContext": "ctx",
+      "mdm": null,
+      "transactionBoundary": null,
+      "steps": [],
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateTarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateTarefa",
+          "entityId": "Tarefa",
+          "operation": "update",
+          "rulesApplied": [
+            "criacaoIdempotente",
+            "edicaoNaoMudaSituacao",
+            "reatribuicaoPorCriadorOuGestor",
+            "tarefaEncerradaNaoTransiciona",
+            "tarefaPaiNaoPodeSerElaMesma"
+          ],
+          "effects": []
+        }
+      }
+    }
+  ],
+  "problems": [],
+  "normalizations": [
+    {
+      "code": "ENUMERATIONS_NOT_CONSUMED",
+      "path": "domain30.enumerations",
+      "detail": "7 enum values stay on the domain draft. usecases50 does not copy them."
+    }
+  ],
+  "emit": [
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "aceitar",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/integration.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "aceitar",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "somenteCriadorRevisa"
+          ],
+          "effects": [
+            {
+              "eventId": "tarefaConcluida",
+              "path": "l4/tarefas/integration.defs.ts",
+              "symbol": "tarefaConcluida"
+            }
+          ],
+          "transitionRef": "aceitar"
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/aceitar",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/aceitar.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/aceitar.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+            "l4/tarefas/integration.defs.ts",
+            "l4/tarefas/ontology/Tarefa.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "cancelar",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/integration.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "cancelar",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "cancelamentoPorCriadorOuGestor"
+          ],
+          "effects": [
+            {
+              "eventId": "tarefaCancelada",
+              "path": "l4/tarefas/integration.defs.ts",
+              "symbol": "tarefaCancelada"
+            }
+          ],
+          "transitionRef": "cancelar"
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/cancelar",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/cancelar.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/cancelar.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+            "l4/tarefas/integration.defs.ts",
+            "l4/tarefas/ontology/Tarefa.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createLista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createLista",
+          "entityId": "Lista",
+          "operation": "create",
+          "rulesApplied": [
+            "listaInativaNaoRecebeTarefa",
+            "listaMantidaPorGestor",
+            "listaNomeUnico"
+          ],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/createLista",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/createLista.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/createLista.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Lista",
+            "102047/tarefas/repositoryPort/ListaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createMembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createMembroEquipe",
+          "entityId": "MembroEquipe",
+          "operation": "create",
+          "rulesApplied": [
+            "responsavelDeveSerMembroAtivo"
+          ],
+          "effects": [],
+          "mdm": {
+            "namespace": "tarefas",
+            "role": "tarefas.MembroEquipe",
+            "atomic": false,
+            "calls": [
+              {
+                "id": "createPerson",
+                "method": "create",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "register.createOrAttach"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "countryCode",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.countryCode"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.identification.countryCode"
+                  },
+                  {
+                    "name": "name",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.identification.name"
+                  },
+                  {
+                    "name": "privacyConsent",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.person.privacyConsent"
+                    },
+                    "capability": "register.createOrAttach",
+                    "path": "details.person.privacyConsent"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "alreadyExists"
+                ]
+              },
+              {
+                "id": "attachRole",
+                "method": "attachRole",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "register.createOrAttach"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "prior",
+                      "path": "mdmId",
+                      "calls": [
+                        "createPerson"
+                      ]
+                    }
+                  },
+                  {
+                    "name": "role",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "literal",
+                      "evidence": "role"
+                    },
+                    "value": "tarefas.MembroEquipe"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/createMembroEquipe",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/createMembroEquipe.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/createMembroEquipe.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/MembroEquipe"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "createTarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "createTarefa",
+          "entityId": "Tarefa",
+          "operation": "create",
+          "rulesApplied": [
+            "criacaoIdempotente",
+            "edicaoNaoMudaSituacao",
+            "reatribuicaoPorCriadorOuGestor",
+            "tarefaEncerradaNaoTransiciona",
+            "tarefaPaiNaoPodeSerElaMesma"
+          ],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/createTarefa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/createTarefa.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/createTarefa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "devolver",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "devolver",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "devolucaoExigeMotivo",
+            "somenteCriadorRevisa"
+          ],
+          "effects": [],
+          "transitionRef": "devolver"
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/devolver",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/devolver.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/devolver.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+            "l4/tarefas/ontology/Tarefa.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "enviarParaRevisao",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "enviarParaRevisao",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "somenteResponsavelExecuta"
+          ],
+          "effects": [],
+          "transitionRef": "enviarParaRevisao"
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/enviarParaRevisao",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/enviarParaRevisao.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/enviarParaRevisao.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+            "l4/tarefas/ontology/Tarefa.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getAvisoVencimento",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/avisoVencimentoRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getAvisoVencimento",
+          "entityId": "AvisoVencimento",
+          "operation": "get",
+          "rulesApplied": [],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/getAvisoVencimento",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/getAvisoVencimento.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/getAvisoVencimento.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/avisoVencimentoRepository.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/AvisoVencimento",
+            "102047/tarefas/repositoryPort/AvisoVencimentoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getLista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getLista",
+          "entityId": "Lista",
+          "operation": "get",
+          "rulesApplied": [],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/getLista",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/getLista.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/getLista.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Lista",
+            "102047/tarefas/repositoryPort/ListaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getMembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getMembroEquipe",
+          "entityId": "MembroEquipe",
+          "operation": "get",
+          "rulesApplied": [],
+          "effects": [],
+          "mdm": {
+            "namespace": "tarefas",
+            "role": "tarefas.MembroEquipe",
+            "atomic": true,
+            "calls": [
+              {
+                "id": "get",
+                "method": "get",
+                "target": "entity",
+                "shape": "point",
+                "capabilities": [
+                  "read.byId"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "id"
+                    },
+                    "path": "id"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "details"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/getMembroEquipe",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/MembroEquipe"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "getTarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "getTarefa",
+          "entityId": "Tarefa",
+          "operation": "get",
+          "rulesApplied": [],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/getTarefa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/getTarefa.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/getTarefa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "iniciar",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/ontology/Tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "iniciar",
+          "entityId": "Tarefa",
+          "operation": "transition",
+          "rulesApplied": [
+            "somenteResponsavelExecuta"
+          ],
+          "effects": [],
+          "transitionRef": "iniciar"
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/iniciar",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/iniciar.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/iniciar.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+            "l4/tarefas/ontology/Tarefa.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listAvisoVencimento",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/avisoVencimentoRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listAvisoVencimento",
+          "entityId": "AvisoVencimento",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/listAvisoVencimento",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/listAvisoVencimento.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/listAvisoVencimento.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/avisoVencimento.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/avisoVencimentoRepository.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/AvisoVencimento",
+            "102047/tarefas/repositoryPort/AvisoVencimentoRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listItemChecklist",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/itemChecklistRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/itemChecklist.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listItemChecklist",
+          "entityId": "ItemChecklist",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/listItemChecklist",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/listItemChecklist.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/listItemChecklist.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/itemChecklist.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/itemChecklistRepository.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/ItemChecklist",
+            "102047/tarefas/repositoryPort/ItemChecklistRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listLista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listLista",
+          "entityId": "Lista",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/listLista",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/listLista.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/listLista.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Lista",
+            "102047/tarefas/repositoryPort/ListaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listMembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listMembroEquipe",
+          "entityId": "MembroEquipe",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": [],
+          "mdm": {
+            "namespace": "tarefas",
+            "role": "tarefas.MembroEquipe",
+            "atomic": false,
+            "calls": [
+              {
+                "id": "get",
+                "method": "get",
+                "target": "entity",
+                "shape": "point",
+                "capabilities": [
+                  "read.byId"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "id"
+                    },
+                    "path": "id"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "details"
+                ]
+              },
+              {
+                "id": "listByName",
+                "method": "listByType",
+                "target": "collection",
+                "shape": "collection",
+                "capabilities": [
+                  "locate.byName"
+                ],
+                "alternative": false,
+                "when": [
+                  {
+                    "kind": "contract",
+                    "path": "details.identification.name",
+                    "present": true
+                  }
+                ],
+                "arguments": [
+                  {
+                    "name": "type",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "literal",
+                      "evidence": "role"
+                    },
+                    "value": "tarefas.MembroEquipe"
+                  },
+                  {
+                    "name": "name",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "path": "details.identification.name"
+                  }
+                ],
+                "result": [
+                  "items",
+                  "page",
+                  "pageSize",
+                  "total"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/listMembroEquipe",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/MembroEquipe"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "listTarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "listTarefa",
+          "entityId": "Tarefa",
+          "operation": "list",
+          "rulesApplied": [],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/listTarefa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateItemChecklist",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/itemChecklistRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/itemChecklist.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateItemChecklist",
+          "entityId": "ItemChecklist",
+          "operation": "update",
+          "rulesApplied": [
+            "checklistNaoMudaSituacao",
+            "editarSomenteTarefaVisivel"
+          ],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/updateItemChecklist",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/updateItemChecklist.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/updateItemChecklist.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/itemChecklist.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/itemChecklistRepository.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/ItemChecklist",
+            "102047/tarefas/repositoryPort/ItemChecklistRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateLista",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateLista",
+          "entityId": "Lista",
+          "operation": "update",
+          "rulesApplied": [
+            "listaInativaNaoRecebeTarefa",
+            "listaMantidaPorGestor",
+            "listaNomeUnico"
+          ],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/updateLista",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/updateLista.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/updateLista.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/listaRepository.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Lista",
+            "102047/tarefas/repositoryPort/ListaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateMembroEquipe",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateMembroEquipe",
+          "entityId": "MembroEquipe",
+          "operation": "update",
+          "rulesApplied": [
+            "responsavelDeveSerMembroAtivo"
+          ],
+          "effects": [],
+          "mdm": {
+            "namespace": "tarefas",
+            "role": "tarefas.MembroEquipe",
+            "atomic": true,
+            "calls": [
+              {
+                "id": "update",
+                "method": "update",
+                "target": "entity",
+                "shape": "write",
+                "capabilities": [
+                  "edit.platformFields"
+                ],
+                "alternative": false,
+                "when": [],
+                "arguments": [
+                  {
+                    "name": "mdmId",
+                    "role": "selector",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "id"
+                    },
+                    "path": "id"
+                  },
+                  {
+                    "name": "expectedVersion",
+                    "role": "parameter",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "version",
+                      "evidence": "writePrecondition"
+                    },
+                    "path": "version"
+                  },
+                  {
+                    "name": "countryCode",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.countryCode"
+                    },
+                    "capability": "edit.platformFields",
+                    "path": "details.identification.countryCode"
+                  },
+                  {
+                    "name": "name",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.identification.name"
+                    },
+                    "capability": "edit.platformFields",
+                    "path": "details.identification.name"
+                  },
+                  {
+                    "name": "privacyConsent",
+                    "role": "patch",
+                    "origin": {
+                      "kind": "contract",
+                      "path": "details.person.privacyConsent"
+                    },
+                    "capability": "edit.platformFields",
+                    "path": "details.person.privacyConsent"
+                  }
+                ],
+                "result": [
+                  "mdmId",
+                  "version",
+                  "details"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/updateMembroEquipe",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/updateMembroEquipe.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/updateMembroEquipe.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/MembroEquipe"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    },
+    {
+      "definition": {
+        "schemaVersion": "2026-09-24-d1-definition-v2",
+        "artifactType": "usecase",
+        "artifactId": "updateTarefa",
+        "moduleName": "tarefas",
+        "status": "pending",
+        "dependencies": [
+          "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+          "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+          "_102047_/l4/tarefas/rules.defs.ts"
+        ],
+        "data": {
+          "usecaseId": "updateTarefa",
+          "entityId": "Tarefa",
+          "operation": "update",
+          "rulesApplied": [
+            "criacaoIdempotente",
+            "edicaoNaoMudaSituacao",
+            "reatribuicaoPorCriadorOuGestor",
+            "tarefaEncerradaNaoTransiciona",
+            "tarefaPaiNaoPodeSerElaMesma"
+          ],
+          "effects": []
+        }
+      },
+      "pipeline": [
+        {
+          "id": "102047/tarefas/usecase/updateTarefa",
+          "type": "usecase",
+          "defPath": "_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.defs.ts",
+          "outputPath": "_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.ts",
+          "outputAvailability": "future",
+          "dependsFiles": [
+            "_102047_/l1/tarefas/layer_3_domain/entities/tarefa.defs.ts",
+            "_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.defs.ts",
+            "l4/tarefas/rules.defs.ts"
+          ],
+          "dependsOn": [
+            "102047/tarefas/domainEntity/Tarefa",
+            "102047/tarefas/repositoryPort/TarefaRepository"
+          ],
+          "skills": [
+            "_102021_/l2/agentDefsL1/skills/architecture.md"
+          ]
+        }
+      ]
+    }
+  ]
+}
