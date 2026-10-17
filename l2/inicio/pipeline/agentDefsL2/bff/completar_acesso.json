@@ -1,0 +1,449 @@
+{
+  "types": [
+    {
+      "name": "PessoaIdentificacao",
+      "description": "Identificação do cadastro mestre da pessoa da organização.",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "countryCode",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.status"
+            ]
+          }
+        },
+        {
+          "name": "tags",
+          "type": "string[]",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.tags"
+            ]
+          }
+        },
+        {
+          "name": "updatedAt",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.updatedAt"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PessoaBase",
+      "description": "Resumo dos contatos e vínculos da pessoa, mantido pela plataforma.",
+      "fields": [
+        {
+          "name": "contacts",
+          "type": "string[]",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.base.contacts"
+            ]
+          }
+        },
+        {
+          "name": "relationshipRefs",
+          "type": "string[]",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.base.relationshipRefs"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PessoaInicio",
+      "description": "Situação calculada do acesso da pessoa no módulo inicio.",
+      "fields": [
+        {
+          "name": "acessoCompleto",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.acessoCompleto"
+            ]
+          }
+        },
+        {
+          "name": "dadosFaltantes",
+          "type": "string[]",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.dadosFaltantes"
+            ]
+          }
+        },
+        {
+          "name": "consentimentoExigido",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.consentimentoExigido"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MeuCadastroDetalhes",
+      "description": "Detalhes do cadastro da pessoa: identificação, base e situação do acesso.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "PessoaIdentificacao"
+        },
+        {
+          "name": "base",
+          "type": "PessoaBase"
+        },
+        {
+          "name": "inicio",
+          "type": "PessoaInicio"
+        }
+      ]
+    },
+    {
+      "name": "MeuCadastro",
+      "description": "Cadastro da pessoa da organização ligado ao e-mail da conta, com a situação calculada do acesso.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.version"
+            ]
+          }
+        },
+        {
+          "name": "details",
+          "type": "MeuCadastroDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "EmpresaIdentificacao",
+      "description": "Nome pelo qual a empresa é reconhecida.",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.name"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EmpresaCompany",
+      "description": "Dados de pessoa jurídica da empresa visíveis à pessoa.",
+      "fields": [
+        {
+          "name": "tradeName",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.company.tradeName"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EmpresaResumoDetalhes",
+      "description": "Resumo dos detalhes da empresa da organização.",
+      "fields": [
+        {
+          "name": "identification",
+          "type": "EmpresaIdentificacao"
+        },
+        {
+          "name": "company",
+          "type": "EmpresaCompany"
+        }
+      ]
+    },
+    {
+      "name": "EmpresaResumo",
+      "description": "Resumo da empresa da organização: nome e nome fantasia.",
+      "fields": [
+        {
+          "name": "details",
+          "type": "EmpresaResumoDetalhes"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "obterMeuAcesso",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "pessoa",
+          "type": "MeuCadastro",
+          "optional": true
+        },
+        {
+          "name": "emailLigado",
+          "type": "boolean",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PessoaOrganizacao.id",
+              "PessoaOrganizacao.details.base.relationshipRefs"
+            ]
+          }
+        },
+        {
+          "name": "empresa",
+          "type": "EmpresaResumo",
+          "optional": true
+        }
+      ],
+      "rules": [
+        "acessoCompletoDadosMinimos",
+        "acessoCompletoSegueDireto",
+        "naoPedirDadoJaExistente",
+        "emailContaNaoEditavel",
+        "liberacaoPeloResponsavel",
+        "pessoaCadastradaPeloEmail"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega de uma vez a situação do acesso da pessoa logada: o próprio cadastro ligado ao e-mail da conta, o que falta, se o consentimento é exigido, se o e-mail está ligado ao cadastro e o resumo da empresa da organização.",
+        "input": "Nenhum. A pessoa é a autenticada, identificada pelo servidor.",
+        "processing": "Localiza a pessoa pelo e-mail da conta (locate.byLogin); o e-mail nunca vem da página (emailContaNaoEditavel). Calcula na leitura, sem gravar: consentimentoExigido (país Brasil ou União Europeia), acessoCompleto (nome e país informados e consentimento válido quando exigido; telefone não conta — acessoCompletoDadosMinimos) e dadosFaltantes apenas com o que ainda falta (naoPedirDadoJaExistente). emailLigado é verdadeiro quando há cadastro e vínculo com a empresa nos relationshipRefs; quando falso, a pessoa deve aguardar a liberação do responsável pelo convite da plataforma e nada é criado nem guardado (liberacaoPeloResponsavel). acessoCompleto verdadeiro permite seguir direto aos módulos (acessoCompletoSegueDireto). Lê da empresa ligada só nome e nome fantasia (grant summaryOnly).",
+        "output": "pessoa: o cadastro da pessoa com id, version, identificação, contatos, vínculos e situação calculada do acesso, ausente quando o e-mail não está ligado; emailLigado: se a plataforma ligou o e-mail ao cadastro; empresa: nome e nome fantasia da empresa da organização, quando houver vínculo."
+      }
+    },
+    {
+      "id": "concluirMeuAcesso",
+      "kind": "cmd",
+      "when": "concluirMeuAcesso",
+      "writes": "PessoaOrganizacao.update",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.version"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.person.privacyConsent",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.person.privacyConsent"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "pessoa",
+          "type": "MeuCadastro"
+        }
+      ],
+      "rules": [
+        "acessoCompletoDadosMinimos",
+        "naoPedirDadoJaExistente",
+        "preencherDadosNaoDaPermissao",
+        "emailContaNaoEditavel",
+        "semDuplicarPessoaAoRepetir"
+      ],
+      "jsdoc": {
+        "purpose": "Grava os dados mínimos que faltavam à pessoa logada e conclui o próprio acesso.",
+        "input": "id e version: cadastro da pessoa e versão lida, para concorrência otimista; details.identification.name: nome, quando faltava; details.identification.countryCode: país ISO 3166-1 alfa-2, quando faltava; details.person.privacyConsent: aceite do consentimento de privacidade, enviado quando o país exige.",
+        "processing": "Confere que o id é o cadastro da pessoa autenticada e que a versão está atual. Grava só os campos que faltavam, sem sobrescrever o que a plataforma já tem (naoPedirDadoJaExistente). Recusa se o país for Brasil ou União Europeia e o consentimento não vier (acessoCompletoDadosMinimos). Não altera o e-mail da conta (emailContaNaoEditavel), não cria outra pessoa nem outro vínculo ao repetir (semDuplicarPessoaAoRepetir) e não concede papéis nem permissões (preencherDadosNaoDaPermissao). acessoCompleto, dadosFaltantes e consentimentoExigido são recalculados na leitura, nunca gravados.",
+        "output": "pessoa: o cadastro da pessoa no novo estado, com a nova version e a situação do acesso recalculada."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "resumoMeuAcesso",
+        "reads": "obterMeuAcesso.pessoa"
+      },
+      {
+        "organism": "empresaBoasVindas",
+        "reads": "obterMeuAcesso.empresa"
+      },
+      {
+        "organism": "avisoLiberacao",
+        "reads": "obterMeuAcesso.emailLigado"
+      },
+      {
+        "organism": "avisoLiberacao",
+        "reads": "obterMeuAcesso.pessoa"
+      },
+      {
+        "organism": "meuCadastro",
+        "reads": "obterMeuAcesso.pessoa"
+      },
+      {
+        "organism": "dadosMinimosForm",
+        "reads": "obterMeuAcesso.pessoa"
+      },
+      {
+        "organism": "acoesMeuAcesso",
+        "reads": "obterMeuAcesso.pessoa"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "concluirMeuAcesso",
+        "refreshes": []
+      }
+    ],
+    "selections": [
+      {
+        "organism": "resumoMeuAcesso",
+        "via": {
+          "list": "obterMeuAcesso.pessoa"
+        }
+      }
+    ],
+    "journeys": [
+      {
+        "step": "completarMeuAcesso/verMeuCadastro",
+        "organisms": [
+          "resumoMeuAcesso",
+          "meuCadastro",
+          "empresaBoasVindas"
+        ],
+        "endpoints": [
+          "obterMeuAcesso"
+        ]
+      },
+      {
+        "step": "completarMeuAcesso/informarDados",
+        "organisms": [
+          "dadosMinimosForm",
+          "acoesMeuAcesso"
+        ],
+        "endpoints": [
+          "concluirMeuAcesso"
+        ]
+      },
+      {
+        "step": "completarMeuAcesso/seguirModulos",
+        "organisms": [
+          "acoesMeuAcesso"
+        ],
+        "endpoints": [
+          "concluirMeuAcesso"
+        ],
+        "continuesIn": "painel"
+      },
+      {
+        "step": "pedirLiberacao/verAviso",
+        "organisms": [
+          "avisoLiberacao"
+        ],
+        "endpoints": [
+          "obterMeuAcesso"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "concluirMeuAcesso",
+        "state": "obterMeuAcesso.pessoa",
+        "mode": "replace"
+      }
+    ]
+  }
+}

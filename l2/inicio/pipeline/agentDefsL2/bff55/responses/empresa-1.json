@@ -1,0 +1,575 @@
+{
+  "attempt": "1",
+  "model": "claude-opus-5-5",
+  "promptChars": 34398,
+  "receivedAt": "2026-10-17T08:18:59.185Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Bff",
+      "arguments": {
+        "types": [
+          {
+            "name": "EmpresaPreparacao",
+            "description": "Cadastro mestre da empresa da organização, com os canais de contato ligados e a situação de preparação calculada.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.id"
+                  ]
+                }
+              },
+              {
+                "name": "version",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.version"
+                  ]
+                }
+              },
+              {
+                "name": "details",
+                "type": "EmpresaDetalhes",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details"
+                  ]
+                }
+              },
+              {
+                "name": "contato",
+                "type": "ContatoEmpresa[]",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Contato.details"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EmpresaDetalhes",
+            "description": "Detalhes do cadastro da empresa.",
+            "fields": [
+              {
+                "name": "identification",
+                "type": "EmpresaIdentificacao",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification"
+                  ]
+                }
+              },
+              {
+                "name": "base",
+                "type": "EmpresaBase",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.base"
+                  ]
+                }
+              },
+              {
+                "name": "company",
+                "type": "EmpresaCompanhia",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.company"
+                  ]
+                }
+              },
+              {
+                "name": "inicio",
+                "type": "EmpresaInicio",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.inicio"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EmpresaIdentificacao",
+            "description": "Identificação da empresa: nome, documento e país.",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "docType",
+                "type": "'CNPJ' | 'EIN' | 'VAT' | 'NationalId' | 'Other'",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.docType"
+                  ]
+                }
+              },
+              {
+                "name": "docId",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.docId"
+                  ]
+                }
+              },
+              {
+                "name": "countryCode",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.countryCode"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EmpresaBase",
+            "description": "Endereços e resumo dos contatos da empresa.",
+            "fields": [
+              {
+                "name": "addresses",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.base.addresses"
+                  ]
+                }
+              },
+              {
+                "name": "contacts",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.base.contacts"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EmpresaCompanhia",
+            "description": "Dados de pessoa jurídica da empresa.",
+            "fields": [
+              {
+                "name": "legalName",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.company.legalName"
+                  ]
+                }
+              },
+              {
+                "name": "tradeName",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.company.tradeName"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "EmpresaInicio",
+            "description": "Situação de preparação da empresa calculada pelo módulo Início.",
+            "fields": [
+              {
+                "name": "preparada",
+                "type": "boolean",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Empresa.details.inicio.preparada",
+                    "Empresa.details.identification.name",
+                    "Empresa.details.identification.docType",
+                    "Empresa.details.identification.docId",
+                    "Empresa.details.base.addresses",
+                    "Empresa.details.base.contacts"
+                  ]
+                }
+              },
+              {
+                "name": "dadosFaltantes",
+                "type": "string[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Empresa.details.inicio.dadosFaltantes",
+                    "Empresa.details.identification.name",
+                    "Empresa.details.identification.docType",
+                    "Empresa.details.identification.docId",
+                    "Empresa.details.base.addresses",
+                    "Empresa.details.base.contacts"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ContatoEmpresa",
+            "description": "Canal de contato ligado à empresa por HasContact.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Contato.id"
+                  ]
+                }
+              },
+              {
+                "name": "details",
+                "type": "ContatoDetalhes",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Contato.details"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ContatoDetalhes",
+            "description": "Detalhes do canal de contato.",
+            "fields": [
+              {
+                "name": "identification",
+                "type": "ContatoIdentificacao",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Contato.details.identification"
+                  ]
+                }
+              },
+              {
+                "name": "contactChannel",
+                "type": "ContatoCanal",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Contato.details.contactChannel"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ContatoIdentificacao",
+            "description": "Identificação do canal de contato.",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Contato.details.identification.name"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ContatoCanal",
+            "description": "Tipo e valor do canal de contato.",
+            "fields": [
+              {
+                "name": "contactType",
+                "type": "'Phone' | 'Email' | 'WhatsApp'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Contato.details.contactChannel.contactType"
+                  ]
+                }
+              },
+              {
+                "name": "value",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Contato.details.contactChannel.value"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "endpoints": [
+          {
+            "id": "qryEmpresa",
+            "kind": "qry",
+            "when": "onLoad",
+            "input": [],
+            "output": [
+              {
+                "name": "empresa",
+                "type": "EmpresaPreparacao",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "prepararSomenteResponsavel",
+              "responsavelReconhecidoPelaPlataforma",
+              "empresaPreparadaComDadosObrigatorios",
+              "naoPedirDadoJaExistente"
+            ],
+            "jsdoc": {
+              "purpose": "Carrega, em uma única chamada, o cadastro da empresa da organização do responsável logado, com os contatos ligados e a situação de preparação já calculada.",
+              "input": "Nenhuma entrada: a empresa é a da organização do responsável autenticado, conhecida pelo servidor.",
+              "processing": "Verifica que quem chama é o responsável reconhecido pela plataforma (prepararSomenteResponsavel, responsavelReconhecidoPelaPlataforma); caso contrário recusa. Lê a Empresa por read.byId e os Contatos ligados por HasContact (listLinks + read.byId). Calcula na leitura, sem gravar: preparada = nome, documento (tipo e número), ao menos um endereço e ao menos um contato (empresaPreparadaComDadosObrigatorios); dadosFaltantes = lista dos obrigatórios ausentes entre nome, documento, endereço e contato, para pedir só o que falta (naoPedirDadoJaExistente).",
+              "output": "A empresa no estado atual: id, version, identificação, razão social e nome fantasia, endereços, resumo de contatos, a lista de contatos ligados (nome, tipo, valor), preparada e dadosFaltantes."
+            }
+          },
+          {
+            "id": "cmdConfirmarDadosEmpresa",
+            "kind": "cmd",
+            "when": "confirmarDadosEmpresa",
+            "writes": "Empresa.update",
+            "input": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.id"
+                  ]
+                }
+              },
+              {
+                "name": "version",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.version"
+                  ]
+                }
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "docType",
+                "type": "'CNPJ' | 'EIN' | 'VAT' | 'NationalId' | 'Other'",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.docType"
+                  ]
+                }
+              },
+              {
+                "name": "docId",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.docId"
+                  ]
+                }
+              },
+              {
+                "name": "countryCode",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.countryCode"
+                  ]
+                }
+              },
+              {
+                "name": "legalName",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.company.legalName"
+                  ]
+                }
+              },
+              {
+                "name": "tradeName",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.company.tradeName"
+                  ]
+                }
+              },
+              {
+                "name": "addresses",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.base.addresses"
+                  ]
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "empresa",
+                "type": "EmpresaPreparacao",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "prepararSomenteResponsavel",
+              "responsavelReconhecidoPelaPlataforma",
+              "naoPedirDadoJaExistente",
+              "empresaPreparadaComDadosObrigatorios",
+              "preencherDadosNaoDaPermissao"
+            ],
+            "jsdoc": {
+              "purpose": "Grava os dados obrigatórios da empresa que faltavam e confirmados pelo responsável.",
+              "input": "id e version da empresa (concorrência otimista); name, docType, docId, countryCode, legalName, tradeName e addresses, enviados somente quando faltavam e foram informados.",
+              "processing": "Recusa se quem chama não é o responsável reconhecido pela plataforma (prepararSomenteResponsavel, responsavelReconhecidoPelaPlataforma). Recusa se a version não for a atual. Grava só os campos enviados que ainda estavam vazios, sem sobrescrever o que a plataforma já tem (naoPedirDadoJaExistente), por edit.platformFields; valida o formato do documento e, se informado, verifica por locate.byDocument que não há outra empresa com o mesmo documento. Não concede papéis nem permissões (preencherDadosNaoDaPermissao). Depois relê a empresa e calcula preparada e dadosFaltantes, sem gravá-los (empresaPreparadaComDadosObrigatorios).",
+              "output": "A empresa no novo estado e nova version, com contatos ligados, preparada e dadosFaltantes recalculados."
+            }
+          }
+        ],
+        "bindings": {
+          "organisms": [
+            {
+              "organism": "dadosEmpresa",
+              "reads": "qryEmpresa.empresa"
+            },
+            {
+              "organism": "pendenciasEmpresa",
+              "reads": "qryEmpresa.empresa"
+            },
+            {
+              "organism": "completarDadosEmpresa",
+              "reads": "qryEmpresa.empresa"
+            }
+          ],
+          "commands": [
+            {
+              "endpoint": "cmdConfirmarDadosEmpresa",
+              "refreshes": []
+            }
+          ],
+          "selections": [],
+          "updates": [
+            {
+              "endpoint": "cmdConfirmarDadosEmpresa",
+              "state": "qryEmpresa.empresa",
+              "mode": "replace"
+            }
+          ],
+          "journeys": [
+            {
+              "step": "prepararEmpresa/abrirEmpresa",
+              "organisms": [
+                "dadosEmpresa"
+              ],
+              "endpoints": [
+                "qryEmpresa"
+              ]
+            },
+            {
+              "step": "prepararEmpresa/verPendencias",
+              "organisms": [
+                "pendenciasEmpresa"
+              ],
+              "endpoints": [
+                "qryEmpresa"
+              ]
+            },
+            {
+              "step": "prepararEmpresa/completarDados",
+              "organisms": [
+                "completarDadosEmpresa"
+              ],
+              "endpoints": [
+                "cmdConfirmarDadosEmpresa"
+              ]
+            },
+            {
+              "step": "prepararEmpresa/verOrientacao",
+              "organisms": [
+                "pendenciasEmpresa"
+              ],
+              "endpoints": [
+                "qryEmpresa",
+                "cmdConfirmarDadosEmpresa"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 16,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

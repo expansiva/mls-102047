@@ -1,0 +1,519 @@
+{
+  "types": [
+    {
+      "name": "EmpresaSituacao",
+      "description": "Situação de preparo da empresa da organização: nome, se está preparada e os dados obrigatórios que ainda faltam.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.id"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.inicio.preparada",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.inicio.preparada"
+            ]
+          }
+        },
+        {
+          "name": "details.inicio.dadosFaltantes",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.inicio.dadosFaltantes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PessoaPendente",
+      "description": "Pessoa da organização que ainda não completou o acesso, com o que lhe falta e se o consentimento é exigido.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.id"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.inicio.acessoCompleto",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.acessoCompleto"
+            ]
+          }
+        },
+        {
+          "name": "details.inicio.dadosFaltantes",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.dadosFaltantes"
+            ]
+          }
+        },
+        {
+          "name": "details.inicio.consentimentoExigido",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.consentimentoExigido"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AcessosResumo",
+      "description": "Andamento dos acessos das pessoas da organização: contagens já calculadas e as pessoas que ainda têm pendência.",
+      "fields": [
+        {
+          "name": "totalPessoas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PessoaOrganizacao.id"
+            ]
+          }
+        },
+        {
+          "name": "acessosCompletos",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.acessoCompleto"
+            ]
+          }
+        },
+        {
+          "name": "acessosPendentes",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.acessoCompleto"
+            ]
+          }
+        },
+        {
+          "name": "consentimentosPendentes",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.consentimentoExigido",
+              "PessoaOrganizacao.details.inicio.acessoCompleto"
+            ]
+          }
+        },
+        {
+          "name": "pessoasPendentes",
+          "type": "PessoaPendente[]"
+        }
+      ]
+    },
+    {
+      "name": "CanalContato",
+      "description": "Canal de contato (telefone, WhatsApp ou e-mail) ligado a uma pessoa da organização.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Contato.id"
+            ]
+          }
+        },
+        {
+          "name": "details.contactChannel.contactType",
+          "type": "'Phone' | 'Email' | 'WhatsApp'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Contato.details.contactChannel.contactType"
+            ]
+          }
+        },
+        {
+          "name": "details.contactChannel.value",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Contato.details.contactChannel.value"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PedidoLiberacao",
+      "description": "Pessoa da organização cujo e-mail a plataforma não ligou sozinha ao cadastro, com nome, país, canais de contato e situação do acesso.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.version"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.updatedAt",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.updatedAt"
+            ]
+          }
+        },
+        {
+          "name": "quantidadeContatos",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "PessoaOrganizacao.details.base.contacts"
+            ]
+          }
+        },
+        {
+          "name": "contacts",
+          "type": "CanalContato[]"
+        },
+        {
+          "name": "details.inicio.acessoCompleto",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.inicio.acessoCompleto"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "obterPainel",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "empresa",
+          "type": "EmpresaSituacao"
+        },
+        {
+          "name": "acessos",
+          "type": "AcessosResumo"
+        }
+      ],
+      "rules": [
+        "prepararSomenteResponsavel",
+        "responsavelReconhecidoPelaPlataforma",
+        "empresaPreparadaComDadosObrigatorios",
+        "naoPedirDadoJaExistente",
+        "acessoCompletoDadosMinimos"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega, numa só chamada ao abrir o painel, a situação de preparo da empresa da organização e o resumo dos acessos das pessoas.",
+        "input": "Sem entrada: a organização e o responsável vêm da sessão autenticada.",
+        "processing": "Recusa quem não é o responsável reconhecido pela plataforma (prepararSomenteResponsavel, responsavelReconhecidoPelaPlataforma). Lê a empresa da organização e calcula na leitura preparada e dadosFaltantes a partir de nome, documento (tipo e número), endereço e contato (empresaPreparadaComDadosObrigatorios), listando só o que falta (naoPedirDadoJaExistente). Lista as pessoas com o papel inicio.PessoaOrganizacao e calcula para cada uma acessoCompleto, dadosFaltantes e consentimentoExigido (acessoCompletoDadosMinimos: nome, país e consentimento quando BR/UE; telefone não conta). Conta total de pessoas, acessos completos, pendentes e consentimentos pendentes. As pessoas pendentes vêm ordenadas pela atualização mais recente, limitadas às primeiras 5. Nada é gravado.",
+        "output": "empresa: id, nome, preparada e dados faltantes. acessos: contagens já calculadas e a lista curta das pessoas com pendência, com o que falta e se o consentimento é exigido."
+      }
+    },
+    {
+      "id": "listarPedidosLiberacao",
+      "kind": "qry",
+      "when": "interaction",
+      "input": [
+        {
+          "name": "busca",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        },
+        {
+          "name": "pageSize",
+          "type": "number",
+          "origin": {
+            "kind": "context",
+            "paths": []
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "pedidos",
+          "type": "PedidoLiberacao[]",
+          "paginated": true
+        }
+      ],
+      "rules": [
+        "prepararSomenteResponsavel",
+        "liberacaoPeloResponsavel",
+        "acessoCompletoDadosMinimos"
+      ],
+      "jsdoc": {
+        "purpose": "Lista, paginada, as pessoas da organização que aguardam a liberação do acesso pelo responsável, com busca pelo nome para localizar a pessoa certa.",
+        "input": "busca: trecho do nome da pessoa (opcional). page e pageSize: página pedida e tamanho da página.",
+        "processing": "Só o responsável consulta (prepararSomenteResponsavel). Seleciona as pessoas da organização cujo e-mail a plataforma não ligou sozinha ao cadastro e cujo acesso ainda não está completo (liberacaoPeloResponsavel; o módulo não guarda essa pendência, ela é deduzida da plataforma). acessoCompleto é calculado na leitura (acessoCompletoDadosMinimos). Filtra pelo nome quando há busca e ordena pela atualização mais recente. A partir do resumo de contatos da pessoa (base.contacts) junta os canais ligados por HasContact com tipo e valor e conta quantos são. Não devolve o consentimento de privacidade.",
+        "output": "pedidos: página de pessoas com id, versão, nome, país, atualizada em, quantidade de contatos, canais de contato (tipo e valor) e acesso completo, no formato { items, page, pageSize, hasMore }."
+      }
+    },
+    {
+      "id": "convidarPessoaCerta",
+      "kind": "cmd",
+      "when": "convidarPessoaCerta",
+      "writes": "PessoaOrganizacao.create",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.id"
+            ]
+          }
+        },
+        {
+          "name": "empresa.id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.id"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "PessoaOrganizacao.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "contato.details.contactChannel.value",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Contato.details.contactChannel.value"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "pedido",
+          "type": "PedidoLiberacao"
+        }
+      ],
+      "rules": [
+        "prepararSomenteResponsavel",
+        "liberacaoPeloResponsavel",
+        "conviteDaPlataformaSemGuardar",
+        "semDuplicarPessoaAoRepetir",
+        "contatoSemDuplicarAoRepetir",
+        "emailContaNaoEditavel",
+        "preencherDadosNaoDaPermissao"
+      ],
+      "jsdoc": {
+        "purpose": "Convida a pessoa certa pelo convite da plataforma, ligando o e-mail ao cadastro existente sem criar uma segunda pessoa.",
+        "input": "id: cadastro existente conferido pelo responsável (quando há). empresa.id: empresa da organização à qual a pessoa é ligada. details.identification.name e details.identification.countryCode: nome e país confirmados do cadastro. contato.details.contactChannel.value: e-mail para onde vai o convite da plataforma.",
+        "processing": "Recusa quem não é o responsável (prepararSomenteResponsavel). Usa register.createOrAttach: se já existe a pessoa (pelo id ou pelo e-mail) só anexa o papel inicio.PessoaOrganizacao e confirma nome e país; senão cadastra — repetir não cria outra pessoa nem outro vínculo (semDuplicarPessoaAoRepetir), nem outro canal de e-mail (contatoSemDuplicarAoRepetir). Liga a pessoa à empresa (AssignedTo) sem duplicar o vínculo. Dispara invite.login da plataforma, que liga o login ao cadastro (liberacaoPeloResponsavel, emailContaNaoEditavel); o módulo não guarda o convite (conviteDaPlataformaSemGuardar). Não concede papéis nem permissões de módulos (preencherDadosNaoDaPermissao). acessoCompleto e a quantidade de contatos são calculados na leitura, nunca gravados.",
+        "output": "pedido: o cadastro da pessoa no novo estado, com id, versão, nome, país, atualizada em, quantidade e canais de contato e acesso completo calculado."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "empresaPreparada",
+        "reads": "obterPainel.empresa"
+      },
+      {
+        "organism": "acessosPessoas",
+        "reads": "obterPainel.acessos"
+      },
+      {
+        "organism": "pedidosLiberacao",
+        "reads": "listarPedidosLiberacao.pedidos"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "convidarPessoaCerta",
+        "refreshes": [
+          "obterPainel"
+        ]
+      }
+    ],
+    "selections": [],
+    "journeys": [
+      {
+        "step": "acompanharAcessos/listarPessoas",
+        "organisms": [
+          "acessosPessoas"
+        ],
+        "endpoints": [
+          "obterPainel"
+        ],
+        "continuesIn": "pessoas"
+      },
+      {
+        "step": "acompanharAcessos/verSituacao",
+        "organisms": [
+          "acessosPessoas"
+        ],
+        "endpoints": [
+          "obterPainel"
+        ]
+      },
+      {
+        "step": "liberarAcesso/localizarPessoa",
+        "organisms": [
+          "pedidosLiberacao"
+        ],
+        "endpoints": [
+          "listarPedidosLiberacao"
+        ]
+      },
+      {
+        "step": "liberarAcesso/conferirCadastro",
+        "organisms": [
+          "pedidosLiberacao"
+        ],
+        "endpoints": [
+          "listarPedidosLiberacao"
+        ]
+      },
+      {
+        "step": "liberarAcesso/convidarPessoaCerta",
+        "organisms": [
+          "pedidosLiberacao"
+        ],
+        "endpoints": [
+          "convidarPessoaCerta"
+        ]
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "listarPedidosLiberacao",
+        "state": "listarPedidosLiberacao.pedidos",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "convidarPessoaCerta",
+        "state": "listarPedidosLiberacao.pedidos",
+        "mode": "upsert"
+      }
+    ]
+  }
+}
