@@ -40,15 +40,15 @@
     },
     {
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "sha256": "sha256:a224047c2c76f5fd852abb33176235b44e6391be60da1e1aeaa0587703039b50",
-      "bytes": 5645,
+      "sha256": "sha256:753eaeb167c2bfbea48fac99d2ae0326c12165cff3486b923513215606b6c85b",
+      "bytes": 5835,
       "schemaVersion": "",
       "state": "present"
     },
     {
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "sha256": "sha256:2b8935baf069df165febbfa4869431c3db4f585bb886fd060cc7e7b7336e0a06",
-      "bytes": 17048,
+      "sha256": "sha256:339a6d697935f8983fb276165638635ddfaf1a0ba441ded7d57a0694cc34f294",
+      "bytes": 15318,
       "schemaVersion": "",
       "state": "present"
     },
@@ -302,26 +302,26 @@
       {
         "pageId": "meus_avisos",
         "routes": [
-          "tarefas.meus_avisos.buscarAvisos",
-          "tarefas.meus_avisos.carregarMeusAvisos",
-          "tarefas.meus_avisos.obterAviso"
+          "tarefas.meus_avisos.qryAvisoPorId",
+          "tarefas.meus_avisos.qryListarMeusAvisos",
+          "tarefas.meus_avisos.qryPaginaMeusAvisos"
         ]
       },
       {
         "pageId": "minhas_tarefas",
         "routes": [
-          "tarefas.minhas_tarefas.abrirTarefa",
-          "tarefas.minhas_tarefas.aceitarTarefa",
-          "tarefas.minhas_tarefas.buscarMembros",
-          "tarefas.minhas_tarefas.cancelarTarefa",
-          "tarefas.minhas_tarefas.carregarMinhasTarefas",
-          "tarefas.minhas_tarefas.criarTarefa",
-          "tarefas.minhas_tarefas.devolverTarefa",
-          "tarefas.minhas_tarefas.enviarParaRevisao",
-          "tarefas.minhas_tarefas.iniciarTarefa",
-          "tarefas.minhas_tarefas.listarMinhasTarefas",
-          "tarefas.minhas_tarefas.salvarChecklist",
-          "tarefas.minhas_tarefas.salvarEdicao"
+          "tarefas.minhas_tarefas.cmdAceitar",
+          "tarefas.minhas_tarefas.cmdCancelar",
+          "tarefas.minhas_tarefas.cmdCriarTarefa",
+          "tarefas.minhas_tarefas.cmdDevolver",
+          "tarefas.minhas_tarefas.cmdEnviarRevisao",
+          "tarefas.minhas_tarefas.cmdIniciar",
+          "tarefas.minhas_tarefas.cmdSalvarChecklist",
+          "tarefas.minhas_tarefas.cmdSalvarEdicao",
+          "tarefas.minhas_tarefas.qryBuscarMembros",
+          "tarefas.minhas_tarefas.qryListasAtivas",
+          "tarefas.minhas_tarefas.qryMinhasTarefas",
+          "tarefas.minhas_tarefas.qryTarefa"
         ]
       },
       {
@@ -1591,7 +1591,51 @@
         ]
       },
       {
-        "route": "tarefas.meus_avisos.buscarAvisos",
+        "route": "tarefas.meus_avisos.qryAvisoPorId",
+        "pageId": "meus_avisos",
+        "kind": "qry",
+        "writes": "",
+        "outputs": [],
+        "params": [
+          {
+            "name": "id",
+            "target": "aviso"
+          }
+        ],
+        "uses": [],
+        "unresolved": [
+          {
+            "path": "output.aviso",
+            "reason": "Interface AvisoDetalhe: fields id, status are fields of AvisoVencimento, Tarefa; the types do not say which.",
+            "kind": "entity",
+            "candidates": [
+              "AvisoVencimento",
+              "Tarefa",
+              "none"
+            ]
+          },
+          {
+            "path": "output.aviso.details.tarefas.situacaoPrazo",
+            "reason": "Interface AvisoLinhaTarefa: field situacaoPrazo is not a field of any entity.",
+            "kind": "fieldPath",
+            "candidates": [
+              "details.tarefas.situacaoPrazo",
+              "none"
+            ]
+          },
+          {
+            "path": "input.id",
+            "reason": "Input id names a field of more than one output entity; the types do not say which it filters.",
+            "kind": "filterField",
+            "candidates": [
+              "aviso:id",
+              "none"
+            ]
+          }
+        ]
+      },
+      {
+        "route": "tarefas.meus_avisos.qryListarMeusAvisos",
         "pageId": "meus_avisos",
         "kind": "qry",
         "writes": "",
@@ -1648,7 +1692,7 @@
         ]
       },
       {
-        "route": "tarefas.meus_avisos.carregarMeusAvisos",
+        "route": "tarefas.meus_avisos.qryPaginaMeusAvisos",
         "pageId": "meus_avisos",
         "kind": "qry",
         "writes": "",
@@ -1687,132 +1731,20 @@
               "Tarefa",
               "none"
             ]
-          }
-        ]
-      },
-      {
-        "route": "tarefas.meus_avisos.obterAviso",
-        "pageId": "meus_avisos",
-        "kind": "qry",
-        "writes": "",
-        "outputs": [],
-        "params": [
-          {
-            "name": "avisoId",
-            "target": "aviso"
-          }
-        ],
-        "uses": [],
-        "unresolved": [
-          {
-            "path": "output.aviso",
-            "reason": "Interface AvisoDetalhe: fields id, status are fields of AvisoVencimento, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "Tarefa",
-              "none"
-            ]
           },
           {
-            "path": "input.avisoId",
-            "reason": "Input avisoId is not the last segment of any field of the output entities; it filters one of their text fields.",
-            "kind": "filterField",
-            "candidates": [
-              "aviso:details.progressoChecklist",
-              "aviso:titulo",
-              "none"
-            ]
-          }
-        ]
-      },
-      {
-        "route": "tarefas.minhas_tarefas.abrirTarefa",
-        "pageId": "minhas_tarefas",
-        "kind": "qry",
-        "writes": "",
-        "outputs": [
-          {
-            "key": "tarefa",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "tarefa.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "tarefa",
-            "relationship": "tarefaLista"
-          },
-          {
-            "key": "tarefa.itensChecklist",
-            "entity": "ItemChecklist",
-            "many": true,
-            "parent": "tarefa",
-            "relationship": "itemChecklistTarefa"
-          }
-        ],
-        "params": [
-          {
-            "name": "id",
-            "target": "tarefa",
-            "field": "id"
-          }
-        ],
-        "uses": [
-          "getTarefa",
-          "getLista",
-          "listItemChecklist"
-        ],
-        "unresolved": [
-          {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+            "path": "output.avisoAtual.details.tarefas.situacaoPrazo",
+            "reason": "Interface AvisoLinhaTarefa: field situacaoPrazo is not a field of any entity.",
             "kind": "fieldPath",
             "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "details.tarefas.situacaoPrazo",
               "none"
             ]
           }
         ]
       },
       {
-        "route": "tarefas.minhas_tarefas.aceitarTarefa",
+        "route": "tarefas.minhas_tarefas.cmdAceitar",
         "pageId": "minhas_tarefas",
         "kind": "cmd",
         "writes": "Tarefa.aceitar",
@@ -1820,7 +1752,11 @@
           {
             "key": "tarefa",
             "entity": "Tarefa",
-            "many": false
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
           },
           {
             "key": "tarefa.lista",
@@ -1830,171 +1766,57 @@
             "relationship": "tarefaLista"
           },
           {
-            "key": "tarefa.itensChecklist",
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
             "entity": "ItemChecklist",
             "many": true,
             "parent": "tarefa",
             "relationship": "itemChecklistTarefa"
-          },
-          {
-            "key": "resumo",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "resumo.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "resumo",
-            "relationship": "tarefaLista"
           }
         ],
         "params": [],
         "uses": [
           "aceitar",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "unresolved": [
           {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
             "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           }
         ]
       },
       {
-        "route": "tarefas.minhas_tarefas.buscarMembros",
-        "pageId": "minhas_tarefas",
-        "kind": "qry",
-        "writes": "",
-        "outputs": [],
-        "params": [
-          {
-            "name": "nome",
-            "target": "membros"
-          }
-        ],
-        "uses": [],
-        "unresolved": [
-          {
-            "path": "output.membros",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.membros.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "input.nome",
-            "reason": "Input nome names a field of more than one output entity; the types do not say which it filters.",
-            "kind": "filterField",
-            "candidates": [
-              "membros:nome",
-              "none"
-            ]
-          }
-        ]
-      },
-      {
-        "route": "tarefas.minhas_tarefas.cancelarTarefa",
+        "route": "tarefas.minhas_tarefas.cmdCancelar",
         "pageId": "minhas_tarefas",
         "kind": "cmd",
         "writes": "Tarefa.cancelar",
@@ -2002,7 +1824,11 @@
           {
             "key": "tarefa",
             "entity": "Tarefa",
-            "many": false
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
           },
           {
             "key": "tarefa.lista",
@@ -2012,230 +1838,57 @@
             "relationship": "tarefaLista"
           },
           {
-            "key": "tarefa.itensChecklist",
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
             "entity": "ItemChecklist",
             "many": true,
             "parent": "tarefa",
             "relationship": "itemChecklistTarefa"
-          },
-          {
-            "key": "resumo",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "resumo.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "resumo",
-            "relationship": "tarefaLista"
           }
         ],
         "params": [],
         "uses": [
           "cancelar",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "unresolved": [
           {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
             "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           }
         ]
       },
       {
-        "route": "tarefas.minhas_tarefas.carregarMinhasTarefas",
-        "pageId": "minhas_tarefas",
-        "kind": "qry",
-        "writes": "",
-        "outputs": [
-          {
-            "key": "tarefas",
-            "entity": "Tarefa",
-            "many": true,
-            "page": "page",
-            "pageSize": "pageSize",
-            "hasMore": "hasMore"
-          },
-          {
-            "key": "tarefas.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "tarefas",
-            "relationship": "tarefaLista"
-          },
-          {
-            "key": "listas",
-            "entity": "Lista",
-            "many": true
-          }
-        ],
-        "params": [
-          {
-            "name": "page",
-            "target": "tarefas",
-            "pages": "tarefas"
-          },
-          {
-            "name": "pageSize",
-            "target": "tarefas",
-            "pages": "tarefas"
-          },
-          {
-            "name": "filtro",
-            "target": ""
-          }
-        ],
-        "uses": [
-          "listTarefa",
-          "getLista",
-          "listLista"
-        ],
-        "unresolved": [
-          {
-            "path": "output.tarefas.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefas.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefas.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefas.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "input.filtro",
-            "reason": "Input filtro is not the last segment of any field of the output entities; it filters one of their text fields.",
-            "kind": "filterField",
-            "candidates": [
-              "listas:nome",
-              "tarefas:details.progressoChecklist",
-              "tarefas:titulo",
-              "none"
-            ]
-          }
-        ]
-      },
-      {
-        "route": "tarefas.minhas_tarefas.criarTarefa",
+        "route": "tarefas.minhas_tarefas.cmdCriarTarefa",
         "pageId": "minhas_tarefas",
         "kind": "cmd",
         "writes": "Tarefa.create",
@@ -2243,7 +1896,11 @@
           {
             "key": "tarefa",
             "entity": "Tarefa",
-            "many": false
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
           },
           {
             "key": "tarefa.lista",
@@ -2253,124 +1910,57 @@
             "relationship": "tarefaLista"
           },
           {
-            "key": "tarefa.itensChecklist",
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
             "entity": "ItemChecklist",
             "many": true,
             "parent": "tarefa",
             "relationship": "itemChecklistTarefa"
-          },
-          {
-            "key": "resumo",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "resumo.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "resumo",
-            "relationship": "tarefaLista"
           }
         ],
         "params": [],
         "uses": [
           "createTarefa",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "unresolved": [
           {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
             "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           }
         ]
       },
       {
-        "route": "tarefas.minhas_tarefas.devolverTarefa",
+        "route": "tarefas.minhas_tarefas.cmdDevolver",
         "pageId": "minhas_tarefas",
         "kind": "cmd",
         "writes": "Tarefa.devolver",
@@ -2378,7 +1968,11 @@
           {
             "key": "tarefa",
             "entity": "Tarefa",
-            "many": false
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
           },
           {
             "key": "tarefa.lista",
@@ -2388,124 +1982,57 @@
             "relationship": "tarefaLista"
           },
           {
-            "key": "tarefa.itensChecklist",
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
             "entity": "ItemChecklist",
             "many": true,
             "parent": "tarefa",
             "relationship": "itemChecklistTarefa"
-          },
-          {
-            "key": "resumo",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "resumo.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "resumo",
-            "relationship": "tarefaLista"
           }
         ],
         "params": [],
         "uses": [
           "devolver",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "unresolved": [
           {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
             "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           }
         ]
       },
       {
-        "route": "tarefas.minhas_tarefas.enviarParaRevisao",
+        "route": "tarefas.minhas_tarefas.cmdEnviarRevisao",
         "pageId": "minhas_tarefas",
         "kind": "cmd",
         "writes": "Tarefa.enviarParaRevisao",
@@ -2513,7 +2040,11 @@
           {
             "key": "tarefa",
             "entity": "Tarefa",
-            "many": false
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
           },
           {
             "key": "tarefa.lista",
@@ -2523,124 +2054,57 @@
             "relationship": "tarefaLista"
           },
           {
-            "key": "tarefa.itensChecklist",
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
             "entity": "ItemChecklist",
             "many": true,
             "parent": "tarefa",
             "relationship": "itemChecklistTarefa"
-          },
-          {
-            "key": "resumo",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "resumo.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "resumo",
-            "relationship": "tarefaLista"
           }
         ],
         "params": [],
         "uses": [
           "enviarParaRevisao",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "unresolved": [
           {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
             "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           }
         ]
       },
       {
-        "route": "tarefas.minhas_tarefas.iniciarTarefa",
+        "route": "tarefas.minhas_tarefas.cmdIniciar",
         "pageId": "minhas_tarefas",
         "kind": "cmd",
         "writes": "Tarefa.iniciar",
@@ -2648,7 +2112,11 @@
           {
             "key": "tarefa",
             "entity": "Tarefa",
-            "many": false
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
           },
           {
             "key": "tarefa.lista",
@@ -2658,124 +2126,253 @@
             "relationship": "tarefaLista"
           },
           {
-            "key": "tarefa.itensChecklist",
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
             "entity": "ItemChecklist",
             "many": true,
             "parent": "tarefa",
             "relationship": "itemChecklistTarefa"
-          },
-          {
-            "key": "resumo",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "resumo.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "resumo",
-            "relationship": "tarefaLista"
           }
         ],
         "params": [],
         "uses": [
           "iniciar",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "unresolved": [
           {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
             "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           }
         ]
       },
       {
-        "route": "tarefas.minhas_tarefas.listarMinhasTarefas",
+        "route": "tarefas.minhas_tarefas.cmdSalvarChecklist",
+        "pageId": "minhas_tarefas",
+        "kind": "cmd",
+        "writes": "ItemChecklist.update",
+        "outputs": [
+          {
+            "key": "tarefa",
+            "entity": "Tarefa",
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
+          },
+          {
+            "key": "tarefa.lista",
+            "entity": "Lista",
+            "many": false,
+            "parent": "tarefa",
+            "relationship": "tarefaLista"
+          },
+          {
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
+            "entity": "ItemChecklist",
+            "many": true,
+            "parent": "tarefa",
+            "relationship": "itemChecklistTarefa"
+          }
+        ],
+        "params": [],
+        "uses": [
+          "updateItemChecklist",
+          "getTarefa",
+          "getLista",
+          "getMembroEquipe"
+        ],
+        "unresolved": [
+          {
+            "path": "output.tarefa.criador",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
+            "candidates": [
+              "tarefaCriador",
+              "tarefaResponsavel",
+              "none"
+            ]
+          },
+          {
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
+            "candidates": [
+              "tarefaCriador",
+              "tarefaResponsavel",
+              "none"
+            ]
+          }
+        ]
+      },
+      {
+        "route": "tarefas.minhas_tarefas.cmdSalvarEdicao",
+        "pageId": "minhas_tarefas",
+        "kind": "cmd",
+        "writes": "Tarefa.update",
+        "outputs": [
+          {
+            "key": "tarefa",
+            "entity": "Tarefa",
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
+          },
+          {
+            "key": "tarefa.lista",
+            "entity": "Lista",
+            "many": false,
+            "parent": "tarefa",
+            "relationship": "tarefaLista"
+          },
+          {
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
+            "entity": "ItemChecklist",
+            "many": true,
+            "parent": "tarefa",
+            "relationship": "itemChecklistTarefa"
+          }
+        ],
+        "params": [],
+        "uses": [
+          "updateTarefa",
+          "getLista",
+          "getMembroEquipe",
+          "listItemChecklist"
+        ],
+        "unresolved": [
+          {
+            "path": "output.tarefa.criador",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
+            "candidates": [
+              "tarefaCriador",
+              "tarefaResponsavel",
+              "none"
+            ]
+          },
+          {
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
+            "candidates": [
+              "tarefaCriador",
+              "tarefaResponsavel",
+              "none"
+            ]
+          }
+        ]
+      },
+      {
+        "route": "tarefas.minhas_tarefas.qryBuscarMembros",
+        "pageId": "minhas_tarefas",
+        "kind": "qry",
+        "writes": "",
+        "outputs": [
+          {
+            "key": "membros",
+            "entity": "MembroEquipe",
+            "many": true
+          }
+        ],
+        "params": [
+          {
+            "name": "termo",
+            "target": "membros"
+          }
+        ],
+        "uses": [
+          "listMembroEquipe"
+        ],
+        "unresolved": [
+          {
+            "path": "input.termo",
+            "reason": "Input termo is not the last segment of any field of the output entities; it filters one of their text fields.",
+            "kind": "filterField",
+            "candidates": [
+              "membros:details.identification.countryCode",
+              "membros:details.identification.name",
+              "membros:details.identification.tags",
+              "none"
+            ]
+          }
+        ]
+      },
+      {
+        "route": "tarefas.minhas_tarefas.qryListasAtivas",
+        "pageId": "minhas_tarefas",
+        "kind": "qry",
+        "writes": "",
+        "outputs": [
+          {
+            "key": "listas",
+            "entity": "Lista",
+            "many": true
+          }
+        ],
+        "params": [],
+        "uses": [
+          "listLista"
+        ]
+      },
+      {
+        "route": "tarefas.minhas_tarefas.qryMinhasTarefas",
         "pageId": "minhas_tarefas",
         "kind": "qry",
         "writes": "",
@@ -2794,6 +2391,18 @@
             "many": false,
             "parent": "tarefas",
             "relationship": "tarefaLista"
+          },
+          {
+            "key": "tarefas.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefas"
+          },
+          {
+            "key": "tarefas.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefas"
           }
         ],
         "params": [
@@ -2810,58 +2419,31 @@
           {
             "name": "filtro",
             "target": "tarefas"
-          },
-          {
-            "name": "busca",
-            "target": "tarefas"
           }
         ],
         "uses": [
           "listTarefa",
-          "getLista"
+          "getLista",
+          "getMembroEquipe"
         ],
         "unresolved": [
           {
             "path": "output.tarefas.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefas.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
             "path": "output.tarefas.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefas.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
@@ -2874,29 +2456,23 @@
               "tarefas:titulo",
               "none"
             ]
-          },
-          {
-            "path": "input.busca",
-            "reason": "Input busca is not the last segment of any field of the output entities; it filters one of their text fields.",
-            "kind": "filterField",
-            "candidates": [
-              "tarefas:details.progressoChecklist",
-              "tarefas:titulo",
-              "none"
-            ]
           }
         ]
       },
       {
-        "route": "tarefas.minhas_tarefas.salvarChecklist",
+        "route": "tarefas.minhas_tarefas.qryTarefa",
         "pageId": "minhas_tarefas",
-        "kind": "cmd",
-        "writes": "ItemChecklist.update",
+        "kind": "qry",
+        "writes": "",
         "outputs": [
           {
             "key": "tarefa",
             "entity": "Tarefa",
-            "many": false
+            "many": false,
+            "computed": [
+              "souCriador",
+              "souResponsavel"
+            ]
           },
           {
             "key": "tarefa.lista",
@@ -2906,252 +2482,65 @@
             "relationship": "tarefaLista"
           },
           {
-            "key": "tarefa.itensChecklist",
+            "key": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "many": false,
+            "parent": "tarefa"
+          },
+          {
+            "key": "tarefa.checklist",
             "entity": "ItemChecklist",
             "many": true,
             "parent": "tarefa",
             "relationship": "itemChecklistTarefa"
-          },
-          {
-            "key": "resumo",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "resumo.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "resumo",
-            "relationship": "tarefaLista"
           }
         ],
-        "params": [],
+        "params": [
+          {
+            "name": "tarefaId",
+            "target": "tarefa"
+          }
+        ],
         "uses": [
-          "updateItemChecklist",
           "getTarefa",
-          "getLista"
-        ],
-        "unresolved": [
-          {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          }
-        ]
-      },
-      {
-        "route": "tarefas.minhas_tarefas.salvarEdicao",
-        "pageId": "minhas_tarefas",
-        "kind": "cmd",
-        "writes": "Tarefa.update",
-        "outputs": [
-          {
-            "key": "tarefa",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "tarefa.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "tarefa",
-            "relationship": "tarefaLista"
-          },
-          {
-            "key": "tarefa.itensChecklist",
-            "entity": "ItemChecklist",
-            "many": true,
-            "parent": "tarefa",
-            "relationship": "itemChecklistTarefa"
-          },
-          {
-            "key": "resumo",
-            "entity": "Tarefa",
-            "many": false
-          },
-          {
-            "key": "resumo.lista",
-            "entity": "Lista",
-            "many": false,
-            "parent": "resumo",
-            "relationship": "tarefaLista"
-          }
-        ],
-        "params": [],
-        "uses": [
-          "updateTarefa",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "unresolved": [
           {
-            "path": "output.tarefa.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.tarefa.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
             "path": "output.tarefa.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
-            "path": "output.tarefa.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
+            "path": "output.tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+            "kind": "relationship",
             "candidates": [
-              "details.identification.name",
+              "tarefaCriador",
+              "tarefaResponsavel",
               "none"
             ]
           },
           {
-            "path": "output.resumo.responsavel",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
+            "path": "input.tarefaId",
+            "reason": "Input tarefaId is not the last segment of any field of the output entities; it filters one of their text fields.",
+            "kind": "filterField",
             "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.responsavel.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador",
-            "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-            "kind": "entity",
-            "candidates": [
-              "AvisoVencimento",
-              "ItemChecklist",
-              "Lista",
-              "MembroEquipe",
-              "Tarefa",
-              "none"
-            ]
-          },
-          {
-            "path": "output.resumo.criador.details.identification.name",
-            "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-            "kind": "fieldPath",
-            "candidates": [
-              "details.identification.name",
+              "tarefa:details.progressoChecklist",
+              "tarefa:titulo",
               "none"
             ]
           }
@@ -3554,7 +2943,7 @@
         "identity": "aceitar",
         "routes": [
           "tarefas.inicio_membro.aceitarEntrega",
-          "tarefas.minhas_tarefas.aceitarTarefa"
+          "tarefas.minhas_tarefas.cmdAceitar"
         ]
       },
       {
@@ -3566,7 +2955,7 @@
         "existing": "",
         "identity": "cancelar",
         "routes": [
-          "tarefas.minhas_tarefas.cancelarTarefa",
+          "tarefas.minhas_tarefas.cmdCancelar",
           "tarefas.tarefas_equipe.cancelarTarefa"
         ]
       },
@@ -3600,7 +2989,7 @@
         "existing": "",
         "identity": "createTarefa",
         "routes": [
-          "tarefas.minhas_tarefas.criarTarefa"
+          "tarefas.minhas_tarefas.cmdCriarTarefa"
         ]
       },
       {
@@ -3613,7 +3002,7 @@
         "identity": "devolver",
         "routes": [
           "tarefas.inicio_membro.devolverComMotivo",
-          "tarefas.minhas_tarefas.devolverTarefa"
+          "tarefas.minhas_tarefas.cmdDevolver"
         ]
       },
       {
@@ -3626,7 +3015,7 @@
         "identity": "enviarParaRevisao",
         "routes": [
           "tarefas.inicio_membro.enviarParaRevisao",
-          "tarefas.minhas_tarefas.enviarParaRevisao"
+          "tarefas.minhas_tarefas.cmdEnviarRevisao"
         ]
       },
       {
@@ -3643,18 +3032,37 @@
           "tarefas.inicio_membro.devolverComMotivo",
           "tarefas.inicio_membro.enviarParaRevisao",
           "tarefas.inicio_membro.iniciarTarefa",
-          "tarefas.minhas_tarefas.abrirTarefa",
-          "tarefas.minhas_tarefas.aceitarTarefa",
-          "tarefas.minhas_tarefas.cancelarTarefa",
-          "tarefas.minhas_tarefas.carregarMinhasTarefas",
-          "tarefas.minhas_tarefas.criarTarefa",
-          "tarefas.minhas_tarefas.devolverTarefa",
-          "tarefas.minhas_tarefas.enviarParaRevisao",
-          "tarefas.minhas_tarefas.iniciarTarefa",
-          "tarefas.minhas_tarefas.listarMinhasTarefas",
-          "tarefas.minhas_tarefas.salvarChecklist",
-          "tarefas.minhas_tarefas.salvarEdicao",
+          "tarefas.minhas_tarefas.cmdAceitar",
+          "tarefas.minhas_tarefas.cmdCancelar",
+          "tarefas.minhas_tarefas.cmdCriarTarefa",
+          "tarefas.minhas_tarefas.cmdDevolver",
+          "tarefas.minhas_tarefas.cmdEnviarRevisao",
+          "tarefas.minhas_tarefas.cmdIniciar",
+          "tarefas.minhas_tarefas.cmdSalvarChecklist",
+          "tarefas.minhas_tarefas.cmdSalvarEdicao",
+          "tarefas.minhas_tarefas.qryMinhasTarefas",
+          "tarefas.minhas_tarefas.qryTarefa",
           "tarefas.tarefas_equipe.listarTarefasEquipe"
+        ]
+      },
+      {
+        "usecaseId": "getMembroEquipe",
+        "entity": "MembroEquipe",
+        "operation": "get",
+        "status": "toCreate",
+        "existing": "",
+        "identity": "getMembroEquipe",
+        "routes": [
+          "tarefas.minhas_tarefas.cmdAceitar",
+          "tarefas.minhas_tarefas.cmdCancelar",
+          "tarefas.minhas_tarefas.cmdCriarTarefa",
+          "tarefas.minhas_tarefas.cmdDevolver",
+          "tarefas.minhas_tarefas.cmdEnviarRevisao",
+          "tarefas.minhas_tarefas.cmdIniciar",
+          "tarefas.minhas_tarefas.cmdSalvarChecklist",
+          "tarefas.minhas_tarefas.cmdSalvarEdicao",
+          "tarefas.minhas_tarefas.qryMinhasTarefas",
+          "tarefas.minhas_tarefas.qryTarefa"
         ]
       },
       {
@@ -3665,8 +3073,8 @@
         "existing": "",
         "identity": "getTarefa",
         "routes": [
-          "tarefas.minhas_tarefas.abrirTarefa",
-          "tarefas.minhas_tarefas.salvarChecklist",
+          "tarefas.minhas_tarefas.cmdSalvarChecklist",
+          "tarefas.minhas_tarefas.qryTarefa",
           "tarefas.tarefas_equipe.obterTarefa"
         ]
       },
@@ -3680,7 +3088,7 @@
         "identity": "iniciar",
         "routes": [
           "tarefas.inicio_membro.iniciarTarefa",
-          "tarefas.minhas_tarefas.iniciarTarefa"
+          "tarefas.minhas_tarefas.cmdIniciar"
         ]
       },
       {
@@ -3691,8 +3099,8 @@
         "existing": "",
         "identity": "listAvisoVencimento",
         "routes": [
-          "tarefas.meus_avisos.buscarAvisos",
-          "tarefas.meus_avisos.carregarMeusAvisos"
+          "tarefas.meus_avisos.qryListarMeusAvisos",
+          "tarefas.meus_avisos.qryPaginaMeusAvisos"
         ]
       },
       {
@@ -3703,14 +3111,14 @@
         "existing": "",
         "identity": "listItemChecklist",
         "routes": [
-          "tarefas.minhas_tarefas.abrirTarefa",
-          "tarefas.minhas_tarefas.aceitarTarefa",
-          "tarefas.minhas_tarefas.cancelarTarefa",
-          "tarefas.minhas_tarefas.criarTarefa",
-          "tarefas.minhas_tarefas.devolverTarefa",
-          "tarefas.minhas_tarefas.enviarParaRevisao",
-          "tarefas.minhas_tarefas.iniciarTarefa",
-          "tarefas.minhas_tarefas.salvarEdicao",
+          "tarefas.minhas_tarefas.cmdAceitar",
+          "tarefas.minhas_tarefas.cmdCancelar",
+          "tarefas.minhas_tarefas.cmdCriarTarefa",
+          "tarefas.minhas_tarefas.cmdDevolver",
+          "tarefas.minhas_tarefas.cmdEnviarRevisao",
+          "tarefas.minhas_tarefas.cmdIniciar",
+          "tarefas.minhas_tarefas.cmdSalvarEdicao",
+          "tarefas.minhas_tarefas.qryTarefa",
           "tarefas.tarefas_equipe.cancelarTarefa",
           "tarefas.tarefas_equipe.obterTarefa",
           "tarefas.tarefas_equipe.reatribuirTarefa"
@@ -3727,8 +3135,19 @@
           "tarefas.inicio_gestor.obterPanoramaEquipe",
           "tarefas.listas.buscarListas",
           "tarefas.listas.listarListas",
-          "tarefas.minhas_tarefas.carregarMinhasTarefas",
+          "tarefas.minhas_tarefas.qryListasAtivas",
           "tarefas.tarefas_equipe.carregarOpcoesEquipe"
+        ]
+      },
+      {
+        "usecaseId": "listMembroEquipe",
+        "entity": "MembroEquipe",
+        "operation": "list",
+        "status": "toCreate",
+        "existing": "",
+        "identity": "listMembroEquipe",
+        "routes": [
+          "tarefas.minhas_tarefas.qryBuscarMembros"
         ]
       },
       {
@@ -3741,8 +3160,7 @@
         "routes": [
           "tarefas.inicio_gestor.listarTarefasParaAcao",
           "tarefas.inicio_membro.carregarInicio",
-          "tarefas.minhas_tarefas.carregarMinhasTarefas",
-          "tarefas.minhas_tarefas.listarMinhasTarefas",
+          "tarefas.minhas_tarefas.qryMinhasTarefas",
           "tarefas.tarefas_equipe.listarTarefasEquipe"
         ]
       },
@@ -3754,7 +3172,7 @@
         "existing": "",
         "identity": "updateItemChecklist",
         "routes": [
-          "tarefas.minhas_tarefas.salvarChecklist"
+          "tarefas.minhas_tarefas.cmdSalvarChecklist"
         ]
       },
       {
@@ -3787,7 +3205,7 @@
         "existing": "",
         "identity": "updateTarefa",
         "routes": [
-          "tarefas.minhas_tarefas.salvarEdicao",
+          "tarefas.minhas_tarefas.cmdSalvarEdicao",
           "tarefas.tarefas_equipe.reatribuirTarefa"
         ]
       }
@@ -3936,9 +3354,9 @@
       "action": "create",
       "identity": "meus_avisos",
       "ownerRefs": [
-        "endpoint:tarefas.meus_avisos.buscarAvisos",
-        "endpoint:tarefas.meus_avisos.carregarMeusAvisos",
-        "endpoint:tarefas.meus_avisos.obterAviso"
+        "endpoint:tarefas.meus_avisos.qryAvisoPorId",
+        "endpoint:tarefas.meus_avisos.qryListarMeusAvisos",
+        "endpoint:tarefas.meus_avisos.qryPaginaMeusAvisos"
       ],
       "dependsOn": [
         "requestService:meus_avisos",
@@ -3953,34 +3371,36 @@
       "action": "create",
       "identity": "minhas_tarefas",
       "ownerRefs": [
-        "endpoint:tarefas.minhas_tarefas.abrirTarefa",
-        "endpoint:tarefas.minhas_tarefas.aceitarTarefa",
-        "endpoint:tarefas.minhas_tarefas.buscarMembros",
-        "endpoint:tarefas.minhas_tarefas.cancelarTarefa",
-        "endpoint:tarefas.minhas_tarefas.carregarMinhasTarefas",
-        "endpoint:tarefas.minhas_tarefas.criarTarefa",
-        "endpoint:tarefas.minhas_tarefas.devolverTarefa",
-        "endpoint:tarefas.minhas_tarefas.enviarParaRevisao",
-        "endpoint:tarefas.minhas_tarefas.iniciarTarefa",
-        "endpoint:tarefas.minhas_tarefas.listarMinhasTarefas",
-        "endpoint:tarefas.minhas_tarefas.salvarChecklist",
-        "endpoint:tarefas.minhas_tarefas.salvarEdicao"
+        "endpoint:tarefas.minhas_tarefas.cmdAceitar",
+        "endpoint:tarefas.minhas_tarefas.cmdCancelar",
+        "endpoint:tarefas.minhas_tarefas.cmdCriarTarefa",
+        "endpoint:tarefas.minhas_tarefas.cmdDevolver",
+        "endpoint:tarefas.minhas_tarefas.cmdEnviarRevisao",
+        "endpoint:tarefas.minhas_tarefas.cmdIniciar",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarChecklist",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarEdicao",
+        "endpoint:tarefas.minhas_tarefas.qryBuscarMembros",
+        "endpoint:tarefas.minhas_tarefas.qryListasAtivas",
+        "endpoint:tarefas.minhas_tarefas.qryMinhasTarefas",
+        "endpoint:tarefas.minhas_tarefas.qryTarefa"
       ],
       "dependsOn": [
         "requestService:minhas_tarefas",
-        "usecase:getTarefa",
-        "usecase:getLista",
-        "usecase:listItemChecklist",
         "usecase:aceitar",
+        "usecase:getLista",
+        "usecase:getMembroEquipe",
+        "usecase:listItemChecklist",
         "usecase:cancelar",
-        "usecase:listTarefa",
-        "usecase:listLista",
         "usecase:createTarefa",
         "usecase:devolver",
         "usecase:enviarParaRevisao",
         "usecase:iniciar",
         "usecase:updateItemChecklist",
+        "usecase:getTarefa",
         "usecase:updateTarefa",
+        "usecase:listMembroEquipe",
+        "usecase:listLista",
+        "usecase:listTarefa",
         "scope:access"
       ]
     },
@@ -4325,9 +3745,9 @@
       "action": "create",
       "identity": "meus_avisos",
       "ownerRefs": [
-        "endpoint:tarefas.meus_avisos.buscarAvisos",
-        "endpoint:tarefas.meus_avisos.carregarMeusAvisos",
-        "endpoint:tarefas.meus_avisos.obterAviso"
+        "endpoint:tarefas.meus_avisos.qryAvisoPorId",
+        "endpoint:tarefas.meus_avisos.qryListarMeusAvisos",
+        "endpoint:tarefas.meus_avisos.qryPaginaMeusAvisos"
       ],
       "dependsOn": [
         "usecase:listAvisoVencimento"
@@ -4340,33 +3760,35 @@
       "action": "create",
       "identity": "minhas_tarefas",
       "ownerRefs": [
-        "endpoint:tarefas.minhas_tarefas.abrirTarefa",
-        "endpoint:tarefas.minhas_tarefas.aceitarTarefa",
-        "endpoint:tarefas.minhas_tarefas.buscarMembros",
-        "endpoint:tarefas.minhas_tarefas.cancelarTarefa",
-        "endpoint:tarefas.minhas_tarefas.carregarMinhasTarefas",
-        "endpoint:tarefas.minhas_tarefas.criarTarefa",
-        "endpoint:tarefas.minhas_tarefas.devolverTarefa",
-        "endpoint:tarefas.minhas_tarefas.enviarParaRevisao",
-        "endpoint:tarefas.minhas_tarefas.iniciarTarefa",
-        "endpoint:tarefas.minhas_tarefas.listarMinhasTarefas",
-        "endpoint:tarefas.minhas_tarefas.salvarChecklist",
-        "endpoint:tarefas.minhas_tarefas.salvarEdicao"
+        "endpoint:tarefas.minhas_tarefas.cmdAceitar",
+        "endpoint:tarefas.minhas_tarefas.cmdCancelar",
+        "endpoint:tarefas.minhas_tarefas.cmdCriarTarefa",
+        "endpoint:tarefas.minhas_tarefas.cmdDevolver",
+        "endpoint:tarefas.minhas_tarefas.cmdEnviarRevisao",
+        "endpoint:tarefas.minhas_tarefas.cmdIniciar",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarChecklist",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarEdicao",
+        "endpoint:tarefas.minhas_tarefas.qryBuscarMembros",
+        "endpoint:tarefas.minhas_tarefas.qryListasAtivas",
+        "endpoint:tarefas.minhas_tarefas.qryMinhasTarefas",
+        "endpoint:tarefas.minhas_tarefas.qryTarefa"
       ],
       "dependsOn": [
-        "usecase:getTarefa",
-        "usecase:getLista",
-        "usecase:listItemChecklist",
         "usecase:aceitar",
+        "usecase:getLista",
+        "usecase:getMembroEquipe",
+        "usecase:listItemChecklist",
         "usecase:cancelar",
-        "usecase:listTarefa",
-        "usecase:listLista",
         "usecase:createTarefa",
         "usecase:devolver",
         "usecase:enviarParaRevisao",
         "usecase:iniciar",
         "usecase:updateItemChecklist",
-        "usecase:updateTarefa"
+        "usecase:getTarefa",
+        "usecase:updateTarefa",
+        "usecase:listMembroEquipe",
+        "usecase:listLista",
+        "usecase:listTarefa"
       ]
     },
     {
@@ -4419,7 +3841,7 @@
       "ownerRefs": [
         "usecase:aceitar",
         "endpoint:tarefas.inicio_membro.aceitarEntrega",
-        "endpoint:tarefas.minhas_tarefas.aceitarTarefa"
+        "endpoint:tarefas.minhas_tarefas.cmdAceitar"
       ],
       "dependsOn": [
         "entity:Tarefa",
@@ -4435,7 +3857,7 @@
       "identity": "cancelar",
       "ownerRefs": [
         "usecase:cancelar",
-        "endpoint:tarefas.minhas_tarefas.cancelarTarefa",
+        "endpoint:tarefas.minhas_tarefas.cmdCancelar",
         "endpoint:tarefas.tarefas_equipe.cancelarTarefa"
       ],
       "dependsOn": [
@@ -4483,7 +3905,7 @@
       "identity": "createTarefa",
       "ownerRefs": [
         "usecase:createTarefa",
-        "endpoint:tarefas.minhas_tarefas.criarTarefa"
+        "endpoint:tarefas.minhas_tarefas.cmdCriarTarefa"
       ],
       "dependsOn": [
         "entity:Tarefa",
@@ -4500,7 +3922,7 @@
       "ownerRefs": [
         "usecase:devolver",
         "endpoint:tarefas.inicio_membro.devolverComMotivo",
-        "endpoint:tarefas.minhas_tarefas.devolverTarefa"
+        "endpoint:tarefas.minhas_tarefas.cmdDevolver"
       ],
       "dependsOn": [
         "entity:Tarefa",
@@ -4517,7 +3939,7 @@
       "ownerRefs": [
         "usecase:enviarParaRevisao",
         "endpoint:tarefas.inicio_membro.enviarParaRevisao",
-        "endpoint:tarefas.minhas_tarefas.enviarParaRevisao"
+        "endpoint:tarefas.minhas_tarefas.cmdEnviarRevisao"
       ],
       "dependsOn": [
         "entity:Tarefa",
@@ -4539,22 +3961,45 @@
         "endpoint:tarefas.inicio_membro.devolverComMotivo",
         "endpoint:tarefas.inicio_membro.enviarParaRevisao",
         "endpoint:tarefas.inicio_membro.iniciarTarefa",
-        "endpoint:tarefas.minhas_tarefas.abrirTarefa",
-        "endpoint:tarefas.minhas_tarefas.aceitarTarefa",
-        "endpoint:tarefas.minhas_tarefas.cancelarTarefa",
-        "endpoint:tarefas.minhas_tarefas.carregarMinhasTarefas",
-        "endpoint:tarefas.minhas_tarefas.criarTarefa",
-        "endpoint:tarefas.minhas_tarefas.devolverTarefa",
-        "endpoint:tarefas.minhas_tarefas.enviarParaRevisao",
-        "endpoint:tarefas.minhas_tarefas.iniciarTarefa",
-        "endpoint:tarefas.minhas_tarefas.listarMinhasTarefas",
-        "endpoint:tarefas.minhas_tarefas.salvarChecklist",
-        "endpoint:tarefas.minhas_tarefas.salvarEdicao",
+        "endpoint:tarefas.minhas_tarefas.cmdAceitar",
+        "endpoint:tarefas.minhas_tarefas.cmdCancelar",
+        "endpoint:tarefas.minhas_tarefas.cmdCriarTarefa",
+        "endpoint:tarefas.minhas_tarefas.cmdDevolver",
+        "endpoint:tarefas.minhas_tarefas.cmdEnviarRevisao",
+        "endpoint:tarefas.minhas_tarefas.cmdIniciar",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarChecklist",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarEdicao",
+        "endpoint:tarefas.minhas_tarefas.qryMinhasTarefas",
+        "endpoint:tarefas.minhas_tarefas.qryTarefa",
         "endpoint:tarefas.tarefas_equipe.listarTarefasEquipe"
       ],
       "dependsOn": [
         "entity:Lista",
         "port:ListaRepository",
+        "scope:access"
+      ]
+    },
+    {
+      "id": "usecase:getMembroEquipe",
+      "artifactType": "usecase",
+      "defPath": "l1/tarefas/layer_2_application/usecases/getMembroEquipe.defs.ts",
+      "action": "create",
+      "identity": "getMembroEquipe",
+      "ownerRefs": [
+        "usecase:getMembroEquipe",
+        "endpoint:tarefas.minhas_tarefas.cmdAceitar",
+        "endpoint:tarefas.minhas_tarefas.cmdCancelar",
+        "endpoint:tarefas.minhas_tarefas.cmdCriarTarefa",
+        "endpoint:tarefas.minhas_tarefas.cmdDevolver",
+        "endpoint:tarefas.minhas_tarefas.cmdEnviarRevisao",
+        "endpoint:tarefas.minhas_tarefas.cmdIniciar",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarChecklist",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarEdicao",
+        "endpoint:tarefas.minhas_tarefas.qryMinhasTarefas",
+        "endpoint:tarefas.minhas_tarefas.qryTarefa"
+      ],
+      "dependsOn": [
+        "entity:MembroEquipe",
         "scope:access"
       ]
     },
@@ -4566,8 +4011,8 @@
       "identity": "getTarefa",
       "ownerRefs": [
         "usecase:getTarefa",
-        "endpoint:tarefas.minhas_tarefas.abrirTarefa",
-        "endpoint:tarefas.minhas_tarefas.salvarChecklist",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarChecklist",
+        "endpoint:tarefas.minhas_tarefas.qryTarefa",
         "endpoint:tarefas.tarefas_equipe.obterTarefa"
       ],
       "dependsOn": [
@@ -4585,7 +4030,7 @@
       "ownerRefs": [
         "usecase:iniciar",
         "endpoint:tarefas.inicio_membro.iniciarTarefa",
-        "endpoint:tarefas.minhas_tarefas.iniciarTarefa"
+        "endpoint:tarefas.minhas_tarefas.cmdIniciar"
       ],
       "dependsOn": [
         "entity:Tarefa",
@@ -4601,8 +4046,8 @@
       "identity": "listAvisoVencimento",
       "ownerRefs": [
         "usecase:listAvisoVencimento",
-        "endpoint:tarefas.meus_avisos.buscarAvisos",
-        "endpoint:tarefas.meus_avisos.carregarMeusAvisos"
+        "endpoint:tarefas.meus_avisos.qryListarMeusAvisos",
+        "endpoint:tarefas.meus_avisos.qryPaginaMeusAvisos"
       ],
       "dependsOn": [
         "entity:AvisoVencimento",
@@ -4618,14 +4063,14 @@
       "identity": "listItemChecklist",
       "ownerRefs": [
         "usecase:listItemChecklist",
-        "endpoint:tarefas.minhas_tarefas.abrirTarefa",
-        "endpoint:tarefas.minhas_tarefas.aceitarTarefa",
-        "endpoint:tarefas.minhas_tarefas.cancelarTarefa",
-        "endpoint:tarefas.minhas_tarefas.criarTarefa",
-        "endpoint:tarefas.minhas_tarefas.devolverTarefa",
-        "endpoint:tarefas.minhas_tarefas.enviarParaRevisao",
-        "endpoint:tarefas.minhas_tarefas.iniciarTarefa",
-        "endpoint:tarefas.minhas_tarefas.salvarEdicao",
+        "endpoint:tarefas.minhas_tarefas.cmdAceitar",
+        "endpoint:tarefas.minhas_tarefas.cmdCancelar",
+        "endpoint:tarefas.minhas_tarefas.cmdCriarTarefa",
+        "endpoint:tarefas.minhas_tarefas.cmdDevolver",
+        "endpoint:tarefas.minhas_tarefas.cmdEnviarRevisao",
+        "endpoint:tarefas.minhas_tarefas.cmdIniciar",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarEdicao",
+        "endpoint:tarefas.minhas_tarefas.qryTarefa",
         "endpoint:tarefas.tarefas_equipe.cancelarTarefa",
         "endpoint:tarefas.tarefas_equipe.obterTarefa",
         "endpoint:tarefas.tarefas_equipe.reatribuirTarefa"
@@ -4647,12 +4092,27 @@
         "endpoint:tarefas.inicio_gestor.obterPanoramaEquipe",
         "endpoint:tarefas.listas.buscarListas",
         "endpoint:tarefas.listas.listarListas",
-        "endpoint:tarefas.minhas_tarefas.carregarMinhasTarefas",
+        "endpoint:tarefas.minhas_tarefas.qryListasAtivas",
         "endpoint:tarefas.tarefas_equipe.carregarOpcoesEquipe"
       ],
       "dependsOn": [
         "entity:Lista",
         "port:ListaRepository",
+        "scope:access"
+      ]
+    },
+    {
+      "id": "usecase:listMembroEquipe",
+      "artifactType": "usecase",
+      "defPath": "l1/tarefas/layer_2_application/usecases/listMembroEquipe.defs.ts",
+      "action": "create",
+      "identity": "listMembroEquipe",
+      "ownerRefs": [
+        "usecase:listMembroEquipe",
+        "endpoint:tarefas.minhas_tarefas.qryBuscarMembros"
+      ],
+      "dependsOn": [
+        "entity:MembroEquipe",
         "scope:access"
       ]
     },
@@ -4666,8 +4126,7 @@
         "usecase:listTarefa",
         "endpoint:tarefas.inicio_gestor.listarTarefasParaAcao",
         "endpoint:tarefas.inicio_membro.carregarInicio",
-        "endpoint:tarefas.minhas_tarefas.carregarMinhasTarefas",
-        "endpoint:tarefas.minhas_tarefas.listarMinhasTarefas",
+        "endpoint:tarefas.minhas_tarefas.qryMinhasTarefas",
         "endpoint:tarefas.tarefas_equipe.listarTarefasEquipe"
       ],
       "dependsOn": [
@@ -4684,7 +4143,7 @@
       "identity": "updateItemChecklist",
       "ownerRefs": [
         "usecase:updateItemChecklist",
-        "endpoint:tarefas.minhas_tarefas.salvarChecklist"
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarChecklist"
       ],
       "dependsOn": [
         "entity:ItemChecklist",
@@ -4731,7 +4190,7 @@
       "identity": "updateTarefa",
       "ownerRefs": [
         "usecase:updateTarefa",
-        "endpoint:tarefas.minhas_tarefas.salvarEdicao",
+        "endpoint:tarefas.minhas_tarefas.cmdSalvarEdicao",
         "endpoint:tarefas.tarefas_equipe.reatribuirTarefa"
       ],
       "dependsOn": [
@@ -4816,6 +4275,8 @@
       "identity": "MembroEquipe",
       "ownerRefs": [
         "usecase:createMembroEquipe",
+        "usecase:getMembroEquipe",
+        "usecase:listMembroEquipe",
         "usecase:updateMembroEquipe"
       ],
       "dependsOn": []
@@ -4888,106 +4349,106 @@
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "message": "Route tarefas.meus_avisos.buscarAvisos access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.meus_avisos.buscarAvisos"
+      "message": "Route tarefas.meus_avisos.qryAvisoPorId access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.meus_avisos.qryAvisoPorId"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "message": "Route tarefas.meus_avisos.carregarMeusAvisos access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.meus_avisos.carregarMeusAvisos"
+      "message": "Route tarefas.meus_avisos.qryListarMeusAvisos access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.meus_avisos.qryListarMeusAvisos"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "message": "Route tarefas.meus_avisos.obterAviso access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.meus_avisos.obterAviso"
+      "message": "Route tarefas.meus_avisos.qryPaginaMeusAvisos access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.meus_avisos.qryPaginaMeusAvisos"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.abrirTarefa access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.abrirTarefa"
+      "message": "Route tarefas.minhas_tarefas.cmdAceitar access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdAceitar"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
+      "message": "Route tarefas.minhas_tarefas.cmdCancelar access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdCancelar"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.buscarMembros access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.buscarMembros"
+      "message": "Route tarefas.minhas_tarefas.cmdCriarTarefa access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdCriarTarefa"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
+      "message": "Route tarefas.minhas_tarefas.cmdDevolver access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdDevolver"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.carregarMinhasTarefas access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.carregarMinhasTarefas"
+      "message": "Route tarefas.minhas_tarefas.cmdEnviarRevisao access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdEnviarRevisao"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
+      "message": "Route tarefas.minhas_tarefas.cmdIniciar access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdIniciar"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
+      "message": "Route tarefas.minhas_tarefas.cmdSalvarChecklist access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdSalvarChecklist"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
+      "message": "Route tarefas.minhas_tarefas.cmdSalvarEdicao access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdSalvarEdicao"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
+      "message": "Route tarefas.minhas_tarefas.qryBuscarMembros access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.qryBuscarMembros"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.listarMinhasTarefas access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.listarMinhasTarefas"
+      "message": "Route tarefas.minhas_tarefas.qryListasAtivas access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.qryListasAtivas"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.qryMinhasTarefas access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.qryMinhasTarefas"
     },
     {
       "severity": "review",
       "code": "CONTRACT_ACCESS_DIVERGENT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao access does not match the L4 access artifact. L4 stays the source.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.qryTarefa access does not match the L4 access artifact. L4 stays the source.",
+      "ownerRef": "tarefas.minhas_tarefas.qryTarefa"
     },
     {
       "severity": "review",
@@ -5588,610 +5049,211 @@
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "message": "Route tarefas.meus_avisos.buscarAvisos input.dataInicio is not derived: Input dataInicio is not the last segment of any field of the output entities; it filters one of their text fields.",
-      "ownerRef": "tarefas.meus_avisos.buscarAvisos"
+      "message": "Route tarefas.meus_avisos.qryAvisoPorId output.aviso is not derived: Interface AvisoDetalhe: fields id, status are fields of AvisoVencimento, Tarefa; the types do not say which.",
+      "ownerRef": "tarefas.meus_avisos.qryAvisoPorId"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "message": "Route tarefas.meus_avisos.buscarAvisos input.dataFim is not derived: Input dataFim is not the last segment of any field of the output entities; it filters one of their text fields.",
-      "ownerRef": "tarefas.meus_avisos.buscarAvisos"
+      "message": "Route tarefas.meus_avisos.qryAvisoPorId output.aviso.details.tarefas.situacaoPrazo is not derived: Interface AvisoLinhaTarefa: field situacaoPrazo is not a field of any entity.",
+      "ownerRef": "tarefas.meus_avisos.qryAvisoPorId"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "message": "Route tarefas.meus_avisos.carregarMeusAvisos output.avisoAtual is not derived: Interface AvisoDetalhe: fields id, status are fields of AvisoVencimento, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.meus_avisos.carregarMeusAvisos"
+      "message": "Route tarefas.meus_avisos.qryAvisoPorId input.id is not derived: Input id names a field of more than one output entity; the types do not say which it filters.",
+      "ownerRef": "tarefas.meus_avisos.qryAvisoPorId"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "message": "Route tarefas.meus_avisos.obterAviso output.aviso is not derived: Interface AvisoDetalhe: fields id, status are fields of AvisoVencimento, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.meus_avisos.obterAviso"
+      "message": "Route tarefas.meus_avisos.qryListarMeusAvisos input.dataInicio is not derived: Input dataInicio is not the last segment of any field of the output entities; it filters one of their text fields.",
+      "ownerRef": "tarefas.meus_avisos.qryListarMeusAvisos"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
-      "message": "Route tarefas.meus_avisos.obterAviso input.avisoId is not derived: Input avisoId is not the last segment of any field of the output entities; it filters one of their text fields.",
-      "ownerRef": "tarefas.meus_avisos.obterAviso"
+      "message": "Route tarefas.meus_avisos.qryListarMeusAvisos input.dataFim is not derived: Input dataFim is not the last segment of any field of the output entities; it filters one of their text fields.",
+      "ownerRef": "tarefas.meus_avisos.qryListarMeusAvisos"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.abrirTarefa output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.abrirTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.abrirTarefa output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.abrirTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.abrirTarefa output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.abrirTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.abrirTarefa output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.abrirTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa output.resumo.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa output.resumo.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa output.resumo.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.aceitarTarefa output.resumo.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.aceitarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.buscarMembros output.membros is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.buscarMembros"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.buscarMembros output.membros.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.buscarMembros"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.buscarMembros input.nome is not derived: Input nome names a field of more than one output entity; the types do not say which it filters.",
-      "ownerRef": "tarefas.minhas_tarefas.buscarMembros"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa output.resumo.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa output.resumo.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa output.resumo.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.cancelarTarefa output.resumo.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.cancelarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.carregarMinhasTarefas output.tarefas.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.carregarMinhasTarefas"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.carregarMinhasTarefas output.tarefas.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.carregarMinhasTarefas"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.carregarMinhasTarefas output.tarefas.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.carregarMinhasTarefas"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.carregarMinhasTarefas output.tarefas.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.carregarMinhasTarefas"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.carregarMinhasTarefas input.filtro is not derived: Input filtro is not the last segment of any field of the output entities; it filters one of their text fields.",
-      "ownerRef": "tarefas.minhas_tarefas.carregarMinhasTarefas"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa output.resumo.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa output.resumo.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa output.resumo.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.criarTarefa output.resumo.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.criarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa output.resumo.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa output.resumo.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa output.resumo.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.devolverTarefa output.resumo.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.devolverTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao output.resumo.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao output.resumo.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao output.resumo.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
+      "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
+      "message": "Route tarefas.meus_avisos.qryPaginaMeusAvisos output.avisoAtual is not derived: Interface AvisoDetalhe: fields id, status are fields of AvisoVencimento, Tarefa; the types do not say which.",
+      "ownerRef": "tarefas.meus_avisos.qryPaginaMeusAvisos"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.enviarParaRevisao output.resumo.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.enviarParaRevisao"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa output.resumo.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa output.resumo.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
-    },
-    {
-      "severity": "review",
-      "code": "OUTPUT_UNRESOLVED",
-      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa output.resumo.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
+      "path": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
+      "message": "Route tarefas.meus_avisos.qryPaginaMeusAvisos output.avisoAtual.details.tarefas.situacaoPrazo is not derived: Interface AvisoLinhaTarefa: field situacaoPrazo is not a field of any entity.",
+      "ownerRef": "tarefas.meus_avisos.qryPaginaMeusAvisos"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.iniciarTarefa output.resumo.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.iniciarTarefa"
+      "message": "Route tarefas.minhas_tarefas.cmdAceitar output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdAceitar"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.listarMinhasTarefas output.tarefas.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.listarMinhasTarefas"
+      "message": "Route tarefas.minhas_tarefas.cmdAceitar output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdAceitar"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.listarMinhasTarefas output.tarefas.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.listarMinhasTarefas"
+      "message": "Route tarefas.minhas_tarefas.cmdCancelar output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdCancelar"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.listarMinhasTarefas output.tarefas.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.listarMinhasTarefas"
+      "message": "Route tarefas.minhas_tarefas.cmdCancelar output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdCancelar"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.listarMinhasTarefas output.tarefas.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.listarMinhasTarefas"
+      "message": "Route tarefas.minhas_tarefas.cmdCriarTarefa output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdCriarTarefa"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.listarMinhasTarefas input.filtro is not derived: Input filtro is not the last segment of any field of the output entities; it filters one of their text fields.",
-      "ownerRef": "tarefas.minhas_tarefas.listarMinhasTarefas"
+      "message": "Route tarefas.minhas_tarefas.cmdCriarTarefa output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdCriarTarefa"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.listarMinhasTarefas input.busca is not derived: Input busca is not the last segment of any field of the output entities; it filters one of their text fields.",
-      "ownerRef": "tarefas.minhas_tarefas.listarMinhasTarefas"
+      "message": "Route tarefas.minhas_tarefas.cmdDevolver output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdDevolver"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.cmdDevolver output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdDevolver"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.cmdEnviarRevisao output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdEnviarRevisao"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.cmdEnviarRevisao output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdEnviarRevisao"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.cmdIniciar output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdIniciar"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist output.resumo.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.cmdIniciar output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdIniciar"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist output.resumo.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.cmdSalvarChecklist output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdSalvarChecklist"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist output.resumo.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.cmdSalvarChecklist output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdSalvarChecklist"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarChecklist output.resumo.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarChecklist"
+      "message": "Route tarefas.minhas_tarefas.cmdSalvarEdicao output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdSalvarEdicao"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao output.tarefa.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.cmdSalvarEdicao output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.cmdSalvarEdicao"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao output.tarefa.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.qryBuscarMembros input.termo is not derived: Input termo is not the last segment of any field of the output entities; it filters one of their text fields.",
+      "ownerRef": "tarefas.minhas_tarefas.qryBuscarMembros"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao output.tarefa.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.qryMinhasTarefas output.tarefas.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.qryMinhasTarefas"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao output.tarefa.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.qryMinhasTarefas output.tarefas.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.qryMinhasTarefas"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao output.resumo.responsavel is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.qryMinhasTarefas input.filtro is not derived: Input filtro is not the last segment of any field of the output entities; it filters one of their text fields.",
+      "ownerRef": "tarefas.minhas_tarefas.qryMinhasTarefas"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao output.resumo.responsavel.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.qryTarefa output.tarefa.criador is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.qryTarefa"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao output.resumo.criador is not derived: Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.qryTarefa output.tarefa.responsavel is not derived: MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
+      "ownerRef": "tarefas.minhas_tarefas.qryTarefa"
     },
     {
       "severity": "review",
       "code": "OUTPUT_UNRESOLVED",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.salvarEdicao output.resumo.criador.details.identification.name is not derived: Interface MembroIdentificacao: field name is not a field of any entity.",
-      "ownerRef": "tarefas.minhas_tarefas.salvarEdicao"
+      "message": "Route tarefas.minhas_tarefas.qryTarefa input.tarefaId is not derived: Input tarefaId is not the last segment of any field of the output entities; it filters one of their text fields.",
+      "ownerRef": "tarefas.minhas_tarefas.qryTarefa"
     },
     {
       "severity": "review",
@@ -6337,18 +5399,18 @@
       "severity": "review",
       "code": "USECASE_FROM_CONTRACT",
       "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-      "message": "Route tarefas.minhas_tarefas.abrirTarefa needs Tarefa.get, which is not in the planned pool. Usecase getTarefa was created from the contract.",
-      "ownerRef": "getTarefa"
+      "message": "Route tarefas.minhas_tarefas.qryMinhasTarefas needs MembroEquipe.get, which is not in the planned pool. Usecase getMembroEquipe was created from the contract.",
+      "ownerRef": "getMembroEquipe"
     },
     {
       "severity": "review",
-      "code": "USECASE_WITHOUT_REQUEST",
-      "path": "l4/tarefas/pool/l2/web/backend.json",
-      "message": "Usecase listMembroEquipe is in the pool and no contract request calls it. It is not generated.",
-      "ownerRef": "listMembroEquipe"
+      "code": "USECASE_FROM_CONTRACT",
+      "path": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
+      "message": "Route tarefas.minhas_tarefas.qryTarefa needs Tarefa.get, which is not in the planned pool. Usecase getTarefa was created from the contract.",
+      "ownerRef": "getTarefa"
     }
   ],
   "consumersReleased": true,
-  "snapshotHash": "sha256:6a2b6df8e1c99b7d1a0a9d989231dafaa27a453d9090578ed504cf5eee73c244",
-  "sourceKey": "sha256:6a2b6df8e1c99b7d1a0a9d989231dafaa27a453d9090578ed504cf5eee73c244"
+  "snapshotHash": "sha256:c93e6e22ea74c0e27612cf0083629d734e2998c8da3abadbb8f878867f198bb8",
+  "sourceKey": "sha256:c93e6e22ea74c0e27612cf0083629d734e2998c8da3abadbb8f878867f198bb8"
 }

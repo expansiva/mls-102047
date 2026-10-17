@@ -2,7 +2,7 @@
   "schemaVersion": "2026-10-06-d1-resolve-v1",
   "project": 102047,
   "moduleName": "tarefas",
-  "sourceKey": "sha256:6a2b6df8e1c99b7d1a0a9d989231dafaa27a453d9090578ed504cf5eee73c244",
+  "sourceKey": "sha256:c93e6e22ea74c0e27612cf0083629d734e2998c8da3abadbb8f878867f198bb8",
   "units": [
     {
       "unitId": "r0",
@@ -1002,7 +1002,45 @@
     },
     {
       "unitId": "r10",
-      "route": "tarefas.meus_avisos.buscarAvisos",
+      "route": "tarefas.meus_avisos.qryAvisoPorId",
+      "pageId": "meus_avisos",
+      "gaps": [
+        {
+          "gapId": "g0",
+          "path": "output.aviso",
+          "kind": "entity",
+          "reason": "Interface AvisoDetalhe: fields id, status are fields of AvisoVencimento, Tarefa; the types do not say which.",
+          "candidates": [
+            "AvisoVencimento",
+            "Tarefa",
+            "none"
+          ]
+        },
+        {
+          "gapId": "g1",
+          "path": "output.aviso.details.tarefas.situacaoPrazo",
+          "kind": "fieldPath",
+          "reason": "Interface AvisoLinhaTarefa: field situacaoPrazo is not a field of any entity.",
+          "candidates": [
+            "details.tarefas.situacaoPrazo",
+            "none"
+          ]
+        },
+        {
+          "gapId": "g2",
+          "path": "input.id",
+          "kind": "filterField",
+          "reason": "Input id names a field of more than one output entity; the types do not say which it filters.",
+          "candidates": [
+            "aviso:id",
+            "none"
+          ]
+        }
+      ]
+    },
+    {
+      "unitId": "r11",
+      "route": "tarefas.meus_avisos.qryListarMeusAvisos",
       "pageId": "meus_avisos",
       "gaps": [
         {
@@ -1026,8 +1064,8 @@
       ]
     },
     {
-      "unitId": "r11",
-      "route": "tarefas.meus_avisos.carregarMeusAvisos",
+      "unitId": "r12",
+      "route": "tarefas.meus_avisos.qryPaginaMeusAvisos",
       "pageId": "meus_avisos",
       "gaps": [
         {
@@ -1040,33 +1078,14 @@
             "Tarefa",
             "none"
           ]
-        }
-      ]
-    },
-    {
-      "unitId": "r12",
-      "route": "tarefas.meus_avisos.obterAviso",
-      "pageId": "meus_avisos",
-      "gaps": [
-        {
-          "gapId": "g0",
-          "path": "output.aviso",
-          "kind": "entity",
-          "reason": "Interface AvisoDetalhe: fields id, status are fields of AvisoVencimento, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "Tarefa",
-            "none"
-          ]
         },
         {
           "gapId": "g1",
-          "path": "input.avisoId",
-          "kind": "filterField",
-          "reason": "Input avisoId is not the last segment of any field of the output entities; it filters one of their text fields.",
+          "path": "output.avisoAtual.details.tarefas.situacaoPrazo",
+          "kind": "fieldPath",
+          "reason": "Interface AvisoLinhaTarefa: field situacaoPrazo is not a field of any entity.",
           "candidates": [
-            "aviso:details.progressoChecklist",
-            "aviso:titulo",
+            "details.tarefas.situacaoPrazo",
             "none"
           ]
         }
@@ -1074,54 +1093,28 @@
     },
     {
       "unitId": "r13",
-      "route": "tarefas.minhas_tarefas.abrirTarefa",
+      "route": "tarefas.minhas_tarefas.cmdAceitar",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         }
@@ -1129,102 +1122,28 @@
     },
     {
       "unitId": "r14",
-      "route": "tarefas.minhas_tarefas.aceitarTarefa",
+      "route": "tarefas.minhas_tarefas.cmdCancelar",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "output.resumo.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "output.resumo.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g6",
-          "path": "output.resumo.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g7",
-          "path": "output.resumo.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         }
@@ -1232,40 +1151,28 @@
     },
     {
       "unitId": "r15",
-      "route": "tarefas.minhas_tarefas.buscarMembros",
+      "route": "tarefas.minhas_tarefas.cmdCriarTarefa",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.membros",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.membros.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "input.nome",
-          "kind": "filterField",
-          "reason": "Input nome names a field of more than one output entity; the types do not say which it filters.",
-          "candidates": [
-            "membros:nome",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         }
@@ -1273,102 +1180,28 @@
     },
     {
       "unitId": "r16",
-      "route": "tarefas.minhas_tarefas.cancelarTarefa",
+      "route": "tarefas.minhas_tarefas.cmdDevolver",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "output.resumo.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "output.resumo.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g6",
-          "path": "output.resumo.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g7",
-          "path": "output.resumo.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         }
@@ -1376,66 +1209,28 @@
     },
     {
       "unitId": "r17",
-      "route": "tarefas.minhas_tarefas.carregarMinhasTarefas",
+      "route": "tarefas.minhas_tarefas.cmdEnviarRevisao",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefas.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefas.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefas.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefas.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "input.filtro",
-          "kind": "filterField",
-          "reason": "Input filtro is not the last segment of any field of the output entities; it filters one of their text fields.",
-          "candidates": [
-            "listas:nome",
-            "tarefas:details.progressoChecklist",
-            "tarefas:titulo",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         }
@@ -1443,102 +1238,28 @@
     },
     {
       "unitId": "r18",
-      "route": "tarefas.minhas_tarefas.criarTarefa",
+      "route": "tarefas.minhas_tarefas.cmdIniciar",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "output.resumo.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "output.resumo.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g6",
-          "path": "output.resumo.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g7",
-          "path": "output.resumo.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         }
@@ -1546,102 +1267,28 @@
     },
     {
       "unitId": "r19",
-      "route": "tarefas.minhas_tarefas.devolverTarefa",
+      "route": "tarefas.minhas_tarefas.cmdSalvarChecklist",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "output.resumo.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "output.resumo.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g6",
-          "path": "output.resumo.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g7",
-          "path": "output.resumo.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         }
@@ -1649,102 +1296,28 @@
     },
     {
       "unitId": "r20",
-      "route": "tarefas.minhas_tarefas.enviarParaRevisao",
+      "route": "tarefas.minhas_tarefas.cmdSalvarEdicao",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "output.resumo.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "output.resumo.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g6",
-          "path": "output.resumo.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g7",
-          "path": "output.resumo.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         }
@@ -1752,102 +1325,18 @@
     },
     {
       "unitId": "r21",
-      "route": "tarefas.minhas_tarefas.iniciarTarefa",
+      "route": "tarefas.minhas_tarefas.qryBuscarMembros",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "input.termo",
+          "kind": "filterField",
+          "reason": "Input termo is not the last segment of any field of the output entities; it filters one of their text fields.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "output.resumo.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "output.resumo.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g6",
-          "path": "output.resumo.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g7",
-          "path": "output.resumo.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
+            "membros:details.identification.countryCode",
+            "membros:details.identification.name",
+            "membros:details.identification.tags",
             "none"
           ]
         }
@@ -1855,73 +1344,36 @@
     },
     {
       "unitId": "r22",
-      "route": "tarefas.minhas_tarefas.listarMinhasTarefas",
+      "route": "tarefas.minhas_tarefas.qryMinhasTarefas",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
           "path": "output.tarefas.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefas.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefas.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g2",
-          "path": "output.tarefas.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefas.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
           "path": "input.filtro",
           "kind": "filterField",
           "reason": "Input filtro is not the last segment of any field of the output entities; it filters one of their text fields.",
-          "candidates": [
-            "tarefas:details.progressoChecklist",
-            "tarefas:titulo",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "input.busca",
-          "kind": "filterField",
-          "reason": "Input busca is not the last segment of any field of the output entities; it filters one of their text fields.",
           "candidates": [
             "tarefas:details.progressoChecklist",
             "tarefas:titulo",
@@ -1932,102 +1384,39 @@
     },
     {
       "unitId": "r23",
-      "route": "tarefas.minhas_tarefas.salvarChecklist",
+      "route": "tarefas.minhas_tarefas.qryTarefa",
       "pageId": "minhas_tarefas",
       "gaps": [
         {
           "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "output.tarefa.criador",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
+          "path": "output.tarefa.responsavel",
+          "kind": "relationship",
+          "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2.",
           "candidates": [
-            "details.identification.name",
+            "tarefaCriador",
+            "tarefaResponsavel",
             "none"
           ]
         },
         {
           "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
+          "path": "input.tarefaId",
+          "kind": "filterField",
+          "reason": "Input tarefaId is not the last segment of any field of the output entities; it filters one of their text fields.",
           "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "output.resumo.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "output.resumo.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g6",
-          "path": "output.resumo.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g7",
-          "path": "output.resumo.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
+            "tarefa:details.progressoChecklist",
+            "tarefa:titulo",
             "none"
           ]
         }
@@ -2035,109 +1424,6 @@
     },
     {
       "unitId": "r24",
-      "route": "tarefas.minhas_tarefas.salvarEdicao",
-      "pageId": "minhas_tarefas",
-      "gaps": [
-        {
-          "gapId": "g0",
-          "path": "output.tarefa.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g1",
-          "path": "output.tarefa.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g2",
-          "path": "output.tarefa.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g3",
-          "path": "output.tarefa.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g4",
-          "path": "output.resumo.responsavel",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g5",
-          "path": "output.resumo.responsavel.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g6",
-          "path": "output.resumo.criador",
-          "kind": "entity",
-          "reason": "Interface MembroResumo: fields id are fields of AvisoVencimento, ItemChecklist, Lista, MembroEquipe, Tarefa; the types do not say which.",
-          "candidates": [
-            "AvisoVencimento",
-            "ItemChecklist",
-            "Lista",
-            "MembroEquipe",
-            "Tarefa",
-            "none"
-          ]
-        },
-        {
-          "gapId": "g7",
-          "path": "output.resumo.criador.details.identification.name",
-          "kind": "fieldPath",
-          "reason": "Interface MembroIdentificacao: field name is not a field of any entity.",
-          "candidates": [
-            "details.identification.name",
-            "none"
-          ]
-        }
-      ]
-    },
-    {
-      "unitId": "r25",
       "route": "tarefas.tarefas_equipe.cancelarTarefa",
       "pageId": "tarefas_equipe",
       "gaps": [
@@ -2192,7 +1478,7 @@
       ]
     },
     {
-      "unitId": "r26",
+      "unitId": "r25",
       "route": "tarefas.tarefas_equipe.carregarOpcoesEquipe",
       "pageId": "tarefas_equipe",
       "gaps": [
@@ -2223,7 +1509,7 @@
       ]
     },
     {
-      "unitId": "r27",
+      "unitId": "r26",
       "route": "tarefas.tarefas_equipe.listarTarefasEquipe",
       "pageId": "tarefas_equipe",
       "gaps": [
@@ -2276,7 +1562,7 @@
       ]
     },
     {
-      "unitId": "r28",
+      "unitId": "r27",
       "route": "tarefas.tarefas_equipe.obterTarefa",
       "pageId": "tarefas_equipe",
       "gaps": [
@@ -2342,7 +1628,7 @@
       ]
     },
     {
-      "unitId": "r29",
+      "unitId": "r28",
       "route": "tarefas.tarefas_equipe.reatribuirTarefa",
       "pageId": "tarefas_equipe",
       "gaps": [

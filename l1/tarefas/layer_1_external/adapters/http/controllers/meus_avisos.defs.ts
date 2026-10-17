@@ -15,39 +15,35 @@ export const definition = {
     "pageId": "meus_avisos",
     "handlers": [
       {
-        "route": "tarefas.meus_avisos.buscarAvisos",
+        "route": "tarefas.meus_avisos.qryAvisoPorId",
         "kind": "query",
         "grantIds": [
           "membroAvisosProprios",
           "gestorAvisosProprios"
         ],
-        "serviceFunction": "tarefas.meus_avisos.buscarAvisos",
+        "serviceFunction": "tarefas.meus_avisos.qryAvisoPorId",
         "contractPath": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
         "contractInterface": "Meus_avisosContracts"
       },
       {
-        "route": "tarefas.meus_avisos.carregarMeusAvisos",
+        "route": "tarefas.meus_avisos.qryListarMeusAvisos",
         "kind": "query",
         "grantIds": [
           "membroAvisosProprios",
-          "gestorAvisosProprios",
-          "membroTarefasProprias",
-          "gestorTarefasEquipe"
+          "gestorAvisosProprios"
         ],
-        "serviceFunction": "tarefas.meus_avisos.carregarMeusAvisos",
+        "serviceFunction": "tarefas.meus_avisos.qryListarMeusAvisos",
         "contractPath": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
         "contractInterface": "Meus_avisosContracts"
       },
       {
-        "route": "tarefas.meus_avisos.obterAviso",
+        "route": "tarefas.meus_avisos.qryPaginaMeusAvisos",
         "kind": "query",
         "grantIds": [
           "membroAvisosProprios",
-          "gestorAvisosProprios",
-          "membroTarefasProprias",
-          "gestorTarefasEquipe"
+          "gestorAvisosProprios"
         ],
-        "serviceFunction": "tarefas.meus_avisos.obterAviso",
+        "serviceFunction": "tarefas.meus_avisos.qryPaginaMeusAvisos",
         "contractPath": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
         "contractInterface": "Meus_avisosContracts"
       }
