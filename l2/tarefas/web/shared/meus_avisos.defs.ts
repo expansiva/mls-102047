@@ -16,7 +16,7 @@ export const definition = {
     }
   },
   "requests": {
-    "carregarMeusAvisos": {
+    "qryPaginaMeusAvisos": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
@@ -24,16 +24,16 @@ export const definition = {
         "avisoAtual"
       ]
     },
-    "buscarAvisos": {
+    "qryListarMeusAvisos": {
       "kind": "qry",
-      "trigger": "buscarAvisos",
+      "trigger": "qryListarMeusAvisos",
       "returns": [
         "avisos"
       ]
     },
-    "obterAviso": {
+    "qryAvisoPorId": {
       "kind": "qry",
-      "trigger": "obterAviso",
+      "trigger": "qryAvisoPorId",
       "returns": [
         "aviso"
       ]
@@ -41,16 +41,16 @@ export const definition = {
   },
   "states": {
     "avisos": {
-      "source": "carregarMeusAvisos.avisos",
-      "description": "the list of Aviso diário de vencimentos de um responsável, com seus totais e o registro de geração e finalização do envio.",
+      "source": "qryPaginaMeusAvisos.avisos",
+      "description": "the list of Aviso diário de vencimentos de um responsável, com data de referência, situação do envio, totais e registro de geração e finalização.",
       "organisms": [
         "historicoAvisos",
         "listaAvisos"
       ]
     },
     "avisoAtual": {
-      "source": "carregarMeusAvisos.avisoAtual",
-      "description": "Aviso diário de vencimentos com seus totais e a relação das tarefas incluídas.",
+      "source": "qryPaginaMeusAvisos.avisoAtual",
+      "description": "Aviso diário de vencimentos com seus totais e as tarefas que trouxe.",
       "organisms": [
         "avisoDoDia"
       ]

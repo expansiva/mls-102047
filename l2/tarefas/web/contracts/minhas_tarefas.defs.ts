@@ -1,306 +1,275 @@
 /// <mls fileReference="_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.ts" enhancement="_blank"/>
 
-/** Identificação de um membro da equipe no cadastro mestre: nome e situação no cadastro. */
-export interface MembroIdentificacao {
-  name: string;
-  readonly status?: 'Active' | 'Inactive' | 'Merged' | 'Blocked';
-}
-
-/** Detalhes de um membro da equipe com a sua identificação. */
-export interface MembroResumoDetails {
-  identification: MembroIdentificacao;
-}
-
-/** Membro da equipe com id e nome. */
-export interface MembroResumo {
-  id: string;
-  details: MembroResumoDetails;
-}
-
-/** Lista (projeto ou área) identificada pelo nome. */
-export interface ListaResumo {
-  id: string;
+/** Lista (projeto ou área) à qual uma tarefa pertence, identificada pelo nome. */
+export interface ListaRef {
   nome: string;
 }
 
-/** Detalhes de uma lista: o tipo. */
-export interface ListaOpcaoDetails {
-  tipo: 'project' | 'area';
+/** Membro da equipe ligado a uma tarefa, identificado pelo nome. */
+export interface MembroRef {
+  details: {
+    identification: {
+      name: string;
+    };
+  };
 }
 
-/** Lista que pode receber tarefas, com nome, tipo e indicação de ativa. */
-export interface ListaOpcao {
-  id: string;
-  nome: string;
-  ativa: boolean;
-  details: ListaOpcaoDetails;
-}
-
-/** Indicadores calculados de uma tarefa: subtarefas, progresso da checklist, vencimento e última devolução. */
-export interface TarefaResumoDetails {
-  readonly quantidadeSubtarefas: number;
-  readonly progressoChecklist: string;
-  readonly venceHoje: boolean;
-  readonly atrasada: boolean;
-  devolvidaEm?: string;
-}
-
-/** Tarefa em forma resumida: título, lista, responsável, criador, prioridade, prazo, situação e indicadores. */
+/** Tarefa resumida com lista, responsável, criador, prazo, situação e indicadores de prazo, subtarefas e checklist. */
 export interface TarefaResumo {
   id: string;
   version: number;
   titulo: string;
-  status: 'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada';
+  listaId: string;
+  lista: ListaRef;
+  responsavelId: string;
+  responsavel: MembroRef;
+  criadorId: string;
+  criador: MembroRef;
   prioridade: 'low' | 'medium' | 'high';
   prazo: string;
-  listaId: string;
-  lista: ListaResumo;
-  responsavelId: string;
-  responsavel: MembroResumo;
-  criadorId: string;
-  criador: MembroResumo;
-  details: TarefaResumoDetails;
+  status: 'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada';
+  details: {
+    readonly quantidadeSubtarefas: number;
+    readonly progressoChecklist: string;
+    readonly venceHoje: boolean;
+    readonly atrasada: boolean;
+    devolvidaEm?: string;
+  };
 }
 
-/** Descrição editável de um item da checklist. */
-export interface ItemChecklistEdicaoDetails {
-  descricao: string;
-}
-
-/** Detalhes de um item da checklist: descrição e momento da marcação. */
-export interface ItemChecklistDetails {
-  descricao: string;
-  marcadoEm?: string;
-}
-
-/** Item da checklist de uma tarefa, com ordem, indicação de feito e descrição. */
+/** Item da checklist de uma tarefa, com ordem, descrição e marcação de feito. */
 export interface ItemChecklistLinha {
   id: string;
   version: number;
   ordem: number;
   feito: boolean;
-  details: ItemChecklistDetails;
-}
-
-/** Item inicial da checklist de uma tarefa nova. */
-export interface NovoItemChecklist {
-  ordem: number;
-  details: ItemChecklistEdicaoDetails;
-}
-
-/** Alteração de um item existente da checklist: ordem, feito e descrição, com a versão lida. */
-export interface ItemChecklistAlteracao {
-  id: string;
-  version: number;
-  ordem: number;
-  feito: boolean;
-  details: ItemChecklistEdicaoDetails;
-}
-
-/** Descrição editável de uma tarefa. */
-export interface TarefaDescricaoDetails {
   details: {
-    descricao?: string;
+    descricao: string;
+    marcadoEm?: string;
   };
 }
 
-/** Motivo informado na devolução de uma tarefa. */
-export interface TarefaMotivoDetails {
-  details: {
-    motivoDevolucao: string;
-  };
-}
-
-/** Detalhes de uma tarefa: descrição, motivo e momento da devolução, conclusão e cancelamento. */
-export interface TarefaDetalheDetails {
-  descricao?: string;
-  motivoDevolucao?: string;
-  devolvidaEm?: string;
-  concluidaEm?: string;
-  canceladaEm?: string;
-}
-
-/** Tarefa completa com lista, criador, responsável, datas do ciclo, motivo da devolução e itens da checklist em ordem. */
+/** Tarefa completa com lista, criador, responsável, situação, marcos do ciclo, motivo da devolução, papel de quem consulta e checklist ordenada. */
 export interface TarefaDetalhe {
   id: string;
   version: number;
   titulo: string;
-  status: 'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada';
-  prioridade: 'low' | 'medium' | 'high';
-  prazo: string;
-  readonly criadaEm: string;
+  details: {
+    descricao?: string;
+    motivoDevolucao?: string;
+    devolvidaEm?: string;
+    concluidaEm?: string;
+    canceladaEm?: string;
+  };
   listaId: string;
-  lista: ListaResumo;
-  responsavelId: string;
-  responsavel: MembroResumo;
+  lista: ListaRef;
   criadorId: string;
-  criador: MembroResumo;
-  details: TarefaDetalheDetails;
-  itensChecklist: ItemChecklistLinha[];
+  criador: MembroRef;
+  responsavelId: string;
+  responsavel: MembroRef;
+  prazo: string;
+  prioridade: 'low' | 'medium' | 'high';
+  status: 'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada';
+  readonly criadaEm: string;
+  readonly souCriador: boolean;
+  readonly souResponsavel: boolean;
+  checklist: ItemChecklistLinha[];
+}
+
+/** Lista ativa que pode receber tarefas, com nome e tipo. */
+export interface ListaOpcao {
+  id: string;
+  nome: string;
+  ativa: boolean;
+  details: {
+    tipo: 'project' | 'area';
+  };
+}
+
+/** Membro da equipe que pode ser escolhido como responsável, com nome e situação no cadastro. */
+export interface MembroOpcao {
+  id: string;
+  details: {
+    identification: {
+      name: string;
+      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';
+    };
+  };
+}
+
+/** Item da checklist informado na criação ou no ajuste da checklist; sem id é um item novo. */
+export interface ItemChecklistEntrada {
+  id?: string;
+  version?: number;
+  details: {
+    descricao: string;
+  };
+  ordem: number;
+  feito: boolean;
 }
 
 export interface Minhas_tarefasContracts {
   /**
-   * Finalidade: Abre a página com a primeira página das tarefas da pessoa logada e as listas ativas onde ela pode criar tarefas.
-   * Entrada: filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas; padrão todas). page/pageSize: página das tarefas.
-   * Processamento: Seleciona as tarefas cujo criador ou responsável é a pessoa da sessão; aplica o filtro (criadorId = sessão; responsavelId = sessão; status emRevisao; devolvidaEm preenchida e status emAndamento). Ordena por prazo. Compõe nome da lista e nomes de responsável e criador lidos no cadastro mestre. Calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist (itens feitos / total) na leitura, sem gravar. Lista as listas com ativa = true ordenadas por nome.
-   * Saída: tarefas: página { items, page, pageSize, hasMore } de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa.
+   * Finalidade: Lista, paginadas, as tarefas que o membro da sessão criou ou pelas quais é responsável, com o filtro rápido escolhido.
+   * Entrada: filtro: criadasPorMim (criadorId = sessão), atribuidasAMim (responsavelId = sessão), emRevisao (status emRevisao), devolvidas (devolvidaEm preenchida e status emAndamento); ausente traz todas as minhas. page e pageSize: página pedida e tamanho da página.
+   * Processamento: Filtra pelas tarefas visíveis ao membro (editarSomenteTarefaVisivel: criador ou responsável é a pessoa da sessão), aplica o filtro, ordena por prazo. Junta o nome da lista e os nomes de responsável e criador em lote. Calcula venceHoje e atrasada (tarefa aberta com prazo hoje ou anterior a hoje), quantidadeSubtarefas (contagem de tarefas filhas) e progressoChecklist (itens feitos do total) — todos derivados, nunca gravados.
+   * Saída: Página de tarefas { items, page, pageSize, hasMore } no formato resumido, com lista, responsável, criador, prioridade, prazo, situação e indicadores.
    */
-  'tarefas.minhas_tarefas.carregarMinhasTarefas': {
+  'tarefas.minhas_tarefas.qryMinhasTarefas': {
     kind: 'qry';
-    input: { filtro?: 'todas' | 'criadasPorMim' | 'atribuidasAMim' | 'emRevisao' | 'devolvidas'; page: number; pageSize: number };
-    output: { tarefas: { items: TarefaResumo[]; page: number; pageSize: number; hasMore: boolean }; listas: ListaOpcao[] };
-    rules: [];
-    access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
-  };
-  /**
-   * Finalidade: Recarrega as tarefas da pessoa logada quando ela troca o filtro rápido, pesquisa pelo título ou pede outra página.
-   * Entrada: filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas). busca: trecho do título. page/pageSize: página pedida.
-   * Processamento: Mesma seleção de carregarMinhasTarefas: tarefas em que a pessoa da sessão é criadora ou responsável, filtro aplicado, busca por texto no título, ordenação por prazo; compõe nomes de lista, responsável e criador e calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist na leitura.
-   * Saída: tarefas: página { items, page, pageSize, hasMore } de tarefas resumidas no filtro e na busca pedidos.
-   */
-  'tarefas.minhas_tarefas.listarMinhasTarefas': {
-    kind: 'qry';
-    input: { filtro?: 'todas' | 'criadasPorMim' | 'atribuidasAMim' | 'emRevisao' | 'devolvidas'; busca?: string; page: number; pageSize: number };
+    input: { filtro?: 'criadasPorMim' | 'atribuidasAMim' | 'emRevisao' | 'devolvidas'; page: number; pageSize: number };
     output: { tarefas: { items: TarefaResumo[]; page: number; pageSize: number; hasMore: boolean } };
-    rules: [];
+    rules: ['editarSomenteTarefaVisivel'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Carrega a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.
-   * Entrada: id: id da tarefa escolhida.
-   * Processamento: Lê a tarefa por id, recusando se a pessoa da sessão não for criadora nem responsável. Compõe nome da lista, nomes de criador e responsável do cadastro mestre e os itens da checklist ordenados por ordem.
-   * Saída: tarefa: a tarefa com versão, situação, datas de criação, devolução, conclusão e cancelamento, motivo da devolução e checklist.
+   * Finalidade: Abre uma tarefa escolhida com seus dados, checklist e marcos do ciclo.
+   * Entrada: tarefaId: id da tarefa selecionada.
+   * Processamento: Lê a tarefa pelo id e recusa se o membro não for criador nem responsável (editarSomenteTarefaVisivel). Junta o nome da lista, os nomes de criador e responsável e os itens da checklist ordenados por ordem. Calcula souCriador e souResponsavel comparando criadorId e responsavelId com a pessoa da sessão.
+   * Saída: A tarefa no estado atual, com descrição, lista, criador, responsável, prazo, prioridade, situação, motivo e data da devolução, datas de criação, conclusão e cancelamento, papel de quem consulta e checklist.
    */
-  'tarefas.minhas_tarefas.abrirTarefa': {
+  'tarefas.minhas_tarefas.qryTarefa': {
     kind: 'qry';
-    input: { id: string };
+    input: { tarefaId: string };
     output: { tarefa: TarefaDetalhe };
-    rules: [];
+    rules: ['editarSomenteTarefaVisivel'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Busca pelo nome os membros que podem ser escolhidos como responsável.
-   * Entrada: nome: trecho do nome digitado.
-   * Processamento: Localiza membros por nome e mantém só os com situação Active, conforme responsavelDeveSerMembroAtivo; limita a poucas dezenas ordenadas por nome.
-   * Saída: membros: membros ativos com id, nome e situação no cadastro.
+   * Finalidade: Traz as listas onde o membro pode colocar uma tarefa.
+   * Entrada: Nenhuma.
+   * Processamento: Filtra as listas com ativa = true (listaInativaNaoRecebeTarefa) e ordena por nome.
+   * Saída: Listas ativas com id, nome, ativa e tipo.
    */
-  'tarefas.minhas_tarefas.buscarMembros': {
+  'tarefas.minhas_tarefas.qryListasAtivas': {
     kind: 'qry';
-    input: { nome: string };
-    output: { membros: MembroResumo[] };
+    input: {};
+    output: { listas: ListaOpcao[] };
+    rules: ['listaInativaNaoRecebeTarefa'];
+    access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
+  };
+  /**
+   * Finalidade: Busca membros da equipe pelo nome para escolher ou trocar o responsável.
+   * Entrada: termo: trecho do nome digitado.
+   * Processamento: Busca no cadastro mestre membros com o papel tarefas.MembroEquipe cujo nome contém o termo, somente com situação Active (responsavelDeveSerMembroAtivo), ordenados por nome, limitados a um número curto de resultados.
+   * Saída: Membros ativos encontrados com id, nome e situação.
+   */
+  'tarefas.minhas_tarefas.qryBuscarMembros': {
+    kind: 'qry';
+    input: { termo: string };
+    output: { membros: MembroOpcao[] };
     rules: ['responsavelDeveSerMembroAtivo'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Cria uma nova tarefa com sua checklist inicial e a atribui ao responsável escolhido.
-   * Entrada: chaveCriacao: chave gerada ao abrir o formulário. listaId, titulo, details.descricao, prioridade, prazo, responsavelId: dados da tarefa. criadorId: criador da tarefa; opcional, pois o servidor sempre grava a pessoa da sessão e recusa um valor diferente dela. itensChecklist: itens iniciais com ordem e descrição.
-   * Processamento: Recusa lista inativa (listaInativaNaoRecebeTarefa) e responsável que não seja membro ativo (responsavelDeveSerMembroAtivo). Grava a tarefa em aFazer com a pessoa da sessão como criadora e os itens da checklist (feito = false) numa só transação. Se já existir tarefa com a mesma chaveCriacao, devolve a já criada sem duplicar nem gerar nova mensagem (criacaoIdempotente). Avisa o responsável.
-   * Saída: tarefa: a tarefa criada, em aFazer, com checklist. resumo: a mesma tarefa em forma resumida com indicadores calculados.
+   * Finalidade: Cria uma nova tarefa com sua checklist inicial.
+   * Entrada: chaveCriacao: chave gerada ao abrir o formulário; listaId, titulo, details.descricao, prioridade, prazo, responsavelId: dados da tarefa; criadorId: criador da tarefa, opcional — o servidor sempre grava a pessoa da sessão e recusa um valor diferente dela; checklist: itens iniciais com descrição, ordem e feito.
+   * Processamento: Recusa lista inativa (listaInativaNaoRecebeTarefa) e responsável que não seja membro ativo (responsavelDeveSerMembroAtivo). Se já existir tarefa com a mesma chaveCriacao, devolve a já criada sem criar outra nem repetir mensagens (criacaoIdempotente). Caso contrário grava, em uma transação, a tarefa em aFazer com criadorId = pessoa da sessão e os itens da checklist; criadaEm é preenchido pelo sistema. Avisa o responsável.
+   * Saída: A tarefa criada em situação aFazer, no formato de detalhe, com checklist.
    */
-  'tarefas.minhas_tarefas.criarTarefa': {
+  'tarefas.minhas_tarefas.cmdCriarTarefa': {
     kind: 'cmd';
     writes: 'Tarefa.create';
-    input: { chaveCriacao: string; listaId: string; titulo: string; details?: TarefaDescricaoDetails; prioridade: 'low' | 'medium' | 'high'; prazo: string; responsavelId: string; criadorId?: string; itensChecklist?: NovoItemChecklist[] };
-    output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
+    input: { chaveCriacao: string; listaId: string; titulo: string; details: { descricao?: string }; prioridade: 'low' | 'medium' | 'high'; prazo: string; responsavelId: string; criadorId?: string; checklist?: ItemChecklistEntrada[] };
+    output: { tarefa: TarefaDetalhe };
     rules: ['criacaoIdempotente', 'listaInativaNaoRecebeTarefa', 'responsavelDeveSerMembroAtivo'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Salva os campos editados da tarefa, incluindo a troca de responsável.
-   * Entrada: id e version: tarefa e versão lida. listaId, titulo, details.descricao, prioridade, prazo, responsavelId: novos valores.
-   * Processamento: Recusa se a pessoa não for criadora nem responsável (editarSomenteTarefaVisivel) ou se a versão mudou. Se o responsável mudou, exige que a pessoa seja a criadora (reatribuicaoPorCriadorOuGestor) e que o novo seja membro ativo (responsavelDeveSerMembroAtivo), e avisa o novo responsável. Se a lista mudou, recusa lista inativa (listaInativaNaoRecebeTarefa). Nunca altera a situação (edicaoNaoMudaSituacao).
-   * Saída: tarefa: a tarefa atualizada, com nova versão e mesma situação. resumo: a mesma tarefa resumida.
+   * Finalidade: Salva a edição dos campos da tarefa, incluindo a troca de responsável.
+   * Entrada: id e version: tarefa e versão lida; listaId, titulo, details.descricao, prioridade, prazo, responsavelId: novos valores.
+   * Processamento: Recusa se o membro não vê a tarefa (editarSomenteTarefaVisivel) ou se a versão mudou. Se a lista mudou, recusa lista inativa (listaInativaNaoRecebeTarefa). Se o responsável mudou, exige que a pessoa da sessão seja a criadora (reatribuicaoPorCriadorOuGestor) e que o novo responsável seja membro ativo (responsavelDeveSerMembroAtivo), e avisa o novo responsável. Nunca altera a situação (edicaoNaoMudaSituacao).
+   * Saída: A tarefa atualizada, com nova versão, no formato de detalhe com checklist.
    */
-  'tarefas.minhas_tarefas.salvarEdicao': {
+  'tarefas.minhas_tarefas.cmdSalvarEdicao': {
     kind: 'cmd';
     writes: 'Tarefa.update';
-    input: { id: string; version: number; listaId: string; titulo: string; details?: TarefaDescricaoDetails; prioridade: 'low' | 'medium' | 'high'; prazo: string; responsavelId: string };
-    output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
-    rules: ['editarSomenteTarefaVisivel', 'edicaoNaoMudaSituacao', 'reatribuicaoPorCriadorOuGestor', 'responsavelDeveSerMembroAtivo', 'listaInativaNaoRecebeTarefa'];
+    input: { id: string; version: number; listaId: string; titulo: string; details: { descricao?: string }; prioridade: 'low' | 'medium' | 'high'; prazo: string; responsavelId: string };
+    output: { tarefa: TarefaDetalhe };
+    rules: ['edicaoNaoMudaSituacao', 'editarSomenteTarefaVisivel', 'reatribuicaoPorCriadorOuGestor', 'responsavelDeveSerMembroAtivo', 'listaInativaNaoRecebeTarefa'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Salva as alterações dos itens da checklist: descrição, ordem e marcação de feito.
-   * Entrada: tarefaId: tarefa dos itens. itens: cada item com id, versão lida, ordem, feito e descrição.
-   * Processamento: Recusa se a pessoa não for criadora nem responsável da tarefa (editarSomenteTarefaVisivel) ou se algum item mudou de versão. Atualiza os itens; o momento de marcação é registrado pelo servidor quando o item passa a feito e limpo quando é desmarcado. Não altera a situação da tarefa (checklistNaoMudaSituacao).
-   * Saída: tarefa: a tarefa com a checklist atualizada. resumo: a tarefa resumida com o progresso da checklist recalculado.
+   * Finalidade: Salva a checklist da tarefa: altera descrição e ordem, marca ou desmarca itens e inclui itens novos.
+   * Entrada: tarefaId: tarefa dona da checklist; itens: itens com id e version quando existentes, e descricao, ordem e feito.
+   * Processamento: Recusa se o membro não vê a tarefa (editarSomenteTarefaVisivel) ou se a versão de algum item mudou. Atualiza cada item; ao marcar feito registra marcadoEm, ao desmarcar o limpa; itens sem id são incluídos. Não altera a situação da tarefa (checklistNaoMudaSituacao).
+   * Saída: A tarefa com a checklist salva, em ordem, e o restante dos dados no formato de detalhe.
    */
-  'tarefas.minhas_tarefas.salvarChecklist': {
+  'tarefas.minhas_tarefas.cmdSalvarChecklist': {
     kind: 'cmd';
     writes: 'ItemChecklist.update';
-    input: { tarefaId: string; itens: ItemChecklistAlteracao[] };
-    output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
-    rules: ['editarSomenteTarefaVisivel', 'checklistNaoMudaSituacao'];
+    input: { tarefaId: string; itens: ItemChecklistEntrada[] };
+    output: { tarefa: TarefaDetalhe };
+    rules: ['checklistNaoMudaSituacao', 'editarSomenteTarefaVisivel'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Inicia a tarefa atribuída à pessoa.
-   * Entrada: id e version: tarefa e versão lida.
-   * Processamento: Exige que a pessoa da sessão seja a responsável (somenteResponsavelExecuta) e que a tarefa esteja em aFazer, nunca concluída ou cancelada (tarefaEncerradaNaoTransiciona). Move para emAndamento e registra a mensagem na sala de discussão.
-   * Saída: tarefa: a tarefa em emAndamento. resumo: a mesma tarefa resumida.
+   * Finalidade: Inicia a tarefa, passando de a fazer para em andamento.
+   * Entrada: id e version da tarefa.
+   * Processamento: Exige que a pessoa da sessão seja o responsável (somenteResponsavelExecuta) e que a tarefa esteja em aFazer, recusando tarefa concluída ou cancelada (tarefaEncerradaNaoTransiciona). Aplica a transição iniciar e registra a mensagem na sala de discussão.
+   * Saída: A tarefa em situação emAndamento, no formato de detalhe.
    */
-  'tarefas.minhas_tarefas.iniciarTarefa': {
+  'tarefas.minhas_tarefas.cmdIniciar': {
     kind: 'cmd';
     writes: 'Tarefa.iniciar';
     input: { id: string; version: number };
-    output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
+    output: { tarefa: TarefaDetalhe };
     rules: ['somenteResponsavelExecuta', 'tarefaEncerradaNaoTransiciona'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Envia ou reenvia a tarefa para a revisão do criador.
-   * Entrada: id e version: tarefa e versão lida.
-   * Processamento: Exige que a pessoa da sessão seja a responsável (somenteResponsavelExecuta) e que a tarefa esteja em emAndamento, nunca encerrada (tarefaEncerradaNaoTransiciona). Move para emRevisao, registra a mensagem na sala e avisa o criador.
-   * Saída: tarefa: a tarefa em emRevisao. resumo: a mesma tarefa resumida.
+   * Finalidade: Envia ou reenvia a tarefa para revisão do criador.
+   * Entrada: id e version da tarefa.
+   * Processamento: Exige que a pessoa da sessão seja o responsável (somenteResponsavelExecuta) e que a tarefa esteja em emAndamento, recusando tarefa encerrada (tarefaEncerradaNaoTransiciona). Aplica enviarParaRevisao, registra a mensagem na sala e avisa o criador.
+   * Saída: A tarefa em situação emRevisao, no formato de detalhe.
    */
-  'tarefas.minhas_tarefas.enviarParaRevisao': {
+  'tarefas.minhas_tarefas.cmdEnviarRevisao': {
     kind: 'cmd';
     writes: 'Tarefa.enviarParaRevisao';
     input: { id: string; version: number };
-    output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
+    output: { tarefa: TarefaDetalhe };
     rules: ['somenteResponsavelExecuta', 'tarefaEncerradaNaoTransiciona'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
    * Finalidade: Aceita a entrega da tarefa e a conclui.
-   * Entrada: id e version: tarefa e versão lida.
-   * Processamento: Exige que a pessoa da sessão seja a criadora (somenteCriadorRevisa) e que a tarefa esteja em emRevisao, nunca encerrada (tarefaEncerradaNaoTransiciona). Move para concluida, registra concluidaEm e a mensagem na sala.
-   * Saída: tarefa: a tarefa concluída com o momento da conclusão. resumo: a mesma tarefa resumida.
+   * Entrada: id e version da tarefa.
+   * Processamento: Exige que a pessoa da sessão seja a criadora (somenteCriadorRevisa) e que a tarefa esteja em emRevisao, recusando tarefa encerrada (tarefaEncerradaNaoTransiciona). Aplica aceitar, registra concluidaEm e a mensagem na sala.
+   * Saída: A tarefa em situação concluida com a data de conclusão, no formato de detalhe.
    */
-  'tarefas.minhas_tarefas.aceitarTarefa': {
+  'tarefas.minhas_tarefas.cmdAceitar': {
     kind: 'cmd';
     writes: 'Tarefa.aceitar';
     input: { id: string; version: number };
-    output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
+    output: { tarefa: TarefaDetalhe };
     rules: ['somenteCriadorRevisa', 'tarefaEncerradaNaoTransiciona'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
    * Finalidade: Devolve a tarefa em revisão para ajuste, com o motivo.
-   * Entrada: id e version: tarefa e versão lida. details.motivoDevolucao: motivo da devolução.
-   * Processamento: Exige que a pessoa seja a criadora (somenteCriadorRevisa), que a tarefa esteja em emRevisao e não encerrada (tarefaEncerradaNaoTransiciona) e que o motivo não esteja vazio (devolucaoExigeMotivo). Registra motivo e devolvidaEm, move para emAndamento e avisa o responsável.
-   * Saída: tarefa: a tarefa em emAndamento com motivo e momento da devolução. resumo: a mesma tarefa resumida.
+   * Entrada: id e version da tarefa; details.motivoDevolucao: por que a entrega volta para ajuste.
+   * Processamento: Exige que a pessoa da sessão seja a criadora (somenteCriadorRevisa), que a tarefa esteja em emRevisao (tarefaEncerradaNaoTransiciona) e recusa motivo vazio (devolucaoExigeMotivo). Aplica devolver, grava o motivo e devolvidaEm, volta para emAndamento e avisa o responsável.
+   * Saída: A tarefa em situação emAndamento com o motivo e a data da devolução, no formato de detalhe.
    */
-  'tarefas.minhas_tarefas.devolverTarefa': {
+  'tarefas.minhas_tarefas.cmdDevolver': {
     kind: 'cmd';
     writes: 'Tarefa.devolver';
-    input: { id: string; version: number; details: TarefaMotivoDetails };
-    output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
+    input: { id: string; version: number; details: { motivoDevolucao: string } };
+    output: { tarefa: TarefaDetalhe };
     rules: ['somenteCriadorRevisa', 'devolucaoExigeMotivo', 'tarefaEncerradaNaoTransiciona'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Cancela uma tarefa criada pela pessoa.
-   * Entrada: id e version: tarefa e versão lida.
-   * Processamento: Exige que a pessoa seja a criadora (cancelamentoPorCriadorOuGestor) e que a tarefa esteja em aFazer, emAndamento ou emRevisao (tarefaEncerradaNaoTransiciona). Move para cancelada, registra canceladaEm e a mensagem na sala.
-   * Saída: tarefa: a tarefa cancelada com o momento do cancelamento. resumo: a mesma tarefa resumida.
+   * Finalidade: Cancela uma tarefa criada pelo membro.
+   * Entrada: id e version da tarefa.
+   * Processamento: Exige que a pessoa da sessão seja a criadora (cancelamentoPorCriadorOuGestor) e que a tarefa esteja em aFazer, emAndamento ou emRevisao (tarefaEncerradaNaoTransiciona). Aplica cancelar, registra canceladaEm e a mensagem na sala.
+   * Saída: A tarefa em situação cancelada com a data do cancelamento, no formato de detalhe.
    */
-  'tarefas.minhas_tarefas.cancelarTarefa': {
+  'tarefas.minhas_tarefas.cmdCancelar': {
     kind: 'cmd';
     writes: 'Tarefa.cancelar';
     input: { id: string; version: number };
-    output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
+    output: { tarefa: TarefaDetalhe };
     rules: ['cancelamentoPorCriadorOuGestor', 'tarefaEncerradaNaoTransiciona'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };

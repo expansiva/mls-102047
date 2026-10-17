@@ -1,62 +1,68 @@
 /// <mls fileReference="_102047_/l2/tarefas/web/contracts/meus_avisos.defs.ts" enhancement="_blank"/>
 
-/** Aviso diário de vencimentos de um responsável, com seus totais e o registro de geração e finalização do envio. */
+/** Detalhes de um aviso diário: momentos de geração e finalização, motivo de falha e totais de tarefas. */
+export interface AvisoResumoDetails {
+  readonly geradoEm: string;
+  readonly finalizadoEm?: string;
+  motivoFalha?: string;
+  readonly quantidadeTarefas: number;
+  readonly quantidadeAtrasadas: number;
+}
+
+/** Aviso diário de vencimentos de um responsável, com data de referência, situação do envio, totais e registro de geração e finalização. */
 export interface AvisoResumo {
   id: string;
   readonly dataReferencia: string;
   status: 'pending' | 'completed' | 'failed';
-  details: {
-    readonly quantidadeTarefas: number;
-    readonly quantidadeAtrasadas: number;
-    readonly geradoEm: string;
-    readonly finalizadoEm?: string;
-    motivoFalha?: string;
-  };
+  details: AvisoResumoDetails;
 }
 
-/** Dados atuais da tarefa incluída em um aviso: título, situação, prazo e indicadores de vencimento. */
-export interface TarefaDoAviso {
+/** Indicadores atuais de prazo de uma tarefa aberta. */
+export interface TarefaAvisoDetails {
+  readonly venceHoje: boolean;
+  readonly atrasada: boolean;
+}
+
+/** Tarefa referenciada por um aviso, com título, situação e prazo atuais. */
+export interface TarefaAviso {
+  id: string;
   titulo: string;
   status: 'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada';
   prazo: string;
-  details: {
-    readonly venceHoje: boolean;
-    readonly atrasada: boolean;
-  };
+  details: TarefaAvisoDetails;
 }
 
-/** Linha do aviso: tarefa incluída, com o prazo registrado na geração e a situação do prazo naquele dia. */
-export interface AvisoTarefa {
-  details: {
-    tarefas: {
-      tarefaId: string;
-      prazo: string;
-      situacaoPrazo: 'dueToday' | 'overdue';
-    };
-  };
-  tarefa: TarefaDoAviso;
+/** Linha de um aviso diário: tarefa incluída, prazo no momento da geração e situação do prazo naquele dia. */
+export interface AvisoLinhaTarefa {
+  tarefaId: string;
+  prazo: string;
+  situacaoPrazo: 'dueToday' | 'overdue';
+  tarefa: TarefaAviso;
 }
 
-/** Aviso diário de vencimentos com seus totais e a relação das tarefas incluídas. */
+/** Detalhes de um aviso diário com totais e linhas de tarefas. */
+export interface AvisoDetalheDetails {
+  readonly quantidadeTarefas: number;
+  readonly quantidadeAtrasadas: number;
+  tarefas: AvisoLinhaTarefa[];
+}
+
+/** Aviso diário de vencimentos com seus totais e as tarefas que trouxe. */
 export interface AvisoDetalhe {
   id: string;
   readonly dataReferencia: string;
   status: 'pending' | 'completed' | 'failed';
-  details: {
-    readonly quantidadeTarefas: number;
-    readonly quantidadeAtrasadas: number;
-  };
-  tarefas: AvisoTarefa[];
+  details: AvisoDetalheDetails;
 }
 
 export interface Meus_avisosContracts {
   /**
-   * Finalidade: Abre a página de avisos com a primeira página dos avisos diários da pessoa logada e o conteúdo do aviso mais recente já montado.
-   * Entrada: page: número da página da lista de avisos; pageSize: quantidade de avisos por página.
-   * Processamento: Filtra os AvisoVencimento cujo responsavelId é a pessoa da sessão, ordenados por dataReferencia decrescente, paginados. Pela regra avisoUnicoPorResponsavelEDia há no máximo um aviso por data. Para o aviso mais recente, carrega as linhas de details.tarefas e compõe cada uma com título, situação e prazo atuais da Tarefa; venceHoje e atrasada são calculados na leitura a partir do prazo e da situação da tarefa, e quantidadeTarefas e quantidadeAtrasadas são calculados a partir das linhas. O conteúdo reflete a regra avisoSomenteTarefasAbertasVencendo: apenas tarefas abertas com prazo no dia do aviso ou anterior.
-   * Saída: avisos: página { items, page, pageSize, hasMore } de avisos com data, situação do envio, totais, geradoEm, finalizadoEm e motivoFalha; avisoAtual: o aviso mais recente com totais e suas tarefas, ausente se a pessoa ainda não recebeu nenhum aviso.
+   * Finalidade: Carrega a abertura da página de avisos: a primeira página dos avisos diários da pessoa logada e o aviso mais recente já completo com suas tarefas.
+   * Entrada: pageSize: tamanho da página de avisos (opcional, padrão do servidor). A pessoa logada não é enviada: o servidor a usa como responsável.
+   * Processamento: Filtra AvisoVencimento pelo responsável da sessão, ordenado por dataReferencia decrescente, página 1 (no máximo um aviso por dia, avisoUnicoPorResponsavelEDia). quantidadeTarefas e quantidadeAtrasadas são calculadas a partir das linhas do aviso (total e linhas com situacaoPrazo overdue), nunca gravadas. Para o aviso mais recente compõe as linhas (tarefaId, prazo e situacaoPrazo do momento da geração, conforme avisoSomenteTarefasAbertasVencendo) com a Tarefa atual (titulo, status, prazo) e calcula venceHoje e atrasada da tarefa em relação à data de hoje.
+   * Saída: avisos: página { items, page, pageSize, hasMore } de avisos com data, situação do envio, totais, geradoEm, finalizadoEm e motivoFalha. avisoAtual: o aviso mais recente com totais e linhas de tarefas; ausente se a pessoa ainda não recebeu aviso.
    */
-  'tarefas.meus_avisos.carregarMeusAvisos': {
+  'tarefas.meus_avisos.qryPaginaMeusAvisos': {
     kind: 'qry';
     input: { page: number; pageSize: number };
     output: { avisos: { items: AvisoResumo[]; page: number; pageSize: number; hasMore: boolean }; avisoAtual?: AvisoDetalhe };
@@ -64,12 +70,12 @@ export interface Meus_avisosContracts {
     access: { actors: ['gestor', 'membroEquipe']; grants: ['membroTarefasProprias', 'membroAvisosProprios', 'gestorTarefasEquipe', 'gestorAvisosProprios']; scope: 'own' };
   };
   /**
-   * Finalidade: Lista os avisos diários da pessoa logada em um período de datas de referência, página a página.
-   * Entrada: dataInicio: data de referência inicial do período (inclusive, opcional); dataFim: data de referência final (inclusive, opcional); page e pageSize: página e tamanho da página.
-   * Processamento: Filtra AvisoVencimento pelo responsavelId da pessoa da sessão e por dataReferencia entre dataInicio e dataFim, ordenando por dataReferencia decrescente; um aviso por data (avisoUnicoPorResponsavelEDia). quantidadeTarefas e quantidadeAtrasadas são calculados a partir das linhas de cada aviso.
+   * Finalidade: Lista os avisos diários da pessoa logada num período, página a página.
+   * Entrada: dataInicio e dataFim: limites inclusivos da data de referência (opcionais); page e pageSize: página pedida e tamanho.
+   * Processamento: Filtra AvisoVencimento pelo responsável da sessão e por dataReferencia entre dataInicio e dataFim, ordenado por dataReferencia decrescente (um aviso por dia, avisoUnicoPorResponsavelEDia). Calcula quantidadeTarefas e quantidadeAtrasadas a partir das linhas de cada aviso.
    * Saída: Página { items, page, pageSize, hasMore } de avisos com data, situação do envio, totais, geradoEm, finalizadoEm e motivoFalha.
    */
-  'tarefas.meus_avisos.buscarAvisos': {
+  'tarefas.meus_avisos.qryListarMeusAvisos': {
     kind: 'qry';
     input: { dataInicio?: string; dataFim?: string; page: number; pageSize: number };
     output: { avisos: { items: AvisoResumo[]; page: number; pageSize: number; hasMore: boolean } };
@@ -77,14 +83,14 @@ export interface Meus_avisosContracts {
     access: { actors: ['gestor', 'membroEquipe']; grants: ['membroTarefasProprias', 'membroAvisosProprios', 'gestorTarefasEquipe', 'gestorAvisosProprios']; scope: 'own' };
   };
   /**
-   * Finalidade: Traz o conteúdo completo de um aviso diário escolhido pela pessoa logada.
-   * Entrada: avisoId: id do aviso escolhido na lista.
-   * Processamento: Lê o AvisoVencimento pelo id e recusa se o responsavelId não for a pessoa da sessão. Compõe cada linha de details.tarefas (tarefaId, prazo registrado, situacaoPrazo) com título, situação e prazo atuais da Tarefa; venceHoje e atrasada são calculados na leitura, e quantidadeTarefas e quantidadeAtrasadas a partir das linhas. As linhas seguem a regra avisoSomenteTarefasAbertasVencendo: tarefas abertas com prazo no dia do aviso ou já vencido.
-   * Saída: O aviso com data de referência, situação do envio, totais de tarefas e de atrasadas e a relação das tarefas incluídas com seus dados atuais.
+   * Finalidade: Abre um aviso diário escolhido com seus totais e as tarefas que ele trouxe.
+   * Entrada: id: id do aviso escolhido.
+   * Processamento: Lê o AvisoVencimento pelo id e recusa se o responsável não for a pessoa logada. Compõe cada linha (tarefaId, prazo e situacaoPrazo do momento da geração, que conforme avisoSomenteTarefasAbertasVencendo traz só tarefas abertas vencendo no dia ou atrasadas) com a Tarefa atual (titulo, status, prazo). Calcula quantidadeTarefas, quantidadeAtrasadas e, para cada tarefa, venceHoje e atrasada em relação a hoje; nada disso é gravado.
+   * Saída: O aviso com data de referência, situação, totais e as linhas de tarefas com os dados atuais de cada tarefa.
    */
-  'tarefas.meus_avisos.obterAviso': {
+  'tarefas.meus_avisos.qryAvisoPorId': {
     kind: 'qry';
-    input: { avisoId: string };
+    input: { id: string };
     output: { aviso: AvisoDetalhe };
     rules: ['avisoSomenteTarefasAbertasVencendo'];
     access: { actors: ['gestor', 'membroEquipe']; grants: ['membroTarefasProprias', 'membroAvisosProprios', 'gestorTarefasEquipe', 'gestorAvisosProprios']; scope: 'own' };

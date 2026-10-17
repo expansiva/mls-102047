@@ -46,119 +46,110 @@ export const definition = {
     }
   },
   "requests": {
-    "carregarMinhasTarefas": {
+    "qryMinhasTarefas": {
       "kind": "qry",
       "trigger": "onLoad",
-      "returns": [
-        "tarefas",
-        "listas"
-      ]
-    },
-    "listarMinhasTarefas": {
-      "kind": "qry",
-      "trigger": "listarMinhasTarefas",
       "returns": [
         "tarefas"
       ]
     },
-    "abrirTarefa": {
+    "qryTarefa": {
       "kind": "qry",
-      "trigger": "abrirTarefa",
+      "trigger": "qryTarefa",
       "returns": [
         "tarefa"
       ]
     },
-    "buscarMembros": {
+    "qryListasAtivas": {
       "kind": "qry",
-      "trigger": "buscarMembros",
+      "trigger": "onLoad",
+      "returns": [
+        "listas"
+      ]
+    },
+    "qryBuscarMembros": {
+      "kind": "qry",
+      "trigger": "qryBuscarMembros",
       "returns": [
         "membros"
       ]
     },
-    "criarTarefa": {
+    "cmdCriarTarefa": {
       "kind": "cmd",
       "trigger": "criarTarefa",
       "returns": [
-        "tarefa",
-        "resumo"
+        "tarefa"
       ],
       "writes": "Tarefa.create"
     },
-    "salvarEdicao": {
+    "cmdSalvarEdicao": {
       "kind": "cmd",
       "trigger": "salvarEdicao",
       "returns": [
-        "tarefa",
-        "resumo"
+        "tarefa"
       ],
       "writes": "Tarefa.update"
     },
-    "salvarChecklist": {
+    "cmdSalvarChecklist": {
       "kind": "cmd",
       "trigger": "salvarChecklist",
       "returns": [
-        "tarefa",
-        "resumo"
+        "tarefa"
       ],
       "writes": "ItemChecklist.update"
     },
-    "iniciarTarefa": {
+    "cmdIniciar": {
       "kind": "cmd",
       "trigger": "iniciar",
       "returns": [
-        "tarefa",
-        "resumo"
+        "tarefa"
       ],
       "writes": "Tarefa.iniciar"
     },
-    "enviarParaRevisao": {
+    "cmdEnviarRevisao": {
       "kind": "cmd",
       "trigger": "enviarRevisao",
       "returns": [
-        "tarefa",
-        "resumo"
+        "tarefa"
       ],
       "writes": "Tarefa.enviarParaRevisao"
     },
-    "aceitarTarefa": {
+    "cmdAceitar": {
       "kind": "cmd",
       "trigger": "aceitar",
       "returns": [
-        "tarefa",
-        "resumo"
+        "tarefa"
       ],
       "writes": "Tarefa.aceitar"
     },
-    "devolverTarefa": {
+    "cmdDevolver": {
       "kind": "cmd",
       "trigger": "devolver",
       "returns": [
-        "tarefa",
-        "resumo"
+        "tarefa"
       ],
       "writes": "Tarefa.devolver"
     },
-    "cancelarTarefa": {
+    "cmdCancelar": {
       "kind": "cmd",
       "trigger": "cancelar",
       "returns": [
-        "tarefa",
-        "resumo"
+        "tarefa"
       ],
       "writes": "Tarefa.cancelar"
     }
   },
   "states": {
     "tarefas": {
-      "source": "carregarMinhasTarefas.tarefas",
-      "description": "the list of Tarefa em forma resumida: título, lista, responsável, criador, prioridade, prazo, situação e indicadores.",
+      "source": "qryMinhasTarefas.tarefas",
+      "description": "the list of Tarefa resumida com lista, responsável, criador, prazo, situação e indicadores de prazo, subtarefas e checklist.",
       "organisms": [
         "listaTarefas"
       ]
     },
     "tarefa": {
-      "source": "abrirTarefa.tarefa",
-      "description": "Tarefa completa com lista, criador, responsável, datas do ciclo, motivo da devolução e itens da checklist em ordem.",
+      "source": "qryTarefa.tarefa",
+      "description": "Tarefa completa com lista, criador, responsável, situação, marcos do ciclo, motivo da devolução, papel de quem consulta e checklist ordenada.",
       "organisms": [
         "acoesTarefa",
         "detalheTarefa",
@@ -167,15 +158,15 @@ export const definition = {
       ]
     },
     "listas": {
-      "source": "carregarMinhasTarefas.listas",
-      "description": "the list of Lista que pode receber tarefas, com nome, tipo e indicação de ativa.",
+      "source": "qryListasAtivas.listas",
+      "description": "the list of Lista ativa que pode receber tarefas, com nome e tipo.",
       "organisms": [
         "formTarefa"
       ]
     },
     "membros": {
-      "source": "buscarMembros.membros",
-      "description": "the list of Membro da equipe com id e nome.",
+      "source": "qryBuscarMembros.membros",
+      "description": "the list of Membro da equipe que pode ser escolhido como responsável, com nome e situação no cadastro.",
       "organisms": [
         "formTarefa"
       ]
