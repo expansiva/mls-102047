@@ -1,0 +1,270 @@
+/// <mls fileReference="_102047_/l2/inicio/web/shared/meu_cadastro.ts" enhancement="_102020_/l2/enhancementAura"/>
+import { property } from 'lit/decorators.js';
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import { execBff } from '/_102029_/l2/bffClient.js';
+import { getState, setState, subscribe, unsubscribe } from '/_102029_/l2/collabState.js';
+import { runBlockingUiAction } from '/_102029_/l2/interactionRuntime.js';
+import type { Meu_cadastroContracts, MeuCadastro, EmpresaDaPessoa } from '/_102047_/l2/inicio/web/contracts/meu_cadastro.defs.js';
+export type { Meu_cadastroContracts, MeuCadastro, EmpresaDaPessoa } from '/_102047_/l2/inicio/web/contracts/meu_cadastro.defs.js';
+type Input<R extends keyof Meu_cadastroContracts> = Meu_cadastroContracts[R]['input'];
+type Output<R extends keyof Meu_cadastroContracts> = Meu_cadastroContracts[R]['output'];
+export type ErrorState = { code: string; message: string; details?: unknown } | null;
+/** Draft of the minimum data the person types: only what the platform still lacks. Every leaf is null until typed. */
+export type SalvarMeusDadosDraft = {
+details: {
+identification: {
+name: string | null;
+countryCode: string | null;
+};
+person: {
+privacyConsent: string | null;
+};
+};
+};
+function emptySalvarMeusDadosDraft(): SalvarMeusDadosDraft {
+return {
+details: {
+identification: { name: null, countryCode: null },
+person: { privacyConsent: null },
+},
+};
+}
+type StateMember =
+| 'meuCadastro'
+| 'pessoaOrganizacaoId'
+| 'salvarMeusDadosDraft'
+| 'pageStatus'
+| 'qryMeuCadastroStatus'
+| 'qryMeuCadastroError'
+| 'salvarMeusDadosStatus'
+| 'salvarMeusDadosError'
+| 'scenary';
+const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
+'ui.inicio.meu_cadastro.meuCadastro': 'meuCadastro',
+'ui.inicio.meu_cadastro.pessoaOrganizacaoId': 'pessoaOrganizacaoId',
+'ui.inicio.meu_cadastro.salvarMeusDadosDraft': 'salvarMeusDadosDraft',
+'ui.inicio.meu_cadastro.pageStatus': 'pageStatus',
+'ui.inicio.meu_cadastro.qryMeuCadastroStatus': 'qryMeuCadastroStatus',
+'ui.inicio.meu_cadastro.qryMeuCadastroError': 'qryMeuCadastroError',
+'ui.inicio.meu_cadastro.salvarMeusDadosStatus': 'salvarMeusDadosStatus',
+'ui.inicio.meu_cadastro.salvarMeusDadosError': 'salvarMeusDadosError',
+'ui.inicio.meu_cadastro.scenary': 'scenary',
+};
+const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
+const PERSIST_KEY_PESSOA_ORGANIZACAO_ID = 'inicio.meu_cadastro.pessoaOrganizacaoId';
+export class InicioMeu_cadastroShared extends StateLitElement {
+/** state meuCadastro — the person's own registration in the organization, with access situation, missing minimum data, contacts, links and company; source qryMeuCadastro.meuCadastro; organisms acoesMeuCadastro, andamentoLiberacao, avisoLiberacao, dadosMinimosForm, meuCadastroResumo */
+@property({ attribute: false }) meuCadastro: MeuCadastro | null = null;
+/** state pessoaOrganizacaoId — id of the registration selected by the entry param (the session person's own record); source entry.params.pessoaOrganizacaoId; organism meuCadastroResumo; persisted */
+@property({ attribute: false }) pessoaOrganizacaoId: string | null = null;
+/** state salvarMeusDadosDraft — draft of the minimum data form (name, country, privacy consent) typed by the person; source salvarMeusDados.input; organism dadosMinimosForm */
+@property({ attribute: false }) salvarMeusDadosDraft: SalvarMeusDadosDraft = emptySalvarMeusDadosDraft();
+/** state pageStatus — overall status of the page: idle, loading, empty, success or error; source page load */
+@property({ attribute: false }) pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error' = 'idle';
+/** state qryMeuCadastroStatus — status of the request qryMeuCadastro (idle, loading, success, error) */
+@property({ attribute: false }) qryMeuCadastroStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state qryMeuCadastroError — error of the request qryMeuCadastro (also client.selectionInvalid); null when none */
+@property({ attribute: false }) qryMeuCadastroError: ErrorState = null;
+/** state salvarMeusDadosStatus — status of the command salvarMeusDados (idle, loading, success, error) */
+@property({ attribute: false }) salvarMeusDadosStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state salvarMeusDadosError — error of the command salvarMeusDados; null when none */
+@property({ attribute: false }) salvarMeusDadosError: ErrorState = null;
+/** state scenary — the visible scene of the page; '' until the page shows its first scene */
+@property({ attribute: false }) scenary = '';
+private publish<M extends StateMember>(member: M, value: this[M]): void {
+(this as unknown as Record<string, unknown>)[member] = value;
+setState(`ui.inicio.meu_cadastro.${member}`, value);
+if (member === 'pessoaOrganizacaoId') {
+try {
+if (value === null || value === undefined) {
+localStorage.removeItem(PERSIST_KEY_PESSOA_ORGANIZACAO_ID);
+} else {
+localStorage.setItem(PERSIST_KEY_PESSOA_ORGANIZACAO_ID, String(value));
+}
+} catch {
+// storage unavailable: the value stays in memory only
+}
+}
+}
+private assignState(key: string, value: unknown): void {
+const member = STATE_MEMBER_BY_KEY[key];
+if (member) (this as unknown as Record<string, unknown>)[member] = value;
+}
+public connectedCallback(): void {
+super.connectedCallback();
+const storedCadastro = getState('ui.inicio.meu_cadastro.meuCadastro');
+if (storedCadastro !== undefined) {
+this.assignState('ui.inicio.meu_cadastro.meuCadastro', storedCadastro);
+}
+this.resetVisit();
+subscribe([...STATE_KEYS], this);
+this.applyEntryParams();
+void this.updateComplete.then(() => this.qryMeuCadastro());
+}
+public disconnectedCallback(): void {
+unsubscribe([...STATE_KEYS], this);
+super.disconnectedCallback();
+}
+public handleIcaStateChange(key: string, value: any): void {
+if (!(key in STATE_MEMBER_BY_KEY)) {
+super.handleIcaStateChange(key, value);
+return;
+}
+if (value === undefined) return;
+this.assignState(key, value);
+this.requestUpdate();
+}
+/** Transient members start fresh on every entry. */
+private resetVisit(): void {
+this.publish('pageStatus', 'idle');
+this.publish('qryMeuCadastroStatus', 'idle');
+this.publish('qryMeuCadastroError', null);
+this.publish('salvarMeusDadosStatus', 'idle');
+this.publish('salvarMeusDadosError', null);
+this.publish('salvarMeusDadosDraft', emptySalvarMeusDadosDraft());
+this.publish('scenary', '');
+}
+/** Clears the result of every command so an old success or error never sits next to new input. */
+private resetCommandResults(): void {
+this.publish('salvarMeusDadosStatus', 'idle');
+this.publish('salvarMeusDadosError', null);
+}
+private applyEntryParams(): void {
+let raw: string | null = new URLSearchParams(window.location.search).get('pessoaOrganizacaoId');
+if (raw === null || raw === '') {
+raw = null;
+try {
+const stored = localStorage.getItem(PERSIST_KEY_PESSOA_ORGANIZACAO_ID);
+if (stored !== null && stored !== '') raw = stored;
+} catch {
+raw = null;
+}
+}
+this.publish('pessoaOrganizacaoId', raw);
+}
+/** Publishes client.selectionInvalid when the selected id is not the loaded registration; clears that error otherwise. */
+private checkSelection(): void {
+const id = this.pessoaOrganizacaoId;
+const record = this.meuCadastro;
+if (id !== null && record !== null && record.id !== id) {
+this.publish('qryMeuCadastroError', { code: 'client.selectionInvalid', message: '', details: { id } });
+return;
+}
+if (this.qryMeuCadastroError !== null && this.qryMeuCadastroError.code === 'client.selectionInvalid') {
+this.publish('qryMeuCadastroError', null);
+}
+}
+/** The selected record for the detail organism meuCadastroResumo: the loaded registration when no id is selected or the id matches it; null otherwise. */
+public get meuCadastroResumo(): MeuCadastro | null {
+const record = this.meuCadastro;
+if (record === null) return null;
+if (this.pessoaOrganizacaoId === null || this.pessoaOrganizacaoId === record.id) return record;
+return null;
+}
+/** select — chooses which registration the summary shows by id (null clears it); the id must be the loaded registration, otherwise client.selectionInvalid is published in qryMeuCadastroError */
+public selectMeuCadastroResumo(id: string | null): void {
+this.resetCommandResults();
+this.publish('pessoaOrganizacaoId', id !== null && id !== '' ? id : null);
+this.checkSelection();
+}
+/** Sets the visible scene of the page (publishes scenary). */
+public setScenario(value: string): void {
+this.resetCommandResults();
+this.publish('scenary', value);
+}
+/** draft — replaces the whole draft of the minimum data form (name, countryCode, privacyConsent); pass a new object each time */
+public setSalvarMeusDadosDraft(value: SalvarMeusDadosDraft): void {
+this.resetCommandResults();
+this.publish('salvarMeusDadosDraft', value);
+}
+/** request qryMeuCadastro — loads in one call the registration of the logged person (access situation, missing data, release notice, request progress, company name); redraws meuCadastro (replace); no arguments, also the method to reload the page */
+public async qryMeuCadastro(): Promise<void> {
+if (this.qryMeuCadastroStatus === 'loading') return;
+this.publish('qryMeuCadastroStatus', 'loading');
+this.publish('qryMeuCadastroError', null);
+this.publish('pageStatus', 'loading');
+try {
+const input: Input<'inicio.meu_cadastro.qryMeuCadastro'> = {};
+const response = await execBff<Output<'inicio.meu_cadastro.qryMeuCadastro'>>('inicio.meu_cadastro.qryMeuCadastro', input, { mode: 'silent' });
+if (!response.ok || !response.data) {
+this.publish('qryMeuCadastroError', response.error);
+this.publish('qryMeuCadastroStatus', 'error');
+this.publish('pageStatus', 'error');
+return;
+}
+this.publish('meuCadastro', response.data.meuCadastro);
+this.publish('qryMeuCadastroStatus', 'success');
+this.publish('pageStatus', 'success');
+this.checkSelection();
+} catch (error) {
+const name = error instanceof Error ? error.name : 'unknown';
+this.publish('qryMeuCadastroError', { code: 'client.unexpected', message: '', details: { name } });
+this.publish('qryMeuCadastroStatus', 'error');
+this.publish('pageStatus', 'error');
+}
+}
+/** request salvarMeusDados — saves in the person's own registration the minimum data that was missing (name, country, privacy consent when the country requires it) from salvarMeusDadosDraft; id and version come from the loaded registration; redraws meuCadastro (replace with the returned record, recalculated access and missing data) and clears the draft; no arguments */
+public async salvarMeusDados(): Promise<void> {
+if (this.salvarMeusDadosStatus === 'loading') return;
+const record = this.meuCadastro;
+if (record === null) {
+this.publish('salvarMeusDadosError', { code: 'client.requiredMissing', message: '', details: { stateKeys: ['meuCadastro'] } });
+this.publish('salvarMeusDadosStatus', 'error');
+return;
+}
+const draft = this.salvarMeusDadosDraft;
+const name = draft.details.identification.name;
+const countryCode = draft.details.identification.countryCode;
+const privacyConsent = draft.details.person.privacyConsent;
+const hasName = name !== null && name !== '';
+const hasCountry = countryCode !== null && countryCode !== '';
+const hasConsent = privacyConsent !== null && privacyConsent !== '';
+if (!hasName && !hasCountry && !hasConsent) {
+this.publish('salvarMeusDadosError', {
+code: 'client.requiredMissing',
+message: '',
+details: { stateKeys: ['salvarMeusDadosDraft'] },
+});
+this.publish('salvarMeusDadosStatus', 'error');
+return;
+}
+const input: Input<'inicio.meu_cadastro.salvarMeusDados'> = {
+id: record.id,
+version: record.version,
+details: {
+identification: {
+...(hasName ? { name: name } : {}),
+...(hasCountry ? { countryCode: countryCode } : {}),
+},
+person: {
+...(hasConsent ? { privacyConsent: privacyConsent } : {}),
+},
+},
+};
+this.publish('salvarMeusDadosStatus', 'loading');
+this.publish('salvarMeusDadosError', null);
+try {
+const response = await runBlockingUiAction(signal =>
+execBff<Output<'inicio.meu_cadastro.salvarMeusDados'>>('inicio.meu_cadastro.salvarMeusDados', input, { mode: 'blocking', signal }),
+);
+if (response === undefined) {
+this.publish('salvarMeusDadosError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
+this.publish('salvarMeusDadosStatus', 'error');
+return;
+}
+if (!response.ok || !response.data) {
+this.publish('salvarMeusDadosError', response.error);
+this.publish('salvarMeusDadosStatus', 'error');
+return;
+}
+this.publish('meuCadastro', response.data.meuCadastro);
+this.publish('salvarMeusDadosDraft', emptySalvarMeusDadosDraft());
+this.checkSelection();
+this.publish('salvarMeusDadosStatus', 'success');
+} catch (error) {
+const errorName = error instanceof Error ? error.name : 'unknown';
+this.publish('salvarMeusDadosError', { code: 'client.unexpected', message: '', details: { name: errorName } });
+this.publish('salvarMeusDadosStatus', 'error');
+}
+}
+}

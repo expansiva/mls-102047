@@ -1,0 +1,212 @@
+/// <mls fileReference="_102047_/l2/inicio/web/mobile/page11/inicio_responsavel.ts" enhancement="_102020_/l2/enhancementAura"/>
+import { html, nothing } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { InicioInicio_responsavelShared } from '/_102047_/l2/inicio/web/shared/inicio_responsavel.js';
+import type { PessoaAguardandoLiberacao } from '/_102047_/l2/inicio/web/shared/inicio_responsavel.js';
+import '/_102040_/l2/molecules/groupviewcard/ml-vertical-card.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
+/// **collab_i18n_start**
+const pageMessage_pt_br = {
+pageTitle: 'Início',
+headlineEmpresa: 'A empresa ainda precisa de dados seus',
+headlinePessoas: 'Há pessoas aguardando a sua liberação',
+headlineGood: 'Nada precisa de atenção agora',
+headlineError: 'Não foi possível carregar tudo',
+empresaLaneLabel: 'Empresa',
+empresaIncompleta: 'Faltam dados obrigatórios para a empresa ficar preparada',
+empresaMissingLabel: 'Dados que faltam',
+empresaAct: 'Completar dados da empresa',
+empresaOk: 'Empresa preparada',
+pessoasTitle: 'Pessoas aguardando sua liberação',
+pessoasEmpty: 'Ninguém aguarda liberação no momento.',
+pessoasMore: 'Ver todas as pessoas desta lista',
+pessoasLoadMore: 'Carregar mais pessoas',
+statusActive: 'Ativa',
+statusInactive: 'Inativa',
+statusMerged: 'Unificada',
+statusBlocked: 'Bloqueada',
+stripLabel: 'Acesso das pessoas',
+stripComplete: 'com acesso completo',
+stripMissing: 'com dados faltando',
+stripConsent: 'com consentimento pendente',
+openPeople: 'Abrir pessoas da organização',
+retry: 'Tentar de novo',
+empresaError: 'Não foi possível carregar a situação da empresa.',
+pessoasError: 'Não foi possível carregar as pessoas que aguardam liberação.',
+stripError: 'Não foi possível carregar os números de acesso.',
+preTitle: 'Falta algo para abrir esta tela',
+preBody: 'Esta tela precisa da sessão da sua empresa para mostrar a situação. Volte ao início do módulo e abra a tela de novo.',
+loading: 'Carregando',
+navError: 'Não foi possível abrir a próxima tela. Tente de novo.',
+};
+type PageMessageType = typeof pageMessage_pt_br;
+const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
+/// **collab_i18n_end**
+const fmt = (n: number) => new Intl.NumberFormat(document.documentElement.lang || undefined).format(n);
+const VISIBLE_ROWS = 3;
+@customElement('inicio--web--mobile--page11--inicio_responsavel-102047')
+export class InicioMobilePage11Inicio_responsavelPage extends InicioInicio_responsavelShared {
+private msg: PageMessageType = pageMessage_pt_br;
+private statusLabel(s: PessoaAguardandoLiberacao['details']['identification']['status']) {
+switch (s) {
+case 'Active': return this.msg.statusActive;
+case 'Inactive': return this.msg.statusInactive;
+case 'Merged': return this.msg.statusMerged;
+default: return this.msg.statusBlocked;
+}
+}
+private skeleton(lines: number) {
+return html`<div class="flex flex-col gap-2" aria-busy="true" aria-label=${this.msg.loading}>
+${Array.from({ length: lines }, () => html`<div class="h-12 animate-pulse rounded-lg bg-[var(--surface-alt-bg,transparent)]"></div>`)}
+</div>`;
+}
+private retryBlock(text: string, onRetry: () => void) {
+return html`<div class="flex flex-col items-start gap-2 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-3" aria-live="polite">
+<p class="text-sm text-[var(--status-error-text,currentColor)]">${text}</p>
+<molecules--grouptriggeraction--ml-button-standard-102040 data-variant="secondary" size="md" data-class="min-h-[44px]" @action=${onRetry}>
+<Label>${this.msg.retry}</Label>
+</molecules--grouptriggeraction--ml-button-standard-102040>
+</div>`;
+}
+private headline() {
+const loading = this.pageStatus === 'loading' || this.pageStatus === 'idle';
+if (loading) return html`<div class="h-8 w-3/4 animate-pulse rounded bg-[var(--surface-alt-bg,transparent)]" aria-busy="true"></div>`;
+let text: string;
+if (this.empresa && !this.empresa.details.inicio.preparada) text = this.msg.headlineEmpresa;
+else if (this.pageStatus === 'error') text = this.msg.headlineError;
+else if (this.pageStatus === 'empty') text = this.msg.headlineGood;
+else text = this.msg.headlinePessoas;
+return html`<h2 class="text-xl font-semibold leading-snug text-[var(--text-strong,currentColor)]" aria-live="polite">${text}</h2>`;
+}
+private renderEmpresa() {
+const e = this.empresa;
+if (!e) {
+if (this.qryPainelResponsavelStatus === 'error') return this.retryBlock(this.msg.empresaError, () => this.qryPainelResponsavel());
+return this.skeleton(1);
+}
+if (e.details.inicio.preparada) {
+return html`<p class="min-h-[44px] flex items-center gap-2 text-sm text-[var(--text-muted,currentColor)]">
+<span>${this.msg.empresaOk}</span><span aria-hidden="true">·</span><span class="break-words">${e.details.identification.name}</span>
+</p>`;
+}
+return html`<molecules--groupviewcard--ml-vertical-card-102040 clickable data-class="w-full" @cardClick=${() => this.irPrepararEmpresa()}>
+<CardHeader>
+<CardTitle>${e.details.identification.name}</CardTitle>
+<CardDescription>${this.msg.empresaIncompleta}</CardDescription>
+</CardHeader>
+<CardContent>
+<p class="mb-1 text-xs text-[var(--text-muted,currentColor)]">${this.msg.empresaMissingLabel}</p>
+<ul class="flex flex-col gap-1 text-sm text-[var(--status-warning-text,currentColor)]">
+${e.details.inicio.dadosFaltantes.map((d) => html`<li>${d}</li>`)}
+</ul>
+</CardContent>
+<CardFooter><span class="inline-flex min-h-[44px] items-center text-sm font-medium text-[var(--link-text,currentColor)]">${this.msg.empresaAct} →</span></CardFooter>
+</molecules--groupviewcard--ml-vertical-card-102040>`;
+}
+private personRow(p: PessoaAguardandoLiberacao) {
+const faltando = p.details.inicio.dadosFaltantes.join(', ');
+const selected = this.pessoaOrganizacaoId === p.id;
+return html`<li>
+<button type="button" aria-current=${selected ? 'true' : 'false'}
+class="flex min-h-[56px] w-full items-start justify-between gap-3 border-b border-[var(--border-subtle,currentColor)] px-3 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] ${selected ? 'bg-[var(--selected-bg,transparent)] text-[var(--selected-text,currentColor)]' : 'bg-[var(--surface-bg,transparent)]'}"
+@click=${() => this.abrirPessoaParaLiberar(p.id)}>
+<span class="flex min-w-0 flex-1 flex-col">
+<span class="break-words font-medium text-[var(--text-strong,currentColor)]">${p.details.identification.name}</span>
+<span class="break-words text-sm text-[var(--text-muted,currentColor)]">${p.details.base.contacts}</span>
+</span>
+${faltando
+? html`<span class="max-w-[50%] shrink-0 text-right text-sm font-medium tabular-nums text-[var(--status-warning-text,currentColor)]">${faltando}</span>`
+: html`<span class="shrink-0 text-right text-sm text-[var(--text-muted,currentColor)]">${this.statusLabel(p.details.identification.status)}</span>`}
+</button>
+</li>`;
+}
+private renderPessoas() {
+const st = this.qryPessoasAguardandoLiberacaoStatus;
+const pg = this.pessoas;
+if (!pg) {
+if (st === 'error') return this.retryBlock(this.msg.pessoasError, () => this.qryPessoasAguardandoLiberacao());
+return this.skeleton(3);
+}
+if (this.pageStatus === 'empty') {
+return html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.pessoasEmpty}</p>`;
+}
+const first = pg.items.slice(0, VISIBLE_ROWS);
+const rest = pg.items.slice(VISIBLE_ROWS);
+return html`
+<ul class="overflow-hidden rounded-lg border border-[var(--border-default,currentColor)]">${first.map((p) => this.personRow(p))}</ul>
+${rest.length
+? html`<details class="mt-2">
+<summary class="flex min-h-[44px] cursor-pointer items-center text-sm font-medium text-[var(--link-text,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${this.msg.pessoasMore}</summary>
+<ul class="overflow-hidden rounded-lg border border-[var(--border-default,currentColor)]">${rest.map((p) => this.personRow(p))}</ul>
+</details>`
+: nothing}
+${pg.hasMore
+? html`<div class="mt-2">
+<molecules--grouptriggeraction--ml-button-standard-102040 data-variant="secondary" size="md" data-class="min-h-[44px] w-full"
+?loading=${st === 'loading'} @action=${() => this.qryPessoasAguardandoLiberacao(pg.page + 1, true)}>
+<Label>${this.msg.pessoasLoadMore}</Label>
+</molecules--grouptriggeraction--ml-button-standard-102040>
+</div>`
+: nothing}
+${this.qryPessoasAguardandoLiberacaoError
+? html`<p class="mt-2 text-sm text-[var(--status-error-text,currentColor)]" aria-live="polite">${this.msg.navError}</p>`
+: nothing}`;
+}
+private renderStrip() {
+const i = this.indicadores;
+if (!i) {
+if (this.qryPainelResponsavelStatus === 'error') return this.retryBlock(this.msg.stripError, () => this.qryPainelResponsavel());
+return this.skeleton(1);
+}
+const pair = (n: number, label: string) => html`<div class="flex items-baseline gap-1.5">
+<dd class="order-1 text-base font-semibold tabular-nums text-[var(--text-default,currentColor)]">${fmt(n)}</dd>
+<dt class="order-2 text-sm text-[var(--text-muted,currentColor)]">${label}</dt>
+</div>`;
+return html`<dl class="flex flex-wrap gap-x-5 gap-y-1">
+${pair(i.totalAcessoCompleto, this.msg.stripComplete)}
+${pair(i.totalComDadosFaltando, this.msg.stripMissing)}
+${pair(i.totalConsentimentoPendente, this.msg.stripConsent)}
+</dl>`;
+}
+render() {
+this.msg = pageMessages[this.getMessageKey(pageMessages)];
+const pre = this.pageStatus === 'error' && this.qryPainelResponsavelError?.code === 'client.preconditionMissing';
+if (pre) {
+return html`<main class="mx-auto flex min-h-screen w-full max-w-[430px] flex-col gap-4 bg-[var(--page-bg,transparent)] px-4 py-8 text-[var(--text-default,currentColor)]">
+<h1 class="text-sm font-medium text-[var(--text-muted,currentColor)]">${this.msg.pageTitle}</h1>
+<div class="flex flex-col gap-3" aria-live="polite">
+<h2 class="text-xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.preTitle}</h2>
+<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.preBody}</p>
+<molecules--grouptriggeraction--ml-button-standard-102040 data-variant="primary" size="md" data-class="min-h-[44px] w-full" @action=${() => this.qryPainelResponsavel()}>
+<Label>${this.msg.retry}</Label>
+</molecules--grouptriggeraction--ml-button-standard-102040>
+</div>
+</main>`;
+}
+return html`<main class="mx-auto flex min-h-screen w-full max-w-[430px] flex-col gap-5 bg-[var(--page-bg,transparent)] px-4 py-5 text-[var(--text-default,currentColor)]" aria-busy=${this.pageStatus === 'loading' ? 'true' : 'false'}>
+<header class="flex flex-col gap-2">
+<h1 class="text-sm font-medium text-[var(--text-muted,currentColor)]">${this.msg.pageTitle}</h1>
+${this.headline()}
+</header>
+<section data-organism-id="situacaoEmpresa" aria-label=${this.msg.empresaLaneLabel} class="flex flex-col gap-2">
+${this.renderEmpresa()}
+${this.qryPainelResponsavelError && this.qryPainelResponsavelError.code !== 'client.preconditionMissing' && this.empresa
+? html`<p class="text-sm text-[var(--status-error-text,currentColor)]" aria-live="polite">${this.msg.navError}</p>`
+: nothing}
+</section>
+<section data-organism-id="pessoasAguardandoLiberacao" class="flex flex-col gap-2">
+<h2 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pessoasTitle}</h2>
+${this.renderPessoas()}
+</section>
+<section data-organism-id="indicadoresAcessoPessoas" class="flex flex-col gap-1 border-t border-[var(--border-subtle,currentColor)] pt-4">
+<h2 class="text-xs font-medium text-[var(--text-muted,currentColor)]">${this.msg.stripLabel}</h2>
+${this.renderStrip()}
+<div>
+<molecules--grouptriggeraction--ml-button-standard-102040 data-variant="link" size="md" data-class="min-h-[44px]" @action=${() => this.verPessoasOrganizacao()}>
+<Label>${this.msg.openPeople}</Label>
+</molecules--grouptriggeraction--ml-button-standard-102040>
+</div>
+</section>
+</main>`;
+}
+}

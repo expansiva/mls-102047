@@ -1,0 +1,43 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { MeuAcesso, PendenciaAcesso, EmpresaDestaque } from '/_102047_/l2/inicio/web/contracts/inicio_pessoa.defs.js';
+export type { Inicio_pessoaContracts, MeuAcesso, MeuAcessoDetalhes, MeuAcessoIdentificacao, MeuAcessoInicio, PendenciaAcesso, EmpresaDestaque, EmpresaDestaqueDetalhes, EmpresaDestaqueIdentificacao, EmpresaDestaqueCompanhia, } from '/_102047_/l2/inicio/web/contracts/inicio_pessoa.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export declare class InicioInicio_pessoaShared extends StateLitElement {
+    /** state meuAcesso — person record linked to the session, with the status of the minimum data (complete access, missing data, consent required); source qryInicioPessoa.meuAcesso; organisms pendenciasMeuAcesso, resumoMeuAcesso */
+    meuAcesso: MeuAcesso | null;
+    /** state pendencias — short non-paged list of things waiting for the person: ask the responsible to release access, or complete the minimum data; empty when access is complete and linked; source qryInicioPessoa.pendencias; organism pendenciasMeuAcesso */
+    pendencias: PendenciaAcesso[];
+    /** state empresa — company the person belongs to, with the fields the person may see (name and trade name); null when none; source qryInicioPessoa.empresa; organism destaqueEmpresa */
+    empresa: EmpresaDestaque | null;
+    /** state pageStatus — overall status of the page load: idle, loading, empty, success or error; derived from qryInicioPessoa */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state qryInicioPessoaStatus — status of the request qryInicioPessoa: idle, loading, success or error */
+    qryInicioPessoaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state qryInicioPessoaError — error of the request qryInicioPessoa (code, message, details), or null */
+    qryInicioPessoaError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private hydrateData;
+    private resetVisit;
+    /** setScenario — publishes the visible scene of the page (state scenary); not persisted, never in the URL */
+    setScenario(value: string): void;
+    /** request qryInicioPessoa — loads at once the person's access status, the pending items waiting for the person and the person's company; replaces meuAcesso, pendencias and empresa; no arguments (the person is the one in the session); also the method to reload the page */
+    qryInicioPessoa(): Promise<void>;
+    /** Opens meu_cadastro carrying the id of the person's record (entry param pessoaOrganizacaoId); refuses with client.preconditionMissing when the record is not loaded */
+    private openMeuCadastro;
+    /** navigate (organism resumoMeuAcesso) — opens the person's own registration page (meu_cadastro) with the id of the loaded person record; takes no argument */
+    abrirMeuCadastroResumo(): void;
+    /** navigate (organism pendenciasMeuAcesso) — opens meu_cadastro so the person completes the missing minimum data (pending item completarDadosMinimos); takes no argument */
+    completarDadosMinimos(): void;
+    /** navigate (organism pendenciasMeuAcesso) — opens meu_cadastro to forward the access release request to the responsible (pending item pedirLiberacao); takes no argument */
+    encaminharPedidoLiberacao(): void;
+}

@@ -1,0 +1,66 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { Inicio_responsavelContracts, SituacaoEmpresa, IndicadoresAcessoPessoas, PessoaAguardandoLiberacao } from '/_102047_/l2/inicio/web/contracts/inicio_responsavel.defs.js';
+export type { Inicio_responsavelContracts, SituacaoEmpresa, IndicadoresAcessoPessoas, PessoaAguardandoLiberacao } from '/_102047_/l2/inicio/web/contracts/inicio_responsavel.defs.js';
+type Output<R extends keyof Inicio_responsavelContracts> = Inicio_responsavelContracts[R]['output'];
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+export type PessoasPage = Output<'inicio.inicio_responsavel.qryPessoasAguardandoLiberacao'>['pessoas'];
+type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
+type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export declare class InicioInicio_responsavelShared extends StateLitElement {
+    /** state empresa — situation of the company that owns the app: name, whether it is prepared and which required data is missing; source qryPainelResponsavel.empresa; organism situacaoEmpresa */
+    empresa: SituacaoEmpresa | null;
+    /** state indicadores — counts of the access situation of the organization people (complete access, missing data, pending consent); source qryPainelResponsavel.indicadores; organism indicadoresAcessoPessoas */
+    indicadores: IndicadoresAcessoPessoas | null;
+    /** state pessoas — page { items, page, pageSize, hasMore } of the organization people whose access awaits release, with name, status, contacts and missing minimum data; source qryPessoasAguardandoLiberacao.pessoas; organism pessoasAguardandoLiberacao */
+    pessoas: PessoasPage | null;
+    /** state pessoaOrganizacaoId — id of the selected person of the organization (entry param, selects the row of pessoas with that id); source entry.params.pessoaOrganizacaoId; organism indicadoresAcessoPessoas; persisted */
+    pessoaOrganizacaoId: string | null;
+    /** state pageStatus — overall status of the page load: loading while the initial requests run, error if one failed, empty when the loaded list is empty, success otherwise; source page */
+    pageStatus: PageStatus;
+    /** state qryPainelResponsavelStatus — status of the request qryPainelResponsavel; source request */
+    qryPainelResponsavelStatus: RequestStatus;
+    /** state qryPainelResponsavelError — error of the request qryPainelResponsavel, null when none; source request */
+    qryPainelResponsavelError: ErrorState;
+    /** state qryPessoasAguardandoLiberacaoStatus — status of the request qryPessoasAguardandoLiberacao; source request */
+    qryPessoasAguardandoLiberacaoStatus: RequestStatus;
+    /** state qryPessoasAguardandoLiberacaoError — error of the request qryPessoasAguardandoLiberacao (also client.selectionInvalid), null when none; source request */
+    qryPessoasAguardandoLiberacaoError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private subscribed;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    private hydrateData;
+    private resetVisit;
+    private readUrlParam;
+    private applyEntryParams;
+    private loadInitial;
+    private refreshPageStatus;
+    private unexpectedError;
+    private findPessoa;
+    /** The selected person: the row of the loaded list pessoas whose id is pessoaOrganizacaoId; null when nothing is selected or the row is not loaded. Selection of the organism indicadoresAcessoPessoas. */
+    get indicadoresAcessoPessoas(): PessoaAguardandoLiberacao | null;
+    private checkSelection;
+    /** select — selects a person of the organization by id (or clears the selection with null); the selected record is the row of pessoas with that id (getter indicadoresAcessoPessoas). An id that no loaded row resolves publishes client.selectionInvalid in qryPessoasAguardandoLiberacaoError. Persisted as the entry param pessoaOrganizacaoId. */
+    selecionarPessoaOrganizacao(id: string | null): void;
+    /** request qryPainelResponsavel — loads the preparation situation of the company and the access counts of the organization people (no input, the session gives the company); redraws empresa and indicadores (replace). Also the method to reload the panel. */
+    qryPainelResponsavel(): Promise<void>;
+    /** request qryPessoasAguardandoLiberacao — lists, page by page, the organization people whose access awaits release, ordered by name; redraws pessoas (replace, or append the next page to items when append is true). Arguments: page — page number to load (default 1; the first page also serves as reload); append — true for a "load more" that adds the page to the current items (does nothing unless pessoas.hasMore). */
+    qryPessoasAguardandoLiberacao(page?: number, append?: boolean): Promise<void>;
+    /** setScenario — publishes the visible scene of the page (not persisted, never in the URL). */
+    setScenario(value: string): void;
+    private goTo;
+    /** navigate — opens the company page (/inicio/empresa) to complete the missing company data, carrying the company id as empresaId; refuses with client.preconditionMissing in qryPainelResponsavelError when the company is not loaded. */
+    irPrepararEmpresa(): void;
+    /** navigate — opens the organization people page (/inicio/pessoas_organizacao), carrying the company id as empresaId and the selected person, when there is one, as pessoaOrganizacaoId. */
+    verPessoasOrganizacao(): void;
+    /** navigate — opens the organization people page (/inicio/pessoas_organizacao) on the person to release. Argument: pessoaId — id of the person row the user opens (carried as pessoaOrganizacaoId, with the company id as empresaId); refuses with client.preconditionMissing in qryPessoasAguardandoLiberacaoError when null. */
+    abrirPessoaParaLiberar(pessoaId: string | null): void;
+}

@@ -1,0 +1,64 @@
+import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
+import type { MeuCadastro } from '/_102047_/l2/inicio/web/contracts/meu_cadastro.defs.js';
+export type { Meu_cadastroContracts, MeuCadastro, EmpresaDaPessoa } from '/_102047_/l2/inicio/web/contracts/meu_cadastro.defs.js';
+export type ErrorState = {
+    code: string;
+    message: string;
+    details?: unknown;
+} | null;
+/** Draft of the minimum data the person types: only what the platform still lacks. Every leaf is null until typed. */
+export type SalvarMeusDadosDraft = {
+    details: {
+        identification: {
+            name: string | null;
+            countryCode: string | null;
+        };
+        person: {
+            privacyConsent: string | null;
+        };
+    };
+};
+export declare class InicioMeu_cadastroShared extends StateLitElement {
+    /** state meuCadastro — the person's own registration in the organization, with access situation, missing minimum data, contacts, links and company; source qryMeuCadastro.meuCadastro; organisms acoesMeuCadastro, andamentoLiberacao, avisoLiberacao, dadosMinimosForm, meuCadastroResumo */
+    meuCadastro: MeuCadastro | null;
+    /** state pessoaOrganizacaoId — id of the registration selected by the entry param (the session person's own record); source entry.params.pessoaOrganizacaoId; organism meuCadastroResumo; persisted */
+    pessoaOrganizacaoId: string | null;
+    /** state salvarMeusDadosDraft — draft of the minimum data form (name, country, privacy consent) typed by the person; source salvarMeusDados.input; organism dadosMinimosForm */
+    salvarMeusDadosDraft: SalvarMeusDadosDraft;
+    /** state pageStatus — overall status of the page: idle, loading, empty, success or error; source page load */
+    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
+    /** state qryMeuCadastroStatus — status of the request qryMeuCadastro (idle, loading, success, error) */
+    qryMeuCadastroStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state qryMeuCadastroError — error of the request qryMeuCadastro (also client.selectionInvalid); null when none */
+    qryMeuCadastroError: ErrorState;
+    /** state salvarMeusDadosStatus — status of the command salvarMeusDados (idle, loading, success, error) */
+    salvarMeusDadosStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state salvarMeusDadosError — error of the command salvarMeusDados; null when none */
+    salvarMeusDadosError: ErrorState;
+    /** state scenary — the visible scene of the page; '' until the page shows its first scene */
+    scenary: string;
+    private publish;
+    private assignState;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    handleIcaStateChange(key: string, value: any): void;
+    /** Transient members start fresh on every entry. */
+    private resetVisit;
+    /** Clears the result of every command so an old success or error never sits next to new input. */
+    private resetCommandResults;
+    private applyEntryParams;
+    /** Publishes client.selectionInvalid when the selected id is not the loaded registration; clears that error otherwise. */
+    private checkSelection;
+    /** The selected record for the detail organism meuCadastroResumo: the loaded registration when no id is selected or the id matches it; null otherwise. */
+    get meuCadastroResumo(): MeuCadastro | null;
+    /** select — chooses which registration the summary shows by id (null clears it); the id must be the loaded registration, otherwise client.selectionInvalid is published in qryMeuCadastroError */
+    selectMeuCadastroResumo(id: string | null): void;
+    /** Sets the visible scene of the page (publishes scenary). */
+    setScenario(value: string): void;
+    /** draft — replaces the whole draft of the minimum data form (name, countryCode, privacyConsent); pass a new object each time */
+    setSalvarMeusDadosDraft(value: SalvarMeusDadosDraft): void;
+    /** request qryMeuCadastro — loads in one call the registration of the logged person (access situation, missing data, release notice, request progress, company name); redraws meuCadastro (replace); no arguments, also the method to reload the page */
+    qryMeuCadastro(): Promise<void>;
+    /** request salvarMeusDados — saves in the person's own registration the minimum data that was missing (name, country, privacy consent when the country requires it) from salvarMeusDadosDraft; id and version come from the loaded registration; redraws meuCadastro (replace with the returned record, recalculated access and missing data) and clears the draft; no arguments */
+    salvarMeusDados(): Promise<void>;
+}
