@@ -328,3 +328,102 @@ jornada em `journeyDecisions`. A aprovação/rejeição (`Despesa`) está na jor
 ### Sem efeito para vocês
 - Grant `fieldsOnly` só com `deniedFields`: o D1 resolve a negação numa lista permitida e grava `allowedFields` como antes (d1_69).
 - "Derivado na entrada de uma leitura é filtro" (d1_73): o usecase já não traz entrada (§10).
+
+## 12b. Escopo `own`: o caminho é por entidade, e pode ter um passo inverso (How planner, 16/10/2026)
+
+Caso medido: `l1/inscricaoEvento/layer_2_application/scope/accessScope.defs.ts`, grant `publicoMinhasInscricoes` (escopo `own`, âncora `Participante`):
+`Inscricao` tem um passo (`Inscricao.participanteId → Participante`) e `Evento` saía com `steps: []`, `pending: ANCHOR_UNRESOLVED`. A spec `l1_d1_78` faz o
+D1 escrever o caminho do `Evento` que o L4 declara: **dois passos, o primeiro ao contrário** —
+`{ inscricaoEvento, from: Evento, to: Inscricao, field: Inscricao.eventoId }` e `{ inscricaoParticipante, from: Inscricao, to: Participante, field:
+Inscricao.participanteId }`. Nenhuma chave nova: o passo é inverso quando o prefixo do `field` é o `to`, não o `from`.
+
+**O que isso muda para vocês (medido em 16/10, `mls-102021` `29799b1`):**
+- Hoje `recordFieldFromGrant`/`recordHops` (`emitters/emit.ts:1075-1098`) descartam a entrada pendente, exigem **uma única cadeia de um passo por grant** e
+  aplicam o campo dela a **todas** as rotas do grant: por isso a rota de `Evento` recebia `participanteId`, campo que `Evento` não tem. Com o def novo
+  (duas cadeias resolvidas), `recordHops` devolve `[{}, {}]`, `recordField` fica vazio e o gate `ACCESS_ANCHOR` (`emitters/gate.ts:78`, e o `resolveGrant`
+  gerado no controller) passa a disparar em **todas** as rotas do grant. Ou seja: sem mudar a leitura, o def mais completo piora.
+- A leitura certa é **por entidade**: a entrada do `path` cuja `entityId` é a entidade do usecase. Um passo com o `field` do lado `from` = filtro direto
+  pela coluna (`row.participanteId = pessoa`). Cadeia que começa com passo inverso = join: `Evento.id IN (SELECT eventoId FROM Inscricao WHERE
+  participanteId = pessoa)`. `pending` naquela entrada = o gate de hoje, só para as rotas daquela entidade.
+- **O gate fica.** Ele protege o grant `own` sem caminho (ex.: `publicoMeuCadastro`/`EmailParticipante`, que continua pendente porque a relação é do
+  catálogo MDM, sem coluna). Tirar o gate faria qualquer pessoa logada ler os e-mails dos outros.
+
+## 13. O motor do processo sai do módulo e vai para o runtime (How planner, 16/10/2026; Wagner, 16/10: *"temos 2 motores, o cm e o l1"*)
+
+**A divisão:**
+- O L1 do módulo é o **motor do processo**: decide a etapa e é o único escritor do andamento.
+- O cm é o **motor dos atores**: pessoas, threads, avisos e canais. O cm nunca avança uma etapa.
+- O que é igual em todo processo vira **biblioteca do `mls-102034`**. O pedido ao runtime está em
+  `todo/runtime/tasks/backlog/fromHow_motor_do_processo_no_runtime.md`.
+- **O módulo gera só as decisões e a tabela de etapas.**
+- **Disponível desde 17/10 (rt78 e rt79, aceitas pelo supervisor do runtime; 102034 sem push):**
+  - **motor:** `/_102034_/l1/workflow/index.js` → `createMemoryOccurrencePort()`, `createWorkflowEngine(port)` (`engine.open(ctx, table, key, …)` →
+    `created|existing`; `engine.advance(ctx, table, key, { from, to | 'end', actorNow, done? })` → `advanced|unchanged|conflict` com o snapshot
+    atual; `engine.find`), `ownerOf(kind)`, `occurrenceRecordId(ctx, processId, seed?)` e `createOccurrenceContext(ctx, recordId)`. O id do registro
+    é o primeiro `newId` do contexto filho: conferir que o usecase de criação usa o primeiro `newId` para o registro (o `createTarefa.ts:157` usa);
+  - **cliente servidor→cm:** `/_102034_/l1/server/layer_1_external/collabMessages/client.js` → `createServerMessagesClient()`, com as seis
+    chamadas, cada uma com o `asUserId`;
+  - **limites:** a porta é **só em memória** (volátil por processo; não usar em produção). A porta cm espera o acerto do contrato no cm. Ações
+    disponíveis, prazos e entrada cm→app ficam fora.
+  - **A migração dos serviços gerados** (`cicloTarefa`, `avisoDiario` e o `liberacaoAcessoPessoa` do `inicio`) é de vocês, nesta seção. Até
+    migrar, o §11 continua valendo.
+
+### O que cada módulo passa a gerar
+1. **A tabela de etapas, por código, a partir do L4.**
+   - Cópia de `processes[].tasks[]`: `{ stepId, kind, actorRef?, journeyRef?, next }`.
+   - Sem status, sem "quem pode" e sem regra.
+   - O dono do step (pessoa, módulo, agente, relógio) vem do `kind`, por uma tabela da biblioteca. Não se escreve no módulo.
+2. **O status de destino de cada transição do processo, por código, a partir da ontologia** (o `to` da transição; ex.: `Tarefa.aceitar` →
+   `concluida`). A repetição depois da falha parcial precisa disso: é o que hoje o `rule.toStatus` da `TRANSITIONS` faz (`cicloTarefa.ts`,
+   caminho "the record already carries the target status").
+3. **As funções do L4** (`functions` do def), com a prosa do L4. Cada uma:
+   - lê o registro. Se ele **já está no status de destino** e a Task ainda está na etapa de origem (o registro foi gravado e a Task não), pula
+     o usecase e só chama `advance`;
+   - senão, chama o usecase. A guarda de status e o `authorize` dizem se pode;
+   - decide a próxima etapa (`to` ou `'end'`) e quem age agora;
+   - chama `advance` da biblioteca. Ela recusa etapa desconhecida e grava condicionado à etapa atual: quem segura "não adiantar etapa" é a
+     guarda do usecase mais essa gravação condicional, não o grafo.
+   - trocar só quem age (reatribuir) é `advance` com `to` igual a `from`. Repetir a mesma chamada não grava de novo; outra pessoa grava.
+   - se outra frente avançou antes (conflito do cm), a função devolve o estado atual, sem erro de sistema.
+4. **Para o primeiro canal, ainda não:** a lista de ações por etapa, gerada por código. São as transições dos `act` da jornada da etapa, com o
+   `payload` da transição na ontologia, para as "ações disponíveis".
+
+### O que sai do que foi gerado no `tarefas` (achados da análise do What, `what/docs/l4/analise_tarefas_materializado_20261016.md` §3)
+| hoje | depois |
+|---|---|
+| `adapters/workflow/taskOccurrence.ts`: ocorrência **em memória** | a porta da biblioteca (memória para teste, cm quando o cm tiver a Task de módulo) |
+| `TRANSITIONS` em `cicloTarefa.ts` (status de origem e destino, quem age) | sai. O "pode ou não" é do usecase (`usecases/aceitar.ts:96` já guarda o status) e do `authorize`. O serviço guarda só a etapa e a passagem de vez |
+| `isGestor` por `actorId === 'gestor'` ou pelo sufixo do scope | o grant do papel (`scope/accessScope.defs.ts`), como os handlers já fazem por rota (`grantIds`) |
+| `WORKFLOW_VERSION = '1'` | o id da release em execução (`getRunningRelease()`), gravado pela biblioteca no `open` |
+| duas chaves de idempotência (`requestMeta.requestId` **e** a coluna `chaveCriacao`) | uma só, o `meta.requestId`. Na tela, o id do registro sai de `occurrenceRecordId` (processo, pessoa, `requestId`), então a repetição acha o mesmo registro. No tick, que não tem pessoa nem `requestId`, vale a unicidade que o L4 já dá (`avisoUnicoPorResponsavelEDia`). A coluna fica sem leitor (o What tira dos próximos L4) |
+| 16 testes stub | testes executáveis do serviço sobre o adaptador em memória: abrir duas vezes com a mesma chave, avançar repetido, falha parcial na criação e no avanço (o registro gravado e a Task não) e duas frentes ao mesmo tempo (uma passa, a outra recebe o estado atual) |
+
+### Tipos do contrato com o cm
+Só `import type` de `/_102036_/l2/shared/interfaces.js`, sem nenhuma cópia nova de `TaskData`. Nenhum import de valor do 102036: o `api.ts`
+dele usa a sessão do navegador.
+
+## 14. O `inicio`: módulo só com papéis MDM (How planner, 17/10/2026)
+
+O `inicio` (onboarding da empresa e da pessoa; L4 em `7293668`) não tem tabela própria. Ele tem os papéis `PessoaOrganizacao` (Person),
+`Empresa` (Company) e `Contato` (ContactChannel). O que o def quer dizer:
+
+- **Escrever num papel é chamar a plataforma pela fachada MDM (`ctx.mdm`), nunca um insert.** O `mdm.calls` do usecase diz a chamada e a
+  capability:
+  - **o convite não é do módulo** (Wagner, 17/10: *"O convite para o login fica em outro lugar"*): quem chega tem login. O L4 do `inicio` vai
+    ser regerado sem o "convidar pessoas"; a liberação do caso ambíguo é a plataforma ligar o login ao cadastro certo, a pedido do responsável;
+  - o `update` da `PessoaOrganizacao` no "completar meu acesso" grava os dados da própria pessoa, **incluindo o consentimento**
+    (`Person.privacyConsent`, regra `rule-person-privacy-consent-required-br-eu`). O e-mail vem da sessão e não se edita;
+  - o `update` da `Empresa` é `edit.platformFields`, e o `Contato` é `register.createOrAttach`.
+- **A solicitação de liberação é da plataforma** (contrato com o runtime, 17/10). Ela guarda o pedido autenticado, com o e-mail verificado imutável.
+  O módulo só lê a solicitação e aciona a capability pelo id dela, nunca com e-mail solto ou `mdmId` arbitrário. O processo
+  `liberacaoAcessoPessoa` usa o id da solicitação como chave da ocorrência, e o `wait` termina quando a plataforma liga o login. "É este cadastro"
+  ou "é outra pessoa" quem decide é o responsável; quem executa é a plataforma.
+- **País desconhecido continua incompleto:** o autocadastro não usa o US como padrão. A tela pede o país e o consentimento.
+- **"Esta pessoa sou eu" não é do módulo.** Quem não tem pessoa passa pela rotina de autocadastro da plataforma antes de chegar ao Início
+  (`todo/runtime/tasks/backlog/fromHow_inicio_pecas_de_plataforma.md`). O módulo só faz o `update` de quem já existe.
+- **Os eventos de entrada** (`loginGranted`, `mdmUpdated`; o `inviteAccepted` sai com o convite) estão no catálogo, mas nada os publica hoje. A tela lê o estado ao
+  abrir, e não espera evento. O `MECHANISM_UNBOUND` deles no relatório é esperado.
+- **O processo `liberacaoAcesso`** (a pessoa pede, o responsável liga o login ao cadastro certo) sai como o do `tarefas`, com a ocorrência em memória até o
+  motor do runtime (§13).
+- **Autorização:** o papel vem do collab-auth (`verifiedAuthorities`); preencher cadastro não dá papel. O "responsável" é quem a plataforma diz,
+  nunca quem entrou primeiro.

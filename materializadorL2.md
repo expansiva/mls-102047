@@ -232,3 +232,24 @@ chave por submissão** quando o formulário de criação abre (uuid), manda a me
 só troca de chave depois do sucesso ou quando a pessoa limpa o formulário. O `bffClient` precisa aceitar o `requestId` do chamador: aviso ao
 runtime em `todo/runtime/tasks/backlog/fromHow_chave_de_submissao_no_bff.md` (hoje `createRequest`, `mls-102029/l2/bffClient.ts:188-199`, não o passa).
 Não é campo do contrato nem do shared; não entra em def nenhum.
+
+## 12. O que fica com a tela, pelos problemas do `tarefas` (How planner, 16/10/2026)
+
+O documento `problemas-defs-tarefas-16-10.md` de vocês foi medido item a item. O que é dos defs entra nos geradores (`l2_d2_100`–`l2_d2_102`;
+o `tarefas` é regerado na `l2_d2_103`), **sem chave nova** (estrutura congelada em 13/10) e **só com intenção**: o def diz o que é e o que
+precisa ser feito, nunca como a tela faz (Wagner, 13/10). O que muda no que vocês leem:
+
+- **A Saída e as descrições dizem o que volta, não o que fazer com isso.** As frases "para inserir na lista sem nova consulta", "substituir no
+  detalhe" e afins saem do texto. Se a tarefa salva continua na lista, com o filtro e a ordem da tela, é decisão de vocês (§5).
+- **A pessoa logada não vem como entrada de rota:** o servidor a resolve. Para mostrar ou esconder uma ação pela pessoa ("só o responsável
+  executa"), o contrato já devolve o `criadorId`/`responsavelId` da linha, e as `rules` dizem quem pode. A pessoa da sessão na tela foi pedida ao
+  runtime (`todo/runtime/tasks/backlog/fromHow_pessoa_da_sessao_na_tela.md`). Até lá, vale o §9: tratar a recusa sem quebrar a tela.
+- **Um param `select:<organismo>`** quer dizer que esse organismo seleciona um registro. **Os params de entrada** passam a ser só os filtros da
+  abertura da tela: busca, página e o id de uma consulta de detalhe não são params.
+- **Uma entrada de comando** que nenhum organismo mostra e que não vem da sessão nem da seleção é algo que a pessoa informa (ex.: o motivo da
+  devolução). Como pedir, é de vocês. O How mediu um gate para isso e não o criou: recusaria 24 de 128 organismos em 11 módulos que usam ação
+  com diálogo.
+- **O tipo do contrato é o dado** (uma lista é escolha múltipla; o período tem dois campos, `l2_d2_101`). A molécula sugerida é sugestão
+  (*"the defs wins on DATA"*).
+- **Histórico, "quem age agora" e a discussão** vêm do andamento da ocorrência, com o motor (`materializadorL1.md` §13). Até lá, a saída não os
+  traz.
