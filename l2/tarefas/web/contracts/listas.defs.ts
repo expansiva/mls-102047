@@ -1,91 +1,74 @@
 /// <mls fileReference="_102047_/l2/tarefas/web/contracts/listas.defs.ts" enhancement="_blank"/>
 
-/** Detalhes da lista exibidos no cadastro: tipo e tarefas abertas. */
-export interface ListaResumoDetalhes {
-  details: {
-    tipo: 'project' | 'area';
-  };
+/** Detalhes de uma lista: tipo, descrição e quantidade de tarefas abertas. */
+export interface ListaDetalhes {
+  tipo: 'project' | 'area';
+  descricao?: string;
   readonly quantidadeTarefasAbertas: number;
 }
 
-/** Linha do cadastro de listas. */
-export interface ListaResumo {
-  id: string;
-  nome: string;
-  ativa: boolean;
-  details: ListaResumoDetalhes;
-}
-
-/** Detalhes editáveis da lista. */
-export interface ListaEdicaoDetalhes {
-  details: {
-    tipo: 'project' | 'area';
-    descricao?: string;
-  };
-}
-
-/** Registro da lista carregado no formulário de edição. */
-export interface ListaEdicao {
+/** Lista de tarefas de um projeto ou área, com seus dados editáveis, versão e a quantidade de tarefas abertas. */
+export interface ListaCadastrada {
   id: string;
   version: number;
   nome: string;
   ativa: boolean;
-  details: ListaEdicaoDetalhes;
+  details: ListaDetalhes;
 }
 
 export interface ListasContracts {
   /**
-   * Finalidade: Carrega, ao abrir a página, todas as listas da organização para o gestor escolher qual manter.
-   * Entrada: Nenhuma entrada; o escopo é a organização do gestor da sessão.
-   * Processamento: Busca todas as listas (ativas e inativas) ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista e situação aFazer, emAndamento ou emRevisao; é um campo derivado, calculado na consulta e nunca gravado. Lista não paginada, pois o número de listas de projetos e áreas cabe numa tela.
-   * Saída: Lista de ListaResumo com id, nome, ativa, tipo e quantidade de tarefas abertas, no formato que o cadastro exibe.
+   * Finalidade: Carrega todas as listas da organização, ativas e inativas, com os dados necessários para exibir e editar cada uma.
+   * Entrada: Sem entrada; o escopo é a organização do gestor logado.
+   * Processamento: Lê todas as listas da organização ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista cuja situação não é concluída nem cancelada (campo derivado, nunca gravado).
+   * Saída: A coleção de listas, cada uma com id, versão, nome, ativa, tipo, descrição e quantidade de tarefas abertas.
    */
   'tarefas.listas.listarListas': {
     kind: 'qry';
     input: {};
-    output: { listas: ListaResumo[] };
+    output: { listas: ListaCadastrada[] };
     rules: [];
-    access: { actors: ['gestor']; grants: ['gestorTarefasEquipe', 'gestorListas']; scope: 'organization' };
+    access: { actors: ['gestor']; grants: ['gestorListas']; scope: 'organization' };
   };
   /**
-   * Finalidade: Abre os dados de uma lista escolhida no cadastro para edição no formulário.
-   * Entrada: listaId: id da lista selecionada no cadastro.
-   * Processamento: Lê a lista pelo id (read.byId) dentro da organização do gestor.
-   * Saída: ListaEdicao com id, version, nome, ativa, tipo e descrição, para preencher o formulário e enviar a versão ao salvar.
+   * Finalidade: Busca as listas cujo nome contém o trecho digitado pelo gestor.
+   * Entrada: busca: trecho do nome da lista; vazio devolve todas as listas.
+   * Processamento: Filtra as listas da organização pelo trecho do nome, sem diferenciar maiúsculas e minúsculas, ordenando por nome. Calcula quantidadeTarefasAbertas de cada lista contando as tarefas nem concluídas nem canceladas (derivado, nunca gravado).
+   * Saída: As listas encontradas, cada uma com id, versão, nome, ativa, tipo, descrição e quantidade de tarefas abertas.
    */
-  'tarefas.listas.obterLista': {
+  'tarefas.listas.buscarListas': {
     kind: 'qry';
-    input: { listaId: string };
-    output: { lista: ListaEdicao };
+    input: { busca: string };
+    output: { listas: ListaCadastrada[] };
     rules: [];
-    access: { actors: ['gestor']; grants: ['gestorTarefasEquipe', 'gestorListas']; scope: 'organization' };
+    access: { actors: ['gestor']; grants: ['gestorListas']; scope: 'organization' };
   };
   /**
    * Finalidade: Cadastra uma nova lista de projeto ou área.
-   * Entrada: nome: nome da lista; ativa: se recebe novas tarefas; tipo: project ou area; descricao: texto livre opcional.
-   * Processamento: listaMantidaPorGestor: recusa se o usuário da sessão não for gestor. listaNomeUnico: recusa se já existir lista com o mesmo nome. Grava a lista; id e version são gerados pelo sistema; quantidadeTarefasAbertas é calculada (zero para lista nova), nunca gravada.
-   * Saída: lista: a linha ListaResumo para inserir no cadastro; registro: ListaEdicao com id e version para o formulário continuar em edição sem nova chamada.
+   * Entrada: nome: nome da lista; details.tipo: projeto ou área; details.descricao: objetivo da lista (opcional); ativa: se a lista recebe novas tarefas.
+   * Processamento: listaMantidaPorGestor: recusa se quem chama não é gestor. listaNomeUnico: recusa se já existe outra lista com o mesmo nome. Grava a lista; quantidadeTarefasAbertas é derivada e começa em zero.
+   * Saída: A lista criada, com id, versão inicial, dados gravados e quantidade de tarefas abertas.
    */
   'tarefas.listas.criarLista': {
     kind: 'cmd';
     writes: 'Lista.create';
-    input: { nome: string; ativa: boolean; details: { tipo: 'project' | 'area'; descricao?: string } };
-    output: { lista: ListaResumo; registro: ListaEdicao };
+    input: { nome: string; details: { tipo: 'project' | 'area'; descricao?: string }; ativa: boolean };
+    output: { lista: ListaCadastrada };
     rules: ['listaMantidaPorGestor', 'listaNomeUnico'];
-    access: { actors: ['gestor']; grants: ['gestorTarefasEquipe', 'gestorListas']; scope: 'organization' };
+    access: { actors: ['gestor']; grants: ['gestorListas']; scope: 'organization' };
   };
   /**
-   * Finalidade: Altera nome, tipo, descrição e situação ativa de uma lista existente.
-   * Entrada: id e version: lista editada e versão lida (controle de concorrência); nome, ativa, tipo, descricao: novos valores.
-   * Processamento: listaMantidaPorGestor: recusa se o usuário não for gestor. listaNomeUnico: recusa se outra lista já tiver o mesmo nome. Recusa se a version não for a atual. Ao inativar, a lista deixa de aparecer na escolha ao criar tarefas. quantidadeTarefasAbertas é recalculada na resposta, nunca gravada.
-   * Saída: lista: a linha ListaResumo atualizada para substituir no cadastro; registro: ListaEdicao com a nova version para o formulário.
+   * Finalidade: Altera nome, tipo, descrição e situação de ativa de uma lista existente.
+   * Entrada: id e version: lista alterada e versão lida (controle de concorrência); nome, details.tipo, details.descricao, ativa: novos valores.
+   * Processamento: listaMantidaPorGestor: recusa se quem chama não é gestor. Recusa se a versão não confere com a gravada. listaNomeUnico: recusa se outra lista já usa o nome. Grava as alterações; inativar não afeta as tarefas já existentes. quantidadeTarefasAbertas é recalculada, nunca gravada.
+   * Saída: A lista alterada, com a nova versão, os dados gravados e a quantidade de tarefas abertas.
    */
   'tarefas.listas.salvarLista': {
     kind: 'cmd';
     writes: 'Lista.update';
-    input: { id: string; version: number; nome: string; ativa: boolean; details: { tipo: 'project' | 'area'; descricao?: string } };
-    output: { lista: ListaResumo; registro: ListaEdicao };
+    input: { id: string; version: number; nome: string; details: { tipo: 'project' | 'area'; descricao?: string }; ativa: boolean };
+    output: { lista: ListaCadastrada };
     rules: ['listaMantidaPorGestor', 'listaNomeUnico'];
-    access: { actors: ['gestor']; grants: ['gestorTarefasEquipe', 'gestorListas']; scope: 'organization' };
+    access: { actors: ['gestor']; grants: ['gestorListas']; scope: 'organization' };
   };
 }

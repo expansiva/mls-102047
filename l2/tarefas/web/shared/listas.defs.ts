@@ -23,19 +23,18 @@ export const definition = {
         "listas"
       ]
     },
-    "obterLista": {
+    "buscarListas": {
       "kind": "qry",
-      "trigger": "obterLista",
+      "trigger": "buscarListas",
       "returns": [
-        "lista"
+        "listas"
       ]
     },
     "criarLista": {
       "kind": "cmd",
       "trigger": "criarLista",
       "returns": [
-        "lista",
-        "registro"
+        "lista"
       ],
       "writes": "Lista.create"
     },
@@ -43,8 +42,7 @@ export const definition = {
       "kind": "cmd",
       "trigger": "salvarLista",
       "returns": [
-        "lista",
-        "registro"
+        "lista"
       ],
       "writes": "Lista.update"
     }
@@ -52,21 +50,15 @@ export const definition = {
   "states": {
     "listas": {
       "source": "listarListas.listas",
-      "description": "Linha do cadastro de listas.",
+      "description": "the list of Lista de tarefas de um projeto ou área, com seus dados editáveis, versão e a quantidade de tarefas abertas.",
       "organisms": [
+        "formularioLista",
         "listasCadastradas"
-      ]
-    },
-    "lista": {
-      "source": "obterLista.lista",
-      "description": "Registro da lista carregado no formulário de edição.",
-      "organisms": [
-        "formularioLista"
       ]
     },
     "selectedLista": {
       "source": "entry.params.listaId",
-      "description": "Registro da lista carregado no formulário de edição.",
+      "description": "the id of the Lista selected in listasCadastradas",
       "organisms": [
         "formularioLista",
         "listasCadastradas"
@@ -103,7 +95,6 @@ export const definition = {
       "gestor"
     ],
     "grants": [
-      "gestorTarefasEquipe",
       "gestorListas"
     ]
   }

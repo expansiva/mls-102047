@@ -1,87 +1,11 @@
 {
   "types": [
     {
-      "name": "TotaisEquipe",
-      "description": "Indicadores da equipe já calculados no servidor.",
+      "name": "ListaResumoDetalhes",
+      "description": "Dados calculados de uma lista de tarefas.",
       "fields": [
         {
-          "name": "abertas",
-          "type": "number",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Tarefa.status",
-              "Tarefa.details.aberta"
-            ]
-          }
-        },
-        {
-          "name": "vencemHoje",
-          "type": "number",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Tarefa.details.venceHoje",
-              "Tarefa.prazo",
-              "Tarefa.details.aberta"
-            ]
-          }
-        },
-        {
-          "name": "atrasadas",
-          "type": "number",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Tarefa.details.atrasada",
-              "Tarefa.prazo",
-              "Tarefa.details.aberta"
-            ]
-          }
-        },
-        {
-          "name": "itensChecklistFeitos",
-          "type": "number",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "ItemChecklist.feito",
-              "ItemChecklist.tarefaId",
-              "Tarefa.details.aberta"
-            ]
-          }
-        },
-        {
-          "name": "itensChecklistTotal",
-          "type": "number",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "ItemChecklist.tarefaId",
-              "Tarefa.details.aberta"
-            ]
-          }
-        },
-        {
-          "name": "progressoChecklist",
-          "type": "string",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Tarefa.details.progressoChecklist",
-              "ItemChecklist.feito",
-              "ItemChecklist.tarefaId"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "ListaAbertasDetails",
-      "description": "",
-      "fields": [
-        {
-          "name": "details.quantidadeTarefasAbertas",
+          "name": "quantidadeTarefasAbertas",
           "type": "number",
           "origin": {
             "kind": "field",
@@ -93,8 +17,8 @@
       ]
     },
     {
-      "name": "ListaAbertas",
-      "description": "Lista com a quantidade de tarefas abertas.",
+      "name": "ListaResumo",
+      "description": "Lista (projeto ou área) com a quantidade de tarefas abertas que ela tem.",
       "fields": [
         {
           "name": "id",
@@ -118,59 +42,13 @@
         },
         {
           "name": "details",
-          "type": "ListaAbertasDetails"
+          "type": "ListaResumoDetalhes"
         }
       ]
     },
     {
-      "name": "TarefaAcaoDetails",
-      "description": "",
-      "fields": [
-        {
-          "name": "details.aberta",
-          "type": "boolean",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Tarefa.details.aberta"
-            ]
-          }
-        },
-        {
-          "name": "details.venceHoje",
-          "type": "boolean",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Tarefa.details.venceHoje"
-            ]
-          }
-        },
-        {
-          "name": "details.atrasada",
-          "type": "boolean",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Tarefa.details.atrasada"
-            ]
-          }
-        },
-        {
-          "name": "details.progressoChecklist",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Tarefa.details.progressoChecklist"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "ListaRef",
-      "description": "",
+      "name": "ListaNome",
+      "description": "Identificação da lista de uma tarefa pelo nome.",
       "fields": [
         {
           "name": "nome",
@@ -185,8 +63,8 @@
       ]
     },
     {
-      "name": "MembroRefIdentification",
-      "description": "",
+      "name": "MembroNomeIdentificacao",
+      "description": "Identificação de um membro da equipe.",
       "fields": [
         {
           "name": "details.identification.name",
@@ -201,28 +79,74 @@
       ]
     },
     {
-      "name": "MembroRefDetails",
-      "description": "",
+      "name": "MembroNomeDetalhes",
+      "description": "Detalhes de um membro da equipe usados para identificá-lo.",
       "fields": [
         {
           "name": "identification",
-          "type": "MembroRefIdentification"
+          "type": "MembroNomeIdentificacao"
         }
       ]
     },
     {
-      "name": "MembroRef",
-      "description": "",
+      "name": "MembroNome",
+      "description": "Membro da equipe identificado pelo nome.",
       "fields": [
         {
           "name": "details",
-          "type": "MembroRefDetails"
+          "type": "MembroNomeDetalhes"
+        }
+      ]
+    },
+    {
+      "name": "TarefaAcaoDetalhes",
+      "description": "Indicadores calculados de uma tarefa: se está aberta, vence hoje, está atrasada e o progresso da checklist.",
+      "fields": [
+        {
+          "name": "aberta",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.aberta"
+            ]
+          }
+        },
+        {
+          "name": "venceHoje",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.venceHoje"
+            ]
+          }
+        },
+        {
+          "name": "atrasada",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.atrasada"
+            ]
+          }
+        },
+        {
+          "name": "progressoChecklist",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.progressoChecklist"
+            ]
+          }
         }
       ]
     },
     {
       "name": "TarefaAcao",
-      "description": "Tarefa aberta atrasada ou vencendo hoje, com lista e responsável.",
+      "description": "Tarefa da equipe com título, situação, prioridade, prazo, nome da lista, nome do responsável e indicadores de prazo e checklist.",
       "fields": [
         {
           "name": "id",
@@ -296,45 +220,82 @@
         },
         {
           "name": "details",
-          "type": "TarefaAcaoDetails"
+          "type": "TarefaAcaoDetalhes"
         },
         {
           "name": "lista",
-          "type": "ListaRef"
+          "type": "ListaNome"
         },
         {
           "name": "membroEquipe",
-          "type": "MembroRef"
+          "type": "MembroNome"
         }
       ]
     }
   ],
   "endpoints": [
     {
-      "id": "qryPanoramaEquipe",
+      "id": "obterPanoramaEquipe",
       "kind": "qry",
       "when": "onLoad",
       "input": [],
       "output": [
         {
-          "name": "totais",
-          "type": "TotaisEquipe"
+          "name": "totalAbertas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Tarefa.details.aberta"
+            ]
+          }
+        },
+        {
+          "name": "totalVenceHoje",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Tarefa.details.venceHoje"
+            ]
+          }
+        },
+        {
+          "name": "totalAtrasadas",
+          "type": "number",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Tarefa.details.atrasada"
+            ]
+          }
+        },
+        {
+          "name": "progressoChecklist",
+          "type": "string",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Tarefa.details.progressoChecklist",
+              "Tarefa.details.aberta"
+            ]
+          }
         },
         {
           "name": "listas",
-          "type": "ListaAbertas[]"
+          "type": "ListaResumo[]"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Carrega, ao abrir o início do gestor, o panorama da equipe: totais de tarefas abertas, vencendo hoje e atrasadas, progresso das checklists e tarefas abertas por lista.",
-        "input": "Nenhuma entrada; o escopo é toda a equipe (organização) do gestor da sessão.",
-        "processing": "Conta as tarefas da organização com details.aberta (status aFazer, emAndamento ou emRevisao), as que vencem hoje (aberta e prazo = hoje) e as atrasadas (aberta e prazo < hoje); esses indicadores derivados são calculados na consulta, nunca gravados. Soma os itens de checklist (ItemChecklist.feito por tarefaId) das tarefas abertas para obter feitos/total e o texto do progresso. Lista as listas ativas ordenadas por nome com quantidadeTarefasAbertas calculada pela contagem de tarefas abertas por listaId.",
-        "output": "totais com os números já prontos para os blocos de destaque e listas com nome e quantidade de tarefas abertas, para o gestor saber onde olhar primeiro."
+        "purpose": "Entrega de uma só vez o panorama da equipe para o gestor: totais de tarefas abertas, que vencem hoje e atrasadas, progresso geral das checklists e tarefas abertas por lista.",
+        "input": "Nenhuma entrada. O gestor é conhecido pela sessão e enxerga todas as tarefas da equipe (escopo da organização).",
+        "processing": "Conta as tarefas da equipe com Tarefa.details.aberta verdadeiro (totalAbertas), com Tarefa.details.venceHoje (totalVenceHoje) e com Tarefa.details.atrasada (totalAtrasadas). Esses campos são derivados e calculados na consulta, nunca gravados: aberta = a fazer, em andamento ou em revisão; venceHoje = aberta com prazo hoje; atrasada = aberta com prazo anterior a hoje. Soma, nas tarefas abertas, os itens feitos e o total de itens das checklists e devolve o resultado no formato 'feitos/total' (progressoChecklist). Lista as listas, ordenadas por nome, com Lista.details.quantidadeTarefasAbertas (derivado, calculado). Não usa campos de privacidade do membro.",
+        "output": "Objeto com totalAbertas, totalVenceHoje e totalAtrasadas (números), progressoChecklist (texto 'feitos/total') e listas (cada lista com id, nome e quantidade de tarefas abertas)."
       }
     },
     {
-      "id": "qryTarefasPedemAcao",
+      "id": "listarTarefasParaAcao",
       "kind": "qry",
       "when": "onLoad",
       "input": [
@@ -364,10 +325,10 @@
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Traz a caixa de tarefas da equipe que podem pedir ação do gestor: abertas e atrasadas ou vencendo hoje.",
-        "input": "page: página pedida (começa em 1); pageSize: quantidade de tarefas por página.",
-        "processing": "Filtra as tarefas da organização com status aFazer, emAndamento ou emRevisao cujo prazo é hoje ou anterior; calcula aberta, venceHoje, atrasada e progressoChecklist (itens feitos do total da checklist) na consulta, sem gravar. Ordena atrasadas primeiro, por prazo crescente e prioridade decrescente. Junta o nome da lista (Lista.nome por listaId) e o nome do responsável lido no cadastro mestre (MembroEquipe.details.identification.name por responsavelId), carregados em lote.",
-        "output": "Página { items, page, pageSize, hasMore } de tarefas com título, lista, responsável, prioridade, prazo, situação e progresso da checklist, prontas para os cartões; a escolha leva a Tarefas da equipe."
+        "purpose": "Lista as tarefas da equipe que podem pedir uma decisão do gestor (atrasadas e que vencem hoje), já com nome da lista e do responsável, em páginas.",
+        "input": "page: número da página, começando em 1 (padrão 1). pageSize: quantidade de tarefas por página (padrão de uma tela).",
+        "processing": "Considera todas as tarefas da equipe (o gestor vê todas) com Tarefa.details.aberta verdadeiro e (Tarefa.details.atrasada ou Tarefa.details.venceHoje verdadeiro); esses campos são derivados e calculados na consulta, nunca gravados. Ordena com as atrasadas primeiro, depois as que vencem hoje, e dentro de cada grupo por prazo crescente e prioridade decrescente. Resolve o nome da lista (Lista.nome) e o nome do responsável (MembroEquipe.details.identification.name) no cadastro mestre; não expõe o consentimento de privacidade. Calcula Tarefa.details.progressoChecklist ('feitos/total') por tarefa. Pagina com page e pageSize e informa hasMore.",
+        "output": "Página { items, page, pageSize, hasMore } de tarefas com id, título, situação, prioridade, prazo, listaId, responsavelId, indicadores (aberta, venceHoje, atrasada, progressoChecklist), nome da lista e nome do responsável."
       }
     }
   ],
@@ -375,51 +336,76 @@
     "organisms": [
       {
         "organism": "destaquesEquipe",
-        "reads": "qryPanoramaEquipe.totais"
+        "reads": "obterPanoramaEquipe.listas"
       },
       {
         "organism": "destaquesEquipe",
-        "reads": "qryPanoramaEquipe.listas"
+        "reads": "obterPanoramaEquipe.totalAbertas"
       },
       {
-        "organism": "tarefasPedemAcao",
-        "reads": "qryTarefasPedemAcao.tarefas"
+        "organism": "destaquesEquipe",
+        "reads": "obterPanoramaEquipe.totalVenceHoje"
+      },
+      {
+        "organism": "destaquesEquipe",
+        "reads": "obterPanoramaEquipe.totalAtrasadas"
+      },
+      {
+        "organism": "destaquesEquipe",
+        "reads": "obterPanoramaEquipe.progressoChecklist"
+      },
+      {
+        "organism": "tarefasParaAcao",
+        "reads": "listarTarefasParaAcao.tarefas"
       }
     ],
     "commands": [],
-    "selections": [],
+    "selections": [
+      {
+        "organism": "destaquesEquipe",
+        "via": {
+          "list": "listarTarefasParaAcao.tarefas"
+        }
+      }
+    ],
     "journeys": [
       {
         "step": "acompanharTarefasEquipe/filtrarTarefas",
-        "organisms": [],
-        "endpoints": [],
+        "organisms": [
+          "tarefasParaAcao"
+        ],
+        "endpoints": [
+          "listarTarefasParaAcao"
+        ],
         "continuesIn": "tarefas_equipe"
       },
       {
         "step": "acompanharTarefasEquipe/verQuadro",
         "organisms": [
-          "destaquesEquipe"
+          "destaquesEquipe",
+          "tarefasParaAcao"
         ],
         "endpoints": [
-          "qryPanoramaEquipe"
+          "obterPanoramaEquipe",
+          "listarTarefasParaAcao"
         ],
         "continuesIn": "tarefas_equipe"
       },
       {
         "step": "acompanharTarefasEquipe/verDetalhe",
         "organisms": [
-          "tarefasPedemAcao"
+          "tarefasParaAcao"
         ],
         "endpoints": [
-          "qryTarefasPedemAcao"
+          "listarTarefasParaAcao"
         ],
         "continuesIn": "tarefas_equipe"
       }
     ],
     "updates": [
       {
-        "endpoint": "qryTarefasPedemAcao",
-        "state": "qryTarefasPedemAcao.tarefas",
+        "endpoint": "listarTarefasParaAcao",
+        "state": "listarTarefasParaAcao.tarefas",
         "mode": "append"
       }
     ]

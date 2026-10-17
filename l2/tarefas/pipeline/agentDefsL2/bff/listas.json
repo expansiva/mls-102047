@@ -1,11 +1,11 @@
 {
   "types": [
     {
-      "name": "ListaResumoDetalhes",
-      "description": "Detalhes da lista exibidos no cadastro: tipo e tarefas abertas.",
+      "name": "ListaDetalhes",
+      "description": "Detalhes de uma lista: tipo, descrição e quantidade de tarefas abertas.",
       "fields": [
         {
-          "name": "details.tipo",
+          "name": "tipo",
           "type": "'project' | 'area'",
           "origin": {
             "kind": "field",
@@ -15,75 +15,7 @@
           }
         },
         {
-          "name": "quantidadeTarefasAbertas",
-          "type": "number",
-          "origin": {
-            "kind": "aggregate",
-            "paths": [
-              "Lista.details.quantidadeTarefasAbertas",
-              "Tarefa.listaId",
-              "Tarefa.status"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "ListaResumo",
-      "description": "Linha do cadastro de listas.",
-      "fields": [
-        {
-          "name": "id",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Lista.id"
-            ]
-          }
-        },
-        {
-          "name": "nome",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Lista.nome"
-            ]
-          }
-        },
-        {
-          "name": "ativa",
-          "type": "boolean",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Lista.ativa"
-            ]
-          }
-        },
-        {
-          "name": "details",
-          "type": "ListaResumoDetalhes"
-        }
-      ]
-    },
-    {
-      "name": "ListaEdicaoDetalhes",
-      "description": "Detalhes editáveis da lista.",
-      "fields": [
-        {
-          "name": "details.tipo",
-          "type": "'project' | 'area'",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Lista.details.tipo"
-            ]
-          }
-        },
-        {
-          "name": "details.descricao",
+          "name": "descricao",
           "type": "string",
           "optional": true,
           "origin": {
@@ -92,12 +24,22 @@
               "Lista.details.descricao"
             ]
           }
+        },
+        {
+          "name": "quantidadeTarefasAbertas",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.details.quantidadeTarefasAbertas"
+            ]
+          }
         }
       ]
     },
     {
-      "name": "ListaEdicao",
-      "description": "Registro da lista carregado no formulário de edição.",
+      "name": "ListaCadastrada",
+      "description": "Lista de tarefas de um projeto ou área, com seus dados editáveis, versão e a quantidade de tarefas abertas.",
       "fields": [
         {
           "name": "id",
@@ -141,7 +83,7 @@
         },
         {
           "name": "details",
-          "type": "ListaEdicaoDetalhes"
+          "type": "ListaDetalhes"
         }
       ]
     }
@@ -155,24 +97,24 @@
       "output": [
         {
           "name": "listas",
-          "type": "ListaResumo[]"
+          "type": "ListaCadastrada[]"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Carrega, ao abrir a página, todas as listas da organização para o gestor escolher qual manter.",
-        "input": "Nenhuma entrada; o escopo é a organização do gestor da sessão.",
-        "processing": "Busca todas as listas (ativas e inativas) ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista e situação aFazer, emAndamento ou emRevisao; é um campo derivado, calculado na consulta e nunca gravado. Lista não paginada, pois o número de listas de projetos e áreas cabe numa tela.",
-        "output": "Lista de ListaResumo com id, nome, ativa, tipo e quantidade de tarefas abertas, no formato que o cadastro exibe."
+        "purpose": "Carrega todas as listas da organização, ativas e inativas, com os dados necessários para exibir e editar cada uma.",
+        "input": "Sem entrada; o escopo é a organização do gestor logado.",
+        "processing": "Lê todas as listas da organização ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista cuja situação não é concluída nem cancelada (campo derivado, nunca gravado).",
+        "output": "A coleção de listas, cada uma com id, versão, nome, ativa, tipo, descrição e quantidade de tarefas abertas."
       }
     },
     {
-      "id": "obterLista",
+      "id": "buscarListas",
       "kind": "qry",
       "when": "interaction",
       "input": [
         {
-          "name": "listaId",
+          "name": "busca",
           "type": "string",
           "origin": {
             "kind": "context",
@@ -182,16 +124,16 @@
       ],
       "output": [
         {
-          "name": "lista",
-          "type": "ListaEdicao"
+          "name": "listas",
+          "type": "ListaCadastrada[]"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Abre os dados de uma lista escolhida no cadastro para edição no formulário.",
-        "input": "listaId: id da lista selecionada no cadastro.",
-        "processing": "Lê a lista pelo id (read.byId) dentro da organização do gestor.",
-        "output": "ListaEdicao com id, version, nome, ativa, tipo e descrição, para preencher o formulário e enviar a versão ao salvar."
+        "purpose": "Busca as listas cujo nome contém o trecho digitado pelo gestor.",
+        "input": "busca: trecho do nome da lista; vazio devolve todas as listas.",
+        "processing": "Filtra as listas da organização pelo trecho do nome, sem diferenciar maiúsculas e minúsculas, ordenando por nome. Calcula quantidadeTarefasAbertas de cada lista contando as tarefas nem concluídas nem canceladas (derivado, nunca gravado).",
+        "output": "As listas encontradas, cada uma com id, versão, nome, ativa, tipo, descrição e quantidade de tarefas abertas."
       }
     },
     {
@@ -207,16 +149,6 @@
             "kind": "field",
             "paths": [
               "Lista.nome"
-            ]
-          }
-        },
-        {
-          "name": "ativa",
-          "type": "boolean",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Lista.ativa"
             ]
           }
         },
@@ -240,16 +172,22 @@
               "Lista.details.descricao"
             ]
           }
+        },
+        {
+          "name": "ativa",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.ativa"
+            ]
+          }
         }
       ],
       "output": [
         {
           "name": "lista",
-          "type": "ListaResumo"
-        },
-        {
-          "name": "registro",
-          "type": "ListaEdicao"
+          "type": "ListaCadastrada"
         }
       ],
       "rules": [
@@ -258,9 +196,9 @@
       ],
       "jsdoc": {
         "purpose": "Cadastra uma nova lista de projeto ou área.",
-        "input": "nome: nome da lista; ativa: se recebe novas tarefas; tipo: project ou area; descricao: texto livre opcional.",
-        "processing": "listaMantidaPorGestor: recusa se o usuário da sessão não for gestor. listaNomeUnico: recusa se já existir lista com o mesmo nome. Grava a lista; id e version são gerados pelo sistema; quantidadeTarefasAbertas é calculada (zero para lista nova), nunca gravada.",
-        "output": "lista: a linha ListaResumo para inserir no cadastro; registro: ListaEdicao com id e version para o formulário continuar em edição sem nova chamada."
+        "input": "nome: nome da lista; details.tipo: projeto ou área; details.descricao: objetivo da lista (opcional); ativa: se a lista recebe novas tarefas.",
+        "processing": "listaMantidaPorGestor: recusa se quem chama não é gestor. listaNomeUnico: recusa se já existe outra lista com o mesmo nome. Grava a lista; quantidadeTarefasAbertas é derivada e começa em zero.",
+        "output": "A lista criada, com id, versão inicial, dados gravados e quantidade de tarefas abertas."
       }
     },
     {
@@ -300,16 +238,6 @@
           }
         },
         {
-          "name": "ativa",
-          "type": "boolean",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Lista.ativa"
-            ]
-          }
-        },
-        {
           "name": "details.tipo",
           "type": "'project' | 'area'",
           "origin": {
@@ -329,16 +257,22 @@
               "Lista.details.descricao"
             ]
           }
+        },
+        {
+          "name": "ativa",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Lista.ativa"
+            ]
+          }
         }
       ],
       "output": [
         {
           "name": "lista",
-          "type": "ListaResumo"
-        },
-        {
-          "name": "registro",
-          "type": "ListaEdicao"
+          "type": "ListaCadastrada"
         }
       ],
       "rules": [
@@ -346,10 +280,10 @@
         "listaNomeUnico"
       ],
       "jsdoc": {
-        "purpose": "Altera nome, tipo, descrição e situação ativa de uma lista existente.",
-        "input": "id e version: lista editada e versão lida (controle de concorrência); nome, ativa, tipo, descricao: novos valores.",
-        "processing": "listaMantidaPorGestor: recusa se o usuário não for gestor. listaNomeUnico: recusa se outra lista já tiver o mesmo nome. Recusa se a version não for a atual. Ao inativar, a lista deixa de aparecer na escolha ao criar tarefas. quantidadeTarefasAbertas é recalculada na resposta, nunca gravada.",
-        "output": "lista: a linha ListaResumo atualizada para substituir no cadastro; registro: ListaEdicao com a nova version para o formulário."
+        "purpose": "Altera nome, tipo, descrição e situação de ativa de uma lista existente.",
+        "input": "id e version: lista alterada e versão lida (controle de concorrência); nome, details.tipo, details.descricao, ativa: novos valores.",
+        "processing": "listaMantidaPorGestor: recusa se quem chama não é gestor. Recusa se a versão não confere com a gravada. listaNomeUnico: recusa se outra lista já usa o nome. Grava as alterações; inativar não afeta as tarefas já existentes. quantidadeTarefasAbertas é recalculada, nunca gravada.",
+        "output": "A lista alterada, com a nova versão, os dados gravados e a quantidade de tarefas abertas."
       }
     }
   ],
@@ -361,7 +295,7 @@
       },
       {
         "organism": "formularioLista",
-        "reads": "obterLista.lista"
+        "reads": "listarListas.listas"
       }
     ],
     "commands": [
@@ -378,7 +312,7 @@
       {
         "organism": "listasCadastradas",
         "via": {
-          "query": "obterLista"
+          "list": "listarListas.listas"
         }
       }
     ],
@@ -389,7 +323,8 @@
           "listasCadastradas"
         ],
         "endpoints": [
-          "listarListas"
+          "listarListas",
+          "buscarListas"
         ]
       },
       {
@@ -408,31 +343,25 @@
           "formularioLista"
         ],
         "endpoints": [
-          "obterLista",
           "salvarLista"
         ]
       }
     ],
     "updates": [
       {
+        "endpoint": "buscarListas",
+        "state": "listarListas.listas",
+        "mode": "replace"
+      },
+      {
         "endpoint": "criarLista",
         "state": "listarListas.listas",
         "mode": "upsert"
       },
       {
-        "endpoint": "criarLista",
-        "state": "obterLista.lista",
-        "mode": "replace"
-      },
-      {
         "endpoint": "salvarLista",
         "state": "listarListas.listas",
         "mode": "upsert"
-      },
-      {
-        "endpoint": "salvarLista",
-        "state": "obterLista.lista",
-        "mode": "replace"
       }
     ]
   }

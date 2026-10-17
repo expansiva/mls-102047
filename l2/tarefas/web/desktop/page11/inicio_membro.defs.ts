@@ -5,37 +5,37 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/dashboardCommandCenter/page21.md",
     "experience": "exceptionTriage"
   },
-  "intent": "Mostrar ao membro da equipe, logo ao entrar, a situação das suas tarefas abertas, o aviso diário de vencimentos de hoje e tudo o que espera por uma ação dele, para que comece o dia sabendo o que fazer primeiro.",
+  "intent": "Ponto de partida do dia do membro da equipe: mostra quantas tarefas estão abertas, quantas vencem hoje e quantas estão atrasadas, destaca o aviso diário das 8h e reúne o que espera por ele — tarefas para iniciar, entregas para revisar e devoluções para ajustar — para agir sem procurar.",
   "sections": [
     {
-      "id": "panoramaTarefas",
+      "id": "secaoResumo",
       "priority": "primary",
-      "purpose": "Dar a visão imediata de quantas tarefas estão abertas, quantas vencem hoje e quantas estão atrasadas, com o progresso da checklist de cada uma.",
+      "purpose": "Dar uma leitura imediata da carga de trabalho: tarefas abertas, as que vencem hoje e as atrasadas, com o progresso da checklist de cada uma.",
       "organisms": [
         "resumoMinhasTarefas"
       ]
     },
     {
-      "id": "pendenciasComigo",
+      "id": "secaoPendencias",
       "priority": "main",
-      "purpose": "Concentrar o que depende de mim agora: tarefas para iniciar, entregas para revisar e tarefas devolvidas para ajustar e reenviar, com a ação certa ao alcance.",
+      "purpose": "Concentrar o que depende de mim agora, para iniciar, enviar para revisão, aceitar ou devolver sem sair do Início.",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     },
     {
-      "id": "avisoDoDia",
+      "id": "secaoAvisoDiario",
       "priority": "secondary",
-      "purpose": "Lembrar do aviso diário das 8h e permitir abrir o aviso de hoje com as tarefas que vencem hoje ou estão atrasadas.",
+      "purpose": "Lembrar do aviso diário das 8h com as tarefas que vencem hoje ou estão atrasadas, com acesso ao aviso completo.",
       "organisms": [
-        "alertaAvisoDiario"
+        "avisoDoDia"
       ]
     }
   ],
   "organisms": {
     "resumoMinhasTarefas": {
       "kind": "summary",
-      "text": "Minhas tarefas abertas, quantas vencem hoje e quantas estão atrasadas, com o progresso da checklist de cada uma, para eu saber onde está o risco de prazo.",
+      "text": "Minhas tarefas abertas, quantas vencem hoje e quantas estão atrasadas, com o progresso da checklist de cada uma, para eu saber por onde começar.",
       "intents": [
         {
           "id": "abrirMinhasTarefas",
@@ -44,9 +44,9 @@ export const definition = {
         }
       ]
     },
-    "alertaAvisoDiario": {
+    "avisoDoDia": {
       "kind": "alerts",
-      "text": "Aviso diário das 8h: mostra a data do aviso, quantas tarefas ele traz e quantas estão atrasadas; abro o aviso de hoje e vejo minhas tarefas que vencem hoje ou estão atrasadas.",
+      "text": "Aviso diário das 8h: mostra o aviso de hoje com a quantidade de tarefas que vencem hoje e de atrasadas; abro o aviso para ver cada tarefa com prazo e situação.",
       "intents": [
         {
           "id": "abrirMeusAvisos",
@@ -55,9 +55,9 @@ export const definition = {
         }
       ]
     },
-    "caixaPendencias": {
+    "esperaPorMim": {
       "kind": "inbox",
-      "text": "O que espera por mim: tarefas atribuídas para iniciar, tarefas em andamento para enviar à revisão, entregas enviadas para eu revisar (aceitar ou devolver com motivo) e tarefas devolvidas, com o motivo da devolução, para eu ajustar e reenviar.",
+      "text": "O que espera por mim: tarefas atribuídas para iniciar, tarefas em andamento para enviar à revisão, entregas que criei para aceitar ou devolver com motivo, e tarefas devolvidas com o motivo para eu ajustar e reenviar.",
       "intents": [
         {
           "id": "iniciarTarefa",
@@ -86,47 +86,47 @@ export const definition = {
   "molecules": {
     "resumoMinhasTarefas": [
       {
-        "role": "Indicadores de abertas, vencendo hoje e atrasadas",
+        "role": "indicadores de abertas, vencem hoje e atrasadas",
         "preferred": "groupviewmetric--ml-metric-card",
         "alternative": "groupviewmetric--ml-metric-big-number"
       },
       {
-        "role": "Progresso da checklist de cada tarefa",
-        "preferred": "groupshowprogress--ml-linear-progress",
-        "alternative": "groupshowprogress--ml-circular-progress"
-      },
-      {
-        "role": "Lista das tarefas abertas com prazo e situação",
+        "role": "tarefas abertas em destaque",
         "preferred": "groupviewdata--ml-vertical-record-list",
         "alternative": "groupviewdata--ml-card-grid"
-      }
-    ],
-    "alertaAvisoDiario": [
-      {
-        "role": "Destaque persistente do aviso de hoje com ação para abri-lo",
-        "preferred": "groupnotifyuser--ml-notify-banner",
-        "alternative": "groupnotifyuser--ml-contextual-feedback"
       },
       {
-        "role": "Tarefas trazidas pelo aviso com prazo e situação do prazo",
-        "preferred": "groupviewdata--ml-vertical-record-list"
+        "role": "progresso da checklist por tarefa",
+        "preferred": "groupshowprogress--ml-linear-progress",
+        "alternative": "groupshowprogress--ml-circular-progress"
       }
     ],
-    "caixaPendencias": [
+    "avisoDoDia": [
       {
-        "role": "Alternar entre para iniciar, para revisar e devolvidas",
+        "role": "destaque do aviso de hoje",
+        "preferred": "groupnotifyuser--ml-notify-banner",
+        "alternative": "groupnotifyuser--ml-contextual-feedback"
+      }
+    ],
+    "esperaPorMim": [
+      {
+        "role": "separar iniciar, revisar e ajustar",
         "preferred": "groupnavigatesection--ml-navigate-pills",
         "alternative": "groupnavigatesection--ml-tabs"
       },
       {
-        "role": "Itens pendentes com título, prazo, prioridade e quem age",
+        "role": "itens pendentes",
         "preferred": "groupviewdata--ml-vertical-record-list",
         "alternative": "groupviewdata--ml-card-grid"
       },
       {
-        "role": "Ações do item: iniciar, enviar, aceitar ou devolver",
-        "preferred": "grouptriggeraction--ml-button-group",
+        "role": "ação principal do item",
+        "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-split-button"
+      },
+      {
+        "role": "ações secundárias do item",
+        "preferred": "grouptriggeraction--ml-kebab-action-trigger"
       }
     ]
   }

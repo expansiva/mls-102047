@@ -5,72 +5,72 @@ export const definition = {
     "params": {}
   },
   "requests": {
-    "qryInicioMembro": {
+    "carregarInicio": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
         "resumo",
-        "avisoHoje",
-        "pendencias"
+        "avisoDoDia",
+        "esperaPorMim"
       ]
     },
-    "cmdIniciarTarefa": {
+    "iniciarTarefa": {
       "kind": "cmd",
       "trigger": "iniciarTarefa",
       "returns": [
         "resumo",
-        "pendencias"
+        "esperaPorMim"
       ],
       "writes": "Tarefa.iniciar"
     },
-    "cmdEnviarParaRevisao": {
+    "enviarParaRevisao": {
       "kind": "cmd",
       "trigger": "enviarParaRevisao",
       "returns": [
         "resumo",
-        "pendencias"
+        "esperaPorMim"
       ],
       "writes": "Tarefa.enviarParaRevisao"
     },
-    "cmdAceitarEntrega": {
+    "aceitarEntrega": {
       "kind": "cmd",
       "trigger": "aceitarEntrega",
       "returns": [
         "resumo",
-        "pendencias"
+        "esperaPorMim"
       ],
       "writes": "Tarefa.aceitar"
     },
-    "cmdDevolverComMotivo": {
+    "devolverComMotivo": {
       "kind": "cmd",
       "trigger": "devolverComMotivo",
       "returns": [
         "resumo",
-        "pendencias"
+        "esperaPorMim"
       ],
       "writes": "Tarefa.devolver"
     }
   },
   "states": {
     "resumo": {
-      "source": "qryInicioMembro.resumo",
-      "description": "Indicadores já calculados das tarefas abertas do membro e a lista dessas tarefas.",
+      "source": "carregarInicio.resumo",
+      "description": "Carga de trabalho da pessoa: totais de tarefas abertas, que vencem hoje e atrasadas, e as tarefas abertas mais urgentes.",
       "organisms": [
         "resumoMinhasTarefas"
       ]
     },
-    "avisoHoje": {
-      "source": "qryInicioMembro.avisoHoje",
-      "description": "Aviso diário de vencimentos de hoje do membro.",
+    "avisoDoDia": {
+      "source": "carregarInicio.avisoDoDia",
+      "description": "Aviso diário de vencimentos da pessoa para a data de hoje, com situação do envio e tarefas incluídas.",
       "organisms": [
-        "alertaAvisoDiario"
+        "avisoDoDia"
       ]
     },
-    "pendencias": {
-      "source": "qryInicioMembro.pendencias",
-      "description": "Tarefa que espera uma ação do membro, com a ação esperada, os nomes do responsável e do criador e a versão para os comandos.",
+    "esperaPorMim": {
+      "source": "carregarInicio.esperaPorMim",
+      "description": "Tarefas que dependem da pessoa, agrupadas pela ação esperada: iniciar, enviar para revisão, revisar e ajustar após devolução.",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     }
   },
@@ -78,20 +78,21 @@ export const definition = {
     {
       "step": "avisoDiarioVencimentos/abrirAviso",
       "organisms": [
-        "alertaAvisoDiario"
-      ]
+        "avisoDoDia"
+      ],
+      "continuesIn": "meus_avisos"
     },
     {
       "step": "avisoDiarioVencimentos/verVencendo",
       "organisms": [
-        "alertaAvisoDiario"
+        "avisoDoDia"
       ],
       "continuesIn": "meus_avisos"
     },
     {
       "step": "executarTarefa/abrirMinhaTarefa",
       "organisms": [
-        "caixaPendencias",
+        "esperaPorMim",
         "resumoMinhasTarefas"
       ]
     },
@@ -103,7 +104,7 @@ export const definition = {
     {
       "step": "executarTarefa/iniciarTarefa",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     },
     {
@@ -114,19 +115,19 @@ export const definition = {
     {
       "step": "executarTarefa/enviarRevisao",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     },
     {
       "step": "retomarTarefaDevolvida/abrirDevolvida",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     },
     {
       "step": "retomarTarefaDevolvida/lerMotivo",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     },
     {
@@ -137,37 +138,36 @@ export const definition = {
     {
       "step": "retomarTarefaDevolvida/reenviarRevisao",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     },
     {
       "step": "revisarTarefa/abrirTarefaRevisao",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     },
     {
       "step": "revisarTarefa/conferirEntrega",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ],
       "continuesIn": "minhas_tarefas"
     },
     {
       "step": "revisarTarefa/aceitarTarefa",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     },
     {
       "step": "revisarTarefa/devolverTarefa",
       "organisms": [
-        "caixaPendencias"
+        "esperaPorMim"
       ]
     }
   ],
   "rules": [
-    "avisoSomenteTarefasAbertasVencendo",
     "avisoUnicoPorResponsavelEDia",
     "devolucaoExigeMotivo",
     "somenteCriadorRevisa",

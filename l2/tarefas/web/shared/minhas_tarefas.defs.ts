@@ -3,53 +3,13 @@
 export const definition = {
   "entry": {
     "params": {
-      "criadasPorMim": {
-        "type": "boolean",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasLista",
-        "persist": true,
-        "required": false
-      },
-      "atribuidasAMim": {
-        "type": "boolean",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasLista",
-        "persist": true,
-        "required": false
-      },
-      "status": {
+      "filtro": {
         "type": "string",
         "sources": [
           "url",
           "localStorage"
         ],
-        "effect": "filter:tarefasLista",
-        "persist": true,
-        "required": false
-      },
-      "somenteDevolvidas": {
-        "type": "boolean",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasLista",
-        "persist": true,
-        "required": false
-      },
-      "page": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasLista",
+        "effect": "filter:listaTarefas",
         "persist": true,
         "required": false
       },
@@ -59,19 +19,9 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "select:tarefaDetalhe",
+        "effect": "select:detalheTarefa",
         "persist": true,
         "required": false
-      },
-      "termo": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefaForm",
-        "persist": true,
-        "required": true
       },
       "listaId": {
         "type": "string",
@@ -79,7 +29,7 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "prefill:tarefaForm",
+        "effect": "prefill:formTarefa",
         "persist": false,
         "required": false
       },
@@ -89,98 +39,99 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "prefill:tarefaForm",
+        "effect": "prefill:formTarefa",
         "persist": false,
         "required": false
       }
     }
   },
   "requests": {
-    "minhasTarefas": {
+    "carregarMinhasTarefas": {
       "kind": "qry",
       "trigger": "onLoad",
+      "returns": [
+        "tarefas",
+        "listas"
+      ]
+    },
+    "listarMinhasTarefas": {
+      "kind": "qry",
+      "trigger": "listarMinhasTarefas",
       "returns": [
         "tarefas"
       ]
     },
-    "tarefaAberta": {
+    "abrirTarefa": {
       "kind": "qry",
-      "trigger": "tarefaAberta",
+      "trigger": "abrirTarefa",
       "returns": [
         "tarefa"
       ]
     },
-    "opcoesFormulario": {
+    "buscarMembros": {
       "kind": "qry",
-      "trigger": "onLoad",
-      "returns": [
-        "listas"
-      ]
-    },
-    "buscarResponsaveis": {
-      "kind": "qry",
-      "trigger": "buscarResponsaveis",
+      "trigger": "buscarMembros",
       "returns": [
         "membros"
       ]
     },
-    "salvarNovaTarefa": {
+    "criarTarefa": {
       "kind": "cmd",
-      "trigger": "salvarNovaTarefa",
+      "trigger": "criarTarefa",
       "returns": [
         "tarefa",
         "resumo"
       ],
       "writes": "Tarefa.create"
     },
-    "salvarEdicaoTarefa": {
+    "salvarEdicao": {
       "kind": "cmd",
-      "trigger": "salvarEdicaoTarefa",
+      "trigger": "salvarEdicao",
       "returns": [
         "tarefa",
         "resumo"
       ],
       "writes": "Tarefa.update"
     },
-    "iniciarTarefa": {
+    "salvarChecklist": {
       "kind": "cmd",
-      "trigger": "iniciarTarefa",
-      "returns": [
-        "tarefa",
-        "resumo"
-      ],
-      "writes": "Tarefa.iniciar"
-    },
-    "marcarItemChecklist": {
-      "kind": "cmd",
-      "trigger": "marcarItemChecklist",
+      "trigger": "salvarChecklist",
       "returns": [
         "tarefa",
         "resumo"
       ],
       "writes": "ItemChecklist.update"
     },
+    "iniciarTarefa": {
+      "kind": "cmd",
+      "trigger": "iniciar",
+      "returns": [
+        "tarefa",
+        "resumo"
+      ],
+      "writes": "Tarefa.iniciar"
+    },
     "enviarParaRevisao": {
       "kind": "cmd",
-      "trigger": "enviarParaRevisao",
+      "trigger": "enviarRevisao",
       "returns": [
         "tarefa",
         "resumo"
       ],
       "writes": "Tarefa.enviarParaRevisao"
     },
-    "aceitarEntrega": {
+    "aceitarTarefa": {
       "kind": "cmd",
-      "trigger": "aceitarEntrega",
+      "trigger": "aceitar",
       "returns": [
         "tarefa",
         "resumo"
       ],
       "writes": "Tarefa.aceitar"
     },
-    "devolverComMotivo": {
+    "devolverTarefa": {
       "kind": "cmd",
-      "trigger": "devolverComMotivo",
+      "trigger": "devolver",
       "returns": [
         "tarefa",
         "resumo"
@@ -189,7 +140,7 @@ export const definition = {
     },
     "cancelarTarefa": {
       "kind": "cmd",
-      "trigger": "cancelarTarefa",
+      "trigger": "cancelar",
       "returns": [
         "tarefa",
         "resumo"
@@ -199,42 +150,42 @@ export const definition = {
   },
   "states": {
     "tarefas": {
-      "source": "minhasTarefas.tarefas",
-      "description": "Linha da lista de minhas tarefas, usada também para atualizar a linha após um comando.",
+      "source": "carregarMinhasTarefas.tarefas",
+      "description": "the list of Tarefa em forma resumida: título, lista, responsável, criador, prioridade, prazo, situação e indicadores.",
       "organisms": [
-        "tarefasLista"
+        "listaTarefas"
       ]
     },
     "tarefa": {
-      "source": "tarefaAberta.tarefa",
-      "description": "Tarefa aberta com nomes, checklist e marcos do histórico; serve ao detalhe, às ações, ao histórico e ao formulário de edição.",
+      "source": "abrirTarefa.tarefa",
+      "description": "Tarefa completa com lista, criador, responsável, datas do ciclo, motivo da devolução e itens da checklist em ordem.",
       "organisms": [
-        "tarefaAcoes",
-        "tarefaDetalhe",
-        "tarefaForm",
-        "tarefaHistorico"
+        "acoesTarefa",
+        "detalheTarefa",
+        "formTarefa",
+        "historicoTarefa"
       ]
     },
     "listas": {
-      "source": "opcoesFormulario.listas",
-      "description": "Lista disponível para receber a tarefa no formulário.",
+      "source": "carregarMinhasTarefas.listas",
+      "description": "the list of Lista que pode receber tarefas, com nome, tipo e indicação de ativa.",
       "organisms": [
-        "tarefaForm"
+        "formTarefa"
       ]
     },
     "membros": {
-      "source": "buscarResponsaveis.membros",
-      "description": "Membro ativo que pode ser escolhido como responsável.",
+      "source": "buscarMembros.membros",
+      "description": "the list of Membro da equipe com id e nome.",
       "organisms": [
-        "tarefaForm"
+        "formTarefa"
       ]
     },
     "selectedTarefa": {
       "source": "entry.params.tarefaId",
-      "description": "Tarefa aberta com nomes, checklist e marcos do histórico; serve ao detalhe, às ações, ao histórico e ao formulário de edição.",
+      "description": "the id of the Tarefa selected in listaTarefas",
       "organisms": [
-        "tarefaDetalhe",
-        "tarefasLista"
+        "detalheTarefa",
+        "listaTarefas"
       ]
     }
   },
@@ -242,144 +193,148 @@ export const definition = {
     {
       "step": "cancelarTarefaCriador/localizarCriada",
       "organisms": [
-        "tarefasLista"
+        "listaTarefas",
+        "detalheTarefa"
       ]
     },
     {
       "step": "cancelarTarefaCriador/cancelarCriada",
       "organisms": [
-        "tarefaAcoes"
+        "acoesTarefa"
       ]
     },
     {
       "step": "criarTarefa/localizarLista",
       "organisms": [
-        "tarefaForm"
+        "formTarefa"
       ]
     },
     {
       "step": "criarTarefa/preencherTarefa",
       "organisms": [
-        "tarefaForm"
+        "formTarefa"
       ]
     },
     {
       "step": "editarTarefa/localizarTarefa",
       "organisms": [
-        "tarefasLista"
+        "listaTarefas",
+        "detalheTarefa"
       ]
     },
     {
       "step": "editarTarefa/alterarCampos",
       "organisms": [
-        "tarefaForm"
+        "formTarefa"
       ]
     },
     {
       "step": "editarTarefa/ajustarChecklist",
       "organisms": [
-        "tarefaForm",
-        "tarefaAcoes"
+        "formTarefa"
       ]
     },
     {
       "step": "executarTarefa/abrirMinhaTarefa",
       "organisms": [
-        "tarefasLista"
+        "listaTarefas",
+        "detalheTarefa"
       ]
     },
     {
       "step": "executarTarefa/verTarefa",
       "organisms": [
-        "tarefaDetalhe",
-        "tarefaHistorico"
+        "detalheTarefa",
+        "historicoTarefa"
       ]
     },
     {
       "step": "executarTarefa/iniciarTarefa",
       "organisms": [
-        "tarefaAcoes"
+        "acoesTarefa"
       ]
     },
     {
       "step": "executarTarefa/marcarChecklist",
       "organisms": [
-        "tarefaAcoes",
-        "tarefaDetalhe"
+        "formTarefa"
       ]
     },
     {
       "step": "executarTarefa/enviarRevisao",
       "organisms": [
-        "tarefaAcoes"
+        "acoesTarefa"
       ]
     },
     {
       "step": "reatribuirTarefaCriador/localizarParaReatribuir",
       "organisms": [
-        "tarefasLista"
+        "listaTarefas",
+        "detalheTarefa"
       ]
     },
     {
       "step": "reatribuirTarefaCriador/escolherNovoResponsavel",
       "organisms": [
-        "tarefaForm"
+        "formTarefa"
       ]
     },
     {
       "step": "reatribuirTarefaCriador/trocarResponsavel",
       "organisms": [
-        "tarefaForm"
+        "formTarefa"
       ]
     },
     {
       "step": "retomarTarefaDevolvida/abrirDevolvida",
       "organisms": [
-        "tarefasLista"
+        "listaTarefas",
+        "detalheTarefa"
       ]
     },
     {
       "step": "retomarTarefaDevolvida/lerMotivo",
       "organisms": [
-        "tarefaDetalhe",
-        "tarefaHistorico"
+        "detalheTarefa",
+        "historicoTarefa"
       ]
     },
     {
       "step": "retomarTarefaDevolvida/ajustarCampos",
       "organisms": [
-        "tarefaForm"
+        "formTarefa"
       ]
     },
     {
       "step": "retomarTarefaDevolvida/reenviarRevisao",
       "organisms": [
-        "tarefaAcoes"
+        "acoesTarefa"
       ]
     },
     {
       "step": "revisarTarefa/abrirTarefaRevisao",
       "organisms": [
-        "tarefasLista"
+        "listaTarefas",
+        "detalheTarefa"
       ]
     },
     {
       "step": "revisarTarefa/conferirEntrega",
       "organisms": [
-        "tarefaDetalhe",
-        "tarefaHistorico"
+        "detalheTarefa",
+        "historicoTarefa"
       ]
     },
     {
       "step": "revisarTarefa/aceitarTarefa",
       "organisms": [
-        "tarefaAcoes"
+        "acoesTarefa"
       ]
     },
     {
       "step": "revisarTarefa/devolverTarefa",
       "organisms": [
-        "tarefaAcoes"
+        "acoesTarefa"
       ]
     }
   ],

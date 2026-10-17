@@ -1,41 +1,41 @@
 {
   "attempt": "decision-1",
   "model": "claude-opus-5-5",
-  "promptChars": 47465,
-  "receivedAt": "2026-10-16T07:57:02.822Z",
+  "promptChars": 46457,
+  "receivedAt": "2026-10-17T03:54:48.109Z",
   "raw": {
     "type": "flexible",
     "result": {
       "toolName": "submitD2Pages",
       "arguments": {
-        "categoryReason": "A página reúne os avisos diários de vencimento que o sistema gera às 8h para o próprio responsável. Por isso, a categoria escolhida foi a central de avisos e atividades (activityNotificationHub). O usuário escolhe o aviso de um dia e confere as tarefas que ele trouxe e quando o envio aconteceu. A página não grava nenhuma informação.",
+        "categoryReason": "A página reúne os avisos diários de vencimento recebidos pelo próprio usuário: uma central de alertas gerados pelo sistema, com lista por data, o conteúdo de cada aviso e o registro de geração e finalização. Não há escrita, apenas consulta e acompanhamento dos alertas, o que corresponde a activityNotificationHub nos dois dispositivos.",
         "desktop": {
           "definition": {
             "template": {
               "category": "activityNotificationHub"
             },
-            "intent": "Mostrar ao responsável os seus avisos diários de vencimento, para que ele saiba quais tarefas abertas vencem hoje ou estão atrasadas e acompanhe quando cada aviso foi gerado e entregue.",
+            "intent": "Permitir que eu consulte meus avisos diários das 8h, escolha um dia e veja quais tarefas abertas venciam naquele dia ou já estavam atrasadas, além de saber quando cada aviso foi gerado e finalizado.",
             "sections": [
               {
                 "id": "avisosRecebidos",
                 "priority": "primary",
-                "purpose": "Mostrar todos os meus avisos diários por data de referência, com o total de tarefas e de atrasadas, para escolher qual aviso abrir.",
+                "purpose": "Mostrar meus avisos diários por data de referência, para eu localizar rapidamente o aviso de hoje ou de um dia anterior e ver quantas tarefas e quantas atrasadas cada um trouxe.",
                 "organisms": [
                   "listaAvisos"
                 ]
               },
               {
-                "id": "avisoAberto",
+                "id": "conteudoAviso",
                 "priority": "main",
-                "purpose": "Mostrar o aviso escolhido com as tarefas abertas que vencem hoje ou estão atrasadas, com o prazo e a situação de cada uma.",
+                "purpose": "Exibir o aviso escolhido com as tarefas que vencem no dia ou estão atrasadas, com prazo e situação, para eu saber o que precisa de atenção agora.",
                 "organisms": [
-                  "detalheAviso"
+                  "avisoDoDia"
                 ]
               },
               {
-                "id": "envioDosAvisos",
+                "id": "registroEnvio",
                 "priority": "secondary",
-                "purpose": "Mostrar quando o processo das 8h gerou e finalizou cada aviso e se o envio teve sucesso ou falhou.",
+                "purpose": "Mostrar quando o sistema gerou e finalizou cada aviso, para eu confiar que o aviso das 8h chegou completo.",
                 "organisms": [
                   "historicoAvisos"
                 ]
@@ -45,19 +45,19 @@
               {
                 "id": "listaAvisos",
                 "kind": "list",
-                "text": "Meus avisos diários por data de referência, com a quantidade de tarefas e de atrasadas em cada um; o aviso de hoje aparece primeiro.",
+                "text": "Meus avisos diários por data de referência, com a quantidade de tarefas e de atrasadas de cada um e a situação do envio; posso filtrar por período e escolher um aviso para ver o conteúdo.",
                 "intents": []
               },
               {
-                "id": "detalheAviso",
+                "id": "avisoDoDia",
                 "kind": "detail",
-                "text": "O aviso do dia: as tarefas abertas que vencem hoje ou estão atrasadas, com o título, o prazo e a situação do prazo de cada uma.",
+                "text": "O aviso escolhido: totais de tarefas e de atrasadas em destaque e a relação das tarefas abertas que vencem no dia ou já estavam atrasadas, com título, prazo e situação de cada uma.",
                 "intents": []
               },
               {
                 "id": "historicoAvisos",
                 "kind": "timeline",
-                "text": "Quando o sistema gerou e finalizou cada aviso diário às 8h, com a situação do envio e o motivo quando houve falha.",
+                "text": "Linha do tempo de quando o sistema gerou e finalizou cada aviso diário às 8h, indicando se o envio terminou com sucesso ou falha.",
                 "intents": []
               }
             ],
@@ -66,29 +66,29 @@
                 "id": "listaAvisos",
                 "recommendations": [
                   {
-                    "role": "Lista dos avisos por data de referência com totais",
+                    "role": "lista de avisos por data",
                     "preferred": "groupviewtable--ml-data-table",
                     "alternative": "groupviewdata--ml-vertical-record-list"
                   },
                   {
-                    "role": "Filtro do período das datas de referência",
+                    "role": "filtro por período de referência",
                     "preferred": "groupenterdateinterval--ml-date-interval-presets",
                     "alternative": "groupenterdateinterval--ml-date-range-dual-calendar"
                   }
                 ]
               },
               {
-                "id": "detalheAviso",
+                "id": "avisoDoDia",
                 "recommendations": [
                   {
-                    "role": "Tarefas do aviso com o prazo e a situação do prazo",
-                    "preferred": "groupviewtable--ml-view-table",
-                    "alternative": "groupviewtable--ml-data-table-minimal"
-                  },
-                  {
-                    "role": "Totais de tarefas e de atrasadas do aviso",
+                    "role": "totais de tarefas e atrasadas",
                     "preferred": "groupviewmetric--ml-metric-card",
                     "alternative": "groupviewmetric--ml-metric-big-number"
+                  },
+                  {
+                    "role": "tarefas do aviso com prazo e situação",
+                    "preferred": "groupviewtable--ml-view-table",
+                    "alternative": "groupviewtable--ml-data-table-minimal"
                   }
                 ]
               },
@@ -96,9 +96,9 @@
                 "id": "historicoAvisos",
                 "recommendations": [
                   {
-                    "role": "Linha do tempo da geração e da finalização dos avisos",
+                    "role": "geração e finalização dos avisos",
                     "preferred": "groupviewdata--ml-timeline-view",
-                    "alternative": "groupviewdata--ml-vertical-record-list"
+                    "alternative": "groupviewtable--ml-data-table-minimal"
                   }
                 ]
               }
@@ -115,11 +115,11 @@
                   "AvisoVencimento.details.quantidadeAtrasadas"
                 ],
                 "edits": [],
-                "selects": "detalheAviso",
+                "selects": "avisoDoDia",
                 "submits": []
               },
               {
-                "id": "detalheAviso",
+                "id": "avisoDoDia",
                 "reads": [
                   "AvisoVencimento.dataReferencia",
                   "AvisoVencimento.details.quantidadeTarefas",
@@ -129,7 +129,9 @@
                   "AvisoVencimento.details.tarefas.situacaoPrazo",
                   "Tarefa.titulo",
                   "Tarefa.status",
-                  "Tarefa.prazo"
+                  "Tarefa.prazo",
+                  "Tarefa.details.venceHoje",
+                  "Tarefa.details.atrasada"
                 ],
                 "edits": [],
                 "selects": "",
@@ -156,28 +158,28 @@
             "template": {
               "category": "activityNotificationHub"
             },
-            "intent": "No celular, mostrar primeiro o aviso de hoje e as tarefas abertas que vencem hoje ou estão atrasadas, em uma única coluna de conteúdo fluido. A página foi pensada para uns 390px de largura e continua legível entre 360px e 430px.",
+            "intent": "No celular, abrir rapidamente o aviso diário das 8h, ver as tarefas que vencem hoje ou estão atrasadas e consultar avisos anteriores, em conteúdo fluido de tela estreita (cerca de 390px, usável de 360px a 430px).",
             "sections": [
               {
                 "id": "avisosRecebidos",
                 "priority": "primary",
-                "purpose": "Mostrar os meus avisos por data de referência em uma lista empilhada, com o total de tarefas e de atrasadas, para tocar no aviso que quero abrir.",
+                "purpose": "Listar meus avisos por data de referência em itens empilhados, com quantidade de tarefas e de atrasadas, para eu tocar no aviso desejado.",
                 "organisms": [
                   "listaAvisos"
                 ]
               },
               {
-                "id": "avisoAberto",
+                "id": "conteudoAviso",
                 "priority": "main",
-                "purpose": "Mostrar o aviso escolhido com cada tarefa que vence hoje ou está atrasada, em linhas curtas com o prazo e a situação.",
+                "purpose": "Mostrar o aviso escolhido com totais em destaque e as tarefas vencendo ou atrasadas, cada uma com prazo e situação legíveis em tela estreita.",
                 "organisms": [
-                  "detalheAviso"
+                  "avisoDoDia"
                 ]
               },
               {
-                "id": "envioDosAvisos",
+                "id": "registroEnvio",
                 "priority": "secondary",
-                "purpose": "Mostrar no final, de forma compacta, quando cada aviso foi gerado e finalizado.",
+                "purpose": "Mostrar, abaixo do conteúdo, quando cada aviso foi gerado e finalizado pelo sistema.",
                 "organisms": [
                   "historicoAvisos"
                 ]
@@ -187,19 +189,19 @@
               {
                 "id": "listaAvisos",
                 "kind": "list",
-                "text": "Meus avisos diários por data de referência, com a quantidade de tarefas e de atrasadas; o aviso de hoje aparece no topo.",
+                "text": "Meus avisos diários por data de referência, mais recentes primeiro, com quantidade de tarefas e de atrasadas e a situação do envio; toco em um aviso para abrir o conteúdo.",
                 "intents": []
               },
               {
-                "id": "detalheAviso",
+                "id": "avisoDoDia",
                 "kind": "detail",
-                "text": "O aviso do dia: as tarefas abertas que vencem hoje ou estão atrasadas, com o prazo e a situação de cada uma.",
+                "text": "O aviso aberto: totais de tarefas e de atrasadas no topo e as tarefas abertas que vencem no dia ou já estavam atrasadas, com título, prazo e situação de cada uma.",
                 "intents": []
               },
               {
                 "id": "historicoAvisos",
                 "kind": "timeline",
-                "text": "Quando o sistema gerou e finalizou cada aviso diário às 8h e se o envio falhou.",
+                "text": "Quando o sistema gerou e finalizou cada aviso diário às 8h, com indicação de sucesso ou falha.",
                 "intents": []
               }
             ],
@@ -208,29 +210,29 @@
                 "id": "listaAvisos",
                 "recommendations": [
                   {
-                    "role": "Lista empilhada dos avisos por data de referência",
+                    "role": "lista de avisos por data",
                     "preferred": "groupviewdata--ml-vertical-record-list",
                     "alternative": "groupviewtable--ml-responsive-table"
                   },
                   {
-                    "role": "Filtro rápido de período",
+                    "role": "filtro por período de referência",
                     "preferred": "groupenterdateinterval--ml-date-interval-presets",
                     "alternative": ""
                   }
                 ]
               },
               {
-                "id": "detalheAviso",
+                "id": "avisoDoDia",
                 "recommendations": [
                   {
-                    "role": "Tarefas do aviso em tela estreita",
-                    "preferred": "groupviewtable--ml-responsive-table",
-                    "alternative": "groupviewtable--ml-responsive-data-table"
-                  },
-                  {
-                    "role": "Total de tarefas e de atrasadas no topo do aviso",
+                    "role": "totais de tarefas e atrasadas",
                     "preferred": "groupviewmetric--ml-metric-big-number",
                     "alternative": "groupviewmetric--ml-metric-card"
+                  },
+                  {
+                    "role": "tarefas do aviso com prazo e situação",
+                    "preferred": "groupviewtable--ml-responsive-table",
+                    "alternative": "groupviewtable--ml-responsive-data-table"
                   }
                 ]
               },
@@ -238,9 +240,9 @@
                 "id": "historicoAvisos",
                 "recommendations": [
                   {
-                    "role": "Linha do tempo compacta do envio dos avisos",
+                    "role": "geração e finalização dos avisos",
                     "preferred": "groupviewdata--ml-timeline-view",
-                    "alternative": ""
+                    "alternative": "groupviewtable--ml-responsive-table"
                   }
                 ]
               }
@@ -257,11 +259,11 @@
                   "AvisoVencimento.details.quantidadeAtrasadas"
                 ],
                 "edits": [],
-                "selects": "detalheAviso",
+                "selects": "avisoDoDia",
                 "submits": []
               },
               {
-                "id": "detalheAviso",
+                "id": "avisoDoDia",
                 "reads": [
                   "AvisoVencimento.dataReferencia",
                   "AvisoVencimento.details.quantidadeTarefas",
@@ -271,7 +273,9 @@
                   "AvisoVencimento.details.tarefas.situacaoPrazo",
                   "Tarefa.titulo",
                   "Tarefa.status",
-                  "Tarefa.prazo"
+                  "Tarefa.prazo",
+                  "Tarefa.details.venceHoje",
+                  "Tarefa.details.atrasada"
                 ],
                 "edits": [],
                 "selects": "",

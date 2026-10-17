@@ -13,16 +13,6 @@ export const definition = {
         "persist": true,
         "required": false
       },
-      "page": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:pessoasEquipe",
-        "persist": true,
-        "required": false
-      },
       "membroEquipeId": {
         "type": "string",
         "sources": [
@@ -36,55 +26,55 @@ export const definition = {
     }
   },
   "requests": {
-    "listarMembrosEquipe": {
+    "qryPessoasEquipe": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "membros"
+        "pessoas"
       ]
     },
-    "obterMembroEquipe": {
-      "kind": "qry",
-      "trigger": "obterMembroEquipe",
-      "returns": [
-        "membro"
-      ]
-    },
-    "cadastrarPessoa": {
+    "cmdCadastrarPessoa": {
       "kind": "cmd",
       "trigger": "cadastrarPessoa",
       "returns": [
-        "membro"
+        "pessoa"
       ],
       "writes": "MembroEquipe.create"
     },
-    "salvarAlteracoesPessoa": {
+    "cmdSalvarAlteracoes": {
       "kind": "cmd",
-      "trigger": "salvarAlteracoesPessoa",
+      "trigger": "salvarAlteracoes",
       "returns": [
-        "membro"
+        "pessoa"
       ],
       "writes": "MembroEquipe.update"
     }
   },
   "states": {
-    "membros": {
-      "source": "listarMembrosEquipe.membros",
-      "description": "Pessoa da equipe como aparece na lista e no cadastro: identificação, situação, país, papéis e contatos.",
+    "pessoas": {
+      "source": "qryPessoasEquipe.pessoas",
+      "description": "the list of Membro da equipe com identificação, situação no cadastro, papéis e resumo dos contatos.",
       "organisms": [
         "pessoasEquipe"
       ]
     },
-    "membro": {
-      "source": "obterMembroEquipe.membro",
-      "description": "Pessoa da equipe como aparece na lista e no cadastro: identificação, situação, país, papéis e contatos.",
+    "cmdCadastrarPessoaPessoa": {
+      "source": "cmdCadastrarPessoa.pessoa",
+      "description": "Membro da equipe com identificação, situação no cadastro, papéis e resumo dos contatos.",
+      "organisms": [
+        "cadastroPessoa"
+      ]
+    },
+    "cmdSalvarAlteracoesPessoa": {
+      "source": "cmdSalvarAlteracoes.pessoa",
+      "description": "Membro da equipe com identificação, situação no cadastro, papéis e resumo dos contatos.",
       "organisms": [
         "cadastroPessoa"
       ]
     },
     "selectedMembroEquipe": {
       "source": "entry.params.membroEquipeId",
-      "description": "Pessoa da equipe como aparece na lista e no cadastro: identificação, situação, país, papéis e contatos.",
+      "description": "the id of the MembroEquipe selected in pessoasEquipe",
       "organisms": [
         "cadastroPessoa",
         "pessoasEquipe"

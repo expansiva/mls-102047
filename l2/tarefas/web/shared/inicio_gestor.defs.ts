@@ -3,28 +3,31 @@
 export const definition = {
   "entry": {
     "params": {
-      "page": {
-        "type": "number",
+      "tarefaId": {
+        "type": "string",
         "sources": [
           "url",
           "localStorage"
         ],
-        "effect": "filter:tarefasPedemAcao",
+        "effect": "select:tarefasParaAcao",
         "persist": true,
         "required": false
       }
     }
   },
   "requests": {
-    "qryPanoramaEquipe": {
+    "obterPanoramaEquipe": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
-        "totais",
+        "totalAbertas",
+        "totalVenceHoje",
+        "totalAtrasadas",
+        "progressoChecklist",
         "listas"
       ]
     },
-    "qryTarefasPedemAcao": {
+    "listarTarefasParaAcao": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
@@ -33,45 +36,77 @@ export const definition = {
     }
   },
   "states": {
-    "totais": {
-      "source": "qryPanoramaEquipe.totais",
-      "description": "Indicadores da equipe já calculados no servidor.",
+    "listas": {
+      "source": "obterPanoramaEquipe.listas",
+      "description": "the list of Lista (projeto ou área) com a quantidade de tarefas abertas que ela tem.",
       "organisms": [
         "destaquesEquipe"
       ]
     },
-    "listas": {
-      "source": "qryPanoramaEquipe.listas",
-      "description": "Lista com a quantidade de tarefas abertas.",
+    "totalAbertas": {
+      "source": "obterPanoramaEquipe.totalAbertas",
+      "description": "the totalAbertas that obterPanoramaEquipe returns",
+      "organisms": [
+        "destaquesEquipe"
+      ]
+    },
+    "totalVenceHoje": {
+      "source": "obterPanoramaEquipe.totalVenceHoje",
+      "description": "the totalVenceHoje that obterPanoramaEquipe returns",
+      "organisms": [
+        "destaquesEquipe"
+      ]
+    },
+    "totalAtrasadas": {
+      "source": "obterPanoramaEquipe.totalAtrasadas",
+      "description": "the totalAtrasadas that obterPanoramaEquipe returns",
+      "organisms": [
+        "destaquesEquipe"
+      ]
+    },
+    "progressoChecklist": {
+      "source": "obterPanoramaEquipe.progressoChecklist",
+      "description": "the progressoChecklist that obterPanoramaEquipe returns",
       "organisms": [
         "destaquesEquipe"
       ]
     },
     "tarefas": {
-      "source": "qryTarefasPedemAcao.tarefas",
-      "description": "Tarefa aberta atrasada ou vencendo hoje, com lista e responsável.",
+      "source": "listarTarefasParaAcao.tarefas",
+      "description": "the list of Tarefa da equipe com título, situação, prioridade, prazo, nome da lista, nome do responsável e indicadores de prazo e checklist.",
       "organisms": [
-        "tarefasPedemAcao"
+        "tarefasParaAcao"
+      ]
+    },
+    "selectedTarefa": {
+      "source": "entry.params.tarefaId",
+      "description": "the id of the Tarefa selected in destaquesEquipe",
+      "organisms": [
+        "destaquesEquipe",
+        "tarefasParaAcao"
       ]
     }
   },
   "journeys": [
     {
       "step": "acompanharTarefasEquipe/filtrarTarefas",
-      "organisms": [],
+      "organisms": [
+        "tarefasParaAcao"
+      ],
       "continuesIn": "tarefas_equipe"
     },
     {
       "step": "acompanharTarefasEquipe/verQuadro",
       "organisms": [
-        "destaquesEquipe"
+        "destaquesEquipe",
+        "tarefasParaAcao"
       ],
       "continuesIn": "tarefas_equipe"
     },
     {
       "step": "acompanharTarefasEquipe/verDetalhe",
       "organisms": [
-        "tarefasPedemAcao"
+        "tarefasParaAcao"
       ],
       "continuesIn": "tarefas_equipe"
     }

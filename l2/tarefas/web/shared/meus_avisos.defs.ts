@@ -3,43 +3,13 @@
 export const definition = {
   "entry": {
     "params": {
-      "responsavelId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:listaAvisos",
-        "persist": true,
-        "required": true
-      },
-      "page": {
-        "type": "number",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:listaAvisos",
-        "persist": true,
-        "required": false
-      },
-      "avisoId": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:detalheAviso",
-        "persist": true,
-        "required": true
-      },
       "avisoVencimentoId": {
         "type": "string",
         "sources": [
           "url",
           "localStorage"
         ],
-        "effect": "select:detalheAviso",
+        "effect": "select:avisoDoDia",
         "persist": true,
         "required": false
       }
@@ -51,12 +21,19 @@ export const definition = {
       "trigger": "onLoad",
       "returns": [
         "avisos",
-        "avisoAberto"
+        "avisoAtual"
       ]
     },
-    "abrirAviso": {
+    "buscarAvisos": {
       "kind": "qry",
-      "trigger": "abrirAviso",
+      "trigger": "buscarAvisos",
+      "returns": [
+        "avisos"
+      ]
+    },
+    "obterAviso": {
+      "kind": "qry",
+      "trigger": "obterAviso",
       "returns": [
         "aviso"
       ]
@@ -65,24 +42,24 @@ export const definition = {
   "states": {
     "avisos": {
       "source": "carregarMeusAvisos.avisos",
-      "description": "Um aviso diário na lista e no histórico de envio.",
+      "description": "the list of Aviso diário de vencimentos de um responsável, com seus totais e o registro de geração e finalização do envio.",
       "organisms": [
         "historicoAvisos",
         "listaAvisos"
       ]
     },
-    "avisoAberto": {
-      "source": "carregarMeusAvisos.avisoAberto",
-      "description": "Aviso aberto com suas tarefas que vencem hoje ou estão atrasadas.",
+    "avisoAtual": {
+      "source": "carregarMeusAvisos.avisoAtual",
+      "description": "Aviso diário de vencimentos com seus totais e a relação das tarefas incluídas.",
       "organisms": [
-        "detalheAviso"
+        "avisoDoDia"
       ]
     },
     "selectedAvisoVencimento": {
       "source": "entry.params.avisoVencimentoId",
-      "description": "Aviso aberto com suas tarefas que vencem hoje ou estão atrasadas.",
+      "description": "the id of the AvisoVencimento selected in listaAvisos",
       "organisms": [
-        "detalheAviso",
+        "avisoDoDia",
         "listaAvisos"
       ]
     }
@@ -92,13 +69,13 @@ export const definition = {
       "step": "avisoDiarioVencimentos/abrirAviso",
       "organisms": [
         "listaAvisos",
-        "detalheAviso"
+        "avisoDoDia"
       ]
     },
     {
       "step": "avisoDiarioVencimentos/verVencendo",
       "organisms": [
-        "detalheAviso"
+        "avisoDoDia"
       ]
     }
   ],

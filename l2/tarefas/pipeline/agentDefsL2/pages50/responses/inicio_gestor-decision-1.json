@@ -2,34 +2,34 @@
   "attempt": "decision-1",
   "model": "claude-opus-5-5",
   "promptChars": 58308,
-  "receivedAt": "2026-10-16T07:57:02.860Z",
+  "receivedAt": "2026-10-17T03:54:35.672Z",
   "raw": {
     "type": "flexible",
     "result": {
       "toolName": "submitD2Pages",
       "arguments": {
-        "categoryReason": "O Painel da equipe é a tela inicial do gestor para monitorar a equipe: indicadores de tarefas abertas por lista, vencendo hoje e atrasadas, com progresso das checklists, e uma caixa de exceções que encaminha às ações de trocar responsável ou cancelar. Esse padrão de KPIs, alertas e ações recomendadas corresponde a dashboardCommandCenter; a página não grava nada e as ações acontecem em Tarefas da equipe.",
+        "categoryReason": "O Painel da equipe é a entrada do gestor: reúne indicadores do andamento (tarefas abertas por lista, que vencem hoje, atrasadas e progresso das checklists) e uma fila curta de tarefas que podem pedir ação. Monitorar exceções com indicadores e ações recomendadas é o perfil de um dashboardCommandCenter. As ações em si (trocar responsável, cancelar) acontecem em Tarefas da equipe.",
         "desktop": {
           "definition": {
             "template": {
               "category": "dashboardCommandCenter"
             },
-            "intent": "Dar ao gestor, logo ao entrar, a visão do andamento da equipe: quantas tarefas estão abertas em cada lista, quantas vencem hoje e quantas estão atrasadas, quanto das checklists já foi feito, e quais tarefas podem pedir que ele troque o responsável ou cancele.",
+            "intent": "Dar ao gestor uma visão rápida do andamento de todas as tarefas da equipe: quantas estão abertas em cada lista, quantas vencem hoje, quantas estão atrasadas e como estão as checklists. Logo abaixo, mostrar as tarefas que podem pedir uma ação dele, como trocar o responsável ou cancelar.",
             "sections": [
               {
                 "id": "panoramaEquipe",
                 "priority": "primary",
-                "purpose": "Mostrar de relance a situação da equipe: tarefas abertas por lista, as que vencem hoje, as atrasadas e o progresso das checklists, para o gestor saber onde olhar primeiro.",
+                "purpose": "Mostrar logo de início a situação da equipe: tarefas abertas por lista, as que vencem hoje, as atrasadas e o progresso das checklists, para o gestor ver onde o trabalho está acumulando ou correndo risco.",
                 "organisms": [
                   "destaquesEquipe"
                 ]
               },
               {
-                "id": "tarefasParaAgir",
+                "id": "atencaoGestor",
                 "priority": "main",
-                "purpose": "Reunir as tarefas da equipe que podem pedir a ação do gestor, como atrasadas ou vencendo hoje, com responsável, lista e prazo, para que ele decida se troca o responsável ou cancela.",
+                "purpose": "Listar as tarefas da equipe que podem precisar de uma decisão do gestor, como as atrasadas ou que vencem hoje, e levar até Tarefas da equipe para trocar o responsável ou cancelar.",
                 "organisms": [
-                  "tarefasPedemAcao"
+                  "tarefasParaAcao"
                 ]
               }
             ],
@@ -37,27 +37,16 @@
               {
                 "id": "destaquesEquipe",
                 "kind": "highlights",
-                "text": "Tarefas abertas por lista, quantas vencem hoje e quantas estão atrasadas na equipe, com o progresso das checklists. Daqui o gestor pode abrir o quadro da equipe ou a lista de listas para aprofundar.",
+                "text": "Tarefas abertas em cada lista, quantas vencem hoje e quantas estão atrasadas na equipe, com o progresso das checklists. Mostra ao gestor onde há acúmulo ou risco de atraso.",
+                "intents": []
+              },
+              {
+                "id": "tarefasParaAcao",
+                "kind": "inbox",
+                "text": "Tarefas da equipe que podem pedir ação do gestor, com título, lista, responsável, prioridade, prazo e situação, e com as atrasadas e as que vencem hoje em destaque. Cada tarefa leva até Tarefas da equipe para trocar o responsável ou cancelar.",
                 "intents": [
                   {
                     "id": "abrirTarefasEquipe",
-                    "kind": "navigate",
-                    "to": "tarefas_equipe"
-                  },
-                  {
-                    "id": "abrirListas",
-                    "kind": "navigate",
-                    "to": "listas"
-                  }
-                ]
-              },
-              {
-                "id": "tarefasPedemAcao",
-                "kind": "inbox",
-                "text": "Tarefas da equipe que podem pedir minha ação: atrasadas ou vencendo hoje, com título, lista, responsável, prioridade, prazo, situação e progresso da checklist. Ao escolher uma, o gestor vai para Tarefas da equipe para trocar o responsável ou cancelar.",
-                "intents": [
-                  {
-                    "id": "agirNaTarefa",
                     "kind": "navigate",
                     "to": "tarefas_equipe"
                   }
@@ -69,7 +58,7 @@
                 "id": "destaquesEquipe",
                 "recommendations": [
                   {
-                    "role": "Totais de abertas, vencendo hoje e atrasadas",
+                    "role": "Totais de tarefas abertas, das que vencem hoje e das atrasadas",
                     "preferred": "groupviewmetric--ml-metric-card",
                     "alternative": "groupviewmetric--ml-metric-big-number"
                   },
@@ -86,20 +75,20 @@
                 ]
               },
               {
-                "id": "tarefasPedemAcao",
+                "id": "tarefasParaAcao",
                 "recommendations": [
                   {
-                    "role": "Tarefas que pedem ação",
+                    "role": "Fila de tarefas que pedem ação",
                     "preferred": "groupviewdata--ml-vertical-record-list",
                     "alternative": "groupviewdata--ml-card-grid"
                   },
                   {
-                    "role": "Abrir a tarefa para agir",
+                    "role": "Abrir a tarefa em Tarefas da equipe",
                     "preferred": "grouptriggeraction--ml-button-standard",
-                    "alternative": "grouptriggeraction--ml-kebab-action-trigger"
+                    "alternative": "grouptriggeraction--ml-icon-button"
                   },
                   {
-                    "role": "Paginar as tarefas",
+                    "role": "Navegar entre páginas da fila",
                     "preferred": "grouptriggeraction--ml-pagination-control",
                     "alternative": ""
                   }
@@ -115,34 +104,30 @@
                   "Lista.nome",
                   "Lista.details.quantidadeTarefasAbertas",
                   "Tarefa.listaId",
-                  "Tarefa.status",
                   "Tarefa.details.aberta",
                   "Tarefa.details.venceHoje",
                   "Tarefa.details.atrasada",
-                  "Tarefa.details.progressoChecklist",
-                  "ItemChecklist.feito",
-                  "ItemChecklist.tarefaId"
+                  "Tarefa.details.progressoChecklist"
                 ],
                 "edits": [],
-                "selects": "",
+                "selects": "tarefasParaAcao",
                 "submits": []
               },
               {
-                "id": "tarefasPedemAcao",
+                "id": "tarefasParaAcao",
                 "reads": [
-                  "Tarefa.id",
                   "Tarefa.titulo",
                   "Tarefa.status",
                   "Tarefa.prioridade",
                   "Tarefa.prazo",
                   "Tarefa.listaId",
+                  "Lista.nome",
                   "Tarefa.responsavelId",
+                  "MembroEquipe.details.identification.name",
                   "Tarefa.details.aberta",
                   "Tarefa.details.venceHoje",
                   "Tarefa.details.atrasada",
-                  "Tarefa.details.progressoChecklist",
-                  "Lista.nome",
-                  "MembroEquipe.details.identification.name"
+                  "Tarefa.details.progressoChecklist"
                 ],
                 "edits": [],
                 "selects": "",
@@ -156,22 +141,22 @@
             "template": {
               "category": "dashboardCommandCenter"
             },
-            "intent": "No celular, em uma coluna fluida de cerca de 390px que também funciona em 360px e 430px, o gestor vê primeiro os números da equipe (abertas, vencendo hoje e atrasadas) e logo abaixo as tarefas que podem pedir que ele troque o responsável ou cancele.",
+            "intent": "No celular, o gestor confere em poucos segundos quantas tarefas da equipe estão abertas, vencem hoje ou estão atrasadas, e depois percorre as tarefas que podem pedir ação dele. O conteúdo ocupa toda a largura estreita, perto de 390px, e continua usável entre 360px e 430px.",
             "sections": [
               {
                 "id": "panoramaEquipe",
                 "priority": "primary",
-                "purpose": "Mostrar em blocos compactos, empilhados, os totais de abertas, vencendo hoje e atrasadas, seguidos das tarefas abertas por lista e do progresso das checklists.",
+                "purpose": "Mostrar primeiro, em blocos empilhados, os totais de abertas, que vencem hoje e atrasadas, e depois as tarefas abertas por lista e o progresso das checklists.",
                 "organisms": [
                   "destaquesEquipe"
                 ]
               },
               {
-                "id": "tarefasParaAgir",
+                "id": "atencaoGestor",
                 "priority": "main",
-                "purpose": "Listar em cartões de leitura rápida as tarefas atrasadas ou vencendo hoje, com responsável e prazo em destaque, para que o gestor toque e vá agir.",
+                "purpose": "Lista vertical das tarefas que podem pedir decisão do gestor, com as atrasadas primeiro, para tocar e abrir em Tarefas da equipe.",
                 "organisms": [
-                  "tarefasPedemAcao"
+                  "tarefasParaAcao"
                 ]
               }
             ],
@@ -179,27 +164,16 @@
               {
                 "id": "destaquesEquipe",
                 "kind": "highlights",
-                "text": "Tarefas abertas por lista, quantas vencem hoje e quantas estão atrasadas na equipe, com o progresso das checklists, em leitura curta e vertical. Um toque leva ao quadro da equipe ou às listas.",
+                "text": "Totais compactos de tarefas abertas, que vencem hoje e atrasadas na equipe, seguidos das tarefas abertas por lista e do progresso das checklists.",
+                "intents": []
+              },
+              {
+                "id": "tarefasParaAcao",
+                "kind": "inbox",
+                "text": "Tarefas da equipe que podem pedir ação do gestor, mostrando título, responsável, prazo e situação, com destaque para atrasadas e as que vencem hoje. Ao tocar numa tarefa, o gestor vai para Tarefas da equipe para trocar o responsável ou cancelar.",
                 "intents": [
                   {
                     "id": "abrirTarefasEquipe",
-                    "kind": "navigate",
-                    "to": "tarefas_equipe"
-                  },
-                  {
-                    "id": "abrirListas",
-                    "kind": "navigate",
-                    "to": "listas"
-                  }
-                ]
-              },
-              {
-                "id": "tarefasPedemAcao",
-                "kind": "inbox",
-                "text": "Tarefas da equipe que podem pedir minha ação, com título, responsável, prazo e situação visíveis em cada cartão. Ao tocar em uma, o gestor vai para Tarefas da equipe para trocar o responsável ou cancelar.",
-                "intents": [
-                  {
-                    "id": "agirNaTarefa",
                     "kind": "navigate",
                     "to": "tarefas_equipe"
                   }
@@ -211,7 +185,7 @@
                 "id": "destaquesEquipe",
                 "recommendations": [
                   {
-                    "role": "Totais de abertas, vencendo hoje e atrasadas",
+                    "role": "Totais de tarefas abertas, das que vencem hoje e das atrasadas",
                     "preferred": "groupviewmetric--ml-metric-big-number",
                     "alternative": "groupviewmetric--ml-metric-card"
                   },
@@ -228,22 +202,17 @@
                 ]
               },
               {
-                "id": "tarefasPedemAcao",
+                "id": "tarefasParaAcao",
                 "recommendations": [
                   {
-                    "role": "Tarefas que pedem ação",
+                    "role": "Fila de tarefas que pedem ação",
                     "preferred": "groupviewdata--ml-vertical-record-list",
                     "alternative": ""
                   },
                   {
-                    "role": "Abrir a tarefa para agir",
+                    "role": "Abrir a tarefa em Tarefas da equipe",
                     "preferred": "grouptriggeraction--ml-button-standard",
                     "alternative": "grouptriggeraction--ml-icon-button"
-                  },
-                  {
-                    "role": "Paginar as tarefas",
-                    "preferred": "grouptriggeraction--ml-pagination-control",
-                    "alternative": ""
                   }
                 ]
               }
@@ -257,34 +226,29 @@
                   "Lista.nome",
                   "Lista.details.quantidadeTarefasAbertas",
                   "Tarefa.listaId",
-                  "Tarefa.status",
                   "Tarefa.details.aberta",
                   "Tarefa.details.venceHoje",
                   "Tarefa.details.atrasada",
-                  "Tarefa.details.progressoChecklist",
-                  "ItemChecklist.feito",
-                  "ItemChecklist.tarefaId"
+                  "Tarefa.details.progressoChecklist"
                 ],
                 "edits": [],
-                "selects": "",
+                "selects": "tarefasParaAcao",
                 "submits": []
               },
               {
-                "id": "tarefasPedemAcao",
+                "id": "tarefasParaAcao",
                 "reads": [
-                  "Tarefa.id",
                   "Tarefa.titulo",
                   "Tarefa.status",
                   "Tarefa.prioridade",
                   "Tarefa.prazo",
                   "Tarefa.listaId",
+                  "Lista.nome",
                   "Tarefa.responsavelId",
+                  "MembroEquipe.details.identification.name",
                   "Tarefa.details.aberta",
                   "Tarefa.details.venceHoje",
-                  "Tarefa.details.atrasada",
-                  "Tarefa.details.progressoChecklist",
-                  "Lista.nome",
-                  "MembroEquipe.details.identification.name"
+                  "Tarefa.details.atrasada"
                 ],
                 "edits": [],
                 "selects": "",

@@ -1,25 +1,25 @@
 {
   "attempt": "decision-1",
   "model": "claude-opus-5-5",
-  "promptChars": 40438,
-  "receivedAt": "2026-10-16T07:56:56.342Z",
+  "promptChars": 45265,
+  "receivedAt": "2026-10-17T03:54:28.828Z",
   "raw": {
     "type": "flexible",
     "result": {
       "toolName": "submitD2Pages",
       "arguments": {
-        "categoryReason": "A página mantém um cadastro base de listas (projetos ou áreas) usado por todo o módulo ao criar e acompanhar tarefas: lista do cadastro e formulário de criação e edição, o que corresponde a Master Data Management.",
+        "categoryReason": "A página mantém o cadastro base de listas (projetos ou áreas) usado por outras telas ao criar e acompanhar tarefas, o que caracteriza gestão de dados mestres.",
         "desktop": {
           "definition": {
             "template": {
               "category": "masterDataManagement"
             },
-            "intent": "O gestor vê todas as listas que agrupam as tarefas da equipe, com quantas tarefas abertas cada uma tem, e cadastra novas listas ou altera as existentes.",
+            "intent": "O gestor vê todas as listas que agrupam as tarefas da equipe, com a quantidade de tarefas abertas em cada uma, e cadastra novas listas ou altera as existentes, sem sair da página.",
             "sections": [
               {
                 "id": "cadastroListas",
                 "priority": "primary",
-                "purpose": "Mostrar as listas de projetos e áreas, se estão ativas e quantas tarefas abertas cada uma ainda tem, para o gestor escolher qual manter.",
+                "purpose": "Mostrar as listas existentes por projeto ou área, se estão ativas e quantas tarefas abertas cada uma tem, para o gestor localizar a lista que quer acompanhar ou alterar.",
                 "organisms": [
                   "listasCadastradas"
                 ]
@@ -27,7 +27,7 @@
               {
                 "id": "manutencaoLista",
                 "priority": "main",
-                "purpose": "Ao lado da lista, cadastrar uma nova lista ou alterar nome, tipo, descrição e se a lista ainda recebe tarefas.",
+                "purpose": "Criar uma nova lista ou editar nome, tipo, descrição e se está ativa para a lista escolhida, ao lado da lista de registros.",
                 "organisms": [
                   "formularioLista"
                 ]
@@ -37,13 +37,13 @@
               {
                 "id": "listasCadastradas",
                 "kind": "list",
-                "text": "Listas que agrupam as tarefas, com nome, tipo (projeto ou área), se está ativa e a quantidade de tarefas abertas em cada uma; escolher uma lista abre seus dados para edição.",
+                "text": "Listas que agrupam as tarefas, com nome, tipo (projeto ou área), se está ativa e a quantidade de tarefas abertas em cada uma; o gestor busca pelo nome e escolhe uma lista para alterar.",
                 "intents": []
               },
               {
                 "id": "formularioLista",
                 "kind": "form",
-                "text": "Cadastrar uma nova lista ou alterar o nome, o tipo, a descrição e se a lista está ativa; listas inativas deixam de aparecer na escolha ao criar tarefas.",
+                "text": "Cadastrar uma nova lista ou alterar o nome, o tipo, a descrição e se a lista está ativa; listas inativas deixam de aparecer na escolha ao criar tarefa, e não pode haver duas listas com o mesmo nome.",
                 "intents": [
                   {
                     "id": "criarLista",
@@ -63,9 +63,14 @@
                 "id": "listasCadastradas",
                 "recommendations": [
                   {
-                    "role": "coleção de listas",
-                    "preferred": "groupviewdata--ml-vertical-record-list",
-                    "alternative": "groupviewdata--ml-card-grid"
+                    "role": "tabela das listas com tarefas abertas",
+                    "preferred": "groupviewtable--ml-data-table",
+                    "alternative": "groupviewtable--ml-side-detail-table"
+                  },
+                  {
+                    "role": "busca pelo nome da lista",
+                    "preferred": "groupsearchcontent--ml-search-filters",
+                    "alternative": "groupsearchcontent--ml-search-bar"
                   },
                   {
                     "role": "paginação das listas",
@@ -88,12 +93,12 @@
                     "alternative": ""
                   },
                   {
-                    "role": "salvar lista",
+                    "role": "salvar ou criar lista",
                     "preferred": "grouptriggeraction--ml-button-standard",
-                    "alternative": ""
+                    "alternative": "grouptriggeraction--ml-button-group"
                   },
                   {
-                    "role": "confirmação ou erro ao salvar",
+                    "role": "confirmação ou erro de nome repetido",
                     "preferred": "groupnotifyuser--ml-toast-notification",
                     "alternative": "groupnotifyuser--ml-contextual-feedback"
                   }
@@ -108,8 +113,8 @@
                 "reads": [
                   "Lista.id",
                   "Lista.nome",
-                  "Lista.ativa",
                   "Lista.details.tipo",
+                  "Lista.ativa",
                   "Lista.details.quantidadeTarefasAbertas"
                 ],
                 "edits": [],
@@ -122,15 +127,15 @@
                   "Lista.id",
                   "Lista.version",
                   "Lista.nome",
-                  "Lista.ativa",
                   "Lista.details.tipo",
-                  "Lista.details.descricao"
+                  "Lista.details.descricao",
+                  "Lista.ativa"
                 ],
                 "edits": [
                   "Lista.nome",
-                  "Lista.ativa",
                   "Lista.details.tipo",
-                  "Lista.details.descricao"
+                  "Lista.details.descricao",
+                  "Lista.ativa"
                 ],
                 "selects": "",
                 "submits": [
@@ -152,12 +157,12 @@
             "template": {
               "category": "masterDataManagement"
             },
-            "intent": "No celular, o gestor percorre as listas da equipe com a quantidade de tarefas abertas e abre uma lista para alterá-la ou cadastra uma nova, em conteúdo fluido de coluna estreita (cerca de 390px, utilizável entre 360px e 430px).",
+            "intent": "No celular, o gestor consulta as listas com a quantidade de tarefas abertas em uma coluna fluida e abre o formulário para cadastrar ou alterar uma lista, com conteúdo legível de 360px a 430px.",
             "sections": [
               {
                 "id": "cadastroListas",
                 "priority": "primary",
-                "purpose": "Mostrar as listas empilhadas, cada uma com nome, tipo, se está ativa e quantas tarefas abertas tem, fáceis de tocar para editar.",
+                "purpose": "Mostrar as listas empilhadas, com nome, tipo, se está ativa e as tarefas abertas, para o gestor tocar na lista que quer alterar.",
                 "organisms": [
                   "listasCadastradas"
                 ]
@@ -165,7 +170,7 @@
               {
                 "id": "manutencaoLista",
                 "priority": "main",
-                "purpose": "Abaixo ou ao tocar numa lista, preencher nome, tipo, descrição e ativa para criar ou salvar a lista.",
+                "purpose": "Formulário em largura total, abaixo da lista ou aberto ao tocar, para criar ou editar uma lista.",
                 "organisms": [
                   "formularioLista"
                 ]
@@ -175,13 +180,13 @@
               {
                 "id": "listasCadastradas",
                 "kind": "list",
-                "text": "Listas que agrupam as tarefas, com nome, tipo (projeto ou área), se está ativa e a quantidade de tarefas abertas em cada uma; tocar numa lista abre seus dados para edição.",
+                "text": "Listas que agrupam as tarefas, cada uma com nome, tipo (projeto ou área), se está ativa e a quantidade de tarefas abertas; busca pelo nome no topo.",
                 "intents": []
               },
               {
                 "id": "formularioLista",
                 "kind": "form",
-                "text": "Cadastrar uma nova lista ou alterar o nome, o tipo, a descrição e se a lista está ativa; listas inativas deixam de aparecer na escolha ao criar tarefas.",
+                "text": "Cadastrar uma nova lista ou alterar o nome, o tipo, a descrição e se está ativa; o nome não pode repetir o de outra lista.",
                 "intents": [
                   {
                     "id": "criarLista",
@@ -201,13 +206,13 @@
                 "id": "listasCadastradas",
                 "recommendations": [
                   {
-                    "role": "coleção de listas",
+                    "role": "listas empilhadas com tarefas abertas",
                     "preferred": "groupviewdata--ml-vertical-record-list",
-                    "alternative": ""
+                    "alternative": "groupviewtable--ml-responsive-data-table"
                   },
                   {
-                    "role": "paginação das listas",
-                    "preferred": "grouptriggeraction--ml-pagination-control",
+                    "role": "busca pelo nome da lista",
+                    "preferred": "groupsearchcontent--ml-search-bar",
                     "alternative": ""
                   }
                 ]
@@ -226,12 +231,12 @@
                     "alternative": ""
                   },
                   {
-                    "role": "salvar lista",
+                    "role": "salvar ou criar lista",
                     "preferred": "grouptriggeraction--ml-button-standard",
                     "alternative": ""
                   },
                   {
-                    "role": "confirmação ou erro ao salvar",
+                    "role": "confirmação ou erro",
                     "preferred": "groupnotifyuser--ml-toast-notification",
                     "alternative": "groupnotifyuser--ml-contextual-feedback"
                   }
@@ -246,8 +251,8 @@
                 "reads": [
                   "Lista.id",
                   "Lista.nome",
-                  "Lista.ativa",
                   "Lista.details.tipo",
+                  "Lista.ativa",
                   "Lista.details.quantidadeTarefasAbertas"
                 ],
                 "edits": [],
@@ -260,15 +265,15 @@
                   "Lista.id",
                   "Lista.version",
                   "Lista.nome",
-                  "Lista.ativa",
                   "Lista.details.tipo",
-                  "Lista.details.descricao"
+                  "Lista.details.descricao",
+                  "Lista.ativa"
                 ],
                 "edits": [
                   "Lista.nome",
-                  "Lista.ativa",
                   "Lista.details.tipo",
-                  "Lista.details.descricao"
+                  "Lista.details.descricao",
+                  "Lista.ativa"
                 ],
                 "selects": "",
                 "submits": [

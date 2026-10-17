@@ -5,20 +5,20 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/masterDataManagement/page21.md",
     "experience": "compactCrudTable"
   },
-  "intent": "Em tela estreita e fluida (cerca de 390px, também usável em 360px e 430px), o gestor percorre as pessoas da equipe e abre uma delas para corrigir nome e país, ou cadastra uma nova pessoa.",
+  "intent": "No celular, deixar o gestor consultar as pessoas da equipe em uma coluna estreita e fluida (por volta de 390px, também usável em 360px e 430px) e cadastrar ou corrigir uma pessoa sem sair da página.",
   "sections": [
     {
-      "id": "equipeCadastrada",
+      "id": "equipe",
       "priority": "primary",
-      "purpose": "Lista compacta das pessoas da equipe, com nome e situação em destaque e país e contatos em segundo plano, para achar rapidamente quem atualizar.",
+      "purpose": "Lista compacta das pessoas da equipe, com nome e situação em destaque e busca pelo nome no topo, para chegar rápido a quem precisa ser revisado.",
       "organisms": [
         "pessoasEquipe"
       ]
     },
     {
-      "id": "manutencaoPessoa",
+      "id": "cadastro",
       "priority": "main",
-      "purpose": "Formulário em coluna única para cadastrar uma pessoa ou atualizar a selecionada, com o botão de salvar sempre ao alcance.",
+      "purpose": "Formulário curto, logo abaixo da lista ou aberto ao tocar em uma pessoa, para cadastrar alguém novo ou atualizar nome e país.",
       "organisms": [
         "cadastroPessoa"
       ]
@@ -27,19 +27,19 @@ export const definition = {
   "organisms": {
     "pessoasEquipe": {
       "kind": "list",
-      "text": "Pessoas da equipe que podem criar tarefas e ser responsáveis, mostrando nome e situação no cadastro; tocar em uma pessoa abre seus dados para edição.",
+      "text": "Pessoas da equipe que podem criar tarefas e ser responsáveis, com nome e situação no cadastro em primeiro plano, e país e contatos em seguida. Tocar em uma pessoa abre o cadastro dela para editar.",
       "intents": []
     },
     "cadastroPessoa": {
       "kind": "form",
-      "text": "Cadastrar ou atualizar o nome e os dados de uma pessoa da equipe: nome como aparece nas tarefas e país.",
+      "text": "Cadastrar uma nova pessoa da equipe ou atualizar o nome e o país da pessoa escolhida. O botão de salvar fica sempre ao alcance do polegar.",
       "intents": [
         {
           "id": "cadastrarPessoa",
           "kind": "submit"
         },
         {
-          "id": "salvarAlteracoesPessoa",
+          "id": "salvarAlteracoes",
           "kind": "submit"
         }
       ]
@@ -64,9 +64,13 @@ export const definition = {
     ],
     "cadastroPessoa": [
       {
-        "role": "nome e país da pessoa",
+        "role": "nome da pessoa",
         "preferred": "groupentertext--ml-floating-text-input",
         "alternative": "groupentertext--ml-enter-text"
+      },
+      {
+        "role": "país da pessoa",
+        "preferred": "groupentertext--ml-enter-text"
       },
       {
         "role": "salvar cadastro",

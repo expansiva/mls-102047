@@ -5,48 +5,37 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/dashboardCommandCenter/page21.md",
     "experience": "exceptionTriage"
   },
-  "intent": "Dar ao gestor, logo ao entrar, a visão do andamento da equipe: quantas tarefas estão abertas em cada lista, quantas vencem hoje e quantas estão atrasadas, quanto das checklists já foi feito, e quais tarefas podem pedir que ele troque o responsável ou cancele.",
+  "intent": "Dar ao gestor uma visão rápida do andamento de todas as tarefas da equipe: quantas estão abertas em cada lista, quantas vencem hoje, quantas estão atrasadas e como estão as checklists. Logo abaixo, mostrar as tarefas que podem pedir uma ação dele, como trocar o responsável ou cancelar.",
   "sections": [
     {
       "id": "panoramaEquipe",
       "priority": "primary",
-      "purpose": "Mostrar de relance a situação da equipe: tarefas abertas por lista, as que vencem hoje, as atrasadas e o progresso das checklists, para o gestor saber onde olhar primeiro.",
+      "purpose": "Mostrar logo de início a situação da equipe: tarefas abertas por lista, as que vencem hoje, as atrasadas e o progresso das checklists, para o gestor ver onde o trabalho está acumulando ou correndo risco.",
       "organisms": [
         "destaquesEquipe"
       ]
     },
     {
-      "id": "tarefasParaAgir",
+      "id": "atencaoGestor",
       "priority": "main",
-      "purpose": "Reunir as tarefas da equipe que podem pedir a ação do gestor, como atrasadas ou vencendo hoje, com responsável, lista e prazo, para que ele decida se troca o responsável ou cancela.",
+      "purpose": "Listar as tarefas da equipe que podem precisar de uma decisão do gestor, como as atrasadas ou que vencem hoje, e levar até Tarefas da equipe para trocar o responsável ou cancelar.",
       "organisms": [
-        "tarefasPedemAcao"
+        "tarefasParaAcao"
       ]
     }
   ],
   "organisms": {
     "destaquesEquipe": {
       "kind": "highlights",
-      "text": "Tarefas abertas por lista, quantas vencem hoje e quantas estão atrasadas na equipe, com o progresso das checklists. Daqui o gestor pode abrir o quadro da equipe ou a lista de listas para aprofundar.",
+      "text": "Tarefas abertas em cada lista, quantas vencem hoje e quantas estão atrasadas na equipe, com o progresso das checklists. Mostra ao gestor onde há acúmulo ou risco de atraso.",
+      "intents": []
+    },
+    "tarefasParaAcao": {
+      "kind": "inbox",
+      "text": "Tarefas da equipe que podem pedir ação do gestor, com título, lista, responsável, prioridade, prazo e situação, e com as atrasadas e as que vencem hoje em destaque. Cada tarefa leva até Tarefas da equipe para trocar o responsável ou cancelar.",
       "intents": [
         {
           "id": "abrirTarefasEquipe",
-          "kind": "navigate",
-          "to": "tarefas_equipe"
-        },
-        {
-          "id": "abrirListas",
-          "kind": "navigate",
-          "to": "listas"
-        }
-      ]
-    },
-    "tarefasPedemAcao": {
-      "kind": "inbox",
-      "text": "Tarefas da equipe que podem pedir minha ação: atrasadas ou vencendo hoje, com título, lista, responsável, prioridade, prazo, situação e progresso da checklist. Ao escolher uma, o gestor vai para Tarefas da equipe para trocar o responsável ou cancelar.",
-      "intents": [
-        {
-          "id": "agirNaTarefa",
           "kind": "navigate",
           "to": "tarefas_equipe"
         }
@@ -56,7 +45,7 @@ export const definition = {
   "molecules": {
     "destaquesEquipe": [
       {
-        "role": "Totais de abertas, vencendo hoje e atrasadas",
+        "role": "Totais de tarefas abertas, das que vencem hoje e das atrasadas",
         "preferred": "groupviewmetric--ml-metric-card",
         "alternative": "groupviewmetric--ml-metric-big-number"
       },
@@ -71,19 +60,19 @@ export const definition = {
         "alternative": "groupshowprogress--ml-circular-progress"
       }
     ],
-    "tarefasPedemAcao": [
+    "tarefasParaAcao": [
       {
-        "role": "Tarefas que pedem ação",
+        "role": "Fila de tarefas que pedem ação",
         "preferred": "groupviewdata--ml-vertical-record-list",
         "alternative": "groupviewdata--ml-card-grid"
       },
       {
-        "role": "Abrir a tarefa para agir",
+        "role": "Abrir a tarefa em Tarefas da equipe",
         "preferred": "grouptriggeraction--ml-button-standard",
-        "alternative": "grouptriggeraction--ml-kebab-action-trigger"
+        "alternative": "grouptriggeraction--ml-icon-button"
       },
       {
-        "role": "Paginar as tarefas",
+        "role": "Navegar entre páginas da fila",
         "preferred": "grouptriggeraction--ml-pagination-control"
       }
     ]

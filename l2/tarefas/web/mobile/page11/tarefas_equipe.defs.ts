@@ -2,51 +2,51 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/operationsQueue/page21.md",
-    "experience": "workQueueSplit"
+    "category": "_102020_/l4/collabux/templates/workPlanningBoard/page21.md",
+    "experience": "timelineList"
   },
-  "intent": "No celular, em conteúdo fluido estreito (referência de 390px, usável de 360px a 430px), o gestor percorre as tarefas da equipe filtradas, abre uma tarefa e, logo abaixo do detalhe, troca o responsável ou cancela; o histórico fica por último.",
+  "intent": "No celular, permitir ao gestor percorrer as tarefas da equipe em uma coluna fluida (cerca de 390px, usável entre 360px e 430px), filtrar, abrir uma tarefa e, a partir dela, trocar o responsável ou cancelar.",
   "sections": [
     {
-      "id": "secaoQuadroEquipe",
+      "id": "quadroEquipe",
       "priority": "primary",
-      "purpose": "Lista empilhada das tarefas da equipe com filtros recolhíveis, mostrando primeiro situação, prazo e atraso para o gestor achar rápido onde agir.",
+      "purpose": "Lista compacta das tarefas da equipe com filtros recolhíveis, destacando atrasadas e as que vencem hoje.",
       "organisms": [
-        "quadroTarefasEquipe"
+        "tarefasEquipe"
       ]
     },
     {
-      "id": "secaoTarefaSelecionada",
+      "id": "tarefaSelecionada",
       "priority": "main",
-      "purpose": "Detalhe da tarefa aberta em uma coluna, seguido das ações do gestor ao alcance do polegar.",
+      "purpose": "Ao tocar numa tarefa, mostrar seu detalhe empilhado e logo abaixo as ações do gestor.",
       "organisms": [
         "detalheTarefa",
-        "acoesGestorTarefa"
+        "acoesGestor"
       ]
     },
     {
-      "id": "secaoHistoricoTarefa",
+      "id": "historico",
       "priority": "secondary",
-      "purpose": "Histórico da tarefa abaixo do detalhe, para consulta quando o gestor precisar de contexto.",
+      "purpose": "Histórico da tarefa ao final, consultado quando o gestor precisa entender o contexto.",
       "organisms": [
         "historicoTarefa"
       ]
     }
   ],
   "organisms": {
-    "quadroTarefasEquipe": {
+    "tarefasEquipe": {
       "kind": "list",
-      "text": "Tarefas da equipe em linhas compactas com título, responsável, prazo, situação, prioridade, aviso de vence hoje ou atrasada e progresso da checklist; filtros por lista, responsável, prioridade, prazo e situação e busca pelo título ficam recolhidos acima da lista. Tocar numa tarefa abre o detalhe.",
+      "text": "Tarefas da equipe com título, responsável, prazo, situação e prioridade, filtráveis por lista, responsável, prioridade, prazo e situação, com sinal para as que vencem hoje ou estão atrasadas.",
       "intents": []
     },
     "detalheTarefa": {
       "kind": "detail",
-      "text": "Detalhe da tarefa aberta: título, situação e prazo em destaque, depois responsável, quem criou, lista, descrição, tarefa pai, quantidade de subtarefas e checklist com itens feitos e pendentes.",
+      "text": "Detalhe da tarefa tocada: descrição, criador, responsável, prazo, situação, subtarefas e checklist com o progresso.",
       "intents": []
     },
-    "acoesGestorTarefa": {
+    "acoesGestor": {
       "kind": "actions",
-      "text": "Trocar o responsável escolhendo pelo nome uma pessoa ativa da equipe, que é avisada, ou cancelar a tarefa aberta após confirmação.",
+      "text": "Trocar o responsável escolhendo uma pessoa ativa da equipe, que é avisada, ou cancelar a tarefa aberta.",
       "intents": [
         {
           "id": "reatribuirTarefa",
@@ -60,74 +60,66 @@ export const definition = {
     },
     "historicoTarefa": {
       "kind": "timeline",
-      "text": "Histórico da tarefa: criação, início, revisões, devoluções com motivo, reatribuições com aviso ao novo responsável, conclusão e cancelamento.",
+      "text": "Histórico da tarefa: criação, início, revisões, devoluções, reatribuições com aviso ao novo responsável e cancelamento.",
       "intents": []
     }
   },
   "molecules": {
-    "quadroTarefasEquipe": [
+    "tarefasEquipe": [
       {
-        "role": "lista de tarefas adaptada a tela estreita",
+        "role": "Lista das tarefas adaptada a tela estreita",
         "preferred": "groupviewtable--ml-responsive-data-table",
         "alternative": "groupviewtable--ml-responsive-table"
       },
       {
-        "role": "filtro por lista ou responsável",
-        "preferred": "groupselectone--ml-select-one-autocomplete",
-        "alternative": "groupselectone--ml-select"
+        "role": "Filtro por lista, responsável, prioridade ou situação",
+        "preferred": "groupselectone--ml-select",
+        "alternative": "groupselectone--ml-combobox"
       },
       {
-        "role": "filtro por prioridade ou situação",
-        "preferred": "groupselectone--ml-select-dropdown",
-        "alternative": "groupselectone--ml-segmented-control"
+        "role": "Filtro por período de prazo",
+        "preferred": "groupenterdateinterval--ml-date-interval-presets"
       },
       {
-        "role": "filtro por período de prazo",
-        "preferred": "groupenterdateinterval--ml-date-interval-presets",
-        "alternative": "groupenterdateinterval--ml-date-interval-drag"
-      },
-      {
-        "role": "busca pelo título",
+        "role": "Busca pelo título da tarefa",
         "preferred": "groupsearchcontent--ml-search-bar",
         "alternative": "groupsearchcontent--ml-search-filters"
       }
     ],
     "detalheTarefa": [
       {
-        "role": "cartão com os dados da tarefa",
+        "role": "Resumo da tarefa tocada",
         "preferred": "groupviewcard--ml-vertical-card",
         "alternative": "groupviewcard--ml-view-card-horizontal"
       },
       {
-        "role": "itens da checklist somente leitura",
-        "preferred": "groupenterboolean--ml-checkbox-preference",
-        "alternative": "groupenterboolean--ml-toggle-icon"
+        "role": "Itens da checklist em ordem",
+        "preferred": "groupviewdata--ml-vertical-record-list"
       }
     ],
-    "acoesGestorTarefa": [
+    "acoesGestor": [
       {
-        "role": "escolha do novo responsável pelo nome",
+        "role": "Escolha do novo responsável pelo nome",
         "preferred": "groupselectone--ml-select-one-autocomplete",
         "alternative": "groupselectone--ml-combobox"
       },
       {
-        "role": "botões de reatribuir e cancelar",
+        "role": "Ações de reatribuir e cancelar",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-kebab-action-trigger"
       },
       {
-        "role": "confirmação antes de cancelar",
+        "role": "Confirmação antes de cancelar",
         "preferred": "groupnotifyuser--ml-alert-modal"
       },
       {
-        "role": "retorno da ação",
-        "preferred": "groupnotifyuser--ml-toast-notification",
-        "alternative": "groupnotifyuser--ml-contextual-feedback"
+        "role": "Retorno após reatribuir ou cancelar",
+        "preferred": "groupnotifyuser--ml-toast-notification"
       }
     ],
     "historicoTarefa": [
       {
-        "role": "linha do tempo dos eventos da tarefa",
+        "role": "Eventos da tarefa em ordem de tempo",
         "preferred": "groupviewdata--ml-timeline-view",
         "alternative": "groupviewdata--ml-vertical-record-list"
       }

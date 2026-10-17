@@ -1,6 +1,6 @@
 {
   "organisms": {
-    "tarefasLista": {
+    "listaTarefas": {
       "reads": [
         "Tarefa.titulo",
         "Tarefa.listaId",
@@ -18,10 +18,10 @@
         "Tarefa.details.devolvidaEm"
       ],
       "edits": [],
-      "selects": "tarefaDetalhe",
+      "selects": "detalheTarefa",
       "submits": []
     },
-    "tarefaDetalhe": {
+    "detalheTarefa": {
       "reads": [
         "Tarefa.titulo",
         "Tarefa.details.descricao",
@@ -34,7 +34,6 @@
         "Tarefa.prioridade",
         "Tarefa.status",
         "Tarefa.details.motivoDevolucao",
-        "Tarefa.details.progressoChecklist",
         "ItemChecklist.ordem",
         "ItemChecklist.details.descricao",
         "ItemChecklist.feito",
@@ -44,13 +43,15 @@
       "selects": "",
       "submits": []
     },
-    "tarefaForm": {
+    "formTarefa": {
       "reads": [
         "Lista.nome",
         "Lista.ativa",
         "Lista.details.tipo",
         "MembroEquipe.details.identification.name",
-        "MembroEquipe.details.identification.status"
+        "MembroEquipe.details.identification.status",
+        "Tarefa.status",
+        "Tarefa.criadorId"
       ],
       "edits": [
         "Tarefa.listaId",
@@ -60,65 +61,65 @@
         "Tarefa.prazo",
         "Tarefa.responsavelId",
         "ItemChecklist.details.descricao",
-        "ItemChecklist.ordem"
+        "ItemChecklist.ordem",
+        "ItemChecklist.feito"
       ],
       "selects": "",
       "submits": [
         {
-          "intentId": "salvarNovaTarefa",
+          "intentId": "criarTarefa",
           "write": "Tarefa.create"
         },
         {
-          "intentId": "salvarEdicaoTarefa",
+          "intentId": "salvarEdicao",
           "write": "Tarefa.update"
+        },
+        {
+          "intentId": "salvarChecklist",
+          "write": "ItemChecklist.update"
         }
       ]
     },
-    "tarefaAcoes": {
+    "acoesTarefa": {
       "reads": [
         "Tarefa.status",
         "Tarefa.criadorId",
         "Tarefa.responsavelId",
-        "ItemChecklist.feito"
+        "MembroEquipe.details.identification.name"
       ],
       "edits": [
-        "ItemChecklist.feito",
         "Tarefa.details.motivoDevolucao"
       ],
       "selects": "",
       "submits": [
         {
-          "intentId": "iniciarTarefa",
+          "intentId": "iniciar",
           "write": "Tarefa.iniciar"
         },
         {
-          "intentId": "marcarItemChecklist",
-          "write": "ItemChecklist.update"
-        },
-        {
-          "intentId": "enviarParaRevisao",
+          "intentId": "enviarRevisao",
           "write": "Tarefa.enviarParaRevisao"
         },
         {
-          "intentId": "aceitarEntrega",
+          "intentId": "aceitar",
           "write": "Tarefa.aceitar"
         },
         {
-          "intentId": "devolverComMotivo",
+          "intentId": "devolver",
           "write": "Tarefa.devolver"
         },
         {
-          "intentId": "cancelarTarefa",
+          "intentId": "cancelar",
           "write": "Tarefa.cancelar"
         }
       ]
     },
-    "tarefaHistorico": {
+    "historicoTarefa": {
       "reads": [
         "Tarefa.criadaEm",
-        "Tarefa.status",
         "Tarefa.responsavelId",
         "MembroEquipe.details.identification.name",
+        "Tarefa.status",
         "Tarefa.details.devolvidaEm",
         "Tarefa.details.motivoDevolucao",
         "Tarefa.details.concluidaEm",

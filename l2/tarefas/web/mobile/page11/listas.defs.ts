@@ -5,12 +5,12 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/masterDataManagement/page21.md",
     "experience": "compactCrudTable"
   },
-  "intent": "No celular, o gestor percorre as listas da equipe com a quantidade de tarefas abertas e abre uma lista para alterá-la ou cadastra uma nova, em conteúdo fluido de coluna estreita (cerca de 390px, utilizável entre 360px e 430px).",
+  "intent": "No celular, o gestor consulta as listas com a quantidade de tarefas abertas em uma coluna fluida e abre o formulário para cadastrar ou alterar uma lista, com conteúdo legível de 360px a 430px.",
   "sections": [
     {
       "id": "cadastroListas",
       "priority": "primary",
-      "purpose": "Mostrar as listas empilhadas, cada uma com nome, tipo, se está ativa e quantas tarefas abertas tem, fáceis de tocar para editar.",
+      "purpose": "Mostrar as listas empilhadas, com nome, tipo, se está ativa e as tarefas abertas, para o gestor tocar na lista que quer alterar.",
       "organisms": [
         "listasCadastradas"
       ]
@@ -18,7 +18,7 @@ export const definition = {
     {
       "id": "manutencaoLista",
       "priority": "main",
-      "purpose": "Abaixo ou ao tocar numa lista, preencher nome, tipo, descrição e ativa para criar ou salvar a lista.",
+      "purpose": "Formulário em largura total, abaixo da lista ou aberto ao tocar, para criar ou editar uma lista.",
       "organisms": [
         "formularioLista"
       ]
@@ -27,12 +27,12 @@ export const definition = {
   "organisms": {
     "listasCadastradas": {
       "kind": "list",
-      "text": "Listas que agrupam as tarefas, com nome, tipo (projeto ou área), se está ativa e a quantidade de tarefas abertas em cada uma; tocar numa lista abre seus dados para edição.",
+      "text": "Listas que agrupam as tarefas, cada uma com nome, tipo (projeto ou área), se está ativa e a quantidade de tarefas abertas; busca pelo nome no topo.",
       "intents": []
     },
     "formularioLista": {
       "kind": "form",
-      "text": "Cadastrar uma nova lista ou alterar o nome, o tipo, a descrição e se a lista está ativa; listas inativas deixam de aparecer na escolha ao criar tarefas.",
+      "text": "Cadastrar uma nova lista ou alterar o nome, o tipo, a descrição e se está ativa; o nome não pode repetir o de outra lista.",
       "intents": [
         {
           "id": "criarLista",
@@ -48,12 +48,13 @@ export const definition = {
   "molecules": {
     "listasCadastradas": [
       {
-        "role": "coleção de listas",
-        "preferred": "groupviewdata--ml-vertical-record-list"
+        "role": "listas empilhadas com tarefas abertas",
+        "preferred": "groupviewdata--ml-vertical-record-list",
+        "alternative": "groupviewtable--ml-responsive-data-table"
       },
       {
-        "role": "paginação das listas",
-        "preferred": "grouptriggeraction--ml-pagination-control"
+        "role": "busca pelo nome da lista",
+        "preferred": "groupsearchcontent--ml-search-bar"
       }
     ],
     "formularioLista": [
@@ -67,11 +68,11 @@ export const definition = {
         "preferred": "groupentertext--ml-multiline-text"
       },
       {
-        "role": "salvar lista",
+        "role": "salvar ou criar lista",
         "preferred": "grouptriggeraction--ml-button-standard"
       },
       {
-        "role": "confirmação ou erro ao salvar",
+        "role": "confirmação ou erro",
         "preferred": "groupnotifyuser--ml-toast-notification",
         "alternative": "groupnotifyuser--ml-contextual-feedback"
       }

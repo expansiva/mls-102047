@@ -5,28 +5,28 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/activityNotificationHub/page21.md",
     "experience": "inboxSplit"
   },
-  "intent": "Mostrar ao responsável os seus avisos diários de vencimento, para que ele saiba quais tarefas abertas vencem hoje ou estão atrasadas e acompanhe quando cada aviso foi gerado e entregue.",
+  "intent": "Permitir que eu consulte meus avisos diários das 8h, escolha um dia e veja quais tarefas abertas venciam naquele dia ou já estavam atrasadas, além de saber quando cada aviso foi gerado e finalizado.",
   "sections": [
     {
       "id": "avisosRecebidos",
       "priority": "primary",
-      "purpose": "Mostrar todos os meus avisos diários por data de referência, com o total de tarefas e de atrasadas, para escolher qual aviso abrir.",
+      "purpose": "Mostrar meus avisos diários por data de referência, para eu localizar rapidamente o aviso de hoje ou de um dia anterior e ver quantas tarefas e quantas atrasadas cada um trouxe.",
       "organisms": [
         "listaAvisos"
       ]
     },
     {
-      "id": "avisoAberto",
+      "id": "conteudoAviso",
       "priority": "main",
-      "purpose": "Mostrar o aviso escolhido com as tarefas abertas que vencem hoje ou estão atrasadas, com o prazo e a situação de cada uma.",
+      "purpose": "Exibir o aviso escolhido com as tarefas que vencem no dia ou estão atrasadas, com prazo e situação, para eu saber o que precisa de atenção agora.",
       "organisms": [
-        "detalheAviso"
+        "avisoDoDia"
       ]
     },
     {
-      "id": "envioDosAvisos",
+      "id": "registroEnvio",
       "priority": "secondary",
-      "purpose": "Mostrar quando o processo das 8h gerou e finalizou cada aviso e se o envio teve sucesso ou falhou.",
+      "purpose": "Mostrar quando o sistema gerou e finalizou cada aviso, para eu confiar que o aviso das 8h chegou completo.",
       "organisms": [
         "historicoAvisos"
       ]
@@ -35,50 +35,50 @@ export const definition = {
   "organisms": {
     "listaAvisos": {
       "kind": "list",
-      "text": "Meus avisos diários por data de referência, com a quantidade de tarefas e de atrasadas em cada um; o aviso de hoje aparece primeiro.",
+      "text": "Meus avisos diários por data de referência, com a quantidade de tarefas e de atrasadas de cada um e a situação do envio; posso filtrar por período e escolher um aviso para ver o conteúdo.",
       "intents": []
     },
-    "detalheAviso": {
+    "avisoDoDia": {
       "kind": "detail",
-      "text": "O aviso do dia: as tarefas abertas que vencem hoje ou estão atrasadas, com o título, o prazo e a situação do prazo de cada uma.",
+      "text": "O aviso escolhido: totais de tarefas e de atrasadas em destaque e a relação das tarefas abertas que vencem no dia ou já estavam atrasadas, com título, prazo e situação de cada uma.",
       "intents": []
     },
     "historicoAvisos": {
       "kind": "timeline",
-      "text": "Quando o sistema gerou e finalizou cada aviso diário às 8h, com a situação do envio e o motivo quando houve falha.",
+      "text": "Linha do tempo de quando o sistema gerou e finalizou cada aviso diário às 8h, indicando se o envio terminou com sucesso ou falha.",
       "intents": []
     }
   },
   "molecules": {
     "listaAvisos": [
       {
-        "role": "Lista dos avisos por data de referência com totais",
+        "role": "lista de avisos por data",
         "preferred": "groupviewtable--ml-data-table",
         "alternative": "groupviewdata--ml-vertical-record-list"
       },
       {
-        "role": "Filtro do período das datas de referência",
+        "role": "filtro por período de referência",
         "preferred": "groupenterdateinterval--ml-date-interval-presets",
         "alternative": "groupenterdateinterval--ml-date-range-dual-calendar"
       }
     ],
-    "detalheAviso": [
+    "avisoDoDia": [
       {
-        "role": "Tarefas do aviso com o prazo e a situação do prazo",
-        "preferred": "groupviewtable--ml-view-table",
-        "alternative": "groupviewtable--ml-data-table-minimal"
-      },
-      {
-        "role": "Totais de tarefas e de atrasadas do aviso",
+        "role": "totais de tarefas e atrasadas",
         "preferred": "groupviewmetric--ml-metric-card",
         "alternative": "groupviewmetric--ml-metric-big-number"
+      },
+      {
+        "role": "tarefas do aviso com prazo e situação",
+        "preferred": "groupviewtable--ml-view-table",
+        "alternative": "groupviewtable--ml-data-table-minimal"
       }
     ],
     "historicoAvisos": [
       {
-        "role": "Linha do tempo da geração e da finalização dos avisos",
+        "role": "geração e finalização dos avisos",
         "preferred": "groupviewdata--ml-timeline-view",
-        "alternative": "groupviewdata--ml-vertical-record-list"
+        "alternative": "groupviewtable--ml-data-table-minimal"
       }
     ]
   }

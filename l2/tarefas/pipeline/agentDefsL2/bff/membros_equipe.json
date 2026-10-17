@@ -1,8 +1,8 @@
 {
   "types": [
     {
-      "name": "MembroEquipeResumo",
-      "description": "Pessoa da equipe como aparece na lista e no cadastro: identificação, situação, país, papéis e contatos.",
+      "name": "PessoaEquipe",
+      "description": "Membro da equipe com identificação, situação no cadastro, papéis e resumo dos contatos.",
       "fields": [
         {
           "name": "id",
@@ -26,30 +26,40 @@
         },
         {
           "name": "details",
-          "type": "MembroEquipeDetalhes"
+          "type": "PessoaEquipeDetalhes"
         }
       ]
     },
     {
-      "name": "MembroEquipeDetalhes",
-      "description": "",
+      "name": "PessoaEquipeDetalhes",
+      "description": "Detalhes do membro da equipe: identificação e dados de base.",
       "fields": [
         {
           "name": "identification",
-          "type": "MembroEquipeIdentificacao"
+          "type": "PessoaEquipeIdentificacao"
         },
         {
           "name": "base",
-          "type": "MembroEquipeBase"
+          "type": "PessoaEquipeBase"
         }
       ]
     },
     {
-      "name": "MembroEquipeIdentificacao",
-      "description": "",
+      "name": "PessoaEquipeIdentificacao",
+      "description": "Identificação do membro da equipe: subtipo, nome, situação no cadastro, país e papéis.",
       "fields": [
         {
-          "name": "details.identification.name",
+          "name": "subtype",
+          "type": "'Person'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "MembroEquipe.details.identification.subtype"
+            ]
+          }
+        },
+        {
+          "name": "name",
           "type": "string",
           "origin": {
             "kind": "field",
@@ -59,7 +69,7 @@
           }
         },
         {
-          "name": "details.identification.status",
+          "name": "status",
           "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
           "origin": {
             "kind": "field",
@@ -69,7 +79,7 @@
           }
         },
         {
-          "name": "details.identification.countryCode",
+          "name": "countryCode",
           "type": "string",
           "origin": {
             "kind": "field",
@@ -79,7 +89,7 @@
           }
         },
         {
-          "name": "details.identification.tags",
+          "name": "tags",
           "type": "string",
           "origin": {
             "kind": "field",
@@ -91,11 +101,11 @@
       ]
     },
     {
-      "name": "MembroEquipeBase",
-      "description": "",
+      "name": "PessoaEquipeBase",
+      "description": "Dados de base do membro: resumo dos canais de contato vinculados.",
       "fields": [
         {
-          "name": "details.base.contacts",
+          "name": "contacts",
           "type": "string",
           "origin": {
             "kind": "field",
@@ -109,7 +119,7 @@
   ],
   "endpoints": [
     {
-      "id": "listarMembrosEquipe",
+      "id": "qryPessoasEquipe",
       "kind": "qry",
       "when": "onLoad",
       "input": [
@@ -141,51 +151,21 @@
       ],
       "output": [
         {
-          "name": "membros",
-          "type": "MembroEquipeResumo[]",
+          "name": "pessoas",
+          "type": "PessoaEquipe[]",
           "paginated": true
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Carrega, ao abrir a página, as pessoas da equipe (papel tarefas.MembroEquipe) para o gestor ver quem pode criar e receber tarefas e escolher quem atualizar.",
-        "input": "page e pageSize: página da lista; busca: trecho opcional do nome para filtrar as pessoas.",
-        "processing": "Lista os membros da organização que têm o papel tarefas.MembroEquipe em details.identification.tags, filtrando pelo nome quando houver busca, ordenados por nome. Situação, papéis e resumo de contatos são campos derivados lidos do cadastro mestre, nunca calculados ou gravados aqui. Não devolve o consentimento de privacidade (campo negado ao gestor).",
-        "output": "Página { items, page, pageSize, hasMore } com id, version, nome, situação, país, papéis e contatos de cada pessoa, no formato que a lista mostra."
+        "purpose": "Lista, de forma paginada, as pessoas da equipe da organização com o papel tarefas.MembroEquipe, com busca opcional pelo nome.",
+        "input": "busca: trecho do nome para filtrar (opcional); page e pageSize: página solicitada e tamanho da página.",
+        "processing": "Filtra os membros da organização que têm o papel tarefas.MembroEquipe em tags; se houver busca, aplica correspondência parcial e sem distinção de maiúsculas sobre details.identification.name; ordena por nome. Não expõe o consentimento de privacidade (campo negado ao gestor). Situação, papéis, subtipo e contatos são campos calculados pela plataforma e apenas lidos.",
+        "output": "Página { items, page, pageSize, hasMore } de pessoas, cada uma com id, version, subtipo, nome, situação no cadastro, país, papéis e resumo dos contatos."
       }
     },
     {
-      "id": "obterMembroEquipe",
-      "kind": "qry",
-      "when": "interaction",
-      "input": [
-        {
-          "name": "id",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "MembroEquipe.id"
-            ]
-          }
-        }
-      ],
-      "output": [
-        {
-          "name": "membro",
-          "type": "MembroEquipeResumo"
-        }
-      ],
-      "rules": [],
-      "jsdoc": {
-        "purpose": "Carrega a pessoa escolhida na lista para abrir seus dados no formulário de cadastro.",
-        "input": "id: identificador (mdmId) da pessoa selecionada.",
-        "processing": "Lê o membro pelo id (read.byId) com a versão atual, para que a edição use o controle de concorrência otimista.",
-        "output": "A pessoa com id, version, nome, país e situação, que o formulário preenche."
-      }
-    },
-    {
-      "id": "cadastrarPessoa",
+      "id": "cmdCadastrarPessoa",
       "kind": "cmd",
       "when": "cadastrarPessoa",
       "writes": "MembroEquipe.create",
@@ -213,22 +193,22 @@
       ],
       "output": [
         {
-          "name": "membro",
-          "type": "MembroEquipeResumo"
+          "name": "pessoa",
+          "type": "PessoaEquipe"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Cadastra uma nova pessoa na equipe para que ela possa criar e receber tarefas.",
-        "input": "name: nome como aparece nas tarefas; countryCode: país que define as regras de privacidade.",
-        "processing": "Cria ou anexa a pessoa no cadastro mestre (register.createOrAttach) com o papel tarefas.MembroEquipe, sem duplicar quem já existe. Id, versão, subtipo, situação, papéis e contatos são definidos pela plataforma, não pelo endpoint.",
-        "output": "A pessoa criada com id, version e dados derivados, para inserir na lista e manter no formulário sem nova chamada."
+        "purpose": "Cadastra uma nova pessoa na equipe com o papel tarefas.MembroEquipe.",
+        "input": "details.identification.name: nome da pessoa como aparecerá nas tarefas; details.identification.countryCode: país da pessoa.",
+        "processing": "Usa register.createOrAttach: cria a pessoa no cadastro mestre ou anexa o papel tarefas.MembroEquipe a quem já existe, sem duplicar. Valida o formato do documento. id, version, subtipo, situação, papéis e contatos são definidos pela plataforma, nunca informados pelo endpoint.",
+        "output": "A pessoa cadastrada, ativa, com id, version, subtipo, nome, situação, país, papéis e resumo dos contatos."
       }
     },
     {
-      "id": "salvarAlteracoesPessoa",
+      "id": "cmdSalvarAlteracoes",
       "kind": "cmd",
-      "when": "salvarAlteracoesPessoa",
+      "when": "salvarAlteracoes",
       "writes": "MembroEquipe.update",
       "input": [
         {
@@ -274,16 +254,16 @@
       ],
       "output": [
         {
-          "name": "membro",
-          "type": "MembroEquipeResumo"
+          "name": "pessoa",
+          "type": "PessoaEquipe"
         }
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Corrige o nome e o país da pessoa selecionada, mantendo correto como ela aparece nas tarefas.",
-        "input": "id e version: pessoa editada e versão lida; name: novo nome; countryCode: novo país.",
-        "processing": "Atualiza nome e país no cadastro mestre (edit.platformFields), recusando a gravação se a versão não for a atual (concorrência otimista). Campos derivados não são alterados.",
-        "output": "A pessoa atualizada com a nova versão, para atualizar a linha da lista e o formulário sem nova chamada."
+        "purpose": "Corrige o nome e o país de uma pessoa que já está na equipe.",
+        "input": "id: identificador do membro; version: versão lida, para controle de concorrência otimista; details.identification.name: novo nome; details.identification.countryCode: novo país.",
+        "processing": "Usa edit.platformFields no cadastro mestre; recusa se a versão não for a atual. Altera apenas nome e país; os demais campos são mantidos pela plataforma.",
+        "output": "A pessoa atualizada, com a nova version, subtipo, nome, situação, país, papéis e resumo dos contatos."
       }
     }
   ],
@@ -291,20 +271,24 @@
     "organisms": [
       {
         "organism": "pessoasEquipe",
-        "reads": "listarMembrosEquipe.membros"
+        "reads": "qryPessoasEquipe.pessoas"
       },
       {
         "organism": "cadastroPessoa",
-        "reads": "obterMembroEquipe.membro"
+        "reads": "cmdCadastrarPessoa.pessoa"
+      },
+      {
+        "organism": "cadastroPessoa",
+        "reads": "cmdSalvarAlteracoes.pessoa"
       }
     ],
     "commands": [
       {
-        "endpoint": "cadastrarPessoa",
+        "endpoint": "cmdCadastrarPessoa",
         "refreshes": []
       },
       {
-        "endpoint": "salvarAlteracoesPessoa",
+        "endpoint": "cmdSalvarAlteracoes",
         "refreshes": []
       }
     ],
@@ -312,31 +296,26 @@
       {
         "organism": "pessoasEquipe",
         "via": {
-          "query": "obterMembroEquipe"
+          "list": "qryPessoasEquipe.pessoas"
         }
       }
     ],
     "journeys": [],
     "updates": [
       {
-        "endpoint": "cadastrarPessoa",
-        "state": "listarMembrosEquipe.membros",
-        "mode": "upsert"
-      },
-      {
-        "endpoint": "cadastrarPessoa",
-        "state": "obterMembroEquipe.membro",
+        "endpoint": "qryPessoasEquipe",
+        "state": "qryPessoasEquipe.pessoas",
         "mode": "replace"
       },
       {
-        "endpoint": "salvarAlteracoesPessoa",
-        "state": "listarMembrosEquipe.membros",
+        "endpoint": "cmdCadastrarPessoa",
+        "state": "qryPessoasEquipe.pessoas",
         "mode": "upsert"
       },
       {
-        "endpoint": "salvarAlteracoesPessoa",
-        "state": "obterMembroEquipe.membro",
-        "mode": "replace"
+        "endpoint": "cmdSalvarAlteracoes",
+        "state": "qryPessoasEquipe.pessoas",
+        "mode": "upsert"
       }
     ]
   }
