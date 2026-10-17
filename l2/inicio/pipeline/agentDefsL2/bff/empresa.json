@@ -1,0 +1,416 @@
+{
+  "types": [
+    {
+      "name": "ContatoEmpresaResumo",
+      "description": "Canal de contato (telefone, WhatsApp ou e-mail) ligado à empresa.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContatoEmpresa.id"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContatoEmpresa.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.contactChannel.contactType",
+          "type": "'Phone' | 'Email' | 'WhatsApp'",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContatoEmpresa.details.contactChannel.contactType"
+            ]
+          }
+        },
+        {
+          "name": "details.contactChannel.value",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContatoEmpresa.details.contactChannel.value"
+            ]
+          }
+        },
+        {
+          "name": "details.contactChannel.isVerified",
+          "type": "boolean",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "ContatoEmpresa.details.contactChannel.isVerified"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EmpresaPreparo",
+      "description": "Empresa dona do app com os dados já registrados na plataforma, seus contatos ligados, o indicador de empresa preparada e os dados obrigatórios que ainda faltam.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.version"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CNPJ' | 'EIN' | 'VAT' | 'NationalId' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.company.legalName",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.company.legalName"
+            ]
+          }
+        },
+        {
+          "name": "details.company.tradeName",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.company.tradeName"
+            ]
+          }
+        },
+        {
+          "name": "details.base.addresses",
+          "type": "string[]",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.base.addresses"
+            ]
+          }
+        },
+        {
+          "name": "contacts",
+          "type": "ContatoEmpresaResumo[]"
+        },
+        {
+          "name": "preparada",
+          "type": "boolean",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Empresa.details.inicio.preparada",
+              "Empresa.details.identification.name",
+              "Empresa.details.identification.docType",
+              "Empresa.details.identification.docId",
+              "Empresa.details.base.addresses",
+              "Empresa.details.base.contacts"
+            ]
+          }
+        },
+        {
+          "name": "dadosFaltantes",
+          "type": "'nome' | 'documento' | 'endereco' | 'contato'",
+          "origin": {
+            "kind": "aggregate",
+            "paths": [
+              "Empresa.details.inicio.dadosFaltantes",
+              "Empresa.details.identification.name",
+              "Empresa.details.identification.docType",
+              "Empresa.details.identification.docId",
+              "Empresa.details.base.addresses",
+              "Empresa.details.base.contacts"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "qryEmpresaPreparo",
+      "kind": "qry",
+      "when": "onLoad",
+      "input": [],
+      "output": [
+        {
+          "name": "empresa",
+          "type": "EmpresaPreparo"
+        }
+      ],
+      "rules": [
+        "empresaPreparadaDadosObrigatorios",
+        "naoPedirDadoJaExistente"
+      ],
+      "jsdoc": {
+        "purpose": "Carrega de uma vez a empresa do app do responsável logado, com os dados já registrados, os contatos ligados, o indicador de preparada e os dados obrigatórios que faltam.",
+        "input": "Nenhuma entrada: a empresa é resolvida pela sessão do responsável (escopo organização).",
+        "processing": "Lê a empresa pelo id da sessão (read.byId) e os contatos ligados por HasContact que não estão inativos. Calcula, sem gravar, 'preparada' e 'dadosFaltantes' (inicio.verificarPreparo): pela regra empresaPreparadaDadosObrigatorios a empresa só está preparada com nome, documento (tipo e número), ao menos um endereço e ao menos um contato; pela regra naoPedirDadoJaExistente a lista de faltantes contém apenas o que a plataforma ainda não tem.",
+        "output": "A empresa em seu estado atual, com id e versão, nome, documento, país, razão social, nome fantasia, endereços, contatos ligados (nome, tipo, valor, verificado), o indicador preparada e a lista de dados que faltam."
+      }
+    },
+    {
+      "id": "cmdSalvarDadosEmpresa",
+      "kind": "cmd",
+      "when": "salvarDadosEmpresa",
+      "writes": "Empresa.update",
+      "input": [
+        {
+          "name": "id",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.id"
+            ]
+          }
+        },
+        {
+          "name": "version",
+          "type": "number",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.version"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.name",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.name"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docType",
+          "type": "'CNPJ' | 'EIN' | 'VAT' | 'NationalId' | 'Other'",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.docType"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.docId",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.docId"
+            ]
+          }
+        },
+        {
+          "name": "details.identification.countryCode",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.identification.countryCode"
+            ]
+          }
+        },
+        {
+          "name": "details.company.legalName",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.company.legalName"
+            ]
+          }
+        },
+        {
+          "name": "details.company.tradeName",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.company.tradeName"
+            ]
+          }
+        },
+        {
+          "name": "details.base.addresses",
+          "type": "string[]",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Empresa.details.base.addresses"
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "empresa",
+          "type": "EmpresaPreparo"
+        }
+      ],
+      "rules": [
+        "somenteResponsavelEditaEmpresa",
+        "naoPedirDadoJaExistente",
+        "empresaPreparadaDadosObrigatorios"
+      ],
+      "jsdoc": {
+        "purpose": "Grava na empresa os dados obrigatórios que faltavam, informados pelo responsável.",
+        "input": "id e version da empresa (concorrência otimista); details.identification.name, details.identification.docType, details.identification.docId, details.identification.countryCode, details.company.legalName, details.company.tradeName e details.base.addresses, cada um enviado apenas quando era um dado faltante.",
+        "processing": "Pela regra somenteResponsavelEditaEmpresa, recusa se quem chama não é reconhecido pela plataforma como responsável pela empresa. Pela regra naoPedirDadoJaExistente, ignora ou recusa a sobrescrita de dado que a plataforma já tinha. Valida o formato do documento conforme o país e verifica duplicidade pelo documento (locate.byDocument). Atualiza via edit.platformFields com a versão informada. Depois recalcula, sem gravar, 'preparada' e 'dadosFaltantes' conforme empresaPreparadaDadosObrigatorios.",
+        "output": "A empresa no novo estado, com nova versão, dados registrados, contatos ligados, indicador preparada e dados que ainda faltam."
+      }
+    }
+  ],
+  "bindings": {
+    "organisms": [
+      {
+        "organism": "boasVindasEmpresa",
+        "reads": "qryEmpresaPreparo.empresa"
+      },
+      {
+        "organism": "dadosFaltantesEmpresa",
+        "reads": "qryEmpresaPreparo.empresa"
+      },
+      {
+        "organism": "completarDadosEmpresa",
+        "reads": "qryEmpresaPreparo.empresa"
+      },
+      {
+        "organism": "acoesEmpresa",
+        "reads": "qryEmpresaPreparo.empresa"
+      }
+    ],
+    "commands": [
+      {
+        "endpoint": "cmdSalvarDadosEmpresa",
+        "refreshes": []
+      }
+    ],
+    "selections": [],
+    "journeys": [
+      {
+        "step": "prepararEmpresa/verBoasVindasEmpresa",
+        "organisms": [
+          "boasVindasEmpresa",
+          "dadosFaltantesEmpresa"
+        ],
+        "endpoints": [
+          "qryEmpresaPreparo"
+        ]
+      },
+      {
+        "step": "prepararEmpresa/completarDadosEmpresa",
+        "organisms": [
+          "completarDadosEmpresa",
+          "acoesEmpresa"
+        ],
+        "endpoints": [
+          "cmdSalvarDadosEmpresa"
+        ]
+      },
+      {
+        "step": "prepararEmpresa/verOrientacaoStudio",
+        "organisms": [
+          "boasVindasEmpresa"
+        ],
+        "endpoints": [
+          "qryEmpresaPreparo",
+          "cmdSalvarDadosEmpresa"
+        ]
+      },
+      {
+        "step": "prepararEmpresa/verPessoasOrganizacao",
+        "organisms": [
+          "acoesEmpresa"
+        ],
+        "endpoints": [],
+        "continuesIn": "pessoas_organizacao"
+      }
+    ],
+    "updates": [
+      {
+        "endpoint": "cmdSalvarDadosEmpresa",
+        "state": "qryEmpresaPreparo.empresa",
+        "mode": "replace"
+      }
+    ]
+  }
+}

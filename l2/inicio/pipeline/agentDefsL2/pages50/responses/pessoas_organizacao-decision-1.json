@@ -1,0 +1,393 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 52963,
+  "receivedAt": "2026-10-17T14:03:13.430Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "A página serve para o responsável acompanhar a situação de acesso das pessoas da organização: localizar quem não completou o acesso ou aguarda liberação, ver o que falta para cada uma e seguir o andamento da liberação. Isso corresponde a gestão de acesso de usuários (userAccessManagement), e não a um cadastro comercial ou a um painel de indicadores.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "userAccessManagement"
+            },
+            "intent": "Mostrar ao responsável todas as pessoas da organização, destacando quem ainda não completou o acesso ou aguarda liberação. Ao selecionar uma pessoa, ele vê o que falta para ela, se o consentimento é exigido e em que ponto está a liberação, que é feita pela plataforma.",
+            "sections": [
+              {
+                "id": "secaoPessoas",
+                "priority": "primary",
+                "purpose": "Encontrar rapidamente as pessoas da organização e filtrar as que ainda não completaram o acesso ou aguardam liberação.",
+                "organisms": [
+                  "listaPessoas"
+                ]
+              },
+              {
+                "id": "secaoPessoaSelecionada",
+                "priority": "main",
+                "purpose": "Entender a situação da pessoa selecionada: dados, acesso completo ou não, o que falta e se o consentimento é exigido.",
+                "organisms": [
+                  "detalhePessoa",
+                  "andamentoLiberacao"
+                ]
+              },
+              {
+                "id": "secaoAcoes",
+                "priority": "secondary",
+                "purpose": "Orientar a liberação do acesso pela plataforma e permitir voltar à preparação da empresa ou ao início.",
+                "organisms": [
+                  "acoesLiberacao"
+                ]
+              }
+            ],
+            "organisms": [
+              {
+                "id": "listaPessoas",
+                "kind": "list",
+                "text": "Lista das pessoas da organização com nome, país, situação na plataforma e se o acesso está completo. Dá para procurar pelo nome e filtrar quem ainda não completou o acesso ou aguarda liberação; quem tem dados faltando aparece em destaque.",
+                "intents": []
+              },
+              {
+                "id": "detalhePessoa",
+                "kind": "detail",
+                "text": "Dados da pessoa selecionada: nome, país, contatos e situação. Mostra se o acesso está completo, a lista do que ainda falta e se o consentimento de privacidade é exigido pela lei do país, sem mostrar o conteúdo do consentimento.",
+                "intents": []
+              },
+              {
+                "id": "acoesLiberacao",
+                "kind": "actions",
+                "text": "Orienta como liberar o acesso de uma pessoa que aguarda liberação: isso é feito pela liberação da plataforma. Também permite voltar à preparação da empresa, para completar os dados que faltam, ou ao início.",
+                "intents": [
+                  {
+                    "id": "irPrepararEmpresa",
+                    "kind": "navigate",
+                    "to": "empresa"
+                  },
+                  {
+                    "id": "irInicio",
+                    "kind": "navigate",
+                    "to": "inicio_responsavel"
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "kind": "timeline",
+                "text": "Etapas da liberação do acesso da pessoa selecionada: pedido encaminhado, acesso liberado, login ligado pela plataforma e acesso completado, mostrando em qual etapa ela está.",
+                "intents": []
+              }
+            ],
+            "molecules": [
+              {
+                "id": "listaPessoas",
+                "recommendations": [
+                  {
+                    "role": "busca e filtro de pessoas",
+                    "preferred": "groupsearchcontent--ml-search-filters",
+                    "alternative": "groupsearchcontent--ml-search-bar"
+                  },
+                  {
+                    "role": "filtro de situação de acesso",
+                    "preferred": "groupselectone--ml-segmented-control",
+                    "alternative": "groupselectone--ml-select"
+                  },
+                  {
+                    "role": "tabela de pessoas",
+                    "preferred": "groupviewtable--ml-side-detail-table",
+                    "alternative": "groupviewtable--ml-data-table"
+                  }
+                ]
+              },
+              {
+                "id": "detalhePessoa",
+                "recommendations": [
+                  {
+                    "role": "cartão da pessoa",
+                    "preferred": "groupviewcard--ml-profile-card",
+                    "alternative": "groupviewcard--ml-view-card-horizontal"
+                  },
+                  {
+                    "role": "aviso do que falta",
+                    "preferred": "groupnotifyuser--ml-contextual-feedback",
+                    "alternative": "groupnotifyuser--ml-notify-banner"
+                  }
+                ]
+              },
+              {
+                "id": "acoesLiberacao",
+                "recommendations": [
+                  {
+                    "role": "navegação para empresa e início",
+                    "preferred": "grouptriggeraction--ml-button-group",
+                    "alternative": "grouptriggeraction--ml-button-standard"
+                  },
+                  {
+                    "role": "orientação sobre liberação pela plataforma",
+                    "preferred": "groupnotifyuser--ml-notify-banner",
+                    "alternative": "groupnotifyuser--ml-contextual-feedback"
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "recommendations": [
+                  {
+                    "role": "etapas da liberação",
+                    "preferred": "groupnavigatesteps--ml-horizontal-stepper",
+                    "alternative": "groupnavigatesteps--ml-vertical-stepper"
+                  }
+                ]
+              }
+            ]
+          },
+          "needs": {
+            "organisms": [
+              {
+                "id": "listaPessoas",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.name",
+                  "PessoaOrganizacao.details.identification.countryCode",
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto",
+                  "PessoaOrganizacao.details.inicio.dadosFaltantes"
+                ],
+                "edits": [],
+                "selects": "detalhePessoa",
+                "submits": []
+              },
+              {
+                "id": "detalhePessoa",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.name",
+                  "PessoaOrganizacao.details.identification.countryCode",
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.base.contacts",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto",
+                  "PessoaOrganizacao.details.inicio.dadosFaltantes",
+                  "PessoaOrganizacao.details.inicio.consentimentoExigido"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "acoesLiberacao",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.status",
+                  "Empresa.details.inicio.preparada",
+                  "Empresa.details.inicio.dadosFaltantes"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "andamentoLiberacao",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            ]
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "userAccessManagement"
+            },
+            "intent": "No celular, numa coluna estreita e fluida (cerca de 390px, também usável entre 360px e 430px), o responsável procura e filtra as pessoas da organização. Ao tocar em uma pessoa, vê o que falta para ela e o andamento da liberação, que é feita pela plataforma.",
+            "sections": [
+              {
+                "id": "secaoPessoas",
+                "priority": "primary",
+                "purpose": "Encontrar e filtrar as pessoas que ainda não completaram o acesso ou aguardam liberação, em uma lista compacta.",
+                "organisms": [
+                  "listaPessoas"
+                ]
+              },
+              {
+                "id": "secaoPessoaSelecionada",
+                "priority": "main",
+                "purpose": "Ver em sequência os dados da pessoa tocada, o que falta e em que etapa está a liberação.",
+                "organisms": [
+                  "detalhePessoa",
+                  "andamentoLiberacao"
+                ]
+              },
+              {
+                "id": "secaoAcoes",
+                "priority": "secondary",
+                "purpose": "Lembrar que a liberação é feita pela plataforma e oferecer o caminho de volta à preparação da empresa ou ao início.",
+                "organisms": [
+                  "acoesLiberacao"
+                ]
+              }
+            ],
+            "organisms": [
+              {
+                "id": "listaPessoas",
+                "kind": "list",
+                "text": "Lista compacta das pessoas da organização com nome e indicação de acesso completo ou pendente. Tem busca pelo nome e filtro para quem não completou o acesso ou aguarda liberação.",
+                "intents": []
+              },
+              {
+                "id": "detalhePessoa",
+                "kind": "detail",
+                "text": "Dados da pessoa tocada: nome, país, contatos e situação, se o acesso está completo, o que falta e se o consentimento é exigido. O conteúdo do consentimento não aparece.",
+                "intents": []
+              },
+              {
+                "id": "acoesLiberacao",
+                "kind": "actions",
+                "text": "Aviso de que o acesso de quem aguarda liberação é liberado pela plataforma, com botões para voltar à preparação da empresa ou ao início.",
+                "intents": [
+                  {
+                    "id": "irPrepararEmpresa",
+                    "kind": "navigate",
+                    "to": "empresa"
+                  },
+                  {
+                    "id": "irInicio",
+                    "kind": "navigate",
+                    "to": "inicio_responsavel"
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "kind": "timeline",
+                "text": "Etapas da liberação em formato compacto: pedido encaminhado, acesso liberado, login ligado pela plataforma e acesso completado.",
+                "intents": []
+              }
+            ],
+            "molecules": [
+              {
+                "id": "listaPessoas",
+                "recommendations": [
+                  {
+                    "role": "busca de pessoas",
+                    "preferred": "groupsearchcontent--ml-search-bar",
+                    "alternative": "groupsearchcontent--ml-search-filters"
+                  },
+                  {
+                    "role": "filtro de situação de acesso",
+                    "preferred": "groupselectone--ml-segmented-control",
+                    "alternative": "groupselectone--ml-select-dropdown"
+                  },
+                  {
+                    "role": "lista de pessoas",
+                    "preferred": "groupviewtable--ml-responsive-data-table",
+                    "alternative": "groupviewtable--ml-responsive-table"
+                  }
+                ]
+              },
+              {
+                "id": "detalhePessoa",
+                "recommendations": [
+                  {
+                    "role": "cartão da pessoa",
+                    "preferred": "groupviewcard--ml-profile-card",
+                    "alternative": "groupviewcard--ml-vertical-card"
+                  },
+                  {
+                    "role": "aviso do que falta",
+                    "preferred": "groupnotifyuser--ml-contextual-feedback",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "acoesLiberacao",
+                "recommendations": [
+                  {
+                    "role": "navegação para empresa e início",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": "grouptriggeraction--ml-button-group"
+                  },
+                  {
+                    "role": "orientação sobre liberação pela plataforma",
+                    "preferred": "groupnotifyuser--ml-contextual-feedback",
+                    "alternative": "groupnotifyuser--ml-notify-banner"
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "recommendations": [
+                  {
+                    "role": "etapas da liberação",
+                    "preferred": "groupnavigatesteps--ml-vertical-stepper",
+                    "alternative": "groupnavigatesteps--ml-compact-step-indicator"
+                  }
+                ]
+              }
+            ]
+          },
+          "needs": {
+            "organisms": [
+              {
+                "id": "listaPessoas",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.name",
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto",
+                  "PessoaOrganizacao.details.inicio.dadosFaltantes"
+                ],
+                "edits": [],
+                "selects": "detalhePessoa",
+                "submits": []
+              },
+              {
+                "id": "detalhePessoa",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.name",
+                  "PessoaOrganizacao.details.identification.countryCode",
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.base.contacts",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto",
+                  "PessoaOrganizacao.details.inicio.dadosFaltantes",
+                  "PessoaOrganizacao.details.inicio.consentimentoExigido"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "acoesLiberacao",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.status",
+                  "Empresa.details.inicio.preparada",
+                  "Empresa.details.inicio.dadosFaltantes"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "andamentoLiberacao",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            ]
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 16,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

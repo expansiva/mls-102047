@@ -1,0 +1,442 @@
+{
+  "attempt": "decision-1",
+  "model": "claude-opus-5-5",
+  "promptChars": 52579,
+  "receivedAt": "2026-10-17T14:03:19.242Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Pages",
+      "arguments": {
+        "categoryReason": "A página trata de um único registro de negócio, o próprio cadastro da pessoa na organização. Não há listagem. A pessoa vê o que já existe, completa só os dados mínimos que faltam e salva. Por isso a categoria entityRecordManagement serve igualmente para desktop e mobile.",
+        "desktop": {
+          "definition": {
+            "template": {
+              "category": "entityRecordManagement"
+            },
+            "intent": "Mostrar à pessoa o próprio cadastro na organização, avisar quando o acesso depende da liberação do responsável e permitir completar só os dados mínimos que faltam para seguir aos módulos liberados.",
+            "sections": [
+              {
+                "id": "situacaoCadastro",
+                "priority": "primary",
+                "purpose": "Mostrar logo de início quem é a pessoa na organização, se o acesso está completo e qualquer aviso que impeça seguir.",
+                "organisms": [
+                  "meuCadastroResumo",
+                  "avisoLiberacao"
+                ]
+              },
+              {
+                "id": "completarDados",
+                "priority": "main",
+                "purpose": "Pedir apenas os dados mínimos que ainda faltam, o telefone opcional e o consentimento quando a lei do país exige, e salvar.",
+                "organisms": [
+                  "dadosMinimosForm",
+                  "acoesMeuCadastro"
+                ]
+              },
+              {
+                "id": "andamentoPedido",
+                "priority": "secondary",
+                "purpose": "Acompanhar em que ponto está o pedido de liberação do acesso.",
+                "organisms": [
+                  "andamentoLiberacao"
+                ]
+              }
+            ],
+            "organisms": [
+              {
+                "id": "meuCadastroResumo",
+                "kind": "detail",
+                "text": "Seus dados na organização: nome, país, e-mail da conta (apenas exibido) e telefones, o nome da empresa, se o acesso está completo, o que ainda falta e os módulos que o responsável liberou para você.",
+                "intents": []
+              },
+              {
+                "id": "avisoLiberacao",
+                "kind": "alerts",
+                "text": "Aviso de que já existe outro cadastro com o mesmo e-mail de contato e de que o responsável precisa liberar o seu acesso. Ele fica visível até a liberação, mesmo que você volte por outro navegador.",
+                "intents": []
+              },
+              {
+                "id": "dadosMinimosForm",
+                "kind": "form",
+                "text": "Informe só os dados mínimos que ainda faltam: nome, país e telefone opcional. O consentimento de privacidade aparece apenas quando a lei do país exige (Brasil e União Europeia). Repetir o envio não cria outro cadastro.",
+                "intents": []
+              },
+              {
+                "id": "acoesMeuCadastro",
+                "kind": "actions",
+                "text": "Salvar meus dados. O pedido de liberação fica com o responsável. Depois de completar os dados mínimos, você segue para os módulos liberados.",
+                "intents": [
+                  {
+                    "id": "salvarMeusDados",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "kind": "timeline",
+                "text": "Andamento do seu pedido de liberação: encaminhado ao responsável, liberado e login ligado pela plataforma.",
+                "intents": []
+              }
+            ],
+            "molecules": [
+              {
+                "id": "meuCadastroResumo",
+                "recommendations": [
+                  {
+                    "role": "cartão do próprio cadastro com situação do acesso",
+                    "preferred": "groupviewcard--ml-profile-card",
+                    "alternative": "groupviewcard--ml-view-card-horizontal"
+                  }
+                ]
+              },
+              {
+                "id": "avisoLiberacao",
+                "recommendations": [
+                  {
+                    "role": "aviso persistente de liberação pendente",
+                    "preferred": "groupnotifyuser--ml-notify-banner",
+                    "alternative": "groupnotifyuser--ml-contextual-feedback"
+                  }
+                ]
+              },
+              {
+                "id": "dadosMinimosForm",
+                "recommendations": [
+                  {
+                    "role": "nome",
+                    "preferred": "groupentertext--ml-enter-text",
+                    "alternative": "groupentertext--ml-floating-text-input"
+                  },
+                  {
+                    "role": "país",
+                    "preferred": "groupentertext--ml-enter-text",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "telefone opcional",
+                    "preferred": "groupentertext--ml-phone-input",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "consentimento de privacidade",
+                    "preferred": "groupenterboolean--ml-checkbox-preference",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "acoesMeuCadastro",
+                "recommendations": [
+                  {
+                    "role": "salvar meus dados",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": "grouptriggeraction--ml-button-group"
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "recommendations": [
+                  {
+                    "role": "etapas da liberação",
+                    "preferred": "groupnavigatesteps--ml-vertical-stepper",
+                    "alternative": "groupnavigatesteps--ml-horizontal-stepper"
+                  }
+                ]
+              }
+            ]
+          },
+          "needs": {
+            "organisms": [
+              {
+                "id": "meuCadastroResumo",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.name",
+                  "PessoaOrganizacao.details.identification.countryCode",
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.base.contacts",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto",
+                  "PessoaOrganizacao.details.inicio.dadosFaltantes",
+                  "PessoaOrganizacao.details.inicio.consentimentoExigido",
+                  "Empresa.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "avisoLiberacao",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.base.contacts"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "dadosMinimosForm",
+                "reads": [
+                  "PessoaOrganizacao.details.inicio.dadosFaltantes",
+                  "PessoaOrganizacao.details.inicio.consentimentoExigido",
+                  "PessoaOrganizacao.details.base.contacts"
+                ],
+                "edits": [
+                  "PessoaOrganizacao.details.identification.name",
+                  "PessoaOrganizacao.details.identification.countryCode",
+                  "PessoaOrganizacao.details.person.privacyConsent"
+                ],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "acoesMeuCadastro",
+                "reads": [
+                  "PessoaOrganizacao.version",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "salvarMeusDados",
+                    "write": "PessoaOrganizacao.update"
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.base.relationshipRefs"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            ]
+          }
+        },
+        "mobile": {
+          "definition": {
+            "template": {
+              "category": "entityRecordManagement"
+            },
+            "intent": "Em tela estreita e fluida (cerca de 390px, usável em 360px e 430px), mostrar primeiro o aviso e a situação do próprio cadastro, depois só os dados mínimos que faltam com o botão de salvar, e por fim o andamento da liberação.",
+            "sections": [
+              {
+                "id": "situacaoCadastro",
+                "priority": "primary",
+                "purpose": "Mostrar logo no topo o aviso de liberação, quando houver, e um resumo compacto do cadastro e do acesso.",
+                "organisms": [
+                  "avisoLiberacao",
+                  "meuCadastroResumo"
+                ]
+              },
+              {
+                "id": "completarDados",
+                "priority": "main",
+                "purpose": "Pedir, em coluna única, apenas os dados mínimos que faltam e salvar com um toque.",
+                "organisms": [
+                  "dadosMinimosForm",
+                  "acoesMeuCadastro"
+                ]
+              },
+              {
+                "id": "andamentoPedido",
+                "priority": "secondary",
+                "purpose": "Mostrar de forma compacta em que ponto está o pedido de liberação.",
+                "organisms": [
+                  "andamentoLiberacao"
+                ]
+              }
+            ],
+            "organisms": [
+              {
+                "id": "meuCadastroResumo",
+                "kind": "detail",
+                "text": "Seus dados na organização: nome, país, e-mail da conta (apenas exibido) e telefones, o nome da empresa, se o acesso está completo, o que ainda falta e os módulos que o responsável liberou para você.",
+                "intents": []
+              },
+              {
+                "id": "avisoLiberacao",
+                "kind": "alerts",
+                "text": "Aviso de que já existe outro cadastro com o mesmo e-mail de contato e de que o responsável precisa liberar o seu acesso. Ele fica visível até a liberação, mesmo que você volte por outro navegador.",
+                "intents": []
+              },
+              {
+                "id": "dadosMinimosForm",
+                "kind": "form",
+                "text": "Informe só os dados mínimos que ainda faltam: nome, país e telefone opcional. O consentimento de privacidade aparece apenas quando a lei do país exige (Brasil e União Europeia). Repetir o envio não cria outro cadastro.",
+                "intents": []
+              },
+              {
+                "id": "acoesMeuCadastro",
+                "kind": "actions",
+                "text": "Salvar meus dados. O pedido de liberação fica com o responsável. Depois de completar os dados mínimos, você segue para os módulos liberados.",
+                "intents": [
+                  {
+                    "id": "salvarMeusDados",
+                    "kind": "submit",
+                    "to": ""
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "kind": "timeline",
+                "text": "Andamento do seu pedido de liberação: encaminhado ao responsável, liberado e login ligado pela plataforma.",
+                "intents": []
+              }
+            ],
+            "molecules": [
+              {
+                "id": "meuCadastroResumo",
+                "recommendations": [
+                  {
+                    "role": "cartão do próprio cadastro com situação do acesso",
+                    "preferred": "groupviewcard--ml-profile-card",
+                    "alternative": "groupviewcard--ml-vertical-card"
+                  }
+                ]
+              },
+              {
+                "id": "avisoLiberacao",
+                "recommendations": [
+                  {
+                    "role": "aviso persistente de liberação pendente",
+                    "preferred": "groupnotifyuser--ml-notify-banner",
+                    "alternative": "groupnotifyuser--ml-contextual-feedback"
+                  }
+                ]
+              },
+              {
+                "id": "dadosMinimosForm",
+                "recommendations": [
+                  {
+                    "role": "nome",
+                    "preferred": "groupentertext--ml-floating-text-input",
+                    "alternative": "groupentertext--ml-enter-text"
+                  },
+                  {
+                    "role": "país",
+                    "preferred": "groupentertext--ml-enter-text",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "telefone opcional",
+                    "preferred": "groupentertext--ml-phone-input",
+                    "alternative": ""
+                  },
+                  {
+                    "role": "consentimento de privacidade",
+                    "preferred": "groupenterboolean--ml-checkbox-preference",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "acoesMeuCadastro",
+                "recommendations": [
+                  {
+                    "role": "salvar meus dados",
+                    "preferred": "grouptriggeraction--ml-button-standard",
+                    "alternative": ""
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "recommendations": [
+                  {
+                    "role": "etapas da liberação",
+                    "preferred": "groupnavigatesteps--ml-compact-step-indicator",
+                    "alternative": "groupnavigatesteps--ml-vertical-stepper"
+                  }
+                ]
+              }
+            ]
+          },
+          "needs": {
+            "organisms": [
+              {
+                "id": "meuCadastroResumo",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.name",
+                  "PessoaOrganizacao.details.identification.countryCode",
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.base.contacts",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto",
+                  "PessoaOrganizacao.details.inicio.dadosFaltantes",
+                  "PessoaOrganizacao.details.inicio.consentimentoExigido",
+                  "Empresa.details.identification.name"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "avisoLiberacao",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.base.contacts"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "dadosMinimosForm",
+                "reads": [
+                  "PessoaOrganizacao.details.inicio.dadosFaltantes",
+                  "PessoaOrganizacao.details.inicio.consentimentoExigido",
+                  "PessoaOrganizacao.details.base.contacts"
+                ],
+                "edits": [
+                  "PessoaOrganizacao.details.identification.name",
+                  "PessoaOrganizacao.details.identification.countryCode",
+                  "PessoaOrganizacao.details.person.privacyConsent"
+                ],
+                "selects": "",
+                "submits": []
+              },
+              {
+                "id": "acoesMeuCadastro",
+                "reads": [
+                  "PessoaOrganizacao.version",
+                  "PessoaOrganizacao.details.inicio.acessoCompleto"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": [
+                  {
+                    "intentId": "salvarMeusDados",
+                    "write": "PessoaOrganizacao.update"
+                  }
+                ]
+              },
+              {
+                "id": "andamentoLiberacao",
+                "reads": [
+                  "PessoaOrganizacao.details.identification.status",
+                  "PessoaOrganizacao.details.base.relationshipRefs"
+                ],
+                "edits": [],
+                "selects": "",
+                "submits": []
+              }
+            ]
+          }
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 16,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}

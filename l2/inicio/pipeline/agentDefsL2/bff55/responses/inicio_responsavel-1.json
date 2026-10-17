@@ -1,0 +1,336 @@
+{
+  "attempt": "1",
+  "model": "claude-opus-5-5",
+  "promptChars": 32043,
+  "receivedAt": "2026-10-17T14:03:55.688Z",
+  "raw": {
+    "type": "flexible",
+    "result": {
+      "toolName": "submitD2Bff",
+      "arguments": {
+        "types": [
+          {
+            "name": "SituacaoEmpresa",
+            "description": "Situação de preparo da empresa dona do app: nome, se está preparada e quais dados obrigatórios faltam.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.id"
+                  ]
+                }
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "preparada",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.inicio.preparada"
+                  ]
+                }
+              },
+              {
+                "name": "dadosFaltantes",
+                "type": "string[]",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details.inicio.dadosFaltantes"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "IndicadoresAcessoPessoas",
+            "description": "Contagens da situação de acesso das pessoas da organização.",
+            "fields": [
+              {
+                "name": "totalAcessoCompleto",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "PessoaOrganizacao.details.inicio.acessoCompleto"
+                  ]
+                }
+              },
+              {
+                "name": "totalComDadosFaltando",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "PessoaOrganizacao.details.inicio.dadosFaltantes"
+                  ]
+                }
+              },
+              {
+                "name": "totalConsentimentoPendente",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "PessoaOrganizacao.details.inicio.consentimentoExigido",
+                    "PessoaOrganizacao.details.inicio.dadosFaltantes"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "PessoaAguardandoLiberacao",
+            "description": "Pessoa da organização cujo acesso aguarda liberação pela plataforma, com nome, situação, contatos e dados mínimos que faltam.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "PessoaOrganizacao.id"
+                  ]
+                }
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "PessoaOrganizacao.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "status",
+                "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "PessoaOrganizacao.details.identification.status"
+                  ]
+                }
+              },
+              {
+                "name": "contacts",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "PessoaOrganizacao.details.base.contacts"
+                  ]
+                }
+              },
+              {
+                "name": "dadosFaltantes",
+                "type": "string[]",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "PessoaOrganizacao.details.inicio.dadosFaltantes"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "endpoints": [
+          {
+            "id": "qryPainelResponsavel",
+            "kind": "qry",
+            "when": "onLoad",
+            "input": [],
+            "output": [
+              {
+                "name": "empresa",
+                "type": "SituacaoEmpresa",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Empresa.details"
+                  ]
+                }
+              },
+              {
+                "name": "indicadores",
+                "type": "IndicadoresAcessoPessoas",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "PessoaOrganizacao.details.inicio.acessoCompleto",
+                    "PessoaOrganizacao.details.inicio.dadosFaltantes",
+                    "PessoaOrganizacao.details.inicio.consentimentoExigido"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "empresaPreparadaDadosObrigatorios",
+              "naoPedirDadoJaExistente",
+              "acessoCompletoDadosMinimos"
+            ],
+            "jsdoc": {
+              "purpose": "Carrega, ao abrir o Início do responsável, a situação de preparo da empresa e os números de acesso das pessoas da organização.",
+              "input": "Nenhuma entrada: a empresa e a organização vêm da sessão do responsável.",
+              "processing": "Lê a empresa da organização da sessão e calcula (inicio.verificarPreparo) preparada e dadosFaltantes conforme empresaPreparadaDadosObrigatorios: nome, documento, ao menos um endereço e ao menos um contato; dadosFaltantes lista só o que a plataforma ainda não tem (naoPedirDadoJaExistente). Para as pessoas com papel inicio.PessoaOrganizacao da organização, calcula acessoCompleto e dadosFaltantes conforme acessoCompletoDadosMinimos (nome, país e consentimento quando o país é Brasil ou UE; telefone não conta) e conta: quantas têm acesso completo, quantas têm dados faltando e quantas têm consentimento exigido ainda pendente. Valores derivados são calculados, nunca gravados.",
+              "output": "empresa: id, nome, indicador de preparada e lista de dados obrigatórios que faltam. indicadores: os três totais já calculados."
+            }
+          },
+          {
+            "id": "qryPessoasAguardandoLiberacao",
+            "kind": "qry",
+            "when": "onLoad",
+            "input": [
+              {
+                "name": "page",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              },
+              {
+                "name": "pageSize",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "pessoas",
+                "type": "PessoaAguardandoLiberacao[]",
+                "paginated": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "PessoaOrganizacao.details"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "ligacaoLoginPelaPlataforma",
+              "acessoCompletoDadosMinimos",
+              "dadosNaoConcedemPermissoes"
+            ],
+            "jsdoc": {
+              "purpose": "Lista, por páginas, as pessoas da organização que aguardam o responsável liberar o acesso.",
+              "input": "page: número da página pedida; pageSize: quantidade de pessoas por página.",
+              "processing": "Filtra as pessoas da organização do responsável com papel inicio.PessoaOrganizacao cuja situação na plataforma não está ativa (Inactive ou Blocked), ou seja, que aguardam a liberação da plataforma; o Início não guarda pendência nem decide a ligação do login (ligacaoLoginPelaPlataforma). Calcula dadosFaltantes de cada pessoa conforme acessoCompletoDadosMinimos. Não expõe o consentimento de privacidade (negado pelo grant). Ordena pelo nome.",
+              "output": "pessoas: página { items, page, pageSize, hasMore } com id, nome, situação, contatos e dados mínimos que faltam de cada pessoa."
+            }
+          }
+        ],
+        "bindings": {
+          "organisms": [
+            {
+              "organism": "situacaoEmpresa",
+              "reads": "qryPainelResponsavel.empresa"
+            },
+            {
+              "organism": "indicadoresAcessoPessoas",
+              "reads": "qryPainelResponsavel.indicadores"
+            },
+            {
+              "organism": "pessoasAguardandoLiberacao",
+              "reads": "qryPessoasAguardandoLiberacao.pessoas"
+            }
+          ],
+          "commands": [],
+          "selections": [],
+          "updates": [
+            {
+              "endpoint": "qryPessoasAguardandoLiberacao",
+              "state": "qryPessoasAguardandoLiberacao.pessoas",
+              "mode": "append"
+            }
+          ],
+          "journeys": [
+            {
+              "step": "prepararEmpresa/verBoasVindasEmpresa",
+              "organisms": [
+                "situacaoEmpresa"
+              ],
+              "endpoints": [
+                "qryPainelResponsavel"
+              ]
+            },
+            {
+              "step": "prepararEmpresa/completarDadosEmpresa",
+              "organisms": [
+                "situacaoEmpresa"
+              ],
+              "endpoints": [],
+              "continuesIn": "empresa"
+            },
+            {
+              "step": "prepararEmpresa/verOrientacaoStudio",
+              "organisms": [
+                "situacaoEmpresa"
+              ],
+              "endpoints": [
+                "qryPainelResponsavel"
+              ],
+              "continuesIn": "empresa"
+            },
+            {
+              "step": "prepararEmpresa/verPessoasOrganizacao",
+              "organisms": [
+                "indicadoresAcessoPessoas",
+                "pessoasAguardandoLiberacao"
+              ],
+              "endpoints": [
+                "qryPainelResponsavel",
+                "qryPessoasAguardandoLiberacao"
+              ],
+              "continuesIn": "pessoas_organizacao"
+            },
+            {
+              "step": "acompanharAcessoPessoas/localizarPessoas",
+              "organisms": [
+                "indicadoresAcessoPessoas"
+              ],
+              "endpoints": [
+                "qryPainelResponsavel"
+              ],
+              "continuesIn": "pessoas_organizacao"
+            },
+            {
+              "step": "acompanharAcessoPessoas/inspecionarPessoa",
+              "organisms": [
+                "pessoasAguardandoLiberacao"
+              ],
+              "endpoints": [
+                "qryPessoasAguardandoLiberacao"
+              ],
+              "continuesIn": "pessoas_organizacao"
+            }
+          ]
+        }
+      }
+    },
+    "status": "completed",
+    "stepId": 16,
+    "interaction": null,
+    "nextSteps": null
+  },
+  "verdict": "accepted"
+}
