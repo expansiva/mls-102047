@@ -241,11 +241,6 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "resumo.quantidadeAbertas",
-            "reason": "Interface ResumoMinhasTarefas pages tarefas; quantidadeAbertas is not one of the paging keys total, page, pageSize, hasMore next to items, so the types do not say what it is."
-          },
-          {
-            "kind": "unresolved",
             "path": "resumo.quantidadeVencemHoje",
             "reason": "Interface ResumoMinhasTarefas pages tarefas; quantidadeVencemHoje is not one of the paging keys total, page, pageSize, hasMore next to items, so the types do not say what it is."
           },
@@ -897,11 +892,6 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "resumo.quantidadeAbertas",
-            "reason": "Interface ResumoMinhasTarefas pages tarefas; quantidadeAbertas is not one of the paging keys total, page, pageSize, hasMore next to items, so the types do not say what it is."
-          },
-          {
-            "kind": "unresolved",
             "path": "resumo.quantidadeVencemHoje",
             "reason": "Interface ResumoMinhasTarefas pages tarefas; quantidadeVencemHoje is not one of the paging keys total, page, pageSize, hasMore next to items, so the types do not say what it is."
           },
@@ -1546,11 +1536,6 @@ export const definition = {
                 "path": "details"
               }
             ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.quantidadeAbertas",
-            "reason": "Interface ResumoMinhasTarefas pages tarefas; quantidadeAbertas is not one of the paging keys total, page, pageSize, hasMore next to items, so the types do not say what it is."
           },
           {
             "kind": "unresolved",

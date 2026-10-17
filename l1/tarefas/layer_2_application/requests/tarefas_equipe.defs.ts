@@ -69,19 +69,25 @@ export const definition = {
             "entity": "MembroEquipe",
             "fields": [
               {
-                "field": "details.identification.name",
+                "field": "name",
                 "path": "details.identification.name"
-              },
-              {
-                "field": "details.identification.status",
-                "path": "details.identification.status"
               }
             ]
           },
           {
             "kind": "unresolved",
+            "path": "membros.details.identification.status",
+            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.carregarOpcoesEquipe details.identification.status"
+          },
+          {
+            "kind": "unresolved",
             "path": "membros.details.identification",
             "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "membros.details.identification.status",
+            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
           }
         ],
         "params": [],
@@ -187,14 +193,15 @@ export const definition = {
             "entity": "MembroEquipe",
             "fields": [
               {
-                "field": "details.identification.name",
+                "field": "name",
                 "path": "details.identification.name"
-              },
-              {
-                "field": "details.identification.status",
-                "path": "details.identification.status"
               }
             ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.items.responsavel.details.identification.status",
+            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.listarTarefasEquipe items.responsavel.details.identification.status"
           },
           {
             "kind": "unresolved",
@@ -205,6 +212,11 @@ export const definition = {
             "kind": "unresolved",
             "path": "tarefas.responsavel.details.identification",
             "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.responsavel.details.identification.status",
+            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
           }
         ],
         "params": [
@@ -334,14 +346,15 @@ export const definition = {
             "entity": "MembroEquipe",
             "fields": [
               {
-                "field": "details.identification.name",
+                "field": "name",
                 "path": "details.identification.name"
-              },
-              {
-                "field": "details.identification.status",
-                "path": "details.identification.status"
               }
             ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details.identification.status",
+            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.obterTarefa criador.details.identification.status"
           },
           {
             "kind": "unresolved",
@@ -365,14 +378,15 @@ export const definition = {
             "entity": "MembroEquipe",
             "fields": [
               {
-                "field": "details.identification.name",
+                "field": "name",
                 "path": "details.identification.name"
-              },
-              {
-                "field": "details.identification.status",
-                "path": "details.identification.status"
               }
             ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details.identification.status",
+            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.obterTarefa responsavel.details.identification.status"
           },
           {
             "kind": "related",
@@ -410,6 +424,11 @@ export const definition = {
           },
           {
             "kind": "unresolved",
+            "path": "tarefa.criador.details.identification.status",
+            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
+          },
+          {
+            "kind": "unresolved",
             "path": "tarefa.responsavel",
             "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
@@ -417,6 +436,11 @@ export const definition = {
             "kind": "unresolved",
             "path": "tarefa.responsavel.details.identification",
             "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details.identification.status",
+            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
           }
         ],
         "params": [],
@@ -508,14 +532,15 @@ export const definition = {
             "entity": "MembroEquipe",
             "fields": [
               {
-                "field": "details.identification.name",
+                "field": "name",
                 "path": "details.identification.name"
-              },
-              {
-                "field": "details.identification.status",
-                "path": "details.identification.status"
               }
             ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details.identification.status",
+            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.reatribuirTarefa criador.details.identification.status"
           },
           {
             "kind": "unresolved",
@@ -539,14 +564,15 @@ export const definition = {
             "entity": "MembroEquipe",
             "fields": [
               {
-                "field": "details.identification.name",
+                "field": "name",
                 "path": "details.identification.name"
-              },
-              {
-                "field": "details.identification.status",
-                "path": "details.identification.status"
               }
             ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details.identification.status",
+            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.reatribuirTarefa responsavel.details.identification.status"
           },
           {
             "kind": "related",
@@ -584,6 +610,11 @@ export const definition = {
           },
           {
             "kind": "unresolved",
+            "path": "tarefa.criador.details.identification.status",
+            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
+          },
+          {
+            "kind": "unresolved",
             "path": "tarefa.responsavel",
             "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
@@ -591,6 +622,11 @@ export const definition = {
             "kind": "unresolved",
             "path": "tarefa.responsavel.details.identification",
             "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details.identification.status",
+            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
           }
         ],
         "params": [],
@@ -687,14 +723,15 @@ export const definition = {
             "entity": "MembroEquipe",
             "fields": [
               {
-                "field": "details.identification.name",
+                "field": "name",
                 "path": "details.identification.name"
-              },
-              {
-                "field": "details.identification.status",
-                "path": "details.identification.status"
               }
             ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details.identification.status",
+            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.cancelarTarefa criador.details.identification.status"
           },
           {
             "kind": "unresolved",
@@ -718,14 +755,15 @@ export const definition = {
             "entity": "MembroEquipe",
             "fields": [
               {
-                "field": "details.identification.name",
+                "field": "name",
                 "path": "details.identification.name"
-              },
-              {
-                "field": "details.identification.status",
-                "path": "details.identification.status"
               }
             ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details.identification.status",
+            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.cancelarTarefa responsavel.details.identification.status"
           },
           {
             "kind": "related",
@@ -763,6 +801,11 @@ export const definition = {
           },
           {
             "kind": "unresolved",
+            "path": "tarefa.criador.details.identification.status",
+            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
+          },
+          {
+            "kind": "unresolved",
             "path": "tarefa.responsavel",
             "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
@@ -770,6 +813,11 @@ export const definition = {
             "kind": "unresolved",
             "path": "tarefa.responsavel.details.identification",
             "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details.identification.status",
+            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
           }
         ],
         "params": [],
