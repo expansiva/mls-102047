@@ -1,8 +1,8 @@
 {
   "attempt": "1",
   "model": "claude-opus-5-5",
-  "promptChars": 45138,
-  "receivedAt": "2026-10-17T04:57:25.692Z",
+  "promptChars": 60489,
+  "receivedAt": "2026-10-17T08:38:05.997Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -151,7 +151,7 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Lista.nome"
+                    "Tarefa.listaId"
                   ]
                 }
               }
@@ -198,9 +198,10 @@
                 "name": "tarefas",
                 "type": "TarefaResumo[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Tarefa.id"
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.aberta"
                   ]
                 }
               }
@@ -510,7 +511,7 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "Tarefa.responsavelId"
                   ]
                 }
               },
@@ -520,7 +521,7 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "Tarefa.criadorId"
                   ]
                 }
               }
@@ -534,8 +535,9 @@
                 "name": "paraIniciar",
                 "type": "TarefaPendencia[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.responsavelId",
                     "Tarefa.status"
                   ]
                 }
@@ -544,9 +546,11 @@
                 "name": "paraEnviarRevisao",
                 "type": "TarefaPendencia[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Tarefa.status"
+                    "Tarefa.responsavelId",
+                    "Tarefa.status",
+                    "Tarefa.details.devolvidaEm"
                   ]
                 }
               },
@@ -554,8 +558,9 @@
                 "name": "paraRevisar",
                 "type": "TarefaPendencia[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.criadorId",
                     "Tarefa.status"
                   ]
                 }
@@ -564,8 +569,11 @@
                 "name": "devolvidas",
                 "type": "TarefaPendencia[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.responsavelId",
+                    "Tarefa.status",
+                    "Tarefa.details.motivoDevolucao",
                     "Tarefa.details.devolvidaEm"
                   ]
                 }
@@ -587,9 +595,8 @@
                 "origin": {
                   "kind": "aggregate",
                   "paths": [
-                    "Tarefa.details.aberta",
-                    "Tarefa.details.venceHoje",
-                    "Tarefa.details.atrasada"
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.aberta"
                   ]
                 }
               },
@@ -598,9 +605,10 @@
                 "type": "AvisoDoDia",
                 "optional": true,
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "AvisoVencimento.id"
+                    "AvisoVencimento.responsavelId",
+                    "AvisoVencimento.dataReferencia"
                   ]
                 }
               },
@@ -608,8 +616,10 @@
                 "name": "esperaPorMim",
                 "type": "EsperaPorMim",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.responsavelId",
+                    "Tarefa.criadorId",
                     "Tarefa.status"
                   ]
                 }
@@ -632,7 +642,7 @@
             "writes": "Tarefa.iniciar",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -659,9 +669,8 @@
                 "origin": {
                   "kind": "aggregate",
                   "paths": [
-                    "Tarefa.details.aberta",
-                    "Tarefa.details.venceHoje",
-                    "Tarefa.details.atrasada"
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.aberta"
                   ]
                 }
               },
@@ -669,8 +678,10 @@
                 "name": "esperaPorMim",
                 "type": "EsperaPorMim",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.responsavelId",
+                    "Tarefa.criadorId",
                     "Tarefa.status"
                   ]
                 }
@@ -682,7 +693,7 @@
             ],
             "jsdoc": {
               "purpose": "Inicia uma tarefa atribuída à pessoa, passando-a de a fazer para em andamento.",
-              "input": "tarefaId: tarefa a iniciar; version: versão lida, para concorrência otimista.",
+              "input": "id: tarefa a iniciar; version: versão lida, para concorrência otimista.",
               "processing": "Recusa se a pessoa da sessão não for o responsável (somenteResponsavelExecuta), se a tarefa estiver concluída ou cancelada (tarefaEncerradaNaoTransiciona) ou se não estiver em aFazer; recusa se a versão divergir. Executa a transição iniciar; a sala de discussão recebe a mensagem. Em seguida recalcula o resumo e as pendências da pessoa como em carregarInicio.",
               "output": "resumo recalculado e esperaPorMim recalculado, já com a tarefa em emAndamento."
             }
@@ -694,7 +705,7 @@
             "writes": "Tarefa.enviarParaRevisao",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -721,9 +732,8 @@
                 "origin": {
                   "kind": "aggregate",
                   "paths": [
-                    "Tarefa.details.aberta",
-                    "Tarefa.details.venceHoje",
-                    "Tarefa.details.atrasada"
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.aberta"
                   ]
                 }
               },
@@ -731,8 +741,10 @@
                 "name": "esperaPorMim",
                 "type": "EsperaPorMim",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.responsavelId",
+                    "Tarefa.criadorId",
                     "Tarefa.status"
                   ]
                 }
@@ -744,7 +756,7 @@
             ],
             "jsdoc": {
               "purpose": "Envia para revisão do criador uma tarefa em andamento da pessoa, inclusive a reenviada após devolução.",
-              "input": "tarefaId: tarefa a enviar; version: versão lida, para concorrência otimista.",
+              "input": "id: tarefa a enviar; version: versão lida, para concorrência otimista.",
               "processing": "Recusa se a pessoa da sessão não for o responsável (somenteResponsavelExecuta), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emAndamento; recusa se a versão divergir. Executa a transição enviarParaRevisao; o criador passa a agir e é avisado. Recalcula resumo e pendências como em carregarInicio.",
               "output": "resumo recalculado e esperaPorMim recalculado, já com a tarefa em emRevisao."
             }
@@ -756,7 +768,7 @@
             "writes": "Tarefa.aceitar",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -783,9 +795,8 @@
                 "origin": {
                   "kind": "aggregate",
                   "paths": [
-                    "Tarefa.details.aberta",
-                    "Tarefa.details.venceHoje",
-                    "Tarefa.details.atrasada"
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.aberta"
                   ]
                 }
               },
@@ -793,8 +804,10 @@
                 "name": "esperaPorMim",
                 "type": "EsperaPorMim",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.responsavelId",
+                    "Tarefa.criadorId",
                     "Tarefa.status"
                   ]
                 }
@@ -806,7 +819,7 @@
             ],
             "jsdoc": {
               "purpose": "Aceita a entrega de uma tarefa criada pela pessoa, concluindo-a.",
-              "input": "tarefaId: tarefa em revisão; version: versão lida, para concorrência otimista.",
+              "input": "id: tarefa em revisão; version: versão lida, para concorrência otimista.",
               "processing": "Recusa se a pessoa da sessão não for o criador (somenteCriadorRevisa), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emRevisao; recusa se a versão divergir. Executa a transição aceitar, registrando concluidaEm; a sala recebe a mensagem. Recalcula resumo e pendências como em carregarInicio.",
               "output": "resumo recalculado e esperaPorMim recalculado, sem a tarefa concluída."
             }
@@ -818,7 +831,7 @@
             "writes": "Tarefa.devolver",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -838,7 +851,7 @@
                 }
               },
               {
-                "name": "motivoDevolucao",
+                "name": "details.motivoDevolucao",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -855,9 +868,8 @@
                 "origin": {
                   "kind": "aggregate",
                   "paths": [
-                    "Tarefa.details.aberta",
-                    "Tarefa.details.venceHoje",
-                    "Tarefa.details.atrasada"
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.aberta"
                   ]
                 }
               },
@@ -865,8 +877,10 @@
                 "name": "esperaPorMim",
                 "type": "EsperaPorMim",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.responsavelId",
+                    "Tarefa.criadorId",
                     "Tarefa.status"
                   ]
                 }
@@ -879,7 +893,7 @@
             ],
             "jsdoc": {
               "purpose": "Devolve para ajuste uma tarefa em revisão criada pela pessoa, registrando o motivo.",
-              "input": "tarefaId: tarefa em revisão; version: versão lida; motivoDevolucao: texto do motivo da devolução.",
+              "input": "id: tarefa em revisão; version: versão lida; details.motivoDevolucao: texto do motivo da devolução.",
               "processing": "Recusa se a pessoa da sessão não for o criador (somenteCriadorRevisa), se o motivo estiver vazio (devolucaoExigeMotivo), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emRevisao; recusa se a versão divergir. Executa a transição devolver gravando motivoDevolucao e devolvidaEm; a tarefa volta para emAndamento com o responsável como quem age e ele é avisado. Recalcula resumo e pendências como em carregarInicio.",
               "output": "resumo recalculado e esperaPorMim recalculado, sem a tarefa entre as para revisar."
             }
@@ -919,48 +933,6 @@
             }
           ],
           "selections": [],
-          "updates": [
-            {
-              "endpoint": "iniciarTarefa",
-              "state": "carregarInicio.resumo",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "iniciarTarefa",
-              "state": "carregarInicio.esperaPorMim",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "enviarParaRevisao",
-              "state": "carregarInicio.resumo",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "enviarParaRevisao",
-              "state": "carregarInicio.esperaPorMim",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "aceitarEntrega",
-              "state": "carregarInicio.resumo",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "aceitarEntrega",
-              "state": "carregarInicio.esperaPorMim",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "devolverComMotivo",
-              "state": "carregarInicio.resumo",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "devolverComMotivo",
-              "state": "carregarInicio.esperaPorMim",
-              "mode": "replace"
-            }
-          ],
           "journeys": [
             {
               "step": "avisoDiarioVencimentos/abrirAviso",
@@ -1092,12 +1064,54 @@
                 "devolverComMotivo"
               ]
             }
+          ],
+          "updates": [
+            {
+              "endpoint": "iniciarTarefa",
+              "state": "carregarInicio.resumo",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "iniciarTarefa",
+              "state": "carregarInicio.esperaPorMim",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "enviarParaRevisao",
+              "state": "carregarInicio.resumo",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "enviarParaRevisao",
+              "state": "carregarInicio.esperaPorMim",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "aceitarEntrega",
+              "state": "carregarInicio.resumo",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "aceitarEntrega",
+              "state": "carregarInicio.esperaPorMim",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "devolverComMotivo",
+              "state": "carregarInicio.resumo",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "devolverComMotivo",
+              "state": "carregarInicio.esperaPorMim",
+              "mode": "replace"
+            }
           ]
         }
       }
     },
     "status": "completed",
-    "stepId": 12,
+    "stepId": 19,
     "interaction": null,
     "nextSteps": null
   },

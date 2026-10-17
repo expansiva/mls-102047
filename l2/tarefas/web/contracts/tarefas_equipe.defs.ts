@@ -1,13 +1,9 @@
 /// <mls fileReference="_102047_/l2/tarefas/web/contracts/tarefas_equipe.defs.ts" enhancement="_blank"/>
 
-/** Identificação de um membro da equipe no cadastro mestre. */
+/** Identificação de um membro da equipe no cadastro mestre, com nome e situação. */
 export interface MembroIdentificacao {
-  details: {
-    identification: {
-      name: string;
-      readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';
-    };
-  };
+  name: string;
+  readonly status: 'Active' | 'Inactive' | 'Merged' | 'Blocked';
 }
 
 /** Detalhes de um membro da equipe. */
@@ -50,9 +46,7 @@ export interface TarefaEquipeItem {
 
 /** Descrição de um item da checklist. */
 export interface ItemChecklistDetalhes {
-  details: {
-    descricao: string;
-  };
+  descricao: string;
 }
 
 /** Item da checklist de uma tarefa com ordem e indicação de feito. */

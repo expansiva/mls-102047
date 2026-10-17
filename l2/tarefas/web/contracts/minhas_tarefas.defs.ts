@@ -2,12 +2,8 @@
 
 /** Identificação de um membro da equipe no cadastro mestre: nome e situação no cadastro. */
 export interface MembroIdentificacao {
-  details: {
-    identification: {
-      name: string;
-      readonly status?: 'Active' | 'Inactive' | 'Merged' | 'Blocked';
-    };
-  };
+  name: string;
+  readonly status?: 'Active' | 'Inactive' | 'Merged' | 'Blocked';
 }
 
 /** Detalhes de um membro da equipe com a sua identificação. */
@@ -73,10 +69,8 @@ export interface ItemChecklistEdicaoDetails {
 
 /** Detalhes de um item da checklist: descrição e momento da marcação. */
 export interface ItemChecklistDetails {
-  details: {
-    descricao: string;
-    marcadoEm?: string;
-  };
+  descricao: string;
+  marcadoEm?: string;
 }
 
 /** Item da checklist de uma tarefa, com ordem, indicação de feito e descrição. */
@@ -101,6 +95,20 @@ export interface ItemChecklistAlteracao {
   ordem: number;
   feito: boolean;
   details: ItemChecklistEdicaoDetails;
+}
+
+/** Descrição editável de uma tarefa. */
+export interface TarefaDescricaoDetails {
+  details: {
+    descricao?: string;
+  };
+}
+
+/** Motivo informado na devolução de uma tarefa. */
+export interface TarefaMotivoDetails {
+  details: {
+    motivoDevolucao: string;
+  };
 }
 
 /** Detalhes de uma tarefa: descrição, motivo e momento da devolução, conclusão e cancelamento. */
@@ -136,7 +144,7 @@ export interface Minhas_tarefasContracts {
    * Finalidade: Abre a página com a primeira página das tarefas da pessoa logada e as listas ativas onde ela pode criar tarefas.
    * Entrada: filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas; padrão todas). page/pageSize: página das tarefas.
    * Processamento: Seleciona as tarefas cujo criador ou responsável é a pessoa da sessão; aplica o filtro (criadorId = sessão; responsavelId = sessão; status emRevisao; devolvidaEm preenchida e status emAndamento). Ordena por prazo. Compõe nome da lista e nomes de responsável e criador lidos no cadastro mestre. Calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist (itens feitos / total) na leitura, sem gravar. Lista as listas com ativa = true ordenadas por nome.
-   * Saída: tarefas: página de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa.
+   * Saída: tarefas: página { items, page, pageSize, hasMore } de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa.
    */
   'tarefas.minhas_tarefas.carregarMinhasTarefas': {
     kind: 'qry';
@@ -149,7 +157,7 @@ export interface Minhas_tarefasContracts {
    * Finalidade: Recarrega as tarefas da pessoa logada quando ela troca o filtro rápido, pesquisa pelo título ou pede outra página.
    * Entrada: filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas). busca: trecho do título. page/pageSize: página pedida.
    * Processamento: Mesma seleção de carregarMinhasTarefas: tarefas em que a pessoa da sessão é criadora ou responsável, filtro aplicado, busca por texto no título, ordenação por prazo; compõe nomes de lista, responsável e criador e calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist na leitura.
-   * Saída: tarefas: página de tarefas resumidas no filtro e na busca pedidos.
+   * Saída: tarefas: página { items, page, pageSize, hasMore } de tarefas resumidas no filtro e na busca pedidos.
    */
   'tarefas.minhas_tarefas.listarMinhasTarefas': {
     kind: 'qry';
@@ -159,7 +167,7 @@ export interface Minhas_tarefasContracts {
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
   };
   /**
-   * Finalidade: Abre a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.
+   * Finalidade: Carrega a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.
    * Entrada: id: id da tarefa escolhida.
    * Processamento: Lê a tarefa por id, recusando se a pessoa da sessão não for criadora nem responsável. Compõe nome da lista, nomes de criador e responsável do cadastro mestre e os itens da checklist ordenados por ordem.
    * Saída: tarefa: a tarefa com versão, situação, datas de criação, devolução, conclusão e cancelamento, motivo da devolução e checklist.
@@ -193,7 +201,7 @@ export interface Minhas_tarefasContracts {
   'tarefas.minhas_tarefas.criarTarefa': {
     kind: 'cmd';
     writes: 'Tarefa.create';
-    input: { chaveCriacao: string; listaId: string; titulo: string; details: { descricao?: string }; prioridade: 'low' | 'medium' | 'high'; prazo: string; responsavelId: string; criadorId?: string; itensChecklist?: NovoItemChecklist[] };
+    input: { chaveCriacao: string; listaId: string; titulo: string; details?: TarefaDescricaoDetails; prioridade: 'low' | 'medium' | 'high'; prazo: string; responsavelId: string; criadorId?: string; itensChecklist?: NovoItemChecklist[] };
     output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
     rules: ['criacaoIdempotente', 'listaInativaNaoRecebeTarefa', 'responsavelDeveSerMembroAtivo'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
@@ -207,7 +215,7 @@ export interface Minhas_tarefasContracts {
   'tarefas.minhas_tarefas.salvarEdicao': {
     kind: 'cmd';
     writes: 'Tarefa.update';
-    input: { id: string; version: number; listaId: string; titulo: string; details: { descricao?: string }; prioridade: 'low' | 'medium' | 'high'; prazo: string; responsavelId: string };
+    input: { id: string; version: number; listaId: string; titulo: string; details?: TarefaDescricaoDetails; prioridade: 'low' | 'medium' | 'high'; prazo: string; responsavelId: string };
     output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
     rules: ['editarSomenteTarefaVisivel', 'edicaoNaoMudaSituacao', 'reatribuicaoPorCriadorOuGestor', 'responsavelDeveSerMembroAtivo', 'listaInativaNaoRecebeTarefa'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };
@@ -277,7 +285,7 @@ export interface Minhas_tarefasContracts {
   'tarefas.minhas_tarefas.devolverTarefa': {
     kind: 'cmd';
     writes: 'Tarefa.devolver';
-    input: { id: string; version: number; details: { motivoDevolucao: string } };
+    input: { id: string; version: number; details: TarefaMotivoDetails };
     output: { tarefa: TarefaDetalhe; resumo: TarefaResumo };
     rules: ['somenteCriadorRevisa', 'devolucaoExigeMotivo', 'tarefaEncerradaNaoTransiciona'];
     access: { actors: ['membroEquipe']; grants: ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']; scope: 'own' };

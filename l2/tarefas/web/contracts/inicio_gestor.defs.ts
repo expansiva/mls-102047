@@ -19,11 +19,7 @@ export interface ListaNome {
 
 /** Identificação de um membro da equipe. */
 export interface MembroNomeIdentificacao {
-  details: {
-    identification: {
-      name: string;
-    };
-  };
+  name: string;
 }
 
 /** Detalhes de um membro da equipe usados para identificá-lo. */
@@ -62,7 +58,7 @@ export interface Inicio_gestorContracts {
   /**
    * Finalidade: Entrega de uma só vez o panorama da equipe para o gestor: totais de tarefas abertas, que vencem hoje e atrasadas, progresso geral das checklists e tarefas abertas por lista.
    * Entrada: Nenhuma entrada. O gestor é conhecido pela sessão e enxerga todas as tarefas da equipe (escopo da organização).
-   * Processamento: Conta as tarefas da equipe com Tarefa.details.aberta verdadeiro (totalAbertas), com Tarefa.details.venceHoje (totalVenceHoje) e com Tarefa.details.atrasada (totalAtrasadas). Esses campos são derivados e calculados na consulta, nunca gravados: aberta = a fazer, em andamento ou em revisão; venceHoje = aberta com prazo hoje; atrasada = aberta com prazo anterior a hoje. Soma, nas tarefas abertas, os itens feitos e o total de itens das checklists e devolve o resultado no formato ’feitos/total’ (progressoChecklist). Lista as listas, ordenadas por nome, com Lista.details.quantidadeTarefasAbertas (derivado, calculado). Não usa campos de privacidade do membro.
+   * Processamento: Conta as tarefas da equipe com Tarefa.details.aberta verdadeiro (totalAbertas), com Tarefa.details.venceHoje (totalVenceHoje) e com Tarefa.details.atrasada (totalAtrasadas). Esses campos são derivados e calculados na consulta, nunca gravados: aberta = a fazer, em andamento ou em revisão; venceHoje = aberta com prazo hoje; atrasada = aberta com prazo anterior a hoje. Soma, nas tarefas abertas, os itens feitos e o total de itens das checklists e devolve o resultado no formato ’feitos/total’ (progressoChecklist). Lista as listas, ordenadas por nome, com Lista.details.quantidadeTarefasAbertas (derivado, contado pelas tarefas abertas com aquele Tarefa.listaId). Não usa campos de privacidade do membro.
    * Saída: Objeto com totalAbertas, totalVenceHoje e totalAtrasadas (números), progressoChecklist (texto ’feitos/total’) e listas (cada lista com id, nome e quantidade de tarefas abertas).
    */
   'tarefas.inicio_gestor.obterPanoramaEquipe': {

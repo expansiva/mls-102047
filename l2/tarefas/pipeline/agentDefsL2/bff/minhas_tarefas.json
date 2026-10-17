@@ -5,7 +5,7 @@
       "description": "Identificação de um membro da equipe no cadastro mestre: nome e situação no cadastro.",
       "fields": [
         {
-          "name": "details.identification.name",
+          "name": "name",
           "type": "string",
           "origin": {
             "kind": "field",
@@ -15,7 +15,7 @@
           }
         },
         {
-          "name": "details.identification.status",
+          "name": "status",
           "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
           "optional": true,
           "origin": {
@@ -329,7 +329,7 @@
       "description": "Detalhes de um item da checklist: descrição e momento da marcação.",
       "fields": [
         {
-          "name": "details.descricao",
+          "name": "descricao",
           "type": "string",
           "origin": {
             "kind": "field",
@@ -339,7 +339,7 @@
           }
         },
         {
-          "name": "details.marcadoEm",
+          "name": "marcadoEm",
           "type": "string",
           "optional": true,
           "origin": {
@@ -468,6 +468,39 @@
         {
           "name": "details",
           "type": "ItemChecklistEdicaoDetails"
+        }
+      ]
+    },
+    {
+      "name": "TarefaDescricaoDetails",
+      "description": "Descrição editável de uma tarefa.",
+      "fields": [
+        {
+          "name": "details.descricao",
+          "type": "string",
+          "optional": true,
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.descricao"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "TarefaMotivoDetails",
+      "description": "Motivo informado na devolução de uma tarefa.",
+      "fields": [
+        {
+          "name": "details.motivoDevolucao",
+          "type": "string",
+          "origin": {
+            "kind": "field",
+            "paths": [
+              "Tarefa.details.motivoDevolucao"
+            ]
+          }
         }
       ]
     },
@@ -707,7 +740,7 @@
         "purpose": "Abre a página com a primeira página das tarefas da pessoa logada e as listas ativas onde ela pode criar tarefas.",
         "input": "filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas; padrão todas). page/pageSize: página das tarefas.",
         "processing": "Seleciona as tarefas cujo criador ou responsável é a pessoa da sessão; aplica o filtro (criadorId = sessão; responsavelId = sessão; status emRevisao; devolvidaEm preenchida e status emAndamento). Ordena por prazo. Compõe nome da lista e nomes de responsável e criador lidos no cadastro mestre. Calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist (itens feitos / total) na leitura, sem gravar. Lista as listas com ativa = true ordenadas por nome.",
-        "output": "tarefas: página de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa."
+        "output": "tarefas: página { items, page, pageSize, hasMore } de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa."
       }
     },
     {
@@ -762,7 +795,7 @@
         "purpose": "Recarrega as tarefas da pessoa logada quando ela troca o filtro rápido, pesquisa pelo título ou pede outra página.",
         "input": "filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas). busca: trecho do título. page/pageSize: página pedida.",
         "processing": "Mesma seleção de carregarMinhasTarefas: tarefas em que a pessoa da sessão é criadora ou responsável, filtro aplicado, busca por texto no título, ordenação por prazo; compõe nomes de lista, responsável e criador e calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist na leitura.",
-        "output": "tarefas: página de tarefas resumidas no filtro e na busca pedidos."
+        "output": "tarefas: página { items, page, pageSize, hasMore } de tarefas resumidas no filtro e na busca pedidos."
       }
     },
     {
@@ -789,7 +822,7 @@
       ],
       "rules": [],
       "jsdoc": {
-        "purpose": "Abre a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.",
+        "purpose": "Carrega a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.",
         "input": "id: id da tarefa escolhida.",
         "processing": "Lê a tarefa por id, recusando se a pessoa da sessão não for criadora nem responsável. Compõe nome da lista, nomes de criador e responsável do cadastro mestre e os itens da checklist ordenados por ordem.",
         "output": "tarefa: a tarefa com versão, situação, datas de criação, devolução, conclusão e cancelamento, motivo da devolução e checklist."
@@ -862,15 +895,9 @@
           }
         },
         {
-          "name": "details.descricao",
-          "type": "string",
-          "optional": true,
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Tarefa.details.descricao"
-            ]
-          }
+          "name": "details",
+          "type": "TarefaDescricaoDetails",
+          "optional": true
         },
         {
           "name": "prioridade",
@@ -988,15 +1015,9 @@
           }
         },
         {
-          "name": "details.descricao",
-          "type": "string",
-          "optional": true,
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Tarefa.details.descricao"
-            ]
-          }
+          "name": "details",
+          "type": "TarefaDescricaoDetails",
+          "optional": true
         },
         {
           "name": "prioridade",
@@ -1266,14 +1287,8 @@
           }
         },
         {
-          "name": "details.motivoDevolucao",
-          "type": "string",
-          "origin": {
-            "kind": "field",
-            "paths": [
-              "Tarefa.details.motivoDevolucao"
-            ]
-          }
+          "name": "details",
+          "type": "TarefaMotivoDetails"
         }
       ],
       "output": [
@@ -1656,6 +1671,16 @@
       {
         "endpoint": "listarMinhasTarefas",
         "state": "carregarMinhasTarefas.tarefas",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "abrirTarefa",
+        "state": "abrirTarefa.tarefa",
+        "mode": "replace"
+      },
+      {
+        "endpoint": "buscarMembros",
+        "state": "buscarMembros.membros",
         "mode": "replace"
       },
       {

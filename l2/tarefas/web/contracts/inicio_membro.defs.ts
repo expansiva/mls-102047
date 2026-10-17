@@ -2,12 +2,10 @@
 
 /** Indicadores calculados de uma tarefa: se está aberta, se vence hoje, se está atrasada e o progresso da checklist. */
 export interface TarefaResumoDetalhes {
-  details: {
-    readonly aberta: boolean;
-    readonly venceHoje: boolean;
-    readonly atrasada: boolean;
-    readonly progressoChecklist: string;
-  };
+  readonly aberta: boolean;
+  readonly venceHoje: boolean;
+  readonly atrasada: boolean;
+  readonly progressoChecklist: string;
 }
 
 /** Lista (projeto ou área) à qual a tarefa pertence, identificada pelo nome. */
@@ -59,11 +57,7 @@ export interface AvisoDoDia {
 
 /** Identificação do membro da equipe pelo nome. */
 export interface MembroIdentificacao {
-  details: {
-    identification: {
-      name: string;
-    };
-  };
+  name: string;
 }
 
 /** Dados do cadastro do membro da equipe visíveis ao membro. */
@@ -78,11 +72,9 @@ export interface MembroRef {
 
 /** Dados da devolução e progresso da checklist de uma tarefa. */
 export interface TarefaPendenciaDetalhes {
-  details: {
-    motivoDevolucao?: string;
-    devolvidaEm?: string;
-    readonly progressoChecklist: string;
-  };
+  motivoDevolucao?: string;
+  devolvidaEm?: string;
+  readonly progressoChecklist: string;
 }
 
 /** Tarefa que depende de uma ação da pessoa, com versão, responsável, criador, devolução e progresso da checklist. */

@@ -1,8 +1,8 @@
 {
   "attempt": "1",
   "model": "claude-opus-5-5",
-  "promptChars": 28986,
-  "receivedAt": "2026-10-17T04:56:50.505Z",
+  "promptChars": 36767,
+  "receivedAt": "2026-10-17T08:37:42.205Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -44,7 +44,7 @@
                 }
               },
               {
-                "name": "quantidadeTarefas",
+                "name": "details.quantidadeTarefas",
                 "type": "number",
                 "origin": {
                   "kind": "field",
@@ -54,7 +54,7 @@
                 }
               },
               {
-                "name": "quantidadeAtrasadas",
+                "name": "details.quantidadeAtrasadas",
                 "type": "number",
                 "origin": {
                   "kind": "field",
@@ -64,7 +64,7 @@
                 }
               },
               {
-                "name": "geradoEm",
+                "name": "details.geradoEm",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -74,7 +74,7 @@
                 }
               },
               {
-                "name": "finalizadoEm",
+                "name": "details.finalizadoEm",
                 "type": "string",
                 "optional": true,
                 "origin": {
@@ -85,7 +85,7 @@
                 }
               },
               {
-                "name": "motivoFalha",
+                "name": "details.motivoFalha",
                 "type": "string",
                 "optional": true,
                 "origin": {
@@ -132,7 +132,7 @@
                 }
               },
               {
-                "name": "venceHoje",
+                "name": "details.venceHoje",
                 "type": "boolean",
                 "origin": {
                   "kind": "field",
@@ -142,7 +142,7 @@
                 }
               },
               {
-                "name": "atrasada",
+                "name": "details.atrasada",
                 "type": "boolean",
                 "origin": {
                   "kind": "field",
@@ -158,7 +158,7 @@
             "description": "Linha do aviso: tarefa incluída, com o prazo registrado na geração e a situação do prazo naquele dia.",
             "fields": [
               {
-                "name": "tarefaId",
+                "name": "details.tarefas.tarefaId",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -168,7 +168,7 @@
                 }
               },
               {
-                "name": "prazo",
+                "name": "details.tarefas.prazo",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -178,7 +178,7 @@
                 }
               },
               {
-                "name": "situacaoPrazo",
+                "name": "details.tarefas.situacaoPrazo",
                 "type": "'dueToday' | 'overdue'",
                 "origin": {
                   "kind": "field",
@@ -191,9 +191,13 @@
                 "name": "tarefa",
                 "type": "TarefaDoAviso",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Tarefa.details"
+                    "Tarefa.titulo",
+                    "Tarefa.status",
+                    "Tarefa.prazo",
+                    "Tarefa.details.venceHoje",
+                    "Tarefa.details.atrasada"
                   ]
                 }
               }
@@ -234,7 +238,7 @@
                 }
               },
               {
-                "name": "quantidadeTarefas",
+                "name": "details.quantidadeTarefas",
                 "type": "number",
                 "origin": {
                   "kind": "field",
@@ -244,7 +248,7 @@
                 }
               },
               {
-                "name": "quantidadeAtrasadas",
+                "name": "details.quantidadeAtrasadas",
                 "type": "number",
                 "origin": {
                   "kind": "field",
@@ -295,9 +299,16 @@
                 "type": "AvisoResumo[]",
                 "paginated": true,
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "AvisoVencimento.id"
+                    "AvisoVencimento.id",
+                    "AvisoVencimento.dataReferencia",
+                    "AvisoVencimento.status",
+                    "AvisoVencimento.details.quantidadeTarefas",
+                    "AvisoVencimento.details.quantidadeAtrasadas",
+                    "AvisoVencimento.details.geradoEm",
+                    "AvisoVencimento.details.finalizadoEm",
+                    "AvisoVencimento.details.motivoFalha"
                   ]
                 }
               },
@@ -306,9 +317,14 @@
                 "type": "AvisoDetalhe",
                 "optional": true,
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "AvisoVencimento.details"
+                    "AvisoVencimento.id",
+                    "AvisoVencimento.dataReferencia",
+                    "AvisoVencimento.status",
+                    "AvisoVencimento.details.quantidadeTarefas",
+                    "AvisoVencimento.details.quantidadeAtrasadas",
+                    "AvisoVencimento.details.tarefas"
                   ]
                 }
               }
@@ -374,9 +390,16 @@
                 "type": "AvisoResumo[]",
                 "paginated": true,
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "AvisoVencimento.id"
+                    "AvisoVencimento.id",
+                    "AvisoVencimento.dataReferencia",
+                    "AvisoVencimento.status",
+                    "AvisoVencimento.details.quantidadeTarefas",
+                    "AvisoVencimento.details.quantidadeAtrasadas",
+                    "AvisoVencimento.details.geradoEm",
+                    "AvisoVencimento.details.finalizadoEm",
+                    "AvisoVencimento.details.motivoFalha"
                   ]
                 }
               }
@@ -410,9 +433,14 @@
                 "name": "aviso",
                 "type": "AvisoDetalhe",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "AvisoVencimento.details"
+                    "AvisoVencimento.id",
+                    "AvisoVencimento.dataReferencia",
+                    "AvisoVencimento.status",
+                    "AvisoVencimento.details.quantidadeTarefas",
+                    "AvisoVencimento.details.quantidadeAtrasadas",
+                    "AvisoVencimento.details.tarefas"
                   ]
                 }
               }
@@ -453,6 +481,29 @@
               }
             }
           ],
+          "journeys": [
+            {
+              "step": "avisoDiarioVencimentos/abrirAviso",
+              "organisms": [
+                "listaAvisos",
+                "avisoDoDia"
+              ],
+              "endpoints": [
+                "carregarMeusAvisos",
+                "obterAviso"
+              ]
+            },
+            {
+              "step": "avisoDiarioVencimentos/verVencendo",
+              "organisms": [
+                "avisoDoDia"
+              ],
+              "endpoints": [
+                "carregarMeusAvisos",
+                "obterAviso"
+              ]
+            }
+          ],
           "updates": [
             {
               "endpoint": "buscarAvisos",
@@ -464,37 +515,12 @@
               "state": "carregarMeusAvisos.avisoAtual",
               "mode": "replace"
             }
-          ],
-          "journeys": [
-            {
-              "step": "avisoDiarioVencimentos/abrirAviso",
-              "organisms": [
-                "listaAvisos",
-                "avisoDoDia"
-              ],
-              "endpoints": [
-                "carregarMeusAvisos",
-                "obterAviso"
-              ],
-              "continuesIn": ""
-            },
-            {
-              "step": "avisoDiarioVencimentos/verVencendo",
-              "organisms": [
-                "avisoDoDia"
-              ],
-              "endpoints": [
-                "carregarMeusAvisos",
-                "obterAviso"
-              ],
-              "continuesIn": ""
-            }
           ]
         }
       }
     },
     "status": "completed",
-    "stepId": 12,
+    "stepId": 19,
     "interaction": null,
     "nextSteps": null
   },

@@ -1,8 +1,8 @@
 {
   "attempt": "1",
-  "model": "claude-opus-5-5",
-  "promptChars": 42021,
-  "receivedAt": "2026-10-17T04:57:19.732Z",
+  "model": "claude-sonnet-5-5)",
+  "promptChars": 55634,
+  "receivedAt": "2026-10-17T08:38:39.757Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -11,7 +11,7 @@
         "types": [
           {
             "name": "MembroIdentificacao",
-            "description": "Identificação de um membro da equipe no cadastro mestre.",
+            "description": "Identificação de um membro da equipe no cadastro mestre, com nome e situação.",
             "fields": [
               {
                 "name": "name",
@@ -179,6 +179,7 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
+                    "Lista.id",
                     "Lista.nome"
                   ]
                 }
@@ -199,7 +200,8 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "MembroEquipe.id",
+                    "MembroEquipe.details"
                   ]
                 }
               },
@@ -488,7 +490,8 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "MembroEquipe.id",
+                    "MembroEquipe.details"
                   ]
                 }
               },
@@ -508,7 +511,8 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "MembroEquipe.id",
+                    "MembroEquipe.details"
                   ]
                 }
               },
@@ -528,9 +532,10 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
+                    "ItemChecklist.id",
                     "ItemChecklist.ordem",
                     "ItemChecklist.feito",
-                    "ItemChecklist.details.descricao"
+                    "ItemChecklist.details"
                   ]
                 }
               }
@@ -542,7 +547,6 @@
             "id": "carregarOpcoesEquipe",
             "kind": "qry",
             "when": "onLoad",
-            "writes": "",
             "input": [],
             "output": [
               {
@@ -551,6 +555,7 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
+                    "Lista.id",
                     "Lista.nome"
                   ]
                 }
@@ -561,6 +566,7 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
+                    "MembroEquipe.id",
                     "MembroEquipe.details.identification.name",
                     "MembroEquipe.details.identification.status"
                   ]
@@ -581,7 +587,6 @@
             "id": "listarTarefasEquipe",
             "kind": "qry",
             "when": "onLoad",
-            "writes": "",
             "input": [
               {
                 "name": "listaId",
@@ -694,19 +699,24 @@
                 "type": "TarefaEquipeItem[]",
                 "paginated": true,
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.id",
                     "Tarefa.titulo",
                     "Tarefa.listaId",
-                    "Lista.nome",
                     "Tarefa.responsavelId",
-                    "MembroEquipe.details.identification.name",
                     "Tarefa.prioridade",
                     "Tarefa.prazo",
                     "Tarefa.status",
                     "Tarefa.details.venceHoje",
                     "Tarefa.details.atrasada",
-                    "Tarefa.details.progressoChecklist"
+                    "Tarefa.details.progressoChecklist",
+                    "Lista.id",
+                    "Lista.nome",
+                    "MembroEquipe.id",
+                    "MembroEquipe.details.identification.name",
+                    "MembroEquipe.details.identification.status",
+                    "ItemChecklist.feito"
                   ]
                 }
               }
@@ -725,7 +735,6 @@
             "id": "obterTarefa",
             "kind": "qry",
             "when": "interaction",
-            "writes": "",
             "input": [
               {
                 "name": "tarefaId",
@@ -741,25 +750,32 @@
                 "name": "tarefa",
                 "type": "TarefaDetalhe",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.id",
+                    "Tarefa.version",
                     "Tarefa.titulo",
-                    "Tarefa.details.descricao",
+                    "Tarefa.status",
+                    "Tarefa.prioridade",
+                    "Tarefa.prazo",
+                    "Tarefa.criadaEm",
                     "Tarefa.criadorId",
                     "Tarefa.responsavelId",
-                    "MembroEquipe.details.identification.name",
-                    "Tarefa.prazo",
-                    "Tarefa.status",
+                    "Tarefa.details.descricao",
+                    "Tarefa.details.motivoDevolucao",
+                    "Tarefa.details.devolvidaEm",
+                    "Tarefa.details.concluidaEm",
+                    "Tarefa.details.canceladaEm",
+                    "Tarefa.details.aberta",
                     "Tarefa.details.quantidadeSubtarefas",
                     "Tarefa.details.progressoChecklist",
+                    "MembroEquipe.id",
+                    "MembroEquipe.details.identification.name",
+                    "MembroEquipe.details.identification.status",
+                    "ItemChecklist.id",
                     "ItemChecklist.ordem",
-                    "ItemChecklist.details.descricao",
                     "ItemChecklist.feito",
-                    "Tarefa.criadaEm",
-                    "Tarefa.details.devolvidaEm",
-                    "Tarefa.details.motivoDevolucao",
-                    "Tarefa.details.concluidaEm",
-                    "Tarefa.details.canceladaEm"
+                    "ItemChecklist.details.descricao"
                   ]
                 }
               }
@@ -779,7 +795,7 @@
             "writes": "Tarefa.update",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -814,12 +830,32 @@
                 "name": "tarefa",
                 "type": "TarefaDetalhe",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Tarefa.responsavelId",
-                    "MembroEquipe.details.identification.name",
+                    "Tarefa.id",
+                    "Tarefa.version",
+                    "Tarefa.titulo",
                     "Tarefa.status",
-                    "Tarefa.version"
+                    "Tarefa.prioridade",
+                    "Tarefa.prazo",
+                    "Tarefa.criadaEm",
+                    "Tarefa.criadorId",
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.descricao",
+                    "Tarefa.details.motivoDevolucao",
+                    "Tarefa.details.devolvidaEm",
+                    "Tarefa.details.concluidaEm",
+                    "Tarefa.details.canceladaEm",
+                    "Tarefa.details.aberta",
+                    "Tarefa.details.quantidadeSubtarefas",
+                    "Tarefa.details.progressoChecklist",
+                    "MembroEquipe.id",
+                    "MembroEquipe.details.identification.name",
+                    "MembroEquipe.details.identification.status",
+                    "ItemChecklist.id",
+                    "ItemChecklist.ordem",
+                    "ItemChecklist.feito",
+                    "ItemChecklist.details.descricao"
                   ]
                 }
               }
@@ -832,7 +868,7 @@
             ],
             "jsdoc": {
               "purpose": "Troca o responsável da tarefa pelo membro escolhido pelo gestor.",
-              "input": "tarefaId: tarefa a reatribuir; version: versão lida, para concorrência otimista; responsavelId: novo responsável.",
+              "input": "id: tarefa a reatribuir; version: versão lida, para concorrência otimista; responsavelId: novo responsável.",
               "processing": "Recusa se quem chama não for o criador nem o gestor (reatribuicaoPorCriadorOuGestor) e se o novo responsável não for membro ativo da equipe (responsavelDeveSerMembroAtivo). Grava apenas responsavelId, sem alterar a situação (edicaoNaoMudaSituacao); recusa versão divergente. Quando a etapa é do responsável, o novo responsável passa a ser quem age agora e é avisado.",
               "output": "A tarefa atualizada com o novo responsável, nova versão, checklist e marcos do histórico."
             }
@@ -844,7 +880,7 @@
             "writes": "Tarefa.cancelar",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -869,11 +905,32 @@
                 "name": "tarefa",
                 "type": "TarefaDetalhe",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
+                    "Tarefa.id",
+                    "Tarefa.version",
+                    "Tarefa.titulo",
                     "Tarefa.status",
+                    "Tarefa.prioridade",
+                    "Tarefa.prazo",
+                    "Tarefa.criadaEm",
+                    "Tarefa.criadorId",
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.descricao",
+                    "Tarefa.details.motivoDevolucao",
+                    "Tarefa.details.devolvidaEm",
+                    "Tarefa.details.concluidaEm",
                     "Tarefa.details.canceladaEm",
-                    "Tarefa.version"
+                    "Tarefa.details.aberta",
+                    "Tarefa.details.quantidadeSubtarefas",
+                    "Tarefa.details.progressoChecklist",
+                    "MembroEquipe.id",
+                    "MembroEquipe.details.identification.name",
+                    "MembroEquipe.details.identification.status",
+                    "ItemChecklist.id",
+                    "ItemChecklist.ordem",
+                    "ItemChecklist.feito",
+                    "ItemChecklist.details.descricao"
                   ]
                 }
               }
@@ -884,7 +941,7 @@
             ],
             "jsdoc": {
               "purpose": "Cancela a tarefa escolhida enquanto ela ainda está aberta.",
-              "input": "tarefaId: tarefa a cancelar; version: versão lida, para concorrência otimista.",
+              "input": "id: tarefa a cancelar; version: versão lida, para concorrência otimista.",
               "processing": "Aplica a transição cancelar. Recusa se quem chama não for o criador nem o gestor ou se a tarefa não estiver a fazer, em andamento ou em revisão (cancelamentoPorCriadorOuGestor); tarefa concluída ou cancelada não muda (tarefaEncerradaNaoTransiciona). Registra canceladaEm e a mensagem na sala de discussão; recusa versão divergente.",
               "output": "A tarefa na situação cancelada, com canceladaEm, nova versão, checklist e marcos do histórico."
             }
@@ -944,6 +1001,94 @@
               }
             }
           ],
+          "journeys": [
+            {
+              "step": "acompanharTarefasEquipe/filtrarTarefas",
+              "organisms": [
+                "tarefasEquipe"
+              ],
+              "endpoints": [
+                "carregarOpcoesEquipe",
+                "listarTarefasEquipe"
+              ],
+              "continuesIn": ""
+            },
+            {
+              "step": "acompanharTarefasEquipe/verQuadro",
+              "organisms": [
+                "tarefasEquipe"
+              ],
+              "endpoints": [
+                "listarTarefasEquipe"
+              ],
+              "continuesIn": ""
+            },
+            {
+              "step": "acompanharTarefasEquipe/verDetalhe",
+              "organisms": [
+                "detalheTarefa",
+                "historicoTarefa"
+              ],
+              "endpoints": [
+                "obterTarefa"
+              ],
+              "continuesIn": ""
+            },
+            {
+              "step": "cancelarTarefaGestor/localizarParaCancelar",
+              "organisms": [
+                "tarefasEquipe",
+                "detalheTarefa"
+              ],
+              "endpoints": [
+                "listarTarefasEquipe",
+                "obterTarefa"
+              ],
+              "continuesIn": ""
+            },
+            {
+              "step": "cancelarTarefaGestor/cancelarPeloGestor",
+              "organisms": [
+                "acoesGestor"
+              ],
+              "endpoints": [
+                "cancelarTarefa"
+              ],
+              "continuesIn": ""
+            },
+            {
+              "step": "reatribuirTarefaGestor/localizarTarefaEquipe",
+              "organisms": [
+                "tarefasEquipe",
+                "detalheTarefa"
+              ],
+              "endpoints": [
+                "listarTarefasEquipe",
+                "obterTarefa"
+              ],
+              "continuesIn": ""
+            },
+            {
+              "step": "reatribuirTarefaGestor/escolherResponsavelEquipe",
+              "organisms": [
+                "acoesGestor"
+              ],
+              "endpoints": [
+                "carregarOpcoesEquipe"
+              ],
+              "continuesIn": ""
+            },
+            {
+              "step": "reatribuirTarefaGestor/reatribuir",
+              "organisms": [
+                "acoesGestor"
+              ],
+              "endpoints": [
+                "reatribuirTarefa"
+              ],
+              "continuesIn": ""
+            }
+          ],
           "updates": [
             {
               "endpoint": "listarTarefasEquipe",
@@ -965,92 +1110,12 @@
               "state": "obterTarefa.tarefa",
               "mode": "replace"
             }
-          ],
-          "journeys": [
-            {
-              "step": "acompanharTarefasEquipe/filtrarTarefas",
-              "organisms": [
-                "tarefasEquipe"
-              ],
-              "endpoints": [
-                "carregarOpcoesEquipe",
-                "listarTarefasEquipe"
-              ]
-            },
-            {
-              "step": "acompanharTarefasEquipe/verQuadro",
-              "organisms": [
-                "tarefasEquipe"
-              ],
-              "endpoints": [
-                "listarTarefasEquipe"
-              ]
-            },
-            {
-              "step": "acompanharTarefasEquipe/verDetalhe",
-              "organisms": [
-                "detalheTarefa",
-                "historicoTarefa"
-              ],
-              "endpoints": [
-                "obterTarefa"
-              ]
-            },
-            {
-              "step": "cancelarTarefaGestor/localizarParaCancelar",
-              "organisms": [
-                "tarefasEquipe",
-                "detalheTarefa"
-              ],
-              "endpoints": [
-                "listarTarefasEquipe",
-                "obterTarefa"
-              ]
-            },
-            {
-              "step": "cancelarTarefaGestor/cancelarPeloGestor",
-              "organisms": [
-                "acoesGestor"
-              ],
-              "endpoints": [
-                "cancelarTarefa"
-              ]
-            },
-            {
-              "step": "reatribuirTarefaGestor/localizarTarefaEquipe",
-              "organisms": [
-                "tarefasEquipe",
-                "detalheTarefa"
-              ],
-              "endpoints": [
-                "listarTarefasEquipe",
-                "obterTarefa"
-              ]
-            },
-            {
-              "step": "reatribuirTarefaGestor/escolherResponsavelEquipe",
-              "organisms": [
-                "acoesGestor"
-              ],
-              "endpoints": [
-                "carregarOpcoesEquipe"
-              ]
-            },
-            {
-              "step": "reatribuirTarefaGestor/reatribuir",
-              "organisms": [
-                "acoesGestor"
-              ],
-              "endpoints": [
-                "reatribuirTarefa"
-              ]
-            }
           ]
         }
       }
     },
     "status": "completed",
-    "stepId": 12,
+    "stepId": 19,
     "interaction": null,
     "nextSteps": null
   },

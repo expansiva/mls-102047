@@ -1,8 +1,8 @@
 {
   "attempt": "2",
   "model": "claude-opus-5-5",
-  "promptChars": 81782,
-  "receivedAt": "2026-10-17T05:00:03.633Z",
+  "promptChars": 108774,
+  "receivedAt": "2026-10-17T08:41:34.411Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -541,6 +541,39 @@
             ]
           },
           {
+            "name": "TarefaDescricaoDetails",
+            "description": "Descrição editável de uma tarefa.",
+            "fields": [
+              {
+                "name": "descricao",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.descricao"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "TarefaMotivoDetails",
+            "description": "Motivo informado na devolução de uma tarefa.",
+            "fields": [
+              {
+                "name": "motivoDevolucao",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.motivoDevolucao"
+                  ]
+                }
+              }
+            ]
+          },
+          {
             "name": "TarefaDetalheDetails",
             "description": "Detalhes de uma tarefa: descrição, motivo e momento da devolução, conclusão e cancelamento.",
             "fields": [
@@ -763,7 +796,6 @@
             "id": "carregarMinhasTarefas",
             "kind": "qry",
             "when": "onLoad",
-            "writes": "",
             "input": [
               {
                 "name": "filtro",
@@ -819,14 +851,13 @@
               "purpose": "Abre a página com a primeira página das tarefas da pessoa logada e as listas ativas onde ela pode criar tarefas.",
               "input": "filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas; padrão todas). page/pageSize: página das tarefas.",
               "processing": "Seleciona as tarefas cujo criador ou responsável é a pessoa da sessão; aplica o filtro (criadorId = sessão; responsavelId = sessão; status emRevisao; devolvidaEm preenchida e status emAndamento). Ordena por prazo. Compõe nome da lista e nomes de responsável e criador lidos no cadastro mestre. Calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist (itens feitos / total) na leitura, sem gravar. Lista as listas com ativa = true ordenadas por nome.",
-              "output": "tarefas: página de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa."
+              "output": "tarefas: página { items, page, pageSize, hasMore } de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa."
             }
           },
           {
             "id": "listarMinhasTarefas",
             "kind": "qry",
             "when": "interaction",
-            "writes": "",
             "input": [
               {
                 "name": "filtro",
@@ -881,17 +912,16 @@
               "purpose": "Recarrega as tarefas da pessoa logada quando ela troca o filtro rápido, pesquisa pelo título ou pede outra página.",
               "input": "filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas). busca: trecho do título. page/pageSize: página pedida.",
               "processing": "Mesma seleção de carregarMinhasTarefas: tarefas em que a pessoa da sessão é criadora ou responsável, filtro aplicado, busca por texto no título, ordenação por prazo; compõe nomes de lista, responsável e criador e calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist na leitura.",
-              "output": "tarefas: página de tarefas resumidas no filtro e na busca pedidos."
+              "output": "tarefas: página { items, page, pageSize, hasMore } de tarefas resumidas no filtro e na busca pedidos."
             }
           },
           {
             "id": "abrirTarefa",
             "kind": "qry",
             "when": "interaction",
-            "writes": "",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -915,8 +945,8 @@
             ],
             "rules": [],
             "jsdoc": {
-              "purpose": "Abre a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.",
-              "input": "tarefaId: id da tarefa escolhida.",
+              "purpose": "Carrega a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.",
+              "input": "id: id da tarefa escolhida.",
               "processing": "Lê a tarefa por id, recusando se a pessoa da sessão não for criadora nem responsável. Compõe nome da lista, nomes de criador e responsável do cadastro mestre e os itens da checklist ordenados por ordem.",
               "output": "tarefa: a tarefa com versão, situação, datas de criação, devolução, conclusão e cancelamento, motivo da devolução e checklist."
             }
@@ -925,7 +955,6 @@
             "id": "buscarMembros",
             "kind": "qry",
             "when": "interaction",
-            "writes": "",
             "input": [
               {
                 "name": "nome",
@@ -995,13 +1024,13 @@
                 }
               },
               {
-                "name": "descricao",
-                "type": "string",
+                "name": "details",
+                "type": "TarefaDescricaoDetails",
                 "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Tarefa.details.descricao"
+                    "Tarefa.details"
                   ]
                 }
               },
@@ -1053,7 +1082,7 @@
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "ItemChecklist.tarefaId"
+                    "ItemChecklist.details"
                   ]
                 }
               }
@@ -1087,7 +1116,7 @@
             ],
             "jsdoc": {
               "purpose": "Cria uma nova tarefa com sua checklist inicial e a atribui ao responsável escolhido.",
-              "input": "chaveCriacao: chave gerada ao abrir o formulário. listaId, titulo, descricao, prioridade, prazo, responsavelId: dados da tarefa. criadorId: criador da tarefa; opcional, pois o servidor sempre grava a pessoa da sessão e recusa um valor diferente dela. itensChecklist: itens iniciais com ordem e descrição.",
+              "input": "chaveCriacao: chave gerada ao abrir o formulário. listaId, titulo, details.descricao, prioridade, prazo, responsavelId: dados da tarefa. criadorId: criador da tarefa; opcional, pois o servidor sempre grava a pessoa da sessão e recusa um valor diferente dela. itensChecklist: itens iniciais com ordem e descrição.",
               "processing": "Recusa lista inativa (listaInativaNaoRecebeTarefa) e responsável que não seja membro ativo (responsavelDeveSerMembroAtivo). Grava a tarefa em aFazer com a pessoa da sessão como criadora e os itens da checklist (feito = false) numa só transação. Se já existir tarefa com a mesma chaveCriacao, devolve a já criada sem duplicar nem gerar nova mensagem (criacaoIdempotente). Avisa o responsável.",
               "output": "tarefa: a tarefa criada, em aFazer, com checklist. resumo: a mesma tarefa em forma resumida com indicadores calculados."
             }
@@ -1099,7 +1128,7 @@
             "writes": "Tarefa.update",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -1139,13 +1168,13 @@
                 }
               },
               {
-                "name": "descricao",
-                "type": "string",
+                "name": "details",
+                "type": "TarefaDescricaoDetails",
                 "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Tarefa.details.descricao"
+                    "Tarefa.details"
                   ]
                 }
               },
@@ -1211,7 +1240,7 @@
             ],
             "jsdoc": {
               "purpose": "Salva os campos editados da tarefa, incluindo a troca de responsável.",
-              "input": "tarefaId e version: tarefa e versão lida. listaId, titulo, descricao, prioridade, prazo, responsavelId: novos valores.",
+              "input": "id e version: tarefa e versão lida. listaId, titulo, details.descricao, prioridade, prazo, responsavelId: novos valores.",
               "processing": "Recusa se a pessoa não for criadora nem responsável (editarSomenteTarefaVisivel) ou se a versão mudou. Se o responsável mudou, exige que a pessoa seja a criadora (reatribuicaoPorCriadorOuGestor) e que o novo seja membro ativo (responsavelDeveSerMembroAtivo), e avisa o novo responsável. Se a lista mudou, recusa lista inativa (listaInativaNaoRecebeTarefa). Nunca altera a situação (edicaoNaoMudaSituacao).",
               "output": "tarefa: a tarefa atualizada, com nova versão e mesma situação. resumo: a mesma tarefa resumida."
             }
@@ -1283,7 +1312,7 @@
             "writes": "Tarefa.iniciar",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -1331,7 +1360,7 @@
             ],
             "jsdoc": {
               "purpose": "Inicia a tarefa atribuída à pessoa.",
-              "input": "tarefaId e version: tarefa e versão lida.",
+              "input": "id e version: tarefa e versão lida.",
               "processing": "Exige que a pessoa da sessão seja a responsável (somenteResponsavelExecuta) e que a tarefa esteja em aFazer, nunca concluída ou cancelada (tarefaEncerradaNaoTransiciona). Move para emAndamento e registra a mensagem na sala de discussão.",
               "output": "tarefa: a tarefa em emAndamento. resumo: a mesma tarefa resumida."
             }
@@ -1343,7 +1372,7 @@
             "writes": "Tarefa.enviarParaRevisao",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -1391,7 +1420,7 @@
             ],
             "jsdoc": {
               "purpose": "Envia ou reenvia a tarefa para a revisão do criador.",
-              "input": "tarefaId e version: tarefa e versão lida.",
+              "input": "id e version: tarefa e versão lida.",
               "processing": "Exige que a pessoa da sessão seja a responsável (somenteResponsavelExecuta) e que a tarefa esteja em emAndamento, nunca encerrada (tarefaEncerradaNaoTransiciona). Move para emRevisao, registra a mensagem na sala e avisa o criador.",
               "output": "tarefa: a tarefa em emRevisao. resumo: a mesma tarefa resumida."
             }
@@ -1403,7 +1432,7 @@
             "writes": "Tarefa.aceitar",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -1451,7 +1480,7 @@
             ],
             "jsdoc": {
               "purpose": "Aceita a entrega da tarefa e a conclui.",
-              "input": "tarefaId e version: tarefa e versão lida.",
+              "input": "id e version: tarefa e versão lida.",
               "processing": "Exige que a pessoa da sessão seja a criadora (somenteCriadorRevisa) e que a tarefa esteja em emRevisao, nunca encerrada (tarefaEncerradaNaoTransiciona). Move para concluida, registra concluidaEm e a mensagem na sala.",
               "output": "tarefa: a tarefa concluída com o momento da conclusão. resumo: a mesma tarefa resumida."
             }
@@ -1463,7 +1492,7 @@
             "writes": "Tarefa.devolver",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -1483,12 +1512,12 @@
                 }
               },
               {
-                "name": "motivoDevolucao",
-                "type": "string",
+                "name": "details",
+                "type": "TarefaMotivoDetails",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Tarefa.details.motivoDevolucao"
+                    "Tarefa.details"
                   ]
                 }
               }
@@ -1522,7 +1551,7 @@
             ],
             "jsdoc": {
               "purpose": "Devolve a tarefa em revisão para ajuste, com o motivo.",
-              "input": "tarefaId e version: tarefa e versão lida. motivoDevolucao: motivo da devolução.",
+              "input": "id e version: tarefa e versão lida. details.motivoDevolucao: motivo da devolução.",
               "processing": "Exige que a pessoa seja a criadora (somenteCriadorRevisa), que a tarefa esteja em emRevisao e não encerrada (tarefaEncerradaNaoTransiciona) e que o motivo não esteja vazio (devolucaoExigeMotivo). Registra motivo e devolvidaEm, move para emAndamento e avisa o responsável.",
               "output": "tarefa: a tarefa em emAndamento com motivo e momento da devolução. resumo: a mesma tarefa resumida."
             }
@@ -1534,7 +1563,7 @@
             "writes": "Tarefa.cancelar",
             "input": [
               {
-                "name": "tarefaId",
+                "name": "id",
                 "type": "string",
                 "origin": {
                   "kind": "field",
@@ -1582,7 +1611,7 @@
             ],
             "jsdoc": {
               "purpose": "Cancela uma tarefa criada pela pessoa.",
-              "input": "tarefaId e version: tarefa e versão lida.",
+              "input": "id e version: tarefa e versão lida.",
               "processing": "Exige que a pessoa seja a criadora (cancelamentoPorCriadorOuGestor) e que a tarefa esteja em aFazer, emAndamento ou emRevisao (tarefaEncerradaNaoTransiciona). Move para cancelada, registra canceladaEm e a mensagem na sala.",
               "output": "tarefa: a tarefa cancelada com o momento do cancelamento. resumo: a mesma tarefa resumida."
             }
@@ -1660,93 +1689,6 @@
                 "kind": "query",
                 "ref": "abrirTarefa"
               }
-            }
-          ],
-          "updates": [
-            {
-              "endpoint": "listarMinhasTarefas",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "criarTarefa",
-              "state": "abrirTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "criarTarefa",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "upsert"
-            },
-            {
-              "endpoint": "salvarEdicao",
-              "state": "abrirTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "salvarEdicao",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "upsert"
-            },
-            {
-              "endpoint": "salvarChecklist",
-              "state": "abrirTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "salvarChecklist",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "upsert"
-            },
-            {
-              "endpoint": "iniciarTarefa",
-              "state": "abrirTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "iniciarTarefa",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "upsert"
-            },
-            {
-              "endpoint": "enviarParaRevisao",
-              "state": "abrirTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "enviarParaRevisao",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "upsert"
-            },
-            {
-              "endpoint": "aceitarTarefa",
-              "state": "abrirTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "aceitarTarefa",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "upsert"
-            },
-            {
-              "endpoint": "devolverTarefa",
-              "state": "abrirTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "devolverTarefa",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "upsert"
-            },
-            {
-              "endpoint": "cancelarTarefa",
-              "state": "abrirTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "cancelarTarefa",
-              "state": "carregarMinhasTarefas.tarefas",
-              "mode": "upsert"
             }
           ],
           "journeys": [
@@ -1980,12 +1922,109 @@
                 "devolverTarefa"
               ]
             }
+          ],
+          "updates": [
+            {
+              "endpoint": "listarMinhasTarefas",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "abrirTarefa",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "buscarMembros",
+              "state": "buscarMembros.membros",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "criarTarefa",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "criarTarefa",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "salvarEdicao",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "salvarEdicao",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "salvarChecklist",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "salvarChecklist",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "iniciarTarefa",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "iniciarTarefa",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "enviarParaRevisao",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "enviarParaRevisao",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "aceitarTarefa",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "aceitarTarefa",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "devolverTarefa",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "devolverTarefa",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "upsert"
+            },
+            {
+              "endpoint": "cancelarTarefa",
+              "state": "abrirTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cancelarTarefa",
+              "state": "carregarMinhasTarefas.tarefas",
+              "mode": "upsert"
+            }
           ]
         }
       }
     },
     "status": "completed",
-    "stepId": 12,
+    "stepId": 19,
     "interaction": null,
     "nextSteps": null
   },
