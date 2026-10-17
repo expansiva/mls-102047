@@ -7,65 +7,51 @@ export const inicioEntityEmpresa = {
   "moduleName": "inicio",
   "entityId": "Empresa",
   "title": "Empresa",
-  "description": "O cadastro mestre da empresa da organização. O responsável completa só os dados obrigatórios que faltam (nome, documento, endereço, contato). O módulo calcula se a empresa está preparada a partir desses dados; não grava essa situação.",
+  "description": "A empresa dona do app, registro mestre da plataforma. O responsável completa só os dados que faltam (nome, documento, endereço, contato); 'preparada' é um valor derivado: os dados obrigatórios estão completos.",
   "displayField": "details.identification.name",
   "relationships": {
-    "contatos": {
-      "relationshipId": "empresaTemContato",
-      "to": "Contato",
-      "via": "HasContact",
-      "cardinality": "1:N",
-      "title": "Contatos da empresa",
-      "description": "Canais de contato da empresa; um deles é exigido para a empresa ficar preparada.",
-      "required": "para a empresa ficar preparada"
-    },
     "pessoas": {
       "relationshipId": "pessoaMembroEmpresa",
       "to": "PessoaOrganizacao",
       "via": "AssignedTo",
       "cardinality": "1:N",
       "title": "Pessoas da organização",
-      "description": "Pessoas que fazem parte da organização e que o responsável acompanha.",
+      "description": "Pessoas aceitas na organização da empresa; o vínculo é mantido pela plataforma.",
       "roles": [
         "member"
       ],
       "direction": "to",
       "required": true
     },
-    "responsaveis": {
-      "relationshipId": "responsavelPelaEmpresa",
-      "to": "PessoaOrganizacao",
-      "via": "ManagedBy",
+    "contatos": {
+      "relationshipId": "empresaTemContato",
+      "to": "ContatoEmpresa",
+      "via": "HasContact",
       "cardinality": "1:N",
-      "title": "Responsáveis pela empresa",
-      "description": "Pessoas que a plataforma reconhece como responsáveis pela empresa.",
-      "roles": [
-        "manager"
-      ],
-      "direction": "to"
+      "title": "Contatos da empresa",
+      "description": "Canais de contato da empresa registrados na plataforma.",
+      "required": "para a empresa ficar preparada"
     }
   },
   "capabilities": {
-    "read.byId": "Lê o cadastro da empresa pelo id já conhecido da organização, ao abrir a tela inicial do responsável.",
-    "locate.byName": "Localiza a empresa pelo nome no índice do cadastro mestre, usada pelo responsável ao abrir a própria empresa.",
-    "locate.byDocument": "Verifica pelo documento (CNPJ, EIN…) se já existe outra empresa antes de o responsável confirmar o documento que faltava.",
-    "edit.platformFields": "Grava nome, documento, endereço e razão social que faltavam, informados pelo responsável na preparação da empresa.",
-    "link.contact": "Cria um canal de contato e o liga à empresa por HasContact, quando o responsável informa o contato que faltava.",
-    "listLinks": "Lista contatos, pessoas da organização e responsáveis ligados à empresa, para o responsável ver quem ainda não completou o acesso.",
-    "link": "Registra o vínculo versionado entre a empresa e suas pessoas, mantido pela plataforma ao aceitar e convidar pessoas.",
-    "audit": "Mostra quem alterou os dados da empresa e quando, a partir do registro da plataforma.",
-    "inicio.verPendencias": "Mostra ao responsável o que a plataforma já tem e destaca só os dados obrigatórios que faltam, a partir do valor calculado de dados faltantes.",
-    "inicio.verOrientacao": "Mostra ao responsável o texto fixo de orientação com o link para criar o primeiro módulo no Studio, sem guardar módulos."
+    "read.byId": "Lê a empresa do app pelo identificador já conhecido na sessão, para mostrar ao responsável a tela de boas-vindas e a orientação final.",
+    "locate.byDocument": "Verifica pelo CNPJ (ou documento do país) se já existe outra empresa com o documento informado pelo responsável, antes de gravá-lo.",
+    "register.createOrAttach": "Marca o registro da empresa com o papel inicio.Empresa sem criar outra empresa, usado quando o responsável abre a preparação.",
+    "edit.platformFields": "Grava nome, razão social, documento e endereço que faltam, informados pelo responsável na preparação da empresa.",
+    "link.contact": "Adiciona um telefone ou e-mail de contato da empresa como canal da plataforma ligado por HasContact, quando o responsável informa o contato que falta.",
+    "listLinks": "Lista as pessoas da organização ligadas à empresa e os contatos da empresa, para o responsável ver quem ainda não completou o acesso.",
+    "audit": "Mostra ao administrador quem completou cada dado da empresa e quando, pelo registro de auditoria da plataforma.",
+    "statusHistory.read": "Mostra ao responsável o histórico de situação do registro da empresa na plataforma.",
+    "inicio.verificarPreparo": "Calcula se a empresa está preparada e quais dados obrigatórios faltam, lendo o registro mestre, para a tela do responsável pedir só o que falta e exibir a orientação do Studio."
   },
   "rules": [
     "rule-foreign-namespace-refused",
     "rule-identity-never-in-namespace",
     "rule-document-shape-validated",
     "rule-company-legal-name-required",
-    "rule-company-ein-unique-for-us",
-    "empresaPreparadaComDadosObrigatorios",
+    "empresaPreparadaDadosObrigatorios",
     "naoPedirDadoJaExistente",
-    "prepararSomenteResponsavel"
+    "somenteResponsavelEditaEmpresa"
   ],
   "kind": "role",
   "subtype": "Company",
@@ -90,7 +76,7 @@ export const inicioEntityEmpresa = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "Documento mestre da empresa da organização, como a plataforma guarda e devolve.",
+        "description": "Registro mestre da empresa dona do app, como a plataforma o guarda e devolve.",
         "fields": {
           "identification": {
             "type": "object",
@@ -107,7 +93,7 @@ export const inicioEntityEmpresa = {
                     "title": "Empresa"
                   }
                 ],
-                "description": "Sempre empresa neste papel.",
+                "description": "Sempre Company: a empresa dona do app.",
                 "title": "Subtipo"
               },
               "name": {
@@ -115,7 +101,7 @@ export const inicioEntityEmpresa = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 200,
-                "description": "Nome pelo qual a empresa é reconhecida; dado obrigatório para a empresa ficar preparada.",
+                "description": "Nome pelo qual a empresa é reconhecida no app; pedido ao responsável só quando ainda não existe.",
                 "title": "Nome da empresa"
               },
               "status": {
@@ -142,7 +128,7 @@ export const inicioEntityEmpresa = {
                   }
                 ],
                 "title": "Situação no cadastro",
-                "description": "Situação do cadastro mestre (ativo ou inativo), mantida pela plataforma."
+                "description": "Situação do registro mestre na plataforma; o Início apenas lê."
               },
               "docType": {
                 "type": "enum",
@@ -170,12 +156,12 @@ export const inicioEntityEmpresa = {
                   }
                 ],
                 "title": "Tipo de documento",
-                "description": "Tipo do documento nacional da empresa; o responsável informa só se a plataforma ainda não tem. Obrigatório para a empresa ficar preparada."
+                "description": "Tipo do documento nacional da empresa (CNPJ no Brasil); pedido só quando falta e obrigatório para a empresa ficar preparada."
               },
               "docId": {
                 "type": "string",
                 "indexed": true,
-                "description": "Número do documento da empresa; pedido apenas quando falta. Obrigatório para a empresa ficar preparada.",
+                "description": "Número do documento da empresa; pedido só quando falta e obrigatório para a empresa ficar preparada.",
                 "title": "Número do documento"
               },
               "countryCode": {
@@ -185,7 +171,7 @@ export const inicioEntityEmpresa = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "País da empresa (ISO 3166-1 alfa-2), que define o documento e as regras legais aplicáveis.",
+                "description": "País da empresa (ISO 3166-1 alfa-2), que define o documento esperado e as regras legais.",
                 "title": "País"
               },
               "tags": {
@@ -193,27 +179,11 @@ export const inicioEntityEmpresa = {
                 "required": true,
                 "collection": true,
                 "derived": true,
-                "description": "Papéis de módulos no cadastro, incluindo inicio.Empresa; escritos pela plataforma.",
+                "description": "Papéis de módulos no registro; inclui inicio.Empresa, escrito pela plataforma.",
                 "title": "Papéis"
-              },
-              "createdAt": {
-                "type": "string",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "title": "Criado em",
-                "description": "Momento em que o cadastro foi criado."
-              },
-              "updatedAt": {
-                "type": "string",
-                "required": true,
-                "indexed": true,
-                "derived": true,
-                "title": "Atualizado em",
-                "description": "Momento da última alteração do cadastro."
               }
             },
-            "description": "Dados de identificação da empresa mantidos pela plataforma."
+            "description": "Dados de identificação da empresa mantidos pela plataforma; o Início só completa o que falta."
           },
           "base": {
             "type": "object",
@@ -223,7 +193,7 @@ export const inicioEntityEmpresa = {
                 "type": "string",
                 "required": true,
                 "collection": true,
-                "description": "Nome fantasia e outros nomes da empresa.",
+                "description": "Outros nomes pelos quais a empresa é conhecida, como o nome fantasia.",
                 "title": "Outros nomes"
               },
               "addresses": {
@@ -232,7 +202,7 @@ export const inicioEntityEmpresa = {
                 "collection": true,
                 "of": "Address",
                 "title": "Endereços",
-                "description": "Endereços da empresa; ao menos um é obrigatório para a empresa ficar preparada."
+                "description": "Endereço da empresa; pedido ao responsável só quando ainda não há nenhum, e obrigatório para a empresa ficar preparada."
               },
               "contacts": {
                 "type": "object",
@@ -240,18 +210,11 @@ export const inicioEntityEmpresa = {
                 "collection": true,
                 "of": "ContactSummary",
                 "derived": true,
-                "description": "Resumo dos canais de contato ligados à empresa; ao menos um é obrigatório para a empresa ficar preparada.",
+                "description": "Resumo dos canais de contato da empresa ligados pela plataforma; ao menos um é obrigatório para a empresa ficar preparada.",
                 "title": "Contatos"
-              },
-              "relationshipRefs": {
-                "type": "object",
-                "required": true,
-                "derived": true,
-                "description": "Chaves compactas dos vínculos da empresa, recalculadas pela plataforma.",
-                "title": "Vínculos"
               }
             },
-            "description": "Dados comuns do cadastro mestre."
+            "description": "Dados comuns do registro mestre usados pelo Início para verificar o que falta."
           },
           "company": {
             "type": "object",
@@ -266,28 +229,28 @@ export const inicioEntityEmpresa = {
                     "title": "Pessoa jurídica"
                   }
                 ],
-                "description": "A empresa da organização é a pessoa jurídica.",
-                "title": "Tipo de empresa"
+                "description": "A empresa dona do app é uma pessoa jurídica.",
+                "title": "Tipo de organização"
               },
               "legalName": {
                 "type": "string",
                 "required": true,
-                "description": "Nome oficial registrado da empresa.",
+                "description": "Nome oficial registrado da empresa; pedido só quando falta.",
                 "title": "Razão social"
               },
               "tradeName": {
                 "type": "string",
-                "description": "Nome comercial da empresa, quando houver.",
+                "description": "Nome comercial da empresa, quando diferente da razão social.",
                 "title": "Nome fantasia"
               }
             },
-            "description": "Dados próprios de pessoa jurídica."
+            "description": "Dados próprios de empresa mantidos pela plataforma."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Campos promovidos pela organização; o módulo apenas lê."
+            "description": "Campos promovidos pela organização; o Início apenas lê."
           },
           "inicio": {
             "type": "object",
@@ -297,16 +260,16 @@ export const inicioEntityEmpresa = {
                 "type": "boolean",
                 "derived": true,
                 "title": "Empresa preparada",
-                "description": "Verdadeiro quando a empresa tem nome, documento, ao menos um endereço e ao menos um contato; calculado na leitura, nunca gravado."
+                "description": "Verdadeiro quando a empresa tem nome, documento, ao menos um endereço e ao menos um contato registrados na plataforma."
               },
               "dadosFaltantes": {
                 "type": "string",
                 "derived": true,
                 "title": "Dados que faltam",
-                "description": "Lista dos dados obrigatórios ainda ausentes entre nome, documento, endereço e contato, mostrada ao responsável para pedir só o que falta."
+                "description": "Lista dos dados obrigatórios da empresa ainda não informados entre nome, documento, endereço e contato, para pedir ao responsável só o que falta."
               }
             },
-            "description": "Espaço do módulo Início; vazio, pois o módulo não guarda nada próprio sobre a empresa."
+            "description": "Namespace do módulo Início: vazio, o módulo não guarda nada próprio sobre a empresa."
           }
         }
       }

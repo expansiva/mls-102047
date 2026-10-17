@@ -7,45 +7,67 @@ export const inicioWorkflows = {
   "moduleName": "inicio",
   "processes": [
     {
-      "processId": "liberacaoAcesso",
-      "title": "Liberação de acesso",
-      "description": "Quando a plataforma não consegue ligar sozinha o e-mail da pessoa ao cadastro, a pessoa da organização avisa o responsável, e ele libera o acesso convidando a pessoa certa pelo convite da plataforma.",
+      "processId": "liberacaoAcessoPessoa",
+      "title": "Liberação do acesso da pessoa",
+      "description": "Quando a plataforma não consegue ligar o e-mail da conta autenticada porque já existe outro cadastro com o mesmo e-mail de contato, a pessoa da organização é avisada, o responsável libera o acesso dela pela liberação da plataforma e a pessoa volta para completar o próprio acesso.",
       "trigger": {
         "kind": "manual",
         "actorRef": "pessoaOrganizacao"
       },
       "tasks": [
         {
-          "taskId": "avisarResponsavel",
+          "taskId": "pessoaVeAvisoLiberacao",
           "kind": "human",
           "actorRef": "pessoaOrganizacao",
-          "journeyRef": "pedirLiberacao",
+          "journeyRef": "aguardarLiberacaoAcesso",
           "next": [
-            "liberarAcessoPessoa"
+            "responsavelLiberaAcesso"
           ],
-          "description": "A pessoa vê que o e-mail não foi ligado e passa ao responsável o pedido de liberação."
+          "description": "A pessoa vê que já existe outro cadastro com o mesmo e-mail de contato e encaminha ao responsável o pedido de liberação do seu acesso."
         },
         {
-          "taskId": "liberarAcessoPessoa",
+          "taskId": "responsavelLiberaAcesso",
           "kind": "human",
           "actorRef": "responsavel",
-          "journeyRef": "liberarAcesso",
+          "journeyRef": "acompanharAcessoPessoas",
+          "next": [
+            "aguardarLigacaoPlataforma"
+          ],
+          "description": "O responsável identifica a pessoa que aguarda liberação e libera o acesso dela pela liberação da plataforma, que decide a qual cadastro o login fica ligado."
+        },
+        {
+          "taskId": "aguardarLigacaoPlataforma",
+          "kind": "wait",
+          "next": [
+            "pessoaCompletaAcesso"
+          ],
+          "description": "Aguarda a plataforma concluir a ligação do login ao cadastro escolhido na liberação."
+        },
+        {
+          "taskId": "pessoaCompletaAcesso",
+          "kind": "human",
+          "actorRef": "pessoaOrganizacao",
+          "journeyRef": "completarMeuAcesso",
           "next": [],
-          "description": "O responsável confere quem é a pessoa certa e a convida pelo convite da plataforma, que liga o e-mail ao cadastro sem criar outra pessoa."
+          "description": "Com o login ligado, a pessoa informa só os dados mínimos que ainda faltam e segue para os módulos que o responsável liberou."
         }
       ],
       "functions": [
         {
-          "functionId": "abrirLiberacaoAcesso",
-          "description": "Chamada pela tela ou pelo cm quando a pessoa autenticada não teve o e-mail ligado: confere que a plataforma realmente não ligou o e-mail, pede ao cm a mensagem de origem e a Task que referencia a pessoa, passa a vez ao responsável e pede ao cm para notificá-lo; não grava pendência no módulo e, se repetida com uma ocorrência aberta para o mesmo e-mail, devolve a mesma ocorrência sem notificar de novo."
+          "functionId": "abrirPedidoLiberacaoAcesso",
+          "description": "Chamada pela tela (BFF) ou pelo cm quando a pessoa autenticada recebe o aviso de que o e-mail não pôde ser ligado; valida que a pessoa é da organização e que a plataforma indicou conflito de e-mail de contato, pede ao cm a mensagem de origem e a Task que referencia a pessoa, passa a vez ao responsável e pede ao cm que o notifique; retorna a ocorrência aberta; repetida, devolve a mesma ocorrência aberta sem criar outra pessoa, outro vínculo nem outra Task."
+        },
+        {
+          "functionId": "resolverResponsavelLiberacao",
+          "description": "Chamada pelas funções do processo para decidir quem é a pessoa da etapa de liberação; consulta na plataforma quem é reconhecido como responsável pela empresa (ser o primeiro a entrar não conta) e retorna esse responsável; é somente leitura e repetir dá o mesmo resultado."
+        },
+        {
+          "functionId": "registrarLiberacaoConcluida",
+          "description": "Chamada pelo cm ou pelo relógio do módulo quando a liberação da plataforma termina; valida que a ocorrência está aguardando e que o login da pessoa agora está ligado a um cadastro, registra o avanço, passa a vez à pessoa da organização e pede ao cm que a notifique para completar o acesso; retorna a etapa atual; repetida após o avanço, não faz nada e devolve o mesmo estado."
         },
         {
           "functionId": "concluirLiberacaoAcesso",
-          "description": "Chamada pela tela ou pelo cm em nome do responsável depois do convite da plataforma: confere que quem chama é o responsável reconhecido pela plataforma e que o e-mail agora está ligado a um único cadastro, registra o fim da etapa, encerra a Task e pede ao cm para avisar a pessoa que já pode completar o acesso; devolve a situação da ocorrência e, se repetida, apenas devolve a ocorrência já encerrada."
-        },
-        {
-          "functionId": "resolverResponsavelEmpresa",
-          "description": "Chamada pelas outras funções do processo para decidir quem recebe a etapa de liberação: lê na plataforma quem é reconhecido como responsável pela empresa (nunca quem entrou primeiro), devolve essa pessoa ou um erro quando não há responsável, sem gravar nada; repetir devolve o mesmo resultado."
+          "description": "Chamada pela tela (BFF) ou pelo cm quando a pessoa termina de completar os dados mínimos; valida que os dados mínimos estão completos, encerra a ocorrência e a Task no cm; retorna a ocorrência encerrada; repetida, devolve a ocorrência já encerrada sem alterar nada."
         }
       ]
     }
@@ -56,26 +78,19 @@ export const inicioWorkflows = {
       "inProcess": false
     },
     {
-      "journeyId": "convidarPessoas",
-      "inProcess": false
-    },
-    {
-      "journeyId": "acompanharAcessos",
-      "inProcess": false
-    },
-    {
-      "journeyId": "liberarAcesso",
+      "journeyId": "acompanharAcessoPessoas",
       "inProcess": true,
-      "processId": "liberacaoAcesso"
+      "processId": "liberacaoAcessoPessoa"
     },
     {
       "journeyId": "completarMeuAcesso",
-      "inProcess": false
+      "inProcess": true,
+      "processId": "liberacaoAcessoPessoa"
     },
     {
-      "journeyId": "pedirLiberacao",
+      "journeyId": "aguardarLiberacaoAcesso",
       "inProcess": true,
-      "processId": "liberacaoAcesso"
+      "processId": "liberacaoAcessoPessoa"
     }
   ]
 } as const satisfies Ns5Readonly<Ns5WorkflowsArtifact>;

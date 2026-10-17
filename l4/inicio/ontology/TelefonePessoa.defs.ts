@@ -1,45 +1,36 @@
-/// <mls fileReference="_102047_/l4/inicio/ontology/Contato.defs.ts" enhancement="_blank"/>
+/// <mls fileReference="_102047_/l4/inicio/ontology/TelefonePessoa.defs.ts" enhancement="_blank"/>
 
 import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
 
-export const inicioEntityContato = {
+export const inicioEntityTelefonePessoa = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "inicio",
-  "entityId": "Contato",
-  "title": "Contato",
-  "description": "Canal de contato (telefone ou e-mail) da empresa ou da pessoa. É um registro da plataforma ligado por HasContact, nunca um campo do cadastro.",
-  "displayField": "details.identification.name",
+  "entityId": "TelefonePessoa",
+  "title": "Telefone da pessoa",
+  "description": "Telefone opcional que a própria pessoa informa ao completar o acesso. O e-mail de login não é este registro e não é editável.",
+  "displayField": "details.contactChannel.value",
   "relationships": {
-    "empresa": {
-      "relationshipId": "empresaTemContato",
-      "to": "Empresa",
-      "via": "HasContact",
-      "cardinality": "N:1",
-      "title": "Empresa dona do contato",
-      "description": "Canal de contato da empresa, ligado por HasContact; um deles é exigido para a empresa ficar preparada.",
-      "direction": "to"
-    },
     "pessoa": {
-      "relationshipId": "pessoaTemContato",
+      "relationshipId": "pessoaTemTelefone",
       "to": "PessoaOrganizacao",
       "via": "HasContact",
       "cardinality": "N:1",
-      "title": "Pessoa dona do contato",
-      "description": "Telefone opcional informado pela pessoa ao completar o acesso, ligado por HasContact.",
-      "direction": "to"
+      "title": "Pessoa dona do telefone",
+      "description": "Pessoa da organização a quem o telefone pertence, ligada por HasContact.",
+      "direction": "to",
+      "role": "HasContact"
     }
   },
   "capabilities": {
-    "read.byId": "Lê os canais já ligados à empresa ou à pessoa pelo mdmId, para mostrar o que a plataforma já tem e não pedir de novo; usado pelas telas do responsável e da pessoa da organização.",
-    "locate.byContact": "Procura se o telefone ou e-mail informado já existe antes de criar outro canal, para que repetir ou interromper não duplique; usado ao salvar o contato da empresa ou o telefone da pessoa.",
-    "register.createOrAttach": "Cria o canal quando ausente e marca com o papel inicio.Contato; usado pelo responsável ao confirmar o contato da empresa e pela pessoa ao informar o telefone opcional.",
-    "edit.platformFields": "Corrige o tipo ou o valor do canal; usado pelo responsável para o contato da empresa e pela pessoa para o próprio telefone.",
-    "edit.moduleNamespace": "Mantém o namespace inicio do canal, que fica vazio; usado apenas pelo próprio módulo ao anexar o papel.",
-    "link": "Liga o canal à empresa ou à pessoa por HasContact, sem criar novo vínculo se já existir; usado ao salvar os dados.",
-    "unlink": "Encerra o vínculo HasContact de um canal que deixou de valer, mantendo o histórico; usado pelo responsável ou pela pessoa dona do telefone.",
-    "listLinks": "Mostra a qual empresa ou pessoa o canal está ligado; usado na preparação da empresa para saber se o contato exigido já existe.",
-    "inactivate": "Tira o canal de uso sem apagar, com reativação possível; usado pelo responsável ou pela pessoa dona.",
-    "audit": "Mostra quem criou ou alterou o canal e quando, pelo módulo audit da plataforma; consultado pelo responsável."
+    "read.byId": "Lê o telefone já ligado à pessoa pelo id, para mostrar na tela Completar meu acesso o que já existe e pedir só o que falta.",
+    "locate.byContact": "Procura se o número informado já pertence a um registro, evitando criar outro telefone ao repetir ou interromper o preenchimento.",
+    "register.createOrAttach": "Cria o registro do telefone quando ausente ou reaproveita o existente, marcando o papel inicio.TelefonePessoa; usado pela pessoa da organização ao completar o acesso.",
+    "edit.platformFields": "Permite à pessoa da organização corrigir o próprio número de telefone.",
+    "link": "Liga o telefone à pessoa da organização pelo relacionamento HasContact, sem duplicar o vínculo em repetições.",
+    "unlink": "Desfaz o vínculo quando a pessoa remove o telefone opcional, mantendo o histórico.",
+    "listLinks": "Mostra a qual pessoa o telefone está ligado; usado pelo responsável ao ver as pessoas da organização.",
+    "inactivate": "Retira de uso um telefone que a pessoa deixou de usar, sem apagá-lo.",
+    "audit": "Mostra quem registrou ou alterou o telefone e quando, pelo módulo de auditoria da plataforma."
   },
   "rules": [
     "rule-foreign-namespace-refused",
@@ -47,12 +38,12 @@ export const inicioEntityContato = {
     "rule-contact-value-unique-per-type",
     "rule-document-shape-validated",
     "rule-delete-blocked-by-relationships",
-    "contatoSemDuplicarAoRepetir",
-    "emailDaContaNaoEditavel"
+    "telefoneOpcional",
+    "telefoneSemDuplicarVinculo"
   ],
   "kind": "role",
   "subtype": "ContactChannel",
-  "roleTag": "inicio.Contato",
+  "roleTag": "inicio.TelefonePessoa",
   "source": "/_102034_/l4/ontology/mdm.defs.ts",
   "record": {
     "fields": {
@@ -73,7 +64,7 @@ export const inicioEntityContato = {
       "details": {
         "type": "object",
         "required": true,
-        "description": "The JSONB document, as a map of groups (see groups).",
+        "description": "Registro de canal de contato do tipo telefone, ligado à pessoa da organização.",
         "fields": {
           "identification": {
             "type": "object",
@@ -90,7 +81,7 @@ export const inicioEntityContato = {
                     "title": "Canal de contato"
                   }
                 ],
-                "description": "Sempre ContactChannel para este papel.",
+                "description": "Sempre ContactChannel para este registro.",
                 "title": "Subtipo"
               },
               "name": {
@@ -98,7 +89,7 @@ export const inicioEntityContato = {
                 "required": true,
                 "indexed": true,
                 "maxLength": 200,
-                "description": "Como o canal é reconhecido na tela de preparação da empresa ou de completar o acesso (ex.: telefone principal).",
+                "description": "Como o telefone é reconhecido na lista, normalmente o próprio número.",
                 "title": "Nome"
               },
               "status": {
@@ -125,7 +116,7 @@ export const inicioEntityContato = {
                   }
                 ],
                 "title": "Situação",
-                "description": "Situação do canal na plataforma."
+                "description": "Situação do registro na plataforma (ativo ou inativo)."
               },
               "countryCode": {
                 "type": "string",
@@ -134,7 +125,7 @@ export const inicioEntityContato = {
                 "pattern": "^[A-Z]{2}$",
                 "maxLength": 2,
                 "default": "US",
-                "description": "País (ISO 3166-1 alfa-2) a que o canal pertence, usado para interpretar o telefone.",
+                "description": "País do telefone (ISO 3166-1 alfa-2), em geral o país informado pela pessoa ao completar o acesso.",
                 "title": "País"
               },
               "tags": {
@@ -142,17 +133,33 @@ export const inicioEntityContato = {
                 "required": true,
                 "collection": true,
                 "derived": true,
-                "description": "Papéis dos módulos sobre o canal; inclui inicio.Contato.",
+                "description": "Papéis de módulo do registro; inclui inicio.TelefonePessoa.",
                 "title": "Papéis"
+              },
+              "createdAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Criado em",
+                "description": "Quando o telefone foi registrado."
+              },
+              "updatedAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Atualizado em",
+                "description": "Última alteração do telefone."
               }
             },
-            "description": "Identificação do canal de contato na plataforma."
+            "description": "Colunas de índice da plataforma para o canal de contato."
           },
           "base": {
             "type": "object",
             "owner": "platform",
             "fields": {},
-            "description": "Dados comuns da plataforma; este papel não usa nenhum deles."
+            "description": "Camada comum da plataforma; o Início não usa nenhum campo dela para o telefone."
           },
           "contactChannel": {
             "type": "object",
@@ -165,44 +172,38 @@ export const inicioEntityContato = {
                   {
                     "value": "Phone",
                     "title": "Telefone"
-                  },
-                  {
-                    "value": "Email",
-                    "title": "E-mail"
-                  },
-                  {
-                    "value": "WhatsApp",
-                    "title": "WhatsApp"
                   }
                 ],
-                "title": "Tipo",
-                "description": "Tipo do canal informado no Início: telefone, WhatsApp ou e-mail da empresa; telefone da pessoa."
+                "title": "Tipo de contato",
+                "description": "No Início este registro é sempre um telefone; o e-mail de login não é registrado aqui."
               },
               "value": {
                 "type": "string",
                 "required": true,
-                "description": "O número ou o endereço de e-mail, sem máscara.",
-                "title": "Valor"
+                "description": "Número de telefone opcional que a própria pessoa informa ao completar o acesso, guardado sem máscara.",
+                "title": "Telefone",
+                "pattern": "^\\+?[0-9]{8,15}$",
+                "maxLength": 20
               },
               "isVerified": {
                 "type": "boolean",
                 "required": true,
                 "title": "Verificado",
-                "description": "Indica se a plataforma já verificou o canal."
+                "description": "Se o telefone foi verificado pela plataforma; o Início não verifica telefones."
               },
               "verifiedAt": {
                 "type": "timestamp",
                 "title": "Verificado em",
-                "description": "Quando a plataforma verificou o canal."
+                "description": "Quando a plataforma verificou o telefone, se verificou."
               }
             },
-            "description": "O telefone ou e-mail da empresa ou o telefone opcional da pessoa."
+            "description": "O telefone como registro próprio da plataforma."
           },
           "general": {
             "type": "object",
             "owner": "organization",
             "open": true,
-            "description": "Campos promovidos pela organização; lidos, não declarados aqui."
+            "description": "Campos promovidos pela organização; o Início apenas lê."
           },
           "inicio": {
             "type": "object",
@@ -216,6 +217,6 @@ export const inicioEntityContato = {
   }
 } as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
 
-export type InicioEntityContatoType = typeof inicioEntityContato;
+export type InicioEntityTelefonePessoaType = typeof inicioEntityTelefonePessoa;
 
-export default inicioEntityContato;
+export default inicioEntityTelefonePessoa;

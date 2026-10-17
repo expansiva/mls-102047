@@ -1,0 +1,201 @@
+{
+  "entity": {
+    "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+    "moduleName": "inicio",
+    "entityId": "ContatoEmpresa",
+    "title": "Contato da empresa",
+    "description": "Canal de contato (telefone ou e-mail) da empresa, informado pelo responsável quando a plataforma ainda não o tem.",
+    "displayField": "details.contactChannel.value",
+    "relationships": {
+      "empresa": {
+        "relationshipId": "empresaTemContato",
+        "to": "Empresa",
+        "via": "HasContact",
+        "cardinality": "N:1",
+        "title": "Empresa dona do contato",
+        "description": "A empresa a que este canal de contato pertence, ligada por HasContact na plataforma.",
+        "direction": "to"
+      }
+    },
+    "capabilities": {
+      "read.byId": "Lê o contato da empresa pelo id quando a tela de preparar a empresa mostra os contatos já ligados; usado pelo responsável.",
+      "locate.byContact": "Procura se o telefone ou e-mail digitado já existe na plataforma antes de criar outro, evitando duplicar; usado pelo responsável ao preparar a empresa.",
+      "register.createOrAttach": "Cria o canal de contato quando a plataforma ainda não o tem, ou reaproveita o existente, e marca a função inicio.ContatoEmpresa; usado pelo responsável.",
+      "edit.platformFields": "Corrige o tipo ou o valor do contato da empresa pela atualização da plataforma; usado pelo responsável.",
+      "inactivate": "Tira de uso um contato da empresa que não vale mais, sem apagá-lo, e permite reativá-lo; usado pelo responsável.",
+      "link": "Liga o contato à empresa pela relação HasContact, preenchendo a lista de contatos da empresa; usado pelo responsável.",
+      "unlink": "Encerra a ligação HasContact entre a empresa e um contato antigo, mantendo o histórico; usado pelo responsável.",
+      "listLinks": "Mostra a empresa à qual o contato está ligado e desde quando; usado pelo responsável na tela de preparar a empresa.",
+      "audit": "Mostra quem incluiu ou alterou o contato da empresa e quando, pelo módulo audit da plataforma; usado pelo responsável."
+    },
+    "rules": [
+      "rule-foreign-namespace-refused",
+      "rule-identity-never-in-namespace",
+      "rule-contact-value-unique-per-type",
+      "rule-document-shape-validated",
+      "rule-delete-blocked-by-relationships",
+      "naoPedirDadoJaExistente"
+    ],
+    "kind": "role",
+    "subtype": "ContactChannel",
+    "roleTag": "inicio.ContatoEmpresa",
+    "source": "/_102034_/l4/ontology/mdm.defs.ts",
+    "record": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true,
+          "indexed": true,
+          "derived": true,
+          "description": "mdmId; stable through promotion and merge."
+        },
+        "version": {
+          "type": "integer",
+          "required": true,
+          "derived": true,
+          "writePrecondition": true,
+          "description": "Bumped by the engine on every write; optimistic concurrency."
+        },
+        "details": {
+          "type": "object",
+          "required": true,
+          "description": "The JSONB document, as a map of groups (see groups).",
+          "fields": {
+            "identification": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "subtype": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    {
+                      "value": "ContactChannel",
+                      "title": "Canal de contato"
+                    }
+                  ],
+                  "description": "Sempre ContactChannel: o contato da empresa é um registro próprio.",
+                  "title": "Subtipo"
+                },
+                "name": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "maxLength": 200,
+                  "description": "Como o contato da empresa é reconhecido na tela (por exemplo, 'Telefone comercial').",
+                  "title": "Nome"
+                },
+                "status": {
+                  "type": "enum",
+                  "required": true,
+                  "indexed": true,
+                  "derived": true,
+                  "values": [
+                    "Active",
+                    "Inactive",
+                    "Merged",
+                    "Blocked"
+                  ],
+                  "title": "Situação",
+                  "description": "Situação do contato no cadastro mestre; inativo não aparece como contato da empresa."
+                },
+                "countryCode": {
+                  "type": "string",
+                  "required": true,
+                  "indexed": true,
+                  "pattern": "^[A-Z]{2}$",
+                  "maxLength": 2,
+                  "default": "US",
+                  "description": "País (ISO 3166-1 alfa-2) a que o contato pertence; define o formato do telefone.",
+                  "title": "País"
+                }
+              },
+              "description": "Identificação do canal de contato da empresa no cadastro mestre."
+            },
+            "base": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {},
+              "description": "Dados comuns do cadastro mestre; o Início não usa nenhum deles para o contato da empresa."
+            },
+            "contactChannel": {
+              "type": "object",
+              "owner": "platform",
+              "fields": {
+                "contactType": {
+                  "type": "enum",
+                  "required": true,
+                  "values": [
+                    {
+                      "value": "Phone",
+                      "title": "Telefone"
+                    },
+                    {
+                      "value": "Email",
+                      "title": "E-mail"
+                    },
+                    {
+                      "value": "WhatsApp",
+                      "title": "WhatsApp"
+                    }
+                  ],
+                  "title": "Tipo de contato",
+                  "description": "Se o contato da empresa é telefone, WhatsApp ou e-mail."
+                },
+                "value": {
+                  "type": "string",
+                  "required": true,
+                  "description": "O número ou o endereço de e-mail da empresa, sem máscara.",
+                  "title": "Contato"
+                },
+                "isVerified": {
+                  "type": "boolean",
+                  "required": true,
+                  "title": "Verificado",
+                  "description": "Se a plataforma já verificou este contato da empresa; o Início apenas mostra."
+                }
+              },
+              "description": "O telefone ou e-mail da empresa informado pelo responsável ao preparar a empresa."
+            },
+            "general": {
+              "type": "object",
+              "owner": "organization",
+              "open": true,
+              "description": "Campos promovidos pela organização; o Início apenas lê."
+            },
+            "inicio": {
+              "type": "object",
+              "owner": "module",
+              "fields": {},
+              "description": "Module namespace; the prompt asked for no data of this module about the record."
+            }
+          }
+        }
+      }
+    }
+  },
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "ContatoEmpresa",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "ContatoEmpresa",
+      "detail": "ContatoEmpresa.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "ContatoEmpresa",
+      "detail": "ContatoEmpresa.details.contactChannel.contactType.values"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "ContatoEmpresa",
+      "detail": "details.inicio"
+    }
+  ]
+}

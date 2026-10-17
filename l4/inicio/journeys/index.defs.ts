@@ -12,19 +12,9 @@ export const inicioJourneyIndex = {
       "title": "Preparar a empresa"
     },
     {
-      "journeyId": "convidarPessoas",
+      "journeyId": "acompanharAcessoPessoas",
       "actorRef": "responsavel",
-      "title": "Convidar pessoas"
-    },
-    {
-      "journeyId": "acompanharAcessos",
-      "actorRef": "responsavel",
-      "title": "Acompanhar acessos"
-    },
-    {
-      "journeyId": "liberarAcesso",
-      "actorRef": "responsavel",
-      "title": "Liberar acesso de uma pessoa"
+      "title": "Acompanhar acesso das pessoas"
     },
     {
       "journeyId": "completarMeuAcesso",
@@ -32,7 +22,7 @@ export const inicioJourneyIndex = {
       "title": "Completar meu acesso"
     },
     {
-      "journeyId": "pedirLiberacao",
+      "journeyId": "aguardarLiberacaoAcesso",
       "actorRef": "pessoaOrganizacao",
       "title": "Aguardar liberação do acesso"
     }

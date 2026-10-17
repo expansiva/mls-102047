@@ -871,7 +871,12 @@ export const solutionRegistry = {
         },
         {
           "subtype": "ContactChannel",
-          "roleTag": "inicio.Contato",
+          "roleTag": "inicio.ContatoEmpresa",
+          "namespace": "inicio"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "inicio.TelefonePessoa",
           "namespace": "inicio"
         }
       ],
@@ -890,14 +895,20 @@ export const solutionRegistry = {
           "class": "mdm"
         },
         {
-          "entityId": "Contato",
+          "entityId": "ContatoEmpresa",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        },
+        {
+          "entityId": "TelefonePessoa",
           "kind": "role",
           "mdmSubtype": "ContactChannel",
           "class": "mdm"
         }
       ],
       "events": [],
-      "updatedAt": "2026-10-17T06:05:24.101Z"
+      "updatedAt": "2026-10-17T13:21:32.082Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

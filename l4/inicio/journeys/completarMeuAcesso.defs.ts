@@ -8,7 +8,7 @@ export const completarMeuAcessoJourney = {
   "business": {
     "actorRef": "pessoaOrganizacao",
     "title": "Completar meu acesso",
-    "goal": "Informar só os dados mínimos que faltam para seguir aos módulos que posso usar.",
+    "goal": "Completar os dados mínimos do próprio cadastro e seguir para os módulos que pode usar.",
     "entry": {
       "mode": "coldStart"
     },
@@ -18,34 +18,34 @@ export const completarMeuAcessoJourney = {
         "kind": "inspect",
         "entity": "PessoaOrganizacao",
         "title": "Ver o que falta",
-        "description": "Ao entrar, a pessoa vê seu cadastro ligado ao e-mail da conta, que não pode ser editado; se nada falta, segue direto para os módulos que pode usar."
+        "description": "Ao entrar, a pessoa vê seu cadastro ligado ao e-mail da conta autenticada (não editável) e apenas os dados mínimos que ainda faltam; se nada falta, segue direto."
       },
       {
-        "stepId": "informarDados",
+        "stepId": "preencherDadosMinimos",
         "kind": "act",
         "entity": "PessoaOrganizacao",
         "effect": "update",
-        "title": "Informar dados que faltam",
-        "description": "A pessoa informa só o que falta: nome, telefone opcional, país e o consentimento de privacidade quando a lei do país exige (Brasil e União Europeia); se não havia pessoa com o e-mail, ela é cadastrada e ligada ao e-mail, sem duplicar ao repetir."
+        "title": "Preencher dados mínimos",
+        "description": "A pessoa informa só o que falta: nome, telefone opcional, país e o consentimento de privacidade quando a lei do país exige (Brasil e União Europeia); repetir não cria outra pessoa nem outro vínculo."
       },
       {
-        "stepId": "seguirModulos",
+        "stepId": "seguirParaModulos",
         "kind": "inspect",
         "entity": "PessoaOrganizacao",
         "title": "Seguir para meus módulos",
-        "description": "Com os dados mínimos completos, a pessoa segue para os módulos que o responsável liberou, sem ganhar papéis ou permissões por preencher dados."
+        "description": "Com os dados mínimos completos, a pessoa segue para os módulos que o responsável liberou para ela."
       }
     ],
     "outcome": {
-      "statement": "A pessoa tem os dados mínimos completos e ligados ao seu e-mail, em um único cadastro.",
+      "statement": "A pessoa tem os dados mínimos completos e acessa os módulos que pode usar.",
       "evidence": [
-        "A tela não pede mais nenhum dado ao entrar de novo, mesmo por outro navegador",
-        "O consentimento de privacidade fica registrado quando o país exige",
-        "Os módulos exibidos são apenas os que a pessoa já podia usar"
+        "Nome e país estão preenchidos no cadastro da pessoa.",
+        "O consentimento de privacidade está registrado quando o país exige.",
+        "A pessoa é levada aos módulos que pode usar."
       ]
     }
   },
-  "businessHash": "sha256:136f24a29d2e1bcd818f28071d005b3230bd6e8e00128e525685847f7dcb438a"
+  "businessHash": "sha256:b3a68bf4b248c7ea80c71e8886ba1113ed78e59d6c5739c9a54163ce67e8789a"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CompletarMeuAcessoJourneyType = typeof completarMeuAcessoJourney;

@@ -1,13 +1,13 @@
 {
   "moduleName": "inicio",
-  "businessDomain": "Início do app da empresa: boas-vindas, preparação dos dados da empresa e conclusão do acesso de cada pessoa da organização, sobre os cadastros mestres da plataforma, sem tabelas próprias.",
+  "businessDomain": "Início do app da empresa: boas-vindas, preparação dos dados da empresa e conclusão do acesso de cada pessoa da organização",
   "entities": [
     {
       "entityId": "Empresa",
       "kind": "role",
       "family": "mdm",
       "title": "Empresa",
-      "description": "O cadastro mestre da empresa da organização. O responsável completa só os dados obrigatórios que faltam (nome, documento, endereço, contato). O módulo calcula se a empresa está preparada a partir desses dados; não grava essa situação.",
+      "description": "A empresa dona do app, registro mestre da plataforma. O responsável completa só os dados que faltam (nome, documento, endereço, contato); 'preparada' é um valor derivado: os dados obrigatórios estão completos.",
       "displayField": "details.identification.name",
       "subtype": "Company",
       "roleTag": "inicio.Empresa",
@@ -18,45 +18,36 @@
       "kind": "role",
       "family": "mdm",
       "title": "Pessoa da organização",
-      "description": "Toda pessoa autenticada e aceita na organização, inclusive o responsável. O cadastro é ligado ao e-mail de login pelo índice da plataforma. Ela completa nome, país, telefone opcional e o consentimento de privacidade quando a lei exige. O módulo calcula se o acesso está completo; não grava convites nem pendências.",
+      "description": "Toda pessoa autenticada e aceita na organização, incluindo o responsável. Já chega cadastrada e ligada ao login pela plataforma; completa só os dados mínimos que faltam (nome, país, consentimento de privacidade quando a lei exige). 'Acesso completo' é um valor derivado dos dados mínimos.",
       "displayField": "details.identification.name",
       "subtype": "Person",
       "roleTag": "inicio.PessoaOrganizacao",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "Contato",
+      "entityId": "ContatoEmpresa",
       "kind": "role",
       "family": "mdm",
-      "title": "Contato",
-      "description": "Canal de contato (telefone ou e-mail) da empresa ou da pessoa. É um registro da plataforma ligado por HasContact, nunca um campo do cadastro.",
-      "displayField": "details.identification.name",
+      "title": "Contato da empresa",
+      "description": "Canal de contato (telefone ou e-mail) da empresa, informado pelo responsável quando a plataforma ainda não o tem.",
+      "displayField": "details.contactChannel.value",
       "subtype": "ContactChannel",
-      "roleTag": "inicio.Contato",
+      "roleTag": "inicio.ContatoEmpresa",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "entityId": "TelefonePessoa",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Telefone da pessoa",
+      "description": "Telefone opcional que a própria pessoa informa ao completar o acesso. O e-mail de login não é este registro e não é editável.",
+      "displayField": "details.contactChannel.value",
+      "subtype": "ContactChannel",
+      "roleTag": "inicio.TelefonePessoa",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     }
   ],
   "relationships": [
-    {
-      "relationshipId": "empresaTemContato",
-      "from": "Empresa",
-      "to": "Contato",
-      "type": "oneToMany",
-      "required": false,
-      "mode": "mdmRelationship",
-      "description": "A empresa tem canais de contato, um deles exigido para que ela fique preparada.",
-      "catalogType": "HasContact"
-    },
-    {
-      "relationshipId": "pessoaTemContato",
-      "from": "PessoaOrganizacao",
-      "to": "Contato",
-      "type": "oneToMany",
-      "required": false,
-      "mode": "mdmRelationship",
-      "description": "A pessoa pode informar um telefone opcional como canal de contato.",
-      "catalogType": "HasContact"
-    },
     {
       "relationshipId": "pessoaMembroEmpresa",
       "from": "PessoaOrganizacao",
@@ -64,24 +55,31 @@
       "type": "manyToOne",
       "required": true,
       "mode": "mdmRelationship",
-      "description": "A pessoa faz parte da organização da empresa e aparece na lista de pessoas que o responsável acompanha.",
+      "description": "A pessoa faz parte da organização da empresa; o vínculo é mantido pela plataforma quando a pessoa é aceita.",
       "roles": [
         "member"
       ],
       "catalogType": "AssignedTo"
     },
     {
-      "relationshipId": "responsavelPelaEmpresa",
-      "from": "PessoaOrganizacao",
-      "to": "Empresa",
-      "type": "manyToOne",
+      "relationshipId": "empresaTemContato",
+      "from": "Empresa",
+      "to": "ContatoEmpresa",
+      "type": "oneToMany",
       "required": false,
       "mode": "mdmRelationship",
-      "description": "A pessoa que a plataforma reconhece como responsável pela empresa, o que limita a preparação à empresa dela.",
-      "roles": [
-        "manager"
-      ],
-      "catalogType": "ManagedBy"
+      "description": "A empresa possui canais de contato registrados na plataforma.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "pessoaTemTelefone",
+      "from": "PessoaOrganizacao",
+      "to": "TelefonePessoa",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "A pessoa pode ter um telefone de contato opcional registrado na plataforma.",
+      "catalogType": "HasContact"
     }
   ],
   "normalizations": [
@@ -97,8 +95,13 @@
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Contato",
-      "detail": "roleTag inicio.Contato; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "ContatoEmpresa",
+      "detail": "roleTag inicio.ContatoEmpresa; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "TelefonePessoa",
+      "detail": "roleTag inicio.TelefonePessoa; source /_102034_/l4/ontology/mdm.defs.ts"
     }
   ]
 }

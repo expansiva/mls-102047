@@ -6,20 +6,17 @@ export const inicioRules = {
   "schemaVersion": "2026-09-16-ns5-rules-v2",
   "moduleName": "inicio",
   "rules": {
-    "empresaPreparadaComDadosObrigatorios": "A empresa fica preparada somente quando tem nome, documento (tipo e número), pelo menos um endereço e pelo menos um contato; essa situação é calculada a partir desses dados e nunca gravada.",
-    "naoPedirDadoJaExistente": "As telas pedem somente os dados obrigatórios que ainda faltam, sem pedir de novo o que a plataforma já tem sobre a empresa ou a pessoa.",
-    "prepararSomenteResponsavel": "Só o responsável pela empresa pode completar os dados da empresa, convidar pessoas, acompanhar os acessos e liberar o acesso de uma pessoa.",
-    "responsavelReconhecidoPelaPlataforma": "O responsável é quem a plataforma já reconhece como responsável pela empresa; ser o primeiro a entrar no app não dá esse papel.",
-    "acessoCompletoDadosMinimos": "O acesso da pessoa está completo quando ela tem nome e país informados e, se o país for o Brasil ou da União Europeia, um consentimento de privacidade válido (conforme rule-person-privacy-consent-required-br-eu); o telefone é opcional e não conta.",
-    "emailContaNaoEditavel": "O e-mail ligado ao cadastro da pessoa é sempre o e-mail da conta autenticada.",
-    "emailDaContaNaoEditavel": "A pessoa não pode editar o e-mail da conta ao completar o acesso; ele é mostrado apenas para leitura.",
-    "semDuplicarPessoaAoRepetir": "Repetir ou interromper o completar acesso, ou voltar por outro navegador, não cria outra pessoa nem outro vínculo com o e-mail; a tela mostra apenas o que ainda falta.",
-    "contatoSemDuplicarAoRepetir": "Informar de novo o mesmo telefone ou contato, da empresa ou da pessoa, reaproveita o canal já ligado em vez de criar outro.",
-    "preencherDadosNaoDaPermissao": "Preencher ou completar dados não concede papéis nem permissões; somente o responsável dá acesso aos módulos.",
-    "pessoaCadastradaPeloEmail": "Se não existe pessoa com o e-mail da conta autenticada, a pessoa é cadastrada e ligada a esse e-mail; se existe, o cadastro existente é usado.",
-    "liberacaoPeloResponsavel": "Quando a plataforma não consegue ligar o e-mail ao cadastro sozinha, a pessoa é avisada de que o responsável precisa liberar o acesso, e a liberação acontece pelo convite da plataforma para a pessoa certa, sem o módulo guardar essa pendência.",
-    "conviteDaPlataformaSemGuardar": "O convite por e-mail usa a pessoa já cadastrada ou cadastra a pessoa e lhe dá o login pelo convite da plataforma, e o módulo não guarda convites.",
-    "acessoCompletoSegueDireto": "Ao entrar, a pessoa com cadastro ligado ao seu e-mail e acesso completo segue direto para os módulos que pode usar."
+    "empresaPreparadaDadosObrigatorios": "A empresa só fica preparada quando tem nome, documento, ao menos um endereço e ao menos um contato registrados na plataforma.",
+    "naoPedirDadoJaExistente": "O Início pede ao responsável ou à pessoa só os dados que ainda faltam e nunca pede de novo um dado que a plataforma já tem.",
+    "somenteResponsavelEditaEmpresa": "Só quem a plataforma já reconhece como responsável pela empresa pode completar os dados da empresa; ser o primeiro a entrar não dá esse papel.",
+    "acessoCompletoDadosMinimos": "O acesso da pessoa fica completo quando ela tem nome e país informados e, se o país for o Brasil ou um país da União Europeia, um consentimento de privacidade válido; o telefone não conta.",
+    "emailContaNaoEditavel": "O e-mail da pessoa é o da conta autenticada e não pode ser editado no Início.",
+    "repetirNaoDuplicaPessoa": "Repetir ou interromper o preenchimento, ou voltar por outro navegador, não cria outra pessoa nem outro vínculo e mostra apenas o que ainda falta.",
+    "dadosNaoConcedemPermissoes": "Preencher dados não dá papéis nem permissões; só o responsável dá acesso aos módulos.",
+    "ligacaoLoginPelaPlataforma": "Quando já existe outro cadastro com o mesmo e-mail de contato, a pessoa vê que o responsável precisa liberar seu acesso e a ligação do login é decidida pela liberação da plataforma, sem que o Início guarde a pendência ou decida a ligação.",
+    "telefoneOpcional": "O telefone da pessoa é opcional e sua ausência não impede completar o acesso.",
+    "telefoneSemDuplicarVinculo": "Informar novamente o telefone não cria outro registro de telefone nem outro vínculo com a pessoa.",
+    "seguirDiretoSeCompleto": "Ao entrar, a pessoa com cadastro ligado ao seu e-mail e dados mínimos completos segue direto para os módulos que pode usar, sem ver o formulário."
   }
 } as const satisfies Ns5Readonly<Ns5RulesArtifactV2>;
 
