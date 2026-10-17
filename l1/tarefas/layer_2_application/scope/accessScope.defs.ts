@@ -219,7 +219,7 @@ export const definition = {
             "pending": ""
           }
         ],
-        "pending": ""
+        "pending": "ACCESS_ANCHOR"
       }
     ]
   }

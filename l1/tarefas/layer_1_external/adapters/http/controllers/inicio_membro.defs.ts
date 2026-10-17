@@ -15,58 +15,58 @@ export const definition = {
     "pageId": "inicio_membro",
     "handlers": [
       {
-        "route": "tarefas.inicio_membro.cmdAceitarEntrega",
+        "route": "tarefas.inicio_membro.aceitarEntrega",
         "kind": "command",
         "grantIds": [
           "membroTarefasProprias",
           "membroConsultaListas"
         ],
-        "serviceFunction": "tarefas.inicio_membro.cmdAceitarEntrega",
+        "serviceFunction": "tarefas.inicio_membro.aceitarEntrega",
         "contractPath": "l2/tarefas/web/contracts/inicio_membro.defs.ts",
         "contractInterface": "Inicio_membroContracts"
       },
       {
-        "route": "tarefas.inicio_membro.cmdDevolverComMotivo",
-        "kind": "command",
-        "grantIds": [
-          "membroTarefasProprias",
-          "membroConsultaListas"
-        ],
-        "serviceFunction": "tarefas.inicio_membro.cmdDevolverComMotivo",
-        "contractPath": "l2/tarefas/web/contracts/inicio_membro.defs.ts",
-        "contractInterface": "Inicio_membroContracts"
-      },
-      {
-        "route": "tarefas.inicio_membro.cmdEnviarParaRevisao",
-        "kind": "command",
-        "grantIds": [
-          "membroTarefasProprias",
-          "membroConsultaListas"
-        ],
-        "serviceFunction": "tarefas.inicio_membro.cmdEnviarParaRevisao",
-        "contractPath": "l2/tarefas/web/contracts/inicio_membro.defs.ts",
-        "contractInterface": "Inicio_membroContracts"
-      },
-      {
-        "route": "tarefas.inicio_membro.cmdIniciarTarefa",
-        "kind": "command",
-        "grantIds": [
-          "membroTarefasProprias",
-          "membroConsultaListas"
-        ],
-        "serviceFunction": "tarefas.inicio_membro.cmdIniciarTarefa",
-        "contractPath": "l2/tarefas/web/contracts/inicio_membro.defs.ts",
-        "contractInterface": "Inicio_membroContracts"
-      },
-      {
-        "route": "tarefas.inicio_membro.qryInicioMembro",
+        "route": "tarefas.inicio_membro.carregarInicio",
         "kind": "query",
         "grantIds": [
           "membroTarefasProprias",
           "membroConsultaListas",
           "membroAvisosProprios"
         ],
-        "serviceFunction": "tarefas.inicio_membro.qryInicioMembro",
+        "serviceFunction": "tarefas.inicio_membro.carregarInicio",
+        "contractPath": "l2/tarefas/web/contracts/inicio_membro.defs.ts",
+        "contractInterface": "Inicio_membroContracts"
+      },
+      {
+        "route": "tarefas.inicio_membro.devolverComMotivo",
+        "kind": "command",
+        "grantIds": [
+          "membroTarefasProprias",
+          "membroConsultaListas"
+        ],
+        "serviceFunction": "tarefas.inicio_membro.devolverComMotivo",
+        "contractPath": "l2/tarefas/web/contracts/inicio_membro.defs.ts",
+        "contractInterface": "Inicio_membroContracts"
+      },
+      {
+        "route": "tarefas.inicio_membro.enviarParaRevisao",
+        "kind": "command",
+        "grantIds": [
+          "membroTarefasProprias",
+          "membroConsultaListas"
+        ],
+        "serviceFunction": "tarefas.inicio_membro.enviarParaRevisao",
+        "contractPath": "l2/tarefas/web/contracts/inicio_membro.defs.ts",
+        "contractInterface": "Inicio_membroContracts"
+      },
+      {
+        "route": "tarefas.inicio_membro.iniciarTarefa",
+        "kind": "command",
+        "grantIds": [
+          "membroTarefasProprias",
+          "membroConsultaListas"
+        ],
+        "serviceFunction": "tarefas.inicio_membro.iniciarTarefa",
         "contractPath": "l2/tarefas/web/contracts/inicio_membro.defs.ts",
         "contractInterface": "Inicio_membroContracts"
       }

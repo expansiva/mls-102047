@@ -13,20 +13,18 @@ export const definition = {
     "_102047_/l1/tarefas/layer_2_application/usecases/getAvisoVencimento.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/getLista.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/iniciar.defs.ts",
-    "_102047_/l1/tarefas/layer_2_application/usecases/listAvisoVencimento.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.defs.ts"
   ],
   "data": {
     "pageId": "inicio_membro",
     "requests": [
       {
-        "route": "tarefas.inicio_membro.qryInicioMembro",
+        "route": "tarefas.inicio_membro.carregarInicio",
         "kind": "qry",
         "uses": [
           "listTarefa",
           "getLista",
-          "getAvisoVencimento",
-          "listAvisoVencimento"
+          "getAvisoVencimento"
         ],
         "transaction": "none",
         "output": [
@@ -40,11 +38,11 @@ export const definition = {
           {
             "kind": "unresolved",
             "path": "resumo.lista",
-            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.qryInicioMembro output resumo.lista nests a relation with no readable interface."
+            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.carregarInicio output resumo.lista nests a relation with no readable interface."
           },
           {
             "kind": "entity",
-            "path": "avisoHoje",
+            "path": "avisoDoDia",
             "entity": "AvisoVencimento",
             "fields": [
               {
@@ -66,27 +64,8 @@ export const definition = {
             ]
           },
           {
-            "kind": "related",
-            "path": "avisoHoje.details.tarefas",
-            "entity": "AvisoVencimento",
-            "fields": [
-              {
-                "field": "details.tarefas.tarefaId",
-                "path": "details.tarefas.tarefaId"
-              },
-              {
-                "field": "details.tarefas.prazo",
-                "path": "details.tarefas.prazo"
-              },
-              {
-                "field": "details.tarefas.situacaoPrazo",
-                "path": "details.tarefas.situacaoPrazo"
-              }
-            ]
-          },
-          {
             "kind": "list",
-            "path": "pendencias",
+            "path": "esperaPorMim.paraIniciar",
             "entity": "Tarefa",
             "items": "",
             "fields": [
@@ -129,15 +108,141 @@ export const definition = {
             ]
           },
           {
-            "kind": "computed",
-            "path": "pendencias.acaoEsperada",
+            "kind": "list",
+            "path": "esperaPorMim.paraEnviarRevisao",
             "entity": "Tarefa",
-            "rules": [
-              "avisoUnicoPorResponsavelEDia",
-              "avisoSomenteTarefasAbertasVencendo",
-              "somenteResponsavelExecuta",
-              "somenteCriadorRevisa"
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
             ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.paraRevisar",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.devolvidas",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.quantidadeAbertas",
+            "reason": "Interface ResumoMinhasTarefas pages tarefas; quantidadeAbertas is not one of the paging keys total, page, pageSize, hasMore next to items, so the types do not say what it is."
           },
           {
             "kind": "unresolved",
@@ -151,67 +256,124 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "avisoHoje.details.tarefas",
-            "reason": "AvisoVencimento inside AvisoVencimento needs one L4 relationship between them; found 0."
+            "path": "avisoDoDia.details.tarefas",
+            "reason": "Interface AvisoTarefa: fields tarefaId, prazo, details.tarefas.situacaoPrazo are not all fields of one entity or of one entity linked to it by an N:1 relationship."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAbertas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.qryInicioMembro projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeVencemHoje",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.qryInicioMembro projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAtrasadas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.qryInicioMembro projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.tarefas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.qryInicioMembro projects Tarefa.tarefas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.tarefas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.qryInicioMembro projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.responsavel, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.qryInicioMembro projects Tarefa.criador, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.carregarInicio projects Tarefa.criador, which is not a field of the ontology."
           }
         ],
         "params": [],
         "rules": [
-          "avisoUnicoPorResponsavelEDia",
-          "avisoSomenteTarefasAbertasVencendo",
-          "somenteResponsavelExecuta",
-          "somenteCriadorRevisa"
+          "avisoUnicoPorResponsavelEDia"
         ],
         "doc": {
-          "raw": "Finalidade: Carrega de uma vez tudo o que a tela inicial do membro mostra ao abrir: o panorama das suas tarefas abertas, o aviso diário de hoje e a caixa do que espera por uma ação dele.\nEntrada: Sem parâmetros: o membro é resolvido pela sessão e a data de hoje pelo servidor.\nProcessamento: Resumo: filtra as tarefas cujo responsável é o membro da sessão e que estão abertas (details.aberta, calculado: aFazer, emAndamento ou emRevisao); conta no servidor o total de abertas, as que vencem hoje (details.venceHoje) e as atrasadas (details.atrasada); lista essas tarefas ordenadas por prazo, com o nome da lista e o progresso da checklist (details.progressoChecklist, calculado pela contagem de itens feitos sobre o total). Campos derivados são calculados, nunca gravados. Aviso: lê o aviso do membro com dataReferencia igual a hoje; pela regra avisoUnicoPorResponsavelEDia há no máximo um; ele traz apenas tarefas abertas que vencem hoje ou estão atrasadas (avisoSomenteTarefasAbertasVencendo); se o processo das 8h ainda não gerou, volta vazio. Pendências: junta as tarefas em que o membro é responsável e está em aFazer (acaoEsperada ’iniciar’) ou emAndamento (acaoEsperada ’enviarParaRevisao’, ou ’ajustar’ quando há devolvidaEm), conforme somenteResponsavelExecuta, e as tarefas que ele criou em emRevisao (acaoEsperada ’revisar’), conforme somenteCriadorRevisa; inclui motivo e data da devolução, nomes do responsável e do criador lidos do cadastro mestre, e a versão para os comandos; ordena por prazo e prioridade.\nSaída: resumo com os três indicadores já calculados e as tarefas abertas; avisoHoje com data, situação, contagens e tarefas do aviso (opcional); pendencias com cada tarefa e a ação esperada, para a página exibir a ação certa em cada item.",
-          "purpose": "Carrega de uma vez tudo o que a tela inicial do membro mostra ao abrir: o panorama das suas tarefas abertas, o aviso diário de hoje e a caixa do que espera por uma ação dele.",
-          "input": "Sem parâmetros: o membro é resolvido pela sessão e a data de hoje pelo servidor.",
-          "processing": "Resumo: filtra as tarefas cujo responsável é o membro da sessão e que estão abertas (details.aberta, calculado: aFazer, emAndamento ou emRevisao); conta no servidor o total de abertas, as que vencem hoje (details.venceHoje) e as atrasadas (details.atrasada); lista essas tarefas ordenadas por prazo, com o nome da lista e o progresso da checklist (details.progressoChecklist, calculado pela contagem de itens feitos sobre o total). Campos derivados são calculados, nunca gravados. Aviso: lê o aviso do membro com dataReferencia igual a hoje; pela regra avisoUnicoPorResponsavelEDia há no máximo um; ele traz apenas tarefas abertas que vencem hoje ou estão atrasadas (avisoSomenteTarefasAbertasVencendo); se o processo das 8h ainda não gerou, volta vazio. Pendências: junta as tarefas em que o membro é responsável e está em aFazer (acaoEsperada ’iniciar’) ou emAndamento (acaoEsperada ’enviarParaRevisao’, ou ’ajustar’ quando há devolvidaEm), conforme somenteResponsavelExecuta, e as tarefas que ele criou em emRevisao (acaoEsperada ’revisar’), conforme somenteCriadorRevisa; inclui motivo e data da devolução, nomes do responsável e do criador lidos do cadastro mestre, e a versão para os comandos; ordena por prazo e prioridade.",
-          "output": "resumo com os três indicadores já calculados e as tarefas abertas; avisoHoje com data, situação, contagens e tarefas do aviso (opcional); pendencias com cada tarefa e a ação esperada, para a página exibir a ação certa em cada item."
+          "raw": "Finalidade: Carrega de uma vez tudo o que o Início do membro mostra: resumo da carga de trabalho, aviso diário de hoje e as pendências que esperam pela pessoa logada.\nEntrada: Sem parâmetros; a pessoa é a da sessão.\nProcessamento: Resumo: considera as tarefas em que a pessoa da sessão é responsável e calcula no servidor quantas estão abertas (details.aberta), quantas vencem hoje (details.venceHoje) e quantas estão atrasadas (details.atrasada); devolve as tarefas abertas mais urgentes (até 10, ordenadas por atrasadas, vencendo hoje, prazo e prioridade) com o nome da lista e o progresso da checklist calculado a partir dos itens feitos sobre o total. Aviso: busca o aviso da pessoa com dataReferencia igual a hoje (há no máximo um, regra avisoUnicoPorResponsavelEDia) com quantidades e tarefas incluídas. Pendências: paraIniciar = responsável é a pessoa e status aFazer; paraEnviarRevisao = responsável é a pessoa, status emAndamento e sem devolução pendente; devolvidas = responsável é a pessoa, status emAndamento e com motivoDevolucao/devolvidaEm registrados; paraRevisar = criador é a pessoa e status emRevisao. Cada item traz versão, nomes do responsável e do criador lidos do cadastro mestre e o progresso da checklist calculado. Campos derivados são calculados, nunca gravados.\nSaída: resumo com os três totais e as tarefas abertas mais urgentes; avisoDoDia de hoje com situação, quantidades e tarefas (ausente se ainda não foi gerado); esperaPorMim com as quatro listas de pendências.",
+          "purpose": "Carrega de uma vez tudo o que o Início do membro mostra: resumo da carga de trabalho, aviso diário de hoje e as pendências que esperam pela pessoa logada.",
+          "input": "Sem parâmetros; a pessoa é a da sessão.",
+          "processing": "Resumo: considera as tarefas em que a pessoa da sessão é responsável e calcula no servidor quantas estão abertas (details.aberta), quantas vencem hoje (details.venceHoje) e quantas estão atrasadas (details.atrasada); devolve as tarefas abertas mais urgentes (até 10, ordenadas por atrasadas, vencendo hoje, prazo e prioridade) com o nome da lista e o progresso da checklist calculado a partir dos itens feitos sobre o total. Aviso: busca o aviso da pessoa com dataReferencia igual a hoje (há no máximo um, regra avisoUnicoPorResponsavelEDia) com quantidades e tarefas incluídas. Pendências: paraIniciar = responsável é a pessoa e status aFazer; paraEnviarRevisao = responsável é a pessoa, status emAndamento e sem devolução pendente; devolvidas = responsável é a pessoa, status emAndamento e com motivoDevolucao/devolvidaEm registrados; paraRevisar = criador é a pessoa e status emRevisao. Cada item traz versão, nomes do responsável e do criador lidos do cadastro mestre e o progresso da checklist calculado. Campos derivados são calculados, nunca gravados.",
+          "output": "resumo com os três totais e as tarefas abertas mais urgentes; avisoDoDia de hoje com situação, quantidades e tarefas (ausente se ainda não foi gerado); esperaPorMim com as quatro listas de pendências."
         }
       },
       {
-        "route": "tarefas.inicio_membro.cmdIniciarTarefa",
+        "route": "tarefas.inicio_membro.iniciarTarefa",
         "kind": "cmd",
         "uses": [
           "iniciar",
@@ -229,11 +391,11 @@ export const definition = {
           {
             "kind": "unresolved",
             "path": "resumo.lista",
-            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.cmdIniciarTarefa output resumo.lista nests a relation with no readable interface."
+            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.iniciarTarefa output resumo.lista nests a relation with no readable interface."
           },
           {
             "kind": "list",
-            "path": "pendencias",
+            "path": "esperaPorMim.paraIniciar",
             "entity": "Tarefa",
             "items": "",
             "fields": [
@@ -276,12 +438,135 @@ export const definition = {
             ]
           },
           {
-            "kind": "computed",
-            "path": "pendencias.acaoEsperada",
+            "kind": "list",
+            "path": "esperaPorMim.paraEnviarRevisao",
             "entity": "Tarefa",
-            "rules": [
-              "somenteResponsavelExecuta",
-              "tarefaEncerradaNaoTransiciona"
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.paraRevisar",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.devolvidas",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
             ]
           },
           {
@@ -301,43 +586,103 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAbertas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdIniciarTarefa projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeVencemHoje",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdIniciarTarefa projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAtrasadas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdIniciarTarefa projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.tarefas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdIniciarTarefa projects Tarefa.tarefas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.tarefas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdIniciarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdIniciarTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.iniciarTarefa projects Tarefa.criador, which is not a field of the ontology."
           }
         ],
         "params": [],
@@ -346,15 +691,15 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Inicia uma tarefa atribuída ao membro, passando-a de a fazer para em andamento.\nEntrada: tarefaId: tarefa a iniciar; version: versão lida, para controle de concorrência.\nProcessamento: Aplica a transição iniciar (aFazer → emAndamento). Recusa se o membro da sessão não for o responsável (somenteResponsavelExecuta) e se a tarefa estiver concluída ou cancelada (tarefaEncerradaNaoTransiciona); recusa se a versão estiver desatualizada. A sala de discussão recebe a mensagem da mudança. Depois recompõe o resumo e as pendências como em qryInicioMembro.\nSaída: resumo e pendencias atualizados, para a página redesenhar o panorama e a caixa sem nova chamada (a tarefa passa a esperar o envio para revisão).",
-          "purpose": "Inicia uma tarefa atribuída ao membro, passando-a de a fazer para em andamento.",
-          "input": "tarefaId: tarefa a iniciar; version: versão lida, para controle de concorrência.",
-          "processing": "Aplica a transição iniciar (aFazer → emAndamento). Recusa se o membro da sessão não for o responsável (somenteResponsavelExecuta) e se a tarefa estiver concluída ou cancelada (tarefaEncerradaNaoTransiciona); recusa se a versão estiver desatualizada. A sala de discussão recebe a mensagem da mudança. Depois recompõe o resumo e as pendências como em qryInicioMembro.",
-          "output": "resumo e pendencias atualizados, para a página redesenhar o panorama e a caixa sem nova chamada (a tarefa passa a esperar o envio para revisão)."
+          "raw": "Finalidade: Inicia uma tarefa atribuída à pessoa, passando-a de a fazer para em andamento.\nEntrada: id: tarefa a iniciar; version: versão lida, para concorrência otimista.\nProcessamento: Recusa se a pessoa da sessão não for o responsável (somenteResponsavelExecuta), se a tarefa estiver concluída ou cancelada (tarefaEncerradaNaoTransiciona) ou se não estiver em aFazer; recusa se a versão divergir. Executa a transição iniciar; a sala de discussão recebe a mensagem. Em seguida recalcula o resumo e as pendências da pessoa como em carregarInicio.\nSaída: resumo recalculado e esperaPorMim recalculado, já com a tarefa em emAndamento.",
+          "purpose": "Inicia uma tarefa atribuída à pessoa, passando-a de a fazer para em andamento.",
+          "input": "id: tarefa a iniciar; version: versão lida, para concorrência otimista.",
+          "processing": "Recusa se a pessoa da sessão não for o responsável (somenteResponsavelExecuta), se a tarefa estiver concluída ou cancelada (tarefaEncerradaNaoTransiciona) ou se não estiver em aFazer; recusa se a versão divergir. Executa a transição iniciar; a sala de discussão recebe a mensagem. Em seguida recalcula o resumo e as pendências da pessoa como em carregarInicio.",
+          "output": "resumo recalculado e esperaPorMim recalculado, já com a tarefa em emAndamento."
         }
       },
       {
-        "route": "tarefas.inicio_membro.cmdEnviarParaRevisao",
+        "route": "tarefas.inicio_membro.enviarParaRevisao",
         "kind": "cmd",
         "uses": [
           "enviarParaRevisao",
@@ -372,11 +717,11 @@ export const definition = {
           {
             "kind": "unresolved",
             "path": "resumo.lista",
-            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.cmdEnviarParaRevisao output resumo.lista nests a relation with no readable interface."
+            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.enviarParaRevisao output resumo.lista nests a relation with no readable interface."
           },
           {
             "kind": "list",
-            "path": "pendencias",
+            "path": "esperaPorMim.paraIniciar",
             "entity": "Tarefa",
             "items": "",
             "fields": [
@@ -419,12 +764,135 @@ export const definition = {
             ]
           },
           {
-            "kind": "computed",
-            "path": "pendencias.acaoEsperada",
+            "kind": "list",
+            "path": "esperaPorMim.paraEnviarRevisao",
             "entity": "Tarefa",
-            "rules": [
-              "somenteResponsavelExecuta",
-              "tarefaEncerradaNaoTransiciona"
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.paraRevisar",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.devolvidas",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
             ]
           },
           {
@@ -444,43 +912,103 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAbertas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdEnviarParaRevisao projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeVencemHoje",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdEnviarParaRevisao projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAtrasadas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdEnviarParaRevisao projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.tarefas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdEnviarParaRevisao projects Tarefa.tarefas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.tarefas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdEnviarParaRevisao projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.responsavel, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdEnviarParaRevisao projects Tarefa.criador, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.enviarParaRevisao projects Tarefa.criador, which is not a field of the ontology."
           }
         ],
         "params": [],
@@ -489,15 +1017,15 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Envia para revisão do criador uma tarefa em andamento do membro, inclusive uma tarefa devolvida já ajustada.\nEntrada: tarefaId: tarefa a enviar; version: versão lida, para controle de concorrência.\nProcessamento: Aplica a transição enviarParaRevisao (emAndamento → emRevisao). Recusa se o membro da sessão não for o responsável (somenteResponsavelExecuta) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. O criador passa a ser quem age agora e é avisado. Recompõe resumo e pendências.\nSaída: resumo e pendencias atualizados; a tarefa sai da caixa do membro, salvo se ele também for o criador, quando aparece para revisar.",
-          "purpose": "Envia para revisão do criador uma tarefa em andamento do membro, inclusive uma tarefa devolvida já ajustada.",
-          "input": "tarefaId: tarefa a enviar; version: versão lida, para controle de concorrência.",
-          "processing": "Aplica a transição enviarParaRevisao (emAndamento → emRevisao). Recusa se o membro da sessão não for o responsável (somenteResponsavelExecuta) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. O criador passa a ser quem age agora e é avisado. Recompõe resumo e pendências.",
-          "output": "resumo e pendencias atualizados; a tarefa sai da caixa do membro, salvo se ele também for o criador, quando aparece para revisar."
+          "raw": "Finalidade: Envia para revisão do criador uma tarefa em andamento da pessoa, inclusive a reenviada após devolução.\nEntrada: id: tarefa a enviar; version: versão lida, para concorrência otimista.\nProcessamento: Recusa se a pessoa da sessão não for o responsável (somenteResponsavelExecuta), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emAndamento; recusa se a versão divergir. Executa a transição enviarParaRevisao; o criador passa a agir e é avisado. Recalcula resumo e pendências como em carregarInicio.\nSaída: resumo recalculado e esperaPorMim recalculado, já com a tarefa em emRevisao.",
+          "purpose": "Envia para revisão do criador uma tarefa em andamento da pessoa, inclusive a reenviada após devolução.",
+          "input": "id: tarefa a enviar; version: versão lida, para concorrência otimista.",
+          "processing": "Recusa se a pessoa da sessão não for o responsável (somenteResponsavelExecuta), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emAndamento; recusa se a versão divergir. Executa a transição enviarParaRevisao; o criador passa a agir e é avisado. Recalcula resumo e pendências como em carregarInicio.",
+          "output": "resumo recalculado e esperaPorMim recalculado, já com a tarefa em emRevisao."
         }
       },
       {
-        "route": "tarefas.inicio_membro.cmdAceitarEntrega",
+        "route": "tarefas.inicio_membro.aceitarEntrega",
         "kind": "cmd",
         "uses": [
           "aceitar",
@@ -515,11 +1043,11 @@ export const definition = {
           {
             "kind": "unresolved",
             "path": "resumo.lista",
-            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.cmdAceitarEntrega output resumo.lista nests a relation with no readable interface."
+            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.aceitarEntrega output resumo.lista nests a relation with no readable interface."
           },
           {
             "kind": "list",
-            "path": "pendencias",
+            "path": "esperaPorMim.paraIniciar",
             "entity": "Tarefa",
             "items": "",
             "fields": [
@@ -562,12 +1090,135 @@ export const definition = {
             ]
           },
           {
-            "kind": "computed",
-            "path": "pendencias.acaoEsperada",
+            "kind": "list",
+            "path": "esperaPorMim.paraEnviarRevisao",
             "entity": "Tarefa",
-            "rules": [
-              "somenteCriadorRevisa",
-              "tarefaEncerradaNaoTransiciona"
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.paraRevisar",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.devolvidas",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
             ]
           },
           {
@@ -587,43 +1238,103 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAbertas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdAceitarEntrega projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeVencemHoje",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdAceitarEntrega projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAtrasadas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdAceitarEntrega projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.tarefas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdAceitarEntrega projects Tarefa.tarefas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.tarefas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdAceitarEntrega projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.responsavel, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdAceitarEntrega projects Tarefa.criador, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.aceitarEntrega projects Tarefa.criador, which is not a field of the ontology."
           }
         ],
         "params": [],
@@ -632,15 +1343,15 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Aceita a entrega de uma tarefa criada pelo membro e que está em revisão, concluindo-a.\nEntrada: tarefaId: tarefa a aceitar; version: versão lida, para controle de concorrência.\nProcessamento: Aplica a transição aceitar (emRevisao → concluida), registrando concluidaEm. Recusa se o membro da sessão não for o criador (somenteCriadorRevisa) ou se a tarefa já estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. A sala recebe a mensagem. Recompõe resumo e pendências.\nSaída: resumo e pendencias atualizados; a tarefa concluída sai da caixa e das abertas.",
-          "purpose": "Aceita a entrega de uma tarefa criada pelo membro e que está em revisão, concluindo-a.",
-          "input": "tarefaId: tarefa a aceitar; version: versão lida, para controle de concorrência.",
-          "processing": "Aplica a transição aceitar (emRevisao → concluida), registrando concluidaEm. Recusa se o membro da sessão não for o criador (somenteCriadorRevisa) ou se a tarefa já estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. A sala recebe a mensagem. Recompõe resumo e pendências.",
-          "output": "resumo e pendencias atualizados; a tarefa concluída sai da caixa e das abertas."
+          "raw": "Finalidade: Aceita a entrega de uma tarefa criada pela pessoa, concluindo-a.\nEntrada: id: tarefa em revisão; version: versão lida, para concorrência otimista.\nProcessamento: Recusa se a pessoa da sessão não for o criador (somenteCriadorRevisa), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emRevisao; recusa se a versão divergir. Executa a transição aceitar, registrando concluidaEm; a sala recebe a mensagem. Recalcula resumo e pendências como em carregarInicio.\nSaída: resumo recalculado e esperaPorMim recalculado, sem a tarefa concluída.",
+          "purpose": "Aceita a entrega de uma tarefa criada pela pessoa, concluindo-a.",
+          "input": "id: tarefa em revisão; version: versão lida, para concorrência otimista.",
+          "processing": "Recusa se a pessoa da sessão não for o criador (somenteCriadorRevisa), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emRevisao; recusa se a versão divergir. Executa a transição aceitar, registrando concluidaEm; a sala recebe a mensagem. Recalcula resumo e pendências como em carregarInicio.",
+          "output": "resumo recalculado e esperaPorMim recalculado, sem a tarefa concluída."
         }
       },
       {
-        "route": "tarefas.inicio_membro.cmdDevolverComMotivo",
+        "route": "tarefas.inicio_membro.devolverComMotivo",
         "kind": "cmd",
         "uses": [
           "devolver",
@@ -658,11 +1369,11 @@ export const definition = {
           {
             "kind": "unresolved",
             "path": "resumo.lista",
-            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.cmdDevolverComMotivo output resumo.lista nests a relation with no readable interface."
+            "reason": "CONTRACT_UNPARSED: Route tarefas.inicio_membro.devolverComMotivo output resumo.lista nests a relation with no readable interface."
           },
           {
             "kind": "list",
-            "path": "pendencias",
+            "path": "esperaPorMim.paraIniciar",
             "entity": "Tarefa",
             "items": "",
             "fields": [
@@ -705,13 +1416,135 @@ export const definition = {
             ]
           },
           {
-            "kind": "computed",
-            "path": "pendencias.acaoEsperada",
+            "kind": "list",
+            "path": "esperaPorMim.paraEnviarRevisao",
             "entity": "Tarefa",
-            "rules": [
-              "somenteCriadorRevisa",
-              "devolucaoExigeMotivo",
-              "tarefaEncerradaNaoTransiciona"
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.paraRevisar",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "esperaPorMim.devolvidas",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
             ]
           },
           {
@@ -731,43 +1564,103 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAbertas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdDevolverComMotivo projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.quantidadeAbertas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeVencemHoje",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdDevolverComMotivo projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.quantidadeVencemHoje, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.quantidadeAtrasadas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdDevolverComMotivo projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.quantidadeAtrasadas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
             "path": "resumo.tarefas",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdDevolverComMotivo projects Tarefa.tarefas, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.tarefas, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdDevolverComMotivo projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.responsavel, which is not a field of the ontology."
           },
           {
             "kind": "unresolved",
-            "path": "pendencias.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.cmdDevolverComMotivo projects Tarefa.criador, which is not a field of the ontology."
+            "path": "esperaPorMim.paraIniciar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraEnviarRevisao.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.paraRevisar.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.criador, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.responsavel",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.responsavel, which is not a field of the ontology."
+          },
+          {
+            "kind": "unresolved",
+            "path": "esperaPorMim.devolvidas.criador",
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_membro.devolverComMotivo projects Tarefa.criador, which is not a field of the ontology."
           }
         ],
         "params": [],
@@ -777,11 +1670,11 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Devolve para ajuste, com o motivo, uma tarefa criada pelo membro que está em revisão.\nEntrada: tarefaId: tarefa a devolver; version: versão lida; motivoDevolucao: texto do motivo, obrigatório.\nProcessamento: Aplica a transição devolver (emRevisao → emAndamento). Recusa se o membro da sessão não for o criador (somenteCriadorRevisa), se o motivo estiver vazio (devolucaoExigeMotivo) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. Grava o motivo e devolvidaEm na tarefa; o responsável volta a ser quem age agora e é avisado. Recompõe resumo e pendências.\nSaída: resumo e pendencias atualizados; a tarefa sai da revisão do membro, salvo se ele também for o responsável, quando aparece para ajustar.",
-          "purpose": "Devolve para ajuste, com o motivo, uma tarefa criada pelo membro que está em revisão.",
-          "input": "tarefaId: tarefa a devolver; version: versão lida; motivoDevolucao: texto do motivo, obrigatório.",
-          "processing": "Aplica a transição devolver (emRevisao → emAndamento). Recusa se o membro da sessão não for o criador (somenteCriadorRevisa), se o motivo estiver vazio (devolucaoExigeMotivo) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); recusa versão desatualizada. Grava o motivo e devolvidaEm na tarefa; o responsável volta a ser quem age agora e é avisado. Recompõe resumo e pendências.",
-          "output": "resumo e pendencias atualizados; a tarefa sai da revisão do membro, salvo se ele também for o responsável, quando aparece para ajustar."
+          "raw": "Finalidade: Devolve para ajuste uma tarefa em revisão criada pela pessoa, registrando o motivo.\nEntrada: id: tarefa em revisão; version: versão lida; details.motivoDevolucao: texto do motivo da devolução.\nProcessamento: Recusa se a pessoa da sessão não for o criador (somenteCriadorRevisa), se o motivo estiver vazio (devolucaoExigeMotivo), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emRevisao; recusa se a versão divergir. Executa a transição devolver gravando motivoDevolucao e devolvidaEm; a tarefa volta para emAndamento com o responsável como quem age e ele é avisado. Recalcula resumo e pendências como em carregarInicio.\nSaída: resumo recalculado e esperaPorMim recalculado, sem a tarefa entre as para revisar.",
+          "purpose": "Devolve para ajuste uma tarefa em revisão criada pela pessoa, registrando o motivo.",
+          "input": "id: tarefa em revisão; version: versão lida; details.motivoDevolucao: texto do motivo da devolução.",
+          "processing": "Recusa se a pessoa da sessão não for o criador (somenteCriadorRevisa), se o motivo estiver vazio (devolucaoExigeMotivo), se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona) ou fora de emRevisao; recusa se a versão divergir. Executa a transição devolver gravando motivoDevolucao e devolvidaEm; a tarefa volta para emAndamento com o responsável como quem age e ele é avisado. Recalcula resumo e pendências como em carregarInicio.",
+          "output": "resumo recalculado e esperaPorMim recalculado, sem a tarefa entre as para revisar."
         }
       }
     ]

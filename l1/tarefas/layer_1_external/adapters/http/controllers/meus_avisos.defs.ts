@@ -15,15 +15,13 @@ export const definition = {
     "pageId": "meus_avisos",
     "handlers": [
       {
-        "route": "tarefas.meus_avisos.abrirAviso",
+        "route": "tarefas.meus_avisos.buscarAvisos",
         "kind": "query",
         "grantIds": [
           "membroAvisosProprios",
-          "gestorAvisosProprios",
-          "membroTarefasProprias",
-          "gestorTarefasEquipe"
+          "gestorAvisosProprios"
         ],
-        "serviceFunction": "tarefas.meus_avisos.abrirAviso",
+        "serviceFunction": "tarefas.meus_avisos.buscarAvisos",
         "contractPath": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
         "contractInterface": "Meus_avisosContracts"
       },
@@ -37,6 +35,19 @@ export const definition = {
           "gestorTarefasEquipe"
         ],
         "serviceFunction": "tarefas.meus_avisos.carregarMeusAvisos",
+        "contractPath": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
+        "contractInterface": "Meus_avisosContracts"
+      },
+      {
+        "route": "tarefas.meus_avisos.obterAviso",
+        "kind": "query",
+        "grantIds": [
+          "membroAvisosProprios",
+          "gestorAvisosProprios",
+          "membroTarefasProprias",
+          "gestorTarefasEquipe"
+        ],
+        "serviceFunction": "tarefas.meus_avisos.obterAviso",
         "contractPath": "l2/tarefas/web/contracts/meus_avisos.defs.ts",
         "contractInterface": "Meus_avisosContracts"
       }

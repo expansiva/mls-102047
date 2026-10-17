@@ -13,9 +13,12 @@ export const definition = {
     "_102047_/l1/tarefas/layer_2_application/usecases/devolver.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/enviarParaRevisao.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/getLista.defs.ts",
+    "_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/getTarefa.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/iniciar.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/listItemChecklist.defs.ts",
+    "_102047_/l1/tarefas/layer_2_application/usecases/listLista.defs.ts",
+    "_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/updateItemChecklist.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.defs.ts"
@@ -24,11 +27,13 @@ export const definition = {
     "pageId": "minhas_tarefas",
     "requests": [
       {
-        "route": "tarefas.minhas_tarefas.minhasTarefas",
+        "route": "tarefas.minhas_tarefas.carregarMinhasTarefas",
         "kind": "qry",
         "uses": [
           "listTarefa",
-          "getLista"
+          "getLista",
+          "getMembroEquipe",
+          "listLista"
         ],
         "transaction": "none",
         "output": [
@@ -54,16 +59,8 @@ export const definition = {
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -74,8 +71,16 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "status",
-                "path": "status"
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -90,6 +95,10 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
@@ -97,23 +106,291 @@ export const definition = {
           },
           {
             "kind": "unresolved",
+            "path": "tarefas.items.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.carregarMinhasTarefas projects items.responsavel.details, items.criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefas.items.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefas.items.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.items.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.carregarMinhasTarefas projects items.responsavel.details, items.criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefas.items.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefas.items.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "listas.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.carregarMinhasTarefas projects details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "list",
+            "path": "listas",
+            "entity": "Lista",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "nome",
+                "path": "nome"
+              },
+              {
+                "field": "ativa",
+                "path": "ativa"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
             "path": "tarefas.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefas.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
+            "path": "tarefas.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          }
+        ],
+        "params": [
+          {
+            "name": "page",
+            "target": "tarefas",
+            "pages": "tarefas"
+          },
+          {
+            "name": "pageSize",
+            "target": "tarefas",
+            "pages": "tarefas"
+          }
+        ],
+        "rules": [],
+        "doc": {
+          "raw": "Finalidade: Abre a página com a primeira página das tarefas da pessoa logada e as listas ativas onde ela pode criar tarefas.\nEntrada: filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas; padrão todas). page/pageSize: página das tarefas.\nProcessamento: Seleciona as tarefas cujo criador ou responsável é a pessoa da sessão; aplica o filtro (criadorId = sessão; responsavelId = sessão; status emRevisao; devolvidaEm preenchida e status emAndamento). Ordena por prazo. Compõe nome da lista e nomes de responsável e criador lidos no cadastro mestre. Calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist (itens feitos / total) na leitura, sem gravar. Lista as listas com ativa = true ordenadas por nome.\nSaída: tarefas: página de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa.",
+          "purpose": "Abre a página com a primeira página das tarefas da pessoa logada e as listas ativas onde ela pode criar tarefas.",
+          "input": "filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas; padrão todas). page/pageSize: página das tarefas.",
+          "processing": "Seleciona as tarefas cujo criador ou responsável é a pessoa da sessão; aplica o filtro (criadorId = sessão; responsavelId = sessão; status emRevisao; devolvidaEm preenchida e status emAndamento). Ordena por prazo. Compõe nome da lista e nomes de responsável e criador lidos no cadastro mestre. Calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist (itens feitos / total) na leitura, sem gravar. Lista as listas com ativa = true ordenadas por nome.",
+          "output": "tarefas: página de tarefas resumidas com lista, responsável, criador, prioridade, prazo, situação e indicadores calculados. listas: listas ativas com nome, tipo e ativa."
+        }
+      },
+      {
+        "route": "tarefas.minhas_tarefas.listarMinhasTarefas",
+        "kind": "qry",
+        "uses": [
+          "listTarefa",
+          "getLista",
+          "getMembroEquipe"
+        ],
+        "transaction": "none",
+        "output": [
+          {
+            "kind": "list",
+            "path": "tarefas",
+            "entity": "Tarefa",
+            "items": "items",
+            "page": "tarefas.page",
+            "pageSize": "tarefas.pageSize",
+            "hasMore": "tarefas.hasMore",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefas.items.lista",
+            "entity": "Lista",
+            "relationship": "tarefaLista",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "nome",
+                "path": "nome"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.items.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.listarMinhasTarefas projects items.responsavel.details, items.criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
             "path": "tarefas.items.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.minhasTarefas projects Tarefa.responsavel, which is not a field of the ontology."
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefas.items.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
           },
           {
             "kind": "unresolved",
+            "path": "tarefas.items.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.listarMinhasTarefas projects items.responsavel.details, items.criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
             "path": "tarefas.items.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.minhasTarefas projects Tarefa.criador, which is not a field of the ontology."
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefas.items.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.criador",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefas.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [
@@ -128,28 +405,27 @@ export const definition = {
             "pages": "tarefas"
           },
           {
-            "name": "status",
+            "name": "busca",
             "target": "tarefas",
-            "field": "status"
+            "field": "titulo"
           }
         ],
-        "rules": [
-          "editarSomenteTarefaVisivel"
-        ],
+        "rules": [],
         "doc": {
-          "raw": "Finalidade: Carrega a página de tarefas que o membro da sessão criou ou pelas quais é responsável, já com nomes da lista, do responsável e do criador.\nEntrada: criadasPorMim: só as tarefas com o membro da sessão como criador; atribuidasAMim: só as em que ele é responsável; status: filtra pela situação (ex.: emRevisao); somenteDevolvidas: só as que têm devolução registrada e seguem em andamento; page/pageSize: paginação.\nProcessamento: Resolve o membro da sessão pelo login e limita a visão às tarefas em que ele é criador ou responsável (editarSomenteTarefaVisivel). Aplica os filtros, ordena por prazo e lê no cadastro mestre os nomes de responsável e criador. venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist são campos derivados calculados pelo servidor (prazo vs. data atual em tarefas abertas; contagem de subtarefas; itens feitos/total), nunca gravados.\nSaída: tarefas paginadas { items, page, pageSize, hasMore } com o necessário para a lista destacar o que vence hoje ou está atrasado.",
-          "purpose": "Carrega a página de tarefas que o membro da sessão criou ou pelas quais é responsável, já com nomes da lista, do responsável e do criador.",
-          "input": "criadasPorMim: só as tarefas com o membro da sessão como criador; atribuidasAMim: só as em que ele é responsável; status: filtra pela situação (ex.: emRevisao); somenteDevolvidas: só as que têm devolução registrada e seguem em andamento; page/pageSize: paginação.",
-          "processing": "Resolve o membro da sessão pelo login e limita a visão às tarefas em que ele é criador ou responsável (editarSomenteTarefaVisivel). Aplica os filtros, ordena por prazo e lê no cadastro mestre os nomes de responsável e criador. venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist são campos derivados calculados pelo servidor (prazo vs. data atual em tarefas abertas; contagem de subtarefas; itens feitos/total), nunca gravados.",
-          "output": "tarefas paginadas { items, page, pageSize, hasMore } com o necessário para a lista destacar o que vence hoje ou está atrasado."
+          "raw": "Finalidade: Recarrega as tarefas da pessoa logada quando ela troca o filtro rápido, pesquisa pelo título ou pede outra página.\nEntrada: filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas). busca: trecho do título. page/pageSize: página pedida.\nProcessamento: Mesma seleção de carregarMinhasTarefas: tarefas em que a pessoa da sessão é criadora ou responsável, filtro aplicado, busca por texto no título, ordenação por prazo; compõe nomes de lista, responsável e criador e calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist na leitura.\nSaída: tarefas: página de tarefas resumidas no filtro e na busca pedidos.",
+          "purpose": "Recarrega as tarefas da pessoa logada quando ela troca o filtro rápido, pesquisa pelo título ou pede outra página.",
+          "input": "filtro: recorte rápido (todas, criadas por mim, atribuídas a mim, em revisão, devolvidas). busca: trecho do título. page/pageSize: página pedida.",
+          "processing": "Mesma seleção de carregarMinhasTarefas: tarefas em que a pessoa da sessão é criadora ou responsável, filtro aplicado, busca por texto no título, ordenação por prazo; compõe nomes de lista, responsável e criador e calcula venceHoje, atrasada, quantidadeSubtarefas e progressoChecklist na leitura.",
+          "output": "tarefas: página de tarefas resumidas no filtro e na busca pedidos."
         }
       },
       {
-        "route": "tarefas.minhas_tarefas.tarefaAberta",
+        "route": "tarefas.minhas_tarefas.abrirTarefa",
         "kind": "qry",
         "uses": [
           "getTarefa",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "none",
@@ -184,20 +460,20 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
+                "field": "criadaEm",
+                "path": "criadaEm"
               },
               {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -212,14 +488,80 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.abrirTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
             "kind": "related",
-            "path": "tarefa.checklist",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.abrirTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -247,71 +589,86 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
             "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.tarefaAberta projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.tarefaAberta projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
-        "params": [],
-        "rules": [
-          "editarSomenteTarefaVisivel"
+        "params": [
+          {
+            "name": "id",
+            "target": "tarefa",
+            "field": "id"
+          }
         ],
+        "rules": [],
         "doc": {
-          "raw": "Finalidade: Abre a tarefa escolhida na lista com tudo o que o detalhe, as ações, o histórico e o formulário de edição mostram.\nEntrada: tarefaId: id da tarefa selecionada na lista ou vinda do aviso.\nProcessamento: Recusa a tarefa se o membro da sessão não for criador nem responsável (editarSomenteTarefaVisivel). Lê a tarefa, o nome da lista, os nomes de criador e responsável no cadastro mestre e a checklist pela tarefaId ordenada por ordem. progressoChecklist é derivado (itens feitos do total), calculado pelo servidor.\nSaída: tarefa com checklist e marcos (criadaEm, devolvidaEm com motivo, concluidaEm, canceladaEm) para o histórico, e version para os comandos.",
-          "purpose": "Abre a tarefa escolhida na lista com tudo o que o detalhe, as ações, o histórico e o formulário de edição mostram.",
-          "input": "tarefaId: id da tarefa selecionada na lista ou vinda do aviso.",
-          "processing": "Recusa a tarefa se o membro da sessão não for criador nem responsável (editarSomenteTarefaVisivel). Lê a tarefa, o nome da lista, os nomes de criador e responsável no cadastro mestre e a checklist pela tarefaId ordenada por ordem. progressoChecklist é derivado (itens feitos do total), calculado pelo servidor.",
-          "output": "tarefa com checklist e marcos (criadaEm, devolvidaEm com motivo, concluidaEm, canceladaEm) para o histórico, e version para os comandos."
+          "raw": "Finalidade: Abre a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.\nEntrada: id: id da tarefa escolhida.\nProcessamento: Lê a tarefa por id, recusando se a pessoa da sessão não for criadora nem responsável. Compõe nome da lista, nomes de criador e responsável do cadastro mestre e os itens da checklist ordenados por ordem.\nSaída: tarefa: a tarefa com versão, situação, datas de criação, devolução, conclusão e cancelamento, motivo da devolução e checklist.",
+          "purpose": "Abre a tarefa escolhida com tudo o que o detalhe, as ações, o formulário e o histórico precisam.",
+          "input": "id: id da tarefa escolhida.",
+          "processing": "Lê a tarefa por id, recusando se a pessoa da sessão não for criadora nem responsável. Compõe nome da lista, nomes de criador e responsável do cadastro mestre e os itens da checklist ordenados por ordem.",
+          "output": "tarefa: a tarefa com versão, situação, datas de criação, devolução, conclusão e cancelamento, motivo da devolução e checklist."
         }
       },
       {
-        "route": "tarefas.minhas_tarefas.opcoesFormulario",
+        "route": "tarefas.minhas_tarefas.buscarMembros",
         "kind": "qry",
-        "uses": [],
+        "uses": [
+          "listMembroEquipe",
+          "getMembroEquipe"
+        ],
         "transaction": "none",
         "output": [
           {
             "kind": "unresolved",
-            "path": "tarefas.minhas_tarefas.opcoesFormulario",
-            "reason": "AUTHORITY_REQUIRED: Operation tarefas.minhas_tarefas.opcoesFormulario on tarefas.minhas_tarefas.opcoesFormulario has no authority. No permissive fallback was applied."
-          }
-        ],
-        "params": [],
-        "rules": [
-          "listaInativaNaoRecebeTarefa"
-        ],
-        "doc": {
-          "raw": "Finalidade: Carrega as listas onde o membro pode criar ou mover uma tarefa.\nEntrada: Nenhuma.\nProcessamento: Lista as listas da organização filtradas por ativa = true, ordenadas por nome; listas inativas não aparecem porque não recebem tarefas (listaInativaNaoRecebeTarefa).\nSaída: listas com id, nome, ativa e tipo para o seletor do formulário.",
-          "purpose": "Carrega as listas onde o membro pode criar ou mover uma tarefa.",
-          "input": "Nenhuma.",
-          "processing": "Lista as listas da organização filtradas por ativa = true, ordenadas por nome; listas inativas não aparecem porque não recebem tarefas (listaInativaNaoRecebeTarefa).",
-          "output": "listas com id, nome, ativa e tipo para o seletor do formulário."
-        }
-      },
-      {
-        "route": "tarefas.minhas_tarefas.buscarResponsaveis",
-        "kind": "qry",
-        "uses": [],
-        "transaction": "none",
-        "output": [
+            "path": "membros.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.buscarMembros projects details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "list",
+            "path": "membros",
+            "entity": "MembroEquipe",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "membros.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
           {
             "kind": "unresolved",
-            "path": "tarefas.minhas_tarefas.buscarResponsaveis",
-            "reason": "AUTHORITY_REQUIRED: Operation tarefas.minhas_tarefas.buscarResponsaveis on tarefas.minhas_tarefas.buscarResponsaveis has no authority. No permissive fallback was applied."
+            "path": "membros.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [],
@@ -319,19 +676,20 @@ export const definition = {
           "responsavelDeveSerMembroAtivo"
         ],
         "doc": {
-          "raw": "Finalidade: Busca pelo nome os membros que podem ser escolhidos como responsável ao criar ou trocar o responsável.\nEntrada: termo: trecho do nome digitado.\nProcessamento: Localiza membros por nome no cadastro mestre e devolve só os com situação Active (responsavelDeveSerMembroAtivo), limitado a poucos resultados.\nSaída: membros com id, nome e situação para o seletor de responsável.",
-          "purpose": "Busca pelo nome os membros que podem ser escolhidos como responsável ao criar ou trocar o responsável.",
-          "input": "termo: trecho do nome digitado.",
-          "processing": "Localiza membros por nome no cadastro mestre e devolve só os com situação Active (responsavelDeveSerMembroAtivo), limitado a poucos resultados.",
-          "output": "membros com id, nome e situação para o seletor de responsável."
+          "raw": "Finalidade: Busca pelo nome os membros que podem ser escolhidos como responsável.\nEntrada: nome: trecho do nome digitado.\nProcessamento: Localiza membros por nome e mantém só os com situação Active, conforme responsavelDeveSerMembroAtivo; limita a poucas dezenas ordenadas por nome.\nSaída: membros: membros ativos com id, nome e situação no cadastro.",
+          "purpose": "Busca pelo nome os membros que podem ser escolhidos como responsável.",
+          "input": "nome: trecho do nome digitado.",
+          "processing": "Localiza membros por nome e mantém só os com situação Active, conforme responsavelDeveSerMembroAtivo; limita a poucas dezenas ordenadas por nome.",
+          "output": "membros: membros ativos com id, nome e situação no cadastro."
         }
       },
       {
-        "route": "tarefas.minhas_tarefas.salvarNovaTarefa",
+        "route": "tarefas.minhas_tarefas.criarTarefa",
         "kind": "cmd",
         "uses": [
           "createTarefa",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -366,20 +724,20 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
+                "field": "criadaEm",
+                "path": "criadaEm"
               },
               {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -394,14 +752,80 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.criarTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
             "kind": "related",
-            "path": "tarefa.checklist",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.criarTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -445,16 +869,8 @@ export const definition = {
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -465,8 +881,16 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "status",
-                "path": "status"
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -481,50 +905,114 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "kind": "related",
+            "path": "resumo.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
           },
           {
             "kind": "unresolved",
             "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.salvarNovaTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.salvarNovaTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.salvarNovaTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.salvarNovaTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [],
@@ -534,19 +1022,20 @@ export const definition = {
           "responsavelDeveSerMembroAtivo"
         ],
         "doc": {
-          "raw": "Finalidade: Cria a tarefa com sua checklist inicial e a atribui ao responsável escolhido.\nEntrada: chaveCriacao: chave gerada ao abrir o formulário; listaId, titulo, descricao, prioridade, prazo, responsavelId: campos da tarefa; criadorId: id do membro da sessão, que será o criador e revisor da tarefa; checklist: itens com ordem e descrição.\nProcessamento: Em uma transação grava a tarefa em aFazer e os itens da checklist; criadorId deve ser o membro da sessão (resolvido pelo login) e é recusado se diferir. Com chave já usada devolve a tarefa existente sem duplicar nem gerar nova mensagem (criacaoIdempotente). Recusa lista inativa (listaInativaNaoRecebeTarefa) e responsável que não seja membro ativo (responsavelDeveSerMembroAtivo). criadaEm é gravado pelo sistema; campos derivados são calculados na leitura.\nSaída: tarefa completa para abrir no detalhe e resumo para inserir na lista sem nova consulta.",
-          "purpose": "Cria a tarefa com sua checklist inicial e a atribui ao responsável escolhido.",
-          "input": "chaveCriacao: chave gerada ao abrir o formulário; listaId, titulo, descricao, prioridade, prazo, responsavelId: campos da tarefa; criadorId: id do membro da sessão, que será o criador e revisor da tarefa; checklist: itens com ordem e descrição.",
-          "processing": "Em uma transação grava a tarefa em aFazer e os itens da checklist; criadorId deve ser o membro da sessão (resolvido pelo login) e é recusado se diferir. Com chave já usada devolve a tarefa existente sem duplicar nem gerar nova mensagem (criacaoIdempotente). Recusa lista inativa (listaInativaNaoRecebeTarefa) e responsável que não seja membro ativo (responsavelDeveSerMembroAtivo). criadaEm é gravado pelo sistema; campos derivados são calculados na leitura.",
-          "output": "tarefa completa para abrir no detalhe e resumo para inserir na lista sem nova consulta."
+          "raw": "Finalidade: Cria uma nova tarefa com sua checklist inicial e a atribui ao responsável escolhido.\nEntrada: chaveCriacao: chave gerada ao abrir o formulário. listaId, titulo, details.descricao, prioridade, prazo, responsavelId: dados da tarefa. criadorId: criador da tarefa; opcional, pois o servidor sempre grava a pessoa da sessão e recusa um valor diferente dela. itensChecklist: itens iniciais com ordem e descrição.\nProcessamento: Recusa lista inativa (listaInativaNaoRecebeTarefa) e responsável que não seja membro ativo (responsavelDeveSerMembroAtivo). Grava a tarefa em aFazer com a pessoa da sessão como criadora e os itens da checklist (feito = false) numa só transação. Se já existir tarefa com a mesma chaveCriacao, devolve a já criada sem duplicar nem gerar nova mensagem (criacaoIdempotente). Avisa o responsável.\nSaída: tarefa: a tarefa criada, em aFazer, com checklist. resumo: a mesma tarefa em forma resumida com indicadores calculados.",
+          "purpose": "Cria uma nova tarefa com sua checklist inicial e a atribui ao responsável escolhido.",
+          "input": "chaveCriacao: chave gerada ao abrir o formulário. listaId, titulo, details.descricao, prioridade, prazo, responsavelId: dados da tarefa. criadorId: criador da tarefa; opcional, pois o servidor sempre grava a pessoa da sessão e recusa um valor diferente dela. itensChecklist: itens iniciais com ordem e descrição.",
+          "processing": "Recusa lista inativa (listaInativaNaoRecebeTarefa) e responsável que não seja membro ativo (responsavelDeveSerMembroAtivo). Grava a tarefa em aFazer com a pessoa da sessão como criadora e os itens da checklist (feito = false) numa só transação. Se já existir tarefa com a mesma chaveCriacao, devolve a já criada sem duplicar nem gerar nova mensagem (criacaoIdempotente). Avisa o responsável.",
+          "output": "tarefa: a tarefa criada, em aFazer, com checklist. resumo: a mesma tarefa em forma resumida com indicadores calculados."
         }
       },
       {
-        "route": "tarefas.minhas_tarefas.salvarEdicaoTarefa",
+        "route": "tarefas.minhas_tarefas.salvarEdicao",
         "kind": "cmd",
         "uses": [
           "updateTarefa",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -581,20 +1070,20 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
+                "field": "criadaEm",
+                "path": "criadaEm"
               },
               {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -609,14 +1098,80 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.salvarEdicao projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
             "kind": "related",
-            "path": "tarefa.checklist",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.salvarEdicao projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -660,16 +1215,8 @@ export const definition = {
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -680,8 +1227,16 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "status",
-                "path": "status"
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -696,6 +1251,205 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "nome",
+                "path": "nome"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador",
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+          }
+        ],
+        "params": [],
+        "rules": [
+          "editarSomenteTarefaVisivel",
+          "edicaoNaoMudaSituacao",
+          "reatribuicaoPorCriadorOuGestor",
+          "responsavelDeveSerMembroAtivo",
+          "listaInativaNaoRecebeTarefa"
+        ],
+        "doc": {
+          "raw": "Finalidade: Salva os campos editados da tarefa, incluindo a troca de responsável.\nEntrada: id e version: tarefa e versão lida. listaId, titulo, details.descricao, prioridade, prazo, responsavelId: novos valores.\nProcessamento: Recusa se a pessoa não for criadora nem responsável (editarSomenteTarefaVisivel) ou se a versão mudou. Se o responsável mudou, exige que a pessoa seja a criadora (reatribuicaoPorCriadorOuGestor) e que o novo seja membro ativo (responsavelDeveSerMembroAtivo), e avisa o novo responsável. Se a lista mudou, recusa lista inativa (listaInativaNaoRecebeTarefa). Nunca altera a situação (edicaoNaoMudaSituacao).\nSaída: tarefa: a tarefa atualizada, com nova versão e mesma situação. resumo: a mesma tarefa resumida.",
+          "purpose": "Salva os campos editados da tarefa, incluindo a troca de responsável.",
+          "input": "id e version: tarefa e versão lida. listaId, titulo, details.descricao, prioridade, prazo, responsavelId: novos valores.",
+          "processing": "Recusa se a pessoa não for criadora nem responsável (editarSomenteTarefaVisivel) ou se a versão mudou. Se o responsável mudou, exige que a pessoa seja a criadora (reatribuicaoPorCriadorOuGestor) e que o novo seja membro ativo (responsavelDeveSerMembroAtivo), e avisa o novo responsável. Se a lista mudou, recusa lista inativa (listaInativaNaoRecebeTarefa). Nunca altera a situação (edicaoNaoMudaSituacao).",
+          "output": "tarefa: a tarefa atualizada, com nova versão e mesma situação. resumo: a mesma tarefa resumida."
+        }
+      },
+      {
+        "route": "tarefas.minhas_tarefas.salvarChecklist",
+        "kind": "cmd",
+        "uses": [
+          "updateItemChecklist",
+          "getTarefa",
+          "getLista",
+          "getMembroEquipe"
+        ],
+        "transaction": "single",
+        "output": [
+          {
+            "kind": "entity",
+            "path": "tarefa",
+            "entity": "Tarefa",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "criadaEm",
+                "path": "criadaEm"
+              },
+              {
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.lista",
+            "entity": "Lista",
+            "relationship": "tarefaLista",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
@@ -703,60 +1457,269 @@ export const definition = {
           },
           {
             "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.salvarChecklist projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.salvarChecklist projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
             "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
+            "entity": "ItemChecklist",
+            "relationship": "itemChecklistTarefa",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "ordem",
+                "path": "ordem"
+              },
+              {
+                "field": "feito",
+                "path": "feito"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "entity",
+            "path": "resumo",
+            "entity": "Tarefa",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "version",
+                "path": "version"
+              },
+              {
+                "field": "titulo",
+                "path": "titulo"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "prioridade",
+                "path": "prioridade"
+              },
+              {
+                "field": "prazo",
+                "path": "prazo"
+              },
+              {
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.lista",
+            "entity": "Lista",
+            "relationship": "tarefaLista",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "nome",
+                "path": "nome"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
           },
           {
             "kind": "unresolved",
             "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.salvarEdicaoTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.salvarEdicaoTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.salvarEdicaoTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.salvarEdicaoTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [],
         "rules": [
-          "edicaoNaoMudaSituacao",
           "editarSomenteTarefaVisivel",
-          "reatribuicaoPorCriadorOuGestor",
-          "responsavelDeveSerMembroAtivo",
-          "listaInativaNaoRecebeTarefa",
           "checklistNaoMudaSituacao"
         ],
         "doc": {
-          "raw": "Finalidade: Salva a edição da tarefa aberta: campos, troca de responsável e ajustes da checklist.\nEntrada: id e version: tarefa editada e versão para concorrência; listaId, titulo, descricao, prioridade, prazo, responsavelId: novos valores; checklist: itens finais (com id altera, sem id inclui, ausentes são removidos).\nProcessamento: Só edita tarefa visível ao membro (editarSomenteTarefaVisivel). Nunca altera status (edicaoNaoMudaSituacao, checklistNaoMudaSituacao). Se responsavelId mudou, exige que o membro seja o criador (reatribuicaoPorCriadorOuGestor) e que o novo seja membro ativo (responsavelDeveSerMembroAtivo), avisando o novo responsável. Recusa mover para lista inativa (listaInativaNaoRecebeTarefa). Grava tarefa e itens juntos e recusa version desatualizada.\nSaída: tarefa atualizada para redesenhar detalhe e formulário e resumo para atualizar a linha da lista.",
-          "purpose": "Salva a edição da tarefa aberta: campos, troca de responsável e ajustes da checklist.",
-          "input": "id e version: tarefa editada e versão para concorrência; listaId, titulo, descricao, prioridade, prazo, responsavelId: novos valores; checklist: itens finais (com id altera, sem id inclui, ausentes são removidos).",
-          "processing": "Só edita tarefa visível ao membro (editarSomenteTarefaVisivel). Nunca altera status (edicaoNaoMudaSituacao, checklistNaoMudaSituacao). Se responsavelId mudou, exige que o membro seja o criador (reatribuicaoPorCriadorOuGestor) e que o novo seja membro ativo (responsavelDeveSerMembroAtivo), avisando o novo responsável. Recusa mover para lista inativa (listaInativaNaoRecebeTarefa). Grava tarefa e itens juntos e recusa version desatualizada.",
-          "output": "tarefa atualizada para redesenhar detalhe e formulário e resumo para atualizar a linha da lista."
+          "raw": "Finalidade: Salva as alterações dos itens da checklist: descrição, ordem e marcação de feito.\nEntrada: tarefaId: tarefa dos itens. itens: cada item com id, versão lida, ordem, feito e descrição.\nProcessamento: Recusa se a pessoa não for criadora nem responsável da tarefa (editarSomenteTarefaVisivel) ou se algum item mudou de versão. Atualiza os itens; o momento de marcação é registrado pelo servidor quando o item passa a feito e limpo quando é desmarcado. Não altera a situação da tarefa (checklistNaoMudaSituacao).\nSaída: tarefa: a tarefa com a checklist atualizada. resumo: a tarefa resumida com o progresso da checklist recalculado.",
+          "purpose": "Salva as alterações dos itens da checklist: descrição, ordem e marcação de feito.",
+          "input": "tarefaId: tarefa dos itens. itens: cada item com id, versão lida, ordem, feito e descrição.",
+          "processing": "Recusa se a pessoa não for criadora nem responsável da tarefa (editarSomenteTarefaVisivel) ou se algum item mudou de versão. Atualiza os itens; o momento de marcação é registrado pelo servidor quando o item passa a feito e limpo quando é desmarcado. Não altera a situação da tarefa (checklistNaoMudaSituacao).",
+          "output": "tarefa: a tarefa com a checklist atualizada. resumo: a tarefa resumida com o progresso da checklist recalculado."
         }
       },
       {
@@ -765,6 +1728,7 @@ export const definition = {
         "uses": [
           "iniciar",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -799,20 +1763,20 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
+                "field": "criadaEm",
+                "path": "criadaEm"
               },
               {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -827,14 +1791,80 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.iniciarTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
             "kind": "related",
-            "path": "tarefa.checklist",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.iniciarTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -878,16 +1908,8 @@ export const definition = {
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -898,8 +1920,16 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "status",
-                "path": "status"
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -914,50 +1944,114 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "kind": "related",
+            "path": "resumo.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
           },
           {
             "kind": "unresolved",
             "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.iniciarTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.iniciarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.iniciarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.iniciarTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [],
@@ -966,225 +2060,11 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Inicia a tarefa, passando de a fazer para em andamento.\nEntrada: id e version da tarefa aberta.\nProcessamento: Recusa se o membro da sessão não for o responsável (somenteResponsavelExecuta) ou se a tarefa estiver concluída/cancelada (tarefaEncerradaNaoTransiciona); aplica a transição iniciar e registra a mensagem na sala da tarefa.\nSaída: tarefa e resumo atualizados para redesenhar detalhe, ações e lista.",
-          "purpose": "Inicia a tarefa, passando de a fazer para em andamento.",
-          "input": "id e version da tarefa aberta.",
-          "processing": "Recusa se o membro da sessão não for o responsável (somenteResponsavelExecuta) ou se a tarefa estiver concluída/cancelada (tarefaEncerradaNaoTransiciona); aplica a transição iniciar e registra a mensagem na sala da tarefa.",
-          "output": "tarefa e resumo atualizados para redesenhar detalhe, ações e lista."
-        }
-      },
-      {
-        "route": "tarefas.minhas_tarefas.marcarItemChecklist",
-        "kind": "cmd",
-        "uses": [
-          "updateItemChecklist",
-          "getTarefa",
-          "getLista"
-        ],
-        "transaction": "single",
-        "output": [
-          {
-            "kind": "entity",
-            "path": "tarefa",
-            "entity": "Tarefa",
-            "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              },
-              {
-                "field": "version",
-                "path": "version"
-              },
-              {
-                "field": "titulo",
-                "path": "titulo"
-              },
-              {
-                "field": "status",
-                "path": "status"
-              },
-              {
-                "field": "prioridade",
-                "path": "prioridade"
-              },
-              {
-                "field": "prazo",
-                "path": "prazo"
-              },
-              {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadaEm",
-                "path": "criadaEm"
-              },
-              {
-                "field": "details",
-                "path": "details"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.lista",
-            "entity": "Lista",
-            "relationship": "tarefaLista",
-            "fields": [
-              {
-                "field": "nome",
-                "path": "nome"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.checklist",
-            "entity": "ItemChecklist",
-            "relationship": "itemChecklistTarefa",
-            "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              },
-              {
-                "field": "version",
-                "path": "version"
-              },
-              {
-                "field": "ordem",
-                "path": "ordem"
-              },
-              {
-                "field": "feito",
-                "path": "feito"
-              },
-              {
-                "field": "details",
-                "path": "details"
-              }
-            ]
-          },
-          {
-            "kind": "entity",
-            "path": "resumo",
-            "entity": "Tarefa",
-            "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              },
-              {
-                "field": "version",
-                "path": "version"
-              },
-              {
-                "field": "titulo",
-                "path": "titulo"
-              },
-              {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
-              },
-              {
-                "field": "prioridade",
-                "path": "prioridade"
-              },
-              {
-                "field": "prazo",
-                "path": "prazo"
-              },
-              {
-                "field": "status",
-                "path": "status"
-              },
-              {
-                "field": "details",
-                "path": "details"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "resumo.lista",
-            "entity": "Lista",
-            "relationship": "tarefaLista",
-            "fields": [
-              {
-                "field": "nome",
-                "path": "nome"
-              }
-            ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.marcarItemChecklist projects Tarefa.criador, which is not a field of the ontology."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.marcarItemChecklist projects Tarefa.responsavel, which is not a field of the ontology."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.marcarItemChecklist projects Tarefa.responsavel, which is not a field of the ontology."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.marcarItemChecklist projects Tarefa.criador, which is not a field of the ontology."
-          }
-        ],
-        "params": [],
-        "rules": [
-          "checklistNaoMudaSituacao",
-          "editarSomenteTarefaVisivel"
-        ],
-        "doc": {
-          "raw": "Finalidade: Marca ou desmarca um item da checklist da tarefa aberta.\nEntrada: id e version do item; feito: novo estado do item.\nProcessamento: Só altera itens de tarefa visível ao membro (editarSomenteTarefaVisivel); grava feito e marcadoEm (momento da marcação, vazio ao desmarcar) sem mudar a situação da tarefa (checklistNaoMudaSituacao). O progresso da checklist é derivado e recalculado na leitura.\nSaída: tarefa com a checklist e o progresso atualizados e resumo para a linha da lista.",
-          "purpose": "Marca ou desmarca um item da checklist da tarefa aberta.",
-          "input": "id e version do item; feito: novo estado do item.",
-          "processing": "Só altera itens de tarefa visível ao membro (editarSomenteTarefaVisivel); grava feito e marcadoEm (momento da marcação, vazio ao desmarcar) sem mudar a situação da tarefa (checklistNaoMudaSituacao). O progresso da checklist é derivado e recalculado na leitura.",
-          "output": "tarefa com a checklist e o progresso atualizados e resumo para a linha da lista."
+          "raw": "Finalidade: Inicia a tarefa atribuída à pessoa.\nEntrada: id e version: tarefa e versão lida.\nProcessamento: Exige que a pessoa da sessão seja a responsável (somenteResponsavelExecuta) e que a tarefa esteja em aFazer, nunca concluída ou cancelada (tarefaEncerradaNaoTransiciona). Move para emAndamento e registra a mensagem na sala de discussão.\nSaída: tarefa: a tarefa em emAndamento. resumo: a mesma tarefa resumida.",
+          "purpose": "Inicia a tarefa atribuída à pessoa.",
+          "input": "id e version: tarefa e versão lida.",
+          "processing": "Exige que a pessoa da sessão seja a responsável (somenteResponsavelExecuta) e que a tarefa esteja em aFazer, nunca concluída ou cancelada (tarefaEncerradaNaoTransiciona). Move para emAndamento e registra a mensagem na sala de discussão.",
+          "output": "tarefa: a tarefa em emAndamento. resumo: a mesma tarefa resumida."
         }
       },
       {
@@ -1193,6 +2073,7 @@ export const definition = {
         "uses": [
           "enviarParaRevisao",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -1227,20 +2108,20 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
+                "field": "criadaEm",
+                "path": "criadaEm"
               },
               {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -1255,14 +2136,80 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.enviarParaRevisao projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
             "kind": "related",
-            "path": "tarefa.checklist",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.enviarParaRevisao projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -1306,16 +2253,8 @@ export const definition = {
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -1326,8 +2265,16 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "status",
-                "path": "status"
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -1342,50 +2289,114 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "kind": "related",
+            "path": "resumo.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
           },
           {
             "kind": "unresolved",
             "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.enviarParaRevisao projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.enviarParaRevisao projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.enviarParaRevisao projects Tarefa.responsavel, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.enviarParaRevisao projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [],
@@ -1394,19 +2405,20 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Envia ou reenvia a tarefa para revisão do criador.\nEntrada: id e version da tarefa aberta.\nProcessamento: Recusa se o membro não for o responsável (somenteResponsavelExecuta) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); passa de emAndamento para emRevisao, registra a mensagem e avisa o criador.\nSaída: tarefa e resumo atualizados.",
-          "purpose": "Envia ou reenvia a tarefa para revisão do criador.",
-          "input": "id e version da tarefa aberta.",
-          "processing": "Recusa se o membro não for o responsável (somenteResponsavelExecuta) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); passa de emAndamento para emRevisao, registra a mensagem e avisa o criador.",
-          "output": "tarefa e resumo atualizados."
+          "raw": "Finalidade: Envia ou reenvia a tarefa para a revisão do criador.\nEntrada: id e version: tarefa e versão lida.\nProcessamento: Exige que a pessoa da sessão seja a responsável (somenteResponsavelExecuta) e que a tarefa esteja em emAndamento, nunca encerrada (tarefaEncerradaNaoTransiciona). Move para emRevisao, registra a mensagem na sala e avisa o criador.\nSaída: tarefa: a tarefa em emRevisao. resumo: a mesma tarefa resumida.",
+          "purpose": "Envia ou reenvia a tarefa para a revisão do criador.",
+          "input": "id e version: tarefa e versão lida.",
+          "processing": "Exige que a pessoa da sessão seja a responsável (somenteResponsavelExecuta) e que a tarefa esteja em emAndamento, nunca encerrada (tarefaEncerradaNaoTransiciona). Move para emRevisao, registra a mensagem na sala e avisa o criador.",
+          "output": "tarefa: a tarefa em emRevisao. resumo: a mesma tarefa resumida."
         }
       },
       {
-        "route": "tarefas.minhas_tarefas.aceitarEntrega",
+        "route": "tarefas.minhas_tarefas.aceitarTarefa",
         "kind": "cmd",
         "uses": [
           "aceitar",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -1441,20 +2453,20 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
+                "field": "criadaEm",
+                "path": "criadaEm"
               },
               {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -1469,14 +2481,80 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.aceitarTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
             "kind": "related",
-            "path": "tarefa.checklist",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.aceitarTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -1520,16 +2598,8 @@ export const definition = {
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -1540,8 +2610,16 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "status",
-                "path": "status"
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -1556,50 +2634,114 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "kind": "related",
+            "path": "resumo.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
           },
           {
             "kind": "unresolved",
             "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.aceitarEntrega projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.aceitarEntrega projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.aceitarEntrega projects Tarefa.responsavel, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.aceitarEntrega projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [],
@@ -1608,19 +2750,20 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Aceita a entrega da tarefa em revisão, concluindo-a.\nEntrada: id e version da tarefa aberta.\nProcessamento: Recusa se o membro não for o criador (somenteCriadorRevisa) ou se a tarefa já estiver encerrada (tarefaEncerradaNaoTransiciona); passa de emRevisao para concluida, grava concluidaEm e registra a mensagem.\nSaída: tarefa e resumo atualizados, com o aceite no histórico.",
-          "purpose": "Aceita a entrega da tarefa em revisão, concluindo-a.",
-          "input": "id e version da tarefa aberta.",
-          "processing": "Recusa se o membro não for o criador (somenteCriadorRevisa) ou se a tarefa já estiver encerrada (tarefaEncerradaNaoTransiciona); passa de emRevisao para concluida, grava concluidaEm e registra a mensagem.",
-          "output": "tarefa e resumo atualizados, com o aceite no histórico."
+          "raw": "Finalidade: Aceita a entrega da tarefa e a conclui.\nEntrada: id e version: tarefa e versão lida.\nProcessamento: Exige que a pessoa da sessão seja a criadora (somenteCriadorRevisa) e que a tarefa esteja em emRevisao, nunca encerrada (tarefaEncerradaNaoTransiciona). Move para concluida, registra concluidaEm e a mensagem na sala.\nSaída: tarefa: a tarefa concluída com o momento da conclusão. resumo: a mesma tarefa resumida.",
+          "purpose": "Aceita a entrega da tarefa e a conclui.",
+          "input": "id e version: tarefa e versão lida.",
+          "processing": "Exige que a pessoa da sessão seja a criadora (somenteCriadorRevisa) e que a tarefa esteja em emRevisao, nunca encerrada (tarefaEncerradaNaoTransiciona). Move para concluida, registra concluidaEm e a mensagem na sala.",
+          "output": "tarefa: a tarefa concluída com o momento da conclusão. resumo: a mesma tarefa resumida."
         }
       },
       {
-        "route": "tarefas.minhas_tarefas.devolverComMotivo",
+        "route": "tarefas.minhas_tarefas.devolverTarefa",
         "kind": "cmd",
         "uses": [
           "devolver",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -1655,20 +2798,20 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
+                "field": "criadaEm",
+                "path": "criadaEm"
               },
               {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -1683,14 +2826,80 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.devolverTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
             "kind": "related",
-            "path": "tarefa.checklist",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.devolverTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -1734,16 +2943,8 @@ export const definition = {
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -1754,8 +2955,16 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "status",
-                "path": "status"
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -1770,50 +2979,114 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "kind": "related",
+            "path": "resumo.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
           },
           {
             "kind": "unresolved",
             "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.devolverComMotivo projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.devolverComMotivo projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.devolverComMotivo projects Tarefa.responsavel, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.devolverComMotivo projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [],
@@ -1823,11 +3096,11 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Devolve a tarefa em revisão para ajuste, com o motivo.\nEntrada: id e version da tarefa; motivoDevolucao: explicação do que ajustar.\nProcessamento: Recusa se o membro não for o criador (somenteCriadorRevisa), se o motivo estiver vazio (devolucaoExigeMotivo) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); passa de emRevisao para emAndamento, grava motivo e devolvidaEm e avisa o responsável.\nSaída: tarefa e resumo atualizados, com o motivo visível no detalhe e no histórico.",
+          "raw": "Finalidade: Devolve a tarefa em revisão para ajuste, com o motivo.\nEntrada: id e version: tarefa e versão lida. details.motivoDevolucao: motivo da devolução.\nProcessamento: Exige que a pessoa seja a criadora (somenteCriadorRevisa), que a tarefa esteja em emRevisao e não encerrada (tarefaEncerradaNaoTransiciona) e que o motivo não esteja vazio (devolucaoExigeMotivo). Registra motivo e devolvidaEm, move para emAndamento e avisa o responsável.\nSaída: tarefa: a tarefa em emAndamento com motivo e momento da devolução. resumo: a mesma tarefa resumida.",
           "purpose": "Devolve a tarefa em revisão para ajuste, com o motivo.",
-          "input": "id e version da tarefa; motivoDevolucao: explicação do que ajustar.",
-          "processing": "Recusa se o membro não for o criador (somenteCriadorRevisa), se o motivo estiver vazio (devolucaoExigeMotivo) ou se a tarefa estiver encerrada (tarefaEncerradaNaoTransiciona); passa de emRevisao para emAndamento, grava motivo e devolvidaEm e avisa o responsável.",
-          "output": "tarefa e resumo atualizados, com o motivo visível no detalhe e no histórico."
+          "input": "id e version: tarefa e versão lida. details.motivoDevolucao: motivo da devolução.",
+          "processing": "Exige que a pessoa seja a criadora (somenteCriadorRevisa), que a tarefa esteja em emRevisao e não encerrada (tarefaEncerradaNaoTransiciona) e que o motivo não esteja vazio (devolucaoExigeMotivo). Registra motivo e devolvidaEm, move para emAndamento e avisa o responsável.",
+          "output": "tarefa: a tarefa em emAndamento com motivo e momento da devolução. resumo: a mesma tarefa resumida."
         }
       },
       {
@@ -1836,6 +3109,7 @@ export const definition = {
         "uses": [
           "cancelar",
           "getLista",
+          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -1870,20 +3144,20 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
+                "field": "criadaEm",
+                "path": "criadaEm"
               },
               {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -1898,14 +3172,80 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
+            "kind": "unresolved",
+            "path": "tarefa.responsavel.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.cancelarTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
             "kind": "related",
-            "path": "tarefa.checklist",
+            "path": "tarefa.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "unresolved",
+            "path": "tarefa.criador.details",
+            "reason": "DISCLOSURE: Route tarefas.minhas_tarefas.cancelarTarefa projects responsavel.details, criador.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "tarefa.itensChecklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -1949,16 +3289,8 @@ export const definition = {
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -1969,8 +3301,16 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "status",
-                "path": "status"
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadorId",
+                "path": "criadorId"
               },
               {
                 "field": "details",
@@ -1985,50 +3325,114 @@ export const definition = {
             "relationship": "tarefaLista",
             "fields": [
               {
+                "field": "id",
+                "path": "id"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "kind": "related",
+            "path": "resumo.responsavel",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.responsavel.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details",
+                "path": "details"
+              }
+            ]
+          },
+          {
+            "kind": "related",
+            "path": "resumo.criador.details.identification",
+            "entity": "MembroEquipe",
+            "fields": [
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              }
+            ]
           },
           {
             "kind": "unresolved",
             "path": "tarefa.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "resumo.responsavel",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
-          },
-          {
-            "kind": "unresolved",
-            "path": "resumo.criador",
-            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
+            "path": "tarefa.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "tarefa.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.cancelarTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.cancelarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "path": "tarefa.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.responsavel",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.cancelarTarefa projects Tarefa.responsavel, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.responsavel.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
             "path": "resumo.criador",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.minhas_tarefas.cancelarTarefa projects Tarefa.criador, which is not a field of the ontology."
+            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+          },
+          {
+            "kind": "unresolved",
+            "path": "resumo.criador.details.identification",
+            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
           }
         ],
         "params": [],
@@ -2037,11 +3441,11 @@ export const definition = {
           "tarefaEncerradaNaoTransiciona"
         ],
         "doc": {
-          "raw": "Finalidade: Cancela uma tarefa que o membro criou.\nEntrada: id e version da tarefa aberta.\nProcessamento: Recusa se o membro não for o criador (cancelamentoPorCriadorOuGestor) ou se a tarefa já estiver concluída ou cancelada (tarefaEncerradaNaoTransiciona); passa para cancelada, grava canceladaEm e registra a mensagem na sala.\nSaída: tarefa e resumo atualizados com a situação cancelada.",
-          "purpose": "Cancela uma tarefa que o membro criou.",
-          "input": "id e version da tarefa aberta.",
-          "processing": "Recusa se o membro não for o criador (cancelamentoPorCriadorOuGestor) ou se a tarefa já estiver concluída ou cancelada (tarefaEncerradaNaoTransiciona); passa para cancelada, grava canceladaEm e registra a mensagem na sala.",
-          "output": "tarefa e resumo atualizados com a situação cancelada."
+          "raw": "Finalidade: Cancela uma tarefa criada pela pessoa.\nEntrada: id e version: tarefa e versão lida.\nProcessamento: Exige que a pessoa seja a criadora (cancelamentoPorCriadorOuGestor) e que a tarefa esteja em aFazer, emAndamento ou emRevisao (tarefaEncerradaNaoTransiciona). Move para cancelada, registra canceladaEm e a mensagem na sala.\nSaída: tarefa: a tarefa cancelada com o momento do cancelamento. resumo: a mesma tarefa resumida.",
+          "purpose": "Cancela uma tarefa criada pela pessoa.",
+          "input": "id e version: tarefa e versão lida.",
+          "processing": "Exige que a pessoa seja a criadora (cancelamentoPorCriadorOuGestor) e que a tarefa esteja em aFazer, emAndamento ou emRevisao (tarefaEncerradaNaoTransiciona). Move para cancelada, registra canceladaEm e a mensagem na sala.",
+          "output": "tarefa: a tarefa cancelada com o momento do cancelamento. resumo: a mesma tarefa resumida."
         }
       }
     ]

@@ -46,14 +46,30 @@ export const definition = {
                 "path": "status"
               },
               {
-                "field": "details",
-                "path": "details"
+                "field": "details.quantidadeTarefas",
+                "path": "details.quantidadeTarefas"
+              },
+              {
+                "field": "details.quantidadeAtrasadas",
+                "path": "details.quantidadeAtrasadas"
+              },
+              {
+                "field": "details.geradoEm",
+                "path": "details.geradoEm"
+              },
+              {
+                "field": "details.finalizadoEm",
+                "path": "details.finalizadoEm"
+              },
+              {
+                "field": "details.motivoFalha",
+                "path": "details.motivoFalha"
               }
             ]
           },
           {
             "kind": "entity",
-            "path": "avisoAberto",
+            "path": "avisoAtual",
             "entity": "AvisoVencimento",
             "fields": [
               {
@@ -69,14 +85,18 @@ export const definition = {
                 "path": "status"
               },
               {
-                "field": "details",
-                "path": "details"
+                "field": "details.quantidadeTarefas",
+                "path": "details.quantidadeTarefas"
+              },
+              {
+                "field": "details.quantidadeAtrasadas",
+                "path": "details.quantidadeAtrasadas"
               }
             ]
           },
           {
             "kind": "related",
-            "path": "avisoAberto.details.tarefas",
+            "path": "avisoAtual.tarefas",
             "entity": "AvisoVencimento",
             "fields": [
               {
@@ -95,13 +115,9 @@ export const definition = {
           },
           {
             "kind": "related",
-            "path": "avisoAberto.details.tarefas.tarefa",
+            "path": "avisoAtual.tarefas.tarefa",
             "entity": "Tarefa",
             "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              },
               {
                 "field": "titulo",
                 "path": "titulo"
@@ -113,17 +129,25 @@ export const definition = {
               {
                 "field": "prazo",
                 "path": "prazo"
+              },
+              {
+                "field": "details.venceHoje",
+                "path": "details.venceHoje"
+              },
+              {
+                "field": "details.atrasada",
+                "path": "details.atrasada"
               }
             ]
           },
           {
             "kind": "unresolved",
-            "path": "avisoAberto.details.tarefas",
+            "path": "avisoAtual.tarefas",
             "reason": "AvisoVencimento inside AvisoVencimento needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
-            "path": "avisoAberto.details.tarefas.tarefa",
+            "path": "avisoAtual.tarefas.tarefa",
             "reason": "Tarefa inside AvisoVencimento needs one L4 relationship between them; found 0."
           }
         ],
@@ -137,11 +161,6 @@ export const definition = {
             "name": "pageSize",
             "target": "avisos",
             "pages": "avisos"
-          },
-          {
-            "name": "responsavelId",
-            "target": "avisos",
-            "field": "responsavelId"
           }
         ],
         "rules": [
@@ -149,15 +168,90 @@ export const definition = {
           "avisoSomenteTarefasAbertasVencendo"
         ],
         "doc": {
-          "raw": "Finalidade: Abre a página Meus avisos de uma vez: a lista paginada dos avisos diários do usuário da sessão, que também alimenta o histórico de envio, e o aviso mais recente (o de hoje) já aberto com as suas tarefas.\nEntrada: responsavelId: membro da sessão (vem do contexto, nunca da tela); page e pageSize: página da lista de avisos.\nProcessamento: Filtra AvisoVencimento pelo responsável da sessão (escopo own) e ordena por dataReferencia decrescente, com o aviso de hoje primeiro; pela regra avisoUnicoPorResponsavelEDia há no máximo um aviso por data, sem agrupamento. Para cada aviso devolve status, geradoEm, finalizadoEm, motivoFalha e os totais quantidadeTarefas e quantidadeAtrasadas, que são calculados pelo servidor a partir das linhas (contagem total e contagem com situacaoPrazo = overdue), nunca gravados pelo endpoint. Para o aviso mais recente compõe as linhas details.tarefas (tarefaId, prazo, situacaoPrazo) com título, situação e prazo atuais de cada Tarefa; as linhas são as que o processo gravou segundo avisoSomenteTarefasAbertasVencendo (tarefas abertas com prazo no dia ou vencido).\nSaída: avisos: página { items, page, pageSize, hasMore } para a lista e o histórico; avisoAberto: o aviso de hoje (ou o mais recente) com totais e linhas, ausente se o usuário ainda não recebeu aviso.",
-          "purpose": "Abre a página Meus avisos de uma vez: a lista paginada dos avisos diários do usuário da sessão, que também alimenta o histórico de envio, e o aviso mais recente (o de hoje) já aberto com as suas tarefas.",
-          "input": "responsavelId: membro da sessão (vem do contexto, nunca da tela); page e pageSize: página da lista de avisos.",
-          "processing": "Filtra AvisoVencimento pelo responsável da sessão (escopo own) e ordena por dataReferencia decrescente, com o aviso de hoje primeiro; pela regra avisoUnicoPorResponsavelEDia há no máximo um aviso por data, sem agrupamento. Para cada aviso devolve status, geradoEm, finalizadoEm, motivoFalha e os totais quantidadeTarefas e quantidadeAtrasadas, que são calculados pelo servidor a partir das linhas (contagem total e contagem com situacaoPrazo = overdue), nunca gravados pelo endpoint. Para o aviso mais recente compõe as linhas details.tarefas (tarefaId, prazo, situacaoPrazo) com título, situação e prazo atuais de cada Tarefa; as linhas são as que o processo gravou segundo avisoSomenteTarefasAbertasVencendo (tarefas abertas com prazo no dia ou vencido).",
-          "output": "avisos: página { items, page, pageSize, hasMore } para a lista e o histórico; avisoAberto: o aviso de hoje (ou o mais recente) com totais e linhas, ausente se o usuário ainda não recebeu aviso."
+          "raw": "Finalidade: Abre a página de avisos com a primeira página dos avisos diários da pessoa logada e o conteúdo do aviso mais recente já montado.\nEntrada: page: número da página da lista de avisos; pageSize: quantidade de avisos por página.\nProcessamento: Filtra os AvisoVencimento cujo responsavelId é a pessoa da sessão, ordenados por dataReferencia decrescente, paginados. Pela regra avisoUnicoPorResponsavelEDia há no máximo um aviso por data. Para o aviso mais recente, carrega as linhas de details.tarefas e compõe cada uma com título, situação e prazo atuais da Tarefa; venceHoje e atrasada são calculados na leitura a partir do prazo e da situação da tarefa, e quantidadeTarefas e quantidadeAtrasadas são calculados a partir das linhas. O conteúdo reflete a regra avisoSomenteTarefasAbertasVencendo: apenas tarefas abertas com prazo no dia do aviso ou anterior.\nSaída: avisos: página { items, page, pageSize, hasMore } de avisos com data, situação do envio, totais, geradoEm, finalizadoEm e motivoFalha; avisoAtual: o aviso mais recente com totais e suas tarefas, ausente se a pessoa ainda não recebeu nenhum aviso.",
+          "purpose": "Abre a página de avisos com a primeira página dos avisos diários da pessoa logada e o conteúdo do aviso mais recente já montado.",
+          "input": "page: número da página da lista de avisos; pageSize: quantidade de avisos por página.",
+          "processing": "Filtra os AvisoVencimento cujo responsavelId é a pessoa da sessão, ordenados por dataReferencia decrescente, paginados. Pela regra avisoUnicoPorResponsavelEDia há no máximo um aviso por data. Para o aviso mais recente, carrega as linhas de details.tarefas e compõe cada uma com título, situação e prazo atuais da Tarefa; venceHoje e atrasada são calculados na leitura a partir do prazo e da situação da tarefa, e quantidadeTarefas e quantidadeAtrasadas são calculados a partir das linhas. O conteúdo reflete a regra avisoSomenteTarefasAbertasVencendo: apenas tarefas abertas com prazo no dia do aviso ou anterior.",
+          "output": "avisos: página { items, page, pageSize, hasMore } de avisos com data, situação do envio, totais, geradoEm, finalizadoEm e motivoFalha; avisoAtual: o aviso mais recente com totais e suas tarefas, ausente se a pessoa ainda não recebeu nenhum aviso."
         }
       },
       {
-        "route": "tarefas.meus_avisos.abrirAviso",
+        "route": "tarefas.meus_avisos.buscarAvisos",
+        "kind": "qry",
+        "uses": [
+          "listAvisoVencimento"
+        ],
+        "transaction": "none",
+        "output": [
+          {
+            "kind": "list",
+            "path": "avisos",
+            "entity": "AvisoVencimento",
+            "items": "items",
+            "page": "avisos.page",
+            "pageSize": "avisos.pageSize",
+            "hasMore": "avisos.hasMore",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "dataReferencia",
+                "path": "dataReferencia"
+              },
+              {
+                "field": "status",
+                "path": "status"
+              },
+              {
+                "field": "details.quantidadeTarefas",
+                "path": "details.quantidadeTarefas"
+              },
+              {
+                "field": "details.quantidadeAtrasadas",
+                "path": "details.quantidadeAtrasadas"
+              },
+              {
+                "field": "details.geradoEm",
+                "path": "details.geradoEm"
+              },
+              {
+                "field": "details.finalizadoEm",
+                "path": "details.finalizadoEm"
+              },
+              {
+                "field": "details.motivoFalha",
+                "path": "details.motivoFalha"
+              }
+            ]
+          }
+        ],
+        "params": [
+          {
+            "name": "page",
+            "target": "avisos",
+            "pages": "avisos"
+          },
+          {
+            "name": "pageSize",
+            "target": "avisos",
+            "pages": "avisos"
+          }
+        ],
+        "rules": [
+          "avisoUnicoPorResponsavelEDia"
+        ],
+        "doc": {
+          "raw": "Finalidade: Lista os avisos diários da pessoa logada em um período de datas de referência, página a página.\nEntrada: dataInicio: data de referência inicial do período (inclusive, opcional); dataFim: data de referência final (inclusive, opcional); page e pageSize: página e tamanho da página.\nProcessamento: Filtra AvisoVencimento pelo responsavelId da pessoa da sessão e por dataReferencia entre dataInicio e dataFim, ordenando por dataReferencia decrescente; um aviso por data (avisoUnicoPorResponsavelEDia). quantidadeTarefas e quantidadeAtrasadas são calculados a partir das linhas de cada aviso.\nSaída: Página { items, page, pageSize, hasMore } de avisos com data, situação do envio, totais, geradoEm, finalizadoEm e motivoFalha.",
+          "purpose": "Lista os avisos diários da pessoa logada em um período de datas de referência, página a página.",
+          "input": "dataInicio: data de referência inicial do período (inclusive, opcional); dataFim: data de referência final (inclusive, opcional); page e pageSize: página e tamanho da página.",
+          "processing": "Filtra AvisoVencimento pelo responsavelId da pessoa da sessão e por dataReferencia entre dataInicio e dataFim, ordenando por dataReferencia decrescente; um aviso por data (avisoUnicoPorResponsavelEDia). quantidadeTarefas e quantidadeAtrasadas são calculados a partir das linhas de cada aviso.",
+          "output": "Página { items, page, pageSize, hasMore } de avisos com data, situação do envio, totais, geradoEm, finalizadoEm e motivoFalha."
+        }
+      },
+      {
+        "route": "tarefas.meus_avisos.obterAviso",
         "kind": "qry",
         "uses": [
           "getAvisoVencimento",
@@ -184,14 +278,18 @@ export const definition = {
                 "path": "status"
               },
               {
-                "field": "details",
-                "path": "details"
+                "field": "details.quantidadeTarefas",
+                "path": "details.quantidadeTarefas"
+              },
+              {
+                "field": "details.quantidadeAtrasadas",
+                "path": "details.quantidadeAtrasadas"
               }
             ]
           },
           {
             "kind": "related",
-            "path": "aviso.details.tarefas",
+            "path": "aviso.tarefas",
             "entity": "AvisoVencimento",
             "fields": [
               {
@@ -210,13 +308,9 @@ export const definition = {
           },
           {
             "kind": "related",
-            "path": "aviso.details.tarefas.tarefa",
+            "path": "aviso.tarefas.tarefa",
             "entity": "Tarefa",
             "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              },
               {
                 "field": "titulo",
                 "path": "titulo"
@@ -228,17 +322,25 @@ export const definition = {
               {
                 "field": "prazo",
                 "path": "prazo"
+              },
+              {
+                "field": "details.venceHoje",
+                "path": "details.venceHoje"
+              },
+              {
+                "field": "details.atrasada",
+                "path": "details.atrasada"
               }
             ]
           },
           {
             "kind": "unresolved",
-            "path": "aviso.details.tarefas",
+            "path": "aviso.tarefas",
             "reason": "AvisoVencimento inside AvisoVencimento needs one L4 relationship between them; found 0."
           },
           {
             "kind": "unresolved",
-            "path": "aviso.details.tarefas.tarefa",
+            "path": "aviso.tarefas.tarefa",
             "reason": "Tarefa inside AvisoVencimento needs one L4 relationship between them; found 0."
           }
         ],
@@ -247,11 +349,11 @@ export const definition = {
           "avisoSomenteTarefasAbertasVencendo"
         ],
         "doc": {
-          "raw": "Finalidade: Carrega o aviso que o usuário escolheu na lista, com as tarefas que ele trouxe.\nEntrada: avisoId: id do aviso selecionado na lista.\nProcessamento: Lê o AvisoVencimento por id e recusa se não pertencer ao responsável da sessão (escopo own). Compõe as linhas details.tarefas (tarefaId, prazo e situacaoPrazo do momento do aviso) com título, situação e prazo atuais de cada Tarefa. As linhas são as gravadas pelo processo diário conforme avisoSomenteTarefasAbertasVencendo. quantidadeTarefas e quantidadeAtrasadas são calculadas pelo servidor a partir das linhas.\nSaída: aviso: o aviso com data, situação, totais e linhas, para substituir o aviso aberto no detalhe.",
-          "purpose": "Carrega o aviso que o usuário escolheu na lista, com as tarefas que ele trouxe.",
-          "input": "avisoId: id do aviso selecionado na lista.",
-          "processing": "Lê o AvisoVencimento por id e recusa se não pertencer ao responsável da sessão (escopo own). Compõe as linhas details.tarefas (tarefaId, prazo e situacaoPrazo do momento do aviso) com título, situação e prazo atuais de cada Tarefa. As linhas são as gravadas pelo processo diário conforme avisoSomenteTarefasAbertasVencendo. quantidadeTarefas e quantidadeAtrasadas são calculadas pelo servidor a partir das linhas.",
-          "output": "aviso: o aviso com data, situação, totais e linhas, para substituir o aviso aberto no detalhe."
+          "raw": "Finalidade: Traz o conteúdo completo de um aviso diário escolhido pela pessoa logada.\nEntrada: avisoId: id do aviso escolhido na lista.\nProcessamento: Lê o AvisoVencimento pelo id e recusa se o responsavelId não for a pessoa da sessão. Compõe cada linha de details.tarefas (tarefaId, prazo registrado, situacaoPrazo) com título, situação e prazo atuais da Tarefa; venceHoje e atrasada são calculados na leitura, e quantidadeTarefas e quantidadeAtrasadas a partir das linhas. As linhas seguem a regra avisoSomenteTarefasAbertasVencendo: tarefas abertas com prazo no dia do aviso ou já vencido.\nSaída: O aviso com data de referência, situação do envio, totais de tarefas e de atrasadas e a relação das tarefas incluídas com seus dados atuais.",
+          "purpose": "Traz o conteúdo completo de um aviso diário escolhido pela pessoa logada.",
+          "input": "avisoId: id do aviso escolhido na lista.",
+          "processing": "Lê o AvisoVencimento pelo id e recusa se o responsavelId não for a pessoa da sessão. Compõe cada linha de details.tarefas (tarefaId, prazo registrado, situacaoPrazo) com título, situação e prazo atuais da Tarefa; venceHoje e atrasada são calculados na leitura, e quantidadeTarefas e quantidadeAtrasadas a partir das linhas. As linhas seguem a regra avisoSomenteTarefasAbertasVencendo: tarefas abertas com prazo no dia do aviso ou já vencido.",
+          "output": "O aviso com data de referência, situação do envio, totais de tarefas e de atrasadas e a relação das tarefas incluídas com seus dados atuais."
         }
       }
     ]

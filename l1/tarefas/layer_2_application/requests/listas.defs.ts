@@ -8,7 +8,6 @@ export const definition = {
   "status": "pending",
   "dependencies": [
     "_102047_/l1/tarefas/layer_2_application/usecases/createLista.defs.ts",
-    "_102047_/l1/tarefas/layer_2_application/usecases/getLista.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/listLista.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/updateLista.defs.ts"
   ],
@@ -34,6 +33,10 @@ export const definition = {
                 "path": "id"
               },
               {
+                "field": "version",
+                "path": "version"
+              },
+              {
                 "field": "nome",
                 "path": "nome"
               },
@@ -51,25 +54,26 @@ export const definition = {
         "params": [],
         "rules": [],
         "doc": {
-          "raw": "Finalidade: Carrega, ao abrir a página, todas as listas da organização para o gestor escolher qual manter.\nEntrada: Nenhuma entrada; o escopo é a organização do gestor da sessão.\nProcessamento: Busca todas as listas (ativas e inativas) ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista e situação aFazer, emAndamento ou emRevisao; é um campo derivado, calculado na consulta e nunca gravado. Lista não paginada, pois o número de listas de projetos e áreas cabe numa tela.\nSaída: Lista de ListaResumo com id, nome, ativa, tipo e quantidade de tarefas abertas, no formato que o cadastro exibe.",
-          "purpose": "Carrega, ao abrir a página, todas as listas da organização para o gestor escolher qual manter.",
-          "input": "Nenhuma entrada; o escopo é a organização do gestor da sessão.",
-          "processing": "Busca todas as listas (ativas e inativas) ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista e situação aFazer, emAndamento ou emRevisao; é um campo derivado, calculado na consulta e nunca gravado. Lista não paginada, pois o número de listas de projetos e áreas cabe numa tela.",
-          "output": "Lista de ListaResumo com id, nome, ativa, tipo e quantidade de tarefas abertas, no formato que o cadastro exibe."
+          "raw": "Finalidade: Carrega todas as listas da organização, ativas e inativas, com os dados necessários para exibir e editar cada uma.\nEntrada: Sem entrada; o escopo é a organização do gestor logado.\nProcessamento: Lê todas as listas da organização ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista cuja situação não é concluída nem cancelada (campo derivado, nunca gravado).\nSaída: A coleção de listas, cada uma com id, versão, nome, ativa, tipo, descrição e quantidade de tarefas abertas.",
+          "purpose": "Carrega todas as listas da organização, ativas e inativas, com os dados necessários para exibir e editar cada uma.",
+          "input": "Sem entrada; o escopo é a organização do gestor logado.",
+          "processing": "Lê todas as listas da organização ordenadas por nome. Para cada lista calcula quantidadeTarefasAbertas contando as tarefas com listaId igual à lista cuja situação não é concluída nem cancelada (campo derivado, nunca gravado).",
+          "output": "A coleção de listas, cada uma com id, versão, nome, ativa, tipo, descrição e quantidade de tarefas abertas."
         }
       },
       {
-        "route": "tarefas.listas.obterLista",
+        "route": "tarefas.listas.buscarListas",
         "kind": "qry",
         "uses": [
-          "getLista"
+          "listLista"
         ],
         "transaction": "none",
         "output": [
           {
-            "kind": "entity",
-            "path": "lista",
+            "kind": "list",
+            "path": "listas",
             "entity": "Lista",
+            "items": "",
             "fields": [
               {
                 "field": "id",
@@ -96,18 +100,18 @@ export const definition = {
         ],
         "params": [
           {
-            "name": "listaId",
-            "target": "lista",
+            "name": "busca",
+            "target": "listas",
             "field": "nome"
           }
         ],
         "rules": [],
         "doc": {
-          "raw": "Finalidade: Abre os dados de uma lista escolhida no cadastro para edição no formulário.\nEntrada: listaId: id da lista selecionada no cadastro.\nProcessamento: Lê a lista pelo id (read.byId) dentro da organização do gestor.\nSaída: ListaEdicao com id, version, nome, ativa, tipo e descrição, para preencher o formulário e enviar a versão ao salvar.",
-          "purpose": "Abre os dados de uma lista escolhida no cadastro para edição no formulário.",
-          "input": "listaId: id da lista selecionada no cadastro.",
-          "processing": "Lê a lista pelo id (read.byId) dentro da organização do gestor.",
-          "output": "ListaEdicao com id, version, nome, ativa, tipo e descrição, para preencher o formulário e enviar a versão ao salvar."
+          "raw": "Finalidade: Busca as listas cujo nome contém o trecho digitado pelo gestor.\nEntrada: busca: trecho do nome da lista; vazio devolve todas as listas.\nProcessamento: Filtra as listas da organização pelo trecho do nome, sem diferenciar maiúsculas e minúsculas, ordenando por nome. Calcula quantidadeTarefasAbertas de cada lista contando as tarefas nem concluídas nem canceladas (derivado, nunca gravado).\nSaída: As listas encontradas, cada uma com id, versão, nome, ativa, tipo, descrição e quantidade de tarefas abertas.",
+          "purpose": "Busca as listas cujo nome contém o trecho digitado pelo gestor.",
+          "input": "busca: trecho do nome da lista; vazio devolve todas as listas.",
+          "processing": "Filtra as listas da organização pelo trecho do nome, sem diferenciar maiúsculas e minúsculas, ordenando por nome. Calcula quantidadeTarefasAbertas de cada lista contando as tarefas nem concluídas nem canceladas (derivado, nunca gravado).",
+          "output": "As listas encontradas, cada uma com id, versão, nome, ativa, tipo, descrição e quantidade de tarefas abertas."
         }
       },
       {
@@ -128,29 +132,6 @@ export const definition = {
                 "path": "id"
               },
               {
-                "field": "nome",
-                "path": "nome"
-              },
-              {
-                "field": "ativa",
-                "path": "ativa"
-              },
-              {
-                "field": "details",
-                "path": "details"
-              }
-            ]
-          },
-          {
-            "kind": "entity",
-            "path": "registro",
-            "entity": "Lista",
-            "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              },
-              {
                 "field": "version",
                 "path": "version"
               },
@@ -175,11 +156,11 @@ export const definition = {
           "listaNomeUnico"
         ],
         "doc": {
-          "raw": "Finalidade: Cadastra uma nova lista de projeto ou área.\nEntrada: nome: nome da lista; ativa: se recebe novas tarefas; tipo: project ou area; descricao: texto livre opcional.\nProcessamento: listaMantidaPorGestor: recusa se o usuário da sessão não for gestor. listaNomeUnico: recusa se já existir lista com o mesmo nome. Grava a lista; id e version são gerados pelo sistema; quantidadeTarefasAbertas é calculada (zero para lista nova), nunca gravada.\nSaída: lista: a linha ListaResumo para inserir no cadastro; registro: ListaEdicao com id e version para o formulário continuar em edição sem nova chamada.",
+          "raw": "Finalidade: Cadastra uma nova lista de projeto ou área.\nEntrada: nome: nome da lista; details.tipo: projeto ou área; details.descricao: objetivo da lista (opcional); ativa: se a lista recebe novas tarefas.\nProcessamento: listaMantidaPorGestor: recusa se quem chama não é gestor. listaNomeUnico: recusa se já existe outra lista com o mesmo nome. Grava a lista; quantidadeTarefasAbertas é derivada e começa em zero.\nSaída: A lista criada, com id, versão inicial, dados gravados e quantidade de tarefas abertas.",
           "purpose": "Cadastra uma nova lista de projeto ou área.",
-          "input": "nome: nome da lista; ativa: se recebe novas tarefas; tipo: project ou area; descricao: texto livre opcional.",
-          "processing": "listaMantidaPorGestor: recusa se o usuário da sessão não for gestor. listaNomeUnico: recusa se já existir lista com o mesmo nome. Grava a lista; id e version são gerados pelo sistema; quantidadeTarefasAbertas é calculada (zero para lista nova), nunca gravada.",
-          "output": "lista: a linha ListaResumo para inserir no cadastro; registro: ListaEdicao com id e version para o formulário continuar em edição sem nova chamada."
+          "input": "nome: nome da lista; details.tipo: projeto ou área; details.descricao: objetivo da lista (opcional); ativa: se a lista recebe novas tarefas.",
+          "processing": "listaMantidaPorGestor: recusa se quem chama não é gestor. listaNomeUnico: recusa se já existe outra lista com o mesmo nome. Grava a lista; quantidadeTarefasAbertas é derivada e começa em zero.",
+          "output": "A lista criada, com id, versão inicial, dados gravados e quantidade de tarefas abertas."
         }
       },
       {
@@ -200,29 +181,6 @@ export const definition = {
                 "path": "id"
               },
               {
-                "field": "nome",
-                "path": "nome"
-              },
-              {
-                "field": "ativa",
-                "path": "ativa"
-              },
-              {
-                "field": "details",
-                "path": "details"
-              }
-            ]
-          },
-          {
-            "kind": "entity",
-            "path": "registro",
-            "entity": "Lista",
-            "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              },
-              {
                 "field": "version",
                 "path": "version"
               },
@@ -247,11 +205,11 @@ export const definition = {
           "listaNomeUnico"
         ],
         "doc": {
-          "raw": "Finalidade: Altera nome, tipo, descrição e situação ativa de uma lista existente.\nEntrada: id e version: lista editada e versão lida (controle de concorrência); nome, ativa, tipo, descricao: novos valores.\nProcessamento: listaMantidaPorGestor: recusa se o usuário não for gestor. listaNomeUnico: recusa se outra lista já tiver o mesmo nome. Recusa se a version não for a atual. Ao inativar, a lista deixa de aparecer na escolha ao criar tarefas. quantidadeTarefasAbertas é recalculada na resposta, nunca gravada.\nSaída: lista: a linha ListaResumo atualizada para substituir no cadastro; registro: ListaEdicao com a nova version para o formulário.",
-          "purpose": "Altera nome, tipo, descrição e situação ativa de uma lista existente.",
-          "input": "id e version: lista editada e versão lida (controle de concorrência); nome, ativa, tipo, descricao: novos valores.",
-          "processing": "listaMantidaPorGestor: recusa se o usuário não for gestor. listaNomeUnico: recusa se outra lista já tiver o mesmo nome. Recusa se a version não for a atual. Ao inativar, a lista deixa de aparecer na escolha ao criar tarefas. quantidadeTarefasAbertas é recalculada na resposta, nunca gravada.",
-          "output": "lista: a linha ListaResumo atualizada para substituir no cadastro; registro: ListaEdicao com a nova version para o formulário."
+          "raw": "Finalidade: Altera nome, tipo, descrição e situação de ativa de uma lista existente.\nEntrada: id e version: lista alterada e versão lida (controle de concorrência); nome, details.tipo, details.descricao, ativa: novos valores.\nProcessamento: listaMantidaPorGestor: recusa se quem chama não é gestor. Recusa se a versão não confere com a gravada. listaNomeUnico: recusa se outra lista já usa o nome. Grava as alterações; inativar não afeta as tarefas já existentes. quantidadeTarefasAbertas é recalculada, nunca gravada.\nSaída: A lista alterada, com a nova versão, os dados gravados e a quantidade de tarefas abertas.",
+          "purpose": "Altera nome, tipo, descrição e situação de ativa de uma lista existente.",
+          "input": "id e version: lista alterada e versão lida (controle de concorrência); nome, details.tipo, details.descricao, ativa: novos valores.",
+          "processing": "listaMantidaPorGestor: recusa se quem chama não é gestor. Recusa se a versão não confere com a gravada. listaNomeUnico: recusa se outra lista já usa o nome. Grava as alterações; inativar não afeta as tarefas já existentes. quantidadeTarefasAbertas é recalculada, nunca gravada.",
+          "output": "A lista alterada, com a nova versão, os dados gravados e a quantidade de tarefas abertas."
         }
       }
     ]

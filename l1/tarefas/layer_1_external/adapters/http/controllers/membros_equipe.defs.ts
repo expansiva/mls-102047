@@ -15,42 +15,32 @@ export const definition = {
     "pageId": "membros_equipe",
     "handlers": [
       {
-        "route": "tarefas.membros_equipe.cadastrarPessoa",
+        "route": "tarefas.membros_equipe.cmdCadastrarPessoa",
         "kind": "command",
         "grantIds": [
           "gestorMembros"
         ],
-        "serviceFunction": "tarefas.membros_equipe.cadastrarPessoa",
+        "serviceFunction": "tarefas.membros_equipe.cmdCadastrarPessoa",
         "contractPath": "l2/tarefas/web/contracts/membros_equipe.defs.ts",
         "contractInterface": "Membros_equipeContracts"
       },
       {
-        "route": "tarefas.membros_equipe.listarMembrosEquipe",
-        "kind": "query",
-        "grantIds": [
-          "gestorMembros"
-        ],
-        "serviceFunction": "tarefas.membros_equipe.listarMembrosEquipe",
-        "contractPath": "l2/tarefas/web/contracts/membros_equipe.defs.ts",
-        "contractInterface": "Membros_equipeContracts"
-      },
-      {
-        "route": "tarefas.membros_equipe.obterMembroEquipe",
-        "kind": "query",
-        "grantIds": [
-          "gestorMembros"
-        ],
-        "serviceFunction": "tarefas.membros_equipe.obterMembroEquipe",
-        "contractPath": "l2/tarefas/web/contracts/membros_equipe.defs.ts",
-        "contractInterface": "Membros_equipeContracts"
-      },
-      {
-        "route": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+        "route": "tarefas.membros_equipe.cmdSalvarAlteracoes",
         "kind": "command",
         "grantIds": [
           "gestorMembros"
         ],
-        "serviceFunction": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+        "serviceFunction": "tarefas.membros_equipe.cmdSalvarAlteracoes",
+        "contractPath": "l2/tarefas/web/contracts/membros_equipe.defs.ts",
+        "contractInterface": "Membros_equipeContracts"
+      },
+      {
+        "route": "tarefas.membros_equipe.qryPessoasEquipe",
+        "kind": "query",
+        "grantIds": [
+          "gestorMembros"
+        ],
+        "serviceFunction": "tarefas.membros_equipe.qryPessoasEquipe",
         "contractPath": "l2/tarefas/web/contracts/membros_equipe.defs.ts",
         "contractInterface": "Membros_equipeContracts"
       }

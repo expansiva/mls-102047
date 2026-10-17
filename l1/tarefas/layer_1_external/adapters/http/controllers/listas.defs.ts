@@ -15,6 +15,16 @@ export const definition = {
     "pageId": "listas",
     "handlers": [
       {
+        "route": "tarefas.listas.buscarListas",
+        "kind": "query",
+        "grantIds": [
+          "gestorListas"
+        ],
+        "serviceFunction": "tarefas.listas.buscarListas",
+        "contractPath": "l2/tarefas/web/contracts/listas.defs.ts",
+        "contractInterface": "ListasContracts"
+      },
+      {
         "route": "tarefas.listas.criarLista",
         "kind": "command",
         "grantIds": [
@@ -31,16 +41,6 @@ export const definition = {
           "gestorListas"
         ],
         "serviceFunction": "tarefas.listas.listarListas",
-        "contractPath": "l2/tarefas/web/contracts/listas.defs.ts",
-        "contractInterface": "ListasContracts"
-      },
-      {
-        "route": "tarefas.listas.obterLista",
-        "kind": "query",
-        "grantIds": [
-          "gestorListas"
-        ],
-        "serviceFunction": "tarefas.listas.obterLista",
         "contractPath": "l2/tarefas/web/contracts/listas.defs.ts",
         "contractInterface": "ListasContracts"
       },

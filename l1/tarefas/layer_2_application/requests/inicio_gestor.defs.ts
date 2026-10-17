@@ -15,7 +15,7 @@ export const definition = {
     "pageId": "inicio_gestor",
     "requests": [
       {
-        "route": "tarefas.inicio_gestor.qryPanoramaEquipe",
+        "route": "tarefas.inicio_gestor.obterPanoramaEquipe",
         "kind": "qry",
         "uses": [
           "listLista"
@@ -44,22 +44,37 @@ export const definition = {
           },
           {
             "kind": "unresolved",
-            "path": "totais",
-            "reason": "Interface TotaisEquipe has no field that is not readonly, so no entity owns it."
+            "path": "totalAbertas",
+            "reason": "Output totalAbertas is a value (number), not an interface; no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "totalVenceHoje",
+            "reason": "Output totalVenceHoje is a value (number), not an interface; no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "totalAtrasadas",
+            "reason": "Output totalAtrasadas is a value (number), not an interface; no entity owns it."
+          },
+          {
+            "kind": "unresolved",
+            "path": "progressoChecklist",
+            "reason": "Output progressoChecklist is a value (string), not an interface; no entity owns it."
           }
         ],
         "params": [],
         "rules": [],
         "doc": {
-          "raw": "Finalidade: Carrega, ao abrir o início do gestor, o panorama da equipe: totais de tarefas abertas, vencendo hoje e atrasadas, progresso das checklists e tarefas abertas por lista.\nEntrada: Nenhuma entrada; o escopo é toda a equipe (organização) do gestor da sessão.\nProcessamento: Conta as tarefas da organização com details.aberta (status aFazer, emAndamento ou emRevisao), as que vencem hoje (aberta e prazo = hoje) e as atrasadas (aberta e prazo < hoje); esses indicadores derivados são calculados na consulta, nunca gravados. Soma os itens de checklist (ItemChecklist.feito por tarefaId) das tarefas abertas para obter feitos/total e o texto do progresso. Lista as listas ativas ordenadas por nome com quantidadeTarefasAbertas calculada pela contagem de tarefas abertas por listaId.\nSaída: totais com os números já prontos para os blocos de destaque e listas com nome e quantidade de tarefas abertas, para o gestor saber onde olhar primeiro.",
-          "purpose": "Carrega, ao abrir o início do gestor, o panorama da equipe: totais de tarefas abertas, vencendo hoje e atrasadas, progresso das checklists e tarefas abertas por lista.",
-          "input": "Nenhuma entrada; o escopo é toda a equipe (organização) do gestor da sessão.",
-          "processing": "Conta as tarefas da organização com details.aberta (status aFazer, emAndamento ou emRevisao), as que vencem hoje (aberta e prazo = hoje) e as atrasadas (aberta e prazo < hoje); esses indicadores derivados são calculados na consulta, nunca gravados. Soma os itens de checklist (ItemChecklist.feito por tarefaId) das tarefas abertas para obter feitos/total e o texto do progresso. Lista as listas ativas ordenadas por nome com quantidadeTarefasAbertas calculada pela contagem de tarefas abertas por listaId.",
-          "output": "totais com os números já prontos para os blocos de destaque e listas com nome e quantidade de tarefas abertas, para o gestor saber onde olhar primeiro."
+          "raw": "Finalidade: Entrega de uma só vez o panorama da equipe para o gestor: totais de tarefas abertas, que vencem hoje e atrasadas, progresso geral das checklists e tarefas abertas por lista.\nEntrada: Nenhuma entrada. O gestor é conhecido pela sessão e enxerga todas as tarefas da equipe (escopo da organização).\nProcessamento: Conta as tarefas da equipe com Tarefa.details.aberta verdadeiro (totalAbertas), com Tarefa.details.venceHoje (totalVenceHoje) e com Tarefa.details.atrasada (totalAtrasadas). Esses campos são derivados e calculados na consulta, nunca gravados: aberta = a fazer, em andamento ou em revisão; venceHoje = aberta com prazo hoje; atrasada = aberta com prazo anterior a hoje. Soma, nas tarefas abertas, os itens feitos e o total de itens das checklists e devolve o resultado no formato ’feitos/total’ (progressoChecklist). Lista as listas, ordenadas por nome, com Lista.details.quantidadeTarefasAbertas (derivado, calculado). Não usa campos de privacidade do membro.\nSaída: Objeto com totalAbertas, totalVenceHoje e totalAtrasadas (números), progressoChecklist (texto ’feitos/total’) e listas (cada lista com id, nome e quantidade de tarefas abertas).",
+          "purpose": "Entrega de uma só vez o panorama da equipe para o gestor: totais de tarefas abertas, que vencem hoje e atrasadas, progresso geral das checklists e tarefas abertas por lista.",
+          "input": "Nenhuma entrada. O gestor é conhecido pela sessão e enxerga todas as tarefas da equipe (escopo da organização).",
+          "processing": "Conta as tarefas da equipe com Tarefa.details.aberta verdadeiro (totalAbertas), com Tarefa.details.venceHoje (totalVenceHoje) e com Tarefa.details.atrasada (totalAtrasadas). Esses campos são derivados e calculados na consulta, nunca gravados: aberta = a fazer, em andamento ou em revisão; venceHoje = aberta com prazo hoje; atrasada = aberta com prazo anterior a hoje. Soma, nas tarefas abertas, os itens feitos e o total de itens das checklists e devolve o resultado no formato ’feitos/total’ (progressoChecklist). Lista as listas, ordenadas por nome, com Lista.details.quantidadeTarefasAbertas (derivado, calculado). Não usa campos de privacidade do membro.",
+          "output": "Objeto com totalAbertas, totalVenceHoje e totalAtrasadas (números), progressoChecklist (texto ’feitos/total’) e listas (cada lista com id, nome e quantidade de tarefas abertas)."
         }
       },
       {
-        "route": "tarefas.inicio_gestor.qryTarefasPedemAcao",
+        "route": "tarefas.inicio_gestor.listarTarefasParaAcao",
         "kind": "qry",
         "uses": [
           "listTarefa",
@@ -125,12 +140,12 @@ export const definition = {
           {
             "kind": "unresolved",
             "path": "tarefas.membroEquipe",
-            "reason": "Interface MembroRef has no field that is not readonly, so no entity owns it."
+            "reason": "Interface MembroNome has no field that is not readonly, so no entity owns it."
           },
           {
             "kind": "unresolved",
             "path": "tarefas.items.membroEquipe",
-            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_gestor.qryTarefasPedemAcao projects Tarefa.membroEquipe, which is not a field of the ontology."
+            "reason": "PROJECTION_FIELD_UNKNOWN: Route tarefas.inicio_gestor.listarTarefasParaAcao projects Tarefa.membroEquipe, which is not a field of the ontology."
           }
         ],
         "params": [
@@ -147,11 +162,11 @@ export const definition = {
         ],
         "rules": [],
         "doc": {
-          "raw": "Finalidade: Traz a caixa de tarefas da equipe que podem pedir ação do gestor: abertas e atrasadas ou vencendo hoje.\nEntrada: page: página pedida (começa em 1); pageSize: quantidade de tarefas por página.\nProcessamento: Filtra as tarefas da organização com status aFazer, emAndamento ou emRevisao cujo prazo é hoje ou anterior; calcula aberta, venceHoje, atrasada e progressoChecklist (itens feitos do total da checklist) na consulta, sem gravar. Ordena atrasadas primeiro, por prazo crescente e prioridade decrescente. Junta o nome da lista (Lista.nome por listaId) e o nome do responsável lido no cadastro mestre (MembroEquipe.details.identification.name por responsavelId), carregados em lote.\nSaída: Página { items, page, pageSize, hasMore } de tarefas com título, lista, responsável, prioridade, prazo, situação e progresso da checklist, prontas para os cartões; a escolha leva a Tarefas da equipe.",
-          "purpose": "Traz a caixa de tarefas da equipe que podem pedir ação do gestor: abertas e atrasadas ou vencendo hoje.",
-          "input": "page: página pedida (começa em 1); pageSize: quantidade de tarefas por página.",
-          "processing": "Filtra as tarefas da organização com status aFazer, emAndamento ou emRevisao cujo prazo é hoje ou anterior; calcula aberta, venceHoje, atrasada e progressoChecklist (itens feitos do total da checklist) na consulta, sem gravar. Ordena atrasadas primeiro, por prazo crescente e prioridade decrescente. Junta o nome da lista (Lista.nome por listaId) e o nome do responsável lido no cadastro mestre (MembroEquipe.details.identification.name por responsavelId), carregados em lote.",
-          "output": "Página { items, page, pageSize, hasMore } de tarefas com título, lista, responsável, prioridade, prazo, situação e progresso da checklist, prontas para os cartões; a escolha leva a Tarefas da equipe."
+          "raw": "Finalidade: Lista as tarefas da equipe que podem pedir uma decisão do gestor (atrasadas e que vencem hoje), já com nome da lista e do responsável, em páginas.\nEntrada: page: número da página, começando em 1 (padrão 1). pageSize: quantidade de tarefas por página (padrão de uma tela).\nProcessamento: Considera todas as tarefas da equipe (o gestor vê todas) com Tarefa.details.aberta verdadeiro e (Tarefa.details.atrasada ou Tarefa.details.venceHoje verdadeiro); esses campos são derivados e calculados na consulta, nunca gravados. Ordena com as atrasadas primeiro, depois as que vencem hoje, e dentro de cada grupo por prazo crescente e prioridade decrescente. Resolve o nome da lista (Lista.nome) e o nome do responsável (MembroEquipe.details.identification.name) no cadastro mestre; não expõe o consentimento de privacidade. Calcula Tarefa.details.progressoChecklist (’feitos/total’) por tarefa. Pagina com page e pageSize e informa hasMore.\nSaída: Página { items, page, pageSize, hasMore } de tarefas com id, título, situação, prioridade, prazo, listaId, responsavelId, indicadores (aberta, venceHoje, atrasada, progressoChecklist), nome da lista e nome do responsável.",
+          "purpose": "Lista as tarefas da equipe que podem pedir uma decisão do gestor (atrasadas e que vencem hoje), já com nome da lista e do responsável, em páginas.",
+          "input": "page: número da página, começando em 1 (padrão 1). pageSize: quantidade de tarefas por página (padrão de uma tela).",
+          "processing": "Considera todas as tarefas da equipe (o gestor vê todas) com Tarefa.details.aberta verdadeiro e (Tarefa.details.atrasada ou Tarefa.details.venceHoje verdadeiro); esses campos são derivados e calculados na consulta, nunca gravados. Ordena com as atrasadas primeiro, depois as que vencem hoje, e dentro de cada grupo por prazo crescente e prioridade decrescente. Resolve o nome da lista (Lista.nome) e o nome do responsável (MembroEquipe.details.identification.name) no cadastro mestre; não expõe o consentimento de privacidade. Calcula Tarefa.details.progressoChecklist (’feitos/total’) por tarefa. Pagina com page e pageSize e informa hasMore.",
+          "output": "Página { items, page, pageSize, hasMore } de tarefas com id, título, situação, prioridade, prazo, listaId, responsavelId, indicadores (aberta, venceHoje, atrasada, progressoChecklist), nome da lista e nome do responsável."
         }
       }
     ]

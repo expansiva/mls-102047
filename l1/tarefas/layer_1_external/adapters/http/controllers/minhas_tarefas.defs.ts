@@ -15,13 +15,36 @@ export const definition = {
     "pageId": "minhas_tarefas",
     "handlers": [
       {
-        "route": "tarefas.minhas_tarefas.aceitarEntrega",
+        "route": "tarefas.minhas_tarefas.abrirTarefa",
+        "kind": "query",
+        "grantIds": [
+          "membroTarefasProprias",
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
+        ],
+        "serviceFunction": "tarefas.minhas_tarefas.abrirTarefa",
+        "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
+        "contractInterface": "Minhas_tarefasContracts"
+      },
+      {
+        "route": "tarefas.minhas_tarefas.aceitarTarefa",
         "kind": "command",
         "grantIds": [
           "membroTarefasProprias",
-          "membroConsultaListas"
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
         ],
-        "serviceFunction": "tarefas.minhas_tarefas.aceitarEntrega",
+        "serviceFunction": "tarefas.minhas_tarefas.aceitarTarefa",
+        "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
+        "contractInterface": "Minhas_tarefasContracts"
+      },
+      {
+        "route": "tarefas.minhas_tarefas.buscarMembros",
+        "kind": "query",
+        "grantIds": [
+          "membroEscolheResponsavel"
+        ],
+        "serviceFunction": "tarefas.minhas_tarefas.buscarMembros",
         "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
         "contractInterface": "Minhas_tarefasContracts"
       },
@@ -30,20 +53,46 @@ export const definition = {
         "kind": "command",
         "grantIds": [
           "membroTarefasProprias",
-          "membroConsultaListas"
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
         ],
         "serviceFunction": "tarefas.minhas_tarefas.cancelarTarefa",
         "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
         "contractInterface": "Minhas_tarefasContracts"
       },
       {
-        "route": "tarefas.minhas_tarefas.devolverComMotivo",
+        "route": "tarefas.minhas_tarefas.carregarMinhasTarefas",
+        "kind": "query",
+        "grantIds": [
+          "membroTarefasProprias",
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
+        ],
+        "serviceFunction": "tarefas.minhas_tarefas.carregarMinhasTarefas",
+        "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
+        "contractInterface": "Minhas_tarefasContracts"
+      },
+      {
+        "route": "tarefas.minhas_tarefas.criarTarefa",
         "kind": "command",
         "grantIds": [
           "membroTarefasProprias",
-          "membroConsultaListas"
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
         ],
-        "serviceFunction": "tarefas.minhas_tarefas.devolverComMotivo",
+        "serviceFunction": "tarefas.minhas_tarefas.criarTarefa",
+        "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
+        "contractInterface": "Minhas_tarefasContracts"
+      },
+      {
+        "route": "tarefas.minhas_tarefas.devolverTarefa",
+        "kind": "command",
+        "grantIds": [
+          "membroTarefasProprias",
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
+        ],
+        "serviceFunction": "tarefas.minhas_tarefas.devolverTarefa",
         "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
         "contractInterface": "Minhas_tarefasContracts"
       },
@@ -52,7 +101,8 @@ export const definition = {
         "kind": "command",
         "grantIds": [
           "membroTarefasProprias",
-          "membroConsultaListas"
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
         ],
         "serviceFunction": "tarefas.minhas_tarefas.enviarParaRevisao",
         "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
@@ -63,64 +113,46 @@ export const definition = {
         "kind": "command",
         "grantIds": [
           "membroTarefasProprias",
-          "membroConsultaListas"
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
         ],
         "serviceFunction": "tarefas.minhas_tarefas.iniciarTarefa",
         "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
         "contractInterface": "Minhas_tarefasContracts"
       },
       {
-        "route": "tarefas.minhas_tarefas.marcarItemChecklist",
-        "kind": "command",
-        "grantIds": [
-          "membroTarefasProprias",
-          "membroConsultaListas"
-        ],
-        "serviceFunction": "tarefas.minhas_tarefas.marcarItemChecklist",
-        "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-        "contractInterface": "Minhas_tarefasContracts"
-      },
-      {
-        "route": "tarefas.minhas_tarefas.minhasTarefas",
+        "route": "tarefas.minhas_tarefas.listarMinhasTarefas",
         "kind": "query",
         "grantIds": [
           "membroTarefasProprias",
-          "membroConsultaListas"
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
         ],
-        "serviceFunction": "tarefas.minhas_tarefas.minhasTarefas",
+        "serviceFunction": "tarefas.minhas_tarefas.listarMinhasTarefas",
         "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
         "contractInterface": "Minhas_tarefasContracts"
       },
       {
-        "route": "tarefas.minhas_tarefas.salvarEdicaoTarefa",
+        "route": "tarefas.minhas_tarefas.salvarChecklist",
         "kind": "command",
         "grantIds": [
           "membroTarefasProprias",
-          "membroConsultaListas"
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
         ],
-        "serviceFunction": "tarefas.minhas_tarefas.salvarEdicaoTarefa",
+        "serviceFunction": "tarefas.minhas_tarefas.salvarChecklist",
         "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
         "contractInterface": "Minhas_tarefasContracts"
       },
       {
-        "route": "tarefas.minhas_tarefas.salvarNovaTarefa",
+        "route": "tarefas.minhas_tarefas.salvarEdicao",
         "kind": "command",
         "grantIds": [
           "membroTarefasProprias",
-          "membroConsultaListas"
+          "membroConsultaListas",
+          "membroEscolheResponsavel"
         ],
-        "serviceFunction": "tarefas.minhas_tarefas.salvarNovaTarefa",
-        "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
-        "contractInterface": "Minhas_tarefasContracts"
-      },
-      {
-        "route": "tarefas.minhas_tarefas.tarefaAberta",
-        "kind": "query",
-        "grantIds": [
-          "membroTarefasProprias",
-          "membroConsultaListas"
-        ],
-        "serviceFunction": "tarefas.minhas_tarefas.tarefaAberta",
+        "serviceFunction": "tarefas.minhas_tarefas.salvarEdicao",
         "contractPath": "l2/tarefas/web/contracts/minhas_tarefas.defs.ts",
         "contractInterface": "Minhas_tarefasContracts"
       }

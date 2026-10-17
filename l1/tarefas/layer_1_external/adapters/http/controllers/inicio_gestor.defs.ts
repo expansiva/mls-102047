@@ -15,23 +15,23 @@ export const definition = {
     "pageId": "inicio_gestor",
     "handlers": [
       {
-        "route": "tarefas.inicio_gestor.qryPanoramaEquipe",
-        "kind": "query",
-        "grantIds": [
-          "gestorListas"
-        ],
-        "serviceFunction": "tarefas.inicio_gestor.qryPanoramaEquipe",
-        "contractPath": "l2/tarefas/web/contracts/inicio_gestor.defs.ts",
-        "contractInterface": "Inicio_gestorContracts"
-      },
-      {
-        "route": "tarefas.inicio_gestor.qryTarefasPedemAcao",
+        "route": "tarefas.inicio_gestor.listarTarefasParaAcao",
         "kind": "query",
         "grantIds": [
           "gestorTarefasEquipe",
           "gestorListas"
         ],
-        "serviceFunction": "tarefas.inicio_gestor.qryTarefasPedemAcao",
+        "serviceFunction": "tarefas.inicio_gestor.listarTarefasParaAcao",
+        "contractPath": "l2/tarefas/web/contracts/inicio_gestor.defs.ts",
+        "contractInterface": "Inicio_gestorContracts"
+      },
+      {
+        "route": "tarefas.inicio_gestor.obterPanoramaEquipe",
+        "kind": "query",
+        "grantIds": [
+          "gestorListas"
+        ],
+        "serviceFunction": "tarefas.inicio_gestor.obterPanoramaEquipe",
         "contractPath": "l2/tarefas/web/contracts/inicio_gestor.defs.ts",
         "contractInterface": "Inicio_gestorContracts"
       }
